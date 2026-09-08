@@ -43,6 +43,7 @@ import userEvent from '@testing-library/user-event';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import { DATE_RANGE_PICKER_FEATURE_FLAG } from '@kbn/date-range-picker';
 
 const mockUseDateRangePickerPresets = useDateRangePickerPresets as jest.Mock;
 
@@ -87,7 +88,7 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
 });
 
 startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback: boolean) => {
-  if (key === 'unifiedSearch.newDateRangePickerEnabled') {
+  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
     return useNewDateRangePickerFlag;
   }
   if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
@@ -97,7 +98,7 @@ startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback
 });
 
 startMock.featureFlags.getBooleanValue$.mockImplementation((key: string, fallback: boolean) => {
-  if (key === 'unifiedSearch.newDateRangePickerEnabled') {
+  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
     return of(useNewDateRangePickerFlag);
   }
   if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
@@ -838,6 +839,81 @@ describe('QueryBarTopRowTopRow', () => {
       });
     });
 
+    it('Should render disabled date picker for KQL when showDatePicker.disabled is true', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: { disabled: true },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        if (useNewPicker) {
+          expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+        } else {
+          expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        }
+      });
+    });
+
+    it('Should keep the KQL date picker enabled when no timeFieldName exists', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should keep the KQL date picker enabled when showDatePicker.disabled is false', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: { disabled: false },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
     it('Should hide ES|QL UI when query input is disabled', async () => {
       render(
         wrapWithPicker({
@@ -920,6 +996,49 @@ describe('QueryBarTopRowTopRow', () => {
           })
         );
       });
+    });
+  });
+
+  describe('auto-refresh-only mode (new picker)', () => {
+    const renderAutoRefreshOnly = (onRefreshChange: jest.Mock) =>
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          showDatePicker: false,
+          showAutoRefreshOnly: true,
+          isRefreshPaused: true,
+          refreshInterval: 5000,
+          onRefreshChange,
+        })
+      );
+
+    beforeEach(() => {
+      useNewDateRangePickerFlag = true;
+    });
+
+    it('renders the picker readOnly with an operable play/pause button even when refresh starts paused', async () => {
+      renderAutoRefreshOnly(jest.fn());
+
+      await waitFor(() => {
+        // Time filter is off: hidden marker present, control inert.
+        expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+        // Auto-refresh stays operable despite the paused-on-load state.
+        expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeEnabled();
+      });
+    });
+
+    it('starts the refresh timer when the play button is clicked', async () => {
+      const onRefreshChange = jest.fn();
+      renderAutoRefreshOnly(onRefreshChange);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeEnabled();
+      });
+      await userEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
+
+      expect(onRefreshChange).toHaveBeenCalledWith({ isPaused: false, refreshInterval: 5000 });
     });
   });
 });

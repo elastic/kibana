@@ -12,6 +12,150 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "dest": {
+        "index": "",
+        "aliases": [
+          {
+            "alias": "",
+            "move_on_creation": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        ],
+        "pipeline": ""
+      },
+      "description": "",
+      "frequency": "",
+      "_meta": {},
+      "source": {
+        "index": "",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        },
+        "runtime_mappings": {
+          "*": {
+            "fields": {
+              "*": {
+                "type": {
+                  "__one_of": [
+                    "boolean",
+                    "composite",
+                    "date",
+                    "double",
+                    "geo_point",
+                    "geo_shape",
+                    "ip",
+                    "keyword",
+                    "long",
+                    "lookup"
+                  ]
+                }
+              }
+            },
+            "fetch_fields": {
+              "__any_of": [
+                {
+                  "field": "",
+                  "format": ""
+                },
+                ""
+              ]
+            },
+            "format": "",
+            "input_field": "",
+            "target_field": "",
+            "target_index": "",
+            "script": {
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
+            },
+            "on_script_error": {
+              "__one_of": [
+                "fail",
+                "continue"
+              ]
+            },
+            "type": {
+              "__one_of": [
+                "boolean",
+                "composite",
+                "date",
+                "double",
+                "geo_point",
+                "geo_shape",
+                "ip",
+                "keyword",
+                "long",
+                "lookup"
+              ]
+            }
+          }
+        }
+      },
+      "settings": {
+        "align_checkpoints": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "dates_as_epoch_millis": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "deduce_mappings": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "docs_per_second": "",
+        "max_page_search_size": "",
+        "use_point_in_time": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "num_failure_retries": "",
+        "unattended": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "sync": {
+        "time": {
+          "delay": "",
+          "field": ""
+        }
+      },
+      "retention_policy": ""
+    },
     "methods": [
       "POST"
     ],

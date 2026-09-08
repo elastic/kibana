@@ -57,7 +57,11 @@ test.describe('Spaces Management: List of Spaces', { tag: tags.deploymentAgnosti
   test('does not display the space switcher button on the current space details page', async ({
     pageObjects,
   }) => {
-    expect((await pageObjects.spaces.getCurrentSpaceTitle())?.toLowerCase()).toBe('default');
+    // Poll: the header nav control renders a placeholder title ("loading spaces
+    // navigation") until the active space resolves, so a one-shot read can race.
+    await expect
+      .poll(async () => (await pageObjects.spaces.getCurrentSpaceTitle())?.toLowerCase())
+      .toBe('default');
 
     // Filter first so the default row is on the (single) visible page regardless
     // of how many spaces other parallel specs have created.
@@ -81,7 +85,11 @@ test.describe('Spaces Management: List of Spaces', { tag: tags.deploymentAgnosti
   });
 
   test('switches to a new space using the space switcher button', async ({ pageObjects }) => {
-    expect((await pageObjects.spaces.getCurrentSpaceTitle())?.toLowerCase()).toBe('default');
+    // Poll: the header nav control renders a placeholder title ("loading spaces
+    // navigation") until the active space resolves, so a one-shot read can race.
+    await expect
+      .poll(async () => (await pageObjects.spaces.getCurrentSpaceTitle())?.toLowerCase())
+      .toBe('default');
 
     const target = SPACES[0];
 

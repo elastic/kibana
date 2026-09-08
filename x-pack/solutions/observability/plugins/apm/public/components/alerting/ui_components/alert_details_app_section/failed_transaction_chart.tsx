@@ -220,6 +220,7 @@ export function FailedTransactionChart({
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
                   element={APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

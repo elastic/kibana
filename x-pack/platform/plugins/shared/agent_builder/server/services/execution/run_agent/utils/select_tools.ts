@@ -12,7 +12,7 @@ import type {
   ToolProvider,
   ExecutableTool,
   ScopedRunner,
-  BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -160,7 +160,7 @@ export const builtinToolToExecutable = ({
   tool,
   runner,
 }: {
-  tool: BuiltinToolDefinition;
+  tool: InternalBuiltinToolDefinition;
   runner: ScopedRunner;
 }): ExecutableTool => {
   return {

@@ -108,6 +108,7 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: [],
     isValidationLoading: false,
+    validationError: null,
     handleValidationErrorClick: jest.fn(),
   })),
 }));
@@ -175,7 +176,7 @@ jest.mock('@kbn/workflows-ui', () => {
 const mockLoadWorkflowSpy = jest.fn();
 
 jest.mock('../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => {
-  const { createAsyncThunk } = jest.requireActual('@reduxjs/toolkit');
+  const { createAsyncThunk } = jest.requireActual('redux-toolkit-v1');
   return {
     loadWorkflowThunk: createAsyncThunk(
       'detail/loadWorkflowThunk/test',

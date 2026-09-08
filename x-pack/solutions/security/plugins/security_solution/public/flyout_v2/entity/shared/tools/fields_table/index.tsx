@@ -7,15 +7,13 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { FieldsTableTab } from '../../../../../cloud_security_posture/components/csp_details/fields_table_tab';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
+import { FIELDS_TABLE_TITLE } from '../../../../shared/constants/flyout_titles';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.fieldsTable.title', {
-  defaultMessage: 'Fields',
-});
+const TITLE = FIELDS_TABLE_TITLE;
 
 export interface FieldsTableToolProps {
   /** The (flattened) document whose fields are displayed in the table. */

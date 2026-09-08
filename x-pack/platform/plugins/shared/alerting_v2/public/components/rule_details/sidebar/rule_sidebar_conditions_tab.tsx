@@ -6,24 +6,6 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { useRule } from '../rule_context';
 import { RuleConditions } from './rule_conditions';
-import { RuleMetadata } from './rule_metadata';
 
-export const RuleSidebarConditionsTab: React.FC = () => {
-  const rule = useRule();
-  const hasMetadata = Boolean(rule.createdAt);
-
-  return (
-    <>
-      <RuleConditions />
-      {hasMetadata && (
-        <>
-          <EuiSpacer size="l" />
-          <RuleMetadata />
-        </>
-      )}
-    </>
-  );
-};
+export const RuleSidebarConditionsTab: React.FC = () => <RuleConditions />;

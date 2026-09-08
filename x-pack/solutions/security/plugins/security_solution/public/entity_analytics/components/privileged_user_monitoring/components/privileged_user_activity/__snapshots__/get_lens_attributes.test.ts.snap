@@ -56,9 +56,6 @@ Object {
         "type": "index-pattern",
       },
     ],
-    "query": Object {
-      "esql": "",
-    },
     "visualization": Object {
       "axisTitlesVisibilitySettings": Object {
         "x": false,

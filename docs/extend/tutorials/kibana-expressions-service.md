@@ -140,7 +140,7 @@ const rendererDefinition = {
    help: 'Outputs the context to the dom element',
    render: (domElement, input, handlers) => {
      // eslint-disable-next-line no-console
-     domElement.innerText = JSON.strinfigy(input);
+     domElement.innerText = JSON.stringify(input);
      handlers.done();
    },
 };

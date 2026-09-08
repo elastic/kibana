@@ -20,14 +20,22 @@ export function getSeverity(score: number | undefined) {
   return getSeverityType(score);
 }
 
+/**
+ * True when a normalized anomaly score is effectively zero, i.e. lower than the
+ * smallest value that would display as a non-zero score (0.01).
+ */
+export function isNoAnomalyScore(score: number | undefined): boolean {
+  return score !== undefined && Number(score) < 0.01;
+}
+
 export function getSeverityColor(score: number) {
   return mlGetSeverityColor(score);
 }
 
 /**
  * Human-readable label for the APM ML detector that produced an anomaly, so
- * consumers can tell users which signal (latency, throughput, failure rate) is
- * anomalous.
+ * consumers can tell users which signal (latency, throughput, failure rate,
+ * or low transaction count) is anomalous.
  */
 export function getApmMlDetectorLabel(detectorType: AnomalyDetectorType): string {
   switch (detectorType) {
@@ -42,6 +50,10 @@ export function getApmMlDetectorLabel(detectorType: AnomalyDetectorType): string
     case AnomalyDetectorType.txFailureRate:
       return i18n.translate('xpack.apm.anomalyDetection.detectorLabel.failedTransactionRate', {
         defaultMessage: 'Failed transaction rate',
+      });
+    case AnomalyDetectorType.txLowCount:
+      return i18n.translate('xpack.apm.anomalyDetection.detectorLabel.lowTransactionCount', {
+        defaultMessage: 'Low transaction count',
       });
   }
 }

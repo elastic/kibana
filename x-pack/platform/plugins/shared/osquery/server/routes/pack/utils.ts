@@ -149,7 +149,8 @@ export const deriveEffectiveQueryKey = (
 ): string => (query.id ? query.id : String(indexOrKey));
 
 // Shape-agnostic emptiness check for a pack's `queries` (array or record).
-// Shared by the V4 mint guard and the reconcile filter so they can't drift.
+// Shared by the V4 mint guard and the reconciler's per-pack skip so they can't
+// drift (the reconciler checks at its write site, being wire-first).
 // Typed as a guard so a truthy result narrows away null/undefined.
 export const hasQueries = <T extends unknown[] | Record<string, unknown>>(
   queries: T | null | undefined
@@ -306,6 +307,8 @@ export const stripPriorModePerQueryFields = (
       return rest;
     }
 
+    // Bare intervals (stale prebuilt-pack copies) are converged away separately by
+    // convergePerQueryIntervals; here we only preserve an explicit same-mode override.
     return scheduleType === undefined ? rest : { ...rest, schedule_type: scheduleType };
   }
 
@@ -320,12 +323,46 @@ export const stripPriorModePerQueryFields = (
   return rest;
 };
 
+/**
+ * Drop marker-less per-query intervals on write so the stored SO matches what
+ * the agent runs: in an interval-mode pack a bare `interval` without an explicit
+ * `schedule_type: 'interval'` marker is a stale prebuilt-pack copy the wire gate
+ * (`convertSOQueriesToPackConfig`) already ignores. Explicit overrides and rrule
+ * queries are left untouched.
+ */
+export const convergePerQueryIntervals = (
+  queries: Record<string, PackQueryInput>,
+  packScheduleType: ScheduleType | undefined | null
+): Record<string, PackQueryInput> => {
+  if (packScheduleType !== 'interval') return queries;
+
+  return Object.fromEntries(
+    Object.entries(queries).map(([key, query]) => {
+      if (query.schedule_type === 'interval' || query.schedule_type === 'rrule') {
+        return [key, query];
+      }
+
+      if (query.interval !== undefined) {
+        const { interval: _interval, ...rest } = query;
+
+        return [key, rest];
+      }
+
+      return [key, query];
+    })
+  );
+};
+
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
   // Required — callers must resolve this explicitly so a missing wiring
   // never silently ships RRULE state to Fleet.
   isRruleFeatureEnabled: boolean;
+  // Anchor used when the stored start_date is absent or the epoch sentinel.
+  // The pack's created_at. When absent or unparseable the epoch sentinel is
+  // emitted — deterministic, so the reconciler's diff gate holds.
+  fallbackStartDate?: string;
 }
 
 export interface PackConfigOutput {
@@ -341,7 +378,15 @@ export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
-  const { spaceId, packSchedule, isRruleFeatureEnabled } = options;
+  const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate } = options;
+  // Never `now()`: a time-of-write anchor differs on every call, so the
+  // reconciler would rewrite the policy (re-anchoring execution numbering) on
+  // every restart. Validate rather than `?? EPOCH` — `created_at` is
+  // `schema.maybe(schema.string())`, and an anchor beats can't parse (including
+  // `''`, which `??` misses) makes it report execution count 0.
+  const resolvedFallback = isValidRfc3339(fallbackStartDate)
+    ? fallbackStartDate
+    : START_DATE_EPOCH_FALLBACK;
 
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
     ? packSchedule?.schedule_type ?? undefined
@@ -383,11 +428,9 @@ export const convertSOQueriesToPackConfig = (
           scheduleFields = { rrule_schedule: queryRrule };
         }
       } else if (packMode === 'interval') {
-        if (
-          querySchedType !== 'rrule' &&
-          interval !== undefined &&
-          interval !== packSchedule?.interval
-        ) {
+        // Emit a per-query interval only for an explicit flyout override; a bare
+        // stored value must not shadow default_native_schedule.
+        if (querySchedType === 'interval' && interval !== undefined) {
           scheduleFields = { interval };
         }
       } else {
@@ -397,14 +440,19 @@ export const convertSOQueriesToPackConfig = (
       }
 
       // Suppress start_date for rrule-mode (osquerybeat would honour the stale
-      // value over the override) and the V4 epoch-fallback (avoid a bogus 1970
-      // on interval packs that never had one).
-      const startDateField =
-        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule')
-          ? {}
-          : legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
-          ? { start_date: legacyStartDate }
-          : {};
+      // value over the rrule_schedule.start_date anchor).
+      // Interval mode must always carry an anchor or osquerybeat's
+      // nativeScheduleExecutionCount returns 0 for every run.
+      const isRruleMode =
+        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule');
+      const startDateField = isRruleMode
+        ? {}
+        : {
+            start_date:
+              legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
+                ? legacyStartDate
+                : resolvedFallback,
+          };
 
       queriesOut[index] = omitBy(
         {
@@ -730,7 +778,7 @@ export const policyHasPack = (
   packName: string,
   spaceId: string
 ): boolean =>
-  has(packagePolicy, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`) ||
+  has(packagePolicy, `inputs[0].config.osquery.value.packs.${makePackKey(packName, spaceId)}`) ||
   has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`);
 
 export const removePackFromPolicy = (
@@ -738,11 +786,19 @@ export const removePackFromPolicy = (
   packName: string,
   spaceId: string
 ): void => {
-  unset(draft, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`);
+  unset(draft, `inputs[0].config.osquery.value.packs.${makePackKey(packName, spaceId)}`);
   unset(draft, `inputs[0].config.osquery.value.packs.${packName}`);
 };
 
-export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
+/**
+ * Separator between a pack block's space id and pack name on the wire. Both
+ * halves can contain it, so it is only ever used to BUILD a key or to strip a
+ * known prefix — never to split an arbitrary key into two parts.
+ */
+export const PACK_KEY_SEPARATOR = '--';
+
+export const makePackKey = (packName: string, spaceId: string) =>
+  `${spaceId}${PACK_KEY_SEPARATOR}${packName}`;
 
 /**
  * Drain ALL osquery package policies via keyset `fetchAllItems`. Shared by the
@@ -752,14 +808,21 @@ export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--$
 export const fetchAllPackagePolicies = async (
   packagePolicyService: PackagePolicyClient | undefined,
   soClient: SavedObjectsClientContract,
-  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`
+  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+  // With Fleet space awareness enabled, policies live in per-space namespaces
+  // and the drain only sees the soClient's space unless told otherwise. Pass
+  // `['*']` to enumerate every space (Fleet's documented wildcard).
+  spaceIds?: string[]
 ): Promise<PackagePolicy[]> => {
   const packagePolicies: PackagePolicy[] = [];
   if (!packagePolicyService) {
     return packagePolicies;
   }
 
-  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, { kuery })) {
+  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, {
+    kuery,
+    ...(spaceIds ? { spaceIds } : {}),
+  })) {
     packagePolicies.push(...policyBatch);
   }
 
@@ -807,4 +870,81 @@ export const findMatchingShards = (agentPolicies: AgentPolicy[] | undefined, sha
   }
 
   return policyShards;
+};
+
+/**
+ * Default shard percentage applied to a pack entry when a targeting agent
+ * policy carries no explicit shard value.
+ */
+export const DEFAULT_PACK_SHARD = 100;
+
+/** A single write target: the Fleet package policy plus every one of the
+ * pack's agent policy ids that resolved to it. */
+interface PackagePolicyWriteTarget {
+  packagePolicy: PackagePolicy;
+  agentPolicyIds: string[];
+}
+
+/**
+ * Groups `agentPolicyIds` by their resolved Fleet package-policy id.
+ * A package policy's `policy_ids` is an array, so distinct agent policy ids
+ * can resolve to the *same* package policy; grouping first means the caller
+ * issues exactly one `packagePolicyService.update` per package policy
+ * instead of one concurrent write per agent-policy id (the source of the
+ * duplicate-schedule race). Agent policy ids that resolve to no package
+ * policy are skipped, matching the previous per-id `.find()` behaviour.
+ */
+export const groupAgentPolicyIdsByPackagePolicy = (
+  agentPolicyIds: string[],
+  packagePolicies: PackagePolicy[]
+): Map<string, PackagePolicyWriteTarget> => {
+  const writeTargetsByPackagePolicyId = new Map<string, PackagePolicyWriteTarget>();
+
+  for (const agentPolicyId of agentPolicyIds) {
+    const packagePolicy = packagePolicies.find((policy) =>
+      policy.policy_ids.includes(agentPolicyId)
+    );
+    if (!packagePolicy) continue;
+
+    const existingTarget = writeTargetsByPackagePolicyId.get(packagePolicy.id);
+    if (existingTarget) {
+      existingTarget.agentPolicyIds.push(agentPolicyId);
+    } else {
+      writeTargetsByPackagePolicyId.set(packagePolicy.id, {
+        packagePolicy,
+        agentPolicyIds: [agentPolicyId],
+      });
+    }
+  }
+
+  return writeTargetsByPackagePolicyId;
+};
+
+/**
+ * Resolves the single, deterministic shard to write for a package policy
+ * that is targeted by one or more of the pack's agent policies. When every
+ * targeting agent policy carries the same shard (the common case, including
+ * 1:1 targeting), that value is returned unchanged. When they differ, the
+ * chosen rule is the MAXIMUM shard value: it is order-independent (unlike
+ * "first seen"), so repeating the same operation always yields the same
+ * result regardless of array/Map iteration order.
+ *
+ * The reduce is seeded with `-Infinity` (the identity for `Math.max`) so a
+ * single value — including a negative one — passes through unchanged, keeping
+ * exact parity with the previous per-agent-policy `policyShards[id] ?? 100`
+ * behaviour. An empty input returns `DEFAULT_PACK_SHARD`.
+ */
+export const resolveSharedPackagePolicyShard = (
+  agentPolicyIds: string[],
+  policyShards: Shard
+): number => {
+  if (agentPolicyIds.length === 0) {
+    return DEFAULT_PACK_SHARD;
+  }
+
+  return agentPolicyIds.reduce(
+    (maxShard, agentPolicyId) =>
+      Math.max(maxShard, policyShards[agentPolicyId] ?? DEFAULT_PACK_SHARD),
+    -Infinity
+  );
 };

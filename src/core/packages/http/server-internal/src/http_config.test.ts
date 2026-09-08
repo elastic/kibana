@@ -245,6 +245,69 @@ describe('publicBaseUrl', () => {
   });
 });
 
+describe('selfHttp', () => {
+  test('defaults to automatic targeting', () => {
+    expect(config.schema.validate({}).selfHttp).toEqual({
+      target: 'auto',
+      ssl: {},
+    });
+  });
+
+  test('accepts local target', () => {
+    expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
+  });
+
+  test('accepts outbound certificate authorities for an automatic HTTPS public target', () => {
+    expect(
+      config.schema.validate({
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+        },
+      }).selfHttp
+    ).toEqual({
+      target: 'auto',
+      ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+    });
+  });
+
+  test.each([
+    {
+      name: 'local target',
+      value: {
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          target: 'local' as const,
+          ssl: { certificateAuthorities: '/path/to/ca.pem' },
+        },
+      },
+    },
+    {
+      name: 'missing public base URL',
+      value: {
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+    {
+      name: 'HTTP public target',
+      value: {
+        publicBaseUrl: 'http://kibana.example.com',
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+  ])('rejects outbound certificate authorities with $name', ({ value }) => {
+    expect(() => config.schema.validate(value)).toThrow(
+      '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS'
+    );
+  });
+
+  test('rejects unsupported targets', () => {
+    expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
+      '[selfHttp.target]'
+    );
+  });
+});
+
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
   expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
@@ -849,5 +912,22 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
     expect(httpConfig.restrictInternalApis).toBe(true);
+  });
+
+  it('builds the self HTTP runtime config', () => {
+    const rawConfig = config.schema.validate({ selfHttp: { target: 'local' } }, {});
+    const rawCspConfig = cspConfig.schema.validate({});
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
+
+    expect(httpConfig.selfHttp).toEqual({
+      target: 'local',
+      ssl: { certificateAuthorities: undefined },
+    });
   });
 });

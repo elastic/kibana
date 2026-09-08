@@ -476,6 +476,8 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedFieldsFromESQL,
     dataSourcesCache,
     memoizedSources,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
     minimalQueryRef,
@@ -501,13 +503,16 @@ const ESQLEditorInternal = function ESQLEditor({
   const { editorActions, onClickQueryHistory, onToggleVisor } = useEsqlEditorActions({
     code,
     isHistoryOpen,
+    isLanguageComponentOpen,
     isCurrentQueryStarred,
+    editorIsInline: Boolean(editorIsInline),
     onUpdateAndSubmitQuery,
     onVisorClosed: () => editorRef.current?.focus(),
     starredQueriesService,
     trimmedQuery,
     isVisorOpenRef,
     setIsHistoryOpen,
+    setIsLanguageComponentOpen,
     setIsCurrentQueryStarred,
     setIsVisorOpen,
     trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
@@ -518,6 +523,20 @@ const ESQLEditorInternal = function ESQLEditor({
   const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
   const stableOnToggleVisor = useStableCallback(onToggleVisor);
   const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
+
+  const expandToFitContent = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+    const lineCount = editor.getModel()?.getLineCount() || 1;
+    const contentHeight = editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical
+    setEditorHeight((currentHeight) => {
+      if (contentHeight > currentHeight) {
+        return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
+      }
+      return currentHeight;
+    });
+  }, [setEditorHeight]);
 
   const esqlCallbacks = useEsqlCallbacks({
     core,
@@ -534,6 +553,8 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedFieldsFromESQL,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices,
     favoritesClient,
     getJoinIndicesCallback,
     enableResourceBrowser,
@@ -581,6 +602,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -642,6 +664,7 @@ const ESQLEditorInternal = function ESQLEditor({
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
@@ -807,7 +830,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(
+                  const keyBindingDisposables = addEditorKeyBindings(
                     editor,
                     stableOnQuerySubmit,
                     stableOnToggleVisor,
@@ -823,6 +846,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (!editorCommandDisposables.current.has(currentEditor)) {
                       editorCommandDisposables.current.set(currentEditor, [
                         ...commandDisposables,
+                        ...keyBindingDisposables,
                         ...ghostHintDisposables,
                       ]);
                     }
@@ -859,25 +883,23 @@ const ESQLEditorInternal = function ESQLEditor({
                     isSuggestionPopupOpenRef
                   );
 
-                  // on CMD/CTRL + / comment out the entire line
-                  editor.addCommand(
+                  // An action, not a command: `addCommand` keybindings are page-wide and fire while
+                  // another editor on the page has focus.
+                  const commentLineDisposable = editor.addAction({
+                    id: 'esql.commentLine',
+                    label: i18n.translate('esqlEditor.query.commentLineLabel', {
+                      defaultMessage: 'Toggle line comment',
+                    }),
                     // eslint-disable-next-line no-bitwise
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-                    onCommentLine
-                  );
+                    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
+                    run: onCommentLine,
+                  });
 
                   setMeasuredEditorWidth(editor.getLayoutInfo().width);
                   if (expandToFitQueryOnMount) {
-                    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-                    const lineCount = editor.getModel()?.getLineCount() || 1;
-                    const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
-                    const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                    if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(height);
-                    } else if (height >= EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(EDITOR_MAX_HEIGHT);
-                    }
+                    expandToFitContent();
                   }
+
                   const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
@@ -897,6 +919,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     layoutChangeDisposable,
                     modelContentDisposable,
                     suggestionPopupDisposable,
+                    commentLineDisposable,
                   ];
                   editorCommandDisposables.current.get(currentEditor)?.push(...listenerDisposables);
 

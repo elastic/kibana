@@ -212,7 +212,6 @@ export const useEntityAnalyticsRoutes = () => {
           from: params.from,
           to: params.to,
           score_type: params.scoreType,
-          page_size: params.pageSize,
           include_contributions: params.includeContributions,
         },
         signal,
@@ -1122,6 +1121,5 @@ export interface FetchRiskScoreHistoryParams {
   from?: string;
   to?: string;
   scoreType?: RiskScoreHistoryEntry['score_type'];
-  pageSize?: number;
   includeContributions?: boolean;
 }

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiText,
   EuiTitle,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useFormContext, useWatch, type FieldPath } from 'react-hook-form';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
 import { DOWNSAMPLE_PHASES } from '../form';
 import { DownsampleIntervalField } from '../form';
@@ -39,7 +38,7 @@ export const DownsampleFieldSection = ({
   dataTestSubj,
   isMetricsStream,
 }: DownsampleFieldSectionProps) => {
-  const { control, getFieldState, getValues, resetField, setValue, trigger, formState } =
+  const { control, getFieldState, getValues, setValue, trigger, formState } =
     useFormContext<IlmPhasesFlyoutFormInternal>();
 
   const enabledPath =
@@ -48,8 +47,6 @@ export const DownsampleFieldSection = ({
     `_meta.${phaseName}.downsample.fixedIntervalValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const intervalUnitPath =
     `_meta.${phaseName}.downsample.fixedIntervalUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
-  const readonlyPath =
-    `_meta.${phaseName}.readonlyEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
   const checkboxId = useGeneratedHtmlId({
@@ -57,18 +54,6 @@ export const DownsampleFieldSection = ({
   });
 
   const isEnabled = Boolean(useWatch({ control, name: enabledPath }));
-  const isReadonlyEnabled = Boolean(useWatch({ control, name: readonlyPath }));
-
-  const resetReadonly = useCallback(() => {
-    resetField(readonlyPath, { defaultValue: false });
-    setValue(readonlyPath, false);
-  }, [resetField, readonlyPath, setValue]);
-
-  useEffect(() => {
-    if (isEnabled && isReadonlyEnabled) {
-      resetReadonly();
-    }
-  }, [isEnabled, isReadonlyEnabled, resetReadonly]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -99,12 +84,6 @@ export const DownsampleFieldSection = ({
             onChange={(e) => {
               const nextEnabled = e.target.checked;
               setValue(enabledPath, nextEnabled);
-
-              if (nextEnabled) {
-                // Downsampling is incompatible with the ILM "readonly" action in this flyout.
-                // Clear and unmount the readonly toggle while downsampling is enabled.
-                resetReadonly();
-              }
 
               // When enabling downsampling, default the fixed_interval to 2x the previous enabled downsample interval.
               // Only do this when the current interval is still the schema default (pristine 1d) to avoid clobbering
@@ -164,21 +143,18 @@ export const DownsampleFieldSection = ({
       </EuiFlexGroup>
 
       {!isMetricsStream && isEnabled && (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
           data-test-subj={`${dataTestSubj}DownsamplingNotSupportedCallout-${phaseName}`}
           title={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle', {
             defaultMessage: 'Downsampling requires a time series stream',
           })}
-        >
-          <EuiText size="s">
-            {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
-              defaultMessage:
-                'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.',
-            })}
-          </EuiText>
-        </EuiCallOut>
+          text={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
+            defaultMessage:
+              'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.',
+          })}
+        />
       )}
 
       <div hidden={!isEnabled} aria-hidden={!isEnabled}>

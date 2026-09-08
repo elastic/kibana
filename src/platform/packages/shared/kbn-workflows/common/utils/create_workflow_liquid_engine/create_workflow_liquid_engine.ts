@@ -95,6 +95,8 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     renderLimit,
     // Default max object allocations (array ops, string ops) per render
     memoryLimit,
+    // Enables grouped expressions (e.g. {% if a and (b or c) %})
+    groupedExpressions: true,
   });
   removeDisallowedLiquidTags(engine);
   registerWorkflowLiquidFilters(engine);
@@ -110,6 +112,17 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
  * eliminates the risk of divergence (e.g. a no-op stub instead of the real function).
  */
 export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
+  // Decodes Base64 without interpreting binary data as UTF-8 text.
+  engine.registerFilter('base64_decode_bytes', function (value: unknown): Uint8Array {
+    const encoded = String(value ?? '');
+    this.context.memoryLimit.use(encoded.length);
+    const bytes =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(encoded, 'base64')
+        : Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+    return bytes;
+  });
+
   // Converts a JSON string to a parsed object; passes non-strings through unchanged.
   engine.registerFilter('json_parse', (value: unknown): unknown => {
     if (typeof value !== 'string') {

@@ -15,6 +15,7 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const props = {
   id: 'action-id',
@@ -104,10 +105,23 @@ describe('ShowAlertButton', () => {
       documentId: 'alert-id',
       indexName: 'alert-index',
       renderCellActions: casesCellActionRenderer,
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+      title: 'Alert',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('includes the rule name in the flyout history title when provided', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(<ShowAlertButton {...props} ruleName="My Detection Rule" />);
+    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+
+    expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Alert: My Detection Rule' })
+    );
   });
 
   it('opens the legacy EASE flyout when the EASE capability is on, regardless of the new flyout flag', () => {

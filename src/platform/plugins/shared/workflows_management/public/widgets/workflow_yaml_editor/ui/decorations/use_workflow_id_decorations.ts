@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';

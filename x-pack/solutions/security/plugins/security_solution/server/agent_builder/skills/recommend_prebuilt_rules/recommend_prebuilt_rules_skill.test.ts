@@ -63,7 +63,7 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     expect(skill.content).toContain(GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID);
   });
 
-  it('content includes the canonical 14 MITRE tactics', () => {
+  it('content includes the canonical 15 MITRE tactics', () => {
     const { getStartServices, logger, ml } = createDeps();
     const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     const tacticIds = [
@@ -81,6 +81,7 @@ describe('createRecommendPrebuiltRulesSkill', () => {
       'TA0040',
       'TA0042',
       'TA0043',
+      'TA0112',
     ];
     tacticIds.forEach((id) => expect(skill.content).toContain(id));
   });

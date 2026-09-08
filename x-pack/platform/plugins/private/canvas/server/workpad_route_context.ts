@@ -11,10 +11,7 @@ import type {
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import {
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
-} from '@kbn/as-code-shared-schemas';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { getId } from '../common/lib/get_id';
@@ -44,10 +41,6 @@ export const createWorkpadRouteContext: () => IContextProvider<
   return async (context) => {
     const core = await context.core;
     const soClient = core.savedObjects.client;
-    const useGASchemas = await core.featureFlags.getBooleanValue(
-      AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-      AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
-    );
 
     return {
       workpad: {
@@ -58,10 +51,7 @@ export const createWorkpadRouteContext: () => IContextProvider<
           const id = maybeId ? maybeId : getId('workpad');
 
           // embeddables transform in
-          const { attributes: transformedAttributes, references } = transformWorkpadIn(
-            attributes,
-            useGASchemas
-          );
+          const { attributes: transformedAttributes, references } = transformWorkpadIn(attributes);
 
           return await soClient.create<WorkpadAttributes>(
             CANVAS_TYPE,
@@ -87,8 +77,7 @@ export const createWorkpadRouteContext: () => IContextProvider<
 
           // embeddables transform in
           const { attributes, references } = transformWorkpadIn(
-            workpadWithoutId as WorkpadAttributes,
-            useGASchemas
+            workpadWithoutId as WorkpadAttributes
           );
           return await soClient.create<WorkpadAttributes>(
             CANVAS_TYPE,
@@ -116,6 +105,10 @@ export const createWorkpadRouteContext: () => IContextProvider<
         },
         resolve: async (id: string) => {
           const resolved = await soClient.resolve<WorkpadAttributes>(CANVAS_TYPE, id);
+
+          if (isSavedObjectErrorResult(resolved.saved_object)) {
+            throw new Error(resolved.saved_object.error.message);
+          }
 
           // embeddables transform out
           resolved.saved_object.attributes = transformWorkpadOut(

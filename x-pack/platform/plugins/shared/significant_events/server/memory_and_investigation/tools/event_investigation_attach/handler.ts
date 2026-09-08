@@ -10,20 +10,26 @@ import type { EventClient } from '../../../lib/significant_events/events';
 
 export const attachEventInvestigationToolHandler = async ({
   eventClient,
-  eventId,
+  eventUuid,
   workflowExecutionId,
   startedAt,
   completedAt,
 }: {
   eventClient: EventClient;
-  eventId: string;
+  eventUuid: string;
   workflowExecutionId: string;
   startedAt: string;
   completedAt?: string;
-}): Promise<{ event_id: string; updated: number; ignored: number }> => {
+}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
+  const { hits } = await eventClient.findByEventUuid(eventUuid);
+  const event = hits[0];
+  if (!event) {
+    throw new Error(`Significant event "${eventUuid}" not found`);
+  }
+
   return attachInvestigationToEvent({
     eventClient,
-    eventId,
+    eventId: event.event_id,
     investigation: {
       workflow_execution_id: workflowExecutionId,
       started_at: startedAt,

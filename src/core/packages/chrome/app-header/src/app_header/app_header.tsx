@@ -8,123 +8,118 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderMetadataItems,
-  AppHeaderPadding,
-  AppHeaderTab,
-  AppHeaderTitle,
-} from '../types';
-import { useHasLegacyActionMenu } from './hooks/chrome';
-import { AppHeaderShell } from './app_header_shell';
-import { AppBadges } from './app_badges';
-import { AppTabs } from './app_tabs';
-import { TitleArea } from './title_area';
-import { TitleActions } from './title_actions';
-import { AppMenu } from './app_menu';
-import { AppHeaderMetadata } from './app_header_metadata';
-import { useResolvedBadges, useShareAction } from './hooks';
+import React from 'react';
+import type { DistributiveOmit } from '@elastic/eui';
+import {
+  AppHeaderView as AppHeaderPresentation,
+  type AppHeaderViewProps as AppHeaderPresentationProps,
+} from '@kbn/ui-app-header';
+import type { AppHeaderTitle } from '../types';
+import {
+  useAppHeaderStaticItems,
+  useBackNavTargets,
+  useInlineAppHeader,
+  useLegacyActionMenu,
+  useResolvedBadges,
+} from './hooks';
+import { LegacyHeaderActionMenu } from './legacy_action_menu';
 
-export interface AppHeaderViewProps {
-  title?: AppHeaderTitle;
-  back?: AppHeaderBack | AppHeaderBack[];
-  tabs?: AppHeaderTab[];
-  badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig & { isCollapsed?: boolean };
-  favorite?: ReactNode;
-  titleAppend?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
-  sticky?: boolean;
-  padding?: AppHeaderPadding;
+export type AppHeaderViewProps = DistributiveOmit<
+  AppHeaderPresentationProps,
+  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless'
+> & {
   docLink?: string;
   showAddIntegrations?: boolean;
-  /**
-   * Omits the header's bottom border. Used when the content rendered below the header owns the
-   * separating line instead (e.g. Discover using UnifiedTabs).
-   */
-  borderless?: boolean;
-}
+};
 
-export const AppHeaderView = React.memo<AppHeaderViewProps>(
-  ({
+const getPublicAppHeaderViewProps = ({
+  title,
+  back,
+  tabs,
+  badges,
+  menu,
+  favorite,
+  share,
+  description,
+  metadata,
+  sticky,
+  spacing,
+  docLink,
+  showAddIntegrations,
+}: AppHeaderViewProps): AppHeaderViewProps => {
+  const secondaryContent = description ? { description } : metadata ? { metadata } : {};
+
+  return {
     title,
     back,
     tabs,
     badges,
     menu,
     favorite,
-    titleAppend,
-    metadata,
+    share,
+    ...secondaryContent,
     sticky,
-    padding,
-    borderless,
+    spacing,
     docLink,
     showAddIntegrations,
-  }) => {
-    const hasLegacyActionMenu = useHasLegacyActionMenu();
-    const shareAction = useShareAction(menu);
-    const resolvedBadges = useResolvedBadges(badges);
+  };
+};
 
-    // A second row (tabs or metadata) makes a taller, multi-line header where an `xs` title looks
-    // too small, so bump the title to `s` there; single-row headers stay `xs`.
-    const isMultiRow = !!tabs?.length || !!metadata?.length;
-    const titleSize = isMultiRow ? 's' : 'xs';
+const usePresentationProps = (
+  props: AppHeaderViewProps,
+  extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless'>
+): AppHeaderPresentationProps => {
+  const publicProps = getPublicAppHeaderViewProps(props);
+  const back = useBackNavTargets(publicProps.back);
+  const resolvedBadges = useResolvedBadges(publicProps.badges);
+  const staticItems = useAppHeaderStaticItems({
+    docLink: publicProps.docLink,
+    showAddIntegrations: publicProps.showAddIntegrations,
+  });
+  const legacyActionMenu = useLegacyActionMenu();
+  const { docLink, showAddIntegrations, ...rest } = publicProps;
 
-    const show =
-      title !== undefined ||
-      back !== undefined ||
-      !!tabs?.length ||
-      !!resolvedBadges?.length ||
-      !!menu?.items?.length ||
-      !!titleAppend ||
-      !!shareAction ||
-      !!favorite ||
-      !!metadata?.length ||
-      !!docLink ||
-      !!showAddIntegrations ||
-      hasLegacyActionMenu;
+  return {
+    ...rest,
+    back,
+    badges: resolvedBadges,
+    staticItems,
+    fallbackMenu:
+      !publicProps.menu && legacyActionMenu ? (
+        <LegacyHeaderActionMenu mount={legacyActionMenu} />
+      ) : undefined,
+    ...extras,
+  };
+};
 
-    if (!show) {
-      return null;
-    }
-
-    return (
-      <AppHeaderShell
-        title={<TitleArea title={title} back={back} size={titleSize} />}
-        badges={<AppBadges badges={resolvedBadges} />}
-        titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
-        titleAppend={titleAppend}
-        trailing={
-          <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
-        }
-        metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
-        tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
-        sticky={sticky}
-        padding={padding}
-        borderless={borderless}
-      />
-    );
-  }
-);
+export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => {
+  const presentationProps = usePresentationProps(props);
+  return <AppHeaderPresentation {...presentationProps} />;
+});
 
 AppHeaderView.displayName = 'AppHeaderView';
 
-export interface AppHeaderProps extends AppHeaderViewProps {
-  title: AppHeaderTitle;
-}
+export type AppHeaderProps = AppHeaderViewProps & { title: AppHeaderTitle };
 
 export const AppHeader = React.memo<AppHeaderProps>((props) => {
-  const chrome = useChromeService();
-  useLayoutEffect(() => {
-    chrome.next.inlineAppHeader.set(true);
-    return () => chrome.next.inlineAppHeader.set(false);
-  }, [chrome]);
-
-  return <AppHeaderView {...props} />;
+  useInlineAppHeader();
+  const presentationProps = usePresentationProps(props);
+  return <AppHeaderPresentation {...presentationProps} title={props.title} />;
 });
 
 AppHeader.displayName = 'AppHeader';
+
+export type DiscoverAppHeaderProps = AppHeaderProps & {
+  tabsBar?: ReactNode;
+};
+
+export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => {
+  useInlineAppHeader();
+  const presentationProps = usePresentationProps(props, {
+    titleAppend: tabsBar,
+    borderless: tabsBar != null,
+  });
+  return <AppHeaderPresentation {...presentationProps} title={props.title} />;
+});
+
+DiscoverAppHeader.displayName = 'DiscoverAppHeader';

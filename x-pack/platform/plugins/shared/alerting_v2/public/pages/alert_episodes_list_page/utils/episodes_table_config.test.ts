@@ -51,13 +51,30 @@ describe('episodes_table_config', () => {
     });
 
     it('applies localStorage over defaults', () => {
-      const result = mergeEpisodesTableConfig({ rowHeight: -1 });
+      const fromStorage = { rowHeight: -1 };
+      const result = mergeEpisodesTableConfig(fromStorage);
       expect(result.rowHeight).toBe(-1);
+      expect(result.visibleColumns).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.visibleColumns);
     });
 
-    it('URL wins over localStorage', () => {
-      const result = mergeEpisodesTableConfig({ rowHeight: -1 }, { rowHeight: 1 });
+    it('URL wins over localStorage per field', () => {
+      const fromStorage = {
+        rowHeight: -1,
+        sort: { sortField: 'duration', sortDirection: 'asc' as const },
+      };
+      const fromUrl = { rowHeight: 1 };
+      const result = mergeEpisodesTableConfig(fromStorage, fromUrl);
+      // URL's rowHeight beats LS
       expect(result.rowHeight).toBe(1);
+      // LS sort is preserved (URL didn't specify sort)
+      expect(result.sort).toEqual({ sortField: 'duration', sortDirection: 'asc' });
+    });
+
+    it('URL fully overrides LS when it specifies the same field', () => {
+      const fromStorage = { visibleColumns: ['rule.id', 'severity'] };
+      const fromUrl = { visibleColumns: ['episode.status', 'tags'] };
+      const result = mergeEpisodesTableConfig(fromStorage, fromUrl);
+      expect(result.visibleColumns).toEqual(['episode.status', 'tags']);
     });
 
     it('ignores null/undefined inputs gracefully', () => {
@@ -73,14 +90,22 @@ describe('episodes_table_config', () => {
     });
 
     it('returns decoded config when storage has a valid value', () => {
-      const stored = { rowHeight: -1 };
+      const stored = {
+        visibleColumns: ['episode.status', 'severity'],
+        sort: { sortField: 'duration', sortDirection: 'desc' },
+        rowHeight: -1,
+        columnSettings: { duration: { width: 200 } },
+      };
       const storage = createMockStorage(stored);
       expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual(stored);
     });
 
     it('writes only non-default fields to localStorage at the expected key', () => {
       const storage = createMockStorage();
-      writeEpisodesTableConfigToStorage(storage as any, { rowHeight: -1 });
+      writeEpisodesTableConfigToStorage(storage as any, {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        rowHeight: -1,
+      });
       expect(storage.set).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY, {
         rowHeight: -1,
       });
@@ -103,9 +128,18 @@ describe('episodes_table_config', () => {
         remove: jest.fn(),
         clear: jest.fn(),
       };
-      const config = { rowHeight: -1 };
+      const config = {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        rowHeight: -1,
+        sort: { sortField: 'tags', sortDirection: 'asc' as const },
+      };
       writeEpisodesTableConfigToStorage(storage as any, config);
-      expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual(config);
+      // Only the fields that diverge from the default are persisted (and read back); the caller
+      // is expected to re-merge with defaults via mergeEpisodesTableConfig.
+      expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual({
+        rowHeight: -1,
+        sort: { sortField: 'tags', sortDirection: 'asc' },
+      });
     });
 
     it('ignores invalid storage values gracefully', () => {
@@ -139,15 +173,49 @@ describe('episodes_table_config', () => {
       expect(readEpisodesTableConfigFromUrl(urlStorage)).toBeUndefined();
     });
 
+    it('reads visibleColumns from URL', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        visibleColumns: ['episode.status', 'tags'],
+      });
+      const result = readEpisodesTableConfigFromUrl(urlStorage);
+      expect(result?.visibleColumns).toEqual(['episode.status', 'tags']);
+    });
+
+    it('reads sort from URL', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        sort: { sortField: 'duration', sortDirection: 'asc' },
+      });
+      const result = readEpisodesTableConfigFromUrl(urlStorage);
+      expect(result?.sort).toEqual({ sortField: 'duration', sortDirection: 'asc' });
+    });
+
     it('reads rowHeight from URL', async () => {
       const urlStorage = await createKbnTestUrlStorage({ rowHeight: -1 });
       const result = readEpisodesTableConfigFromUrl(urlStorage);
       expect(result?.rowHeight).toBe(-1);
     });
 
-    it('ignores invalid rowHeight values', async () => {
-      const urlStorage = await createKbnTestUrlStorage({ rowHeight: 'not-a-number' });
-      expect(readEpisodesTableConfigFromUrl(urlStorage)?.rowHeight).toBeUndefined();
+    it('reads columnSettings (column widths) from URL', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        columnSettings: { duration: { width: 200 }, tags: { width: 150 } },
+      });
+      const result = readEpisodesTableConfigFromUrl(urlStorage);
+      expect(result?.columnSettings).toEqual({
+        duration: { width: 200 },
+        tags: { width: 150 },
+      });
+    });
+
+    it('ignores invalid sort direction', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        sort: { sortField: 'tags', sortDirection: 'invalid' },
+      });
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.sort).toBeUndefined();
+    });
+
+    it('ignores empty visibleColumns arrays', async () => {
+      const urlStorage = await createKbnTestUrlStorage({ visibleColumns: [] });
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toBeUndefined();
     });
   });
 
@@ -160,7 +228,10 @@ describe('episodes_table_config', () => {
 
     it('writes non-default fields to _a.episodesTable', async () => {
       const urlStorage = await createKbnTestUrlStorage();
-      await writeEpisodesTableConfigToUrl(urlStorage, { rowHeight: -1 });
+      await writeEpisodesTableConfigToUrl(urlStorage, {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        rowHeight: -1,
+      });
       expect(urlStorage.get('_a')).toEqual({
         [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
       });
@@ -174,7 +245,10 @@ describe('episodes_table_config', () => {
       });
       await urlStorage.set('_a', { episodesList: { status: 'recovering' } }, { replace: true });
 
-      await writeEpisodesTableConfigToUrl(urlStorage, { rowHeight: -1 });
+      await writeEpisodesTableConfigToUrl(urlStorage, {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        rowHeight: -1,
+      });
 
       expect(urlStorage.get('_a')).toEqual({
         episodesList: { status: 'recovering' },
@@ -184,10 +258,21 @@ describe('episodes_table_config', () => {
 
     it('round-trips config through URL', async () => {
       const urlStorage = await createKbnTestUrlStorage();
-      const config = { rowHeight: -1 };
+      const config = {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        visibleColumns: ['episode.status', 'tags'],
+        sort: { sortField: 'duration', sortDirection: 'desc' as const },
+        rowHeight: -1,
+        columnSettings: { duration: { width: 250 } },
+      };
       await writeEpisodesTableConfigToUrl(urlStorage, config);
       const result = readEpisodesTableConfigFromUrl(urlStorage);
-      expect(result).toEqual({ rowHeight: -1 });
+      expect(result).toEqual({
+        visibleColumns: ['episode.status', 'tags'],
+        sort: { sortField: 'duration', sortDirection: 'desc' },
+        rowHeight: -1,
+        columnSettings: { duration: { width: 250 } },
+      });
     });
   });
 });

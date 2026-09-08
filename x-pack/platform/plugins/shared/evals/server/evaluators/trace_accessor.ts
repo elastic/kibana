@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type {
+  AggregationsAggregate,
+  AggregationsAggregationContainer,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { isValidTraceId } from '@opentelemetry/api';
 import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import type { TraceAccessor } from './types';
@@ -18,19 +21,87 @@ const TRACE_SOURCE = {
 
 export type TraceSource = keyof typeof TRACE_SOURCE;
 
-export interface TraceAccessorWithEsql extends TraceAccessor {
-  runEsql(source: TraceSource, pipeline: string): Promise<ESQLSearchResponse>;
+export interface TraceFilterTerm {
+  type: 'term';
+  field: string;
+  value: string;
 }
 
-export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessorWithEsql => ({
+export interface TraceFilterExistence {
+  type: 'exists' | 'not_exists';
+  field: string;
+}
+
+export type TraceFilter = TraceFilterTerm | TraceFilterExistence;
+
+export interface TraceSearchSort {
+  field: string;
+  order: 'asc' | 'desc';
+}
+
+export interface TraceSearchParams {
+  filter?: TraceFilter[];
+  fields?: string[];
+  sort?: TraceSearchSort;
+  size?: number;
+  aggs?: Record<string, AggregationsAggregationContainer>;
+}
+
+export interface TraceSearchResult<TAggregations = Record<string, AggregationsAggregate>> {
+  documents: Array<Record<string, unknown>>;
+  aggregations?: TAggregations;
+}
+
+export interface TraceAccessorWithSearch extends TraceAccessor {
+  runSearch<TAggregations = Record<string, AggregationsAggregate>>(
+    source: TraceSource,
+    params: TraceSearchParams
+  ): Promise<TraceSearchResult<TAggregations>>;
+}
+
+export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessorWithSearch => ({
   ...traceAccessor,
-  runEsql: async (source: TraceSource, pipeline: string) => {
+  runSearch: async <TAggregations = Record<string, AggregationsAggregate>>(
+    source: TraceSource,
+    params: TraceSearchParams
+  ) => {
     if (!isValidTraceId(traceAccessor.traceId)) {
       throw new Error('Invalid trace_id: must be a 32-character hex string');
     }
+
     const { index, field } = TRACE_SOURCE[source];
-    const query = `FROM ${index}\n| WHERE ${field} == ?trace_id\n${pipeline}`;
-    const params = [{ trace_id: traceAccessor.traceId }] as unknown as FieldValue[];
-    return (await traceAccessor.esClient.esql.query({ query, params })) as ESQLSearchResponse;
+    const { filter = [], fields, sort, size, aggs } = params;
+
+    const filterClauses: QueryDslQueryContainer[] = [{ term: { [field]: traceAccessor.traceId } }];
+    const mustNotClauses: QueryDslQueryContainer[] = [];
+    for (const clause of filter) {
+      if (clause.type === 'term') {
+        filterClauses.push({ term: { [clause.field]: clause.value } });
+      } else if (clause.type === 'exists') {
+        filterClauses.push({ exists: { field: clause.field } });
+      } else {
+        mustNotClauses.push({ exists: { field: clause.field } });
+      }
+    }
+
+    const response = await traceAccessor.esClient.search<Record<string, unknown>>({
+      index,
+      ignore_unavailable: true,
+      _source: fields,
+      size,
+      aggs,
+      sort: sort ? [{ [sort.field]: { order: sort.order } }] : undefined,
+      query: {
+        bool: {
+          filter: filterClauses,
+          ...(mustNotClauses.length > 0 ? { must_not: mustNotClauses } : {}),
+        },
+      },
+    });
+
+    return {
+      documents: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
+      aggregations: response.aggregations as TAggregations | undefined,
+    };
   },
 });

@@ -420,6 +420,11 @@ components:
             type: string
             maxLength: 150
           description: MITRE ATT&CK tactic names for all jobs that fired in this bucket
+        tacticCounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Number of anomaly records per MITRE ATT&CK tactic within this time bucket; a job's doc_count is attributed to each tactic it is configured for
 
     AnomalyOverviewHit:
       type: object

@@ -19,6 +19,8 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { createRuleOasExamples } from './create_rule_oas_example';
 
 @injectable()
 export class CreateRuleRoute extends BaseAlertingRoute {
@@ -33,6 +35,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
     summary: 'Create a rule',
     description:
       'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
+    oasOperationObject: createRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -45,7 +48,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

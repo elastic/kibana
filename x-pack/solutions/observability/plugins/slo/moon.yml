@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: '@elastic/nightshift-sre-agent-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
-  owner: '@elastic/actionable-obs-team'
+  owner: '@elastic/nightshift-sre-agent-team'
   sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:
   - '@kbn/i18n'
@@ -135,9 +135,14 @@ dependsOn:
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-analytics-browser'
-  - '@kbn/core-spaces-common'
   - '@kbn/inspector-plugin'
+  - '@kbn/zod-helpers'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
+  - '@kbn/cps-server-utils'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

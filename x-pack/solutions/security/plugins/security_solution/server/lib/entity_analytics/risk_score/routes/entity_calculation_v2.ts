@@ -25,6 +25,7 @@ import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_priv
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
   context: SecuritySolutionRequestHandlerContext,
@@ -74,17 +75,27 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     );
     const riskScoreDataClient = securityContext.getRiskScoreDataClient();
 
-    await recalculateEntityRiskScore({
-      esClient,
-      soClient,
-      crudClient: securityContext.getEntityStoreUpdateClient(),
+    await runWithSpan({
+      name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
       namespace,
-      entityId,
-      identifierType,
-      getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
-      idBasedRiskScoringEnabled,
-      logger,
-      alertSampleSizePerShard: securityConfig.entityAnalytics?.riskEngine?.alertSampleSizePerShard,
+      attributes: {
+        'entity_analytics.operation': 'entity_calculation_v2',
+        'entity_analytics.identifier_type': identifierType,
+      },
+      cb: () =>
+        recalculateEntityRiskScore({
+          esClient,
+          soClient,
+          crudClient: securityContext.getEntityStoreUpdateClient(),
+          namespace,
+          entityId,
+          identifierType,
+          getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
+          idBasedRiskScoringEnabled,
+          logger,
+          alertSampleSizePerShard:
+            securityConfig.entityAnalytics?.riskEngine?.alertSampleSizePerShard,
+        }),
     });
 
     return response.ok({ body: { success: true } });

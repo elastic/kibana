@@ -27,6 +27,7 @@ import {
 } from '../../lib/significant_events/validate_esql_query';
 import { createServerRoute } from '../create_server_route';
 import { assertSignificantEventsAccess } from '../utils/assert_significant_events_access';
+import { cleanupStaleEvents } from '../../lib/significant_events/events/cleanup_stale_events';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -95,8 +96,8 @@ const listQueriesRoute = createServerRoute({
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -161,12 +162,12 @@ const upsertQueryRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -245,8 +246,8 @@ const deleteQueryRoute = createServerRoute({
     server,
   }): Promise<DeleteQueryResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { queryId, name: streamName },
@@ -256,16 +257,32 @@ const deleteQueryRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     // includeExpired: explicit-id action, so an expired query must stay reachable.
-    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId], {
+    const [queryLink] = await kiClient.bulkGetQueriesByIds(streamName, [queryId], {
       includeExpired: true,
     });
-    if (queryLink.length === 0) {
+    if (!queryLink) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
 
     await kiClient.deleteQuery(definition, queryId);
 
-    logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
+    if (queryLink.rule_backed && queryLink.rule_id) {
+      try {
+        const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+        await cleanupStaleEvents({
+          eventClient: scopedClients.getEventClient(),
+          rulesClient,
+          candidateRuleIds: [queryLink.rule_id],
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger
+          .get('significantEvents')
+          .error(`Failed to clean up significant events after query deletion: ${errorMessage}`);
+      }
+    }
+
+    logger.get('significantEvents').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
     return {
       acknowledged: true,
@@ -338,8 +355,8 @@ const bulkQueriesRoute = createServerRoute({
     server,
   }): Promise<BulkUpdateAssetsResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { name: streamName },
@@ -404,8 +421,29 @@ const bulkQueriesRoute = createServerRoute({
     ];
     await kiClient.syncQueries(definition, nextQueries, { currentLinks });
 
+    const candidateRuleIds = currentLinks.flatMap((link) =>
+      deleteIds.has(link.query.id) && link.rule_backed && link.rule_id ? [link.rule_id] : []
+    );
+    if (candidateRuleIds.length > 0) {
+      try {
+        const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+        await cleanupStaleEvents({
+          eventClient: scopedClients.getEventClient(),
+          rulesClient,
+          candidateRuleIds,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger
+          .get('significantEvents')
+          .error(
+            `Failed to clean up significant events after bulk query deletion: ${errorMessage}`
+          );
+      }
+    }
+
     logger
-      .get('significant_events')
+      .get('significantEvents')
       .debug(
         `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
       );

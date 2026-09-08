@@ -81,6 +81,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -96,13 +97,66 @@ steps:
           EVAL_SUITE_ID: 'agent-builder-dashboards'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Keep in sync with `weeklyEisModelGroups` for agent-builder-dashboards in evals.suites.json.
+          # Intentionally not using *weekly_eis_core_models — Gemini Flash/Pro fail this suite's
+          # generate_dashboard tool-call schema and should not run weekly here.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/openai-gpt-5.2,eis/openai-gpt-5.4'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Agent Builder Visualizations'
+        key: kbn-evals-weekly-agent-builder-visualizations
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'agent-builder-visualizations'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          # Keep in sync with `weeklyEisModelGroups` for agent-builder-visualizations in evals.suites.json.
+          # Same allowlist as dashboards (no Gemini) — suite timeout is 45m per model.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/openai-gpt-5.2,eis/openai-gpt-5.4'
+        timeout_in_minutes: 90
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Alerting V2'
+        key: kbn-evals-weekly-alerting-v2
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'alerting-v2'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_alerting_v2'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -125,6 +179,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -147,6 +202,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -164,13 +220,14 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           # Extended tier: includes smaller/cheaper models for cost-performance evaluation.
           # Keep in sync with `weeklyEisModelGroups` for significant-events in evals.suites.json.
-          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.7-opus,eis/anthropic-claude-4.8-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-flash-lite,eis/google-gemini-3.5-flash,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-oss-120b'
+          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.7-opus,eis/anthropic-claude-4.8-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-flash-lite,eis/google-gemini-3.5-flash,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-5.6-luna,eis/openai-gpt-5.6-terra,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -193,6 +250,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -214,6 +272,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -236,6 +295,31 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Detection Watch Rule Creation'
+        key: kbn-evals-weekly-detection-watch-rule-creation
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'detection-watch-rule-creation'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_detection_watch_rule_creation'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -259,6 +343,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -282,6 +367,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -305,6 +391,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -327,6 +414,38 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Attack Discovery Agent Builder'
+        key: kbn-evals-weekly-attack-discovery-agent-builder
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'attack-discovery-agent-builder'
+          EVAL_FANOUT: '1'
+          EVAL_GREP: 'golden |non-golden'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_attack_discovery_agent_builder'
+        # This suite ships as a baseline measurement point. The default-agent
+        # routing + main skill prose is intentionally not hardened yet — expect
+        # live-retrieval and multiple-alert-sets cases to fail on trajectory
+        # and cost evaluators. soft_fail keeps the suite informational until
+        # the follow-up skill-hardening PR lands.
+        soft_fail: true
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -349,6 +468,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -372,6 +492,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -394,6 +515,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -416,6 +538,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -438,6 +561,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -461,6 +585,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -483,6 +608,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:

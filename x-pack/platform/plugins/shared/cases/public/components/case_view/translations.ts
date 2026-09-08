@@ -282,6 +282,27 @@ export const ERROR_CHANGING_TEMPLATE = i18n.translate(
   }
 );
 
+export const TEMPLATE_UPDATED_TITLE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToastTitle',
+  {
+    defaultMessage: 'Template updated',
+  }
+);
+
+export const TEMPLATE_UPDATED_TEXT = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToastText',
+  {
+    defaultMessage: 'Reload the page to see your changes.',
+  }
+);
+
+export const RELOAD_PAGE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.reloadPageButton',
+  {
+    defaultMessage: 'Reload page',
+  }
+);
+
 export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.caseView.extendedFieldsTitle', {
   defaultMessage: 'Extended fields',
 });

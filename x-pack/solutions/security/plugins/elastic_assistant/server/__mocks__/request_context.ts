@@ -126,6 +126,7 @@ const createElasticAssistantRequestContextMock = (
     userProfile: {
       suggest: jest.fn(),
       getCurrent: jest.fn(),
+      getCurrentProfileId: jest.fn(),
       bulkGet: jest.fn(),
     },
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),

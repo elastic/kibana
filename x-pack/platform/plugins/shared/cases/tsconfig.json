@@ -54,6 +54,7 @@
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/shared-ux-router",
+    "@kbn/shared-ux-utility",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
     "@kbn/shared-ux-file-context",
@@ -104,6 +105,7 @@
     "@kbn/openapi-generator",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
@@ -122,6 +124,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
+    "@kbn/core-http-common",
   ],
   "exclude": ["target/**/*"]
 }

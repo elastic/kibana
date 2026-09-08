@@ -71,8 +71,20 @@ export const REPEAT_EVERY_LABEL = i18n.translate('xpack.osquery.scheduleSection.
   defaultMessage: 'Repeat every',
 });
 
+export const REPEAT_UNIT_LABEL = i18n.translate('xpack.osquery.scheduleSection.repeatUnitLabel', {
+  defaultMessage: 'Repeat every unit',
+});
+
 export const UNIT_WEEKS = i18n.translate('xpack.osquery.scheduleSection.unitWeeks', {
   defaultMessage: 'Week(s)',
+});
+
+export const UNIT_MONTHS = i18n.translate('xpack.osquery.scheduleSection.unitMonths', {
+  defaultMessage: 'Month(s)',
+});
+
+export const UNIT_YEARS = i18n.translate('xpack.osquery.scheduleSection.unitYears', {
+  defaultMessage: 'Year(s)',
 });
 
 export const DAYS_OF_WEEK_LABEL = i18n.translate('xpack.osquery.scheduleSection.daysOfWeekLabel', {
@@ -105,6 +117,12 @@ export const AT_LEAST_ONE_DAY_ERROR = i18n.translate(
   'xpack.osquery.scheduleSection.atLeastOneDayError',
   { defaultMessage: 'Select at least one day of the week.' }
 );
+
+export const intervalOutOfRangeError = (max: number): string =>
+  i18n.translate('xpack.osquery.scheduleSection.intervalOutOfRangeError', {
+    defaultMessage: 'Repeat every must be between 1 and {max}.',
+    values: { max },
+  });
 
 export const START_DATE_LABEL = i18n.translate('xpack.osquery.scheduleSection.startDateLabel', {
   defaultMessage: 'Start date and time',

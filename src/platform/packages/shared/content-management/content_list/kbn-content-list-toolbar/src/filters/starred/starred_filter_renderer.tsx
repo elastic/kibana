@@ -74,7 +74,7 @@ export const StarredFilterRenderer = ({
   // toggled visual state. `hasActiveFilters` adds EUI's existing
   // active-highlight on top, matching the treatment used by the recents
   // filter so both single-filter toggles look and behave the same way.
-  // The icon also swaps between `starFilled`/`starEmpty` to reinforce the
+  // The icon also swaps between `starFill`/`star` to reinforce the
   // toggled state visually — a luxury the recents filter does not have
   // because EUI doesn't ship a paired filled/empty clock glyph.
   return (
@@ -82,7 +82,7 @@ export const StarredFilterRenderer = ({
       isToggle
       isSelected={active}
       hasActiveFilters={active}
-      iconType={active ? 'starFilled' : 'starEmpty'}
+      iconType={active ? 'starFill' : 'star'}
       onClick={handleClick}
       data-test-subj={dataTestSubj}
     >

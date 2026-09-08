@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Action, ActionReducerMapBuilder } from '@reduxjs/toolkit';
+import type { Action, ActionReducerMapBuilder } from 'redux-toolkit-v1';
 import { addLoadingStateReducers, initialLoadingState } from './loading_states';
 import type { WorkflowDetailState } from '../types';
 
@@ -16,7 +16,10 @@ jest.mock('../../../../../../common/schema', () => ({
   getWorkflowZodSchema: jest.fn(() => ({})),
 }));
 jest.mock('../../../../../trigger_schemas', () => ({
-  triggerSchemas: { getRegisteredIds: jest.fn(() => []) },
+  triggerSchemas: {
+    getRegisteredIds: jest.fn(() => []),
+    getRegisteredTriggersForSchema: jest.fn(() => []),
+  },
 }));
 jest.mock('../../../../../shared/lib/query_client', () => ({
   queryClient: { invalidateQueries: jest.fn() },

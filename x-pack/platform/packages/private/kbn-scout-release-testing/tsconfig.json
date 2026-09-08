@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/test",
     "@kbn/unified-doc-viewer"
   ]
 }

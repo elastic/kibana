@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import type { MemoryRouter } from 'react-router-dom';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock } from '../../../mocks';
@@ -135,7 +138,8 @@ describe('WorkflowDetailPage', () => {
     props: WorkflowDetailPageProps,
     storeSetup?: (
       store: ReturnType<typeof createMockStore>
-    ) => void | ReturnType<typeof createMockStore>
+    ) => void | ReturnType<typeof createMockStore>,
+    initialEntries?: React.ComponentProps<typeof MemoryRouter>['initialEntries']
   ) => {
     let store = createMockStore();
 
@@ -149,11 +153,25 @@ describe('WorkflowDetailPage', () => {
     const services = createStartServicesMock();
     const navigateToApp = jest.spyOn(services.application, 'navigateToApp');
 
-    const view = render(<WorkflowDetailPage {...props} />, {
-      wrapper: getTestProvider({ store, services }),
-    });
+    // Captures the MemoryRouter history so tests can mutate the URL query the
+    // way `useWorkflowUrlState` does (e.g. `?view=graph` on view toggle).
+    const historyRef: { current?: ReturnType<typeof useHistory> } = {};
+    const CaptureHistory = () => {
+      historyRef.current = useHistory();
+      return null;
+    };
 
-    return { ...view, navigateToApp };
+    const view = render(
+      <>
+        <CaptureHistory />
+        <WorkflowDetailPage {...props} />
+      </>,
+      {
+        wrapper: getTestProvider({ store, services, initialEntries }),
+      }
+    );
+
+    return { ...view, navigateToApp, historyRef };
   };
 
   beforeEach(() => {
@@ -194,6 +212,48 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(dispatchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('when creating with initial content (history state)', () => {
+    const initialYaml = 'name: My template workflow\nsteps:\n  - name: hello\n    type: console\n';
+
+    const getSeededYaml = (store: ReturnType<typeof createMockStore>) =>
+      selectYamlString(store.getState());
+
+    it('seeds the editor with `initialYaml` from the history state (e.g. library "Remix with AI")', () => {
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, [
+        { pathname: '/create', state: { initialYaml } },
+      ]);
+
+      expect(getSeededYaml(store)).toBe(initialYaml);
+    });
+
+    it('does not reset the yaml when URL-state churn drops the history state (e.g. switching to the graph view)', () => {
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        { pathname: '/create', state: { initialYaml } },
+      ]);
+      expect(getSeededYaml(store)).toBe(initialYaml);
+
+      // Simulate `useWorkflowUrlState` mutating the query on view toggle —
+      // `history.replace` without state discards `location.state`.
+      act(() => {
+        historyRef.current?.replace('/create?view=graph');
+      });
+
+      expect(getSeededYaml(store)).toBe(initialYaml);
+    });
+
+    it('falls back to the default yaml on a plain `/create` without state', () => {
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create']);
+
+      expect(getSeededYaml(store)).toContain('name: New workflow');
     });
   });
 

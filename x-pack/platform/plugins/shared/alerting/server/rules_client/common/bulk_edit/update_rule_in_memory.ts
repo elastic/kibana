@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   validateRuleTypeParams,
@@ -153,6 +154,10 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.params,
     ruleType.validate.params
   );
+  await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: rule.attributes.params,
+  });
 
   const {
     references,
@@ -261,12 +266,12 @@ async function updateAttributes({
     attributes.throttle ?? null
   );
 
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     attributes.tags,
     apiKeyAttributes?.uiamApiKey,
-    apiKeyAttributes?.apiKeyCreatedByUser,
     context.isServerless,
-    context.featureFlags
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted

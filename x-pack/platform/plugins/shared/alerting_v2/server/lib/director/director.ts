@@ -10,6 +10,7 @@ import { inject, injectable } from 'inversify';
 import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
@@ -27,6 +28,7 @@ interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEvent[];
   executionContext: ExecutionContext;
+  spaceId: string;
 }
 
 interface CalculateNextStateParams {
@@ -34,11 +36,26 @@ interface CalculateNextStateParams {
   currentAlertEvent: AlertEvent;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
+  logger: LoggerServiceContract;
 }
 
 interface ResolveEpisodeIdParams {
   previousAlertEvent?: LatestAlertEventState;
   nextStatus: AlertEpisodeStatus;
+}
+
+interface ResolveEpisodeIdResult {
+  readonly episodeId: string;
+  readonly isNew: boolean;
+}
+
+export interface DirectorRunStats {
+  readonly newEpisodeIds: readonly string[];
+}
+
+export interface DirectorRunResult {
+  readonly alertEvents: AlertEvent[];
+  readonly stats: DirectorRunStats;
 }
 
 @injectable()
@@ -50,22 +67,34 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({
+    rule,
+    alertEvents,
+    executionContext,
+    spaceId,
+  }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return [];
+      return { alertEvents: [], stats: { newEpisodeIds: [] } };
     }
+
+    const logger = this.logger.forSubsystem('director').withLabels({
+      rule_id: rule.id,
+      rule_kind: rule.kind,
+      space_id: spaceId,
+    });
 
     const strategy = this.strategyFactory.getStrategy(rule);
     executionContext.throwIfAborted();
-    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, logger);
   }
 
   private async processAlertEvents(
     rule: RuleResponse,
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
-    executionContext: ExecutionContext
-  ): Promise<AlertEvent[]> {
+    executionContext: ExecutionContext,
+    logger: LoggerServiceContract
+  ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
@@ -79,16 +108,34 @@ export class DirectorService {
     try {
       executionContext.throwIfAborted();
 
-      return alertEvents.map((currentAlertEvent) =>
-        this.getAlertEventWithNextEpisode({
+      const newEpisodeIds: string[] = [];
+      const processed = alertEvents.map((currentAlertEvent) => {
+        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
-        })
-      );
+          logger,
+        });
+
+        if (isNewEpisode && alertEvent.episode) {
+          newEpisodeIds.push(alertEvent.episode.id);
+        }
+
+        return alertEvent;
+      });
+
+      return { alertEvents: processed, stats: { newEpisodeIds } };
     } finally {
-      await scope.disposeAll();
+      try {
+        await scope.disposeAll();
+      } catch (error) {
+        logger.warn({
+          message: 'Failed to release alert state cache',
+          error,
+          code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
+        });
+      }
     }
   }
 
@@ -115,7 +162,8 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
-  }: CalculateNextStateParams): AlertEvent {
+    logger,
+  }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
     // the user hits `deactivate` (which flips the lifecycle marker
@@ -126,12 +174,15 @@ export class DirectorService {
     // strategies emit any → active transitions.
     if (this.isUserLocked(previousAlertEvent)) {
       return {
-        ...currentAlertEvent,
-        type: alertEventType.alert,
-        episode: {
-          id: previousAlertEvent!.last_episode_id!,
-          status: alertEpisodeStatus.active,
+        alertEvent: {
+          ...currentAlertEvent,
+          type: alertEventType.alert,
+          episode: {
+            id: previousAlertEvent!.last_episode_id!,
+            status: alertEpisodeStatus.active,
+          },
         },
+        isNewEpisode: false,
       };
     }
 
@@ -143,27 +194,32 @@ export class DirectorService {
       previousEpisode: previousAlertEvent,
     });
 
-    const episodeId = this.resolveEpisodeId({
+    const { episodeId, isNew } = this.resolveEpisodeId({
       previousAlertEvent,
       nextStatus: result.status,
     });
 
     if (currentStatus !== result.status) {
-      this.logger.debug({
-        message: `State Transition [${currentAlertEvent.group_hash}]: ${
-          currentStatus ?? 'unknown'
-        } -> ${result.status} (Episode: ${episodeId})`,
+      logger.debug({
+        message: 'Episode status transition',
+        labels: {
+          group_hash: currentAlertEvent.group_hash,
+          episode_id: episodeId,
+          resource: `${currentStatus ?? 'unknown'}->${result.status}`,
+        },
       });
     }
 
     return {
-      ...currentAlertEvent,
-      type: alertEventType.alert,
-      episode: {
-        id: episodeId,
-        status: result.status,
-        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+      alertEvent: {
+        ...currentAlertEvent,
+        episode: {
+          id: episodeId,
+          status: result.status,
+          ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+        },
       },
+      isNewEpisode: isNew,
     };
   }
 
@@ -204,16 +260,19 @@ export class DirectorService {
     );
   }
 
-  private resolveEpisodeId({ previousAlertEvent, nextStatus }: ResolveEpisodeIdParams): string {
+  private resolveEpisodeId({
+    previousAlertEvent,
+    nextStatus,
+  }: ResolveEpisodeIdParams): ResolveEpisodeIdResult {
     if (!previousAlertEvent) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
     const currentEpisodeStatus = previousAlertEvent.last_episode_status;
     const currentEpisodeId = previousAlertEvent.last_episode_id;
 
     if (currentEpisodeStatus == null) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
     const isNewLifecycle =
@@ -221,9 +280,13 @@ export class DirectorService {
       nextStatus !== alertEpisodeStatus.inactive;
 
     if (isNewLifecycle) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
-    return currentEpisodeId ?? uuidV4();
+    if (currentEpisodeId == null) {
+      return { episodeId: uuidV4(), isNew: true };
+    }
+
+    return { episodeId: currentEpisodeId, isNew: false };
   }
 }

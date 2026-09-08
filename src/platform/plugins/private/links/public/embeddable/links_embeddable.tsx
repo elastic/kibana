@@ -208,6 +208,7 @@ export const getLinksEmbeddableFactory = () => {
             },
           });
         },
+        supportsJsonExport: true,
       });
 
       const Component = () => {
@@ -246,8 +247,6 @@ export const getLinksEmbeddableFactory = () => {
             color="transparent"
             hasShadow={false}
             hasBorder={false}
-            data-shared-item
-            data-rendering-count={1}
             data-test-subj="links--component"
             borderRadius="none"
           >

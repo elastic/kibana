@@ -8,6 +8,7 @@
  */
 
 export const storybookAliases = {
+  agent_builder: 'x-pack/platform/plugins/shared/agent_builder/.storybook',
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   alerting_v2: 'x-pack/platform/plugins/shared/alerting_v2/.storybook',
   alerting_v2_rule_form:
@@ -50,20 +51,19 @@ export const storybookAliases = {
   index_management: 'x-pack/platform/plugins/shared/index_management/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
-  kbn_split_button: 'src/platform/packages/private/kbn-split-button/.storybook',
   kbn_ui: 'src/platform/kbn-ui/storybook-config',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
   metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
-  nightshift: 'x-pack/solutions/observability/packages/kbn-nightshift/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
+  nightshift: 'x-pack/solutions/observability/plugins/nightshift/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
@@ -75,6 +75,7 @@ export const storybookAliases = {
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
+  unified_data_table: 'src/platform/packages/shared/kbn-unified-data-table/.storybook',
   unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',

@@ -10,7 +10,6 @@ import { EbtTelemetryClient } from './client';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
 } from './constants';
 
@@ -79,27 +78,6 @@ describe('EbtTelemetryClient', () => {
         },
         status_code: 500,
       });
-    });
-  });
-
-  describe('trackDescriptionGenerated', () => {
-    it('tracks description generated events', () => {
-      client.trackDescriptionGenerated({
-        input_tokens_used: 200,
-        output_tokens_used: 100,
-        stream_name: 'test-stream',
-        stream_type: 'classic',
-      });
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-        {
-          input_tokens_used: 200,
-          output_tokens_used: 100,
-          stream_name: 'test-stream',
-          stream_type: 'classic',
-        }
-      );
     });
   });
 

@@ -51,6 +51,14 @@ const createShare = (
     },
   } as unknown as SharePublicStart);
 
+const createClassicStreamWithImportPrivileges = () =>
+  createMockClassicStreamDefinition({
+    privileges: {
+      ...createMockClassicStreamDefinition().privileges,
+      manage_failure_store: true,
+    },
+  });
+
 describe('buildLifecycleTabActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -103,6 +111,62 @@ describe('buildLifecycleTabActions', () => {
     actions.items.find((item) => item.id === 'copy')!.onClick();
 
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
+  });
+
+  it('opens the import lifecycle flyout from the import action', () => {
+    const onImportFromStream = jest.fn();
+    const actions = buildLifecycleTabActions({
+      definition: createClassicStreamWithImportPrivileges(),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+      onImportFromStream,
+    });
+
+    const importItem = actions.items.find((item) => item.id === 'importFromStream')!;
+    expect(importItem.disabled).toBe(false);
+    importItem.onClick();
+
+    expect(onImportFromStream).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not include the import lifecycle action without failure store management privilege', () => {
+    const actions = buildLifecycleTabActions({
+      definition: createMockClassicStreamDefinition({
+        privileges: {
+          ...createMockClassicStreamDefinition().privileges,
+          lifecycle: true,
+          manage_failure_store: false,
+        },
+      }),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+      onImportFromStream: jest.fn(),
+    });
+
+    expect(actions.items.find((item) => item.id === 'importFromStream')).toBeUndefined();
+  });
+
+  it('disables the import lifecycle action while another lifecycle flyout is open', () => {
+    const onImportFromStream = jest.fn();
+    const actions = buildLifecycleTabActions({
+      definition: createClassicStreamWithImportPrivileges(),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+      onImportFromStream,
+      isImportFromStreamDisabled: true,
+    });
+
+    const importItem = actions.items.find((item) => item.id === 'importFromStream')!;
+    expect(importItem.disabled).toBe(true);
+    importItem.onClick();
+
+    expect(onImportFromStream).not.toHaveBeenCalled();
   });
 
   describe('classic stream', () => {

@@ -31,6 +31,35 @@
       ]
     },
     {
+      "id": "ml",
+      "name": "ML Agent Builder Skills",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "ml",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:ml"
+      ]
+    },
+    {
+      "id": "alerting-v2",
+      "name": "Alerting V2",
+      "slackChannel": "#rna-program-notify",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2/playwright.config.ts",
+      "serverConfigSet": "evals_alerting_v2",
+      "tags": [
+        "platform",
+        "alerting-v2"
+      ],
+      "ciLabels": [
+        "evals:alerting-v2"
+      ]
+    },
+    {
       "id": "esql-generation",
       "name": "ES|QL Generation Evaluations",
       "slackChannel": "#agent-builder-alerts",
@@ -68,6 +97,29 @@
       "ciLabels": [
         "evals:significant-events"
       ],
+      "stepTimeoutInMinutes": 150,
+      "shards": [
+        {
+          "id": "discovery-and-queries",
+          "specFiles": [
+            "evals/discovery/discovery.spec.ts",
+            "evals/ki_query_generation/ki_query_generation.spec.ts"
+          ]
+        },
+        {
+          "id": "feature-extraction",
+          "specFiles": [
+            "evals/ki_feature_extraction/ki_feature_extraction.spec.ts"
+          ]
+        },
+        {
+          "id": "feature-dedup-and-exclusion",
+          "specFiles": [
+            "evals/ki_feature_deduplication/ki_feature_deduplication.spec.ts",
+            "evals/ki_feature_exclusion/ki_feature_exclusion.spec.ts"
+          ]
+        }
+      ],
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-4.6-sonnet",
         "eis/anthropic-claude-4.6-opus",
@@ -80,13 +132,15 @@
         "eis/openai-gpt-5.4",
         "eis/openai-gpt-5.4-mini",
         "eis/openai-gpt-5.4-nano",
+        "eis/openai-gpt-5.6-luna",
+        "eis/openai-gpt-5.6-terra",
         "eis/openai-gpt-oss-120b"
       ]
     },
     {
       "id": "llm-tasks",
       "name": "LLM Tasks",
-      "slackChannel": "#appex-ai-infra-alerts",
+      "slackChannel": "#search-ml-ux-team",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
       "tags": [
         "ai-infra"
@@ -133,6 +187,35 @@
       "ciLabels": [
         "evals:security-ai-rules"
       ]
+    },
+    {
+      "id": "security-persona-matrix",
+      "name": "Security Persona Matrix",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix"
+      ],
+      "serverConfigSet": "evals_security_persona_matrix"
+    },
+    {
+      "id": "security-persona-matrix-attack-discovery",
+      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix-attack-discovery"
+      ],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "endpoint",
@@ -185,7 +268,23 @@
       ],
       "ciLabels": [
         "evals:attack-discovery"
-      ]
+      ],
+      "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "attack-discovery-agent-builder",
+      "name": "Attack Discovery Agent Builder",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery-agent-builder"
+      ],
+      "serverConfigSet": "evals_attack_discovery_agent_builder"
     },
     {
       "id": "lead-generation",
@@ -287,6 +386,25 @@
       ]
     },
     {
+      "id": "agent-builder-visualizations",
+      "name": "Agent Builder Visualizations",
+      "slackChannel": "#kibana-presentation-reminders",
+      "configPath": "x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations/playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder-visualizations"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-visualizations"
+      ],
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.6-opus",
+        "eis/openai-gpt-5.2",
+        "eis/openai-gpt-5.4"
+      ]
+    },
+    {
       "id": "security-alert-triage",
       "name": "Security Alert Triage",
       "slackChannel": "#security-generative-ai-evals",
@@ -304,8 +422,27 @@
       "name": "Alert Analysis Workflow",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
-      "tags": ["security", "alert-analysis"],
-      "ciLabels": ["evals:security-alert-analysis-workflow"]
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow"
+      ]
+    },
+    {
+      "id": "detection-watch-rule-creation",
+      "name": "Detection Watch Rule Creation",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/playwright.config.ts",
+      "tags": [
+        "security",
+        "detection-engineering"
+      ],
+      "ciLabels": [
+        "evals:detection-watch-rule-creation"
+      ],
+      "serverConfigSet": "evals_detection_watch_rule_creation"
     },
     {
       "id": "skill-selection-benchmark",

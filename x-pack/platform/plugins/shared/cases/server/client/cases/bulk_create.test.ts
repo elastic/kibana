@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import Boom from '@hapi/boom';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -14,6 +15,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
@@ -86,6 +88,69 @@ describe('bulkCreate', () => {
     });
   });
 
+  describe('assignee identity population', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+    });
+
+    it('resolves every uid across all cases in a single bulkGet and populates identity', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+        {
+          uid: '2',
+          enabled: true,
+          data: {},
+          user: { username: 'u2', full_name: 'User Two', email: 'u2@e.com' },
+        },
+      ] as never);
+
+      await bulkCreate(
+        {
+          cases: [
+            getCases({ assignees: [{ uid: '1' }] })[0],
+            getCases({ assignees: [{ uid: '2' }] })[0],
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).toHaveBeenCalledTimes(1);
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+      expect(cases[1].assignees).toEqual([
+        { uid: '2', username: 'u2', full_name: 'User Two', email: 'u2@e.com' },
+      ]);
+    });
+
+    it('does not resolve profiles when the flag is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: false } };
+
+      await bulkCreate(
+        { cases: getCases({ assignees: [{ uid: '1' }] }) },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).not.toHaveBeenCalled();
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].assignees).toEqual([{ uid: '1' }]);
+    });
+  });
+
   describe('execution', () => {
     const createdAtDate = new Date('2023-11-05');
 
@@ -99,6 +164,9 @@ describe('bulkCreate', () => {
     });
 
     const clientArgs = createCasesClientMockArgs();
+    // This suite asserts the exact bulkCreateCases payload; the extended_fields
+    // mirroring (templates flag ON) is covered by dedicated tests below.
+    clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
 
     clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
       saved_objects: [caseSO],
@@ -643,6 +711,280 @@ describe('bulkCreate', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
       );
+    });
+
+    it('rejects an extended field value that exceeds the maximum byte size before writing', async () => {
+      // A real global field definition so the request first clears the definition-aware
+      // key/type checks and the oversized value is what actually trips the rejection.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-large',
+            name: 'large',
+            owner: SECURITY_SOLUTION_OWNER,
+            description: '',
+            isGlobal: true,
+            definition: 'name: large\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Large\n',
+          },
+        ],
+        total: 1,
+      });
+
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              extended_fields: {
+                large_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1),
+              },
+            }),
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        `Failed to bulk create cases: Error: Invalid extended_fields: Extended field "large_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('does not require a required global field the caller never sent (parity with the manual create path)', async () => {
+      // Regression: bulkCreate (the cases connector's only path) has no way to fill in a value
+      // for a field it doesn't know exists. Before this fix, `partial: false` was hardcoded here,
+      // so any required global field with no default — even one totally unrelated to the request —
+      // would silently break every automated case creation for that owner, the moment pairing
+      // mirrored ANY other linked customField into extended_fields. create.ts's manual path already
+      // skips this via `partial: !hadExtendedFieldsBeforeDefaults`; bulkCreate must match.
+      const localClientArgs = createCasesClientMockArgs();
+      const localCasesClient = createCasesClientMock();
+      localCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: SECURITY_SOLUTION_OWNER,
+          customFields: [
+            { key: 'other_key', type: CustomFieldTypes.TEXT, label: 'Other', required: false },
+          ],
+        },
+      ]);
+      localClientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          // Required global field, unrelated to the request — no linked v1 customField at all.
+          {
+            fieldDefinitionId: 'fd-priority',
+            name: 'priority',
+            owner: SECURITY_SOLUTION_OWNER,
+            description: '',
+            isGlobal: true,
+            definition:
+              'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nvalidation:\n  required: true\n',
+          },
+          // Linked field that pairing mirrors, making extended_fields non-empty even though the
+          // caller never sent extended_fields directly.
+          {
+            fieldDefinitionId: 'fd-other',
+            name: 'other',
+            owner: SECURITY_SOLUTION_OWNER,
+            description: '',
+            isGlobal: true,
+            legacyKey: 'other_key',
+            definition: 'name: other\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Other\n',
+          },
+        ],
+        total: 2,
+      });
+      localClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              customFields: [{ key: 'other_key', type: CustomFieldTypes.TEXT, value: 'x' }],
+            }),
+          },
+          localClientArgs,
+          localCasesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(localClientArgs.services.caseService.bulkCreateCases).toHaveBeenCalled();
+    });
+
+    it('rejects an extended field key that does not correspond to a global field definition', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              extended_fields: { unknown_as_keyword: 'value' },
+            }),
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'Failed to bulk create cases: Error: Invalid extended_fields: Unknown extended field key: "unknown_as_keyword". No fields are available for this case'
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('global defaults injection and relaxRequiredFields', () => {
+    const priorityWithDefault = {
+      fieldDefinitionId: 'fd-priority',
+      name: 'priority',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition:
+        'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nmetadata:\n  default: "p3"\n',
+    };
+
+    const priorityRequiredNoDefault = {
+      fieldDefinitionId: 'fd-priority',
+      name: 'priority',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition:
+        'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nvalidation:\n  required: true\n',
+    };
+
+    const notesField = {
+      fieldDefinitionId: 'fd-notes',
+      name: 'notes',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition: 'name: notes\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Notes\n',
+    };
+
+    const countField = {
+      fieldDefinitionId: 'fd-count',
+      name: 'count',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition: 'name: count\ntype: long\ncontrol: INPUT_NUMBER\nlabel: Count\n',
+    };
+
+    const setup = (fieldDefinitions: Array<typeof priorityWithDefault>) => {
+      const localClientArgs = createCasesClientMockArgs();
+      const localCasesClient = createCasesClientMock();
+      localCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      localClientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions,
+        total: fieldDefinitions.length,
+      });
+      localClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+      return { localClientArgs, localCasesClient };
+    };
+
+    it('injects a global default the caller did not send', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityWithDefault]);
+
+      await bulkCreate({ cases: getCases() }, localClientArgs, localCasesClient);
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toEqual({ priority_as_keyword: 'p3' });
+    });
+
+    it('lets a caller-sent value win over the injected global default', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityWithDefault]);
+
+      await bulkCreate(
+        { cases: getCases({ extended_fields: { priority_as_keyword: 'p1' } }) },
+        localClientArgs,
+        localCasesClient
+      );
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toEqual({ priority_as_keyword: 'p1' });
+    });
+
+    it('does not inject anything for a global field without a default', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityRequiredNoDefault]);
+
+      await bulkCreate({ cases: getCases() }, localClientArgs, localCasesClient);
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toBeUndefined();
+    });
+
+    it('does not inject global defaults when the templates flag is disabled', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityWithDefault]);
+      localClientArgs.config = {
+        ...localClientArgs.config,
+        templates: { enabled: false },
+      };
+
+      await bulkCreate({ cases: getCases() }, localClientArgs, localCasesClient);
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toBeUndefined();
+    });
+
+    it('rejects a required no-default global field when the caller sent extended_fields and no relax option', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityRequiredNoDefault, notesField]);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ extended_fields: { notes_as_keyword: 'x' } }) },
+          localClientArgs,
+          localCasesClient
+        )
+      ).rejects.toThrow('Field "Priority" is required');
+
+      expect(localClientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('relaxRequiredFields skips required enforcement for fields the caller could not fill', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityRequiredNoDefault, notesField]);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ extended_fields: { notes_as_keyword: 'x' } }) },
+          localClientArgs,
+          localCasesClient,
+          { relaxRequiredFields: true }
+        )
+      ).resolves.not.toThrow();
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toEqual({ notes_as_keyword: 'x' });
+    });
+
+    it('relaxRequiredFields still validates the values that ARE present', async () => {
+      const { localClientArgs, localCasesClient } = setup([countField]);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ extended_fields: { count_as_long: 'not-a-number' } }) },
+          localClientArgs,
+          localCasesClient,
+          { relaxRequiredFields: true }
+        )
+      ).rejects.toThrow('Field "Count" must be a number');
+
+      expect(localClientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
     });
   });
 
@@ -1358,11 +1700,12 @@ describe('bulkCreate', () => {
       await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
 
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        1
       );
     });
 
-    it('increments stats once per unique template ID', async () => {
+    it('adds one use per case, in a single call per template', async () => {
       const caseSOWithTemplate1 = {
         ...caseSO,
         id: 'case-1',
@@ -1389,12 +1732,16 @@ describe('bulkCreate', () => {
         casesClient
       );
 
+      // Two cases share tmpl-1, so it gains two uses from one call — the tally counts cases, while
+      // the call is still deduped per template to keep the writes down.
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(2);
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        2
       );
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-2'
+        'tmpl-2',
+        1
       );
     });
 
@@ -1428,6 +1775,487 @@ describe('bulkCreate', () => {
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update template usage stats')
       );
+    });
+
+    it('rejects a template reference without a pinned version (no server-side expansion on bulkCreate)', async () => {
+      await expect(
+        bulkCreate({ cases: getCases({ template: { id: 'tmpl-1' } }) }, clientArgs, casesClient)
+      ).rejects.toThrow('template.version is required');
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('accepts a version-pinned template reference', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ template: { id: 'tmpl-1', version: 2 } }) },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('records a template user action (with point-in-time name) when the flag is enabled', async () => {
+      const flagOnClientArgs = createCasesClientMockArgs();
+      flagOnClientArgs.config = { ...flagOnClientArgs.config, templates: { enabled: true } };
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+      flagOnClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+      flagOnClientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template' },
+      } as Awaited<ReturnType<typeof flagOnClientArgs.services.templatesService.getTemplate>>);
+
+      await bulkCreate({ cases: getCases() }, flagOnClientArgs, casesClient);
+
+      expect(flagOnClientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith(
+        'tmpl-1',
+        '1'
+      );
+      expect(
+        flagOnClientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith({
+        userActions: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'template',
+            caseId: caseSOWithTemplate.id,
+            owner: caseSOWithTemplate.attributes.owner,
+            payload: { template: { id: 'tmpl-1', version: 1, name: 'My Template' } },
+          }),
+        ]),
+      });
+    });
+
+    it('does not record a template user action when the templates flag is disabled', async () => {
+      const flagOffClientArgs = createCasesClientMockArgs();
+      flagOffClientArgs.config = { ...flagOffClientArgs.config, templates: { enabled: false } };
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+      flagOffClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+
+      await bulkCreate({ cases: getCases() }, flagOffClientArgs, casesClient);
+
+      const [{ userActions: recordedUserActions }] =
+        flagOffClientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls[0];
+      expect(recordedUserActions.some((ua: { type: string }) => ua.type === 'template')).toBe(
+        false
+      );
+      expect(flagOffClientArgs.services.templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Template usage counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
+    const casesClient = createCasesClientMock();
+    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+    const caseSOWithTemplate = (id: string, templateId: string) => ({
+      ...caseSO,
+      id,
+      attributes: { ...caseSO.attributes, template: { id: templateId, version: 1 } },
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('counts created cases, not distinct templates', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSOWithTemplate('case-1', 'tmpl-1'),
+          caseSOWithTemplate('case-2', 'tmpl-1'),
+          { ...caseSO, id: 'case-3' },
+        ],
+      });
+
+      await bulkCreate(
+        { cases: [getCases()[0], getCases()[0], getCases()[0]] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not emit a counter for an empty bucket', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'create_case_with_template' })
+      );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    it('attributes counters to the calling source', async () => {
+      const connectorArgs = {
+        ...createCasesClientMockArgs(),
+        usageCounter,
+        clientSource: 'connector' as const,
+      };
+      connectorArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate('case-1', 'tmpl-1')],
+      });
+
+      await bulkCreate({ cases: getCases() }, connectorArgs, casesClient);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.connector',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not count a bulk create that failed', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockRejectedValueOnce(
+        new Error('bulk create failed')
+      );
+
+      await expect(bulkCreate({ cases: getCases() }, clientArgs, casesClient)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+
+    // The realistic partial failure is a resolved response carrying an error entry, which is a
+    // different branch from a rejected write — nothing may be counted, not even the cases that
+    // did persist.
+    it('does not count a bulk create whose saved object write partially failed', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSOWithTemplate('case-1', 'tmpl-1'),
+          {
+            type: 'cases',
+            id: 'case-2',
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await expect(bulkCreate({ cases: getCases() }, clientArgs, casesClient)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('customFields → extended_fields adapter (write-time mirror)', () => {
+    const adapterCustomFieldsCfg = [
+      { key: 'priority', type: CustomFieldTypes.TEXT, label: 'Priority', required: false },
+      { key: 'count', type: CustomFieldTypes.NUMBER, label: 'Count', required: false },
+    ];
+
+    const adapterCustomFields: CaseCustomFields = [
+      { key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' },
+      { key: 'count', type: CustomFieldTypes.NUMBER, value: 3 },
+    ];
+
+    const adapterCasesClient = createCasesClientMock();
+
+    // Linked v2 definitions for the configured v1 fields — write-time mirroring
+    // only writes keys that resolve to a definition (via legacyKey or name).
+    const adapterFieldDefinitions = [
+      {
+        fieldDefinitionId: 'fd-priority',
+        name: 'priority',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'priority',
+        definition: 'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\n',
+      },
+      {
+        fieldDefinitionId: 'fd-count',
+        name: 'count',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'count',
+        definition: 'name: count\ntype: integer\ncontrol: INPUT_NUMBER\nlabel: Count\n',
+      },
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      adapterCasesClient.configure.get = jest
+        .fn()
+        .mockResolvedValue([
+          { owner: SECURITY_SOLUTION_OWNER, customFields: adapterCustomFieldsCfg },
+        ]);
+    });
+
+    it('mirrors customFields into extended_fields when templates flag is enabled', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        { cases: getCases({ customFields: adapterCustomFields }) },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
+    });
+
+    it('mirrors customFields into extended_fields even when templates flag is disabled (addendum A1)', async () => {
+      // Pairing for existing links runs independently of the feature flag: once
+      // a link exists, live sync must not depend on xpack.cases.templates.enabled.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        { cases: getCases({ customFields: adapterCustomFields }) },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
+    });
+
+    it('rejects conflicting explicit dual input with a structured 400 instead of picking a side', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
+              extended_fields: { priority_as_keyword: 'critical' },
+            }),
+          },
+          clientArgs,
+          adapterCasesClient
+        )
+      ).rejects.toThrow(
+        'conflicting values for both representations of the linked field(s): "priority"'
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('accepts semantically equal explicit dual input and persists one canonical pair', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        {
+          cases: getCases({
+            customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'same' }],
+            extended_fields: { priority_as_keyword: 'same' },
+          }),
+        },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields?.priority_as_keyword).toBe('same');
+    });
+
+    it('preserves a mirror key for a customField absent from the request (synthetic-null regression)', async () => {
+      // FAILURE SCENARIO (before fix): fillMissingCustomFields pads { key: 'priority', value: null }
+      // for the absent 'priority' field; the merge then deletes priority_as_keyword — even though
+      // the request never submitted priority. Fix: mirror only request-provided customFields.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        {
+          cases: getCases({
+            // Only count is provided — priority is absent from the request.
+            customFields: [{ key: 'count', type: CustomFieldTypes.NUMBER, value: 3 }],
+            // priority_as_keyword pre-set by a template default in extended_fields.
+            extended_fields: { priority_as_keyword: 'crit' },
+          }),
+        },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      // priority was not submitted — its mirror key must be preserved.
+      expect(createdCase.extended_fields?.priority_as_keyword).toBe('crit');
+      // count was submitted — it must still be mirrored.
+      expect(createdCase.extended_fields?.count_as_integer).toBe('3');
+    });
+
+    it('creates successfully when two required linked fields are split across customFields and extended_fields', async () => {
+      // FAILURE SCENARIO (before fix): pre-pair validation only saw its own representation —
+      // the customFields-required check never looked at extended_fields, and the extended_fields
+      // pre-pair check ran before pairing had mirrored `priority` over, so `count` (sent only via
+      // extended_fields) or `priority` (sent only via customFields) could be wrongly rejected as
+      // "missing" even though pairing would have produced a fully valid final map.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      adapterCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: SECURITY_SOLUTION_OWNER,
+          customFields: adapterCustomFieldsCfg.map((cf) => ({ ...cf, required: true })),
+        },
+      ]);
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        {
+          cases: getCases({
+            // priority supplied via customFields only; count supplied via extended_fields only.
+            customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' }],
+            extended_fields: { count_as_integer: '3' },
+          }),
+        },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
+      expect(createdCase.customFields).toMatchObject(
+        expect.arrayContaining([
+          expect.objectContaining({ key: 'priority', value: 'high' }),
+          expect.objectContaining({ key: 'count', value: 3 }),
+        ])
+      );
+    });
+  });
+
+  describe('extended_fields user action baseline filtering (connector-created cases)', () => {
+    it('omits untouched template defaults from the activity log but keeps the caller-changed value', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: {
+          ...caseSO.attributes,
+          template: { id: 'tmpl-1', version: 1 },
+          // priority matches the template default untouched; count was changed by the caller.
+          extended_fields: { priority_as_keyword: 'default-priority', count_as_integer: '9' },
+        },
+      };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          owner: SECURITY_SOLUTION_OWNER,
+          definition: JSON.stringify({
+            name: 'My Template',
+            fields: [
+              {
+                control: 'INPUT_TEXT',
+                name: 'priority',
+                type: 'keyword',
+                label: 'Priority',
+                metadata: { default: 'default-priority' },
+              },
+              {
+                control: 'INPUT_NUMBER',
+                name: 'count',
+                type: 'integer',
+                label: 'Count',
+                metadata: { default: 1 },
+              },
+            ],
+          }),
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await bulkCreate({ cases: getCases() }, clientArgs, casesClientMock);
+
+      const [{ userActions: recordedUserActions }] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls[0];
+      const extendedFieldsAction = recordedUserActions.find(
+        (ua: { type: string }) => ua.type === 'extended_fields'
+      );
+
+      expect(extendedFieldsAction?.payload).toEqual({
+        extended_fields: { count_as_integer: '9' },
+      });
     });
   });
 });

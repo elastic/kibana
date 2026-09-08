@@ -7,15 +7,13 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { AnomaliesTab } from '../../../../../entity_analytics/components/anomalies/anomalies_tab';
+import { ANOMALY_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.anomalyInsights.title', {
-  defaultMessage: 'Behavioral anomalies',
-});
+const TITLE = ANOMALY_INSIGHTS_TITLE;
 
 const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
 

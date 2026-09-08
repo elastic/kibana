@@ -209,6 +209,50 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'boolean',
           },
           min_created_at: { _meta: { description: 'Earliest rule creation date.' }, type: 'date' },
+          count_by_query_format: {
+            composed: {
+              _meta: { description: 'Number of rules using the composed query format.' },
+              type: 'long',
+            },
+            standalone: {
+              _meta: { description: 'Number of rules using the standalone query format.' },
+              type: 'long',
+            },
+          },
+          count_by_recovery_strategy: {
+            no_breach: {
+              _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+              type: 'long',
+            },
+            query: {
+              _meta: { description: 'Number of rules with recovery strategy query.' },
+              type: 'long',
+            },
+            none: {
+              _meta: { description: 'Number of rules with recovery strategy none.' },
+              type: 'long',
+            },
+          },
+          count_by_no_data_strategy: {
+            last_known_status: {
+              _meta: {
+                description: 'Number of rules with no-data strategy last_known_status.',
+              },
+              type: 'long',
+            },
+            emit: {
+              _meta: { description: 'Number of rules with no-data strategy emit.' },
+              type: 'long',
+            },
+            recover: {
+              _meta: { description: 'Number of rules with no-data strategy recover.' },
+              type: 'long',
+            },
+            none: {
+              _meta: { description: 'Number of rules with no-data strategy none.' },
+              type: 'long',
+            },
+          },
           action_policies_avg_group_by_fields_count: {
             _meta: { description: 'Average number of group by fields per action policy.' },
             type: 'float',

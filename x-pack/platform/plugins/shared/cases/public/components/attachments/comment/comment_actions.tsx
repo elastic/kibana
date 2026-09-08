@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { UserCommentPropertyActions } from '../../user_actions/property_actions/user_comment_property_actions';
-import { DELETE_COMMENT_SUCCESS_TITLE } from './translations';
+import { DELETE_COMMENT_SUCCESS_TOAST } from './translations';
 import { useCommentRenderingContext } from '../../user_actions/comment/comment_rendering_context';
 
 export interface CommentActionsProps {
@@ -39,7 +39,7 @@ export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, conte
 
   const onDelete = useCallback(() => {
     if (handleDeleteComment) {
-      handleDeleteComment(commentId, DELETE_COMMENT_SUCCESS_TITLE);
+      handleDeleteComment(commentId, DELETE_COMMENT_SUCCESS_TOAST);
     }
   }, [handleDeleteComment, commentId]);
 

@@ -17,6 +17,17 @@ import { SnoozeDurationPicker } from './snooze_duration_picker';
 
 export type { SnoozeUnit, QuickDurationId, CustomSnoozeMode, CustomDurationState } from './types';
 
+/**
+ * Copy that names the snoozed entity. Consumers snoozing something other than
+ * an alert pass their own translated sentences rather than interpolating a noun.
+ */
+export interface QuickSnoozePanelMessages {
+  /** Question shown above the duration options. */
+  durationQuestion: string;
+  /** Preview shown once the snooze has an end date. */
+  getUnsnoozeOnDateMessage: (date: string) => string;
+}
+
 export interface QuickSnoozePanelProps {
   /**
    * Called with the current snooze end date whenever the selection changes.
@@ -24,7 +35,16 @@ export interface QuickSnoozePanelProps {
    * `null` means indefinite snooze.
    */
   onScheduleChange: (endDate: string | null | undefined) => void;
+  /** Hides the "Indefinitely" option for consumers whose API requires an end date. */
+  hideIndefinite?: boolean;
+  /** Overrides the default alert-centric copy. */
+  messages?: Partial<QuickSnoozePanelMessages>;
 }
+
+const DEFAULT_MESSAGES: QuickSnoozePanelMessages = {
+  durationQuestion: i18n.DURATION_QUESTION,
+  getUnsnoozeOnDateMessage: i18n.getUnsnoozeOnDateMessage,
+};
 
 // Character class built from SNOOZE_UNIT_OPTIONS so unit values have a single source of truth.
 const DURATION_ID_REGEX = new RegExp(
@@ -39,8 +59,36 @@ const SNOOZE_PRESET_OPTIONS: Array<{ id: QuickDurationId; label: string }> = [
   { id: 'custom', label: i18n.DURATION_CUSTOM },
 ];
 
-export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) => {
-  const [selectedDuration, setSelectedDuration] = useState<QuickDurationId>('indefinitely');
+const OPTIONS_WITHOUT_INDEFINITE = SNOOZE_PRESET_OPTIONS.filter(({ id }) => id !== 'indefinitely');
+
+// The wider labels need more room than the compact "1h"/"8h" presets, so their
+// buttons get a larger flex-grow. "Custom" is always last in both variants.
+const WIDE_OPTION_STYLES = css`
+  .euiButtonGroup__buttons > *:last-of-type {
+    flex-grow: 2;
+  }
+`;
+
+// Only applies when "Indefinitely" leads the group, which also shifts "24h" into
+// fourth position.
+const WIDE_INDEFINITE_OPTION_STYLES = css`
+  .euiButtonGroup__buttons > *:first-of-type {
+    flex-grow: 2.4;
+  }
+  .euiButtonGroup__buttons > *:nth-of-type(4) {
+    flex-grow: 1.2;
+  }
+`;
+
+export const QuickSnoozePanel = ({
+  onScheduleChange,
+  hideIndefinite,
+  messages,
+}: QuickSnoozePanelProps) => {
+  const { durationQuestion, getUnsnoozeOnDateMessage } = { ...DEFAULT_MESSAGES, ...messages };
+  const [selectedDuration, setSelectedDuration] = useState<QuickDurationId>(
+    hideIndefinite ? '1h' : 'indefinitely'
+  );
   const [customDuration, setCustomDuration] = useState<CustomDurationState>({
     mode: 'duration',
     value: 1,
@@ -82,33 +130,25 @@ export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) =>
     ? selectedDuration === 'indefinitely'
       ? i18n.INDEFINITELY_MESSAGE
       : null
-    : i18n.getUnsnoozeOnDateMessage(moment(snoozeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT));
+    : getUnsnoozeOnDateMessage(moment(snoozeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT));
 
   return (
     <>
       <EuiText size="s">
-        <p>{i18n.DURATION_QUESTION}</p>
+        <p>{durationQuestion}</p>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiButtonGroup
         legend={i18n.DURATION_LEGEND}
-        options={SNOOZE_PRESET_OPTIONS}
+        options={hideIndefinite ? OPTIONS_WITHOUT_INDEFINITE : SNOOZE_PRESET_OPTIONS}
         idSelected={selectedDuration}
         onChange={(id) => setSelectedDuration(id as QuickDurationId)}
         data-test-subj="quickSnoozeDurationOptions"
         buttonSize="compressed"
         isFullWidth
-        css={css`
-          .euiButtonGroup__buttons > *:nth-of-type(1) {
-            flex-grow: 2.4;
-          }
-          .euiButtonGroup__buttons > *:nth-of-type(4) {
-            flex-grow: 1.2;
-          }
-          .euiButtonGroup__buttons > *:nth-of-type(5) {
-            flex-grow: 2;
-          }
-        `}
+        css={
+          hideIndefinite ? WIDE_OPTION_STYLES : [WIDE_OPTION_STYLES, WIDE_INDEFINITE_OPTION_STYLES]
+        }
       />
 
       {selectedDuration === 'custom' && (

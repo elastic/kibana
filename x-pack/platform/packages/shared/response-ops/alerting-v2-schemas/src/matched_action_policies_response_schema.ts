@@ -30,7 +30,8 @@ export const matchActionPoliciesForRuleBodySchema = z
       .strict()
       .optional(),
   })
-  .strict();
+  .strict()
+  .meta({ id: 'alerting_match_action_policies_for_rule_request' });
 
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
 
@@ -47,15 +48,24 @@ export const matchedActionPolicySchema = z
     actionPolicy: actionPolicyResponseSchema.describe('The matched action policy.'),
     category: matchedActionPolicyCategorySchema,
   })
-  .describe('An action policy that matches a rule, along with the reason it matched.');
+  .describe('An action policy that matches a rule, along with the reason it matched.')
+  .meta({ id: 'alerting_matched_action_policy' });
 
 export type MatchedActionPolicy = z.infer<typeof matchedActionPolicySchema>;
 
 export const matchActionPoliciesForRuleResponseSchema = z
   .object({
     items: z.array(matchedActionPolicySchema).describe('The list of matched action policies.'),
+    total: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.'
+      ),
   })
-  .describe('Action policies that match a given rule, grouped by match category.');
+  .describe('Action policies that match a given rule, grouped by match category.')
+  .meta({ id: 'alerting_match_action_policies_for_rule_response' });
 
 export type MatchActionPoliciesForRuleResponse = z.infer<
   typeof matchActionPoliciesForRuleResponseSchema

@@ -8,14 +8,19 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import type { AppMenuBreakpointSource } from '@kbn/app-menu';
 import { useAppMenu } from './chrome_hooks';
 
 const AppMenu = lazy(async () => {
-  const { AppMenuComponent } = await import('@kbn/core-chrome-app-menu-components');
+  const { AppMenuComponent } = await import('@kbn/app-menu');
   return { default: AppMenuComponent };
 });
 
-export const HeaderAppMenu = () => {
+export const HeaderAppMenu = ({
+  breakpointSource = 'application',
+}: {
+  breakpointSource?: AppMenuBreakpointSource;
+}) => {
   const menuConfig = useAppMenu();
 
   if (!menuConfig) {
@@ -24,7 +29,7 @@ export const HeaderAppMenu = () => {
 
   return (
     <Suspense>
-      <AppMenu config={menuConfig} />
+      <AppMenu config={menuConfig} breakpointSource={breakpointSource} />
     </Suspense>
   );
 };

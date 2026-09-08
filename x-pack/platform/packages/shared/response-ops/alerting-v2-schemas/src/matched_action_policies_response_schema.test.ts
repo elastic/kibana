@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { matchActionPoliciesForRuleBodySchema } from './matched_action_policies_response_schema';
+import {
+  matchActionPoliciesForRuleBodySchema,
+  matchActionPoliciesForRuleResponseSchema,
+} from './matched_action_policies_response_schema';
 
 describe('matchActionPoliciesForRuleBodySchema', () => {
   it('accepts a valid rule payload', () => {
@@ -32,6 +35,24 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
       matchActionPoliciesForRuleBodySchema.parse({
         rule: { id: 'rule-1', unknownField: 'x' },
       })
+    ).toThrow();
+  });
+});
+
+describe('matchActionPoliciesForRuleResponseSchema', () => {
+  it('accepts a response with an empty item list and a total', () => {
+    const result = matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: 0 });
+
+    expect(result).toEqual({ items: [], total: 0 });
+  });
+
+  it('rejects a response missing total', () => {
+    expect(() => matchActionPoliciesForRuleResponseSchema.parse({ items: [] })).toThrow();
+  });
+
+  it('rejects a negative total', () => {
+    expect(() =>
+      matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: -1 })
     ).toThrow();
   });
 });

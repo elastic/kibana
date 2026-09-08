@@ -15,7 +15,7 @@ import type {
   SolutionTelemetrySchema,
   AssigneesSchema,
   AttachmentFrameworkSchema,
-  AttachmentItemsSchema,
+  AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
   ObservablesSchema,
 } from './types';
@@ -30,29 +30,43 @@ const countSchema: CountSchema = {
   daily: long,
 };
 
-interface AttachmentRegistrySchema {
-  type: 'array';
-  items: AttachmentItemsSchema;
-}
-
-const attachmentRegistrySchema: AttachmentRegistrySchema = {
-  type: 'array',
-  items: {
-    average: long,
-    maxOnACase: long,
-    total: long,
-    type: string,
+const attachmentTypeStatsSchema: AttachmentTypeStatsSchema = {
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of attachments of this type, across all cases' },
+  },
+  average: {
+    type: 'long',
+    _meta: { description: 'Average number of attachments of this type per case' },
   },
 };
 
 const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
-  persistableAttachments: attachmentRegistrySchema,
-  externalAttachments: attachmentRegistrySchema,
+  attachmentsByType: {
+    DYNAMIC_KEY: attachmentTypeStatsSchema,
+  },
+  bySavedObject: {
+    legacy: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
+        },
+      },
+    },
+    unified: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
+        },
+      },
+    },
+  },
   files: {
-    average: long,
     averageSize: long,
-    maxOnACase: long,
-    total: long,
     topMimeTypes: {
       type: 'array',
       items: {
@@ -174,12 +188,54 @@ export const casesSchema: CasesTelemetrySchema = {
   },
   connectors: {
     all: {
-      all: { totalAttached: long },
-      itsm: { totalAttached: long },
-      sir: { totalAttached: long },
-      jira: { totalAttached: long },
-      resilient: { totalAttached: long },
-      swimlane: { totalAttached: long },
+      all: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of all cases with any connector attached' },
+        },
+      },
+      itsm: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow ITSM connector attached' },
+        },
+      },
+      sir: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow SIR connector attached' },
+        },
+      },
+      jira: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Jira connector attached' },
+        },
+      },
+      resilient: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Resilient connector attached' },
+        },
+      },
+      swimlane: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Swimlane connector attached' },
+        },
+      },
+      thehive: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with The Hive connector attached' },
+        },
+      },
+      caseswebhook: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Cases Webhook connector attached' },
+        },
+      },
       maxAttachedToACase: long,
     },
   },

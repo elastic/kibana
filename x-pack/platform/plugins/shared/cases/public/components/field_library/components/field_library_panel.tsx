@@ -183,7 +183,7 @@ export const FieldLibraryPanel: React.FC<FieldLibraryPanelProps> = ({
                     <EuiFlexItem grow={false}>
                       <EuiToolTip content={i18n.UNLINK_FIELD} disableScreenReaderOutput>
                         <EuiButtonIcon
-                          iconType="unlink"
+                          iconType="linkSlash"
                           aria-label={i18n.UNLINK_FIELD}
                           size="xs"
                           color="danger"
@@ -230,7 +230,7 @@ export const FieldLibraryPanel: React.FC<FieldLibraryPanelProps> = ({
                       disableScreenReaderOutput
                     >
                       <EuiButtonIcon
-                        iconType={hasReferenceMode ? 'copy' : 'plusInCircle'}
+                        iconType={hasReferenceMode ? 'copy' : 'plusCircle'}
                         aria-label={hasReferenceMode ? i18n.COPY_FIELD : i18n.INSERT_FIELD}
                         size="xs"
                         onClick={() => handleInsert(fd)}

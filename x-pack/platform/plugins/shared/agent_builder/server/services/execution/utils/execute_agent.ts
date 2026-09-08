@@ -11,27 +11,28 @@ import type {
   ConverseInput,
   Conversation,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
+  ConversationRoundAuthor,
+  InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ExecutionConversationSource } from '@kbn/agent-builder-server/execution';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 export const executeAgent$ = ({
   agentId,
   executionId,
   request,
-  capabilities,
   structuredOutput,
   outputSchema,
   runAgent,
   conversation,
   nextInput,
-  source,
+  origin,
+  author,
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
@@ -40,17 +41,21 @@ export const executeAgent$ = ({
   configurationOverrides,
   action,
   executionMode,
+  interactivity,
+  parentExecutionId,
+  projectRouting,
+  roundId,
 }: {
   agentId: string;
   executionId: string;
   request: KibanaRequest;
-  capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   runAgent: RunAgentFn;
   conversation?: Conversation;
   nextInput: ConverseInput;
-  source?: ExecutionConversationSource;
+  origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -59,6 +64,10 @@ export const executeAgent$ = ({
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  interactivity?: InteractivityConfigInput;
+  parentExecutionId?: string;
+  projectRouting?: string;
+  roundId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -70,17 +79,21 @@ export const executeAgent$ = ({
       telemetryMetadata,
       maxContentLength,
       executionMode,
+      interactive: interactivity,
+      parentExecutionId,
+      projectRouting,
       agentParams: {
         nextInput,
         conversation,
-        source,
-        capabilities,
+        origin,
+        author,
         browserApiTools,
         configurationOverrides,
         structuredOutput,
         outputSchema,
         action,
         executionId,
+        roundId,
       },
       onEvent: (event) => {
         observer.next(event);

@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import type {
-  AgentCapabilities,
   AgentExecutionMode,
   ChatEvent,
   ConverseInput,
@@ -15,10 +14,12 @@ import type {
   BrowserApiToolMetadata,
   ConversationAction,
   ConversationAccessControl,
-  ConversationRoundSource,
-  ConversationSource,
-  ConversationSourceAuthor,
+  ConversationRoundOrigin,
+  ConversationOrigin,
+  ConversationRoundAuthor,
   ExecutionStatus,
+  InteractivityConfig,
+  InteractivityConfigInput,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -32,8 +33,6 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /** Capabilities to use for this execution. */
-  capabilities?: AgentCapabilities;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
@@ -54,17 +53,18 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  projectRouting?: string;
 }
 
 /**
- * External source that initiated a conversation execution, for example a Slack thread.
+ * External origin that initiated a conversation execution, for example a Slack thread.
  * Each attribute is persisted on its parent model: `external_conversation_id` on the
- * conversation, `type` on the round, and `author` on the round input.
+ * conversation, `type` on the round, and `author` on the round.
  */
-export type ExecutionConversationSource = ConversationSource &
-  ConversationRoundSource & {
-    /** Author attribution from the external source. */
-    author?: ConversationSourceAuthor;
+export type ExecutionConversationOrigin = ConversationOrigin &
+  ConversationRoundOrigin & {
+    /** Author attribution for the round input. */
+    author?: ConversationRoundAuthor;
   };
 
 /**
@@ -78,9 +78,11 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   /** Create conversation with specified ID if not found. */
   autoCreateConversationWithId?: boolean;
   /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
-  accessControl?: ConversationAccessControl;
-  /** External source that initiated this execution, used to resolve the conversation and attribute the round. */
-  source?: ExecutionConversationSource;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+  /** Read-only flag to apply when creating a new conversation. Ignored for existing conversations. */
+  readOnly?: boolean;
+  /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
+  origin?: ExecutionConversationOrigin;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */
@@ -90,6 +92,15 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
+  /**
+   * Used to establish the parent linkage and add subagent-specific metadata
+   * to the newly-created child conversation.
+   */
+  subagentCreation?: {
+    parentConversationId: string;
+    subagentName: string;
+    subagentPurpose?: string;
+  };
 }
 
 /**
@@ -128,6 +139,10 @@ interface BaseAgentExecution {
   metadata?: Record<string, string>;
   /** The ID of the parent execution that spawned this standalone execution. */
   parentExecutionId?: string;
+  /**
+   * Canonical interactivity config for this execution, snapshotted at creation.
+   */
+  interactivity?: InteractivityConfig;
 }
 
 /**
@@ -185,6 +200,10 @@ interface ExecuteAgentBaseParams {
    * - `undefined` (default): auto-decide based on context.
    */
   useTaskManager?: boolean;
+  /**
+   * Interactivity configuration for this execution.
+   */
+  interactive?: InteractivityConfigInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

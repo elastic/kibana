@@ -65,6 +65,7 @@ const defaultProps = {
   openDetailsPanel: () => {},
   isPreviewMode: false,
   entityStoreEntityId: 'host:host-1@okta',
+  riskScoreQueryId: 'HostPanelRiskScoreQuery',
 };
 
 describe('Content — resolution license gating', () => {

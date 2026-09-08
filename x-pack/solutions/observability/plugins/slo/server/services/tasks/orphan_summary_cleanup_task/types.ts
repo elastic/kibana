@@ -12,7 +12,7 @@ export interface Dependencies {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClient;
   logger: Logger;
-  abortController: AbortController;
+  signal: AbortSignal;
 }
 
 export interface CompletedRunResult {
@@ -28,9 +28,9 @@ export interface AbortedRunResult<TNextState> {
 
 export type RunResult<TNextState> = AbortedRunResult<TNextState> | CompletedRunResult;
 
-export function isAbortError(error: unknown, abortController: AbortController): boolean {
+export function isAbortError(error: unknown, signal: AbortSignal): boolean {
   if (error instanceof errors.RequestAbortedError) return true;
-  if (abortController.signal.aborted) return true;
+  if (signal.aborted) return true;
   if (error instanceof DOMException && error.name === 'AbortError') return true;
   return false;
 }

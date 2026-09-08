@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -20,6 +20,8 @@ import { ExpandableSection } from '../../../shared/components/expandable_section
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
 import { HighlightedFields } from './highlighted_fields';
+import { HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID } from './test_ids';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../../common/components/event_details/translations';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
@@ -27,15 +29,13 @@ import {
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
+import { getNonLocalQualifiedIndex } from '../../../shared/utils/non_local_index';
+import { LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-
-export const INVESTIGATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.investigation.sectionTitle',
-  {
-    defaultMessage: 'Investigation',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'investigation';
 
@@ -57,16 +57,18 @@ export interface InvestigationSectionProps {
  */
 export const InvestigationSection = memo(
   ({ hit, renderCellActions }: InvestigationSectionProps) => {
-    const { openDocumentInvestigationGuide } = useFlyoutApi();
+    const { openDocumentInvestigationGuide, openDocumentFlyoutFromPattern } = useFlyoutApi();
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
     const isRemoteDocument = useMemo(
-      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
-      [hit]
+      () => isNonLocalIndexName(documentIndexName),
+      [documentIndexName]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const ruleId = useMemo(
       () =>
         (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
@@ -79,9 +81,14 @@ export const InvestigationSection = memo(
       () => rule?.investigation_fields?.field_names ?? [],
       [rule?.investigation_fields?.field_names]
     );
+
     const ancestorsIndexName = useMemo(
-      () => (getFieldValue(hit, 'signal.ancestors.index') as string) ?? '',
-      [hit]
+      () =>
+        getNonLocalQualifiedIndex(
+          (getFieldValue(hit, LEGACY_ANCESTOR_INDEX) as string) ?? '',
+          documentIndexName
+        ),
+      [hit, documentIndexName]
     );
 
     const expanded = useExpandSection({
@@ -91,26 +98,55 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      openDocumentInvestigationGuide({ hit });
+      openDocumentInvestigationGuide({ hit, origin: FLYOUT_ORIGIN.INVESTIGATION_GUIDE });
     }, [openDocumentInvestigationGuide, hit]);
 
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => {
+        // Source event: open the ancestor document in a new flyout. The value is the ancestor
+        // document id and the index comes from `signal.ancestors.index`. Render plain text when
+        // either piece is missing.
+        //
+        // We resolve the ancestor by *pattern* (routing the search at `ancestorsIndexName`) rather
+        // than by concrete `_index`. The from-index path pins the lookup with a `term` filter on
+        // `_index`, which never matches a cross-cluster document: on the remote cluster the stored
+        // `_index` is the bare name, while `ancestorsIndexName` carries the `cluster:` alias. Routing
+        // at the index instead lets cross-cluster search reach the document (matching the legacy
+        // flyout's behavior). See SDH https://github.com/elastic/sdh-security-team/issues/1666.
+        if (props.field === EVENT_SOURCE_FIELD_DESCRIPTOR) {
+          if (!props.value || !ancestorsIndexName) {
+            return <>{props.children}</>;
+          }
+          return (
+            <EuiLink
+              onClick={() =>
+                openDocumentFlyoutFromPattern({
+                  documentId: props.value,
+                  indexName: ancestorsIndexName,
+                  origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+                })
+              }
+              data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
+            >
+              {props.children}
+            </EuiLink>
+          );
+        }
         // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
         // UUID) while keeping the rule name as the displayed text. When no UUID is available,
-        // render plain text to avoid opening the rule flyout with an invalid id.
+        // or when in rule preview (the rule doesn't exist yet), render plain text.
         if (
           props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
           props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
         ) {
-          if (!ruleId) {
+          if (!ruleId || isRulePreview) {
             return <>{props.children}</>;
           }
           return <OpenFlyoutLink {...props} value={ruleId} />;
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId]
+      [ruleId, isRulePreview, ancestorsIndexName, openDocumentFlyoutFromPattern]
     );
 
     return (
@@ -125,7 +161,7 @@ export const InvestigationSection = memo(
         {isAlert && !isRemoteDocument ? (
           <InvestigationGuide
             hit={hit}
-            isAvailable={true}
+            isAvailable={!isRulePreview}
             onShowInvestigationGuide={onShowInvestigationGuide}
           />
         ) : null}

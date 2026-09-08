@@ -13,6 +13,53 @@ const baseQuery = {
 };
 
 describe('graph request schema', () => {
+  describe('identifier maxLength', () => {
+    it('accepts Elasticsearch document IDs up to 512 characters', () => {
+      expect(() =>
+        graphRequestSchema.validate({
+          query: {
+            ...baseQuery,
+            originEventIds: [{ id: 'a'.repeat(512), isAlert: false }],
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects Elasticsearch document IDs longer than 512 characters', () => {
+      expect(() =>
+        graphRequestSchema.validate({
+          query: {
+            ...baseQuery,
+            originEventIds: [{ id: 'a'.repeat(513), isAlert: false }],
+          },
+        })
+      ).toThrow();
+    });
+
+    it('accepts entity EUIDs up to 1024 characters', () => {
+      expect(() =>
+        graphRequestSchema.validate({
+          query: {
+            ...baseQuery,
+            pinnedIds: ['a'.repeat(1024)],
+            entityIds: [{ id: 'a'.repeat(1024), isOrigin: true }],
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects entity EUIDs longer than 1024 characters', () => {
+      expect(() =>
+        graphRequestSchema.validate({
+          query: {
+            ...baseQuery,
+            pinnedIds: ['a'.repeat(1025)],
+          },
+        })
+      ).toThrow();
+    });
+  });
+
   describe('originEventIds maxSize (1000)', () => {
     const buildOriginEventIds = (length: number) =>
       Array.from({ length }, (_, index) => ({ id: `event-${index}`, isAlert: false }));

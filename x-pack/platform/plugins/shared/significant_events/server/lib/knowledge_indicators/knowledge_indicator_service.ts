@@ -11,13 +11,13 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { DataStreamClient } from '@kbn/data-streams';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from '../../types';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import {
   knowledgeIndicatorsDataStream,
   type StoredKnowledgeIndicator,
@@ -50,10 +50,9 @@ export class KnowledgeIndicatorService {
     >;
   }): Promise<KnowledgeIndicatorClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
-    const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-    const isSignificantEventsEnabled = await uiSettings
-      .get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)
-      .then((v) => v ?? false);
+    const significantEventsAvailable = await isSignificantEventsFeatureFlagEnabled(
+      coreStart.featureFlags
+    );
 
     const dataStreamClient: KnowledgeIndicatorDataStreamClient = DataStreamClient.fromDefinition<
       typeof knowledgeIndicatorsMappings,
@@ -70,7 +69,7 @@ export class KnowledgeIndicatorService {
         soClient,
         logger: this.logger.get('knowledge_indicators'),
       },
-      isSignificantEventsEnabled,
+      significantEventsAvailable,
       context,
       config
     );

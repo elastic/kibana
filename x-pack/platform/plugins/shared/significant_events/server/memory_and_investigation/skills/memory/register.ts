@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { MemoryToolsOptions } from '../../tools/memory';
+import { gateInlineTools } from '../../../agent_builder/skills/register_skills';
 import { createSignificantEventsMemorySkill } from './significant_events_memory_skill';
 import { createMemorySynthesisSkill } from './memory_synthesis_skill';
 import { createMemoryConsolidationSkill } from './memory_consolidation_skill';
@@ -24,14 +25,14 @@ export const registerStreamsMemoryAgentBuilder = async ({
   agentBuilder,
   memoryToolsOptions,
   logger,
-  isMemoryEnabled,
+  isAvailable,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   memoryToolsOptions: MemoryToolsOptions;
   logger: Logger;
-  isMemoryEnabled: () => Promise<boolean>;
+  isAvailable: () => Promise<boolean>;
 }): Promise<{
-  onMemoryEnabled: () => Promise<void>;
+  ensureRegistered: () => Promise<void>;
 }> => {
   const registeredSkillIds = new Set<string>();
 
@@ -44,7 +45,9 @@ export const registerStreamsMemoryAgentBuilder = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map(({ create }) => agentBuilder.skills.register(create(memoryToolsOptions)))
+      pending.map(({ create }) =>
+        agentBuilder.skills.register(gateInlineTools(create(memoryToolsOptions), isAvailable))
+      )
     );
 
     const registered: string[] = [];
@@ -66,7 +69,7 @@ export const registerStreamsMemoryAgentBuilder = async ({
 
     if (failed.length === 0) {
       logger.info(
-        'Streams memory skills registered (streams.significantEventsMemoryEnabled is enabled)'
+        'Streams memory skills registered (streams.significantEventsAvailable is enabled)'
       );
     } else {
       logger.warn(
@@ -79,14 +82,14 @@ export const registerStreamsMemoryAgentBuilder = async ({
   };
 
   const doEnsureMemorySkillsRegistered = async (): Promise<void> => {
-    if (!(await isMemoryEnabled())) {
+    if (!(await isAvailable())) {
       return;
     }
     await registerSkills();
   };
 
-  // Serialize invocations: this handler is driven by both the availability and memory flip streams,
-  // which can fire in the same tick, and registering the same skill twice throws.
+  // Serialize invocations: the availability flip can fire while a prior run is in flight, and
+  // registering the same skill twice throws.
   let queue: Promise<void> = Promise.resolve();
   const ensureMemorySkillsRegistered = (): Promise<void> => {
     queue = queue.catch(() => {}).then(doEnsureMemorySkillsRegistered);
@@ -96,6 +99,6 @@ export const registerStreamsMemoryAgentBuilder = async ({
   await ensureMemorySkillsRegistered();
 
   return {
-    onMemoryEnabled: ensureMemorySkillsRegistered,
+    ensureRegistered: ensureMemorySkillsRegistered,
   };
 };

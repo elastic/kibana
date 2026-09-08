@@ -57,7 +57,7 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  onResetToNewConversation?: (message: string) => void;
+  onResetToNewConversation?: (message: string, attachments?: ConversationAttachment[]) => void;
 }
 
 export interface SendMessageMutationBindings {
@@ -215,6 +215,7 @@ export const useSendMessageMutation = ({
       let succeeded = false;
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
+        const projectRouting = services.plugins.cps?.cpsManager?.getProjectRouting();
 
         const rawEvents$ = isRegenerate
           ? chatService.regenerate({
@@ -224,6 +225,7 @@ export const useSendMessageMutation = ({
               agentId: vars.agentId,
               connectorId: vars.connectorId,
               browserApiTools: browserApiToolsMetadata,
+              projectRouting,
             })
           : chatService.chat({
               signal: controller.signal,
@@ -240,6 +242,7 @@ export const useSendMessageMutation = ({
                 })),
               ],
               browserApiTools: browserApiToolsMetadata,
+              projectRouting,
             });
 
         const events$ = rawEvents$.pipe(
@@ -258,7 +261,8 @@ export const useSendMessageMutation = ({
           isAborted: () => controller.signal.aborted,
         });
 
-        if (!isRegenerate) {
+        // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
+        if (!isRegenerate && !controller.signal.aborted) {
           clearPendingMessage(vars.conversationId);
           vars.resetAttachments?.();
         }
@@ -310,12 +314,12 @@ export const useSendMessageMutation = ({
             });
           }
           clearPendingMessage(vars.conversationId);
-          vars.onResetToNewConversation!(vars.message!);
+          vars.onResetToNewConversation!(vars.message!, vars.attachments);
         } else {
           if (succeeded && !endedInAwaitingPrompt) {
             streamActions.invalidateConversation();
           }
-          if (!succeeded && hasInsertedOptimisticListRow) {
+          if (!succeeded && hasInsertedOptimisticListRow && !conversationPersisted) {
             removeSidebarConversationListRow({
               queryClient,
               agentId: vars.agentId,

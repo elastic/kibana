@@ -27,6 +27,27 @@ export const isErrorCountRuleType = (
   ruleTypeId: ApmRuleType
 ): ruleTypeId is ApmRuleType.ErrorCount => ruleTypeId === ApmRuleType.ErrorCount;
 
+/**
+ * For anomaly alerts, use the anomaly timestamp as the range start so padded alert
+ * time ranges cover the anomaly despite ML detection delay. An anomaly alert cannot
+ * fire before the anomaly exists, so alertStart is never earlier than anomalyTimestamp.
+ */
+export const getAlertDetailsRangeStart = ({
+  alertStart,
+  isAnomaly,
+  anomalyTimestamp,
+}: {
+  alertStart: string;
+  isAnomaly: boolean;
+  anomalyTimestamp?: number;
+}): string => {
+  if (!isAnomaly || anomalyTimestamp === undefined) {
+    return alertStart;
+  }
+
+  return new Date(anomalyTimestamp).toISOString();
+};
+
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };

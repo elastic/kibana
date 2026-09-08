@@ -15,7 +15,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPagination,
   EuiSpacer,
   EuiText,
@@ -30,13 +29,84 @@ import type {
 } from '@kbn/evals-common';
 import * as i18n from './translations';
 
-const EXAMPLE_ID_VISIBLE_LENGTH = 16;
-
-const truncate = (value: string, maxLength: number) =>
-  value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
-
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
+
+const POSITIVE_VERDICTS = [
+  'MATCH',
+  'CORRECT',
+  'ACCURATE',
+  'COMPLETE',
+  'GROUNDED',
+  'RELEVANT',
+  'SIMILAR',
+  'COHERENT',
+] as const;
+
+/**
+ * Every positive word above appears inside its own negations, so 'incorrect', 'no-match' and
+ * 'ungrounded' have to be recognized before the words they contain. Derived rather than listed
+ * so a new positive word cannot be added without its negations.
+ */
+const NEGATED_VERDICTS = ['NOT_', 'NON_', 'NO_', 'UN', 'IN', 'IR', 'MIS', 'DIS'].flatMap((prefix) =>
+  POSITIVE_VERDICTS.map((word) => `${prefix}${word}`)
+);
+
+const OTHER_NEGATIVE_VERDICTS = ['MISSING', 'MAJOR', 'SEVERE', 'UNSAFE', 'LEAK'];
+
+/**
+ * Maps a verdict label + numeric score to an EUI badge color.
+ *
+ * A score between 0 and 1 decides the color, because labels are free-form and substring matching
+ * cannot be trusted: 'incorrect' contains 'correct', and evaluators name their own scores things
+ * like 'correctness-analysis'. Keywords only classify verdicts with no score to read.
+ */
+export const getVerdictBadgeColor = (label: string, score: number | null | undefined): string => {
+  // Fold separators into underscores so 'leak-detected', 'leak detected' and 'n/a' all normalize
+  const u = label
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+
+  // Neutral sentinels — shown in muted gray regardless of score. An evaluator that could not
+  // judge reports why ('fixture-error', 'unavailable'), which is neither a pass nor a failure.
+  if (
+    u === 'NOT_APPLICABLE' ||
+    u === 'N_A' ||
+    u === 'NA' ||
+    u === 'UNAVAILABLE' ||
+    u.split('_').includes('ERROR')
+  )
+    return 'default';
+
+  // Only scores on a 0-to-1 scale are judgements. Evaluators also report measurements — latency
+  // in seconds, token counts — and against those a 0.8 threshold would call every run a pass.
+  if (score != null && score >= 0 && score <= 1) {
+    if (score >= 0.8) return 'success';
+    if (score >= 0.5) return 'warning';
+    return 'danger';
+  }
+
+  if (
+    NEGATED_VERDICTS.some((verdict) => u.includes(verdict)) ||
+    OTHER_NEGATIVE_VERDICTS.some((verdict) => u.includes(verdict)) ||
+    u === 'POOR' ||
+    u === 'OUT_OF_SCOPE'
+  )
+    return 'danger';
+
+  if (u.includes('MINOR') || u.includes('PARTIAL')) return 'warning';
+
+  if (
+    POSITIVE_VERDICTS.some((verdict) => u.includes(verdict)) ||
+    u === 'GOOD' ||
+    u === 'SAFE' ||
+    u === 'IN_SCOPE'
+  )
+    return 'success';
+
+  return 'hollow';
+};
 
 const hasNonEmptyMetadata = (
   metadata: Record<string, unknown> | null | undefined
@@ -56,11 +126,84 @@ const repetitionPaginationCss = css`
   }
 `;
 
+/**
+ * A multi-score evaluator namespaces its scores as `evaluator.score`, so the segment before
+ * the first dot names the evaluator and the remainder names the individual score.
+ */
+const splitScoreName = (scoreName: string): { evaluatorName: string; scoreLabel: string } => {
+  const separatorIndex = scoreName.indexOf('.');
+  if (separatorIndex < 0) {
+    return { evaluatorName: scoreName, scoreLabel: scoreName };
+  }
+  return {
+    evaluatorName: scoreName.slice(0, separatorIndex),
+    scoreLabel: scoreName.slice(separatorIndex + 1),
+  };
+};
+
+const collectModelIds = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
+  new Set(
+    scores
+      .map((scoreDoc) => scoreDoc.evaluator.model?.id)
+      .filter((modelId): modelId is string => Boolean(modelId))
+  );
+
+interface EvaluatorScoreGroup {
+  evaluatorName: string;
+  scores: EvaluationExperimentDatasetExample['scores'];
+  /** Only set when the group's scores agree on one judge, so the group can label itself once. */
+  sharedModelId?: string;
+}
+
+const groupScoresByEvaluator = (
+  scores: EvaluationExperimentDatasetExample['scores']
+): EvaluatorScoreGroup[] => {
+  const groupsByName = new Map<string, EvaluatorScoreGroup>();
+
+  for (const scoreDoc of scores) {
+    const { evaluatorName } = splitScoreName(scoreDoc.evaluator.name);
+    const group = groupsByName.get(evaluatorName);
+    if (group) {
+      group.scores.push(scoreDoc);
+      continue;
+    }
+    groupsByName.set(evaluatorName, { evaluatorName, scores: [scoreDoc] });
+  }
+
+  return Array.from(groupsByName.values()).map((group) => {
+    const [onlyModelId, ...otherModelIds] = collectModelIds(group.scores);
+    return otherModelIds.length === 0 && onlyModelId
+      ? { ...group, sharedModelId: onlyModelId }
+      : group;
+  });
+};
+
+const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
+  [
+    exampleId,
+    scoreDoc.evaluator.name,
+    scoreDoc.task.repetition_index,
+    scoreDoc.task.trace_id ?? 'no_trace',
+    scoreDoc['@timestamp'],
+  ].join(':');
+
+/**
+ * Deliberately not a badge: the badges alongside it are verdicts, and the judge is metadata
+ * about who produced them.
+ */
+const JudgeLabel: React.FC<{ modelId: string }> = ({ modelId }) => (
+  <EuiText size="xs" color="subdued">
+    <em>{i18n.getJudgedByLabel(modelId)}</em>
+  </EuiText>
+);
+
 const EvaluatorScoreAccordion: React.FC<{
   score: EvaluationScoreDocument;
   exampleId: string;
+  scoreLabel: string;
+  judgeModelId?: string;
   onTraceClick: (traceId: string) => void;
-}> = ({ score, exampleId, onTraceClick }) => {
+}> = ({ score, exampleId, scoreLabel, judgeModelId, onTraceClick }) => {
   const { evaluator } = score;
   const accordionId = [exampleId, evaluator.name, score.task.repetition_index].join('-');
 
@@ -73,12 +216,19 @@ const EvaluatorScoreAccordion: React.FC<{
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
-          <strong>{evaluator.name}:</strong> {formatScore(evaluator.score)}
+          <strong>{scoreLabel}:</strong> {formatScore(evaluator.score)}
         </EuiText>
       </EuiFlexItem>
       {evaluator.label && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{evaluator.label}</EuiBadge>
+          <EuiBadge color={getVerdictBadgeColor(evaluator.label, evaluator.score)}>
+            {evaluator.label}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {judgeModelId && (
+        <EuiFlexItem grow={false}>
+          <JudgeLabel modelId={judgeModelId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -127,7 +277,7 @@ const EvaluatorScoreAccordion: React.FC<{
         {hasTraceId && (
           <EuiButtonEmpty
             size="xs"
-            iconType="apmTrace"
+            iconType="chartWaterfall"
             onClick={() => onTraceClick(evaluator.trace_id!)}
             aria-label={i18n.getEvaluatorViewTraceAriaLabel(evaluator.name)}
           >
@@ -136,6 +286,62 @@ const EvaluatorScoreAccordion: React.FC<{
         )}
       </div>
     </EuiAccordion>
+  );
+};
+
+const EvaluatorScoreGroupBlock: React.FC<{
+  group: EvaluatorScoreGroup;
+  exampleId: string;
+  showJudge: boolean;
+  onTraceClick: (traceId: string) => void;
+}> = ({ group, exampleId, showJudge, onTraceClick }) => {
+  const { euiTheme } = useEuiTheme();
+  const { evaluatorName, scores, sharedModelId } = group;
+
+  // A single-score evaluator needs no heading: the score already carries the evaluator name.
+  if (scores.length === 1) {
+    const [score] = scores;
+    return (
+      <EvaluatorScoreAccordion
+        score={score}
+        exampleId={exampleId}
+        scoreLabel={score.evaluator.name}
+        judgeModelId={showJudge ? score.evaluator.model?.id : undefined}
+        onTraceClick={onTraceClick}
+      />
+    );
+  }
+
+  return (
+    <div css={{ marginBottom: euiTheme.size.s }}>
+      <EuiText size="xs" color="subdued">
+        <strong>{evaluatorName}</strong>
+      </EuiText>
+      {showJudge && sharedModelId && <JudgeLabel modelId={sharedModelId} />}
+      {/* The rule marks where the evaluator's scores end, so the next top-level score is not
+          mistaken for one of them. */}
+      <div
+        css={{
+          marginLeft: euiTheme.size.xxs,
+          paddingLeft: euiTheme.size.s,
+          borderLeft: euiTheme.border.thin,
+        }}
+      >
+        {scores.map((score) => (
+          <EvaluatorScoreAccordion
+            key={getScoreKey(score, exampleId)}
+            score={score}
+            exampleId={exampleId}
+            scoreLabel={splitScoreName(score.evaluator.name).scoreLabel}
+            judgeModelId={
+              // The group heading already names a shared judge; only per-score judges are left.
+              showJudge && !sharedModelId ? score.evaluator.model?.id : undefined
+            }
+            onTraceClick={onTraceClick}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -149,14 +355,12 @@ interface ExampleScoreRow {
 export interface ExampleScoresTableProps {
   examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
-  onExampleClick: (exampleId: string) => void;
   onTraceClick: (traceId: string, exampleId: string) => void;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   examples,
   selectedExampleId,
-  onExampleClick,
   onTraceClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -269,6 +473,9 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
     return (
       <EuiCodeBlock
+        // Table cell content is a flex container, so without an explicit width the block
+        // shrink-wraps the JSON and pulls its copy/expand controls in with it.
+        css={{ width: '100%' }}
         overflowHeight={200}
         language="json"
         paddingSize="none"
@@ -280,15 +487,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       </EuiCodeBlock>
     );
   };
-
-  const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
-    [
-      exampleId,
-      scoreDoc.evaluator.name,
-      scoreDoc.task.repetition_index,
-      scoreDoc.task.trace_id ?? 'no_trace',
-      scoreDoc['@timestamp'],
-    ].join(':');
 
   const itemIdToExpandedRowMap = useMemo<Record<string, ReactNode>>(() => {
     return rows.reduce<Record<string, ReactNode>>((acc, row) => {
@@ -317,26 +515,26 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'exampleId',
       name: i18n.COLUMN_EXAMPLE_ID,
-      width: '120px',
+      width: '160px',
       render: (exampleId: string, row: ExampleScoreRow) => {
         // Numeric-only IDs (auto-generated) get a 1-based "#N" label for readability.
-        // Descriptive string IDs (e.g. "healthy-baseline") are shown as-is;
-        // the index prefix is omitted because the ID is self-explanatory.
+        // Descriptive/string IDs (e.g. content hashes) are shown in full. Long ids
+        // wrap within the column rather than being truncated.
         const isNumericFallback = /^\d+$/.test(exampleId);
         const label = isNumericFallback
           ? `#${(row.exampleIndex ?? Number(exampleId)) + 1}`
           : exampleId;
         return (
-          <EuiLink onClick={() => onExampleClick(exampleId)}>
-            {truncate(label, EXAMPLE_ID_VISIBLE_LENGTH)}
-          </EuiLink>
+          <EuiText size="s" css={{ fontFamily: euiTheme.font.familyCode, wordBreak: 'break-all' }}>
+            {label}
+          </EuiText>
         );
       },
     },
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_INPUT,
-      width: '30%',
+      width: '18%',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
@@ -360,21 +558,27 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_EVALUATOR_SCORES,
-      width: '300px',
+      width: '30%',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
         const scores = getScoresForSelectedRepetition(row);
+        // A judge only disambiguates when the cell holds more than one.
+        const showJudge = collectModelIds(scores).size > 1;
+        const groups = groupScoresByEvaluator(scores);
         return scores.length > 0 ? (
           <div>
-            {scores.map((scoreDoc) => (
-              <EvaluatorScoreAccordion
-                key={getScoreKey(scoreDoc, row.exampleId)}
-                score={scoreDoc}
-                exampleId={row.exampleId}
-                onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
-              />
+            {groups.map((group, idx) => (
+              <React.Fragment key={`${row.exampleId}-${group.evaluatorName}`}>
+                {idx > 0 && <EuiSpacer size="xs" />}
+                <EvaluatorScoreGroupBlock
+                  group={group}
+                  exampleId={row.exampleId}
+                  showJudge={showJudge}
+                  onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
+                />
+              </React.Fragment>
             ))}
           </div>
         ) : (
@@ -402,7 +606,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
                 >
                   <EuiButtonIcon
                     size="s"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     onClick={() => onTraceClick(traceId, row.exampleId)}
                     aria-label={i18n.getTraceButtonAriaLabel(traceId)}
                   />

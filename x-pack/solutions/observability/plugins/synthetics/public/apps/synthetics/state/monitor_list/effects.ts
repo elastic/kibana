@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
 import { call, put, takeEvery, select, takeLatest } from 'redux-saga/effects';
 import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
@@ -110,6 +110,9 @@ export function* upsertMonitorEffect() {
             yield put(
               quietFetchOverviewStatusAction.get({
                 pageState: monitorState.pageState,
+                // Preserve any accumulated infinite-scroll window in the card
+                // view instead of collapsing it back to a single page.
+                silent: true,
               })
             );
           }

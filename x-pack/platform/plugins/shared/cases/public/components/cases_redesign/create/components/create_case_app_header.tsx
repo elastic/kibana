@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { CREATE_CASE_TITLE, PAGE_TITLE } from '../../../../common/translations';
 import { useAllCasesNavigation } from '../../../../common/navigation/hooks';
+import { CasesAppHeader } from '../../../app/cases_app_header';
 
 export const CreateCaseAppHeader: FC = () => {
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
@@ -28,7 +28,7 @@ export const CreateCaseAppHeader: FC = () => {
     [getAllCasesUrl, navigateToAllCases]
   );
 
-  return <AppHeader title={CREATE_CASE_TITLE} back={back} sticky={false} />;
+  return <CasesAppHeader title={CREATE_CASE_TITLE} back={back} />;
 };
 
 CreateCaseAppHeader.displayName = 'CreateCaseAppHeader';

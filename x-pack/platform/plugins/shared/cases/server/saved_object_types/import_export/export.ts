@@ -16,11 +16,20 @@ import type {
   AttachmentAttributesWithoutRefs,
 } from '../../../common/types/domain';
 import type { AttachmentAttributesV2 } from '../../../common/types/domain/attachment/v2';
+import type { Template } from '../../../common/types/domain/template/latest';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { ConfigType } from '../../config';
-import { getAttachmentsAndUserActionsForCases } from './utils';
+import {
+  getAttachmentsAndUserActionsForCases,
+  getTemplatesAndFieldDefinitionsForCases,
+} from './utils';
 import { getSavedObjectsTypes } from '../../../common';
+import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+} from '../../../common/constants';
 
 export async function handleExport({
   context,
@@ -41,6 +50,8 @@ export async function handleExport({
       | AttachmentAttributesWithoutRefs
       | AttachmentAttributesV2
       | CaseUserActionWithoutReferenceIds
+      | Template
+      | FieldDefinition
     >
   >
 > {
@@ -56,18 +67,33 @@ export async function handleExport({
         incremental_id: undefined,
       },
     }));
+
     const [{ savedObjects }] = await coreSetup.getStartServices();
+    // Include both new template SO types unconditionally — they are always registered and their
+    // importableAndExportable flag is static, so bundling must not depend on the feature flag.
+    // This mirrors how cases-attachments is always included regardless of xpack.cases.attachments.enabled.
+    const includedHiddenTypes = [
+      ...new Set([
+        ...getSavedObjectsTypes(config),
+        CASE_TEMPLATE_SAVED_OBJECT,
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      ]),
+    ];
     const savedObjectsClient = savedObjects.getScopedClient(context.request, {
-      includedHiddenTypes: getSavedObjectsTypes(config),
+      includedHiddenTypes,
     });
 
     const caseIds = cleanedObjects.map((caseObject) => caseObject.id);
-    const attachmentsAndUserActionsForCases = await getAttachmentsAndUserActionsForCases(
-      savedObjectsClient,
-      caseIds
-    );
+    const [attachmentsAndUserActionsForCases, templatesAndFieldDefinitions] = await Promise.all([
+      getAttachmentsAndUserActionsForCases(savedObjectsClient, caseIds),
+      getTemplatesAndFieldDefinitionsForCases(savedObjectsClient, cleanedObjects, logger),
+    ]);
 
-    return [...cleanedObjects, ...attachmentsAndUserActionsForCases.flat()];
+    return [
+      ...cleanedObjects,
+      ...attachmentsAndUserActionsForCases,
+      ...templatesAndFieldDefinitions,
+    ];
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve associated objects for exporting of cases: ${error}`,

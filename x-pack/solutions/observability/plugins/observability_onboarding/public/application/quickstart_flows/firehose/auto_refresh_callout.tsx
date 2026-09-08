@@ -35,7 +35,7 @@ export function AutoRefreshCallout() {
         `}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiIcon type="refreshTime" size="m" />
+          <EuiIcon aria-hidden={true} type="refreshTime" size="m" />
           <EuiText size="s">
             <p id={messageId}>
               {i18n.translate(
