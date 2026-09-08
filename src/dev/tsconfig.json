@@ -51,6 +51,7 @@
     "@kbn/sort-package-json",
     "@kbn/swc-register",
     "@kbn/rspack-optimizer",
-    "@kbn/dev-validation-runner"
+    "@kbn/dev-validation-runner",
+    "@kbn/some-dev-log"
   ]
 }
