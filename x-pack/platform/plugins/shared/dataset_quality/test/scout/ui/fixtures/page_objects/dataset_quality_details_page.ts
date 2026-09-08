@@ -145,6 +145,10 @@ export class DatasetQualityDetailsPage {
   }
 
   async waitUntilTableLoaded(): Promise<void> {
+    // Wait for the table to mount first: right after `goto` the loading class is not yet
+    // attached, so checking only for its absence would resolve before any fetch has begun.
+    // The no-data message renders inside the same table, so this holds for both states.
+    await this.qualityIssuesTable.waitFor({ state: 'visible' });
     // A filter refetch on serverless can hold the table in its loading state for longer
     // than the default 10s, so give the loading class room to detach before reading rows.
     await this.page
@@ -354,6 +358,12 @@ export class DatasetQualityDetailsPage {
     const popover = this.page.testSubj.locator(`${selectorTestSubj}Options`);
     const button = this.page.testSubj.locator(buttonTestSubj);
 
+    // Settle the table's initial fetch before touching the filter. Right after `goto` a
+    // late data update can remount the selector's popover just after it opens, and
+    // `selectSearchableOption` only re-waits the search box — it never reopens — so it
+    // cannot recover. Waiting for the fetch to finish first removes that window.
+    await this.waitUntilTableLoaded();
+
     // Selecting an option leaves the popover open, so a re-invocation (to deselect) would
     // otherwise reuse a stale popover whose search box is still filtered from the previous
     // pass. Toggle it shut first, then reopen, so every pass starts from a clean list.
@@ -362,8 +372,16 @@ export class DatasetQualityDetailsPage {
       await popover.waitFor({ state: 'detached' });
     }
 
-    await button.click();
-    await popover.waitFor({ state: 'visible' });
+    // Open the popover and confirm its search box is reachable. The button is an
+    // `EuiFilterButton` that toggles on every click, so only click when the popover is
+    // closed — otherwise a retry after a transient search-box miss would toggle it shut.
+    const searchbox = popover.getByRole('searchbox');
+    await expect(async () => {
+      if (!(await popover.isVisible())) {
+        await button.click();
+      }
+      await expect(searchbox).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 15_000 });
 
     for (const value of values) {
       await selectSearchableOption(this.page, selectorTestSubj, value);
