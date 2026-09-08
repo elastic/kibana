@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
+import type { ListSourcesItem } from '../../../../server/threat_intel/routes/list_sources';
 import {
   LIST_SOURCES_API_PATH,
   SOURCE_BY_ID_API_PATH,
@@ -13,15 +14,15 @@ import {
 } from '../../../../common/threat_intel';
 import { apiTest, tags, testData, SECURITY_READ_ONLY_ROLE } from '../fixtures';
 
+/**
+ * Shaped from the route's own response type so a field rename cannot leave this
+ * suite asserting on `undefined`. A local copy of this interface previously
+ * declared `id` where the route returns `source_id`, which made the catalog
+ * comparison below compare two arrays of `undefined` and pass unconditionally.
+ */
 interface ListSourcesResponse {
   total: number;
-  sources: Array<{
-    id: string;
-    enabled: boolean;
-    report_count: number;
-    env_hits_total: number;
-    url?: string;
-  }>;
+  sources: ListSourcesItem[];
 }
 
 /**
@@ -93,9 +94,12 @@ apiTest.describe('Threat Intel - source catalog API', { tag: [...tags.stateful.c
     const firstBody = first.body as ListSourcesResponse;
     const secondBody = second.body as ListSourcesResponse;
     expect(secondBody.total).toBe(firstBody.total);
-    expect(secondBody.sources.map((s) => s.id).sort()).toStrictEqual(
-      firstBody.sources.map((s) => s.id).sort()
+    expect(secondBody.sources.map((s) => s.source_id).sort()).toStrictEqual(
+      firstBody.sources.map((s) => s.source_id).sort()
     );
+    // Guard the comparison itself: if the response shape changes, the maps above
+    // would silently compare arrays of `undefined` and pass.
+    expect(firstBody.sources.every((s) => typeof s.source_id === 'string')).toBe(true);
   });
 
   apiTest('returns 404 when updating a source that does not exist', async ({ apiClient }) => {

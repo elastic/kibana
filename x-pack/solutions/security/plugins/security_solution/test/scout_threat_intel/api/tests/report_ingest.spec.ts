@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
+import type { ExtractIocsResult } from '../../../../server/threat_intel/services/extract_iocs';
 import {
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
@@ -17,9 +18,8 @@ interface CreateReportResponse {
   report_id: string;
 }
 
-interface ExtractIocsResponse {
-  iocs: Array<{ type: string; value: string; tier: string; tier_basis: string }>;
-}
+/** Shaped from the service's own result type so a field rename fails the type check. */
+type ExtractIocsResponse = ExtractIocsResult;
 
 const MANUAL_ADAPTER_ID = 'manual:analyst-paste';
 
