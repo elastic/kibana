@@ -7,5 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './remote_host';
+import { i18n } from '@kbn/i18n';
+
+export const CONNECTOR_ID = '.ssh-host';
+
+export const CONNECTOR_NAME = i18n.translate('connectors.sshHost.title', {
+  defaultMessage: 'SSH Host',
+});
+
+export const AUTH_TYPE = {
+  PrivateKey: 'privateKey',
+  Password: 'password',
+} as const;
+
+export type AuthType = (typeof AUTH_TYPE)[keyof typeof AUTH_TYPE];
+
+export enum SUB_ACTION {
+  Exec = 'exec',
+  UploadFile = 'uploadFile',
+  DownloadFile = 'downloadFile',
+}
