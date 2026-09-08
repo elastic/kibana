@@ -24,6 +24,7 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
   CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+  DISABLED_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
@@ -473,6 +474,47 @@ describe('artifacts lists', () => {
 
       expect(translated).toEqual({
         entries: [{ yara_rule_data: firstRule }, { yara_rule_data: secondRule }],
+      });
+    });
+
+    test('it should skip Custom YARA Signatures tagged as disabled', async () => {
+      const enabledRule = 'rule Enabled { condition: true }';
+      const disabledRule = 'rule Disabled { condition: true }';
+      const exceptionMock = getFoundExceptionListItemSchemaMock(2);
+      exceptionMock.data[0] = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        tags: [DISABLED_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: disabledRule,
+          },
+        ],
+      });
+      exceptionMock.data[1] = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: enabledRule,
+          },
+        ],
+      });
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [{ yara_rule_data: enabledRule }],
       });
     });
 
