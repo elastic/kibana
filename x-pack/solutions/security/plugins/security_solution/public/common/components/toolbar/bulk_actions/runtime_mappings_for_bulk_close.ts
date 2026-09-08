@@ -57,9 +57,10 @@ export const toBulkCloseRuntimeMappings = (
 ): BulkCloseRuntimeMappings | undefined => {
   if (!runtimeMappings) return undefined;
 
-  const entries = Object.entries(runtimeMappings)
-    .filter(([, field]) => SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type))
-    .flatMap(([name, field]) => {
+  const result = Object.entries(runtimeMappings).reduce<BulkCloseRuntimeMappings>(
+    (acc, [name, field]) => {
+      if (!SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type)) return acc;
+
       const mapping: BulkCloseRuntimeMappings[string] = {
         type: field.type as BulkCloseRuntimeMappings[string]['type'],
       };
@@ -73,9 +74,8 @@ export const toBulkCloseRuntimeMappings = (
         } else {
           const scriptObj = field.script as Record<string, unknown>;
           const source = scriptObj.source as string | undefined;
-          const hasUnsupportedKeys = Object.keys(scriptObj).some((k) => k !== 'source');
 
-          if (!source || hasUnsupportedKeys) {
+          if (!source || Object.keys(scriptObj).some((k) => k !== 'source')) {
             // Drop the entry when:
             // - No source: non-inline (e.g. stored script by id) — forwarding
             //   only {type} would silently become a _source reader.
@@ -84,18 +84,21 @@ export const toBulkCloseRuntimeMappings = (
             //   that references params.x would fail silently at runtime under
             //   on_script_error:continue, skipping alerts instead of matching
             //   them. Drop to avoid the semantic change.
-            return [];
+            return acc;
           }
           mapping.script = { source };
         }
       }
 
-      if ('format' in field && field.format) {
+      if (field.format) {
         mapping.format = field.format;
       }
 
-      return [[name, mapping] as const];
-    });
+      acc[name] = mapping;
+      return acc;
+    },
+    {}
+  );
 
-  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  return Object.keys(result).length > 0 ? result : undefined;
 };
