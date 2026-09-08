@@ -197,7 +197,7 @@ export abstract class SaveMixin extends NavigationMixin {
     }
   }
 
-  async exportAsCsv(): Promise<import('playwright-core').Download> {
+  async exportAsCsv(options?: TimeoutOptions): Promise<import('playwright-core').Download> {
     // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
     await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
@@ -206,11 +206,17 @@ export abstract class SaveMixin extends NavigationMixin {
     await this.page.testSubj.click('generateReportButton');
 
     // 3. Explicitly wait for the report to finish generating
-    // Ensure the button is ready before we try to download
     const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
-    await expect(downloadBtn).toBeEnabled({
-      timeout: 30_000,
+    const reportFailure = this.page.locator('[data-test-errorText]');
+    await downloadBtn.or(reportFailure).waitFor({
+      state: 'visible',
+      timeout: options?.timeout ?? 30_000,
     });
+
+    if (await reportFailure.isVisible()) {
+      const errorText = await reportFailure.getAttribute('data-test-errorText');
+      throw new Error(`CSV report generation failed: ${errorText ?? 'Unknown error'}`);
+    }
 
     // 4. Coordinate the click and the event listener
     const [download] = await Promise.all([

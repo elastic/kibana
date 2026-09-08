@@ -45,8 +45,8 @@ describe('SecuritySolutionEventBus', () => {
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
@@ -55,12 +55,12 @@ describe('SecuritySolutionEventBus', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: ['a'],
-          tagsToAdd: ['t'],
-          tagsToRemove: [],
+          tagsAdded: ['t'],
+          tagsRemoved: [],
           truncated: false,
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertTagsChanged(cb),
-      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [], truncated: false },
+      expectedPayload: { alertIds: ['a'], tagsAdded: ['t'], tagsRemoved: [], truncated: false },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertStatusChanged(mockRequest, {
           alertIds: [],
@@ -74,22 +74,22 @@ describe('SecuritySolutionEventBus', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAlertAssigneesChanged(mockRequest, {
           alertIds: ['a'],
-          assigneesToAdd: ['uid'],
-          assigneesToRemove: [],
+          assigneesAdded: ['uid'],
+          assigneesRemoved: [],
           truncated: false,
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertAssigneesChanged(cb),
       expectedPayload: {
         alertIds: ['a'],
-        assigneesToAdd: ['uid'],
-        assigneesToRemove: [],
+        assigneesAdded: ['uid'],
+        assigneesRemoved: [],
         truncated: false,
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
@@ -112,8 +112,8 @@ describe('SecuritySolutionEventBus', () => {
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
@@ -122,22 +122,22 @@ describe('SecuritySolutionEventBus', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAttackTagsChanged(mockRequest, {
           attackIds: ['a'],
-          tagsToAdd: ['t'],
-          tagsToRemove: [],
+          tagsAdded: ['t'],
+          tagsRemoved: [],
           truncated: false,
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackTagsChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
-        tagsToAdd: ['t'],
-        tagsToRemove: [],
+        tagsAdded: ['t'],
+        tagsRemoved: [],
         truncated: false,
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
@@ -146,22 +146,22 @@ describe('SecuritySolutionEventBus', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAttackAssigneesChanged(mockRequest, {
           attackIds: ['a'],
-          assigneesToAdd: ['uid'],
-          assigneesToRemove: [],
+          assigneesAdded: ['uid'],
+          assigneesRemoved: [],
           truncated: false,
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackAssigneesChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
-        assigneesToAdd: ['uid'],
-        assigneesToRemove: [],
+        assigneesAdded: ['uid'],
+        assigneesRemoved: [],
         truncated: false,
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
@@ -182,8 +182,8 @@ describe('SecuritySolutionEventBus', () => {
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
@@ -204,8 +204,8 @@ describe('SecuritySolutionEventBus', () => {
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
-          tagsToAdd: [],
-          tagsToRemove: [],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: false,
         }),
     },
