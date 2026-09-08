@@ -31,6 +31,25 @@ describe('SuggestUserProfilesRoute', () => {
     expect(ctx.response.ok).toHaveBeenCalledWith({ body: [{ uid: 'u-1' }] });
   });
 
+  it('drops an empty name so Elasticsearch returns an unfiltered list', async () => {
+    const { ctx } = createRouteDependencies();
+    const requestWithoutName = httpServerMock.createKibanaRequest({
+      body: { name: '', size: 10 },
+    });
+
+    securityStart.userProfiles.suggest.mockResolvedValue([]);
+
+    const route = new SuggestUserProfilesRoute(ctx, requestWithoutName, securityStart);
+
+    await route.handle();
+
+    expect(securityStart.userProfiles.suggest).toHaveBeenCalledWith({
+      name: undefined,
+      size: 10,
+      dataPath: 'avatar',
+    });
+  });
+
   it('accepts dataPath in body', async () => {
     const { ctx } = createRouteDependencies();
     const requestWithDataPath = httpServerMock.createKibanaRequest({

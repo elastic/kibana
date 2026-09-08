@@ -20,7 +20,11 @@ import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../cons
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
 const suggestUserProfilesBodySchema = z.object({
-  name: z.string().min(1).max(256).describe('Name fragment to search by.'),
+  name: z
+    .string()
+    .max(256)
+    .optional()
+    .describe('Name fragment to search by. Omit or leave empty to list profiles unfiltered.'),
   size: z
     .number()
     .int()
@@ -92,7 +96,9 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
   protected async execute() {
     const { name, size } = this.request.body;
     const profiles = await this.securityStart.userProfiles.suggest({
-      name,
+      // An empty name must reach Elasticsearch as "no filter" so the picker can
+      // show an initial list of profiles before the user types anything.
+      name: name || undefined,
       size,
       dataPath: 'avatar',
     });
