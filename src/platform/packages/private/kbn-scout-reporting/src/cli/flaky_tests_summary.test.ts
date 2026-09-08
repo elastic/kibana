@@ -271,7 +271,12 @@ describe('displaySummary', () => {
       from: new Date('2026-08-31T12:00:00.000Z'),
       to: now,
     },
-    scope: { pipelines: ['kibana-on-merge'], branches: [], frameworks: ['jest', 'playwright'] },
+    scope: {
+      pipelines: ['kibana-on-merge'],
+      branches: [],
+      frameworks: ['jest', 'playwright'],
+      classifications: ['flaky', 'consistently-failing'],
+    },
     thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
     summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
@@ -301,9 +306,10 @@ describe('displaySummary', () => {
 
     expect(output).toContain('Flaky tests summary');
     expect(output).toContain('Lookback : 7d');
-    expect(output).toContain('Pipelines  : kibana-on-merge');
-    expect(output).toContain('Branches   : any');
-    expect(output).toContain('Frameworks : jest, playwright');
+    expect(output).toContain('Pipelines       : kibana-on-merge');
+    expect(output).toContain('Branches        : any');
+    expect(output).toContain('Frameworks      : jest, playwright');
+    expect(output).toContain('Classifications : flaky, consistently-failing');
     expect(output).toContain('Min builds        : 10');
     expect(output).toContain('Min failed builds : 2');
     expect(output).toContain('Max tests         : 200 per list');

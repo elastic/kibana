@@ -26,6 +26,7 @@ import {
   FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
   type FlakyTestBranchStats,
+  type FlakyTestClassification,
   type FlakyTestEntry,
   type FlakyTestLatestRun,
   type FlakyTestReport,
@@ -46,8 +47,6 @@ export const latestRunAcrossBranches = (
   }
   return latest;
 };
-
-export type FlakyTestClassification = 'flaky' | 'consistently-failing';
 
 /**
  * A test qualifies when it ran and failed in enough builds. It is flaky when it also had at
@@ -125,8 +124,12 @@ const buildReport = async (
   if (!Number.isInteger(options.lookbackDays) || options.lookbackDays < 1) {
     throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
   }
+  if (options.classifications.length === 0) {
+    throw new Error('classifications must include at least one of: flaky, consistently-failing');
+  }
 
   const { thresholds, frameworks } = options;
+  const classifications = new Set<FlakyTestClassification>(options.classifications);
   const to = options.now ?? new Date();
   const from = new Date(to.getTime() - options.lookbackDays * 24 * 60 * 60 * 1000);
   const scope: FlakyTestQueryScope = {
@@ -169,7 +172,7 @@ const buildReport = async (
   const consistentlyFailing: AggregatedEntry[] = [];
   const candidates = stats.flatMap((row) => {
     const classification = classifyTest(row, thresholds);
-    return classification ? [{ row, classification }] : [];
+    return classification && classifications.has(classification) ? [{ row, classification }] : [];
   });
 
   let metadata = new Map<string, TestMetadataRow>();
@@ -227,6 +230,7 @@ const buildReport = async (
       pipelines: options.pipelines,
       branches: options.branches,
       frameworks,
+      classifications: options.classifications,
     },
     thresholds,
     summary: {

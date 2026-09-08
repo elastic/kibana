@@ -846,11 +846,16 @@ node scripts/scout discover-flaky-tests
 # Include PR builds, widen the window, restrict to Jest and FTR
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
 
+# Flaky tests only, leaving consistently failing tests out of the report
+node scripts/scout discover-flaky-tests --classifications flaky
+
 # Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
 node scripts/scout discover-flaky-tests --summaryLimit 25
 ```
 
 The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.
+
+The [kibana / scout / discover-flaky-tests](https://buildkite.com/elastic/kibana-scout-discover-flaky-tests) Buildkite pipeline runs the command daily for `kibana-on-merge` (flaky tests only) and publishes `target/flaky_tests/flaky_tests.json` as a build artifact, with the top offenders summarised in a build annotation. Its inputs are the `FLAKY_TESTS_*` environment variables read by `.buildkite/scripts/steps/scout_discover_flaky_tests.sh`; trigger a new build with different values (pipelines, lookback, classifications, branches, frameworks) to produce a custom report, or add a schedule to the pipeline definition for a recurring one.
 
 ### AI prompts to help you migrate from FTR
 

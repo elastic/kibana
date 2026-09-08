@@ -206,9 +206,10 @@ export const displaySummary = (report: FlakyTestReport, limit: number, log: Tool
     [
       dedent(`\
         Scope
-          Pipelines  : ${scope.pipelines.join(', ') || 'any'}
-          Branches   : ${scope.branches.join(', ') || 'any'}
-          Frameworks : ${scope.frameworks.join(', ')}
+          Pipelines       : ${scope.pipelines.join(', ') || 'any'}
+          Branches        : ${scope.branches.join(', ') || 'any'}
+          Frameworks      : ${scope.frameworks.join(', ')}
+          Classifications : ${scope.classifications.join(', ')}
         `),
     ],
     [
