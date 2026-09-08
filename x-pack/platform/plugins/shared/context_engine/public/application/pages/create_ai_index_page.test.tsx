@@ -19,22 +19,6 @@ import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    query,
-    onTextLangQueryChange,
-  }: {
-    query: { esql: string };
-    onTextLangQueryChange: (query: { esql: string }) => void;
-  }) => (
-    <textarea
-      data-test-subj="mockEsqlEditor"
-      value={query.esql}
-      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-    />
-  ),
-}));
-
 jest.mock('../hooks/use_data_connectors', () => ({
   useDataConnectors: () => ({
     connectors: [],
@@ -65,11 +49,6 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
       </I18nProvider>
     </ChromeServiceProvider>
   );
-};
-
-const addEsqlSource = (query: string) => {
-  fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
-  fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
 
 const typeId = (id: string) => {
@@ -190,7 +169,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
@@ -201,7 +179,7 @@ describe('CreateAiIndexPage', () => {
             id: VALID_ID,
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
-            sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
+            sources: [],
           }),
         })
       );
@@ -219,7 +197,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
@@ -231,7 +208,7 @@ describe('CreateAiIndexPage', () => {
             id: VALID_ID,
             dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
             automations: [],
-            sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
+            sources: [],
           }),
         })
       );
@@ -245,7 +222,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
