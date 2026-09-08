@@ -6,21 +6,24 @@
  */
 
 import React from 'react';
-import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, useEuiTheme } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { AppHeader } from '@kbn/app-header';
 import { css } from '@emotion/react';
-import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { hostsTitle } from '../../../translations';
-import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostsContainer } from './components/hosts_container';
+import { HostsOnboardingPage } from './components/hosts_onboarding_page';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostsTimeRangeMetadataProvider } from './hooks/use_hosts_metadata_provider';
+import { useHostsHasData } from './hooks/use_hosts_has_data';
 import { SearchBar } from './components/search_bar/search_bar';
+import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
-export const HostsPage = () => {
+export const HostsPage = (): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 
@@ -33,40 +36,83 @@ export const HostsPage = () => {
     { parent: 'app' }
   );
 
+  const { menu, flyouts } = useMetricsAppHeaderMenu();
+  const { hasData, loading } = useHostsHasData();
+  const showOnboarding = !loading && !hasData;
+
+  // Template noDataConfig ignores children; Hosts renders onboarding as body instead.
   return (
     <div className={APP_WRAPPER_CLASS}>
-      <UnifiedSearchProvider>
-        <HostsTimeRangeMetadataProvider>
-          <InfraPageTemplate
-            dataSourceAvailability="host"
-            onboardingFlow={OnboardingFlow.Hosts}
-            pageHeader={{
-              alignItems: 'center',
-              color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-              rightSideItems: [],
-              pageTitle: (
-                <div
-                  css={css`
+      <InfraPageTemplate
+        hasDataOverride={!showOnboarding}
+        header={
+          <>
+            <AppHeader title={hostsTitle} menu={menu} spacing="standard" />
+            {flyouts}
+          </>
+        }
+        pageSectionProps={{
+          paddingSize: 'none',
+          contentProps: {
+            css: css`
+              display: flex;
+              flex-direction: column;
+              flex: 1 1 auto;
+              min-height: 0;
+              height: 100%;
+              width: 100%;
+              padding-bottom: 0;
+            `,
+          },
+        }}
+      >
+        {showOnboarding ? (
+          <HostsOnboardingPage />
+        ) : (
+          <UnifiedSearchProvider>
+            <HostsTimeRangeMetadataProvider>
+              <EuiPageSection
+                paddingSize="m"
+                grow
+                restrictWidth={false}
+                contentProps={{
+                  css: css`
                     display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
+                    flex-direction: column;
+                    flex: 1 1 auto;
+                    min-height: 0;
+                    height: 100%;
+                    width: 100%;
+                    padding-top: ${euiTheme.size.base};
+                    padding-bottom: 0;
+                  `,
+                }}
+              >
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="m"
+                  css={css`
+                    flex: 1;
+                    min-height: 0;
                   `}
                 >
-                  <h1>{hostsTitle}</h1>
-                </div>
-              ),
-              children: <SearchBar />,
-            }}
-            pageSectionProps={{
-              contentProps: {
-                css: fullHeightContentStyles,
-              },
-            }}
-          >
-            <HostsContainer />
-          </InfraPageTemplate>
-        </HostsTimeRangeMetadataProvider>
-      </UnifiedSearchProvider>
+                  <EuiFlexItem grow={false}>
+                    <SearchBar />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    css={css`
+                      min-height: 0;
+                      overflow-y: auto;
+                    `}
+                  >
+                    <HostsContainer />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPageSection>
+            </HostsTimeRangeMetadataProvider>
+          </UnifiedSearchProvider>
+        )}
+      </InfraPageTemplate>
     </div>
   );
 };
