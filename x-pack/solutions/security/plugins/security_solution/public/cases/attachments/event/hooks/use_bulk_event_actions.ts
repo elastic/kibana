@@ -43,14 +43,14 @@ export const useBulkAddEventsToCaseActions = ({
   } = useKibana();
 
   const canAttach = useCanAttachToCase();
-  const CasesContext = useMemo(() => casesService?.ui.getCasesContext(), [casesService]);
-  const isCasesContextAvailable = Boolean(casesService && CasesContext);
+  const CasesContext = useMemo(() => casesService.ui.getCasesContext(), [casesService]);
+  const isCasesContextAvailable = Boolean(CasesContext);
 
   const onSuccess = useCallback(() => {
     clearSelection();
   }, [clearSelection]);
 
-  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
+  const selectCaseModal = casesService.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
   });
 
