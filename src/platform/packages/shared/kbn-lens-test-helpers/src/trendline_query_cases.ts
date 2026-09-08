@@ -215,6 +215,14 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       metricFields: ['total'],
     },
     {
+      description: 'FORK query with SORT _fork DESC NULLS LAST after FORK',
+      sourceQuery: `FROM ${index} | FORK (STATS total = COUNT(*)) (STATS avg_bytes = AVG(bytes)) | SORT _fork DESC NULLS LAST`,
+      expectedQuery: `FROM ${index} | STATS total = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total'],
+      metricFields: ['total'],
+    },
+    {
       description: 'FORK query with WHERE on the _fork discriminator',
       sourceQuery: `FROM ${index} | FORK (STATS total = COUNT(*)) (STATS avg_bytes = AVG(bytes)) | WHERE _fork == "fork1"`,
       expectedQuery: `FROM ${index} | STATS total = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,

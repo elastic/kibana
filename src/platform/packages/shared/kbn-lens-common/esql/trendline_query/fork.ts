@@ -128,9 +128,15 @@ const removeForkDiscriminatorReferences = (commands: ESQLCommand[], fromIndex: n
       case 'keep':
       case 'drop':
       case 'sort':
-        command.args = command.args.filter(
-          (arg) => !(isColumn(arg) && arg.name === FORK_DISCRIMINATOR_COLUMN)
-        );
+        // SORT entries with a direction or nulls modifier (e.g. `_fork DESC`)
+        // are order nodes wrapping the column, not bare columns
+        command.args = command.args.filter((arg) => {
+          const column =
+            !Array.isArray(arg) && arg.type === 'order' && isColumn(arg.args[0])
+              ? arg.args[0]
+              : arg;
+          return !(isColumn(column) && column.name === FORK_DISCRIMINATOR_COLUMN);
+        });
         if (command.args.length === 0) commands.splice(i, 1);
         break;
       case 'rename':
