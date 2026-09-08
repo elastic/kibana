@@ -98,7 +98,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     })
   ),
   dataFormat: schema.maybe(
-    schema.string({ meta: { description: 'Data format: ecs or otel. Used to hydrate the services step on resume.' } })
+    schema.string({
+      meta: {
+        description: 'Data format: ecs or otel. Used to hydrate the services step on resume.',
+      },
+    })
   ),
   agentPolicyId: schema.maybe(
     schema.string({
