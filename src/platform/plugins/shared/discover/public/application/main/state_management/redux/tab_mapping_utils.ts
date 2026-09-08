@@ -12,7 +12,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isFilterPinned, isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
@@ -31,7 +31,7 @@ export const fromSavedObjectTabToAppState = ({
   return omitBy<DiscoverAppState>(
     {
       columns: tab.columns,
-      filters: tab.serializedSearchSource.filter,
+      filters: tab.serializedSearchSource.filter?.filter((filter) => !isFilterPinned(filter)),
       grid: tab.grid,
       hideChart: tab.hideChart,
       hideTable: tab.hideTable,
@@ -70,13 +70,23 @@ export const fromSavedObjectTabToTabState = ({
   profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
   const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
+  const serializedGlobalFilters = tab.serializedSearchSource.filter?.filter(isFilterPinned);
 
-  const globalState = {
+  const globalState: TabState['globalState'] = {
     timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
     refreshInterval: tab.timeRestore
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
   };
+
+  const storedGlobalFilters = serializedGlobalFilters?.length ? serializedGlobalFilters : undefined;
+
+  // Keep the current global filters, even an empty list, so old pinned filters do not reappear.
+  const globalFilters = existingTab?.globalState.filters ?? storedGlobalFilters;
+
+  if (globalFilters !== undefined) {
+    globalState.filters = globalFilters;
+  }
 
   return {
     ...DEFAULT_TAB_STATE,

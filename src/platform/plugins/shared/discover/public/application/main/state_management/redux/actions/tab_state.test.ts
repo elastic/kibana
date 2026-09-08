@@ -865,7 +865,12 @@ describe('tab_state actions', () => {
       const storageSetSpy = jest.spyOn(services.storage, 'set');
 
       const query = { query: "foo: 'bar'", language: 'kuery' };
-      const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
+      const filters = [
+        {
+          meta: { index: 'the-data-view-id', key: 'status' },
+          query: { match_phrase: { status: 200 } },
+        },
+      ];
       internalState.dispatch(
         internalStateActions.setGlobalState({
           tabId,
@@ -935,7 +940,7 @@ describe('tab_state actions', () => {
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
-        esql: 'FROM the-data-view-title | SORT @timestamp DESC | WHERE KQL("""foo: \'bar\'""")',
+        esql: 'FROM the-data-view-title | SORT @timestamp DESC | WHERE KQL("""foo: \'bar\'""") AND `status` : 200',
       });
       expect(tab.appState.sort).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);

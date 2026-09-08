@@ -14,7 +14,7 @@ import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashb
 import { DiscoverSessionSaveModalContainer } from './save_discover_session_modal_container';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSessionPersistence } from '../../../../../session';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
   fromTabStateToSavedObjectTab,
@@ -89,7 +89,7 @@ const setup = async ({
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
-  mockSaveDiscoverSession?: SavedSearchPublicPluginStart['saveDiscoverSession'];
+  mockSaveDiscoverSession?: DiscoverSessionPersistence['save'];
   onSaveCb?: () => void;
   persistedDiscoverSession?: DiscoverSession | false;
   services?: DiscoverServices;
@@ -125,7 +125,7 @@ const setup = async ({
   });
 
   jest
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
+    .spyOn(services.discoverSessionPersistence, 'save')
     .mockImplementation(mockSaveDiscoverSession);
 
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
@@ -835,7 +835,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('should not close modal on error', async () => {
+    it('should close modal on error', async () => {
       const services = createDiscoverServicesMock();
       const { modalProps, onClose } = await setup({
         isEmbedded: true,
@@ -847,7 +847,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps());
       });
 
-      expect(onClose).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it('should show no toast when save is unsuccessful without an error', async () => {

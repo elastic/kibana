@@ -1189,21 +1189,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchWithTimeField,
-        id: savedSearchWithTimeField.id ?? '',
-        title: savedSearchWithTimeField.title ?? '',
-        description: savedSearchWithTimeField.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchWithTimeField.id ?? '',
-              label: savedSearchWithTimeField.title ?? '',
-            },
-            savedSearch: savedSearchWithTimeField,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionPersistence, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchWithTimeField,
+          id: savedSearchWithTimeField.id ?? '',
+          title: savedSearchWithTimeField.title ?? '',
+          description: savedSearchWithTimeField.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchWithTimeField.id ?? '',
+                label: savedSearchWithTimeField.title ?? '',
+              },
+              savedSearch: savedSearchWithTimeField,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithTimeField.id })
@@ -1234,21 +1237,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchMock,
-        id: savedSearchMock.id ?? '',
-        title: savedSearchMock.title ?? '',
-        description: savedSearchMock.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchMock.id ?? '',
-              label: savedSearchMock.title ?? '',
-            },
-            savedSearch: savedSearchMock,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionPersistence, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchMock,
+          id: savedSearchMock.id ?? '',
+          title: savedSearchMock.title ?? '',
+          description: savedSearchMock.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchMock.id ?? '',
+                label: savedSearchMock.title ?? '',
+              },
+              savedSearch: savedSearchMock,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchMock.id })

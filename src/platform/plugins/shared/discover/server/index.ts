@@ -62,6 +62,7 @@ export type {
   DiscoverSessionApiDataInput,
   DiscoverSessionSanitizeResponse,
   DiscoverSessionWarning,
+  DiscoverSessionGetResponse,
 } from './api/schema';
 export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 

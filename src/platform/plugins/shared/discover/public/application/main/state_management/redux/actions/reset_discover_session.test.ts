@@ -18,6 +18,7 @@ import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import { FilterStateStore } from '@kbn/es-query';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -196,6 +197,47 @@ describe('resetDiscoverSession', () => {
 
     const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
+  });
+
+  it('should not copy a persisted global filter into app state', async () => {
+    const { internalState, persistedTab1, persistedDiscoverSession } = await setup();
+    const pinnedFilter = {
+      meta: { index: dataViewWithTimefieldMock.id },
+      query: { match_all: {} },
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    const legacySaveResponse = {
+      ...persistedDiscoverSession,
+      tabs: persistedDiscoverSession.tabs.map((tab) =>
+        tab.id === persistedTab1.id
+          ? {
+              ...tab,
+              serializedSearchSource: {
+                ...tab.serializedSearchSource,
+                filter: [pinnedFilter],
+              },
+            }
+          : tab
+      ),
+    };
+
+    internalState.dispatch(
+      internalStateSlice.actions.setGlobalState({
+        tabId: persistedTab1.id,
+        globalState: { filters: [pinnedFilter] },
+      })
+    );
+
+    await internalState
+      .dispatch(
+        internalStateActions.resetDiscoverSession({ updatedDiscoverSession: legacySaveResponse })
+      )
+      .unwrap();
+
+    const tab = selectTab(internalState.getState(), persistedTab1.id);
+    const allFilters = [...(tab.globalState.filters ?? []), ...(tab.appState.filters ?? [])];
+
+    expect(allFilters).toEqual([pinnedFilter]);
   });
 
   it('should keep current tab runtime state available while replacing all session tabs', async () => {

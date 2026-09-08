@@ -14,6 +14,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import type { DiscoverCustomizationService } from '../../customizations/customization_service';
 import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
@@ -23,6 +24,8 @@ import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DATASETS_ROUTE } from '@kbn/esql-types';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -129,6 +132,83 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
+  test('loads a Discover session when its URL is ambiguous', async () => {
+    const services = getServicesMock();
+    services.discoverSessionPersistence.get.mockResolvedValueOnce({
+      session: createDiscoverSessionMock({
+        id: 'conflicting-session',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'other-session',
+          aliasPurpose: 'savedObjectConversion',
+        },
+      }),
+      warnings: [],
+    });
+    const props: MainRouteProps = {
+      customizationCallbacks: [],
+      customizationContext: mockCustomizationContext,
+      onAppLeave: jest.fn(),
+    };
+
+    renderWithI18n(
+      <MemoryRouter initialEntries={['/view/conflicting-session']}>
+        <Route path="/view/:id">
+          <DiscoverTestProvider services={services}>
+            <DiscoverMainRoute {...props} />
+          </DiscoverTestProvider>
+        </Route>
+      </MemoryRouter>
+    );
+
+    await waitForLoad();
+
+    expect(services.discoverSessionPersistence.get).toHaveBeenCalledWith('conflicting-session');
+    expect(screen.queryByText('Cannot load this page')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
+  test('redirects and warns when the requested Discover session does not exist', async () => {
+    const id = 'missing-session';
+    const services = getServicesMock();
+    const replaceHistory = jest.spyOn(services.history, 'replace');
+    services.discoverSessionPersistence.get.mockRejectedValueOnce(
+      new SavedObjectNotFound({ type: 'search', id })
+    );
+    const props: MainRouteProps = {
+      customizationCallbacks: [],
+      customizationContext: mockCustomizationContext,
+      onAppLeave: jest.fn(),
+    };
+
+    renderWithI18n(
+      <MemoryRouter initialEntries={[`/view/${id}`]}>
+        <Route path="/view/:id">
+          <DiscoverTestProvider services={services}>
+            <DiscoverMainRoute {...props} />
+          </DiscoverTestProvider>
+        </Route>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Saved object is missing',
+          text: expect.any(Function),
+        })
+      );
+    });
+
+    expect(services.discoverSessionPersistence.get).toHaveBeenCalledWith(id);
+    expect(services.urlTracker.setTrackedUrl).toHaveBeenCalledWith('/');
+    expect(replaceHistory).toHaveBeenCalledWith(
+      `/?notFound=search&notFoundMessage=Could not locate that search (id: ${id})`
+    );
+    expect(screen.queryByText('Cannot load this page')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
   });
 
   test('renders the main app when ad hoc data views exist', async () => {
