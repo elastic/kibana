@@ -40,6 +40,8 @@ const DEFAULT_MIN_BUILDS = defaults.thresholds.minBuilds;
 const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
 const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
 const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
+// Only affects the printed summary; the JSON report is bounded by --maxTests
+const DEFAULT_SUMMARY_LIMIT = 10;
 
 /** Reads a flag that may be repeated or comma-separated into a de-duplicated list. */
 const readList = (flagsReader: FlagsReader, key: string): string[] => [
@@ -82,6 +84,9 @@ export const discoverFlakyTests: Command<void> = {
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
+
+    # Show the 25 worst offenders in the summary table
+    node scripts/scout discover-flaky-tests --summaryLimit 25
   `,
   flags: {
     string: [
@@ -97,6 +102,7 @@ export const discoverFlakyTests: Command<void> = {
       'maxTests',
       'samplesPerTest',
       'outputPath',
+      'summaryLimit',
     ],
     boolean: ['verifyTLSCerts'],
     default: {
@@ -111,6 +117,7 @@ export const discoverFlakyTests: Command<void> = {
       maxTests: String(DEFAULT_MAX_TESTS),
       samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
+      summaryLimit: String(DEFAULT_SUMMARY_LIMIT),
     },
     help: `
     --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
@@ -126,6 +133,7 @@ export const discoverFlakyTests: Command<void> = {
     --maxTests         (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
     --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
     --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
+    --summaryLimit     (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
     `,
   },
   run: async ({ flagsReader, log }) => {
@@ -137,6 +145,10 @@ export const discoverFlakyTests: Command<void> = {
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
     if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
       throw createFlagError('--lookbackDays must be a positive integer');
+    }
+    const summaryLimit = flagsReader.requiredNumber('summaryLimit');
+    if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
+      throw createFlagError('--summaryLimit must be a non-negative integer');
     }
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
@@ -178,7 +190,7 @@ export const discoverFlakyTests: Command<void> = {
 
     // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
     if (!flagsReader.boolean('quiet')) {
-      displaySummary(report, 10, log);
+      displaySummary(report, summaryLimit, log);
     }
 
     log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
