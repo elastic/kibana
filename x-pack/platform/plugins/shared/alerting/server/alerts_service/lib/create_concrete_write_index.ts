@@ -19,6 +19,7 @@ import {
   evaluateTotalFieldsLimit,
   getTotalFieldsLimitSettings,
 } from './total_fields_limit_settings';
+import { doesLiveMappingSatisfyTarget } from './mapping_satisfies';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -99,6 +100,31 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
+const getLiveMappings = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  logger: Logger
+): Promise<MappingTypeMapping[] | undefined> => {
+  try {
+    const response = await retryTransientEsErrors(() => esClient.indices.getMapping({ index }), {
+      logger,
+    });
+    const mappings = Object.values(response ?? {})
+      .map((indexMapping) => indexMapping.mappings)
+      .filter((mapping): mapping is MappingTypeMapping => mapping != null);
+    if (mappings.length === 0) {
+      return undefined;
+    }
+    return mappings;
+  } catch (err) {
+    // Any failure reading the live mapping leaves the installed content unknown,
+    // which falls through to the PUT. The check must never block an update that
+    // would otherwise have succeeded.
+    logger.debug(`Could not read live mapping for ${index}; will putMapping (${err.message})`);
+    return undefined;
+  }
+};
+
 const updateUnderlyingMapping = async ({
   logger,
   esClient,
@@ -107,6 +133,20 @@ const updateUnderlyingMapping = async ({
   attempt = 1,
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
+
+  // Skip only on a positive match, and only on the first attempt. After a
+  // total_fields.limit increase we must PUT so the new fields can apply.
+  if (attempt === 1) {
+    const liveMappings = await getLiveMappings(esClient, index, logger);
+    if (
+      liveMappings !== undefined &&
+      liveMappings.every((live) => doesLiveMappingSatisfyTarget(live, simulatedMapping))
+    ) {
+      logger.debug(`Skipping PUT mapping for ${alias}; live mapping already satisfies target`);
+      return;
+    }
+  }
+
   try {
     await retryTransientEsErrors(
       () => esClient.indices.putMapping({ index, ...simulatedMapping }),

@@ -428,6 +428,135 @@ describe('createConcreteWriteIndex', () => {
         expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
       });
 
+      it(`should skip the mapping update when the live mapping already satisfies the simulated mapping`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getMapping.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            mappings: { enabled: false },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.getMapping).toHaveBeenCalled();
+        expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+      });
+
+      it(`should skip the mapping update when the live mapping has extra fields`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getMapping.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            mappings: {
+              enabled: false,
+              properties: { extra_dynamic: { type: 'keyword' } },
+            },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+      });
+
+      it(`should PUT mapping when the live mapping does not satisfy the simulated mapping`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getMapping.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            mappings: { enabled: true },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should PUT mapping when the live mapping cannot be read`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getMapping.mockRejectedValue(new Error('security_exception'));
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+        expect(logger.debug).toHaveBeenCalledWith(
+          useDataStream
+            ? `Could not read live mapping for .alerts-test.alerts-default; will putMapping (security_exception)`
+            : `Could not read live mapping for .internal.alerts-test.alerts-default-000001; will putMapping (security_exception)`
+        );
+      });
+
+      it(`should skip both settings and mapping updates when both are already satisfied`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getSettings.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            settings: {
+              'index.mapping.total_fields.limit': '2500',
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': 'true',
+            },
+          },
+        });
+        clusterClient.indices.getMapping.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            mappings: { enabled: false },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+        expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+      });
+
       it(`should raise an existing lower total_fields.limit to the configured value`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
         clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
