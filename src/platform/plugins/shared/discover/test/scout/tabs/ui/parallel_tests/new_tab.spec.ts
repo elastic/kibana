@@ -26,9 +26,8 @@ const isEsqlSearchStart = (url: URL) => url.pathname.endsWith(ESQL_ASYNC_ENDPOIN
 
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
   // Every test here drives several tabs through full data fetches, and creating a data view
-  // adds an index-sources lookup on top. The budget also has to cover a data view creation
-  // that retries, since that helper cannot abort an attempt already in flight: at 90s the
-  // test budget expired first and hid the underlying failure (#274869).
+  // adds an index-sources lookup plus the editor's retry budget on top, so these do far more
+  // work than the default allowance covers on a loaded CI worker (#274869).
   spaceTest.setTimeout(150_000);
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -146,15 +145,8 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
     // search keeps a fetch in flight whenever the next tab opens. Delaying the response is
     // what opens the race window; an expensive query used to do it, which tied the window
     // and the runtime to dataset size and CI load (#274834).
-    let holdSearches = true;
-
-    // Gated by the flag rather than `page.unroute`, which does not wait for handlers still
-    // sleeping: it resolves the requests they hold, and their later `route.continue()` then
-    // fails with `Route is already handled!`.
     await page.route(isEsqlSearchStart, async (route) => {
-      if (holdSearches) {
-        await delay(ESQL_RESPONSE_DELAY_MS);
-      }
+      await delay(ESQL_RESPONSE_DELAY_MS);
       await route.continue();
     });
 
@@ -174,9 +166,10 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       }
       await discover.waitUntilTabIsLoaded();
 
-      // The race window has been created, so stop holding searches back: the walk below only
-      // checks that every tab settles, and paying the delay again there wastes the budget.
-      holdSearches = false;
+      // The race window has been created, so drop the delay before the walk below. `wait`
+      // lets handlers that are still sleeping finish, instead of resolving the requests they
+      // hold and leaving their `route.continue()` to fail with `Route is already handled!`.
+      await page.unrouteAll({ behavior: 'wait' });
 
       // The initial tab plus every rapidly-opened tab should be present.
       await expect(unifiedTabs.getTabs()).toHaveCount(newTabCount + 1);

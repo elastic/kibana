@@ -115,23 +115,18 @@ export abstract class LayoutMixin extends SaveMixin {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // The editor renders a skeleton until it has loaded the index sources and the existing
-    // data view names, so a visible flyout does not mean the fields exist yet. Outside the
-    // retry below because the skeleton is one-way, and waiting for it on every attempt put
-    // a 30s floor under each retry.
+    // The editor renders a skeleton until index sources and existing data view names load, so
+    // a visible flyout does not mean the fields exist yet. Outside the retry below because the
+    // skeleton is one-way, and waiting per attempt put a 30s floor under each retry.
     await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
     // Submitting can silently no-op: the title's async validation races a separately
-    // debounced index lookup and can latch invalid even once matches exist, and the form
-    // only re-validates fields it has not already validated (#283967). Re-filling the title
-    // forces fresh validation, so the whole sequence is retried, not just the click.
+    // debounced index lookup and can latch invalid even once matches exist (#283967), so the
+    // whole fill -> validate -> submit sequence is retried, not just the click.
     //
-    // The exit condition is the new data view being selected, which only ever becomes true.
-    // The flyout closing is a transition, so a deadline on it made a slow save look like a
-    // rejected submit, and the retry then drove an editor that had already closed (#274530).
-    //
-    // `toPass` cannot abort an attempt already running, so a caller's test budget has to
-    // cover this window plus one whole attempt (#274869).
+    // Exits on the new data view being selected, not on the flyout closing, which is a
+    // transition a slow save can miss (#274530). `toPass` abandons an attempt that crosses
+    // its deadline, so this budget has to exceed one whole attempt (~75s of inner waits).
     await expect(async () => {
       await titleInput.fill(''); // a real value change, so a latched validation runs again
       await titleInput.fill(title);
@@ -157,7 +152,7 @@ export abstract class LayoutMixin extends SaveMixin {
             }
             return (await timestampCombo.getSelectedOptions()).length > 0;
           },
-          { timeout: 30_000, intervals: [200] }
+          { timeout: 15_000, intervals: [200] }
         )
         .toBe(true);
 
@@ -168,7 +163,7 @@ export abstract class LayoutMixin extends SaveMixin {
       // Saving writes a saved object and refreshes the data view list. Keep this generous: a
       // deadline short enough to expire on a slow save sends the retry to a closed flyout.
       await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
-    }).toPass({ timeout: 30_000, intervals: [0] });
+    }).toPass({ timeout: 90_000, intervals: [0] });
 
     await this.waitUntilTabIsLoaded();
   }
