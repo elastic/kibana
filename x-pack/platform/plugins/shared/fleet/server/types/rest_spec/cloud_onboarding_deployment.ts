@@ -91,6 +91,14 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  globalRegion: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the wizard on resume.',
+      },
+    })
+  ),
   agentPolicyId: schema.maybe(
     schema.string({
       meta: {
@@ -139,6 +147,9 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       meta: { description: 'Service IDs to be covered by this deployment.' },
     }),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    globalRegion: schema.maybe(
+      schema.string({ meta: { description: 'Global AWS region from the Service Settings step.' } })
+    ),
   }),
 };
 
@@ -186,6 +197,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     agentPolicyId: schema.maybe(schema.string()),
     packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     apiKeyId: schema.maybe(schema.string()),
+    globalRegion: schema.maybe(schema.string()),
   }),
 };
 
