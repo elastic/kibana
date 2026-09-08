@@ -21,6 +21,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_client';
 import { createToolRoutingEvaluator } from './tool_routing';
+import { createTrajectoryEvaluator } from './trajectory';
 import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
 import {
   extractMitreTechniques,
@@ -332,6 +333,7 @@ export const createEvaluateDataset =
       createLookbackGapEvaluator(),
       createQueryExecutabilityEvaluator(esClient),
       createToolRoutingEvaluator({ traceEsClient, log }),
+      createTrajectoryEvaluator({ traceEsClient, log }),
       createGapAddressedEvaluator(evaluators, judgeProvenance),
     ];
 

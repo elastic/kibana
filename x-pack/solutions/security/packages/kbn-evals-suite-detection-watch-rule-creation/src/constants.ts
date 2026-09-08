@@ -40,3 +40,23 @@ export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
  * Tool Routing evaluator (src/evaluators/tool_routing.ts).
  */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';
+
+/**
+ * ES|QL generation tool called by the detection-rule-edit skill. Consumed by the Trajectory
+ * evaluator to verify call ordering (generate_esql → security.create_detection_rule).
+ * Full namespaced form matches what Agent Builder exports on gen_ai.tool.name spans.
+ */
+export const GENERATE_ESQL_TOOL_ID = 'platform.core.generate_esql';
+
+/**
+ * Complete set of tool IDs the Rule Creation Worker is permitted to call. Any span with a
+ * tool name outside this set is counted as hallucinated by the Trajectory evaluator.
+ */
+export const KNOWN_TOOL_IDS = new Set([GENERATE_ESQL_TOOL_ID, RULE_CREATION_TOOL_ID]);
+
+/**
+ * Reasonable bounds on total tool-call count for a single draft_creation run.
+ * Too few = agent skipped steps; too many = agent is hallucinating extra calls.
+ */
+export const TRAJECTORY_MIN_TOOL_CALLS = 2;
+export const TRAJECTORY_MAX_TOOL_CALLS = 10;
