@@ -105,10 +105,12 @@ describe('ImportDashboardJsonFlyout', () => {
     await waitFor(() => expect(screen.getByText(/schema validation failed/)).toBeInTheDocument());
   });
 
-  it('includes http body message in error details when present', async () => {
-    const err = Object.assign(new Error('Bad Request'), {
-      body: { message: 'panels must be an array' },
-    });
+  it('formats zod validation issues from the error body', async () => {
+    const zodIssues = JSON.stringify([
+      { code: 'invalid_type', path: ['title'], message: 'Invalid input: expected string' },
+      { code: 'invalid_type', path: ['panels', 0, 'type'], message: 'Required' },
+    ]);
+    const err = Object.assign(new Error('Bad Request'), { body: { message: zodIssues } });
     mockSanitizeDashboard.mockRejectedValue(err);
     renderFlyout();
     await pickFile(VALID_FILE);
@@ -118,9 +120,10 @@ describe('ImportDashboardJsonFlyout', () => {
     await act(async () => {
       await userEvent.click(screen.getByText('Show details'));
     });
-    await waitFor(() =>
-      expect(screen.getByText(/Bad Request: panels must be an array/)).toBeInTheDocument()
-    );
+    await waitFor(() => {
+      expect(screen.getByText(/title: Invalid input: expected string/)).toBeInTheDocument();
+      expect(screen.getByText(/panels\.0\.type: Required/)).toBeInTheDocument();
+    });
   });
 
   it('calls sanitize and enables Import after a valid file is chosen', async () => {

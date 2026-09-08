@@ -92,11 +92,31 @@ export const ImportDashboardJsonFlyout = ({
           setWarnings(sanitizeWarnings);
           setSanitizedState(data);
         } catch (e) {
-          const httpMessage = (e as { body?: { message?: string } })?.body?.message;
           const baseMessage = e instanceof Error ? e.message : String(e);
+          const rawBodyMessage = (e as { body?: { message?: string } })?.body?.message;
+          let details = baseMessage;
+          if (rawBodyMessage) {
+            try {
+              const issues = JSON.parse(rawBodyMessage);
+              if (Array.isArray(issues) && issues.length > 0 && 'message' in issues[0]) {
+                const lines = issues
+                  .map((issue: { path?: Array<string | number>; message?: string }) =>
+                    issue.path?.length
+                      ? `${issue.path.join('.')}: ${issue.message}`
+                      : issue.message
+                  )
+                  .join('\n');
+                details = `${baseMessage}:\n${lines}`;
+              } else {
+                details = `${baseMessage}: ${rawBodyMessage}`;
+              }
+            } catch {
+              details = `${baseMessage}: ${rawBodyMessage}`;
+            }
+          }
           setServerError({
             friendly: importDashboardJsonStrings.getServerValidationError(),
-            details: httpMessage ? `${baseMessage}: ${httpMessage}` : baseMessage,
+            details,
           });
         }
       } finally {
