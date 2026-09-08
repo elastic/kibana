@@ -151,6 +151,28 @@ steps:
         on-failure:
           continue: true
 
+      # By-reference security.rule attachment: the framework resolves the rule once
+      # from its rule_id and snapshots it, recording the rule as it was when this
+      # proposal was raised. The fixed attachment id makes the refresh PUT below
+      # deterministic. No workflow step exists for attachments yet, hence the raw API.
+      - name: attach_rule
+        type: kibana.request
+        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}/attachments"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "tuned-rule"
+            type: security.rule
+            origin: "{{ foreach.item.3 }}"
+            description: "Rule under tuning: {{ foreach.item.1 }}"
+        on-failure:
+          continue: true
+
       # Both previews end at the last false positive, not at now, so the rule's own
       # `from` lookback covers the events analysts judged. Anchoring at now would
       # backtest a window where those events no longer exist.
@@ -261,6 +283,30 @@ steps:
           patch:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+
+      # security.rule attachments resolve once and never refresh, so after the patch
+      # the snapshot would silently show the pre-tuning rule. This PUT writes the
+      # patched rule (security.patchRule returns the full RuleResponse) as version 2;
+      # version 1 keeps the before state in the attachment history.
+      - name: refresh_rule_attachment
+        type: kibana.request
+        if: >-
+          ${{ steps.attach_rule.error == null
+            and steps.apply_query_tuning.output.id != null }}
+        with:
+          method: PUT
+          path: "/s/{{ workflow.spaceId }}/api/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}/attachments/tuned-rule"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            data:
+              text: "{{ steps.apply_query_tuning.output | json }}"
+              attachmentLabel: "{{ steps.apply_query_tuning.output.name }}"
+            description: "Rule after applied tuning: {{ foreach.item.1 }}"
+        on-failure:
+          continue: true
 
       # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
       # harvest's KEEP projects: the alert_ids multivalue.
