@@ -150,19 +150,6 @@
       ]
     },
     {
-      "id": "obs-ai-assistant",
-      "name": "Observability AI Assistant",
-      "slackChannel": "#obs-ai-assistant-alerts",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts",
-      "tags": [
-        "observability",
-        "ai-assistant"
-      ],
-      "ciLabels": [
-        "evals:obs-ai-assistant"
-      ]
-    },
-    {
       "id": "observability-ai",
       "name": "Observability AI",
       "slackChannel": "#obs-ai-assistant-alerts",
