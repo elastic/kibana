@@ -89,11 +89,19 @@ const isPassing = (result: CriterionVerdict['result']): boolean =>
  * verdict even when its own stated reason agrees the criterion holds. Voting
  * across `samples` passes damps that per-run flip without re-running the task
  * (the model under test is called once; only the judge repeats).
+ *
+ * Cost trade-off: each additional sample is another judge call per criterion per
+ * example, so the default `samples = 3` triples judge spend for this evaluator.
+ * Kept at 3 as the smallest odd count that can break a single-run flip; raise
+ * only if the judge stays noisy after this.
+ *
+ * Spreads `base` so `getModel` / `getVersion` survive: the executor reads them
+ * after `evaluate` (`kibana_evals_executor/client.ts`) to attribute the score to
+ * the judge model. Rebuilding the literal field-by-field would drop them and land
+ * every voted score with `model` undefined.
  */
 export const withMajorityVote = (base: Evaluator, samples = 3): Evaluator => ({
-  name: base.name,
-  kind: base.kind,
-  direction: base.direction,
+  ...base,
   evaluate: async (args) => {
     const runs = [];
     for (let i = 0; i < samples; i++) {

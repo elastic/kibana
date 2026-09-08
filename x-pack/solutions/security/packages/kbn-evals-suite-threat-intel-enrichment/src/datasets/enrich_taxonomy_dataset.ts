@@ -11,8 +11,8 @@ import { ALL_PACKS, type ThreatIntelPack } from './packs';
 /**
  * Curated taxonomy ground truth, keyed by pack id.
  *
- * The pack `categories` / `regions` in `packs.ts` are a verbatim snapshot of the
- * BlackHat demo fixtures, which were authored for a demo rather than for taxonomy
+ * The pack `categories` in `packs.ts` are a verbatim snapshot of the BlackHat
+ * demo fixtures, which were authored for a demo rather than for taxonomy
  * grounding: several carried region and category labels the article prose does
  * not actually support (e.g. `europe`/`global` on packs whose text names no such
  * region, or `insider-threat` on external account-takeover reports). Recall

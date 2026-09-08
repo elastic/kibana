@@ -23,12 +23,12 @@ export interface ThreatIntelPack {
   title: string;
   /** Article body, verbatim from the fixture `body` field. */
   body: string;
-  /** Closed-set taxonomy categories the fixture is labelled with. */
+  /**
+   * Closed-set taxonomy categories the fixture is labelled with. Consumed by
+   * `classify_severity_dataset` as `classify_severity` input. Taxonomy recall
+   * ground truth lives in `enrich_taxonomy_dataset`'s curated set, not here.
+   */
   categories: string[];
-  /** Closed-set taxonomy regions the fixture is labelled with. */
-  regions: string[];
-  /** ATT&CK techniques referenced in the article. */
-  mitre: string[];
 }
 
 export const OKTA_PACK: ThreatIntelPack = {
@@ -44,8 +44,6 @@ export const OKTA_PACK: ThreatIntelPack = {
     'extortion risk; revoke sessions and lock down Super Admin immediately. Hunt ATT&CK ' +
     'T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
   categories: ['insider-threat', 'cloud-security'],
-  regions: ['north-america', 'europe'],
-  mitre: ['T1078.004', 'T1556', 'T1098', 'T1136.003'],
 };
 
 export const AWS_IAM_PACK: ThreatIntelPack = {
@@ -61,8 +59,6 @@ export const AWS_IAM_PACK: ThreatIntelPack = {
     'hunts, but this write-up does not assert that customer production is currently offline. ' +
     'Hunt ATT&CK T1098.001, T1078.004, and T1562.008 in aws.cloudtrail logs.',
   categories: ['cloud-security', 'insider-threat'],
-  regions: ['north-america', 'global'],
-  mitre: ['T1098.001', 'T1078.004', 'T1562.008'],
 };
 
 export const KUBERNETES_PACK: ThreatIntelPack = {
@@ -73,8 +69,6 @@ export const KUBERNETES_PACK: ThreatIntelPack = {
     '(compromised-sa) in prod-us-east-1. Monitor 192[.]0[.]2[.]60 (192.0.2.60), ' +
     'escalation-binding creation, and exec-pod. Map detections to T1552.007, T1078, and T1610.',
   categories: ['cloud-security', 'malware'],
-  regions: ['north-america', 'europe'],
-  mitre: ['T1552.007', 'T1078', 'T1610'],
 };
 
 export const GITHUB_ACTIONS_PACK: ThreatIntelPack = {
@@ -90,8 +84,6 @@ export const GITHUB_ACTIONS_PACK: ThreatIntelPack = {
     'catalogs previously reported indicators for optional hunting. Related ATT&CK references: ' +
     'T1567, T1098, and T1195 in github.audit telemetry.',
   categories: ['supply-chain', 'insider-threat'],
-  regions: ['north-america', 'europe'],
-  mitre: ['T1567', 'T1098', 'T1195'],
 };
 
 export const ALL_PACKS: ThreatIntelPack[] = [

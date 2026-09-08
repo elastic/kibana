@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-/** @type {import('eslint').Linter.Config} */
 module.exports = {
-  overrides: [
-    // This package is Node-only (Playwright eval suite). Allow Node.js builtins.
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
-  ],
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment'],
 };
