@@ -178,11 +178,29 @@ export class SLOPlugin
 
     registerDataProviders({ core, plugins, logger: this.logger });
 
+    const commonResourcesInstalled = core
+      .getStartServices()
+      .then(async ([coreStart]) => {
+        const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
+          sloResourceInstaller.ensureCommonResourcesInstalled()
+        );
+      })
+      .catch((err) => {
+        if (err instanceof LockAcquisitionError) {
+          this.logger.debug('Cannot install SLO resources, another process is already doing it');
+        } else {
+          this.logger.error(`Failed to install SLO common resources: ${err.message}`);
+        }
+      });
+
     registerServerRoutes({
       core,
       dependencies: {
         corePlugins: core,
         plugins: mappedPlugins,
+        commonResourcesInstalled,
         config: {
           isServerless: this.isServerless,
           compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
@@ -257,21 +275,6 @@ export class SLOPlugin
       }),
       isDev: this.isDev,
     });
-
-    core
-      .getStartServices()
-      .then(async ([coreStart, pluginStart]) => {
-        const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
-          sloResourceInstaller.ensureCommonResourcesInstalled()
-        );
-      })
-      .catch((err) => {
-        if (err instanceof LockAcquisitionError) {
-          this.logger.debug('Cannot install SLO resources, another process is already doing it');
-        }
-      });
 
     this.orphanSummaryCleanupTask = new OrphanSummaryCleanupTask({
       core,
