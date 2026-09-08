@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -26,6 +26,7 @@ import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_co
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps, DashboardListingTab } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export const DashboardListing = ({
   children,
@@ -51,8 +52,16 @@ export const DashboardListing = ({
         useSessionStorageIntegration,
         initialFilter,
         getTabs,
+        refreshListBouncer,
       }),
-    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs]
+    [
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      getTabs,
+      refreshListBouncer,
+    ]
   );
 
   const activeTabId = useMemo(() => {
@@ -104,7 +113,10 @@ export const DashboardListing = ({
     [tabs, activeTabId]
   );
 
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+
   const onImportSuccess = useCallback((id: string, title: string) => {
+    setRefreshListBouncer((b) => !b);
     coreServices.notifications.toasts.addSuccess(
       i18n.translate('dashboard.importJson.successToast', {
         defaultMessage: 'Dashboard "{title}" imported successfully.',
@@ -173,23 +185,25 @@ export const DashboardListing = ({
               }
             : undefined,
       },
-      items: [
-        {
-          id: 'importDashboardJson',
-          order: 0,
-          label: i18n.translate('dashboard.listing.importJsonButtonLabel', {
-            defaultMessage: 'Import JSON',
-          }),
-          iconType: 'importAction',
-          testId: 'dashboardListingImportButton',
-          run: (params) => {
-            openImportDashboardJsonFlyout({
-              onImportSuccess,
-              returnFocus: params?.returnFocus,
-            });
-          },
-        },
-      ],
+      items: getDashboardCapabilities().showWriteControls
+        ? [
+            {
+              id: 'importDashboardJson',
+              order: 0,
+              label: i18n.translate('dashboard.listing.importJsonButtonLabel', {
+                defaultMessage: 'Import JSON',
+              }),
+              iconType: 'importAction',
+              testId: 'dashboardListingImportButton',
+              run: (params) => {
+                openImportDashboardJsonFlyout({
+                  onImportSuccess,
+                  returnFocus: params?.returnFocus,
+                });
+              },
+            },
+          ]
+        : [],
     };
   }, [tabs, onImportSuccess]);
 
