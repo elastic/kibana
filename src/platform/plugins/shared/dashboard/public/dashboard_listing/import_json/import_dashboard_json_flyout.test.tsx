@@ -15,10 +15,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ImportDashboardJsonFlyout } from './import_dashboard_json_flyout';
 
 const mockSanitizeDashboard = jest.fn();
-jest.mock(
-  '../../dashboard_app/top_nav/share/export_json/sanitize_dashboard',
-  () => ({ sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args) })
-);
+jest.mock('../../dashboard_app/top_nav/share/export_json/sanitize_dashboard', () => ({
+  sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args),
+}));
 
 const mockDashboardClientCreate = jest.fn();
 jest.mock('../../dashboard_client/dashboard_client', () => ({
@@ -69,37 +68,41 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByText(/Stack Management/)).toBeInTheDocument();
   });
 
-  it('shows an error when an invalid JSON file is selected', async () => {
+  it('shows a JSON parse error when the file is not valid JSON', async () => {
     renderFlyout();
     const badFile = new File(['not json }{'], 'bad.json', { type: 'application/json' });
     await pickFile(badFile);
     await waitFor(() =>
       expect(screen.getByText(/does not contain valid JSON/)).toBeInTheDocument()
     );
+    expect(mockSanitizeDashboard).not.toHaveBeenCalled();
   });
 
-  it('shows an error when the public API response shape { id, data, meta } is provided', async () => {
+  it('shows the server error callout when sanitize rejects the file', async () => {
+    mockSanitizeDashboard.mockRejectedValue(new Error('schema validation failed: missing title'));
     renderFlyout();
-    const apiResponseFile = new File(
-      [JSON.stringify({ id: 'abc', data: VALID_STATE, meta: {} })],
-      'api.json',
-      { type: 'application/json' }
-    );
-    await pickFile(apiResponseFile);
+    await pickFile(VALID_FILE);
     await waitFor(() =>
-      expect(screen.getByText(/does not appear to be a valid dashboard/)).toBeInTheDocument()
+      expect(screen.getByTestId('importDashboardJsonServerError')).toBeInTheDocument()
     );
+    expect(screen.getByText(/could not be imported/)).toBeInTheDocument();
+    expect(screen.getByTestId('importDashboardJsonImportButton')).toBeDisabled();
   });
 
-  it('shows an error when a JSON file with an unrecognised format is selected', async () => {
+  it('exposes raw server error in a collapsed accordion', async () => {
+    mockSanitizeDashboard.mockRejectedValue(new Error('schema validation failed: missing title'));
     renderFlyout();
-    const badFile = new File([JSON.stringify({ foo: 'bar' })], 'bad.json', {
-      type: 'application/json',
+    await pickFile(VALID_FILE);
+    await waitFor(() =>
+      expect(screen.getByTestId('importDashboardJsonServerErrorDetails')).toBeInTheDocument()
+    );
+    // Details start collapsed — raw error not yet visible
+    expect(screen.queryByText(/schema validation failed/)).not.toBeInTheDocument();
+    // Expand the accordion
+    await act(async () => {
+      await userEvent.click(screen.getByText('Show details'));
     });
-    await pickFile(badFile);
-    await waitFor(() =>
-      expect(screen.getByText(/does not appear to be a valid dashboard/)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/schema validation failed/)).toBeInTheDocument());
   });
 
   it('calls sanitize and enables Import after a valid file is chosen', async () => {
@@ -109,7 +112,7 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
-  it('displays sanitize warnings', async () => {
+  it('displays sanitize warnings but still allows import', async () => {
     mockSanitizeDashboard.mockResolvedValue({
       data: VALID_STATE,
       warnings: ['Panel "chart-1" could not be loaded'],
@@ -120,6 +123,7 @@ describe('ImportDashboardJsonFlyout', () => {
       expect(screen.getByTestId('importDashboardJsonWarnings')).toBeInTheDocument()
     );
     expect(screen.getByText(/Panel "chart-1" could not be loaded/)).toBeInTheDocument();
+    expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
   it('creates a new dashboard and calls onImportSuccess', async () => {

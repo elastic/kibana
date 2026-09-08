@@ -30,10 +30,18 @@ export const importDashboardJsonStrings = {
     i18n.translate('dashboard.importJson.flyout.invalidJsonError', {
       defaultMessage: 'The selected file does not contain valid JSON.',
     }),
-  getInvalidFormatError: () =>
-    i18n.translate('dashboard.importJson.flyout.invalidFormatError', {
+  getServerValidationError: () =>
+    i18n.translate('dashboard.importJson.flyout.serverValidationError', {
       defaultMessage:
-        'The JSON file does not appear to be a valid dashboard. Make sure the file was exported from the Dashboard export feature.',
+        'The file could not be imported. Make sure it was exported from the Dashboard export feature.',
+    }),
+  getServerErrorShowDetails: () =>
+    i18n.translate('dashboard.importJson.flyout.serverErrorShowDetails', {
+      defaultMessage: 'Show details',
+    }),
+  getServerErrorHideDetails: () =>
+    i18n.translate('dashboard.importJson.flyout.serverErrorHideDetails', {
+      defaultMessage: 'Hide details',
     }),
   getWarningsTitle: () =>
     i18n.translate('dashboard.importJson.flyout.warningsTitle', {

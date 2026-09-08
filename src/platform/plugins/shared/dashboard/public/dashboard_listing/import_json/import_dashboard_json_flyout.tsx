@@ -9,9 +9,9 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFilePicker,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -24,8 +24,10 @@ import {
   EuiText,
   EuiTitle,
   EuiLink,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { DashboardState } from '../../../common';
 import { dashboardClient } from '../../dashboard_client/dashboard_client';
@@ -38,43 +40,29 @@ interface ImportDashboardJsonFlyoutProps {
   onImportSuccess: (id: string, title: string) => void;
 }
 
-/**
- * Parses the file contents as a raw DashboardState (the format produced by Export JSON).
- * The public API response shape `{ id, data, meta }` is intentionally rejected — only
- * the inner `data` is importable, and users should not hand-edit API responses.
- */
-const parseDashboardJson = (raw: unknown): DashboardState => {
-  if (typeof raw !== 'object' || raw === null) {
-    throw new Error('not an object');
-  }
-
-  const obj = raw as Record<string, unknown>;
-
-  // Reject the public API response shape { id, data, meta } — importing id/meta is not supported.
-  if (typeof obj.id === 'string' && typeof obj.data === 'object') {
-    throw new Error('api response shape');
-  }
-
-  // DashboardState must have a title string at minimum.
-  if (typeof obj.title === 'string') {
-    return obj as unknown as DashboardState;
-  }
-
-  throw new Error('unrecognised format');
-};
+interface ServerError {
+  friendly: string;
+  details: string;
+}
 
 export const ImportDashboardJsonFlyout = ({
   closeFlyout,
   onImportSuccess,
 }: ImportDashboardJsonFlyoutProps) => {
-  const [parseError, setParseError] = useState<string | null>(null);
+  const serverErrorDetailsId = useGeneratedHtmlId({ prefix: 'importDashboardJsonServerError' });
+
+  const [jsonParseError, setJsonParseError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<ServerError | null>(null);
+  const [isServerErrorExpanded, setIsServerErrorExpanded] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [sanitizedState, setSanitizedState] = useState<DashboardState | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
   const resetState = useCallback(() => {
-    setParseError(null);
+    setJsonParseError(null);
+    setServerError(null);
+    setIsServerErrorExpanded(false);
     setWarnings([]);
     setSanitizedState(null);
   }, []);
@@ -93,26 +81,22 @@ export const ImportDashboardJsonFlyout = ({
         try {
           raw = JSON.parse(text);
         } catch {
-          setParseError(importDashboardJsonStrings.getInvalidJsonError());
+          setJsonParseError(importDashboardJsonStrings.getInvalidJsonError());
           return;
         }
 
-        let state: DashboardState;
         try {
-          state = parseDashboardJson(raw);
-        } catch {
-          setParseError(importDashboardJsonStrings.getInvalidFormatError());
-          return;
+          const { data, warnings: sanitizeWarnings } = await sanitizeDashboard(
+            raw as DashboardState
+          );
+          setWarnings(sanitizeWarnings);
+          setSanitizedState(data);
+        } catch (e) {
+          setServerError({
+            friendly: importDashboardJsonStrings.getServerValidationError(),
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
-
-        const { data, warnings: sanitizeWarnings } = await sanitizeDashboard(state);
-        setWarnings(sanitizeWarnings);
-        setSanitizedState(data);
-      } catch (e) {
-        coreServices.notifications.toasts.addDanger({
-          title: importDashboardJsonStrings.getFlyoutTitle(),
-          text: e instanceof Error ? e.message : String(e),
-        });
       } finally {
         setIsValidating(false);
       }
@@ -138,7 +122,7 @@ export const ImportDashboardJsonFlyout = ({
     }
   }, [sanitizedState, closeFlyout, onImportSuccess]);
 
-  const canImport = Boolean(sanitizedState) && !isValidating && !parseError;
+  const canImport = Boolean(sanitizedState) && !isValidating && !jsonParseError && !serverError;
 
   return (
     <>
@@ -177,36 +161,60 @@ export const ImportDashboardJsonFlyout = ({
         <EuiForm>
           <EuiFormRow
             label={importDashboardJsonStrings.getFilePickerLabel()}
-            isInvalid={Boolean(parseError)}
-            error={parseError ?? undefined}
+            isInvalid={Boolean(jsonParseError)}
+            error={jsonParseError ?? undefined}
           >
             <EuiFilePicker
               accept=".json"
               onChange={onFileChange}
               isLoading={isValidating}
-              isInvalid={Boolean(parseError)}
+              isInvalid={Boolean(jsonParseError)}
               data-test-subj="importDashboardJsonFilePicker"
             />
           </EuiFormRow>
         </EuiForm>
 
+        {serverError && (
+          <>
+            <EuiSpacer size="m" />
+            <KbnDangerCallout
+              announceOnMount
+              title={serverError.friendly}
+              data-test-subj="importDashboardJsonServerError"
+            >
+              <EuiAccordion
+                id={serverErrorDetailsId}
+                initialIsOpen={false}
+                paddingSize="s"
+                onToggle={setIsServerErrorExpanded}
+                buttonContent={
+                  isServerErrorExpanded
+                    ? importDashboardJsonStrings.getServerErrorHideDetails()
+                    : importDashboardJsonStrings.getServerErrorShowDetails()
+                }
+                data-test-subj="importDashboardJsonServerErrorDetails"
+              >
+                {isServerErrorExpanded && <EuiText size="s">{serverError.details}</EuiText>}
+              </EuiAccordion>
+            </KbnDangerCallout>
+          </>
+        )}
+
         {warnings.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={importDashboardJsonStrings.getWarningsTitle()}
-              color="warning"
-              iconType="warning"
+              text={importDashboardJsonStrings.getWarningsBody()}
               data-test-subj="importDashboardJsonWarnings"
             >
-              <p>{importDashboardJsonStrings.getWarningsBody()}</p>
               <ul>
                 {warnings.map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}
               </ul>
-            </EuiCallOut>
+            </KbnWarningCallout>
           </>
         )}
       </EuiFlyoutBody>
