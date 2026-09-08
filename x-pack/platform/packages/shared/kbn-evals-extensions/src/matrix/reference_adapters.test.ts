@@ -129,6 +129,21 @@ describe('reference adapters', () => {
       expect(collectExamples(mod)).toHaveLength(2);
     });
 
+    // Regression: the agent-builder AD suite exports `goldenPathExamples`, which
+    // was absent from the adapter's export list, so rejudging the AD column
+    // failed with "does not export an examples array" -- the one suite the
+    // command most needed to reach.
+    it('collects the agent-builder attack-discovery fixtures', () => {
+      const mod = {
+        goldenPathExamples: [
+          { output: { criteria: ['a'] }, metadata: { fixture: 'provided-alerts' } },
+          { output: { criteria: ['b'] }, metadata: { fixture: 'live-retrieval' } },
+        ],
+      };
+      expect(collectExamples(mod)).toHaveLength(2);
+      expect(selectAdapter(collectExamples(mod))?.name).toBe('attack-discovery');
+    });
+
     it('unwraps a dataset object exposing an examples array', () => {
       const mod = { dataset: { examples: [{ id: 'a', output: { reference: 'x' } }] } };
       expect(collectExamples(mod)).toHaveLength(1);

@@ -96,6 +96,11 @@ export const personaMatrixAdapter: ReferenceAdapter = {
 export const attackDiscoveryAdapter: ReferenceAdapter = {
   name: 'attack-discovery',
   exportNames: [
+    // The agent-builder AD suite exports its fixtures under this name, and the
+    // spec slices it per fixture. Omitting it made `--dataset src/dataset.ts`
+    // fail with "does not export an examples array" for the very suite whose
+    // column the rejudge exists to refresh.
+    'goldenPathExamples',
     'cleanProfileProvidedAlertsExamples',
     'cleanProfileProvidedAlertsDataset',
     'default',
