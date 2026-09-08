@@ -439,16 +439,18 @@ describe('POST /conversations', () => {
   const CREATE_CONVERSATION_PATH = `${publicApiPath}/conversations`;
 
   const makeRouter = (
-    onPost: (handler: (ctx: any, req: any, res: any) => Promise<any>) => void
+    onPost: (handler: (ctx: any, req: any, res: any) => Promise<any>) => void,
+    onSchema?: (versionConfig: any) => void
   ) => ({
     versioned: {
       get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       post: jest.fn().mockImplementation((config: { path: string }) => ({
-        addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: any) => {
+        addVersion: jest.fn().mockImplementation((versionConfig: any, handler: any) => {
           if (config.path === CREATE_CONVERSATION_PATH) {
             onPost(handler);
+            onSchema?.(versionConfig);
           }
         }),
       })),
@@ -639,5 +641,93 @@ describe('POST /conversations', () => {
     );
 
     expect(result.status).toBe(409);
+  });
+
+  it('forwards template_id and metadata to the public client', async () => {
+    const mockCreate = jest.fn().mockResolvedValue(createdConversation);
+    const mockExists = jest.fn().mockResolvedValue(false);
+    const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
+
+    let createHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const router = makeRouter((h) => {
+      createHandler = h;
+    });
+
+    registerConversationRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({
+            get: jest.fn(),
+            list: jest.fn(),
+            exists: mockExists,
+            create: mockCreate,
+          }),
+        },
+        agents: {
+          getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
+        },
+      }),
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    await createHandler!(
+      defaultCtx,
+      {
+        body: {
+          template_id: 'incident-response',
+          metadata: { severity: 'high', services: ['checkout'] },
+        },
+      },
+      defaultResponse
+    );
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template_id: 'incident-response',
+        metadata: { severity: 'high', services: ['checkout'] },
+      })
+    );
+  });
+
+  describe('body schema', () => {
+    const getBodySchema = () => {
+      let capturedConfig: any;
+      const router = makeRouter(
+        () => {},
+        (versionConfig) => {
+          capturedConfig = versionConfig;
+        }
+      );
+      registerConversationRoutes({
+        router,
+        getInternalServices: jest.fn(),
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+      return capturedConfig.validate.request.body;
+    };
+
+    it('accepts template_id + metadata', () => {
+      expect(() =>
+        getBodySchema().validate({
+          template_id: 'incident-response',
+          metadata: { severity: 'high', services: ['checkout'], on_call: true, count: 3 },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects metadata without template_id', () => {
+      expect(() => getBodySchema().validate({ metadata: { severity: 'high' } })).toThrow(
+        /`metadata` requires `template_id`/
+      );
+    });
+
+    it('accepts template_id without metadata', () => {
+      expect(() => getBodySchema().validate({ template_id: 'incident-response' })).not.toThrow();
+    });
+
+    it('accepts an empty body', () => {
+      expect(() => getBodySchema().validate({})).not.toThrow();
+    });
   });
 });
