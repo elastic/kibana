@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useDeleteAiIndex } from '../../hooks/use_delete_ai_index';
-import { useKiList } from '../../hooks/use_ki_list';
 import { useKibana } from '../../hooks/use_kibana';
 
 interface AiIndexDeleteConfirmModalProps {
