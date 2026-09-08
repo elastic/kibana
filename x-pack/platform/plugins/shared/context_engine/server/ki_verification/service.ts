@@ -10,6 +10,7 @@ import type { KiVerifierRegistry } from './registry';
 import type {
   KiVerificationContext,
   KiVerificationSummary,
+  KiVerifier,
   KiVerifierContext,
   KiVerifierResult,
   KnowledgeIndicator,
@@ -22,11 +23,13 @@ export class KiVerificationService {
    * Runs all applicable verifiers and aggregates their results, stamping each
    * result with its verifier id. A verifier that throws from `applies` or
    * `verify` is recorded as a failure and does not abort the run; cancellation
-   * errors rethrow. No-op when the feature flag is off.
+   * errors rethrow. No-op when the feature flag is off. `extraVerifiers` run
+   * after the registered ones.
    */
   async verifyKi(
     ki: KnowledgeIndicator,
-    { isEnabled, ...verifierContext }: KiVerificationContext
+    { isEnabled, ...verifierContext }: KiVerificationContext,
+    extraVerifiers: KiVerifier[] = []
   ): Promise<KiVerificationSummary> {
     if (!isEnabled) {
       return { passed: true, results: [] };
@@ -34,7 +37,7 @@ export class KiVerificationService {
 
     const results: KiVerifierResult[] = [];
 
-    for (const verifier of this.registry.getAll()) {
+    for (const verifier of [...this.registry.getAll(), ...extraVerifiers]) {
       let applies: boolean;
       try {
         applies = verifier.applies(ki);

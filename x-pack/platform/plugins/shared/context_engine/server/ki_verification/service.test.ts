@@ -161,6 +161,19 @@ describe('KiVerificationService', () => {
     expect(summary).toEqual({ passed: true, results: [] });
   });
 
+  it('runs extra verifiers after the registered ones', async () => {
+    registry.register(makeVerifier('builtin', { passed: true }));
+    const extra = makeVerifier('workflow:custom', { passed: false, reason: 'nope' });
+
+    const summary = await service.verifyKi({}, context, [extra]);
+
+    expect(summary.passed).toBe(false);
+    expect(summary.results).toEqual([
+      { verifier: 'builtin', passed: true },
+      { verifier: 'workflow:custom', passed: false, reason: 'nope' },
+    ]);
+  });
+
   it('is a no-op that passes with no results when the feature flag is disabled', async () => {
     const verifier = makeVerifier('a', { passed: false, reason: 'x' });
     registry.register(verifier);

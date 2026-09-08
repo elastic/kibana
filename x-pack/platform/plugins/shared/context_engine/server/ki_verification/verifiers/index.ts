@@ -10,3 +10,9 @@ export {
   ESQL_ATTRIBUTE_KEY,
   ESQL_VALID_SYNTAX_VERIFIER_ID,
 } from './esql_valid_syntax';
+export {
+  createWorkflowVerifier,
+  WORKFLOW_VERIFIER_ID_PREFIX,
+  WORKFLOW_VERIFIER_TRIGGERED_BY,
+} from './workflow_verifier';
+export type { KiVerifierWorkflowRunner, WorkflowVerifierDependencies } from './workflow_verifier';

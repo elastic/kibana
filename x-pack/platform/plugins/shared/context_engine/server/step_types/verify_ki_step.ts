@@ -10,14 +10,20 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
-import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
+import {
+  createKiVerifierRegistry,
+  createWorkflowVerifier,
+  KiVerificationService,
+} from '../ki_verification';
+import type { KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
 export const createVerifyKiStepDefinition = (
   coreSetup: CoreSetup,
   logger: Logger,
-  analyticsService: ContextEngineAnalyticsService
+  analyticsService: ContextEngineAnalyticsService,
+  workflowsManagement?: KiVerifierWorkflowRunner
 ) => {
   const service = new KiVerificationService(createKiVerifierRegistry());
 
@@ -36,16 +42,39 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
+      const verifierWorkflows = context.input.verifiers ?? [];
+      if (verifierWorkflows.length > 0 && !workflowsManagement) {
+        throw new ExecutionError({
+          type: 'FeatureDisabledError',
+          message:
+            'Custom KI verifiers require the workflowsManagement plugin, which is not available.',
+        });
+      }
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const workflowVerifiers = workflowsManagement
+        ? verifierWorkflows.map((definition) =>
+            createWorkflowVerifier(definition, {
+              workflowsManagement,
+              request: fakeRequest,
+              spaceId,
+            })
+          )
+        : [];
+
       const summary = await withKiVerificationTelemetry({
         analyticsService,
         logger,
         run: () =>
-          service.verifyKi(context.input.ki, {
-            isEnabled,
-            esClient: context.contextManager.getScopedEsClient(),
-            logger,
-            abortSignal: context.abortSignal,
-          }),
+          service.verifyKi(
+            context.input.ki,
+            {
+              isEnabled,
+              esClient: context.contextManager.getScopedEsClient(),
+              logger,
+              abortSignal: context.abortSignal,
+            },
+            workflowVerifiers
+          ),
       });
 
       return { output: summary };

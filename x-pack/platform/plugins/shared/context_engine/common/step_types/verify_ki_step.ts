@@ -9,12 +9,58 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { kiPartialFieldsSchema } from './ki';
+import { MAX_KI_ATTRIBUTE_KEY_LENGTH, MAX_KI_TYPE_LENGTH, kiPartialFieldsSchema } from './ki';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
+export const MAX_KI_VERIFIER_WORKFLOWS = 10;
+export const MAX_KI_VERIFIER_WORKFLOW_ID_LENGTH = 256;
+export const MAX_KI_VERIFIER_APPLIES_TO_VALUES = 20;
+export const DEFAULT_KI_VERIFIER_TIMEOUT_SEC = 60;
+export const MAX_KI_VERIFIER_TIMEOUT_SEC = 300;
+
+/** A user-authored verifier: a workflow taking `inputs.ki` and emitting `passed` and `reason`. */
+export const kiVerifierWorkflowSchema = z.object({
+  workflow_id: z
+    .string()
+    .min(1)
+    .max(MAX_KI_VERIFIER_WORKFLOW_ID_LENGTH)
+    .describe('The id of the workflow to run as a verifier'),
+  timeout_sec: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_KI_VERIFIER_TIMEOUT_SEC)
+    .optional()
+    .describe(
+      `Seconds to wait for the verifier workflow before failing the KI (default ${DEFAULT_KI_VERIFIER_TIMEOUT_SEC})`
+    ),
+  applies_to: z
+    .object({
+      types: z
+        .array(z.string().min(1).max(MAX_KI_TYPE_LENGTH))
+        .max(MAX_KI_VERIFIER_APPLIES_TO_VALUES)
+        .optional()
+        .describe('Run only for KIs with one of these types'),
+      attributes: z
+        .array(z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH))
+        .max(MAX_KI_VERIFIER_APPLIES_TO_VALUES)
+        .optional()
+        .describe('Run only for KIs carrying every one of these attribute keys'),
+    })
+    .optional()
+    .describe('When omitted, the verifier runs for every KI'),
+});
+
+export type KiVerifierWorkflow = z.infer<typeof kiVerifierWorkflowSchema>;
+
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
+  verifiers: z
+    .array(kiVerifierWorkflowSchema)
+    .max(MAX_KI_VERIFIER_WORKFLOWS)
+    .optional()
+    .describe('Custom verifier workflows to run alongside the built-in verifiers'),
 });
 
 export const VerifyKiOutputSchema = z.object({
@@ -48,7 +94,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. If no verifier applies (for example, no ES|QL in `attributes.esql`), the step passes with empty results. Requires the Context Engine advanced setting.',
+        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. If no verifier applies (for example, no ES|QL in `attributes.esql`), the step passes with empty results. Custom verifiers are workflows listed under `verifiers`: each receives the KI as `inputs.ki` and must emit `passed` (boolean) and `reason` (string) through a `workflow.output` step. A custom verifier that fails, times out, or returns malformed output fails the KI. Requires the Context Engine advanced setting.',
       values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID },
     }),
     examples: [
@@ -62,6 +108,19 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
       title: Failed login burst
       attributes:
         esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
+\`\`\``,
+      `## Run custom verifier workflows alongside the built-in verifiers
+\`\`\`yaml
+- name: verify_ki
+  type: ${VERIFY_KI_STEP_TYPE_ID}
+  with:
+    ki: "{{ steps.build_ki.output }}"
+    verifiers:
+      - workflow_id: no-pii-in-content
+      - workflow_id: esql-returns-rows
+        timeout_sec: 60
+        applies_to:
+          attributes: [esql]
 \`\`\``,
     ],
   },

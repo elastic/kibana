@@ -74,7 +74,12 @@ export class ContextEnginePlugin
     const analyticsService = this.analyticsService;
 
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
+      createVerifyKiStepDefinition(
+        coreSetup,
+        this.logger.get('context_steps'),
+        analyticsService,
+        setupDeps.workflowsManagement?.management
+      )
     );
 
     coreSetup.uiSettings.registerGlobal({

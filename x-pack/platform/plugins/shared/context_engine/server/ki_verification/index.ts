@@ -19,6 +19,10 @@ export { KiVerificationService } from './service';
 export { createKiVerifierRegistry } from './create_registry';
 export {
   createEsqlValidSyntaxVerifier,
+  createWorkflowVerifier,
   ESQL_ATTRIBUTE_KEY,
   ESQL_VALID_SYNTAX_VERIFIER_ID,
+  WORKFLOW_VERIFIER_ID_PREFIX,
+  WORKFLOW_VERIFIER_TRIGGERED_BY,
 } from './verifiers';
+export type { KiVerifierWorkflowRunner, WorkflowVerifierDependencies } from './verifiers';

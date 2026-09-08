@@ -6,22 +6,29 @@
  */
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
 import { ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
+import type { KiVerifierWorkflowRunner } from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
 
 type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'];
 type VerifyKiHandlerContext = Parameters<VerifyKiHandler>[0];
+type VerifyKiInput = VerifyKiHandlerContext['input'];
 
 const makeHandlerContext = (
-  ki: VerifyKiHandlerContext['input']['ki'],
+  input: VerifyKiInput,
   getScopedEsClient: () => unknown = jest.fn()
 ): VerifyKiHandlerContext =>
   ({
-    input: { ki },
+    input,
     config: {},
-    rawInput: { ki },
-    contextManager: { getFakeRequest: jest.fn(), getScopedEsClient },
+    rawInput: input,
+    contextManager: {
+      getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
+      getScopedEsClient,
+      getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'space-a' } }),
+    },
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
     stepId: 'verify_ki',
@@ -32,6 +39,7 @@ describe('verify_ki workflow step', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let uiSettingsGet: jest.Mock;
   let telemetry: ReturnType<typeof mockKiStepTelemetry>;
+  let workflowsManagement: jest.Mocked<KiVerifierWorkflowRunner>;
 
   const setContextEngineEnabled = (isEnabled: boolean) => {
     uiSettingsGet.mockResolvedValue(isEnabled);
@@ -46,18 +54,29 @@ describe('verify_ki workflow step', () => {
     } as unknown as ReturnType<typeof startServices.uiSettings.asScopedToClient>);
     coreSetup.getStartServices.mockResolvedValue([startServices, {}, undefined]);
     telemetry = mockKiStepTelemetry();
+    workflowsManagement = { executeWorkflow: jest.fn(), cancelWorkflowExecution: jest.fn() };
   });
 
-  const makeDefinition = () =>
-    createVerifyKiStepDefinition(coreSetup, telemetry.logger, telemetry.analyticsService);
+  const makeDefinition = (withWorkflows = true) =>
+    createVerifyKiStepDefinition(
+      coreSetup,
+      telemetry.logger,
+      telemetry.analyticsService,
+      withWorkflows ? workflowsManagement : undefined
+    );
 
-  const runHandler = async (ki: VerifyKiHandlerContext['input']['ki']) => {
-    const { output } = await makeDefinition().handler(makeHandlerContext(ki));
+  const runHandler = async (ki: VerifyKiInput['ki'], verifiers?: VerifyKiInput['verifiers']) => {
+    const { output } = await makeDefinition().handler(makeHandlerContext({ ki, verifiers }));
     if (!output) {
       throw new Error('step returned no output');
     }
     return output;
   };
+
+  const completedWith = (output: unknown) => ({
+    workflowExecutionId: 'exec-1',
+    execution: { status: ExecutionStatus.COMPLETED, error: null, context: { output } },
+  });
 
   it('passes a KI with valid ES|QL', async () => {
     setContextEngineEnabled(true);
@@ -166,7 +185,7 @@ describe('verify_ki workflow step', () => {
     setContextEngineEnabled(true);
     const abortError = new Error('Request aborted');
     abortError.name = 'AbortError';
-    const context = makeHandlerContext({ attributes: { esql: 'FROM logs-*' } }, () => {
+    const context = makeHandlerContext({ ki: { attributes: { esql: 'FROM logs-*' } } }, () => {
       throw abortError;
     });
 
@@ -181,7 +200,7 @@ describe('verify_ki workflow step', () => {
 
   it('reports a failure when the run errors', async () => {
     setContextEngineEnabled(true);
-    const context = makeHandlerContext({ attributes: { esql: 'FROM logs-*' } }, () => {
+    const context = makeHandlerContext({ ki: { attributes: { esql: 'FROM logs-*' } } }, () => {
       throw new TypeError('boom');
     });
 
@@ -200,5 +219,108 @@ describe('verify_ki workflow step', () => {
     await expect(runHandler({ attributes: { esql: 'FROM logs-*' } })).rejects.toThrow();
 
     expect(telemetry.analyticsService.reportKiVerification).not.toHaveBeenCalled();
+  });
+
+  describe('custom verifier workflows', () => {
+    const validEsql = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
+
+    it('aggregates workflow verifiers after the built-ins', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.executeWorkflow
+        .mockResolvedValueOnce(completedWith({ passed: true }) as never)
+        .mockResolvedValueOnce(completedWith({ passed: false, reason: 'has PII' }) as never);
+
+      const output = await runHandler({ attributes: { esql: validEsql } }, [
+        { workflow_id: 'esql-returns-rows' },
+        { workflow_id: 'no-pii' },
+      ]);
+
+      expect(output.passed).toBe(false);
+      expect(output.results).toEqual([
+        { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
+        { verifier: 'workflow:esql-returns-rows', passed: true },
+        { verifier: 'workflow:no-pii', passed: false, reason: 'has PII' },
+      ]);
+    });
+
+    it('runs the workflow in the executing space with the step request', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.executeWorkflow.mockResolvedValue(
+        completedWith({ passed: true }) as never
+      );
+
+      await runHandler({ title: 'x' }, [{ workflow_id: 'no-pii', timeout_sec: 15 }]);
+
+      expect(workflowsManagement.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'no-pii',
+          inputs: { ki: { title: 'x' } },
+          request: { headers: {} },
+          spaceId: 'space-a',
+          completionTimeoutSec: 15,
+        })
+      );
+    });
+
+    it('skips workflow verifiers whose applies_to does not match', async () => {
+      setContextEngineEnabled(true);
+
+      const output = await runHandler({ type: 'faq' }, [
+        { workflow_id: 'runbook-only', applies_to: { types: ['runbook'] } },
+      ]);
+
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(output).toEqual({ passed: true, results: [] });
+    });
+
+    it('fails the KI when executeWorkflow throws', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.executeWorkflow.mockRejectedValue(new Error('Workflow not found'));
+
+      const output = await runHandler({ title: 'x' }, [{ workflow_id: 'missing' }]);
+
+      expect(output.passed).toBe(false);
+      expect(output.results).toEqual([
+        { verifier: 'workflow:missing', passed: false, reason: 'Workflow not found' },
+      ]);
+    });
+
+    it('reports custom verifier failures by kind, not id', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.executeWorkflow.mockResolvedValue(
+        completedWith({ passed: false, reason: 'nope' }) as never
+      );
+
+      await runHandler({ attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } }, [
+        { workflow_id: 'no-pii' },
+      ]);
+
+      expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+        outcome: 'success',
+        passed: false,
+        verifiersRun: 2,
+        failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow'],
+      });
+    });
+
+    it('throws when verifiers are declared but workflowsManagement is unavailable', async () => {
+      setContextEngineEnabled(true);
+
+      await expect(
+        makeDefinition(false).handler(
+          makeHandlerContext({ ki: { title: 'x' }, verifiers: [{ workflow_id: 'no-pii' }] })
+        )
+      ).rejects.toThrow('workflowsManagement plugin');
+    });
+
+    it('runs built-ins without workflowsManagement when no verifiers are declared', async () => {
+      setContextEngineEnabled(true);
+
+      const { output } = await makeDefinition(false).handler(
+        makeHandlerContext({ ki: { attributes: { esql: validEsql } } })
+      );
+
+      expect(output?.results).toEqual([{ verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true }]);
+    });
   });
 });

@@ -18,6 +18,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
+import type { KiVerifierWorkflowRunner } from './ki_verification';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -39,6 +40,8 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /** Structurally typed: the workflows management plugin's types cannot be referenced without a project cycle. */
+  workflowsManagement?: { management: KiVerifierWorkflowRunner };
 }
 
 export interface ContextEngineStartDependencies {
