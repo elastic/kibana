@@ -102,7 +102,7 @@ export async function importRules({
         deps: {
           actionsClient,
           rulesClient,
-          savedObjectsClient,
+          prebuiltRuleAssetClient: ruleAssetsClient,
           changeTracking: importOptions.changeTracking,
         },
       });

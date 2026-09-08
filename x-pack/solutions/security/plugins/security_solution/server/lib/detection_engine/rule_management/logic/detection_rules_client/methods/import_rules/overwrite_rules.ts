@@ -6,7 +6,6 @@
  */
 
 import pMap from 'p-map';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
@@ -16,7 +15,7 @@ import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule
 import { applyRuleUpdate } from '../../mergers/apply_rule_update';
 import { toggleRuleEnabledOnUpdate } from '../../utils';
 import { createRuleImportErrorObject, isRuleImportError } from './errors';
-import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { RULE_IMPORT_BULK_UPDATE_CONCURRENCY } from '../../../../api/constants';
 import type {
   ImportRuleSuccess,
@@ -34,7 +33,7 @@ interface OverwriteRulesParams {
 interface OverwriteRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
@@ -43,8 +42,7 @@ export async function overwriteRules({
   existingRules,
   deps,
 }: OverwriteRulesParams): Promise<ImportRulesResult> {
-  const { actionsClient, rulesClient, savedObjectsClient, changeTracking } = deps;
-  const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const { actionsClient, rulesClient, prebuiltRuleAssetClient, changeTracking } = deps;
   const successes: ImportRuleSuccess[] = [];
   const errors: ImportRuleError[] = [];
 
