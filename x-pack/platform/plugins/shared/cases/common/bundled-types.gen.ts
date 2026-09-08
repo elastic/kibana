@@ -1619,6 +1619,147 @@ export const TemplateDryRunResponse = lazySchema(() =>
 export type TemplateDryRunResponse = z.infer<typeof TemplateDryRunResponse>;
 
 /**
+  * A reusable field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated v1 custom field, is not included in the public API response.
+
+  */
+export const FieldDefinitionResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Unique server-assigned identifier for the field definition (UUIDv4).
+     */
+    fieldDefinitionId: z
+      .string()
+      .max(36)
+      .describe('Unique server-assigned identifier for the field definition (UUIDv4).'),
+    /**
+      * The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
+
+      */
+    name: z
+      .string()
+      .max(50)
+      .describe(
+        'The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.\n'
+      ),
+    /**
+     * The field definition as a YAML string.
+     */
+    definition: z.string().max(30000).describe('The field definition as a YAML string.'),
+    owner: Owner,
+    /**
+     * Optional human-readable description of the field's purpose.
+     */
+    description: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe("Optional human-readable description of the field's purpose."),
+    /**
+      * When true, this field is rendered in every case regardless of which template the case uses.
+
+      */
+    isGlobal: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, this field is rendered in every case regardless of which template the case uses.\n'
+      ),
+    /**
+      * Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.
+
+      */
+    displayOrder: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.\n'
+      ),
+  })
+);
+export type FieldDefinitionResponse = z.infer<typeof FieldDefinitionResponse>;
+
+/**
+ * A paginated list of reusable field definitions.
+ */
+export const GetCaseFieldDefinitionsResponse = lazySchema(() =>
+  z.object({
+    fieldDefinitions: z.array(FieldDefinitionResponse),
+    /**
+     * The current page number.
+     */
+    page: z.number().int().min(1).describe('The current page number.'),
+    /**
+     * The number of items per page.
+     */
+    perPage: z.number().int().min(1).max(100).describe('The number of items per page.'),
+    /**
+     * The total number of field definitions matching the query (before pagination).
+     */
+    total: z
+      .number()
+      .int()
+      .min(0)
+      .describe('The total number of field definitions matching the query (before pagination).'),
+  })
+);
+export type GetCaseFieldDefinitionsResponse = z.infer<typeof GetCaseFieldDefinitionsResponse>;
+
+/**
+  * The body for creating or updating a reusable field definition.
+
+Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
+
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+  */
+export const FieldDefinitionWriteRequest = lazySchema(() =>
+  z.object({
+    /**
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. Immutable after creation.
+
+      */
+    name: z
+      .string()
+      .min(1)
+      .max(50)
+      .describe(
+        'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. Immutable after creation.\n'
+      ),
+    owner: Owner,
+    /**
+     * The field definition as a YAML string describing a single field (type, label, control, metadata).
+     */
+    definition: z
+      .string()
+      .max(30000)
+      .describe(
+        'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+      ),
+    /**
+     * Optional human-readable description of the field's purpose.
+     */
+    description: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe("Optional human-readable description of the field's purpose."),
+    /**
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
+
+      */
+    isGlobal: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n'
+      ),
+  })
+);
+export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteRequest>;
+
+/**
   * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
 
   */

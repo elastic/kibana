@@ -1,0 +1,51 @@
+title: Field definition write request
+description: >
+  The body for creating or updating a reusable field definition.
+
+
+  Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200
+  field definitions per space. The `definition` string may not exceed 30000 characters.
+
+
+  Identity constraints: the `name` property must match the `name` key in the YAML `definition`.
+  Once created, a field's `name` and YAML `type` are immutable — they determine the key under which
+  case values are stored. An attempt to change either returns `409` with
+  `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity
+  attributes were modified.
+type: object
+required:
+  - name
+  - owner
+  - definition
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: >
+      The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML
+      definition. Immutable after creation.
+  owner:
+    $ref: 'owner.yaml'
+  definition:
+    type: string
+    maxLength: 30000
+    description: The field definition as a YAML string describing a single field (type, label, control, metadata).
+    example: |
+      name: priority
+      label: Priority
+      type: keyword
+      control: SELECT_BASIC
+      metadata:
+        options: [low, medium, high]
+        default: medium
+  description:
+    type: string
+    maxLength: 1000
+    description: Optional human-readable description of the field's purpose.
+  isGlobal:
+    type: boolean
+    description: >
+      When true, this field is rendered in every case for this owner, regardless of the template
+      used. Global fields cannot be demoted (set to false) while they are linked to an active v1
+      custom field in the Cases configuration.
