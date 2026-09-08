@@ -13,10 +13,12 @@
     "requiredPlugins": [],
     "optionalPlugins": [
       "agentBuilder",
+      "ruleRegistry",
+      "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
-      "workflowsManagement"
+      "workflowsManagement",
     ],
-    "requiredBundles": []
-  }
+    "requiredBundles": [],
+  },
 }
