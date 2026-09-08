@@ -40,7 +40,7 @@ export const FinalizeAlertsMigrationRequestBody = lazySchema(() =>
     /**
      * Array of `migration_id`s to finalize.
      */
-    migration_ids: z.array(z.string()).min(1),
+    migration_ids: z.array(z.string()).min(1).describe('Array of `migration_id`s to finalize.'),
   })
 );
 export type FinalizeAlertsMigrationRequestBody = z.infer<typeof FinalizeAlertsMigrationRequestBody>;
