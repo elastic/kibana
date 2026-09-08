@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendTimeBucketToEsqlQuery } from './trendline_query';
+import {
+  appendTimeBucketToEsqlQuery,
+  buildTrendlineQueryWithMetricFieldMap,
+} from './trendline_query';
 
 // Common rewrite shapes (TS/TBUCKET, KEEP/RENAME, FORK) are covered by the
 // shared case matrix from @kbn/lens-test-helpers (trendline_query_cases.test.ts);
@@ -143,5 +146,30 @@ describe('appendTimeBucketToEsqlQuery', () => {
     expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(
       'TS metrics-* | STATS total = AVG(cpu) BY host, TBUCKET(75) | STATS MAX(total) BY TBUCKET(100)'
     );
+  });
+
+  // Dotted field names are not present in the archive backing the case matrix,
+  // so the escaped end-to-end KEEP + BUCKET path is pinned here.
+  it('preserves a dotted time field through KEEP commands with backtick escaping', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index | KEEP bytes', 'order.date', ['bytes']);
+    expect(result).toBe(
+      'FROM index | KEEP bytes, `order.date` | STATS AVG(bytes) BY BUCKET(`order.date`, 75, ?_tstart, ?_tend)'
+    );
+  });
+});
+
+describe('buildTrendlineQueryWithMetricFieldMap', () => {
+  // Aliases containing spaces are not expressible in the executable case matrix
+  // (no such fields in the archive); pins backtick-quoted alias unquoting.
+  it('returns a backtick-quoted TBUCKET alias unquoted as the time result column', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY `Over time` = TBUCKET(1 hour)',
+      '@timestamp'
+    );
+
+    expect(result.query).toBe(
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY `Over time` = TBUCKET(1 hour)'
+    );
+    expect(result.timeField).toBe('Over time');
   });
 });
