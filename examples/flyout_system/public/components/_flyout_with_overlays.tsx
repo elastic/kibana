@@ -20,9 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { OverlayStart } from '@kbn/core/public';
-import { useFlyoutTemplate } from '@kbn/flyout-template-overlay';
-import type { UseFlyoutTemplateResult } from '@kbn/flyout-template-overlay';
+import type { OverlayRef, OverlayStart } from '@kbn/core/public';
 import { useBooleanUrlState } from '@kbn/shared-url-state';
 
 import {
@@ -142,11 +140,19 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
   const childTriggerARef = useRef<HTMLButtonElement>(null);
   const childTriggerBRef = useRef<HTMLButtonElement>(null);
 
-  const childFlyoutA = useFlyoutTemplate(overlays, { returnFocusTo: childTriggerARef });
-  const childFlyoutB = useFlyoutTemplate(overlays, { returnFocusTo: childTriggerBRef });
+  const overlayARef = useRef<OverlayRef | null>(null);
+  const overlayBRef = useRef<OverlayRef | null>(null);
+  const [isChildAOpen, setIsChildAOpen] = useState(false);
+  const [isChildBOpen, setIsChildBOpen] = useState(false);
 
-  const openChildFlyout = (flyout: UseFlyoutTemplateResult, label: 'A' | 'B', id: string) => () => {
-    flyout.open(
+  const openChildFlyout = (
+    overlayRef: React.MutableRefObject<OverlayRef | null>,
+    setIsOpen: (v: boolean) => void,
+    returnFocusRef: React.RefObject<HTMLButtonElement>,
+    label: 'A' | 'B',
+    id: string
+  ) => {
+    overlayRef.current = overlays.openFlyoutTemplate(
       {
         id,
         session: 'inherit',
@@ -159,7 +165,9 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
           console.log(`activate child flyout ${label}`, title); // eslint-disable-line no-console
         },
         onClose: () => {
-          console.log(`close child flyout ${label}`, title); // eslint-disable-line no-console
+          overlayRef.current = null;
+          setIsOpen(false);
+          returnFocusRef.current?.focus();
         },
       },
       (T) => (
@@ -171,6 +179,18 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
         </>
       )
     );
+    setIsOpen(true);
+  };
+
+  const closeChildFlyout = (
+    overlayRef: React.MutableRefObject<OverlayRef | null>,
+    setIsOpen: (v: boolean) => void,
+    returnFocusRef: React.RefObject<HTMLButtonElement>
+  ) => {
+    overlayRef.current?.close();
+    overlayRef.current = null;
+    setIsOpen(false);
+    returnFocusRef.current?.focus();
   };
 
   return (
@@ -178,24 +198,38 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
       <EuiButton
         buttonRef={childTriggerARef}
         onClick={
-          childFlyoutA.isOpen
-            ? childFlyoutA.close
-            : openChildFlyout(childFlyoutA, 'A', `childFlyout-${title}`)
+          isChildAOpen
+            ? () => closeChildFlyout(overlayARef, setIsChildAOpen, childTriggerARef)
+            : () =>
+                openChildFlyout(
+                  overlayARef,
+                  setIsChildAOpen,
+                  childTriggerARef,
+                  'A',
+                  `childFlyout-${title}`
+                )
         }
         data-test-subj={`openChildFlyoutAOverlaysButton-${title}`}
       >
-        {childFlyoutA.isOpen ? 'Close child flyout A' : 'Open child flyout A'}
+        {isChildAOpen ? 'Close child flyout A' : 'Open child flyout A'}
       </EuiButton>{' '}
       <EuiButton
         buttonRef={childTriggerBRef}
         onClick={
-          childFlyoutB.isOpen
-            ? childFlyoutB.close
-            : openChildFlyout(childFlyoutB, 'B', `childFlyout-${title}-B`)
+          isChildBOpen
+            ? () => closeChildFlyout(overlayBRef, setIsChildBOpen, childTriggerBRef)
+            : () =>
+                openChildFlyout(
+                  overlayBRef,
+                  setIsChildBOpen,
+                  childTriggerBRef,
+                  'B',
+                  `childFlyout-${title}-B`
+                )
         }
         data-test-subj={`openChildFlyoutBOverlaysButton-${title}`}
       >
-        {childFlyoutB.isOpen ? 'Close child flyout B' : 'Open child flyout B'}
+        {isChildBOpen ? 'Close child flyout B' : 'Open child flyout B'}
       </EuiButton>
     </>
   );
@@ -210,7 +244,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     `flyoutOverlays_${title.replace(/\s+/g, '')}Open`
   );
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const flyout = useFlyoutTemplate(overlays, { returnFocusTo: triggerRef });
+  const overlayRef = useRef<OverlayRef | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Callbacks for state synchronization
   const mainFlyoutOnActive = useCallback(() => {
@@ -224,8 +259,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   // Bridge URL-backed open state to the imperative overlays.openFlyoutTemplate API:
   // opening mounts the overlay, closing (via URL, Back button, or user click) unmounts it.
   useEffect(() => {
-    if (isFlyoutOpen && !flyout.isOpen) {
-      flyout.open(
+    if (isFlyoutOpen && !isOpen) {
+      overlayRef.current = overlays.openFlyoutTemplate(
         {
           id: `mainFlyout-${title}`,
           type: flyoutType,
@@ -236,7 +271,10 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           resizable: true,
           onActive: mainFlyoutOnActive,
           onClose: () => {
+            overlayRef.current = null;
+            setIsOpen(false);
             setIsFlyoutOpen(false);
+            triggerRef.current?.focus();
           },
           historyKey,
         },
@@ -280,11 +318,16 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           </>
         )
       );
-    } else if (!isFlyoutOpen && flyout.isOpen) {
-      flyout.close();
+      setIsOpen(true);
+    } else if (!isFlyoutOpen && isOpen) {
+      overlayRef.current?.close();
+      overlayRef.current = null;
+      setIsOpen(false);
+      triggerRef.current?.focus();
     }
   }, [
     isFlyoutOpen,
+    isOpen,
     title,
     flyoutType,
     flyoutOwnFocus,
@@ -297,7 +340,6 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     mainFlyoutOnActive,
     handleCloseFlyout,
     setIsFlyoutOpen,
-    flyout,
   ]);
 
   return (

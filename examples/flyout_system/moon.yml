@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'
   - '@kbn/flyout-template'
-  - '@kbn/flyout-template-overlay'
   - '@kbn/shared-ux-router'
   - '@kbn/scout'
   - '@kbn/shared-url-state'
