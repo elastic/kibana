@@ -606,16 +606,6 @@
     ]
   },
   {
-    "id": "obs-sig-events-team",
-    "name": "Obs Sig Events Team",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-sig-events-team"
-    }
-  },
-  {
     "id": "obs-ux-management-team",
     "name": "Obs Ux Management Team",
     "areas": [

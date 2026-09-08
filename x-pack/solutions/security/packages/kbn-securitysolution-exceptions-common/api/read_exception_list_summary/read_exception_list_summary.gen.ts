@@ -27,21 +27,27 @@ export const ReadExceptionListSummaryRequestQuery = lazySchema(() =>
     /**
      * Exception list's identifier generated upon creation.
      */
-    id: ExceptionListId.optional(),
+    id: ExceptionListId.optional().describe("Exception list's identifier generated upon creation."),
     /**
      * Exception list's human readable identifier.
      */
-    list_id: ExceptionListHumanId.optional(),
+    list_id: ExceptionListHumanId.optional().describe(
+      "Exception list's human readable identifier."
+    ),
     /**
       * `single` returns summary for a list in the current space; `agnostic` for a space-agnostic list. Must
 line up with `id` / `list_id` used to look up the list.
 
       */
-    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    namespace_type: ExceptionNamespaceType.optional()
+      .default('single')
+      .describe(
+        '`single` returns summary for a list in the current space; `agnostic` for a space-agnostic list. Must\nline up with `id` / `list_id` used to look up the list.\n'
+      ),
     /**
      * Search filter clause
      */
-    filter: z.string().optional(),
+    filter: z.string().optional().describe('Search filter clause'),
   })
 );
 export type ReadExceptionListSummaryRequestQuery = z.infer<
