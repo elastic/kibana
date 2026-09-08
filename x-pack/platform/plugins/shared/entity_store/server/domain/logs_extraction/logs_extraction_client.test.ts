@@ -14,11 +14,7 @@ import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
-import {
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  ENGINE_METADATA_UNTYPED_ID_FIELD,
-  TIMESTAMP_FIELD,
-} from './query_builder_commons';
+import { ENGINE_METADATA_UNTYPED_ID_FIELD, TIMESTAMP_FIELD } from './query_builder_commons';
 import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
 
 const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
@@ -96,12 +92,14 @@ function createMockEngineDescriptor(
     checkpointTimestamp: string;
     paginationId: string;
     lastExecutionTimestamp: string;
+    sliceEndTimestamp: string;
   }>
 ) {
   const logExtractionState = {
     checkpointTimestamp: overrides?.checkpointTimestamp ?? null,
     paginationId: overrides?.paginationId ?? null,
     lastExecutionTimestamp: overrides?.lastExecutionTimestamp ?? null,
+    sliceEndTimestamp: overrides?.sliceEndTimestamp ?? null,
   };
   return {
     type,
@@ -111,18 +109,21 @@ function createMockEngineDescriptor(
   };
 }
 
+type GlobalStateLogExtractionOverrides = Partial<{
+  lookbackPeriod: string;
+  delay: string;
+  maxTimeWindowSize: string;
+  maxLogsPerWindow: number;
+  excludedIndexPatterns: string[];
+  additionalIndexPatterns: string[];
+  docsLimit: number;
+}>;
+
 function createMockGlobalStateClient(
-  logExtractionOverrides?: Partial<{
-    lookbackPeriod: string;
-    delay: string;
-    maxTimeWindowSize: string;
-    maxLogsPerWindow: number;
-    excludedIndexPatterns: string[];
-    additionalIndexPatterns: string[];
-  }>
+  logExtractionOverrides?: GlobalStateLogExtractionOverrides
 ): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
   const logsExtraction = LogExtractionConfig.parse({
-    docsLimit: 10000,
+    docsLimit: logExtractionOverrides?.docsLimit ?? 10000,
     additionalIndexPatterns: logExtractionOverrides?.additionalIndexPatterns ?? [],
     excludedIndexPatterns: logExtractionOverrides?.excludedIndexPatterns ?? [],
     lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
@@ -142,6 +143,58 @@ function createMockGlobalStateClient(
   };
 }
 
+interface TestContext {
+  client: LogsExtractionClient;
+  mockLogger: ReturnType<typeof loggerMock.create>;
+  mockEsClient: jest.Mocked<ElasticsearchClient>;
+  mockDataViewsService: jest.Mocked<DataViewsService>;
+  mockEngineDescriptorClient: jest.Mocked<Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>>;
+  mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
+}
+
+/** Fresh mocks + client for one test. Shared by every top-level describe in this file. */
+function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverrides): TestContext {
+  jest.clearAllMocks();
+  // clearAllMocks does NOT drain mockResolvedValueOnce queues — only mockReset does.
+  // Cap tests consume fewer queued calls than were set up (cap fires early), leaving stale
+  // Once values that would otherwise pollute the next test.
+  mockExecuteEsqlQuery.mockReset();
+  mockIngestEntities.mockReset();
+
+  const mockLogger = loggerMock.create();
+  const mockEsClient = {
+    indices: {
+      resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+    },
+  } as unknown as jest.Mocked<ElasticsearchClient>;
+  const mockDataViewsService = {
+    get: jest.fn(),
+  } as unknown as jest.Mocked<DataViewsService>;
+  const mockEngineDescriptorClient: TestContext['mockEngineDescriptorClient'] = {
+    findOrThrow: jest.fn(),
+    update: jest.fn().mockResolvedValue({}),
+  };
+  const mockGlobalStateClient = createMockGlobalStateClient(globalStateOverrides);
+
+  const client = new LogsExtractionClient({
+    logger: mockLogger,
+    namespace: 'default',
+    esClient: mockEsClient,
+    dataViewsService: mockDataViewsService,
+    engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+    globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+  });
+
+  return {
+    client,
+    mockLogger,
+    mockEsClient,
+    mockDataViewsService,
+    mockEngineDescriptorClient,
+    mockGlobalStateClient,
+  };
+}
+
 describe('LogsExtractionClient', () => {
   let client: LogsExtractionClient;
   let mockLogger: ReturnType<typeof loggerMock.create>;
@@ -153,36 +206,14 @@ describe('LogsExtractionClient', () => {
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    // clearAllMocks does NOT drain mockResolvedValueOnce queues — only mockReset does.
-    // Cap tests consume fewer queued calls than were set up (cap fires early), leaving stale
-    // Once values that would otherwise pollute the next test.
-    mockExecuteEsqlQuery.mockReset();
-    mockIngestEntities.mockReset();
-
-    mockLogger = loggerMock.create();
-    mockEsClient = {
-      indices: {
-        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
-      },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
-    mockDataViewsService = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<DataViewsService>;
-    mockEngineDescriptorClient = {
-      findOrThrow: jest.fn(),
-      update: jest.fn().mockResolvedValue({}),
-    };
-    mockGlobalStateClient = createMockGlobalStateClient();
-
-    client = new LogsExtractionClient({
-      logger: mockLogger,
-      namespace: 'default',
-      esClient: mockEsClient,
-      dataViewsService: mockDataViewsService,
-      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
-      globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-    });
+    ({
+      client,
+      mockLogger,
+      mockEsClient,
+      mockDataViewsService,
+      mockEngineDescriptorClient,
+      mockGlobalStateClient,
+    } = createTestContext());
   });
 
   describe('extractLogs', () => {
@@ -243,7 +274,6 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         esqlResponse: mockEsqlResponse,
         esIdField: HASHED_ID_FIELD,
-        fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
         targetIndex: expect.stringContaining('.entities.v2.latest.default'),
         logger: expect.any(Object),
         abortController: undefined,
@@ -568,77 +598,6 @@ describe('LogsExtractionClient', () => {
         })
       );
 
-      jest.useRealTimers();
-    });
-
-    it('should preserve inclusive lower bound on first bounded extraction when recovering from paginationId', async () => {
-      const fromDateISO = '2025-01-15T10:00:00.000Z';
-      const toDateISO = '2025-01-15T11:00:00.000Z';
-      const recoveryId = 'recover-entity-id';
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', {
-          paginationId: recoveryId,
-        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery
-        .mockResolvedValueOnce(
-          mockLogPaginationCursorProbeRow(fromDateISO, 1 /* single doc — last page */)
-        )
-        .mockResolvedValueOnce({ columns: [], values: [] });
-      mockIngestEntities.mockResolvedValue(undefined);
-
-      const result = await client.extractLogs('user', {
-        specificWindow: { fromDateISO, toDateISO },
-      });
-
-      expect(result.success).toBe(true);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
-
-      const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
-      const boundedQuery = mockExecuteEsqlQuery.mock.calls[1][0].query;
-      expect(probeQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
-      expect(boundedQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
-    });
-
-    it('on recovery, first boundary probe uses checkpointTimestamp as the window start', async () => {
-      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
-      const checkpointTimestamp = '2025-01-15T10:00:00.000Z';
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-      const mainExtractionResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-        ],
-        values: [],
-      };
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', {
-          lookbackPeriod: '3h',
-          delay: '1m',
-          checkpointTimestamp,
-          paginationId: 'entity-cursor',
-          lastExecutionTimestamp: '2025-01-15T10:00:00.000Z',
-        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExtractSuccessSequence(mainExtractionResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
-
-      const result = await client.extractLogs('user');
-
-      expect(result.success).toBe(true);
-      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
-      const firstProbeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
-      expect(firstProbeQuery).toContain(checkpointTimestamp);
       jest.useRealTimers();
     });
 
@@ -1020,12 +979,11 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
-            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
             { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2025-01-15T11:00:00.000Z', 'hash1', '2025-01-15T11:00:00.000Z', 'entity1'],
-            ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
+            ['2025-01-15T11:00:00.000Z', 'hash1', 'entity1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2', 'entity2'],
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
@@ -1060,12 +1018,11 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
-            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
             { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2025-01-15T11:00:00.000Z', 'hash1', '2025-01-15T11:00:00.000Z', 'entity1'],
-            ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
+            ['2025-01-15T11:00:00.000Z', 'hash1', 'entity1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2', 'entity2'],
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
@@ -1139,12 +1096,11 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
-            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
             { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2024-01-02T10:00:00.000Z', 'hash1', '2024-01-02T10:00:00.000Z', 'entity1'],
-            [lastPageTimestamp, 'hash2', lastPageTimestamp, 'entity2'],
+            ['2024-01-02T10:00:00.000Z', 'hash1', 'entity1'],
+            [lastPageTimestamp, 'hash2', 'entity2'],
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
@@ -1180,12 +1136,11 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
-            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
             { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2024-01-02T10:00:00.000Z', 'hash1', '2024-01-02T10:00:00.000Z', 'entity1'],
-            ['2024-01-02T11:00:00.000Z', 'hash2', '2024-01-02T11:00:00.000Z', 'entity2'],
+            ['2024-01-02T10:00:00.000Z', 'hash1', 'entity1'],
+            ['2024-01-02T11:00:00.000Z', 'hash2', 'entity2'],
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
@@ -1393,6 +1348,7 @@ describe('LogsExtractionClient', () => {
               checkpointTimestamp: null,
               paginationId: null,
               lastExecutionTimestamp: effectiveWindowEnd,
+              sliceEndTimestamp: null,
             },
           })
         );
@@ -1651,4 +1607,276 @@ describe('LogsExtractionClient', () => {
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
   });
+});
+
+describe('LogsExtractionClient mid-slice resume', () => {
+  const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+  const checkpointTimestamp = '2025-01-15T10:00:00.000Z';
+  const sliceEndTimestamp = '2025-01-15T10:05:00.000Z';
+
+  /** A probe query aggregates MAX(@timestamp); an extraction query joins the latest index. */
+  const isProbeQuery = (query: string) => query.includes('MAX(@timestamp)');
+  const isExtractionQuery = (query: string) => query.includes('LOOKUP JOIN');
+
+  const extractionColumns: ESQLSearchResponse['columns'] = [
+    { name: '@timestamp', type: 'date' },
+    { name: HASHED_ID_FIELD, type: 'keyword' },
+    { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
+  ];
+
+  let ctx: TestContext;
+
+  const setup = (globalStateOverrides?: GlobalStateLogExtractionOverrides) => {
+    ctx = createTestContext(globalStateOverrides);
+    ctx.mockDataViewsService.get.mockResolvedValue({
+      getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+    } as any);
+    mockIngestEntities.mockResolvedValue(undefined);
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: fixedNow.getTime() });
+    setup();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('resumes with the pinned slice end and id cursor, skipping the boundary probe', async () => {
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp,
+        paginationId: 'entity-cursor',
+        sliceEndTimestamp,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExecuteEsqlQuery
+      // resumed slice: extraction directly, no probe (1 row < docsLimit → slice done)
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [['2025-01-15T10:02:00.000Z', 'hash3', 'entity3']],
+      })
+      // probe for the next slice: empty (sampled → follow-up sweep extraction)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await ctx.client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+    // First query re-enters the slice: an extraction bounded by the persisted slice end,
+    // paginating past the persisted id cursor; the probe is not re-run for this slice.
+    expect(isExtractionQuery(queries[0])).toBe(true);
+    expect(queries[0]).toContain(`@timestamp <= TO_DATETIME("${sliceEndTimestamp}")`);
+    expect(queries[0]).toContain('> "entity-cursor"');
+    expect(isProbeQuery(queries[1])).toBe(true);
+    expect(ctx.mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Resuming mid-slice'));
+  });
+
+  it('discards an id cursor persisted without a pinned slice end and re-processes the slice', async () => {
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp,
+        paginationId: 'stale-cursor',
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    const result = await ctx.client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+    // Without a pinned slice end the cursor is discarded: probe-first flow from the checkpoint.
+    expect(isProbeQuery(queries[0])).toBe(true);
+    expect(queries[0]).toContain(checkpointTimestamp);
+    expect(queries.every((q) => !q.includes('stale-cursor'))).toBe(true);
+    expect(ctx.mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('without a pinned slice end')
+    );
+  });
+
+  it('persists the id cursor and pinned slice end mid-slice, leaving the checkpoint at the slice start', async () => {
+    // docsLimit=2 so a full 2-row page saturates the limit and produces an entity cursor.
+    setup({ docsLimit: 2 });
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExecuteEsqlQuery
+      // probe: saturated slice ending at sliceEndTimestamp (more slices may follow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndTimestamp))
+      // entity page 1: 2 rows == docsLimit → pagination continues
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [
+          ['2025-01-15T10:01:00.000Z', 'hash1', 'entity1'],
+          ['2025-01-15T10:02:00.000Z', 'hash2', 'entity2'],
+        ],
+      })
+      // entity page 2: empty → slice done
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] })
+      // probe for next slice: empty → sweep extraction → done
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+    const result = await ctx.client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    const stateUpdates = ctx.mockEngineDescriptorClient.update.mock.calls
+      .map(([, update]) => update.logExtractionState)
+      .filter(Boolean);
+    // Mid-slice persist: id cursor + pinned end, checkpoint untouched at the slice start.
+    expect(stateUpdates[0]).toMatchObject({
+      checkpointTimestamp,
+      paginationId: 'entity2',
+      sliceEndTimestamp,
+    });
+    // Slice completion: checkpoint advances to the slice end, both cursors cleared.
+    expect(stateUpdates[1]).toMatchObject({
+      checkpointTimestamp: sliceEndTimestamp,
+      paginationId: null,
+      sliceEndTimestamp: null,
+    });
+  });
+
+  it('pins the window start as the checkpoint on a first-ever cycle so the resume lower bound cannot drift', async () => {
+    setup({ docsLimit: 2 });
+    // Fresh engine: no checkpoint and no lastExecutionTimestamp, so the window start falls back
+    // to now - lookbackPeriod (09:00 at the frozen clock) - a value that moves between runs.
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user') as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    const lookbackStartAtRun1 = '2025-01-15T09:00:00.000Z';
+
+    // Run 1: probe pins the slice end, page 1 persists the cursor, the run dies on page 2.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndTimestamp))
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [
+          ['2025-01-15T09:01:00.000Z', 'hash1', 'entity1'],
+          ['2025-01-15T09:02:00.000Z', 'hash2', 'entity2'],
+        ],
+      })
+      .mockRejectedValueOnce(new Error('crash mid-slice on first-ever cycle'));
+
+    const run1 = await ctx.client.extractLogs('user');
+    expect(run1.success).toBe(false);
+
+    const persistedState = ctx.mockEngineDescriptorClient.update.mock.calls
+      .map(([, update]) => update.logExtractionState)
+      .filter((s) => s?.paginationId)
+      .at(-1)!;
+    // The slice start is pinned even though the engine state held no checkpoint.
+    expect(persistedState.checkpointTimestamp).toBe(lookbackStartAtRun1);
+
+    // Advance the clock: a re-derived now - lookbackPeriod would now be 09:02, not 09:00.
+    jest.setSystemTime(new Date('2025-01-15T12:02:00.000Z'));
+
+    // Run 2 resumes from the persisted state.
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp: persistedState.checkpointTimestamp!,
+        paginationId: persistedState.paginationId!,
+        sliceEndTimestamp: persistedState.sliceEndTimestamp!,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] })
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+    const run2 = await ctx.client.extractLogs('user');
+    expect(run2.success).toBe(true);
+
+    // The resumed slice re-runs with run 1's exact bounds: the pinned start, not the drifted one.
+    const run2FirstQuery = mockExecuteEsqlQuery.mock.calls.at(-3)![0].query;
+    expect(isExtractionQuery(run2FirstQuery)).toBe(true);
+    expect(run2FirstQuery).toContain(`@timestamp >= TO_DATETIME("${lookbackStartAtRun1}")`);
+    expect(run2FirstQuery).toContain(`@timestamp <= TO_DATETIME("${sliceEndTimestamp}")`);
+  });
+
+  it.each(['user', 'host', 'service', 'generic'] as const)(
+    'resume determinism for %s: no entity skipped or duplicated across an interrupted run and its resume',
+    async (entityType) => {
+      setup({ docsLimit: 2 });
+      ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor(entityType, {
+          checkpointTimestamp,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+
+      const ingestedIds: string[] = [];
+      mockIngestEntities.mockImplementation(async ({ esqlResponse }) => {
+        const idIdx = esqlResponse.columns.findIndex(
+          ({ name }) => name === ENGINE_METADATA_UNTYPED_ID_FIELD
+        );
+        esqlResponse.values.forEach((row) => {
+          if (row[idIdx]) {
+            ingestedIds.push(String(row[idIdx]));
+          }
+        });
+      });
+
+      // Run 1: probe pins the slice end, page 1 ingests entity1+entity2 and persists the
+      // cursor, then the run dies mid-slice on the page-2 query.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndTimestamp))
+        .mockResolvedValueOnce({
+          columns: extractionColumns,
+          values: [
+            ['2025-01-15T10:01:00.000Z', 'hash1', 'entity1'],
+            ['2025-01-15T10:02:00.000Z', 'hash2', 'entity2'],
+          ],
+        })
+        .mockRejectedValueOnce(new Error('node restarted mid-slice'));
+
+      const run1 = await ctx.client.extractLogs(entityType);
+      expect(run1.success).toBe(false);
+
+      // The state a real deployment would resume from: the last persisted mid-slice cursor.
+      const persistedState = ctx.mockEngineDescriptorClient.update.mock.calls
+        .map(([, update]) => update.logExtractionState)
+        .filter((s) => s?.paginationId)
+        .at(-1)!;
+      expect(persistedState).toMatchObject({
+        checkpointTimestamp,
+        paginationId: 'entity2',
+        sliceEndTimestamp,
+      });
+
+      // Run 2: resumes the same slice from the persisted cursor.
+      ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor(entityType, {
+          checkpointTimestamp: persistedState.checkpointTimestamp ?? undefined,
+          paginationId: persistedState.paginationId!,
+          sliceEndTimestamp: persistedState.sliceEndTimestamp!,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockExecuteEsqlQuery
+        // resumed slice: remaining page (1 row < docsLimit → slice done)
+        .mockResolvedValueOnce({
+          columns: extractionColumns,
+          values: [['2025-01-15T10:03:00.000Z', 'hash3', 'entity3']],
+        })
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+      const run2 = await ctx.client.extractLogs(entityType);
+      expect(run2.success).toBe(true);
+
+      // The resumed extraction reuses the pinned bounds and pages past the persisted cursor.
+      const run2FirstQuery = mockExecuteEsqlQuery.mock.calls.at(-3)![0].query;
+      expect(isExtractionQuery(run2FirstQuery)).toBe(true);
+      expect(run2FirstQuery).toContain(`@timestamp <= TO_DATETIME("${sliceEndTimestamp}")`);
+      expect(run2FirstQuery).toContain('> "entity2"');
+
+      // The union across both runs covers every entity exactly once: no skips, no duplicates.
+      expect(ingestedIds).toEqual(['entity1', 'entity2', 'entity3']);
+    }
+  );
 });
