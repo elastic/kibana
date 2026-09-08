@@ -9,10 +9,21 @@
 
 export {
   DocViewer,
+  DOC_VIEWER_FLYOUT_HISTORY_KEY,
+  DOC_VIEWER_TABS_EBT_ELEMENT,
   type DocViewerProps,
   type DocViewerApi,
   type DocViewerRestorableState,
   DocViewsRegistry,
   ElasticRequestState,
   FieldName,
+  registerDocViewerAnalyticsEvents,
+  type UseDocViewerSpanLogViewedEventParams,
+  type UseDocViewerTabViewedEventParams,
+  type UseDocViewerViewedEventParams,
+  useDocViewerSpanLogViewedEvent,
+  useDocViewerTabViewedEvent,
+  useDocViewerViewedEvent,
+  FieldActionsProvider,
+  useUIFieldActions,
 } from './src';

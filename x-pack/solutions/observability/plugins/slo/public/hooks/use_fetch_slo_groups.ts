@@ -76,7 +76,7 @@ export function useFetchSloGroups({
           ],
           dataView,
           {
-            ignoreFilterIfFieldNotInIndex: true,
+            ignoreFilterIfFieldNotInIndex: false,
           }
         )
       );

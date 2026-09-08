@@ -16,6 +16,7 @@ import {
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,
 } from '.';
+import { GROUP_NOT_SET_VALUE } from '../../../constants';
 
 describe('cascaded documents helpers utils', () => {
   const dataViewMock = createStubDataView({
@@ -185,6 +186,30 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([]);
     });
 
+    it('should return empty metadata when a group field is an inline cast wrapping an unsupported function', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY ts = BUCKET(@timestamp, 1 hour)::string`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
+    it('should return empty metadata when a group field among multiple is an inline cast wrapping an unsupported function', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY agent.keyword, ts = BUCKET(@timestamp, 1 hour)::string`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
+    it('should allow an inline cast of a simple column', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY casted = clientip::keyword`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([{ field: 'casted', type: 'inlineCast' }]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
+    });
+
     it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
       const queryString = `
         FROM kibana_sample_data_logs | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes) BY response.keyword | KEEP Visits, Unique, p95, median, response.keyword | LIMIT 123
@@ -198,6 +223,16 @@ describe('cascaded documents helpers utils', () => {
         { aggregation: 'PERCENTILE', identifier: 'p95' },
         { aggregation: 'MEDIAN', identifier: 'median' },
       ]);
+    });
+
+    it('should return an empty array of group by fields and applied functions if the query contains the TS_INFO command', () => {
+      const queryString = `
+        TS kibana_sample_data_logstsdb | TS_INFO | STATS count = COUNT() BY metric_name
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
     });
   });
 
@@ -396,6 +431,37 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
+        it('constructs a FROM-based cascade query when the editor query uses a TS command', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb
+              | STATS count = COUNT(AVG_OVER_TIME(bytes_gauge)) BY agent.keyword
+            `,
+          };
+
+          const nodePath = ['agent.keyword'];
+          const nodePathMap = { 'agent.keyword': 'Mozilla/5.0' };
+
+          jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
+            esTypes: ['text', 'keyword'],
+            aggregatable: false,
+          } as unknown as DataViewField);
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE MATCH_PHRASE(`agent.keyword`, "Mozilla/5.0")'
+          );
+        });
+
         it('uses match phrase query when the selected column is a multi field with a parent field that is a text or keyword field that is not aggregatable', () => {
           const editorQuery: AggregateQuery = {
             esql: `
@@ -440,6 +506,30 @@ describe('cascaded documents helpers utils', () => {
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
             'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`tags.keyword`, "some random pattern")'
+          );
+        });
+
+        it('uses postfix unary expression when the selected column is the denoted "GROUP_NOT_SET_VALUE"', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY clientip
+            `,
+          };
+
+          const nodePath = ['clientip'];
+          const nodePathMap = { clientip: GROUP_NOT_SET_VALUE };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY clientip | WHERE clientip IS NULL'
           );
         });
       });
@@ -851,6 +941,27 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
+        it("appends a negated filter operation for a param field declared in the stats command column field group using it's param definition value before the driving stats command", () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs  | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC',
+              [
+                {
+                  key: 'field',
+                  type: ESQLVariableType.FIELDS,
+                  value: 'message',
+                },
+              ],
+              dataViewMock,
+              '??field',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '-'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE message != "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC'
+          );
+        });
+
         it('the query generated from a previous filter operation can be used as the input to a subsequent filter operation', () => {
           expect(
             appendFilteringWhereClauseForCascadeLayout(
@@ -924,6 +1035,27 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
+        it('appends a negated filter operation for a function field derived from a function group with a param argument before the driving stats command', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | SORT average ASC',
+              [
+                {
+                  key: 'field',
+                  type: ESQLVariableType.FIELDS,
+                  value: 'message',
+                },
+              ],
+              dataViewMock,
+              'CATEGORIZE(??field)',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '-'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | WHERE `CATEGORIZE(??field)` != "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
+
         it('appends filter operation for a named function field derived from a function group with a param argument before the driving stats command', () => {
           expect(
             appendFilteringWhereClauseForCascadeLayout(
@@ -942,6 +1074,36 @@ describe('cascaded documents helpers utils', () => {
             )
           ).toBe(
             'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Named = CATEGORIZE(??field) | WHERE Named == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
+
+        it('uses postfix unary expression when "is_null" filter operation is applied regardless of the selected columns value', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC',
+              [],
+              dataViewMock,
+              'clientip',
+              GROUP_NOT_SET_VALUE,
+              'is_null'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip IS NULL | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC'
+          );
+        });
+
+        it('uses postfix unary expression when "is_not_null" filter operation is applied regardless of the selected columns value', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC',
+              [],
+              dataViewMock,
+              'clientip',
+              GROUP_NOT_SET_VALUE,
+              'is_not_null'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip IS NOT NULL | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC'
           );
         });
       });

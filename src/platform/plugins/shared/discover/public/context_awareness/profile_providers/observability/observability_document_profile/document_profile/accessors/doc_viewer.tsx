@@ -13,11 +13,14 @@ import { UnifiedDocViewerObservabilityGenericOverview } from '@kbn/unified-doc-v
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocumentProfileProvider } from '../../../../../profiles';
-import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
+import type { DocViewerExtensionParams } from '../../../../../types';
 
 export const createGetDocViewer =
-  (indexes: ObservabilityIndexes): DocumentProfileProvider['profile']['getDocViewer'] =>
-  (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
+  (
+    indexes: ObservabilityIndexes,
+    profileId: string
+  ): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (prev, { toolkit }) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
     const tabTitle = i18n.translate('discover.docViews.observability.generic.overview.title', {
@@ -31,7 +34,12 @@ export const createGetDocViewer =
           title: tabTitle,
           order: 0,
           render: (props) => (
-            <UnifiedDocViewerObservabilityGenericOverview {...props} indexes={indexes} />
+            <UnifiedDocViewerObservabilityGenericOverview
+              {...props}
+              indexes={indexes}
+              profileId={profileId}
+              docViewActions={toolkit.actions}
+            />
           ),
         });
 

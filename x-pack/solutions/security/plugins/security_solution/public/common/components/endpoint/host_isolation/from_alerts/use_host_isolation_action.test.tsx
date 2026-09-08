@@ -15,7 +15,8 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../user_privilege
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
-import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { HOST_ON_LINKED_PROJECT_TOOLTIP, ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -50,13 +51,21 @@ describe('useHostIsolationAction', () => {
     return appContextMock.renderHook(() => useHostIsolationAction(hookProps));
   };
 
+  // The linked-project guard only runs on CPS-enabled deployments, which the client detects via the
+  // presence of `cps.cpsManager`. Tests exercising that path must enable it explicitly.
+  const enableCps = () => {
+    appContextMock.startServices.cps = {
+      cpsManager: { whenReady: jest.fn().mockResolvedValue(undefined) } as unknown as ICPSManager,
+      isTierEligible: true,
+    };
+  };
+
   beforeEach(() => {
     appContextMock = createAppRootMockRenderer();
     authMockSetter = appContextMock.getUserPrivilegesMockSetter(useUserPrivilegesMock);
     hookProps = {
       closePopover: jest.fn(),
       detailsData: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
-      isHostIsolationPanelOpen: false,
       onAddIsolationStatusClick: jest.fn(),
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
@@ -170,6 +179,63 @@ describe('useHostIsolationAction', () => {
       );
     }
   );
+
+  it('should return disabled menu item when the host is from a linked project (CPS)', async () => {
+    enableCps();
+    hookProps.detailsData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
+      'kibana.alert.ancestors.index': {
+        category: 'kibana',
+        field: 'kibana.alert.ancestors.index',
+        values: ['linked_local_project:.ds-logs-endpoint.events-default'],
+        originalValue: ['linked_local_project:.ds-logs-endpoint.events-default'],
+        isObjectArray: false,
+      },
+    });
+    const { result } = render();
+
+    await appContextMock.waitFor(() =>
+      expect(result.current).toEqual([
+        buildExpectedMenuItemResult({
+          disabled: true,
+          toolTipContent: HOST_ON_LINKED_PROJECT_TOOLTIP,
+        }),
+      ])
+    );
+  });
+
+  it('should return enabled menu item for a non-local ancestor index when CPS is disabled', async () => {
+    hookProps.detailsData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
+      'kibana.alert.ancestors.index': {
+        category: 'kibana',
+        field: 'kibana.alert.ancestors.index',
+        values: ['linked_local_project:.ds-logs-endpoint.events-default'],
+        originalValue: ['linked_local_project:.ds-logs-endpoint.events-default'],
+        isObjectArray: false,
+      },
+    });
+    const { result } = render();
+
+    await appContextMock.waitFor(() =>
+      expect(result.current).toEqual([buildExpectedMenuItemResult()])
+    );
+  });
+
+  it('should return enabled menu item when the ancestor index is local', async () => {
+    hookProps.detailsData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
+      'kibana.alert.ancestors.index': {
+        category: 'kibana',
+        field: 'kibana.alert.ancestors.index',
+        values: ['.ds-logs-endpoint.events-default'],
+        originalValue: ['.ds-logs-endpoint.events-default'],
+        isObjectArray: false,
+      },
+    });
+    const { result } = render();
+
+    await appContextMock.waitFor(() =>
+      expect(result.current).toEqual([buildExpectedMenuItemResult()])
+    );
+  });
 
   it('should call isolate API when agent is currently NOT isolated', async () => {
     const { result } = render();

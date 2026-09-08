@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_default_ad_hoc_data_views.ts
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -85,6 +87,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.load(
           'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
         );
+        // `logstash_functional` is loaded once at the suite level (see `../index.ts`),
+        // so reload it here after the "no data page" test unloaded it.
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
@@ -112,6 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show the no data page when no ES data is available', async () => {
         await esArchiver.unload(
           'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+        );
+        // Also unload the suite-level archive so Discover truly sees no ES data.
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
         );
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,

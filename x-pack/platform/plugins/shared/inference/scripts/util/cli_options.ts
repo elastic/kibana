@@ -20,7 +20,11 @@ export const elasticsearchOption = {
   describe: 'Where Elasticsearch is running',
   string: true as const,
   default: format({
-    ...parse(config['elasticsearch.hosts']),
+    ...parse(
+      Array.isArray(config['elasticsearch.hosts'])
+        ? config['elasticsearch.hosts'][0]
+        : config['elasticsearch.hosts']
+    ),
     auth: `${config['elasticsearch.username']}:${config['elasticsearch.password']}`,
   }),
 };

@@ -42,6 +42,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           >
             <input
               aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
               class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
               id="licenseFile"
               type="file"
@@ -54,7 +55,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -85,7 +86,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                   >
                     Cancel
                   </span>
@@ -154,28 +155,43 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-1slkmya-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  The supplied license has expired.
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        The supplied license has expired.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -186,6 +202,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           >
             <input
               aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
               class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
               id="licenseFile"
               type="file"
@@ -198,7 +215,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -229,7 +246,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                   >
                     Cancel
                   </span>
@@ -298,28 +315,43 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-1slkmya-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  The supplied license is not valid for this product.
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        The supplied license is not valid for this product.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -330,6 +362,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           >
             <input
               aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
               class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
               id="licenseFile"
               type="file"
@@ -342,7 +375,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -373,7 +406,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                   >
                     Cancel
                   </span>
@@ -442,28 +475,43 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-1slkmya-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  Error encountered uploading license: Check your license file.
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        Error encountered uploading license: Check your license file.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -474,6 +522,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           >
             <input
               aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
               class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
               id="licenseFile"
               type="file"
@@ -486,7 +535,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -517,7 +566,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                   >
                     Cancel
                   </span>
@@ -586,28 +635,43 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-1slkmya-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -618,6 +682,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           >
             <input
               aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
               class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
               id="licenseFile"
               type="file"
@@ -630,7 +695,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -661,7 +726,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                   >
                     Cancel
                   </span>

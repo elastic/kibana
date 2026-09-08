@@ -120,6 +120,9 @@ const SecurityAlertRequired = rt.type({
 });
 // prettier-ignore
 const SecurityAlertOptional = rt.partial({
+  'data_stream.dataset': schemaString,
+  'data_stream.namespace': schemaString,
+  'data_stream.type': schemaString,
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
@@ -133,6 +136,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
   'kibana.alert.duration.us': schemaStringOrNumber,
   'kibana.alert.end': schemaDate,
+  'kibana.alert.entity.id': schemaStringArray,
   'kibana.alert.flapping': schemaBoolean,
   'kibana.alert.flapping_history': schemaBooleanArray,
   'kibana.alert.group.id': schemaString,
@@ -196,6 +200,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.scheduled_action.group': schemaString,
   'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
+  'kibana.alert.snoozed': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.suppression.docs_count': schemaStringOrNumber,
   'kibana.alert.suppression.end': schemaDate,
@@ -224,11 +229,14 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
+  'kibana.cps_scope.expression': schemaString,
+  'kibana.cps_scope.linked_projects': schemaUnknownArray,
   'kibana.version': schemaString,
   'service.asset.criticality': schemaString,
   'service.risk.calculated_level': schemaString,
   'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
+  'threat.enrichments': schemaUnknown,
   'user.asset.criticality': schemaString,
 });
 

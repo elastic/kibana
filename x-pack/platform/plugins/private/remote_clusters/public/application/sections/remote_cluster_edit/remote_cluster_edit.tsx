@@ -6,22 +6,18 @@
  */
 
 import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiPageTemplate,
-  EuiPageSection,
-  EuiPageBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiPageSection, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
 import type { RequestError } from '../../../types';
 import type { Cluster, ClusterPayload } from '../../../../common/lib';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
@@ -30,7 +26,7 @@ const FORM_MAX_WIDTH = 850;
 
 interface Props {
   isLoading: boolean;
-  cluster: Cluster;
+  cluster: Cluster | undefined;
   startEditingCluster: (clusterName: string) => void;
   stopEditingCluster: () => void;
   editCluster: (cluster: ClusterPayload) => void;
@@ -116,7 +112,11 @@ export const RemoteClusterEdit: React.FC<Props> = ({
           </p>
         }
         actions={
-          <EuiButton {...reactRouterNavigate(history, '/list')} color="danger" iconType="arrowLeft">
+          <EuiButton
+            {...reactRouterNavigate(history, '/list')}
+            color="danger"
+            iconType="chevronSingleLeft"
+          >
             <FormattedMessage
               id="xpack.remoteClusters.edit.viewRemoteClustersButtonLabel"
               defaultMessage="View remote clusters"
@@ -130,20 +130,20 @@ export const RemoteClusterEdit: React.FC<Props> = ({
   const { hasDeprecatedProxySetting } = cluster;
 
   return (
-    <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-edit">
-      <EuiPageSection restrictWidth={FORM_MAX_WIDTH}>
+    <EuiPageBody restrictWidth={false} data-test-subj="remote-clusters-edit">
+      <EuiPageSection paddingSize="none">
         <RemoteClusterPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.editTitle"
-              defaultMessage="Edit remote cluster"
-            />
-          }
+          title={i18n.translate('xpack.remoteClusters.editTitle', {
+            defaultMessage: 'Edit remote cluster',
+          })}
+          backHref={`/app${CRUD_APP_BASE_PATH}/list?cluster=${encodeURIComponent(clusterName)}`}
         />
+      </EuiPageSection>
 
+      <EuiPageSection restrictWidth={FORM_MAX_WIDTH} paddingSize="none">
         {hasDeprecatedProxySetting ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               title={
                 <FormattedMessage
@@ -151,14 +151,13 @@ export const RemoteClusterEdit: React.FC<Props> = ({
                   defaultMessage="Proceed with caution"
                 />
               }
-              color="warning"
-              iconType="question"
-            >
-              <FormattedMessage
-                id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
-                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
+                  defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+                />
+              }
+            />
             <EuiSpacer />
           </>
         ) : null}

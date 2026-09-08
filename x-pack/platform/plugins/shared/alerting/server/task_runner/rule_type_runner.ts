@@ -75,6 +75,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 >;
 
 interface RunOpts<
@@ -187,6 +188,7 @@ export class RuleTypeRunner<
       revision,
       snoozeSchedule,
       alertDelay,
+      lastEnabledAt,
     } = rule;
 
     const { alertTypeState: ruleTypeState = {}, previousStartedAt } = state;
@@ -202,7 +204,10 @@ export class RuleTypeRunner<
           const maxAlerts = alertsClient.getMaxAlertLimit();
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`,
+              {
+                labels: { ruleId: context.ruleId, ruleType: ruleTypeId },
+              }
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }
@@ -253,10 +258,13 @@ export class RuleTypeRunner<
             return maintenanceWindowsPromise;
           };
 
+          const cpsData = context.isServerless ? await executorServices.getCpsData() : undefined;
+
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
               ruleType.executor({
                 executionId,
+                cpsData,
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
@@ -321,6 +329,7 @@ export class RuleTypeRunner<
                   muteAll,
                   snoozeSchedule,
                   alertDelay,
+                  ...(lastEnabledAt ? { lastEnabledAt } : {}),
                 },
                 logger: context.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
@@ -403,7 +412,10 @@ export class RuleTypeRunner<
           await alertsClient.persistAlerts();
         } else {
           context.logger.debug(
-            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
+            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`,
+            {
+              labels: { ruleId: context.ruleId, ruleType: ruleTypeId },
+            }
           );
         }
       })

@@ -8,11 +8,14 @@
  */
 
 import React, { useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
+import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
@@ -31,11 +34,11 @@ export const OptionsListPopover = ({
 }) => {
   const { componentApi, displaySettings } = useOptionsListContext();
 
-  const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
-    componentApi.field$,
+  const [loading, availableOptions, invalidSelections, field] = useBatchedPublishingSubjects(
+    componentApi.dataLoading$,
     componentApi.availableOptions$,
     componentApi.invalidSelections$,
-    componentApi.dataLoading$
+    isDSLOptionsListApi(componentApi) ? componentApi.field$ : new BehaviorSubject(undefined)
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
@@ -45,7 +48,7 @@ export const OptionsListPopover = ({
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
-      {field?.type !== 'boolean' && !displaySettings.hideActionBar && (
+      {field?.type !== 'boolean' && !displaySettings.hide_action_bar && (
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
@@ -62,7 +65,7 @@ export const OptionsListPopover = ({
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
-      {!displaySettings.hideExclude && <OptionsListPopoverFooter />}
+      {!displaySettings.hide_exclude && <OptionsListPopoverFooter />}
     </div>
   );
 };

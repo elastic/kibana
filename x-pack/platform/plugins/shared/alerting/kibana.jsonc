@@ -30,7 +30,8 @@
       "monitoringCollection",
       "spaces",
       "serverless",
-      "maintenanceWindows"
+      "maintenanceWindows",
+      "cps"
     ],
     "extraPublicDirs": ["common", "common/parse_duration"]
   }

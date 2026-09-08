@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 
 export class AnnotationsApp {
   constructor(private readonly page: ScoutPage) {}

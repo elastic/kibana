@@ -69,6 +69,7 @@ Object {
       },
     },
   },
+  "excludeRoutes": Array [],
   "host": "localhost",
   "http2": Object {
     "allowUnsecure": false,
@@ -102,6 +103,12 @@ Object {
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
+  "selfHttp": Object {
+    "ssl": Object {},
+    "target": "auto",
+  },
+  "serverTiming": false,
+  "serverTimingElasticsearch": false,
   "shutdownTimeout": "PT30S",
   "socketTimeout": 120000,
   "ssl": Object {
@@ -146,6 +153,7 @@ Object {
     "versionResolution": "oldest",
   },
   "xsrf": Object {
+    "allowedSchemes": Array [],
     "allowlist": Array [],
     "disableProtection": false,
   },

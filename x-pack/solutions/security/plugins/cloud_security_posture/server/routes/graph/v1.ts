@@ -7,8 +7,9 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchGraph } from './fetch_graph';
-import type { EsQuery, OriginEventId } from './types';
+import type { EsQuery, EntityId, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 
 interface GraphContextServices {
@@ -19,42 +20,63 @@ interface GraphContextServices {
 export interface GetGraphParams {
   services: GraphContextServices;
   query: {
-    originEventIds: OriginEventId[];
+    originEventIds?: OriginEventId[];
     indexPatterns?: string[];
     spaceId?: string;
     start: string | number;
     end: string | number;
     esQuery?: EsQuery;
+    entityIds?: EntityId[];
+    pinnedIds?: string[];
+    projectRouting?: ProjectRouting;
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
+  integrationRuntimeEvalsEnabled?: boolean;
 }
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
+  query: {
+    originEventIds,
+    spaceId = 'default',
+    indexPatterns,
+    start,
+    end,
+    esQuery,
+    entityIds,
+    pinnedIds,
+    projectRouting,
+  },
   showUnknownTarget,
   nodesLimit,
+  integrationRuntimeEvalsEnabled,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds
-      .map((e) => e.id)
-      .join(', ')}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    `Fetching graph for [originEventIds: ${
+      originEventIds?.map((e) => e.id).join(', ') ?? 'none'
+    }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}] [projectRouting: ${
+      projectRouting ?? 'default'
+    }]`
   );
 
-  const results = await fetchGraph({
+  const { events, relationships, entities } = await fetchGraph({
     esClient,
-    showUnknownTarget,
     logger,
     start,
     end,
-    originEventIds,
+    originEventIds: originEventIds ?? [],
+    showUnknownTarget,
     indexPatterns,
     spaceId,
     esQuery,
+    pinnedIds,
+    entityIds,
+    projectRouting,
+    integrationRuntimeEvalsEnabled,
   });
 
-  return parseRecords(logger, results.records, nodesLimit);
+  return parseRecords(logger, events, relationships, entities, nodesLimit);
 };

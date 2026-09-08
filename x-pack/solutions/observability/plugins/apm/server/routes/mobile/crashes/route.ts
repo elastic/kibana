@@ -4,35 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+
+import {
+  routeDefinitions,
+  type CrashDistributionResponse,
+  type CrashMainStatisticsRouteResponse,
+  type MobileCrashesGroupPeriodsResponse,
+} from '@kbn/apm-api-shared';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
-import { offsetRt } from '../../../../common/comparison_rt';
-import type { MobileCrashGroupMainStatisticsResponse } from './get_crash_groups/get_crash_group_main_statistics';
 import { getMobileCrashGroupMainStatistics } from './get_crash_groups/get_crash_group_main_statistics';
-import type { MobileCrashesGroupPeriodsResponse } from './get_mobile_crash_group_detailed_statistics';
 import { getMobileCrashesGroupPeriods } from './get_mobile_crash_group_detailed_statistics';
-import type { CrashDistributionResponse } from './distribution/get_distribution';
 import { getCrashDistribution } from './distribution/get_distribution';
 
 const mobileCrashDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.partial({
-        groupId: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.mobileCrashes.distribution.endpoint,
+  params: routeDefinitions.mobileCrashes.distribution.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<CrashDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -53,23 +40,10 @@ const mobileCrashDistributionRoute = createApmServerRoute({
 });
 
 const mobileCrashMainStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.partial({
-        sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.mobileCrashes.mainStatistics.endpoint,
+  params: routeDefinitions.mobileCrashes.mainStatistics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ errorGroups: MobileCrashGroupMainStatisticsResponse }> => {
+  handler: async (resources): Promise<CrashMainStatisticsRouteResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
@@ -91,22 +65,8 @@ const mobileCrashMainStatisticsRoute = createApmServerRoute({
 });
 
 const mobileCrashDetailedStatisticsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-      t.type({
-        numBuckets: toNumberRt,
-      }),
-    ]),
-    body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
-  }),
+  endpoint: routeDefinitions.mobileCrashes.detailedStatistics.endpoint,
+  params: routeDefinitions.mobileCrashes.detailedStatistics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileCrashesGroupPeriodsResponse> => {
     const apmEventClient = await getApmEventClient(resources);

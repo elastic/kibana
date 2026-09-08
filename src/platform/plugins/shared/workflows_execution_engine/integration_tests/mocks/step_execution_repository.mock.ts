@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionRepository } from '../../server/repositories/step_execution_repository';
+import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type {
+  StepExecutionField,
+  StepExecutionRepository,
+} from '../../server/repositories/step_execution_repository';
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
@@ -17,6 +21,63 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
   ): Promise<EsWorkflowStepExecution[]> {
     return Promise.resolve(
       Array.from(this.stepExecutions.values()).filter((step) => step.workflowRunId === executionId)
+    );
+  }
+
+  public getStepExecutionsByIds(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    const results = stepExecutionIds
+      .map((id) => this.stepExecutions.get(id) || null)
+      .filter((step): step is EsWorkflowStepExecution => step !== null)
+      .map((step) => {
+        const filtered = { ...step };
+        if (sourceIncludes?.length) {
+          const includeSet = new Set<string>(sourceIncludes);
+          for (const key of Object.keys(filtered)) {
+            if (!includeSet.has(key)) {
+              delete (filtered as Record<string, unknown>)[key];
+            }
+          }
+        }
+        if (sourceExcludes?.length) {
+          for (const field of sourceExcludes) {
+            delete (filtered as Record<string, unknown>)[field];
+          }
+        }
+        return filtered;
+      });
+    return Promise.resolve(results);
+  }
+
+  public getStepExecutionsByWorkflowExecution(
+    workflowExecutionId: string,
+    _stepExecutionIds?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    return this.searchStepExecutionsByExecutionId(workflowExecutionId);
+  }
+
+  public async markNonTerminalStepsFailed(
+    workflowExecutionId: string,
+    error: SerializedError
+  ): Promise<void> {
+    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
+
+    if (nonTerminalSteps.length === 0) {
+      return;
+    }
+
+    const finishedAt = new Date().toISOString();
+    await this.bulkUpsert(
+      nonTerminalSteps.map((step) => ({
+        id: step.id,
+        status: ExecutionStatus.FAILED,
+        error,
+        finishedAt,
+      }))
     );
   }
 

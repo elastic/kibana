@@ -17,25 +17,31 @@ import {
   isSubQuery,
   mutate,
   synth,
-  type ESQLCommand,
-  type ESQLFunction,
-  type ESQLAstItem,
-  type ESQLColumn,
   isBinaryExpression,
   Walker,
-} from '@kbn/esql-language';
+  isInlineCast,
+} from '@elastic/esql';
 import type {
+  ESQLCommand,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLColumn,
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
-} from '@kbn/esql-language/src/types';
+  ESQLProperNode,
+} from '@elastic/esql/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
-import { getUsedFields, getFieldTerminals } from '../esql_fields_utils';
+import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../esql_fields_utils';
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
+import {
+  convertTimeseriesCommandNodeToFrom,
+  hasTimeseriesInfoCommand,
+} from '../query_parsing_helpers';
 import {
   isSupportedStatsFunction,
   type SupportedFieldTypes,
@@ -52,6 +58,23 @@ import {
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
+import { GROUP_NOT_SET_VALUE } from '../../../constants';
+
+const hasUnsupportedGroupingFunction = (definition: ESQLProperNode): boolean => {
+  const funcExpr = isFunctionExpression(definition)
+    ? definition
+    : isInlineCast(definition) && isFunctionExpression(definition.value)
+    ? definition.value
+    : null;
+
+  if (!funcExpr) {
+    return false;
+  }
+
+  return (
+    !isSupportedStatsFunction(funcExpr.name) || isCategorizeFunctionWithFunctionArgument(funcExpr)
+  );
+};
 
 type NodeType = 'group' | 'leaf';
 
@@ -73,6 +96,12 @@ export interface ESQLStatsQueryMeta {
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
   const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
+
+  if (hasTimeseriesInfoCommand(queryString)) {
+    // TS_INFO/METRICS_INFO rows are synthetic metric metadata rather than documents,
+    // so there's no underlying document to drive a cascade experience from
+    return { groupByFields, appliedFunctions };
+  }
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
@@ -96,7 +125,8 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   for (let j = 0; j < grouping.length; j++) {
     const group = grouping[j];
 
-    if (!group.definition) {
+    const groupDefinition = getFieldDefinitionFromArg(group.arg);
+    if (!groupDefinition) {
       // query received is malformed without complete grouping definition, there's no need to proceed further
       return { groupByFields: [], appliedFunctions: [] };
     }
@@ -139,11 +169,9 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       }
     }
 
-    if (
-      isFunctionExpression(groupFieldNode.definition) &&
-      (!isSupportedStatsFunction(groupFieldNode.definition.name) ||
-        isCategorizeFunctionWithFunctionArgument(groupFieldNode.definition))
-    ) {
+    const groupFieldDefinition = getFieldDefinitionFromArg(groupFieldNode.arg);
+
+    if (hasUnsupportedGroupingFunction(groupFieldDefinition)) {
       // if the group field has a grouping function that is not supported,
       // this nullifies the entire query to count as a valid query for the cascade experience
       groupByFields.splice(0, groupByFields.length);
@@ -235,10 +263,12 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   }
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
+    const aggregateFieldDefinition = getFieldDefinitionFromArg(aggregate.arg);
+    const aggregationName =
+      (aggregateFieldDefinition as ESQLFunction).operator?.name ?? aggregateFieldDefinition.text;
     appliedFunctions.push({
       identifier: removeBackticks(aggregate.field), // we remove backticks to have a clean identifier that gets displayed in the UI
-      aggregation:
-        (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
+      aggregation: aggregationName,
     });
   });
 
@@ -344,7 +374,8 @@ export const constructCascadeQuery = ({
       (cmd) => cmd.text === summarizedStatsCommand.command.text
     );
 
-    if (isColumn(groupValue.definition)) {
+    const groupValueDefinition = getFieldDefinitionFromArg(groupValue.arg);
+    if (isColumn(groupValueDefinition)) {
       return handleStatsByColumnLeafOperation(
         EditorESQLQuery,
         operatingStatsCommandIndex,
@@ -353,8 +384,8 @@ export const constructCascadeQuery = ({
         esqlVariables,
         nodePathMap[pathSegment]
       );
-    } else if (isFunctionExpression(groupValue.definition)) {
-      switch (groupValue.definition.name) {
+    } else if (isFunctionExpression(groupValueDefinition)) {
+      switch (groupValueDefinition.name) {
         case 'categorize': {
           return handleStatsByCategorizeLeafOperation(
             EditorESQLQuery,
@@ -366,7 +397,7 @@ export const constructCascadeQuery = ({
         }
         default: {
           throw new Error(
-            `The "${groupValue.definition.name}" function is not supported for leaf node operations`
+            `The "${groupValueDefinition.name}" function is not supported for leaf node operations`
           );
         }
       }
@@ -390,15 +421,15 @@ function handleStatsByColumnLeafOperation(
 ): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-  let operationColumnName = columnNode.definition.name;
+  const columnDefinition = getFieldDefinitionFromArg(columnNode.arg);
+  let operationColumnName = columnDefinition.name;
 
   let operationColumnNameParamValue;
 
   if (
     (operationColumnNameParamValue = getFieldParamDefinition(
       operationColumnName,
-      getFieldTerminals(columnNode.definition),
+      getFieldTerminals(columnNode.arg),
       esqlVariables
     ))
   ) {
@@ -442,7 +473,11 @@ function handleStatsByColumnLeafOperation(
         continue;
       }
     } else {
-      mutate.generic.commands.insert(cascadeOperationQuery.ast, cmd, 0);
+      mutate.generic.commands.insert(
+        cascadeOperationQuery.ast,
+        convertTimeseriesCommandNodeToFrom(cmd),
+        0
+      );
     }
   }
 
@@ -450,7 +485,11 @@ function handleStatsByColumnLeafOperation(
   const filterCommand = Builder.command({
     name: 'where',
     args: [
-      shouldUseMatchPhrase
+      operationValue === GROUP_NOT_SET_VALUE
+        ? Builder.expression.func.postfix('IS NULL', [
+            Builder.identifier({ name: operationColumnName }),
+          ])
+        : shouldUseMatchPhrase
         ? Builder.expression.func.call('match_phrase', [
             Builder.identifier({ name: operationColumnName }),
             Builder.expression.literal.string(operationValue as string),
@@ -498,13 +537,17 @@ function handleStatsByCategorizeLeafOperation(
       return;
     }
 
-    mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    mutate.generic.commands.append(
+      cascadeOperationQuery.ast,
+      convertTimeseriesCommandNodeToFrom(cmd)
+    );
   });
 
   // we select the first argument because that's the field being categorized
   // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
+  const categorizedFieldDefinition = getFieldDefinitionFromArg(categorizeCommandNode.arg);
   const categorizedField = (
-    categorizeCommandNode.definition as ESQLFunction<'variadic-call', 'categorize'>
+    categorizedFieldDefinition as ESQLFunction<'variadic-call', 'categorize'>
   ).args[0];
 
   let categorizedFieldName: string;
@@ -521,7 +564,7 @@ function handleStatsByCategorizeLeafOperation(
     if (
       (categorizedFieldNameParamValue = getFieldParamDefinition(
         categorizedFieldName,
-        getFieldTerminals(categorizeCommandNode.definition),
+        getFieldTerminals(categorizeCommandNode.arg),
         esqlVariables
       ))
     ) {
@@ -629,13 +672,13 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
     // Add used fields from aggregates
     Object.values(operatingStatsCommand.aggregates).forEach((aggregate) => {
-      const usedFields = getUsedFields(aggregate.definition);
+      const usedFields = getUsedFields(aggregate.arg);
       usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
     });
 
     // Add used fields from grouping
     Object.values(operatingStatsCommand.grouping).forEach((group) => {
-      const usedFields = getUsedFields(group.definition);
+      const usedFields = getUsedFields(group.arg);
       usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
     });
 
@@ -711,7 +754,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     if (
       (fieldNameParamValue = getFieldParamDefinition(
         fieldName,
-        getFieldTerminals(fieldDeclaration.definition),
+        getFieldTerminals(fieldDeclaration.arg),
         esqlVariables
       ))
     ) {
@@ -827,6 +870,14 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   if (isBinaryExpression(filteringExpression) && filteringExpression.name === 'and') {
     // This is already a combination of some conditions, for now we'll just append the new condition to the existing one
     modifiedFilteringWhereCommand = synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringExpression}`;
+  } else if (
+    isFunctionExpression(filteringExpression) &&
+    filteringExpression.subtype === 'postfix-unary-expression'
+  ) {
+    modifiedFilteringWhereCommand =
+      (filteringExpression.args[0] as ESQLColumn).name === normalizedFieldName
+        ? synth.cmd`WHERE ${computedFilteringExpression}`
+        : synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringExpression}`;
   } else {
     modifiedFilteringWhereCommand =
       isBinaryExpression(filteringExpression) &&

@@ -24,6 +24,7 @@ describe('Use get case hook', () => {
       expect(spy).toHaveBeenCalledWith({
         caseId: 'case-1',
         signal: expect.any(AbortSignal),
+        mode: 'unified',
       })
     );
   });

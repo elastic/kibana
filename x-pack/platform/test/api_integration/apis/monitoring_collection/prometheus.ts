@@ -21,16 +21,16 @@ export default function ({ getService }: FtrProviderContext) {
       const cleanResponseText = response.text.replace(/\s+/g, ' ');
 
       // 1. Match the headers with the resource attributes
-      // Check for required attributes (service_name and service_version) but allow any additional attributes in any order
-      // Using non-greedy quantifiers (.*?) to prevent ReDoS vulnerabilities from catastrophic backtracking
       expect(cleanResponseText).to.match(
-        /^# HELP target_info Target metadata # TYPE target_info gauge target_info{.*?service_name=".+?".*?service_version=".+?".*?} 1/
+        /^# HELP target_info Target metadata # TYPE target_info gauge target_info\{/
       );
+      expect(cleanResponseText).to.match(/service_name="[^"]+"/);
+      expect(cleanResponseText).to.match(/service_version="[^"]+"/);
+      expect(cleanResponseText).to.match(/service_instance_id="[^"]+"/);
 
       // 2. Match the specific known counter reported in src/platform/test/common/plugins/otel_metrics/server/monitoring/metrics.ts
-      // Allow optional labels (e.g., {otel_scope_name="dummyMetric"}) before the value
       expect(cleanResponseText).to.match(
-        /# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total(\{[^}]+\})? [0-9]/
+        /# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total\{otel_scope_name="dummyMetric"\} [0-9]/
       );
     });
   });

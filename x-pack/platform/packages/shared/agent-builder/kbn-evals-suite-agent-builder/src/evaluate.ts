@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { evaluate as base } from '@kbn/evals';
+import { evaluate as evalsBase } from '@kbn/evals';
 import { AgentBuilderEvaluationChatClient } from './chat_client';
-export const evaluate = base.extend<
+
+export const evaluate = evalsBase.extend<
   {},
   {
     chatClient: AgentBuilderEvaluationChatClient;

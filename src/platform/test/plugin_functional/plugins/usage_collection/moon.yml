@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/usage-collection-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/usage-collection-test-plugin'
+  title: '@kbn/usage-collection-test-plugin'
   description: Moon project for @kbn/usage-collection-test-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/usage_collection
+  sourceRoot: src/platform/test/plugin_functional/plugins/usage_collection
 dependsOn:
   - '@kbn/core'
   - '@kbn/usage-collection-plugin'

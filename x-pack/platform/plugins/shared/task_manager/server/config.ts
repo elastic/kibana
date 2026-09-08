@@ -14,8 +14,8 @@ export const DEFAULT_CAPACITY = 10;
 export const MAX_CAPACITY = 50;
 export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
-export const DEFAULT_POLL_INTERVAL = 3000;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
+export const LOW_UTILIZATION_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 
 // Monitoring Constants
@@ -32,7 +32,6 @@ export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
 export const WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS = 15 * 1000; // 15 seconds
 
-export const CLAIM_STRATEGY_UPDATE_BY_QUERY = 'update_by_query';
 export const CLAIM_STRATEGY_MGET = 'mget';
 
 export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
@@ -44,6 +43,15 @@ export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';
 const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
+
+export const DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS = 5000; // 5 seconds
+const MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000; // 1 second
+const MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000 * 60; // 1 minute
+
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
+}
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -88,6 +96,12 @@ const validateDuration = (duration: string) => {
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
+    /* The API key type to switch between UIAM API keys and Elasticsearch API keys. */
+    api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
+      defaultValue: ApiKeyType.ES,
+    }),
+    /* Whether Task Manager should grant and persist UIAM API keys. Usage of granted UIAM keys is still governed by api_key_type. */
+    grant_uiam_api_keys: schema.boolean({ defaultValue: false }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     discovery: schema.object({
@@ -108,6 +122,14 @@ export const configSchema = schema.object(
         defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
         min: MIN_DISCOVERY_INTERVAL_MS,
         max: MAX_DISCOVERY_INTERVAL_MS,
+      }),
+    }),
+    /* How often each node polls the runtime task execution control (pause/resume) state. */
+    execution_control: schema.object({
+      poll_interval: schema.number({
+        defaultValue: DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS,
+        min: MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS,
+        max: MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS,
       }),
     }),
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
@@ -157,7 +179,7 @@ export const configSchema = schema.object(
     /* The rate at which we emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
     monitored_stats_required_freshness: schema.number({
       defaultValue: (config?: unknown) =>
-        ((config as { poll_interval: number })?.poll_interval ?? DEFAULT_POLL_INTERVAL) + 1000,
+        ((config as { poll_interval: number })?.poll_interval ?? MGET_DEFAULT_POLL_INTERVAL) + 1000,
       min: 100,
     }),
     /* The size of the running average window for monitored stats. */
@@ -174,18 +196,11 @@ export const configSchema = schema.object(
       default: taskExecutionFailureThresholdSchema,
     }),
     /* How often, in milliseconds, the task manager will look for more work. */
-    poll_interval: schema.conditional(
-      schema.siblingRef('claim_strategy'),
-      CLAIM_STRATEGY_MGET,
-      schema.number({
-        defaultValue: MGET_DEFAULT_POLL_INTERVAL,
-        min: 100,
-      }),
-      schema.number({
-        defaultValue: DEFAULT_POLL_INTERVAL,
-        min: 100,
-      })
-    ),
+    poll_interval: schema.number({
+      defaultValue: MGET_DEFAULT_POLL_INTERVAL,
+      min: 100,
+    }),
+
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
       // a nice round contrived number, feel free to change as we learn how it behaves
@@ -229,4 +244,3 @@ export const configSchema = schema.object(
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
-export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;

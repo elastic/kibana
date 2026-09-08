@@ -15,13 +15,13 @@ exports[`TransactionActionMenu  matches the snapshot 1`] = `
         class="emotion-euiButtonDisplayContent"
       >
         <span
-          class="eui-textTruncate"
+          class="eui-textTruncate css-13ifi6d-m"
         >
           Investigate
         </span>
         <span
           color="inherit"
-          data-euiicon-type="arrowDown"
+          data-euiicon-type="chevronSingleDown"
         />
       </span>
     </button>

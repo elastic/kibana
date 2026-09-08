@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/workplace-ai-app",
   "owner": [
-    "@elastic/search-kibana",
+    "@elastic/search-ml-ux",
     "@elastic/workchat-eng"
    ],
   "group": "workplaceai",
@@ -13,8 +13,8 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "workplaceAIApp"],
-    "requiredPlugins": ["inference", "actions", "features", "dataCatalog", "spaces", "triggersActionsUi", "workflowsExtensions"],
+    "requiredPlugins": ["inference", "actions", "features", "spaces", "triggersActionsUi"],
     "optionalPlugins": ["cloud", "share"],
-    "requiredBundles": ["kibanaReact", "stackConnectors"]
+    "requiredBundles": ["kibanaReact"]
   }
 }

@@ -20,10 +20,22 @@ describe('parseExperimentalConfigValue', () => {
   });
 
   it('should enable a valid feature flag', () => {
-    const { features, invalid } = parseExperimentalConfigValue(['_placeholder']);
+    // Precondition: if the default flips to true, fail here instead of passing vacuously below.
+    expect(allowedExperimentalValues.crossProjectSearch).toBe(false);
 
-    expect(features._placeholder).toBe(true);
+    const { features, invalid } = parseExperimentalConfigValue(['crossProjectSearch']);
+
+    expect(features.crossProjectSearch).toBe(true);
     expect(invalid).toEqual([]);
+  });
+
+  it('should report a graduated feature flag as invalid', () => {
+    expect(parseExperimentalConfigValue(['queryHistoryRework']).invalid).toEqual([
+      'queryHistoryRework',
+    ]);
+    expect(parseExperimentalConfigValue(['unifiedDataTable']).invalid).toEqual([
+      'unifiedDataTable',
+    ]);
   });
 
   it('should track invalid feature flags', () => {
@@ -35,22 +47,22 @@ describe('parseExperimentalConfigValue', () => {
 
   it('should handle mix of valid and invalid feature flags', () => {
     const { features, invalid } = parseExperimentalConfigValue([
-      '_placeholder',
+      'crossProjectSearch',
       'invalidFeature1',
       'invalidFeature2',
     ]);
 
-    expect(features._placeholder).toBe(true);
+    expect(features.crossProjectSearch).toBe(true);
     expect(invalid).toEqual(['invalidFeature1', 'invalidFeature2']);
   });
 
   it('should handle disable: prefix to turn off features', () => {
     const { features, invalid } = parseExperimentalConfigValue([
-      '_placeholder',
-      'disable:_placeholder',
+      'exportResults',
+      'disable:exportResults',
     ]);
 
-    expect(features._placeholder).toBe(false);
+    expect(features.exportResults).toBe(false);
     expect(invalid).toEqual([]);
   });
 
@@ -67,6 +79,25 @@ describe('getExperimentalAllowedValues', () => {
     const allowedValues = getExperimentalAllowedValues();
 
     expect(allowedValues).toEqual(Object.keys(allowedExperimentalValues));
-    expect(allowedValues).toContain('_placeholder');
+    expect(allowedValues).toContain('exportResults');
+  });
+
+  it('should return exactly the currently supported flags', () => {
+    // Pinned literally: adding or graduating a flag must be an explicit change here.
+    expect(getExperimentalAllowedValues()).toEqual([
+      'exportResults',
+      'rruleScheduling',
+      'crossProjectSearch',
+    ]);
+  });
+});
+
+describe('allowedExperimentalValues', () => {
+  it('should pin the default state of every flag', () => {
+    expect(allowedExperimentalValues).toEqual({
+      exportResults: true,
+      rruleScheduling: true,
+      crossProjectSearch: false,
+    });
   });
 });

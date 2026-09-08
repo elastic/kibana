@@ -23,11 +23,11 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "inspector",
       "lens",
       "licensing",
       "observability",
       "observabilityShared",
-      "presentationUtil",
       "ruleRegistry",
       "share",
       "sloShared",
@@ -42,19 +42,23 @@
     "optionalPlugins": [
       "cases",
       "cloud",
+      "cps",
       "discover",
-      "embeddableEnhanced",
       "observabilityAIAssistant",
       "security",
       "serverless",
-      "spaces"
+      "spaces",
+      "agentBuilder",
+      "observabilityAgentBuilder"
     ],
     "requiredBundles": [
       "embeddable",
       "ingestPipelines",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch"
+      "unifiedSearch",
+      "observabilityAgentBuilder",
+      "presentationUtil"
     ]
   }
 }

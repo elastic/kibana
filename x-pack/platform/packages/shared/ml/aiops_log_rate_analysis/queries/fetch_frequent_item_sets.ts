@@ -99,6 +99,7 @@ export async function fetchFrequentItemSets({
     deviationMin: number;
     deviationMax: number;
     sampleProbability?: number;
+    projectRouting?: string;
   };
 }): Promise<FetchFrequentItemSetsResponse> {
   const {
@@ -110,6 +111,7 @@ export async function fetchFrequentItemSets({
     deviationMax,
     // The default value of 1 means no sampling will be used
     sampleProbability = 1,
+    projectRouting,
   } = args;
 
   // Sort significant terms by ascending p-value, necessary to apply the field limit correctly.
@@ -156,6 +158,7 @@ export async function fetchFrequentItemSets({
     aggs: wrap(frequentItemSetsAgg),
     size: 0,
     track_total_hits: true,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   const body = await esClient.search<

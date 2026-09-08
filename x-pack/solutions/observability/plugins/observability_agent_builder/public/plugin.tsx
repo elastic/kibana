@@ -14,11 +14,13 @@ import type {
 } from './types';
 import {
   createAlertAIInsight,
+  createAlertAskAiAgentButton,
   createErrorSampleAIInsight,
   createLogAIInsight,
   createLogsAIInsightRenderer,
 } from './components/insights';
 import { registerAttachmentUiDefinitions } from './attachment_types';
+import { registerTelemetryEventTypes } from './analytics';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -38,6 +40,7 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginPublicSetup {
+    registerTelemetryEventTypes(core.analytics);
     return {};
   }
 
@@ -58,6 +61,7 @@ export class ObservabilityAgentBuilderPlugin
 
     return {
       getAlertAIInsight: () => createAlertAIInsight(core, plugins),
+      getAlertAskAiAgentButton: () => createAlertAskAiAgentButton(core, plugins),
       getErrorSampleAIInsight: () => createErrorSampleAIInsight(core, plugins),
     };
   }

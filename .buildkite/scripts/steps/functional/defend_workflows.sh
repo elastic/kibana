@@ -7,6 +7,8 @@ source .buildkite/scripts/steps/functional/common.sh
 export JOB=kibana-defend-workflows-cypress
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
+source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
+
 echo "--- Defend Workflows Cypress tests"
 
 cd x-pack/solutions/security/plugins/security_solution

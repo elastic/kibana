@@ -246,7 +246,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiButtonEmpty
             size="xs"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             flush="left"
             href={cancelUrl}
             onClick={onCancel}

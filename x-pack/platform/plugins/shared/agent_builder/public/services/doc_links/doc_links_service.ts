@@ -13,13 +13,18 @@ export class DocLinksService {
   public readonly models: string;
   public readonly chat: string;
   public readonly agentBuilderAgents: string;
-  public readonly tools: string;
+  public readonly agentBuilderSkills: string;
+  public readonly agentBuilderPlugins: string;
+  public readonly agentBuilderConnectors: string;
+  public readonly agentBuilderTools: string;
+  public readonly elasticCapabilities: string;
   public readonly programmaticAccess: string;
   public readonly kibanaApi: string;
   public readonly mcpServer: string;
   public readonly a2aServer: string;
   public readonly limitationsKnownIssues: string;
   public readonly limitationsKnownIssuesConversationLengthExceeded: string;
+  public readonly applicationConnections: string;
 
   constructor(docLinks: DocLinks) {
     this.agentBuilder = docLinks.agentBuilder.agentBuilder;
@@ -27,12 +32,17 @@ export class DocLinksService {
     this.models = docLinks.agentBuilder.models;
     this.chat = docLinks.agentBuilder.chat;
     this.agentBuilderAgents = docLinks.agentBuilder.agentBuilderAgents;
-    this.tools = docLinks.agentBuilder.tools;
+    this.agentBuilderSkills = docLinks.agentBuilder.agentBuilderSkills;
+    this.agentBuilderPlugins = docLinks.agentBuilder.agentBuilderPlugins;
+    this.agentBuilderConnectors = docLinks.agentBuilder.agentBuilderConnectors;
+    this.agentBuilderTools = docLinks.agentBuilder.agentBuilderTools;
+    this.elasticCapabilities = docLinks.agentBuilder.elasticCapabilities;
     this.programmaticAccess = docLinks.agentBuilder.programmaticAccess;
     this.kibanaApi = docLinks.agentBuilder.kibanaApi;
     this.mcpServer = docLinks.agentBuilder.mcpServer;
     this.a2aServer = docLinks.agentBuilder.a2aServer;
     this.limitationsKnownIssues = docLinks.agentBuilder.limitationsKnownIssues;
     this.limitationsKnownIssuesConversationLengthExceeded = `${docLinks.agentBuilder.limitationsKnownIssues}#conversation-length-exceeded`;
+    this.applicationConnections = docLinks.applicationConnections.oauthClients;
   }
 }

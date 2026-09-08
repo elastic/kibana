@@ -97,7 +97,7 @@ const RelatedIntegrationsList = ({
           ))}
         </EuiFlexGroup>
         {items.length > 0 && <EuiSpacer size="s" />}
-        <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
+        <EuiButtonEmpty size="xs" iconType="plusCircle" onClick={addItem}>
           {i18n.ADD_INTEGRATION}
         </EuiButtonEmpty>
       </>

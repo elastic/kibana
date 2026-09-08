@@ -11,6 +11,7 @@ import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import { NER_MODEL_ID } from '@kbn/anonymization-common';
 import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
@@ -25,7 +26,16 @@ const NER_DOCS_URL_DEPLOY_MODEL =
 function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
   const chunks: string[] = [];
   for (let i = 0; i < text.length; i += maxChars) {
-    chunks.push(text.slice(i, i + maxChars));
+    let end = Math.min(i + maxChars, text.length);
+    // Avoid splitting a UTF-16 surrogate pair: if the boundary falls between
+    // a high surrogate (0xD800–0xDBFF) and its low surrogate, back up one unit.
+    if (end < text.length) {
+      const code = text.charCodeAt(end - 1);
+      if (code >= 0xd800 && code <= 0xdbff) {
+        end--;
+      }
+    }
+    chunks.push(text.slice(i, end));
   }
   return chunks;
 }
@@ -41,6 +51,16 @@ function isModelNotDeployedError(error: unknown): boolean {
 
 const DEFAULT_BATCH_SIZE = 1_000;
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 7;
+type NerEntityClass = NonNullable<NamedEntityRecognitionRule['allowedEntityClasses']>[number];
+
+const isNerEntityClass = (entityClass: string): entityClass is NerEntityClass => {
+  return (
+    entityClass === 'PER' ||
+    entityClass === 'ORG' ||
+    entityClass === 'LOC' ||
+    entityClass === 'MISC'
+  );
+};
 
 /**
  * Executes a NER anonymization rule, by:
@@ -63,11 +83,15 @@ export async function executeNerRule({
   state,
   rule,
   esClient,
+  salt,
 }: {
   state: AnonymizationState;
   rule: NamedEntityRecognitionRule;
   esClient: ElasticsearchClient;
+  salt?: string;
 }): Promise<AnonymizationState> {
+  const modelId = rule.modelId ?? NER_MODEL_ID;
+
   const anonymizations: Anonymization[] = state.anonymizations.concat();
 
   const allowedNerEntities = rule.allowedEntityClasses;
@@ -109,7 +133,7 @@ export async function executeNerRule({
               span?.setAttribute('input.value', JSON.stringify(docs));
 
               const response = await esClient.ml.inferTrainedModel({
-                model_id: rule.modelId,
+                model_id: modelId,
                 docs,
                 timeout: `${rule.timeoutSeconds ?? 30}s`,
               });
@@ -123,7 +147,7 @@ export async function executeNerRule({
           // The model was not found, probably not downloaded.
           if (isNotFoundError(error)) {
             throw new Error(
-              `The NER model '${rule.modelId}' was not found. ` +
+              `The NER model '${modelId}' was not found. ` +
                 `Please download and deploy the model before enabling anonymization. ` +
                 `For instructions, see: ${NER_DOCS_URL_DOWNLOAD_MODEL}`,
               { cause: error }
@@ -133,7 +157,7 @@ export async function executeNerRule({
           // The model is available but not currently deployed.
           if (isModelNotDeployedError(error)) {
             throw new Error(
-              `The NER model '${rule.modelId}' is not deployed. ` +
+              `The NER model '${modelId}' is not deployed. ` +
                 `Please deploy the model before enabling anonymization. ` +
                 `For instructions, see: ${NER_DOCS_URL_DEPLOY_MODEL}`,
               { cause: error }
@@ -142,7 +166,7 @@ export async function executeNerRule({
 
           // Other error, rethrow.
           const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Inference failed for NER model '${rule.modelId}': ${errorMessage}`, {
+          throw new Error(`Inference failed for NER model '${modelId}': ${errorMessage}`, {
             cause: error,
           });
         });
@@ -163,9 +187,28 @@ export async function executeNerRule({
 
           let anonymizedValue = allTexts[position];
 
-          for (const entity of (nerOutput.entities ?? []).filter((e) =>
-            allowedNerEntities ? allowedNerEntities.includes(e.class_name as any) : true
-          )) {
+          const filteredEntities = (
+            (nerOutput?.entities ?? []) as Array<{
+              class_name: string;
+              start_pos: number;
+              end_pos: number;
+            }>
+          )
+            .filter((e) =>
+              allowedNerEntities
+                ? isNerEntityClass(e.class_name) && allowedNerEntities.includes(e.class_name)
+                : true
+            )
+            .sort((a, b) => a.start_pos - b.start_pos);
+
+          // Resolve overlapping spans: skip entities whose start falls before the previous entity's end
+          let lastEndPos = -1;
+          for (const entity of filteredEntities) {
+            if (entity.start_pos < lastEndPos) {
+              continue;
+            }
+            lastEndPos = entity.end_pos;
+
             const from = entity.start_pos + offset;
             const to = entity.end_pos + offset;
 
@@ -174,7 +217,10 @@ export async function executeNerRule({
 
             const entityText = anonymizedValue.slice(from, to);
 
-            const mask = getEntityMask({ class_name: entity.class_name, value: entityText });
+            const mask = getEntityMask(
+              { class_name: entity.class_name, value: entityText, field: key },
+              salt
+            );
 
             anonymizedValue = before + mask + after;
             offset += mask.length - entityText.length;

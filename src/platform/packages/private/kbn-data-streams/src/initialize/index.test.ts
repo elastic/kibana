@@ -592,5 +592,66 @@ describe('initialize - versioning logic', () => {
         name: dataStream.name,
       });
     });
+
+    it('should include template lifecycle when configured', async () => {
+      const dataStream: DataStreamDefinition<typeof testMappings> = {
+        ...createTestDataStream(1),
+        template: {
+          mappings: testMappings,
+          lifecycle: {
+            data_retention: '30d',
+          },
+        },
+      };
+
+      // Mock: No index template exists
+      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject(
+          new EsErrors.ResponseError({
+            statusCode: 404,
+            body: { error: { type: 'resource_not_found_exception' } },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      // Mock: No data stream exists
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject(
+          new EsErrors.ResponseError({
+            statusCode: 404,
+            body: { error: { type: 'resource_not_found_exception' } },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      // Mock: putIndexTemplate for creation
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ acknowledged: true })
+      );
+
+      // Mock: createDataStream for creation
+      (elasticsearchClient.indices.createDataStream as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ acknowledged: true })
+      );
+
+      await initialize({
+        logger,
+        elasticsearchClient,
+        dataStream,
+        lazyCreation: false,
+      });
+
+      const createCall = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+        .calls[0][0];
+      expect(createCall?.template?.lifecycle).toEqual({
+        data_retention: '30d',
+      });
+    });
   });
 });

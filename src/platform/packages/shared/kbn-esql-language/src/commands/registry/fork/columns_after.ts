@@ -8,8 +8,8 @@
  */
 import { uniqBy } from 'lodash';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLAstAllCommands, ESQLAstForkCommand } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLAstAllCommands, ESQLAstForkCommand } from '../../../types';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
@@ -19,7 +19,7 @@ export const columnsAfter = async (
   previousColumns: ESQLColumnData[],
   query: string,
   additionalFields: IAdditionalFields,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ) => {
   const forkCommand = command as ESQLAstForkCommand;
   const branches = forkCommand.args.map((parens) => parens.child);

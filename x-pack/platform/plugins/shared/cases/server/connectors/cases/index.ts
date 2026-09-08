@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { clamp } from 'lodash/fp';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
@@ -23,7 +24,6 @@ import {
   CASES_CONNECTOR_TITLE,
   OWNER_INFO,
   DEFAULT_MAX_OPEN_CASES,
-  MAX_OPEN_CASES,
 } from '../../../common/constants';
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 
@@ -45,19 +45,29 @@ import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './a
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getUnsecuredSavedObjectsClient: (
     request: KibanaRequest,
     savedObjectTypes: string[]
   ) => Promise<SavedObjectsClientContract>;
+  getUiSettingsClient: (request: KibanaRequest) => Promise<IUiSettingsClient>;
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: string;
+  isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
+  isAtLeastPlatinum: () => Promise<boolean>;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
+  getActionsClient,
   getSpaceId,
   getUnsecuredSavedObjectsClient,
+  getUiSettingsClient,
   serverlessProjectType,
+  isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
+  isAtLeastPlatinum,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -66,7 +76,16 @@ export const getCasesConnectorType = ({
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
     new CasesConnector({
-      casesParams: { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient },
+      casesParams: {
+        getCasesClient,
+        getActionsClient,
+        getSpaceId,
+        getUnsecuredSavedObjectsClient,
+        getUiSettingsClient,
+        isCasesAttachmentsEnabled,
+        isTemplatesEnabled,
+        isAtLeastPlatinum,
+      },
       connectorParams: params,
     }),
   schema: {
@@ -120,11 +139,7 @@ export const getCasesConnectorAdapter = ({
        */
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
-      let maximumCasesToOpen = clamp(
-        1,
-        params.subActionParams.maximumCasesToOpen || DEFAULT_MAX_OPEN_CASES,
-        MAX_OPEN_CASES
-      );
+      let maximumCasesToOpen = params.subActionParams.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
@@ -154,6 +169,7 @@ export const getCasesConnectorAdapter = ({
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
+        templateVersion: params.subActionParams.templateVersion,
         internallyManagedAlerts,
       };
 

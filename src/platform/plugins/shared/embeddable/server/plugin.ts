@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, RequestHandlerContext } from '@kbn/core/server';
 import { identity } from 'lodash';
+import { distinctUntilChanged, skip } from 'rxjs';
+
 import type {
   PersistableStateService,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectType } from '@kbn/config-schema';
+import type { ZodObjectType } from '@kbn/zod';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -25,57 +27,68 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type {
-  EmbeddableTransforms,
-  TransformEnhancementsIn,
-  TransformEnhancementsOut,
-} from '../common';
-import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
-import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
+import type { EmbeddableTransforms } from '../common';
+import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
+import { getDrilldownRegistry } from './drilldowns/registry';
+import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
+import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
+import { registerSearchRoute } from './search_route';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   /*
-   * Use registerTransforms to register transforms and schema for an embeddable type.
-   * Transforms decouple REST API state from stored state,
-   * allowing embeddables to have one shape for REST APIs and another for storage.
-   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
-   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
-   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+   * Use registerDrilldown to register transforms and schema for a drilldown type.
    */
-  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
+  registerDrilldown: <
+    StoredState extends DrilldownState = DrilldownState,
+    State extends DrilldownState = DrilldownState
+  >(
+    type: string,
+    drilldown: DrilldownSetup<StoredState, State>
+  ) => void;
+  /**
+   * Registers an embeddable server defintion.
+   * Be sure to register an embeddable public definition for this type.
+   */
+  registerEmbeddableServerDefinition: (
+    type: string,
+    transforms: EmbeddableServerDefinition<any, any>
+  ) => void;
   getAllMigrations: () => MigrateFunctionsObject;
-  transformEnhancementsIn: TransformEnhancementsIn;
-  transformEnhancementsOut: TransformEnhancementsOut;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
   /**
-   * Returns all embeddable schemas registered with registerTransforms.
+   * Returns all embeddable schemas registered with registerEmbeddableServerDefinition.
    */
-  getEmbeddableSchemas: () => ObjectType[];
+  getAllEmbeddableSchemas: () => { [key: string]: { schema: ZodObjectType; title: string } };
 
-  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+  getTransforms: (type: string) =>
+    | (EmbeddableTransforms & {
+        schema?: ZodObjectType;
+        throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
+      })
+    | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
-  private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
+  private drilldownRegistry = getDrilldownRegistry();
+  private transformsRegistry = getEmbeddableServerRegistry(this.drilldownRegistry);
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
+
+    const unversionedRouter = core.http.createRouter<RequestHandlerContext>();
+    registerSearchRoute(unversionedRouter);
+
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
-        if (this.transformsRegistry[type]) {
-          throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
-        }
-
-        this.transformsRegistry[type] = transforms;
-      },
-      transformEnhancementsIn: enhancementsPersistableState.extract,
-      transformEnhancementsOut,
+      registerDrilldown: this.drilldownRegistry
+        .registerDrilldown as EmbeddableSetup['registerDrilldown'],
+      registerEmbeddableServerDefinition:
+        this.transformsRegistry.registerEmbeddableServerDefinition,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),
@@ -84,15 +97,20 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
+    // Changing lens.apiFormat feature flag changes output of lens getSchema, so
+    // we cannot use the cached value.
+    // TODO: remove when lens.apiFormat feature flag is removed.
+    core.featureFlags
+      .getBooleanValue$('lens.apiFormat', false)
+      .pipe(skip(1), distinctUntilChanged())
+      .subscribe((lensApiFormatFlag) => {
+        this.transformsRegistry.resetCache();
+      });
+
     return {
-      getEmbeddableSchemas: () =>
-        Object.values(this.transformsRegistry)
-          .map((transforms) => transforms?.getSchema?.())
-          .filter((schema) => Boolean(schema)) as ObjectType[],
-      getTransforms: (type: string) => {
-        return this.transformsRegistry[type];
-      },
+      getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
+      getTransforms: this.transformsRegistry.getEmbeddableTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

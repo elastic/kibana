@@ -51,7 +51,9 @@ export const usePackageIconType = ({
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
     const localIconSrc =
-      Array.isArray(svgIcons) && toPackageImage(svgIcons[0], packageName, version);
+      Array.isArray(svgIcons) &&
+      svgIcons.length > 0 &&
+      toPackageImage(svgIcons[0], packageName, version);
     if (localIconSrc) {
       CACHED_ICONS.set(cacheKey, localIconSrc);
       setIconType(CACHED_ICONS.get(cacheKey) || '');

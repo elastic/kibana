@@ -9,7 +9,7 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: EntityDetailsHighlights
-      summary: Initialize the Entity Store
+      summary: Generate AI summary for entity
 
       requestBody:
         description: Schema for the entity details highlights
@@ -20,7 +20,9 @@ paths:
               type: object
               properties:
                 entityType:
-                  $ref: '../entity_store/common.schema.yaml#/components/schemas/EntityType'
+                  type: string
+                  enum: [user, host, service, generic]
+                  description: The type of entity.
                 entityIdentifier:
                   type: string
                   description: The identifier of the entity.
@@ -33,7 +35,7 @@ paths:
                   description: The 'from' date.
                 to:
                   type: number
-                  description: The 'to' date.      
+                  description: The 'to' date.
                 connectorId:
                   type: string
                   description: The connector id.
@@ -42,8 +44,8 @@ paths:
                 - entityIdentifier
                 - anonymizationFields
                 - from
-                - to      
-                - connectorId  
+                - to
+                - connectorId
       responses:
         '200':
           description: Successful response
@@ -57,24 +59,31 @@ paths:
                     properties:
                       assetCriticality:
                         type: array
+                        description: Assigned asset criticality only. Empty when unassigned.
                         items:
                           type: object
+                          additionalProperties: true
                       riskScore:
                         type: array
                         items:
                           type: object
+                          additionalProperties: true
                       vulnerabilities:
                         type: array
                         items:
                           type: object
+                          additionalProperties: true
                       vulnerabilitiesTotal:
                         type: object
                         additionalProperties:
                           type: number
                       anomalies:
                         type: array
+                        nullable: true
+                        description: ML anomaly findings. Null when there are none.
                         items:
                           type: object
+                          additionalProperties: true
                     description: The highlights of the entity.
                   replacements:
                     $ref: '../../../../../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.schema.yaml#/components/schemas/Replacements'

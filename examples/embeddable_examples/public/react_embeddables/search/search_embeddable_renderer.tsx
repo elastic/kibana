@@ -21,7 +21,7 @@ interface Props {
 export function SearchEmbeddableRenderer(props: Props) {
   const initialState = useMemo(() => {
     return {
-      timeRange: undefined,
+      time_range: undefined,
     };
     // only run onMount
   }, []);

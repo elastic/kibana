@@ -20,12 +20,12 @@ import type {
 import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
   executionContextServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
@@ -102,6 +102,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_SNOOZED,
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
@@ -115,6 +116,7 @@ import {
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
+const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
 }));
@@ -129,7 +131,16 @@ jest.mock('../rules_client/lib/get_alert_from_raw');
 const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
-const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
+const taskRunnerLogger = createTaskRunnerLogger({
+  logger,
+  labels: {
+    ruleId: '1',
+    ruleType: 'test',
+    spaceId: 'default',
+    executionId: RULE_EXECUTION_UUID,
+    taskInstanceId: '1',
+  },
+});
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -207,7 +218,6 @@ describe('Task Runner', () => {
       actionsPlugin: actionsMock.createStart(),
       alertsService: mockAlertsService,
       backfillClient,
-      basePathService: httpServiceMock.createBasePath(),
       cancelAlertsOnRuleTimeout: true,
       connectorAdapterRegistry,
       data: dataPlugin,
@@ -229,6 +239,7 @@ describe('Task Runner', () => {
       usageCounter: mockUsageCounter,
       isServerless: false,
       getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+      apiKeyType: ApiKeyType.ES,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -300,6 +311,25 @@ describe('Task Runner', () => {
         });
       });
 
+      const createTaskRunner = (
+        overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}
+      ) =>
+        new TaskRunner({
+          ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
+          taskInstance: {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            },
+          },
+          context: taskRunnerFactoryInitializerParams,
+          inMemoryMetrics,
+          executionUuid: RULE_EXECUTION_UUID,
+          ...overrides,
+        });
+
       test('should not use legacy alerts client if alerts client created', async () => {
         const spy1 = jest
           .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
@@ -324,19 +354,7 @@ describe('Task Runner', () => {
           hasReachedAlertLimit: false,
           triggeredActionsStatus: 'complete',
         });
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
-          context: taskRunnerFactoryInitializerParams,
-          inMemoryMetrics,
-        });
+        const taskRunner = createTaskRunner();
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
         mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
@@ -359,6 +377,7 @@ describe('Task Runner', () => {
             id: '1',
             muteAll: false,
             mutedInstanceIds: [],
+            snoozedInstances: [],
             name: 'rule-name',
             parameters: {
               bar: true,
@@ -377,30 +396,70 @@ describe('Task Runner', () => {
 
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          tags: ['1', 'test'],
-        });
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
+        );
+        expect(logger.debug).toHaveBeenNthCalledWith(
           2,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           3,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           4,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -437,21 +496,11 @@ describe('Task Runner', () => {
           .spyOn(alertsService, 'getContextInitializationPromise')
           .mockResolvedValue({ result: true });
 
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
+        const taskRunner = createTaskRunner({
           context: {
             ...taskRunnerFactoryInitializerParams,
             alertsService,
           },
-          inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
         mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
@@ -491,50 +540,91 @@ describe('Task Runner', () => {
         expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
 
         let debugCall = 1;
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'executing rule test:1 at 1970-01-01T00:00:00.000Z',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
-        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          debugCall++,
+          `Initializing resources for AlertsService`
+        );
 
         if (!useDataStreamForAlerts) {
-          expect(logger.debug).nthCalledWith(
+          expect(logger.debug).toHaveBeenNthCalledWith(
             debugCall++,
             'Installing ILM policy .alerts-ilm-policy'
           );
         }
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'Installing component template .alerts-framework-mappings'
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'Installing component template .alerts-legacy-alert-mappings'
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'Installing component template .alerts-ecs-mappings'
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
         );
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -590,15 +680,12 @@ describe('Task Runner', () => {
           }
         );
 
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
+        const taskRunner = createTaskRunner({
           taskInstance: mockedTaskInstance,
           context: {
             ...taskRunnerFactoryInitializerParams,
             alertsService,
           },
-          inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
         mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
@@ -647,6 +734,7 @@ describe('Task Runner', () => {
               [ALERT_RULE_TYPE_ID]: 'test',
               [ALERT_RULE_TAGS]: ['rule-', '-tags'],
               [ALERT_RULE_UUID]: '1',
+              [ALERT_SNOOZED]: false,
               [ALERT_START]: DATE_1970,
               [ALERT_STATUS]: 'active',
               [ALERT_TIME_RANGE]: { gte: DATE_1970 },
@@ -687,19 +775,7 @@ describe('Task Runner', () => {
           hasReachedAlertLimit: false,
           triggeredActionsStatus: 'complete',
         });
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
-          context: taskRunnerFactoryInitializerParams,
-          inMemoryMetrics,
-        });
+        const taskRunner = createTaskRunner();
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
         mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
@@ -710,7 +786,15 @@ describe('Task Runner', () => {
         expect(mockAlertsService.createAlertsClient).toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(
           `Error initializing AlertsClient for context test. Using legacy alerts client instead. - Could not initialize!`,
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              taskInstanceId: '1',
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+            },
+          }
         );
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
           alertingEventLogger,
@@ -729,15 +813,31 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          tags: ['1', 'test'],
-        });
-
-        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            labels: {
+              taskInstanceId: '1',
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+            },
+          }
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
+        );
+
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -781,18 +881,8 @@ describe('Task Runner', () => {
           hasReachedAlertLimit: false,
           triggeredActionsStatus: 'complete',
         });
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
+        const taskRunner = createTaskRunner({
           context: { ...taskRunnerFactoryInitializerParams, alertsService: null },
-          inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -820,15 +910,31 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          tags: ['1', 'test'],
-        });
-
-        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            labels: {
+              taskInstanceId: '1',
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+            },
+          }
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
+        );
+
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -856,19 +962,7 @@ describe('Task Runner', () => {
           rawRecoveredAlerts: {},
         });
 
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
-          context: taskRunnerFactoryInitializerParams,
-          inMemoryMetrics,
-        });
+        const taskRunner = createTaskRunner();
 
         const ruleSpecificFlapping = {
           enabled: false,
@@ -915,19 +1009,7 @@ describe('Task Runner', () => {
           rawRecoveredAlerts: {},
         });
 
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
-          context: taskRunnerFactoryInitializerParams,
-          inMemoryMetrics,
-        });
+        const taskRunner = createTaskRunner();
 
         const ruleSpecificFlapping = {
           lookBackWindow: 10,
@@ -993,6 +1075,8 @@ describe('Task Runner', () => {
         maxAlerts: 1000,
         recoveredAlertsFromState: {},
         ruleLabel: "test:1: 'rule-name'",
+        runTimestamp: undefined,
+        snoozedInstances: [],
         startedAt: new Date(DATE_1970),
       });
       expect(alertsClientNotToUse.initializeExecution).not.toHaveBeenCalled();

@@ -28,10 +28,13 @@ import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
 import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
+import { registerRoutes as registerManagedOtlpApiKeyRoutes } from './managed_otlp_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
+import { registerRoutes as registerCloudOnboardingDeploymentRoutes } from './cloud_onboarding_deployment';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
+import { registerRoutes as registerIacProvisionerRoutes } from './iac_provisioner';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -43,7 +46,7 @@ export function registerRoutes(
     config.experimentalFeatures || {}
   );
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter, experimentalFeatures, isServerless);
+  registerAppRoutes(fleetAuthzRouter, experimentalFeatures);
 
   // The upload package route is only authorized for the superuser
   registerEPMRoutes(fleetAuthzRouter, config);
@@ -62,9 +65,16 @@ export function registerRoutes(
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerManagedOtlpApiKeyRoutes(fleetAuthzRouter);
   registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
+  if (experimentalFeatures.enableCloudOnboardingDeployments) {
+    registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
+  }
+  if (config.iacProvisioner?.enabled) {
+    registerIacProvisionerRoutes(fleetAuthzRouter);
+  }
 
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 

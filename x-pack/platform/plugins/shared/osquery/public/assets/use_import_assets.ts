@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import { PACKS_ID } from '../packs/constants';
+import { PACKS_ID, PACK_USERS_ID } from '../packs/constants';
 import { INTEGRATION_ASSETS_STATUS_ID } from './constants';
 
 interface UseImportAssetsProps {
@@ -30,6 +30,7 @@ export const useImportAssets = ({ successToastText }: UseImportAssetsProps) => {
       onSuccess: () => {
         setErrorToast();
         queryClient.invalidateQueries([PACKS_ID]);
+        queryClient.invalidateQueries([PACK_USERS_ID]);
         queryClient.invalidateQueries([INTEGRATION_ASSETS_STATUS_ID]);
         toasts.addSuccess(successToastText);
       },

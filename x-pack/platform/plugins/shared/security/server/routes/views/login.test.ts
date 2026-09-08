@@ -56,11 +56,8 @@ describe('Login view routes', () => {
 
       expect(routeConfig.security).toEqual(
         expect.objectContaining({
-          authc: { enabled: 'optional' },
-          authz: {
-            enabled: false,
-            reason: expect.any(String),
-          },
+          authc: { enabled: 'optional', reason: expect.any(String) },
+          authz: { enabled: false, reason: expect.any(String) },
         })
       );
 
@@ -165,7 +162,13 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.security?.authc).toEqual(
+        expect.objectContaining({
+          enabled: false,
+          reason: expect.any(String),
+        })
+      );
       expect(routeConfig.validate).toBe(false);
     });
 

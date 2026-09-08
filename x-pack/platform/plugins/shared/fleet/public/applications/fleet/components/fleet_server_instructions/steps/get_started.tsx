@@ -11,7 +11,6 @@ import type { EuiStepProps } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiForm,
   EuiFormErrorText,
@@ -22,6 +21,7 @@ import {
   EuiFieldText,
   EuiSwitch,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -60,25 +60,21 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
 
   if (status === 'success') {
     return (
-      <EuiCallOut
+      <KbnSuccessCallout
         announceOnMount
-        color="success"
-        iconType="check"
         title={i18n.translate(
           'xpack.fleet.fleetServerFlyout.generateFleetServerPolicySuccessTitle',
           {
             defaultMessage: 'Fleet Server policy created.',
           }
         )}
-      >
-        <EuiText>
+        text={
           <FormattedMessage
             id="xpack.fleet.fleetServerFlyout.generateFleetServerPolicySuccessInstructions"
             defaultMessage="Fleet server policy and service token have been generated. Host configured at {hostUrl}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
-                // eslint-disable-next-line @elastic/eui/href-or-on-click
                 <EuiLink href={getHref('settings')} onClick={onClose}>
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
@@ -88,8 +84,8 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
               ),
             }}
           />
-        </EuiText>
-      </EuiCallOut>
+        }
+      />
     );
   }
 

@@ -374,6 +374,12 @@ describe('pollEsNodesVersion', () => {
       internalClient.nodes.info.mockReturnValueOnce([infos]);
     };
 
+    const mockTestSchedulerInfoErrorOnce = (error = 'mock error') => {
+      internalClient.nodes.info.mockImplementationOnce(() => {
+        throw new Error(error);
+      });
+    };
+
     it('starts polling immediately and then every healthCheckInterval', () => {
       expect.assertions(1);
 
@@ -468,6 +474,40 @@ describe('pollEsNodesVersion', () => {
         }).pipe(take(4));
 
         expectObservable(esNodesCompatibility$).toBe('a 49ms b 99ms c 99ms (d|)', {
+          a: expect.any(Object),
+          b: expect.any(Object),
+          c: expect.any(Object),
+          d: expect.any(Object),
+        });
+      });
+    });
+
+    it('switches to failure interval when check fails and back to normal on recovery', () => {
+      expect.assertions(1);
+
+      // poll 1: success (interval=100)
+      mockTestSchedulerInfoResponseOnce(createNodes('5.1.0'));
+      // poll 2: error + retry error (interval switches to 30)
+      mockTestSchedulerInfoErrorOnce();
+      mockTestSchedulerInfoErrorOnce();
+      // poll 3: recovery (interval switches back to 100)
+      mockTestSchedulerInfoResponseOnce(createNodes('5.1.0'));
+      // poll 4: different result to pass distinctUntilChanged
+      mockTestSchedulerInfoResponseOnce(createNodes('5.2.0'));
+
+      getTestScheduler().run(({ expectObservable }) => {
+        const esNodesCompatibility$ = pollEsNodesVersion({
+          internalClient,
+          healthCheckInterval: 100,
+          healthCheckFailureInterval: 30,
+          ignoreVersionMismatch: false,
+          kibanaVersion: KIBANA_VERSION,
+          log: mockLogger,
+          healthCheckRetry: 1,
+        }).pipe(take(4));
+
+        // a at 0, b at 200 (100 poll + 100 retry), c at 230 (30 failure interval), d at 330 (100 normal)
+        expectObservable(esNodesCompatibility$).toBe('a 199ms b 29ms c 99ms (d|)', {
           a: expect.any(Object),
           b: expect.any(Object),
           c: expect.any(Object),

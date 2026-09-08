@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -17,6 +16,7 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/change-history",
     "@kbn/test-suites-xpack-security-endpoint",
     "@kbn/dev-utils",
     "@kbn/test",
@@ -54,7 +54,7 @@
     "@kbn/openapi-common",
     "@kbn/scout-info",
     "@kbn/security-plugin-types-common",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/config-schema",
     "@kbn/test-suites-xpack-platform",
     "@kbn/response-ops-rule-params",
@@ -67,5 +67,8 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/detections-response-ftr-services",
     "@kbn/connector-schemas",
+    "@kbn/security-solution-features",
+    "@kbn/core-spaces-common",
+    "@kbn/entity-store",
   ]
 }

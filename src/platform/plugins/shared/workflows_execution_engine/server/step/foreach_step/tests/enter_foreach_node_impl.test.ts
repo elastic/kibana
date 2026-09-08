@@ -10,6 +10,7 @@
 import type { ForEachStep } from '@kbn/workflows';
 import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { EnterForeachNodeImpl } from '../enter_foreach_node_impl';
@@ -19,6 +20,7 @@ describe('EnterForeachNodeImpl', () => {
   let workflowExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntime: StepExecutionRuntime;
   let workflowLogger: IWorkflowEventLogger;
+  let stepIoService: StepIoService;
   let underTest: EnterForeachNodeImpl;
 
   beforeEach(() => {
@@ -50,11 +52,16 @@ describe('EnterForeachNodeImpl', () => {
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
+    stepIoService = {
+      pinForeachSource: jest.fn(),
+      unpinForeachScope: jest.fn(),
+    } as unknown as StepIoService;
     underTest = new EnterForeachNodeImpl(
       node,
       workflowExecutionRuntimeManager,
       stepExecutionRuntime,
-      workflowLogger
+      workflowLogger,
+      stepIoService
     );
   });
 
@@ -94,11 +101,20 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
+      });
+
+      it('should pin the foreach source for the lifetime of the loop', async () => {
+        await underTest.run();
+
+        expect(stepIoService.pinForeachSource).toHaveBeenCalledWith(
+          'testStep',
+          node.configuration.foreach
+        );
+        // The loop runs, so the pin must NOT be released on enter.
+        expect(stepIoService.unpinForeachScope).not.toHaveBeenCalled();
       });
     });
 
@@ -140,8 +156,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -151,7 +165,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue(null);
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
         );
       });
@@ -162,7 +176,7 @@ describe('EnterForeachNodeImpl', () => {
         ).mockReturnValue({
           key: 'value',
         });
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object: {"key":"value"}.'
         );
       });
@@ -171,7 +185,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue('{"key": value }');
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
       });
@@ -198,8 +212,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -209,7 +221,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
         ).mockReturnValue(JSON.stringify({ foo: 'bar' }));
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array.'
         );
       });
@@ -218,7 +230,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
         ).mockReturnValue('{"key": value }');
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
       });
@@ -229,10 +241,9 @@ describe('EnterForeachNodeImpl', () => {
         node.configuration.foreach = JSON.stringify([]);
       });
 
-      it('should set empty items and total to 0', async () => {
+      it('should set total to 0', async () => {
         await underTest.run();
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: [],
           total: 0,
         });
       });
@@ -254,6 +265,81 @@ describe('EnterForeachNodeImpl', () => {
           { workflow: { step_id: 'testStep' } }
         );
       });
+
+      it('should release the source pin when there are no items to iterate', async () => {
+        await underTest.run();
+
+        // Pin is taken eagerly before items are evaluated; an empty array means
+        // no iterations will run, so the pin must be released immediately.
+        expect(stepIoService.pinForeachSource).toHaveBeenCalledWith(
+          'testStep',
+          node.configuration.foreach
+        );
+        expect(stepIoService.unpinForeachScope).toHaveBeenCalledWith('testStep');
+      });
+    });
+
+    describe('when foreach configuration is a native array', () => {
+      beforeEach(() => {
+        node.configuration.foreach = ['a', 'b', 'c'] as any;
+      });
+
+      it('should persist input as a JSON string', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: JSON.stringify(['a', 'b', 'c']),
+        });
+      });
+
+      it('should initialize foreach state with correct total', async () => {
+        await underTest.run();
+
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          index: 0,
+          total: 3,
+        });
+      });
+
+      it('should not call renderValueAccordingToContext or evaluateExpressionInContext', async () => {
+        await underTest.run();
+
+        expect(
+          stepExecutionRuntime.contextManager.renderValueAccordingToContext
+        ).not.toHaveBeenCalled();
+        expect(
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should enter the first iteration scope', async () => {
+        await underTest.run();
+
+        expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+        expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
+      });
+    });
+
+    describe('when foreach configuration is an empty native array', () => {
+      beforeEach(() => {
+        node.configuration.foreach = [] as any;
+      });
+
+      it('should persist input as a JSON string', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: JSON.stringify([]),
+        });
+      });
+
+      it('should set total to 0 and skip execution', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          total: 0,
+        });
+        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitNode');
+      });
     });
 
     it('should go to next node', async () => {
@@ -266,7 +352,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not provided', async () => {
       node.configuration.foreach = undefined as any;
 
-      await expect(underTest.run()).rejects.toThrowError(
+      await expect(underTest.run()).rejects.toThrow(
         'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
       );
       expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
@@ -275,7 +361,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not an array', async () => {
       node.configuration.foreach = JSON.stringify({ key: 'value' });
 
-      await expect(underTest.run()).rejects.toThrowError(
+      await expect(underTest.run()).rejects.toThrow(
         'Foreach expression must evaluate to an array. Expression "{"key":"value"}" resolved to object: {"key":"value"}.'
       );
       expect(stepExecutionRuntime.startStep).toHaveBeenCalledTimes(1);
@@ -286,8 +372,6 @@ describe('EnterForeachNodeImpl', () => {
   describe('on next iterations', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
-        item: 'item1',
         index: 0,
         total: 3,
       });
@@ -311,13 +395,11 @@ describe('EnterForeachNodeImpl', () => {
       expect(stepExecutionRuntime.startStep).not.toHaveBeenCalledWith();
     });
 
-    it('should initialize foreach state', async () => {
+    it('should update foreach state with incremented index', async () => {
       await underTest.run();
 
       expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
       expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-        items: ['item1', 'item2', 'item3'],
-        item: 'item2',
         index: 1,
         total: 3,
       });

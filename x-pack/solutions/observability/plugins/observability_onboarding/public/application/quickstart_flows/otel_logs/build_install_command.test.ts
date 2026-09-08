@@ -232,4 +232,26 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
       expect(command).toContain('-replace');
     });
   });
+
+  describe('Wired Streams', () => {
+    const baseConfig = {
+      isMetricsOnboardingEnabled: false,
+      isManagedOtlpServiceAvailable: false,
+      managedOtlpServiceUrl: 'http://example.com/otlp',
+      elasticsearchUrl: 'http://example.com/elasticsearch',
+      apiKeyEncoded: 'api_key_encoded',
+      agentVersion: '9.1.0',
+    };
+
+    it.each(['linux', 'mac', 'windows'] as const)(
+      'never injects wired streams config for %s',
+      (platform) => {
+        const command = buildInstallCommand({ ...baseConfig, platform });
+
+        expect(command).not.toContain('logs_index: logs.otel');
+        expect(command).not.toContain('resource/wired_streams');
+        expect(command).not.toContain('elasticsearch.index');
+      }
+    );
+  });
 });

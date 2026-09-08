@@ -15,10 +15,11 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import { getIgnoredReason } from '@kbn/discover-utils';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import type { ValueToStringConverter } from '../types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,
@@ -37,6 +38,20 @@ function onFilterCell(
   }
 }
 
+/**
+ * Elasticsearch did not index this value, so a filter built from it would never
+ * match. Whether that happened is per document, not per column, so it cannot be
+ * decided in `buildCellActions` alongside the other filter checks.
+ */
+function isCellValueIgnored(
+  context: DataTableContext,
+  rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
+  field: DataViewField
+): boolean {
+  const row = context.getRowByIndex(rowIndex);
+  return Boolean(row && getIgnoredReason(field, row.raw._ignored));
+}
+
 export const FilterInBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
@@ -52,12 +67,16 @@ export const FilterInBtn = ({
     values: { value: columnId },
   });
 
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
+
   return (
     <Component
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '+', field, dataGridRef);
       }}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterForButton"
@@ -84,12 +103,16 @@ export const FilterOutBtn = ({
     values: { value: columnId },
   });
 
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
+
   return (
     <Component
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '-', field, dataGridRef);
       }}
-      iconType="minusInCircle"
+      iconType="minusCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterOutButton"
@@ -104,7 +127,8 @@ export const FilterOutBtn = ({
 export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
-  valueToStringConverter: ValueToStringConverter
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -121,7 +145,7 @@ export function buildCopyValueButton(
           toastNotifications,
         });
       }}
-      iconType="copyClipboard"
+      iconType="copy"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
@@ -137,6 +161,7 @@ export function buildCellActions(
   field: DataViewField,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode,
   onFilter?: DocViewFilterFn,
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
   hideFilteringOnComputedColumns?: boolean
@@ -168,7 +193,8 @@ export function buildCellActions(
       buildCopyValueButton(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
-        valueToStringConverter
+        valueToStringConverter,
+        documentsDisplayMode
       ),
   ];
 }

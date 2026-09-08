@@ -9,11 +9,13 @@ import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
@@ -38,7 +40,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
-      schema: preferredSchema ?? 'ecs',
+      schema: preferredSchema ?? DEFAULT_SCHEMA,
     })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
@@ -49,7 +51,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   >;
 
   const { nodes, loading } = useSnapshot({
-    kuery: `"${model.fields.id}": ${node.id}`,
+    kuery: `"${model.fields.id}": "${escapeQuotes(node.id)}"`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -93,7 +95,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
           // if custom metric, find field and label from waffleOptionsContext result
           // because useSnapshot does not return it
           const customMetric =
-            name === 'custom' ? customMetrics.find((item) => item.id === metric.name) : null;
+            name === 'custom' ? customMetrics?.find((item) => item.id === metric.name) : null;
           const formatter = customMetric
             ? createFormatterForMetric(customMetric)
             : createInventoryMetricFormatter({ type: metricName });

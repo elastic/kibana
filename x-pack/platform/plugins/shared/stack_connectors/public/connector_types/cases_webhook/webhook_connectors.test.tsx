@@ -25,7 +25,10 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
     ...originalModule,
     useKibana: () => ({
       services: {
-        docLinks: { ELASTIC_WEBSITE_URL: 'url' },
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'url',
+          links: { alerting: { casesWebhookAction: 'url/cases-webhook' } },
+        },
         notifications: {
           toasts: {
             addError: jest.fn(),
@@ -205,7 +208,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
   });
 
-  describe('Step Validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/237095
+  describe.skip('Step Validation', () => {
     it('Steps work correctly when all fields valid', async () => {
       render(
         <ConnectorFormTestProvider connector={actionConnector}>
@@ -375,8 +379,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
     });
 
-    // Flaky - https://github.com/elastic/kibana/issues/205708
-    it.skip('Step 2 is properly validated', async () => {
+    it('Step 2 is properly validated', async () => {
       const incompleteActionConnector = {
         ...actionConnector,
         config: {
@@ -520,7 +523,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       const { isPreconfigured, ...rest } = actionConnector;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             __internal__: {
@@ -556,7 +559,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: {
@@ -598,7 +601,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       const { isPreconfigured, ...rest } = actionConnector;
       const { headers, ...rest2 } = actionConnector.config;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: rest2,

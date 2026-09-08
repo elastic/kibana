@@ -12,12 +12,10 @@ import type {
   PublishesReload,
   PublishesViewMode,
   PublishesUnifiedSearch,
-} from '@kbn/presentation-publishing';
-import type {
   CanAddNewPanel,
   HasLastSavedChildState,
   HasSerializedChildState,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 
 export type CanvasContainerApi = PublishesViewMode &
   CanAddNewPanel &

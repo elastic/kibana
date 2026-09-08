@@ -1,0 +1,17 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          getSpaceResponse:
+            summary: Get details about a marketing space
+            description: A response that contains the full configuration for a single Kibana space.
+            value:
+              id: marketing
+              name: Marketing
+              description: This is the Marketing Space
+              color: '#aabbcc'
+              initials: MK
+              disabledFeatures: []
+              imageUrl: ''
+              solution: es

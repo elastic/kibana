@@ -12,7 +12,6 @@ module.exports = {
 
       plugins: [
         'mocha',
-        '@babel',
         'import',
         'no-unsanitized',
       ],

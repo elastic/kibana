@@ -31,6 +31,7 @@ export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
+  | 'integration_details_alerting'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_details_language_clients'
@@ -51,10 +52,12 @@ export type DynamicPage =
   | 'agent_details_logs'
   | 'agent_details_settings'
   | 'agent_details_diagnostics'
+  | 'agent_details_collector_config'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
-  | 'settings_edit_fleet_proxy';
+  | 'settings_edit_fleet_proxy'
+  | 'integration_collection';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -74,6 +77,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
   agent_details_settings: '/agents/:agentId/settings',
+  agent_details_collector_config: '/agents/:agentId/collector-config',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -94,23 +98,23 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-
-  // TODO: Move this to the integrations app
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
+export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
   integrations_create: '/create',
+  integrations_upload: '/upload',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
   integration_details_assets: '/detail/:pkgkey/assets',
+  integration_details_alerting: '/detail/:pkgkey/alerting',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_configs: '/detail/:pkgkey/configs',
   integration_details_custom: '/detail/:pkgkey/custom',
@@ -119,6 +123,8 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
+  add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
+  integration_collection: '/collection/:groupId',
 };
 
 export const pagePathGetters: {
@@ -134,11 +140,13 @@ export const pagePathGetters: {
     category,
     subCategory,
     onlyAgentless,
+    showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
     onlyAgentless?: boolean;
+    showDeprecated?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
@@ -152,6 +160,9 @@ export const pagePathGetters: {
     }
     if (onlyAgentless) {
       queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    if (showDeprecated === true) {
+      queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
     const queryString = queryParams.toString();
     return [
@@ -193,6 +204,10 @@ export const pagePathGetters: {
   integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
   },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });
@@ -245,22 +260,15 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({
-    pkgkey,
-    integration,
-    agentPolicyId,
-    useMultiPageLayout,
-    prerelease,
-  }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
       ...(prerelease ? { prerelease } : {}),
     });
     return [
-      FLEET_BASE_PATH,
+      INTEGRATIONS_BASE_PATH,
       // prettier-ignore
-      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+      `/detail/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
     ];
   },
   edit_integration: ({ policyId, packagePolicyId }) => [
@@ -294,6 +302,10 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
+  agent_details_collector_config: ({ agentId }) => [
+    FLEET_BASE_PATH,
+    `/agents/${agentId}/collector-config`,
+  ],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
@@ -331,4 +343,5 @@ export const pagePathGetters: {
     FLEET_ROUTING_PATHS.settings_create_download_sources,
   ],
   debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
+  integration_collection: ({ groupId }) => [INTEGRATIONS_BASE_PATH, `/collection/${groupId}`],
 };

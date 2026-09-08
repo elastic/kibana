@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
 import type { GrokProcessor } from '../../../../types/processors';
 import { parseMultiGrokPatterns } from '../../../../types/utils/grok_patterns';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -67,7 +67,7 @@ export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCom
   const commands: ESQLAstCommand[] = [];
 
   // Add missing field filter if needed (ignore_missing = false)
-  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }

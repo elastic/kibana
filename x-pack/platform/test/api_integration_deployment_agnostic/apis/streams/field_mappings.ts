@@ -34,9 +34,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('preserves index sort fields when child stream adds resource.attributes fields', async () => {
         await putStream(
           apiClient,
-          'logs.resourcetest',
+          'logs.otel.resourcetest',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -61,7 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.resourcetest',
+              name: 'logs.otel.resourcetest',
             },
           },
         });
@@ -77,9 +78,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('handles hierarchical field names in attributes namespace', async () => {
         await putStream(
           apiClient,
-          'logs.hierarchical',
+          'logs.otel.hierarchical',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -104,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.hierarchical',
+              name: 'logs.otel.hierarchical',
             },
           },
         });
@@ -119,9 +121,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('handles fields across multiple namespace prefixes', async () => {
         await putStream(
           apiClient,
-          'logs.multinamespace',
+          'logs.otel.multinamespace',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -147,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.multinamespace',
+              name: 'logs.otel.multinamespace',
             },
           },
         });

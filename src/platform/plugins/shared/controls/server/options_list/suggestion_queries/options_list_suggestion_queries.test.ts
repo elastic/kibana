@@ -35,61 +35,45 @@ describe('options list suggestion queries', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: '@timestamp',
-      allowExpensiveQueries: true,
+
       sort: { by: '_key', direction: 'desc' },
       fieldSpec: { type: 'date' } as unknown as FieldSpec,
     };
     getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).toBeCalled();
-    expect(getExactMatchAggregationBuilder).not.toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
+    expect(getAllSuggestionsAggregationBuilder).toHaveBeenCalled();
+    expect(getExactMatchAggregationBuilder).not.toHaveBeenCalled();
+    expect(getSearchSuggestionsAggregationBuilder).not.toHaveBeenCalled();
   });
 
   test('returns generic exact match search query when search technique is `exact`', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
-      allowExpensiveQueries: true,
+
       searchTechnique: 'exact',
       searchString: 'searchForMe',
       sort: { by: '_key', direction: 'asc' },
       fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };
     getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
-    expect(getExactMatchAggregationBuilder).toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
+    expect(getAllSuggestionsAggregationBuilder).not.toHaveBeenCalled();
+    expect(getExactMatchAggregationBuilder).toHaveBeenCalled();
+    expect(getSearchSuggestionsAggregationBuilder).not.toHaveBeenCalled();
   });
 
-  test('returns generic exact match search query when allowExpensiveQueries is `false`', () => {
+  test('returns type-specific search query when search technique is not `exact`', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
-      allowExpensiveQueries: false,
-      searchTechnique: 'prefix',
-      searchString: 'searchForMe',
-      sort: { by: '_key', direction: 'asc' },
-      fieldSpec: { type: 'number' } as unknown as FieldSpec,
-    };
-    getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
-    expect(getExactMatchAggregationBuilder).toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
-  });
 
-  test('returns type-specific search query only when absolutely necessary', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
-      size: 10,
-      fieldName: 'bytes',
-      allowExpensiveQueries: true,
       searchTechnique: 'prefix',
       searchString: 'searchForMe',
       sort: { by: '_key', direction: 'asc' },
       fieldSpec: { type: 'keyword' } as unknown as FieldSpec,
     };
     getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
-    expect(getExactMatchAggregationBuilder).not.toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).toBeCalled();
+    expect(getAllSuggestionsAggregationBuilder).not.toHaveBeenCalled();
+    expect(getExactMatchAggregationBuilder).not.toHaveBeenCalled();
+    expect(getSearchSuggestionsAggregationBuilder).toHaveBeenCalled();
   });
 });

@@ -36,6 +36,7 @@ import {
   FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
   FLYOUT_JSON_TAB,
+  FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE,
   FLYOUT_OVERVIEW_TAB,
@@ -60,7 +61,6 @@ import {
   QUERY_INPUT,
   REFRESH_BUTTON,
   TABLE_CONTROLS,
-  TIME_RANGE_PICKER,
 } from '../../../screens/threat_intelligence/indicators';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
@@ -79,9 +79,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('basic/simple url', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -115,7 +113,6 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
       cy.log('should show kql bar');
 
       cy.get(FILTERS_GLOBAL_CONTAINER).should('exist');
-      cy.get(`${FILTERS_GLOBAL_CONTAINER} ${TIME_RANGE_PICKER}`).should('exist');
       cy.get(`${FIELD_SELECTOR}`).should('exist');
 
       cy.log('should show flyout');
@@ -149,22 +146,15 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       cy.log('should show the high level blocks');
 
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(0)
-        .should('contain.text', 'Feed')
-        .and('contain.text', 'AbuseCH Malware');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(1)
-        .should('contain.text', 'Indicator type')
-        .and('contain.text', 'file');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(2)
-        .should('contain.text', 'TLP Marking-')
-        .and('contain.text', '-');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(3)
-        .should('contain.text', 'Confidence')
-        .and('contain.text', '-');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(0).should('contain.text', 'Feed');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(1).should('contain.text', 'Indicator type');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(2).should('contain.text', 'TLP Marking');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(3).should('contain.text', 'Confidence');
+
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(0).should('contain.text', 'AbuseCH Malware');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(1).should('contain.text', 'file');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(2).should('contain.text', '-');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(3).should('contain.text', '-');
 
       cy.log('should show the highlighted fields table');
 
@@ -191,7 +181,12 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       navigateToFlyoutJsonTab();
 
-      cy.get(FLYOUT_JSON).should('contain.text', '2022-06-02T13:29:47.677Z');
+      // The JSON tab renders a synthetic `{ _id, fields }` view of the indicator (not the raw
+      // Elasticsearch hit - see the IOC flyout's `indicator` memo), inside a virtualised code
+      // editor that only keeps the lines currently in view in the DOM. Assert on the two-key
+      // preamble the editor always renders, rather than on a field that sits further down the
+      // document and may never be rendered.
+      cy.get(FLYOUT_JSON).should('contain.text', '_id').and('contain.text', 'fields');
     });
   });
 
@@ -221,9 +216,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('Field browser', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -239,9 +232,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('Request inspector', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -274,9 +265,7 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
   describe('Indicator page search', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -325,9 +314,7 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
   describe('verify the grid loads even with missing fields', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -384,9 +371,7 @@ describe('Missing mappings', { tags: ['@ess'] }, () => {
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 

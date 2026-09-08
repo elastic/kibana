@@ -20,13 +20,17 @@
     "@kbn/core",
     "@kbn/streamlang",
     "@kbn/streams-schema",
+    "@kbn/significant-events-schema",
     "@kbn/inference-common",
     "@kbn/zod",
     "@kbn/inference-prompt-utils",
-    "@kbn/es-query",
     "@kbn/zod-helpers",
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-utils",
     "@kbn/i18n",
+    "@kbn/traced-es-client",
+    "@kbn/es-types",
+    "@kbn/es-query",
+    "@kbn/logging",
   ]
 }

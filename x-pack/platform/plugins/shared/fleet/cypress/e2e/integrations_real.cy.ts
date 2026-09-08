@@ -33,6 +33,7 @@ import {
   INTEGRATION_LIST,
   getIntegrationCategories,
   ADD_INTEGRATION_FLYOUT,
+  BREAKING_CHANGE_CHECKBOX_SEL,
 } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
@@ -62,21 +63,20 @@ function setupIntegrations() {
 function getAllIntegrations() {
   const cardItems = new Set<string>();
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     cy.window().then((win) => {
       const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
 
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       } else {
-        cy.scrollTo(0, i * 600);
+        cy.scrollTo(0, i * 300);
       }
     });
 
     cy.wait(50);
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
-      .should('be.visible')
       .each((element) => {
         const attrValue = element.attr('data-test-subj');
         if (attrValue) {
@@ -91,8 +91,6 @@ function getAllIntegrations() {
 }
 
 describe('Add Integration - Real API', () => {
-  const integration = 'apache';
-
   beforeEach(() => {
     login();
 
@@ -109,7 +107,7 @@ describe('Add Integration - Real API', () => {
 
     cy.wait('@getPackageInfo').then((interception) => {
       const packageInfo = interception.response?.body.item;
-      const assetCount = calculateAssetCount(packageInfo);
+      const assetCount = calculateAssetCount(packageInfo, { includeKnowledgeBase: false });
 
       cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
       // Assert against the actual asset count from the package
@@ -128,10 +126,10 @@ describe('Add Integration - Real API', () => {
   });
 
   it('should display Apache integration in the Policies list once installed ', () => {
-    setupIntegrations();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
-    cy.getBySel(getIntegrationCard(integration)).click();
+    // Navigate directly to the Apache detail page: the browse page now renders Apache
+    // as a collection tile (enableIntegrationCollectionTiles is enabled by default),
+    // so clicking the tile lands on the collection overview rather than the add-integration flow.
+    cy.visit('/app/integrations/detail/apache/overview');
     addIntegration();
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
@@ -184,6 +182,7 @@ describe('Add Integration - Real API', () => {
 
   it('should upgrade policies with integration update', () => {
     const oldVersion = '0.3.3';
+    cy.intercept('GET', '**/api/fleet/epm/packages/apache/*/changelog.yml').as('getChangelog');
     installPackageWithVersion('apache', oldVersion);
     navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
 
@@ -196,6 +195,7 @@ describe('Add Integration - Real API', () => {
 
     cy.getBySel(SETTINGS_TAB).click();
     cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX);
+    clickIfVisible(BREAKING_CHANGE_CHECKBOX_SEL);
     cy.getBySel(UPDATE_PACKAGE_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
@@ -240,6 +240,7 @@ describe('Browsing integrations - Real API', () => {
         cy.getBySel(LOADING_SPINNER).should('not.exist');
 
         // Verify that integrations are displayed
+        cy.getBySel(INTEGRATION_LIST).scrollTo('bottom', { ensureScrollable: false });
         cy.getBySel(INTEGRATION_LIST).should('be.visible');
         getAllIntegrations().should('have.length.greaterThan', 50);
       });
@@ -287,7 +288,7 @@ describe.skip('Dashboards link for installed integration - Real API', () => {
     cy.getBySel(LOADING_SPINNER).should('not.exist');
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
     cy.getBySel(getIntegrationCard(integration)).click();
-    addIntegration();
+    addIntegration({ skipButtonClick: true });
     cy.visit('/app/integrations/installed');
     cy.getBySel(INSTALLED_INTEGRATIONS_TABLE_ROW)
       .contains('Apache')

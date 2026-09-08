@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useState, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -15,6 +16,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EsqlPluginStart } from './plugin';
 
 export let core: CoreStart;
@@ -26,12 +28,26 @@ export interface ServiceDeps {
   uiActions: UiActionsStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   esql: EsqlPluginStart;
   docLinks: DocLinksStart;
   kql: KqlPluginStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
+
+export function useKibanaServices() {
+  const [services, setServices] = useState<ServiceDeps | undefined>(servicesReady$.value);
+  useEffect(() => {
+    const subscription = servicesReady$.subscribe(setServices);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  return services;
+}
+
 export const untilPluginStartServicesReady = () => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
   return new Promise<ServiceDeps>((resolve) => {
@@ -52,7 +68,8 @@ export const setKibanaServices = (
   uiActions: UiActionsStart,
   kql: KqlPluginStart,
   fieldsMetadata?: FieldsMetadataPublicStart,
-  usageCollection?: UsageCollectionStart
+  usageCollection?: UsageCollectionStart,
+  cps?: CPSPluginStart
 ) => {
   core = kibanaCore;
   servicesReady$.next({
@@ -62,6 +79,7 @@ export const setKibanaServices = (
     uiActions,
     fieldsMetadata,
     usageCollection,
+    cps,
     docLinks: core.docLinks,
     esql,
     kql,

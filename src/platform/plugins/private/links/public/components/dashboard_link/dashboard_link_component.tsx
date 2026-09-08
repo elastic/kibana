@@ -10,23 +10,22 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiListGroupItem } from '@elastic/eui';
+import { type UseEuiTheme, EuiListGroupItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 
-import type { LinksLayoutType } from '../../../common/content_management';
-import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import type { LinksLayoutType } from '../../../common/types';
+import type { DashboardLink } from '../../../server';
 import { trackUiMetric } from '../../services/kibana_services';
 import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import type { DashboardLink } from '../../../server';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;
@@ -145,10 +144,10 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   ]);
 
   const id = `dashboardLink--${link.id}`;
+  const testId = `dashboardLink--${link.title}`;
 
   return (
     <EuiListGroupItem
-      size="s"
       color="text"
       {...onClickProps}
       id={id}
@@ -159,8 +158,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         content: tooltipMessage,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
-        'data-test-subj': `${id}--tooltip`,
+        'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
@@ -172,7 +170,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
       })}
       label={linkLabel}
       external={(link.options as DashboardLink['options'])?.open_in_new_tab}
-      data-test-subj={link.error ? `${id}--error` : `${id}`}
+      data-test-subj={link.error ? `${testId}--error` : `${testId}`}
       aria-current={link.destination === parentDashboardId}
     />
   );
@@ -184,25 +182,33 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&.linkCurrent': {
       borderRadius: 0,
       cursor: 'default',
-      '& .euiListGroupItem__text': {
+      '& .euiListItemLayout__text': {
         color: euiTheme.colors.textPrimary,
       },
     },
 
+    // vertical layout - current dashboard border offset styles
+    '.verticalLayoutWrapper & .euiListItemLayout__text': {
+      paddingInlineStart: euiTheme.size.s,
+    },
+
     // vertical layout - current dashboard link styles
-    '.verticalLayoutWrapper &.linkCurrent::before': {
-      // add left border for current dashboard
-      content: "''",
-      position: 'absolute',
-      height: '75%',
-      width: `calc(.5 * ${euiTheme.size.xs})`,
-      backgroundColor: euiTheme.colors.primary,
+    '.verticalLayoutWrapper &.linkCurrent': {
+      paddingLeft: euiTheme.size.s,
+      '&::before': {
+        // add left border for current dashboard
+        content: "''",
+        position: 'absolute',
+        height: '75%',
+        width: `calc(.5 * ${euiTheme.size.xs})`,
+        backgroundColor: euiTheme.colors.primary,
+      },
     },
 
     // horizontal layout - current dashboard link styles
     '.horizontalLayoutWrapper &.linkCurrent': {
       padding: `0 ${euiTheme.size.s}`,
-      '& .euiListGroupItem__text': {
+      '& .euiListItemLayout__text': {
         // add bottom border for current dashboard
         boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
         paddingInline: 0,
@@ -211,7 +217,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
 
     // dashboard not found error styles
     '&.dashboardLinkError': {
-      '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
+      '&.dashboardLinkError--noLabel .euiListItemLayout__text': {
         fontStyle: 'italic',
       },
 

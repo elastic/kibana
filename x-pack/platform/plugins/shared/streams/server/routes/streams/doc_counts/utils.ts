@@ -39,6 +39,25 @@ export function getLastBackingIndexByStream(
   return lastBackingIndexByStream;
 }
 
+// Maps each data stream to all its backing indices, for metrics aggregated across the whole stream (older indices may have rolled into e.g. frozen).
+export function getAllBackingIndicesByStream(
+  dataStreams: IndicesGetDataStreamResponse['data_streams']
+): Map<string, string[]> {
+  const backingIndicesByStream = new Map<string, string[]>();
+
+  for (const dataStream of dataStreams) {
+    const indices = dataStream.indices
+      .map((index) => index.index_name)
+      .filter((indexName): indexName is string => Boolean(indexName));
+
+    if (indices.length) {
+      backingIndicesByStream.set(dataStream.name, indices);
+    }
+  }
+
+  return backingIndicesByStream;
+}
+
 /**
  * Runs an async operation over a list of string items in byte-size-safe chunks.
  */

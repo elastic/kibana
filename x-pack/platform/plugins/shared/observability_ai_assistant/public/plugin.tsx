@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { type ComponentType, lazy, type Ref } from 'react';
 import { AIChatExperience, type AssistantScope } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -22,6 +23,8 @@ import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
+
+const queryClient = new QueryClient();
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -86,9 +89,11 @@ export class ObservabilityAIAssistantPlugin
     ) =>
       React.forwardRef((props: P, ref: Ref<R>) => (
         <KibanaContextProvider services={services}>
-          <ObservabilityAIAssistantProvider value={service}>
-            <Component {...props} ref={ref} />
-          </ObservabilityAIAssistantProvider>
+          <QueryClientProvider client={queryClient}>
+            <ObservabilityAIAssistantProvider value={service}>
+              <Component {...props} ref={ref} />
+            </ObservabilityAIAssistantProvider>
+          </QueryClientProvider>
         </KibanaContextProvider>
       ));
 
@@ -103,7 +108,7 @@ export class ObservabilityAIAssistantPlugin
 
     return {
       service,
-      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(),
       useChat: createUseChat({
         notifications: coreStart.notifications,
       }),

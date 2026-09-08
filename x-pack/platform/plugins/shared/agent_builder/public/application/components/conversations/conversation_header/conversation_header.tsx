@@ -5,44 +5,68 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ConversationRightActions } from './conversation_actions_right';
-import { ConversationLeftActions } from './conversation_actions_left';
 import { ConversationTitle } from './conversation_title';
+import { useConversationReadOnly } from '../../../hooks/use_conversation';
 
-const centerSectionStyles = css`
-  align-items: center;
+const titleSlotStyles = css`
+  min-width: 0;
 `;
 
-interface ConversationHeaderProps {
-  onClose?: () => void;
-  ariaLabelledBy?: string;
-}
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
-  onClose,
-  ariaLabelledBy,
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
+const labels = {
+  readOnly: i18n.translate('xpack.agentBuilder.conversationHeader.readOnly', {
+    defaultMessage: 'Read-Only',
+  }),
+};
+
+const ConversationReadOnlyBadge = () => {
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <ConversationLeftActions />
+    <EuiBadge
+      color={euiTheme.colors.lightShade}
+      iconType="lock"
+      data-test-subj="agentBuilderConversationReadOnlyBadge"
+      css={css`
+        color: ${euiTheme.colors.text};
+      `}
+    >
+      {labels.readOnly}
+    </EuiBadge>
+  );
+};
+
+interface ConversationHeaderProps {
+  ariaLabelledBy?: string;
+}
+export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) => {
+  const { isReadOnly } = useConversationReadOnly();
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem grow={true} css={titleSlotStyles}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false} css={titleSlotStyles}>
+            <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+          </EuiFlexItem>
+          {isReadOnly && (
+            <EuiFlexItem grow={false}>
+              <ConversationReadOnlyBadge />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={true} css={centerSectionStyles}>
-        <ConversationTitle
-          ariaLabelledBy={ariaLabelledBy}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ConversationRightActions
-          onClose={onClose}
-          onRenameConversation={() => setIsEditing(true)}
-        />
+        <ConversationRightActions />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

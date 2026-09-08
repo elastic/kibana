@@ -8,6 +8,7 @@
 import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -22,7 +23,9 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_STATUS,
   ALERT_UUID,
@@ -121,6 +124,31 @@ export const existingFlattenedRecoveredAlert = {
   [ALERT_SEVERITY_IMPROVING]: false,
 };
 
+export const existingFlattenedDelayedAlert = {
+  ...alertRule,
+  [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+  [EVENT_KIND]: 'signal',
+  [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+  [ALERT_ACTION_GROUP]: 'error',
+  [ALERT_FLAPPING]: false,
+  [ALERT_FLAPPING_HISTORY]: [true],
+  [ALERT_INSTANCE_ID]: 'alert-A',
+  [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+  [ALERT_MUTED]: false,
+  [ALERT_PENDING_RECOVERED_COUNT]: 0,
+  [ALERT_CONSECUTIVE_MATCHES]: 1,
+  [ALERT_STATUS]: 'delayed',
+  [ALERT_START]: '2023-03-28T12:27:28.159Z',
+  [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+  [ALERT_UUID]: 'abcdefg',
+  [ALERT_WORKFLOW_STATUS]: 'open',
+  [SPACE_IDS]: ['default'],
+  [VERSION]: '8.8.1',
+  [TAGS]: ['rule-', '-tags'],
+};
+
 export const existingExpandedNewAlert = expandFlattenedAlert(existingFlattenedNewAlert);
 export const existingExpandedActiveAlert = expandFlattenedAlert(existingFlattenedActiveAlert);
 export const existingExpandedRecoveredAlert = expandFlattenedAlert(existingFlattenedRecoveredAlert);
+export const existingExpandedDelayedAlert = expandFlattenedAlert(existingFlattenedDelayedAlert);

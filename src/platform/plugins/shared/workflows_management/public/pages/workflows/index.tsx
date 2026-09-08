@@ -8,39 +8,126 @@
  */
 
 import {
-  EuiButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiPageTemplate,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
-import { useWorkflows } from '@kbn/workflows-ui';
-import { PLUGIN_ID } from '../../../common';
+import {
+  useShowManagedWorkflowsSetting,
+  useWorkflows,
+  useWorkflowsCapabilities,
+} from '@kbn/workflows-ui';
+import {
+  parseBooleanFilterValue,
+  parseWorkflowsUrlSearchParams,
+  serializeWorkflowsUrlSearchParams,
+} from './url_search_params';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
+import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
-import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { getAddConnectorsMenuItem } from '../../shared/ui/get_add_connectors_menu_item';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
 
+const MANAGED_FILTER_OPTIONS = [
+  {
+    label: i18n.translate('workflows.management.managedFilter.customOptionLabel', {
+      defaultMessage: 'Custom',
+    }),
+    key: 'unmanaged',
+  },
+  {
+    label: i18n.translate('workflows.management.managedFilter.managedOptionLabel', {
+      defaultMessage: 'Managed',
+    }),
+    key: 'managed',
+  },
+];
+
+const getSelectedManagedFilterValues = (
+  managed: WorkflowsSearchParams['managed']
+): Array<'unmanaged' | 'managed'> => {
+  if (managed === 'all') {
+    return ['unmanaged', 'managed'];
+  }
+
+  if (managed === 'managed') {
+    return ['managed'];
+  }
+
+  return ['unmanaged'];
+};
+
+const getManagedFilterValue = (
+  selectedValues: Array<'unmanaged' | 'managed'>
+): WorkflowsSearchParams['managed'] => {
+  const selectedValuesSet = new Set(selectedValues);
+  const isCustomSelected = selectedValuesSet.has('unmanaged');
+  const isManagedSelected = selectedValuesSet.has('managed');
+
+  if (isCustomSelected && isManagedSelected) {
+    return 'all';
+  }
+
+  if (isManagedSelected) {
+    return 'managed';
+  }
+
+  return undefined;
+};
+
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
-  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
+  const isManagedWorkflowsSettingEnabled = useShowManagedWorkflowsSetting();
+  const { canCreateWorkflow, canReadWorkflow, canReadManagedWorkflow, canUpdateWorkflow } =
+    useWorkflowsCapabilities();
+  const showManagedWorkflowsFilter = Boolean(
+    isManagedWorkflowsSettingEnabled && canReadWorkflow && canReadManagedWorkflow
+  );
   const { euiTheme } = useEuiTheme();
-  const [search, setSearch] = useState<WorkflowsSearchParams>({
-    size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
-    page: 1,
-    query: '',
-  });
+  const location = useLocation();
+
+  const search = useMemo<WorkflowsSearchParams>(() => {
+    const nextSearch = parseWorkflowsUrlSearchParams(location.search);
+
+    if (!showManagedWorkflowsFilter) {
+      const { managed, ...searchWithoutManaged } = nextSearch;
+      return searchWithoutManaged;
+    }
+
+    return nextSearch;
+  }, [location.search, showManagedWorkflowsFilter]);
+  const { data: filtersData } = useWorkflowFiltersOptions(
+    ['enabled', 'createdBy', 'tags'],
+    showManagedWorkflowsFilter ? 'all' : undefined
+  );
+
+  const setSearch = useCallback(
+    (newSearch: WorkflowsSearchParams) => {
+      const serializedSearch = serializeWorkflowsUrlSearchParams(newSearch);
+      void application.navigateToApp(PLUGIN_ID, {
+        path: serializedSearch ? `?${serializedSearch}` : '',
+        replace: true,
+      });
+    },
+    [application]
+  );
+
+  const [showImportFlyout, setShowImportFlyout] = useState(false);
 
   const navigateToCreateWorkflow = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { path: '/create' });
@@ -49,7 +136,9 @@ export function WorkflowsPage() {
   const { data: workflows } = useWorkflows(search);
   useWorkflowsBreadcrumbs();
 
-  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
+  /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
+  const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
+  const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
   const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
     false
@@ -57,56 +146,62 @@ export function WorkflowsPage() {
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
+  const shouldShowFilters = !shouldShowEmptyState || showManagedWorkflowsFilter;
+
+  const appMenu = useMemo<AppMenuConfig>(() => {
+    const items: AppMenuItemType[] = [];
+    if (canImportWorkflows) {
+      items.push({
+        id: 'importWorkflows',
+        order: 1,
+        label: i18n.translate('workflows.importWorkflowsButton', {
+          defaultMessage: 'Import',
+        }),
+        iconType: 'download',
+        overflow: true,
+        run: () => setShowImportFlyout(true),
+        testId: 'importWorkflowsButton',
+      });
+    }
+    if (addConnectorsMenuItem) {
+      items.push(addConnectorsMenuItem);
+    }
+
+    return {
+      primaryActionItem: canCreateWorkflow
+        ? {
+            id: 'createWorkflow',
+            label: i18n.translate('workflows.createWorkflowButton', {
+              defaultMessage: 'Create workflow',
+            }),
+            iconType: 'plus',
+            run: navigateToCreateWorkflow,
+            testId: 'createWorkflowButton',
+          }
+        : undefined,
+      items,
+    };
+  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
 
   return (
-    <EuiPageTemplate offset={0} css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
-      {/* negative margin to compensate for header's bottom padding and reduce space between header and content */}
-      <EuiPageTemplate.Header
-        bottomBorder={false}
-        css={{ marginBottom: `-${euiTheme.size.l}` }}
-        restrictWidth={false}
-      >
-        <EuiFlexGroup justifyContent={'spaceBetween'}>
-          <EuiFlexItem>
-            <EuiPageHeader
-              pageTitle={
-                <FormattedMessage id="workflows.pageTitle" defaultMessage="Workflows" ignoreTag />
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              {canCreateWorkflow && (
-                <EuiButton
-                  iconType="plusInCircle"
-                  color="primary"
-                  size="m"
-                  fill
-                  onClick={navigateToCreateWorkflow}
-                >
-                  <FormattedMessage
-                    id="workflows.createWorkflowButton"
-                    defaultMessage="Create a new workflow"
-                    ignoreTag
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageTemplate.Header>
+    <EuiPageTemplate
+      offset={0}
+      css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
+      data-test-subj="workflowsPage"
+    >
+      <AppHeader
+        title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
+        menu={appMenu}
+        docLink={WORKFLOWS_DOCUMENTATION_URL}
+      />
       <EuiPageTemplate.Section restrictWidth={false}>
-        {!shouldShowEmptyState && (
+        {shouldShowFilters ? (
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <WorkflowSearchField
                   initialValue={search.query || ''}
-                  onSearch={(query) =>
-                    setSearch((prevState) => {
-                      return { ...prevState, query };
-                    })
-                  }
+                  onSearch={(query) => setSearch({ ...search, page: 1, query })}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -117,8 +212,14 @@ export function WorkflowsPage() {
                     values={filtersData?.enabled || []}
                     selectedValues={search.enabled || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch((prevState) => {
-                        return { ...prevState, enabled: newValues };
+                      const enabled = newValues
+                        .map(parseBooleanFilterValue)
+                        .filter((value): value is boolean => value !== undefined);
+
+                      setSearch({
+                        ...search,
+                        page: 1,
+                        enabled,
                       });
                     }}
                   />
@@ -132,17 +233,50 @@ export function WorkflowsPage() {
                     values={filtersData?.createdBy || []}
                     selectedValues={search.createdBy || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch((prevState) => {
-                        return { ...prevState, createdBy: newValues };
-                      });
+                      setSearch({ ...search, page: 1, createdBy: newValues.map(String) });
                     }}
                   />
                 </EuiFilterGroup>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  <WorkflowsFilterPopover
+                    filter="tags"
+                    title="Tags"
+                    values={filtersData?.tags || []}
+                    selectedValues={search.tags || []}
+                    onSelectedValuesChanged={(newValues) => {
+                      setSearch({ ...search, page: 1, tags: newValues.map(String) });
+                    }}
+                  />
+                </EuiFilterGroup>
+              </EuiFlexItem>
+              {showManagedWorkflowsFilter ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFilterGroup>
+                    <WorkflowsFilterPopover
+                      filter="managed"
+                      title={i18n.translate('workflows.management.managedFilter.title', {
+                        defaultMessage: 'View',
+                      })}
+                      values={MANAGED_FILTER_OPTIONS}
+                      selectedValues={getSelectedManagedFilterValues(search.managed)}
+                      onSelectedValuesChanged={(newValues) => {
+                        const managed = getManagedFilterValue(
+                          newValues as Array<'unmanaged' | 'managed'>
+                        );
+                        setSearch({ ...search, page: 1, managed });
+                      }}
+                    />
+                  </EuiFilterGroup>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
-            {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
+            {!shouldShowEmptyState && isExecutionStatsBarEnabled ? (
+              <WorkflowExecutionStatsBar height={140} />
+            ) : null}
           </>
-        )}
+        ) : null}
 
         <WorkflowList
           search={search}
@@ -150,6 +284,9 @@ export function WorkflowsPage() {
           onCreateWorkflow={navigateToCreateWorkflow}
         />
       </EuiPageTemplate.Section>
+      {showImportFlyout ? (
+        <ImportWorkflowsFlyout onClose={() => setShowImportFlyout(false)} />
+      ) : null}
     </EuiPageTemplate>
   );
 }

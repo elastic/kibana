@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
-import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import {
+  applyColorToSchema,
+  colorByValueSchema,
+  colorMappingSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -20,292 +25,266 @@ import {
   sharedPanelInfoSchema,
 } from '../shared';
 import {
-  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
-  mergeAllBucketsWithChartDimensionSchema,
+  getMetricsWithChartDimensionSchemaWithRefBasedOps,
+  getBucketsWithChartDimensionSchema,
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { directionSchema } from '../enums';
+
+/**
+ * Datatable supports an additional "badge" mode (render colored values as badges),
+ * so it uses a datatable-specific schema rather than the shared applyColorToSchema.
+ */
+const applyColorToDatatableSchema = z.union([applyColorToSchema, z.literal('badge')]).meta({
+  description:
+    'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.',
+});
 
 /**
  * Sorting configuration for the datatable. Only one column can be sorted at a time.
  */
-const sortingSchema = schema.oneOf(
-  [
-    // Sorting for metric or row columns
-    schema.object(
-      {
-        column_type: schema.oneOf([schema.literal('metric'), schema.literal('row')], {
-          meta: { description: 'Type of column to sort by' },
-        }),
-        index: schema.number({
-          min: 0,
-          meta: { description: 'Index of the column/row to sort by (0-based)' },
-        }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
-      },
-      { meta: { description: 'Sort by a metric or row column' } }
-    ),
-    // Sorting for split_metrics_by (transposed) columns
-    schema.object(
-      {
-        column_type: schema.literal('split_metrics_by'),
-        metric_index: schema.number({
-          min: 0,
-          meta: {
-            description: 'Index of the metric column to sort by (0-based)',
-          },
-        }),
-        values: schema.arrayOf(schema.string(), {
-          minSize: 1,
-          maxSize: 20,
-          meta: {
-            description:
-              'Array of transposed column values, one for each split_metrics_by column in order',
-          },
-        }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
-      },
-      {
-        meta: {
+const sortingSchema = z
+  .union([
+    z
+      .object({
+        column_type: z
+          .union([z.literal('metric'), z.literal('row')])
+          .meta({ description: 'Type of column to sort by.' }),
+        index: z
+          .number()
+          .min(0)
+          .meta({ description: 'Index of the column or row to sort by (0-based).' }),
+        direction: directionSchema.meta({ description: 'Sort direction.' }),
+      })
+      .strict()
+      .meta({ description: 'Sort by a metric or row column' }),
+    z
+      .object({
+        column_type: z.literal('pivoted_metric'),
+        index: z.number().min(0).meta({
           description:
-            'Sort by a transposed metric column (created when metrics are pivoted by split_metrics_by)',
-        },
-      }
-    ),
-  ],
-  {
-    meta: {
-      description:
-        'Sorting configuration. Only one column can be sorted at a time. Use "column_type" to specify the column type.',
-    },
-  }
-);
+            '0-based index into the "metrics" array for the metric to sort; use "values" to identify the pivoted column',
+        }),
+        values: z.array(z.string()).min(1).max(20).meta({
+          description: 'Array of pivot values, one for each split_metrics_by column in order',
+        }),
+        direction: directionSchema.meta({ description: 'Sort direction.' }),
+      })
+      .strict()
+      .meta({
+        description:
+          'Sort by a pivoted metric column (created when metrics are pivoted by split_metrics_by)',
+      }),
+  ])
+  .meta({
+    description:
+      'Sorting configuration. Only one column can be sorted at a time. Use "column_type" to specify the column type.',
+  });
 
-const datatableStateSharedOptionsSchema = {
-  /**
-   * Density  configuration
-   */
-  density: schema.maybe(
-    schema.object(
-      {
+const datatableStylingSchema = z
+  .object({
+    /**
+     * Density  configuration
+     */
+    density: z
+      .object({
         /**
          * Density mode
          */
-        mode: schema.maybe(
-          schema.oneOf(
-            [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
-            {
-              defaultValue: 'default',
-              meta: { description: 'Density mode' },
-            }
-          )
-        ),
+        mode: z
+          .union([z.literal('compact'), z.literal('default'), z.literal('expanded')])
+          .default('default')
+          .optional()
+          .meta({ description: 'Display density mode.' }),
         /**
          * Height configuration
          */
-        height: schema.maybe(
-          schema.object({
-            header: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.object({ type: schema.literal('auto') }),
-                  schema.object({
-                    type: schema.literal('custom'),
-                    max_lines: schema.number({
-                      defaultValue: DEFAULT_HEADER_ROW_HEIGHT_LINES,
-                      min: 1,
-                      max: 5,
-                    }),
-                  }),
-                ],
-                {
-                  meta: {
-                    description: 'Maximum number of lines to use before header is truncated',
-                  },
-                }
-              )
-            ),
-            value: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.object({ type: schema.literal('auto') }),
-                  schema.object({
-                    type: schema.literal('custom'),
-                    lines: schema.number({
-                      defaultValue: DEFAULT_ROW_HEIGHT_LINES,
-                      min: 1,
-                      max: 20,
-                    }),
-                  }),
-                ],
-                {
-                  meta: {
-                    description: 'Number of lines to display per table body cell',
-                  },
-                }
-              )
-            ),
+        height: z
+          .object({
+            header: z
+              .union([
+                z.object({ type: z.literal('auto') }).strict(),
+                z
+                  .object({
+                    type: z.literal('custom'),
+                    max_lines: z.number().min(1).max(5).default(DEFAULT_HEADER_ROW_HEIGHT_LINES),
+                  })
+                  .strict(),
+              ])
+              .optional()
+              .meta({
+                description: 'Number of lines before the header is truncated.',
+              }),
+            value: z
+              .union([
+                z.object({ type: z.literal('auto') }).strict(),
+                z
+                  .object({
+                    type: z.literal('custom'),
+                    lines: z.number().min(1).max(20).default(DEFAULT_ROW_HEIGHT_LINES),
+                  })
+                  .strict(),
+              ])
+              .optional()
+              .meta({
+                description: 'Number of lines to display per table body cell.',
+              }),
           })
-        ),
-      },
-      {
-        meta: {
-          id: 'datatableDensity',
-          description: 'Density configuration for the datatable',
-        },
-      }
-    )
-  ),
-  /**
-   * Paging configuration
-   */
-  paging: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(10),
-        schema.literal(20),
-        schema.literal(30),
-        schema.literal(50),
-        schema.literal(100),
-      ],
-      {
-        meta: {
-          description: 'Enables pagination and sets the number of rows to display per page',
-        },
-      }
-    )
-  ),
-  /**
-   * Sorting configuration
-   */
-  sort_by: schema.maybe(sortingSchema),
-};
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional()
+      .meta({
+        id: 'datatableDensity',
+        description: 'Density configuration for the datatable.',
+      }),
+    /**
+     * Paging configuration
+     */
+    paging: z
+      .union([z.literal(10), z.literal(20), z.literal(30), z.literal(50), z.literal(100)])
+      .optional()
+      .meta({
+        description:
+          'Rows per page. When set, pagination is enabled with the specified number of rows.',
+      }),
+    /**
+     * Sorting configuration
+     */
+    sort_by: sortingSchema.optional(),
+    /**
+     * Show row numbers
+     */
+    row_numbers: z
+      .object({
+        visible: z.boolean().meta({ description: 'When `true`, displays row numbers.' }),
+      })
+      .strict()
+      .optional()
+      .meta({
+        description: 'Configuration for row numbers',
+      }),
+  })
+  .strict()
+  .meta({
+    id: 'datatableStyling',
+    title: 'Datatable styling',
+    description: 'Visual chart styling options',
+  });
 
-const datatableStateCommonOptionsSchema = {
-  /**
-   * Where to apply the color (background or value)
-   */
-  apply_color_to: schema.maybe(applyColorToSchema),
-  /**
-   * Whether to show the column
-   */
-  visible: schema.maybe(schema.boolean({ defaultValue: true })),
-  /**
-   * Column width in pixels
-   */
-  width: schema.maybe(
-    schema.number({
-      min: 0,
-      meta: { description: 'Column width in pixels' },
-    })
-  ),
-};
+const datatableConfigCommonOptionsSchema = z
+  .object({
+    /**
+     * Where to apply the color (background, value or badge)
+     */
+    apply_color_to: applyColorToDatatableSchema.optional(),
+    /**
+     * Show the column
+     */
+    visible: z
+      .boolean()
+      .default(true)
+      .optional()
+      .meta({ description: 'When `false`, hides the column from the datatable.' }),
+    /**
+     * Column width in pixels
+     */
+    width: z.number().min(0).optional().meta({ description: 'Column width in pixels.' }),
+  })
+  .strict();
 
-const datatableStateRowsOptionsNoESQLSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchema.extend({
   /**
    * Alignment of the rows
    */
-  alignment: schema.maybe(
-    horizontalAlignmentSchema({
-      defaultValue: 'left',
-      meta: { description: 'Alignment of the rows' },
-    })
-  ),
+  alignment: horizontalAlignmentSchema.default('left').optional().meta({
+    description: 'Alignment of the rows.',
+  }),
   /**
    * Color configuration
    */
-  color: schema.maybe(colorMappingSchema),
+  color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
   /**
    * Whether to enable the one click filter
    */
-  click_filter: schema.maybe(
-    schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Whether to enable the one click filter' },
-    })
-  ),
+  click_filter: z
+    .boolean()
+    .default(false)
+    .optional()
+    .meta({ description: 'When `true`, enables one-click filtering on cell values.' }),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the
    * number of columns specified in the columns parameter.
    */
-  collapse_by: schema.maybe(collapseBySchema),
-};
+  collapse_by: collapseBySchema.optional(),
+});
 
-const datatableStateRowsOptionsESQLSchema = {
-  ...datatableStateRowsOptionsNoESQLSchema,
+const datatableConfigRowsOptionsESQLSchema = datatableConfigRowsOptionsNoESQLSchema.extend({
   /**
    * Color configuration
    */
-  color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
-      meta: {
-        description:
-          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      },
-    })
-  ),
-};
+  color: z
+    .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
+    .default(AUTO_COLOR)
+    .optional()
+    .meta({
+      description:
+        'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+    }),
+});
 
-const datatableStateMetricsOptionsSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema.extend({
   /**
    * Color configuration
    */
-  color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
-      meta: {
-        description:
-          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      },
-    })
-  ),
+  color: z
+    .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
+    .default(AUTO_COLOR)
+    .optional()
+    .meta({
+      description:
+        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+    }),
   /**
    * Alignment of the columns
    */
-  alignment: schema.maybe(
-    horizontalAlignmentSchema({
-      defaultValue: 'right',
-      meta: { description: 'Alignment of the columns' },
-    })
-  ),
+  alignment: horizontalAlignmentSchema.default('right').optional().meta({
+    description: 'Alignment of the columns.',
+  }),
   /**
    * Summary configuration
    */
-  summary: schema.maybe(
-    schema.object(
-      {
-        type: schema.oneOf(
-          [
-            schema.literal('sum'),
-            schema.literal('avg'),
-            schema.literal('count'),
-            schema.literal('min'),
-            schema.literal('max'),
-          ],
-          { meta: { description: 'Type of summary function to apply to the column' } }
-        ),
-        label: schema.maybe(schema.string({ meta: { description: 'Summary row label' } })),
-      },
-      { meta: { description: 'Summary row configuration' } }
-    )
-  ),
-};
+  summary: z
+    .object({
+      type: z
+        .union([
+          z.literal('sum'),
+          z.literal('avg'),
+          z.literal('count'),
+          z.literal('min'),
+          z.literal('max'),
+        ])
+        .meta({ description: 'Type of summary function to apply to the column.' }),
+      label: z.string().optional().meta({ description: 'Summary row label.' }),
+    })
+    .strict()
+    .optional()
+    .meta({ description: 'Summary row configuration' }),
+});
 
 interface SortByValidationInput {
-  metrics: Array<{}>;
+  metrics?: Array<{}>;
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
-  sort_by?: {
-    column_type: 'metric' | 'row' | 'split_metrics_by';
-    index?: number;
-    metric_index?: number;
-    values?: string[];
+  styling?: {
+    sort_by?: {
+      column_type: 'metric' | 'row' | 'pivoted_metric';
+      index?: number;
+      values?: string[];
+    };
   };
 }
 
@@ -313,18 +292,19 @@ function validateSortBy({
   metrics,
   rows,
   split_metrics_by,
-  sort_by,
+  styling,
 }: SortByValidationInput): string | undefined {
-  if (!sort_by) {
+  if (!styling?.sort_by) {
     return;
   }
 
-  const { column_type } = sort_by;
+  const { column_type, index, values } = styling.sort_by;
+
+  const numberOfMetrics = metrics?.length ?? 0;
 
   if (column_type === 'metric') {
-    const index = sort_by.index;
-    if (index == null || index >= metrics.length) {
-      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= numberOfMetrics) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${numberOfMetrics} item(s).`;
     }
   }
 
@@ -332,141 +312,152 @@ function validateSortBy({
     if (!rows || rows.length === 0) {
       return `Cannot sort by 'row' when no rows are defined.`;
     }
-    const index = sort_by.index;
+
     if (index == null || index >= rows.length) {
       return `The 'sort_by.index' (${index}) is out of bounds. The 'rows' array has ${rows.length} item(s).`;
     }
   }
 
-  if (column_type === 'split_metrics_by') {
+  if (column_type === 'pivoted_metric') {
     if (!split_metrics_by || split_metrics_by.length === 0) {
-      return `Cannot sort by 'split_metrics_by' when no split_metrics_by columns are defined.`;
+      return `Cannot sort by 'pivoted_metric' when no split_metrics_by columns are defined.`;
     }
 
-    const metricIndex = sort_by.metric_index;
-    if (metricIndex == null || metricIndex >= metrics.length) {
-      return `The 'sort_by.metric_index' (${metricIndex}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= numberOfMetrics) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${numberOfMetrics} item(s).`;
     }
 
-    const values = sort_by.values;
     if (values == null || values.length !== split_metrics_by.length) {
       return `The 'sort_by.values' length (${values?.length}) must match the 'split_metrics_by' length (${split_metrics_by.length}).`;
     }
   }
 }
 
-export const datatableStateSchemaNoESQL = schema.object(
-  {
-    type: schema.literal('datatable'),
-    ...sharedPanelInfoSchema,
-    ...dslOnlyPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetSchema,
-    ...datatableStateSharedOptionsSchema,
+export const datatableConfigSchemaNoESQL = z
+  .object({
+    type: z.literal('data_table'),
+    ...sharedPanelInfoSchema.shape,
+    ...dslOnlyPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    ...dataSourceSchema.shape,
+    styling: datatableStylingSchema.optional(),
     /**
      * Metric columns configuration, must define operation.
      */
-    metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Array of metrics to display as columns in the datatable' },
-      }
-    ),
+    metrics: z
+      .array(
+        getMetricsWithChartDimensionSchemaWithRefBasedOps('datatableMetric').and(
+          datatableConfigMetricsOptionsSchema
+        )
+      )
+      .min(1)
+      .max(1000)
+      .meta({ description: 'Array of metrics to display as columns in the datatable' }),
     /**
      * Row configuration, optional bucket operations.
      */
-    rows: schema.maybe(
-      schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsNoESQLSchema),
-        {
-          minSize: 1,
-          maxSize: 50,
-          meta: { description: 'Array of operations to split the datatable rows by' },
-        }
+    rows: z
+      .array(
+        getBucketsWithChartDimensionSchema('datatableRow').and(
+          datatableConfigRowsOptionsNoESQLSchema
+        )
       )
-    ),
+      .min(1)
+      .max(50)
+      .optional()
+      .meta({ description: 'Array of operations to split the datatable rows by' }),
     /**
      * Split metrics by configuration, optional bucket operations.
      */
-    split_metrics_by: schema.maybe(
-      schema.arrayOf(bucketOperationDefinitionSchema, {
-        minSize: 1,
-        maxSize: 20,
-        meta: { description: 'Array of operations to split the metric columns by' },
-      })
-    ),
-  },
-  {
-    validate: validateSortBy,
-    meta: {
-      id: 'datatableNoESQL',
-      description: 'Datatable state configuration for standard queries',
-    },
-  }
-);
+    split_metrics_by: z
+      .array(bucketOperationDefinitionSchema)
+      .min(1)
+      .max(20)
+      .optional()
+      .meta({ description: 'Array of operations to split the metric columns by' }),
+  })
+  .superRefine((data, ctx) => {
+    const msg = validateSortBy(data);
+    if (msg) {
+      ctx.addIssue({ code: 'custom', message: msg });
+    }
+  })
+  .meta({
+    id: 'datatableNoESQL',
+    title: 'Datatable (DSL)',
+    description: 'Datatable state configuration for standard queries',
+  });
 
-export const datatableStateSchemaESQL = schema.object(
-  {
-    type: schema.literal('datatable'),
-    ...sharedPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
-    ...datatableStateSharedOptionsSchema,
+export const datatableConfigSchemaESQL = z
+  .object({
+    type: z.literal('data_table'),
+    ...sharedPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    ...dataSourceEsqlTableSchema.shape,
+    styling: datatableStylingSchema.optional(),
     /**
      * Metric columns configuration, must define operation.
      */
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
-        meta: { id: 'datatableESQLMetric' },
-      }),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Array of metrics to display as columns in the datatable' },
-      }
-    ),
+    metrics: z
+      .array(
+        esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
+          id: 'datatableESQLMetric',
+          title: 'Datatable Metric (ES|QL)',
+        })
+      )
+      .min(1)
+      .max(1000)
+      .optional()
+      .meta({ description: 'Array of metrics to display as columns in the datatable' }),
     /**
      * Row configuration, optional operations.
      */
-    rows: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
-        minSize: 1,
-        maxSize: 50,
-        meta: { description: 'Array of operations to split the datatable rows by' },
-      })
-    ),
+    rows: z
+      .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape))
+      .min(1)
+      .max(50)
+      .optional()
+      .meta({ description: 'Array of operations to split the datatable rows by' }),
     /**
      * Split metrics by configuration, optional operations.
      */
-    split_metrics_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema, {
-        minSize: 1,
-        maxSize: 20,
-        meta: { description: 'Array of operations to split the metric columns by' },
-      })
-    ),
-  },
-  {
-    validate: validateSortBy,
-    meta: {
-      id: 'datatableESQL',
-      description: 'Datatable state configuration for ES|QL queries',
-    },
-  }
-);
+    split_metrics_by: z
+      .array(esqlColumnWithFormatSchema)
+      .min(1)
+      .max(20)
+      .optional()
+      .meta({ description: 'Array of operations to split the metric columns by' }),
+  })
+  .superRefine((data, ctx) => {
+    const sortByError = validateSortBy(data);
+    if (sortByError) {
+      ctx.addIssue({ code: 'custom', message: sortByError });
+      return;
+    }
 
-export const datatableStateSchema = schema.oneOf(
-  [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
-  {
-    meta: {
-      description: 'Datatable chart configuration: DSL or ES|QL query based',
-      id: 'datatableChartSchema',
-    },
-  }
-);
+    const { metrics, rows } = data;
 
-export type DatatableState = TypeOf<typeof datatableStateSchema>;
-export type DatatableStateNoESQL = TypeOf<typeof datatableStateSchemaNoESQL>;
-export type DatatableStateESQL = TypeOf<typeof datatableStateSchemaESQL>;
+    if (!metrics && !rows) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Datatable must have at least one column',
+      });
+    }
+  })
+  .meta({
+    id: 'datatableESQL',
+    title: 'Datatable (ES|QL)',
+    description: 'Datatable state configuration for ES|QL queries',
+  });
+
+export const datatableConfigSchema = z
+  .union([datatableConfigSchemaNoESQL, datatableConfigSchemaESQL])
+  .meta({
+    id: 'datatableChart',
+    title: 'Datatable',
+    description: 'Datatable chart configuration: DSL or ES|QL query based',
+  });
+
+export type DatatableConfig = z.output<typeof datatableConfigSchema>;
+export type DatatableConfigNoESQL = z.output<typeof datatableConfigSchemaNoESQL>;
+export type DatatableConfigESQL = z.output<typeof datatableConfigSchemaESQL>;

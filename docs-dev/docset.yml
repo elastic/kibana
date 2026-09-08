@@ -1,0 +1,23 @@
+project: 'Kibana'
+
+icon: kibana
+
+registry: internal
+
+storybook:
+  # Registry of embeddable Storybook stories that resolves `:::{storybook}` directives
+  # (e.g. `:id: kibana:<alias>:<story>`). The committed default is the registry published
+  # from `main` by the storybook-docs CI step (see
+  # .buildkite/scripts/steps/storybooks/build_and_upload.ts). Local serve and per-PR
+  # previews override it via the allow-listed `KIBANA_STORYBOOK_REGISTRY` env var without
+  # editing this file (docs-builder env interpolation, elastic/docs-builder#3486).
+  registry: ${KIBANA_STORYBOOK_REGISTRY:-https://ci-artifacts.kibana.dev/storybooks/main/storybook-docs/docs_registry.json}
+
+subs:
+  kib: 'Kibana'
+
+# Subject-matter TOCs live in each folder's `toc.yml`. Add a new `- toc: <subject>` entry
+# when introducing another documentation area under `docs-dev/`.
+toc:
+  - file: index.md
+  - toc: kbn-ui

@@ -31,10 +31,22 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     isolation: 'isolate',
   }),
   containerInner: css([relativePosition, { height: '100%' }]),
+  cascadeLoadingContainer: css({
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }),
   cascadeTreeGridBlock: css([
     overflowYAuto,
     relativePosition,
     {
+      contain: 'layout style',
+      overflowAnchor: 'none',
       scrollbarGutter: 'auto',
       scrollbarWidth: 'thin',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,

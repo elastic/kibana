@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createToolCallMessage } from './proxy/utils';
+export { createToolCallMessage, createMultiToolCallMessage } from './proxy/utils';
 export { type ToolMessage, type LLMMessage, type LLmError, isLlmError } from './proxy/types';
 export { createInterceptors } from './proxy/interceptors';
 export { createLlmProxy, type LlmProxy } from './proxy/proxy';

@@ -7,38 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-interface Options<T extends string> {
-  defaultValue?: T;
-  meta?: { description: string };
-}
+export const orientationSchema = z.enum(['horizontal', 'vertical', 'angled']).meta({
+  id: 'vis_api_orientation',
+  description: 'Orientation',
+});
 
-function withDefaults<T extends string>(
-  opts?: Options<T>,
-  defaults: { defaultValue?: T; description?: string } = {}
-): Options<T> {
-  return {
-    ...opts,
-    defaultValue: opts && 'defaultValue' in opts ? opts.defaultValue : defaults.defaultValue,
-    meta: {
-      description: opts?.meta?.description ?? defaults.description ?? '',
-      ...opts?.meta,
-    },
-  };
-}
+export const simpleOrientationSchema = z.enum(['horizontal', 'vertical']).meta({
+  id: 'vis_api_simple_orientation',
+  description: 'Orientation',
+});
 
-class BuilderEnums {
-  orientation = (opts?: Options<'horizontal' | 'vertical' | 'angled'>) =>
-    schema.oneOf(
-      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
-      withDefaults(opts, {
-        description: 'Orientation',
-      })
-    );
-}
-
-/**
- * Helper utility to create commonly used enum schemas with defaults
- */
-export const builderEnums = new BuilderEnums();
+export const directionSchema = z.enum(['asc', 'desc']).meta({
+  id: 'vis_api_direction',
+  description: 'Direction',
+});

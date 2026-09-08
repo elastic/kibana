@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,13 +21,15 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLEditor } from './esql_editor';
+import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
+
+jest.mock('@kbn/code-editor', () => ({
+  ...jest.requireActual('@kbn/code-editor'),
   ESQLLang: {
-    ...jest.requireActual('@kbn/monaco').ESQLLang,
+    ...jest.requireActual('@kbn/code-editor').ESQLLang,
     getEsqlLanguage: jest.fn(() => ({
       id: 'esql',
       name: 'ESQL',
@@ -35,6 +38,19 @@ jest.mock('@kbn/monaco', () => ({
       mimetypes: ['application/esql'],
     })),
     validate: async () => mockValidate(),
+  },
+}));
+
+jest.mock('monaco-promql', () => ({
+  promLanguageDefinition: {
+    id: 'promql',
+    extensions: ['.promql'],
+    aliases: [],
+    mimetypes: [],
+    loader: jest.fn().mockResolvedValue({
+      language: { tokenizer: { root: [] } },
+      languageConfiguration: {},
+    }),
   },
 }));
 
@@ -47,6 +63,8 @@ jest.mock('./lookup_join', () => {
     }),
   };
 });
+
+window.performance.mark = jest.fn();
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -116,15 +134,14 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor')).toBeInTheDocument();
   });
 
-  it('should not render the query history action if hideQueryHistory is set to true', async () => {
+  it('should not render the query history icon when hideQueryHistory is true', async () => {
     const newProps = {
       ...props,
+      editorIsInline: true,
       hideQueryHistory: true,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(
-      queryByTestId('ESQLEditor-toggle-query-history-button-container')
-    ).not.toBeInTheDocument();
+    expect(queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
   });
 
   it('should render the correct buttons for the expanded code editor mode', async () => {
@@ -143,11 +160,6 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
   });
 
-  it('should render the run query text', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-run-query')).toBeInTheDocument();
-  });
-
   it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
     const newProps = {
       ...props,
@@ -158,33 +170,15 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-documentation')).toBeInTheDocument();
   });
 
-  it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
-    const newProps = {
-      ...props,
-      hideRunQueryText: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-run-query')).not.toBeInTheDocument();
-  });
-
   it('should render correctly if editorIsInline prop is set to true', async () => {
-    const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
-      hideRunQueryText: true,
       editorIsInline: true,
-      onTextLangQuerySubmit,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-run-query')).not.toBeInTheDocument();
 
     const runQueryButton = queryByTestId('ESQLEditor-run-query-button');
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
-
-    if (runQueryButton) {
-      await userEvent.click(runQueryButton);
-      expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
-    }
   });
 
   it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {
@@ -276,6 +270,128 @@ describe('ESQLEditor', () => {
     });
   });
 
+  it('displays server errors when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs | COMPLETION "prompt" WITH { "inference_id": "bad" }';
+    const serverErrorMessage = 'Unknown inference_id [bad]';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query failed: parent passes server errors and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          errors: [new Error(serverErrorMessage)],
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 error')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 error'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('displays server warnings when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs';
+    const serverWarningMessage = 'No limit defined, adding default limit of [1000].';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query succeeded with warning: parent passes server warning and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          warning: serverWarningMessage,
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 warning'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverWarningMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
   it('should render warning if the warning and mergeExternalMessages props are set', async () => {
     const user = userEvent.setup();
 
@@ -300,74 +416,6 @@ describe('ESQLEditor', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Client warning example')).toBeInTheDocument();
-    });
-  });
-
-  describe('openVisorOnSourceCommands', () => {
-    it('should open the visor on mount when prop is true and query has only source commands', async () => {
-      const newProps = {
-        ...props,
-        query: { esql: 'FROM test_index' },
-        openVisorOnSourceCommands: true,
-      };
-      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
-
-      await waitFor(() => {
-        const visor = getByTestId('ESQLEditor-quick-search-visor');
-        expect(visor).toBeInTheDocument();
-        // Visor is visible
-        expect(visor).toHaveStyle({ opacity: 1 });
-      });
-    });
-
-    it('should not open the visor when prop is false even if query has only source commands', async () => {
-      const newProps = {
-        ...props,
-        query: { esql: 'FROM test_index' },
-        openVisorOnSourceCommands: false,
-      };
-      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
-
-      await waitFor(() => {
-        const visor = getByTestId('ESQLEditor-quick-search-visor');
-        expect(visor).toBeInTheDocument();
-        // Visor is hidden
-        expect(visor).toHaveStyle({ opacity: 0 });
-      });
-    });
-
-    it('should not open the visor when prop is true but query has transformational commands', async () => {
-      const newProps = {
-        ...props,
-        query: { esql: 'FROM test_index | STATS count()' },
-        openVisorOnSourceCommands: true,
-      };
-      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
-
-      await waitFor(() => {
-        const visor = getByTestId('ESQLEditor-quick-search-visor');
-        expect(visor).toBeInTheDocument();
-        // Visor is hidden
-        expect(visor).toHaveStyle({ opacity: 0 });
-      });
-    });
-
-    it('should not open the visor if user has previously dismissed it', async () => {
-      // Simulate user having dismissed the visor in a previous session
-      localStorage.setItem('esql:visorAutoOpenDismissed', 'true');
-
-      const newProps = {
-        ...props,
-        query: { esql: 'FROM test_index' },
-        openVisorOnSourceCommands: true,
-      };
-      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
-
-      await waitFor(() => {
-        const visor = getByTestId('ESQLEditor-quick-search-visor');
-        expect(visor).toBeInTheDocument();
-        expect(visor).toHaveStyle({ opacity: 0 });
-      });
     });
   });
 });

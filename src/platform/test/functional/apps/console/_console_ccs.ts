@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/240147
-  describe.skip('Console App CCS', function describeIndexTests() {
+  describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
@@ -29,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
+      await PageObjects.console.clearEditorText();
     });
 
     after(async () => {
@@ -38,15 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Perform CCS Search in Console', () => {
-      before(async () => {
-        await PageObjects.console.clearEditorText();
-      });
       it('it should be able to access remote data', async () => {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
-        await PageObjects.console.clickPlay();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.clickPlayAndWaitForResults();
 
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getOutputText();

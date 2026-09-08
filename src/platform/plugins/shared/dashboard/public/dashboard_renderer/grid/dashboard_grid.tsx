@@ -204,7 +204,8 @@ export const DashboardGrid = () => {
   return (
     <div
       ref={layoutRef}
-      className={classNames(viewMode === 'edit' ? 'dshLayout--editing' : 'dshLayout--viewing', {
+      className={classNames({
+        'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
       })}
@@ -236,10 +237,9 @@ const dashboardGridStyles = {
         },
 
       // Hide hover actions when dashboard has an overlay
-      '.dshDashboardGrid__item--blurred .embPanel__hoverActions, .dshDashboardGrid__item--focused .embPanel__hoverActions':
-        {
-          visibility: 'hidden !important' as 'hidden',
-        },
+      '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
+        visibility: 'hidden !important' as 'hidden',
+      },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
         '.dshDashboardGrid__item--expanded': {
@@ -256,6 +256,8 @@ const dashboardGridStyles = {
       // Adjust borders/etc... for non-spaced out and expanded panels
       '&.dshLayout-withoutMargins': {
         paddingTop: euiTheme.size.s,
+        paddingLeft: euiTheme.size.s,
+        paddingRight: euiTheme.size.s,
         '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
           borderRadius: 0,
         },
@@ -264,7 +266,7 @@ const dashboardGridStyles = {
         },
       },
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
-      '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
+      '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred':
         {
           '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',

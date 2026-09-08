@@ -1,0 +1,306 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+
+jest.mock('@kbn/inference-prompt-utils', () => ({
+  executeAsReasoningAgent: jest.fn(),
+}));
+
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { identifyFeatures, MAX_IDENTIFIED_FEATURES_PER_ITERATION } from './identify_features';
+
+const executeAsReasoningAgentMock = executeAsReasoningAgent as jest.MockedFunction<
+  typeof executeAsReasoningAgent
+>;
+const inferenceClient = {} as BoundInferenceClient;
+const signal = new AbortController().signal;
+const logger = {
+  warn: jest.fn(),
+} as unknown as Logger;
+
+const createReasoningResponse = (arguments_: Record<string, unknown>) =>
+  ({
+    content: '',
+    toolCalls: [
+      {
+        toolCallId: 'call-finalize_features',
+        function: {
+          name: 'finalize_features',
+          arguments: arguments_,
+        },
+      },
+    ],
+    tokens: { prompt: 10, completion: 5, total: 15 },
+  } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+
+const responseWithoutFinalTool = {
+  content: '',
+  toolCalls: [],
+  tokens: { prompt: 10, completion: 5, total: 15 },
+} as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>;
+
+describe('identifyFeatures', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('uses the reasoning-agent tools and validates finalized output', async () => {
+    let capturedOptions: Parameters<typeof executeAsReasoningAgent>[0] | undefined;
+
+    executeAsReasoningAgentMock.mockImplementation(async (options) => {
+      capturedOptions = options as Parameters<typeof executeAsReasoningAgent>[0];
+      return createReasoningResponse({
+        features: [
+          {
+            id: 'okta',
+            type: 'technology',
+            subtype: 'identity_provider',
+            title: 'Okta',
+            description: 'Okta identity provider',
+            properties: { name: 'okta' },
+            confidence: 90,
+            evidence: ['service.name=okta'],
+            evidence_doc_ids: ['doc-1'],
+            tags: ['identity'],
+            filter: { field: 'service.name' },
+          },
+          {
+            id: 'empty-properties',
+            type: 'technology',
+            subtype: 'library',
+            title: 'Invalid',
+            description: 'Invalid feature',
+            properties: {},
+            confidence: 50,
+            evidence: [],
+            tags: [],
+          },
+          {
+            id: 'okta',
+            type: 'technology',
+            subtype: 'identity_provider',
+            title: 'Duplicate Okta',
+            description: 'Duplicate output',
+            properties: { name: 'okta' },
+            confidence: 80,
+            evidence: [],
+            tags: [],
+          },
+        ],
+        ignored_features: [
+          {
+            feature_id: 'excluded',
+            feature_title: 'Excluded',
+            excluded_feature_id: 'known-excluded',
+            reason: 'Same feature',
+          },
+          { feature_id: 42 },
+        ],
+      });
+    });
+
+    const result = await identifyFeatures({
+      streamName: 'logs.test',
+      sampleDocuments: [{ _id: 'doc-1', fields: { message: 'test message' } }],
+      inferenceClient,
+      systemPrompt: 'system prompt',
+      logger,
+      signal,
+      previouslyIdentifiedFeatures: [
+        {
+          id: 'existing',
+          type: 'technology',
+          properties: { name: 'existing' },
+        },
+      ],
+      knownFeatureIds: 'technology: existing, okta',
+    });
+
+    expect(capturedOptions).toEqual(
+      expect.objectContaining({
+        maxSteps: 4,
+        finalToolChoice: {
+          type: 'function',
+          function: 'finalize_features',
+        },
+        input: {
+          sample_documents: JSON.stringify([{ _id: 'doc-1', fields: { message: 'test message' } }]),
+          previously_identified_features: JSON.stringify([
+            {
+              id: 'existing',
+              type: 'technology',
+              properties: { name: 'existing' },
+            },
+          ]),
+          known_feature_ids: 'technology: existing, okta',
+          excluded_features: '',
+        },
+      })
+    );
+    // `evidence` bounds, `filter.oneOf`, and required optional fields are deliberately absent:
+    // `fromJSONSchema` discards sibling keys next to `oneOf`, and any rejected payload retries
+    // the whole generation before the batch is dropped. Both are enforced in code instead.
+    expect(capturedOptions?.prompt.versions[0]?.tools?.finalize_features?.schema).toEqual(
+      expect.objectContaining({
+        required: ['features', 'ignored_features'],
+        properties: expect.objectContaining({
+          features: expect.objectContaining({
+            items: expect.objectContaining({
+              required: [
+                'id',
+                'type',
+                'subtype',
+                'description',
+                'title',
+                'properties',
+                'confidence',
+                'evidence',
+                'tags',
+              ],
+              properties: expect.objectContaining({
+                type: expect.objectContaining({
+                  enum: ['entity', 'infrastructure', 'technology', 'dependency', 'schema'],
+                }),
+                evidence: expect.not.objectContaining({ maxItems: expect.anything() }),
+                filter: expect.not.objectContaining({ oneOf: expect.anything() }),
+              }),
+            }),
+          }),
+        }),
+      })
+    );
+    expect(result.features).toEqual([
+      expect.objectContaining({
+        id: 'okta',
+        stream_name: 'logs.test',
+        filter: undefined,
+      }),
+    ]);
+    expect(result.ignoredFeatures).toEqual([
+      {
+        feature_id: 'excluded',
+        feature_title: 'Excluded',
+        excluded_feature_id: 'known-excluded',
+        reason: 'Same feature',
+      },
+    ]);
+    expect(result.tokensUsed).toEqual({ prompt: 10, completion: 5, total: 15, cached: 0 });
+  });
+
+  it('caps evidence in code and keeps single-evidence features', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({
+        features: [
+          {
+            id: 'verbose-evidence',
+            type: 'technology',
+            subtype: 'library',
+            title: 'Verbose',
+            description: 'Feature with more evidence than the prompt asks for',
+            properties: { library: 'verbose' },
+            confidence: 70,
+            evidence: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
+            tags: ['technology'],
+          },
+          {
+            id: 'single-evidence',
+            type: 'technology',
+            subtype: 'library',
+            title: 'Single',
+            description: 'Feature supported by one grounded observation',
+            properties: { library: 'single' },
+            confidence: 60,
+            evidence: ['only-one'],
+            tags: ['technology'],
+          },
+        ],
+        ignored_features: [],
+      })
+    );
+
+    const result = await identifyFeatures({
+      streamName: 'logs.test',
+      sampleDocuments: [],
+      inferenceClient,
+      systemPrompt: 'system prompt',
+      logger,
+      signal,
+    });
+
+    expect(result.features).toEqual([
+      expect.objectContaining({
+        id: 'verbose-evidence',
+        evidence: ['e1', 'e2', 'e3', 'e4', 'e5'],
+      }),
+      expect.objectContaining({ id: 'single-evidence', evidence: ['only-one'] }),
+    ]);
+  });
+
+  it('caps returned features at MAX_IDENTIFIED_FEATURES_PER_ITERATION', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({
+        features: Array.from({ length: MAX_IDENTIFIED_FEATURES_PER_ITERATION + 1 }, (_, index) => ({
+          id: `feature-${index}`,
+          type: 'technology',
+          subtype: 'library',
+          title: `Feature ${index}`,
+          description: `Feature ${index}`,
+          properties: { name: `feature-${index}` },
+          confidence: 80,
+          evidence: ['evidence'],
+          tags: [],
+        })),
+        ignored_features: [],
+      })
+    );
+
+    const result = await identifyFeatures({
+      streamName: 'logs.test',
+      sampleDocuments: [],
+      inferenceClient,
+      systemPrompt: 'system prompt',
+      logger,
+      signal,
+    });
+
+    expect(result.features).toHaveLength(MAX_IDENTIFIED_FEATURES_PER_ITERATION);
+  });
+
+  it('fails the iteration when the reasoning agent does not finalize', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(responseWithoutFinalTool);
+
+    await expect(
+      identifyFeatures({
+        streamName: 'logs.test',
+        sampleDocuments: [],
+        inferenceClient,
+        systemPrompt: 'system prompt',
+        logger,
+        signal,
+      })
+    ).rejects.toThrow('Feature identification did not call finalize_features');
+  });
+
+  it('fails the iteration when final tool output is malformed', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({ ignored_features: [] })
+    );
+
+    await expect(
+      identifyFeatures({
+        streamName: 'logs.test',
+        sampleDocuments: [],
+        inferenceClient,
+        systemPrompt: 'system prompt',
+        logger,
+        signal,
+      })
+    ).rejects.toThrow('Feature identification returned invalid finalize_features output');
+  });
+});

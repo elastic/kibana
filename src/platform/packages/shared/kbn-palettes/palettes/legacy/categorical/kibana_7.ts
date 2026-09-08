@@ -13,6 +13,7 @@ import { KbnPalette } from '../../../constants';
 
 export const kibana7Palette = new KbnCategoricalPalette({
   id: KbnPalette.Kibana7,
+  legacy: true,
   aliases: [
     KbnPalette.Default, // needed when switching between new and old themes
     KbnPalette.Amsterdam, // to assign to existing default palettes

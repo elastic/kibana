@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/iframe-embedded-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/iframe-embedded-plugin'
+  title: '@kbn/iframe-embedded-plugin'
   description: Moon project for @kbn/iframe-embedded-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/test/functional_embedded/plugins/iframe_embedded
+  sourceRoot: x-pack/platform/test/functional_embedded/plugins/iframe_embedded
 dependsOn:
   - '@kbn/core'
 tags:

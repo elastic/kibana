@@ -105,8 +105,7 @@ describe('Streams Usage Collector (simplified)', () => {
     await expect(collector.fetch({ esClient: fakeEsClient })).rejects.toThrow('reader error');
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Failed to collect Streams telemetry data',
-      expect.any(Error)
+      'Failed to collect Streams telemetry data: reader error'
     );
   });
 });

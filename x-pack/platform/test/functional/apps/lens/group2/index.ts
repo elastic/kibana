@@ -45,14 +45,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
-    after(async () => {
-      await esNode.unload(esArchive);
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-    });
-
     // total run time ~ 16m 20s
     loadTestFile(require.resolve('./partition')); // 1m 40s
     loadTestFile(require.resolve('./persistent_context')); // 1m
@@ -62,5 +54,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./layer_actions')); // 1m 45s
     loadTestFile(require.resolve('./field_formatters')); // 1m 30s
     loadTestFile(require.resolve('./color_mapping_runtime_migrations'));
+    loadTestFile(require.resolve('./config_panel_scroll'));
   });
 };

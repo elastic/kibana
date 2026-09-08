@@ -64,7 +64,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
       enabled: (item: TransformListRow) =>
         !isDiscoverActionDisabled([item], forceDisable, dataViewExists(item)),
       description: discoverActionNameText,
-      icon: 'visTable',
+      icon: 'table',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionDiscover',

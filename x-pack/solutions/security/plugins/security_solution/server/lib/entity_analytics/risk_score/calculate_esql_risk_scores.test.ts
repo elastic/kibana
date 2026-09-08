@@ -7,7 +7,14 @@
 
 import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import { buildRiskScoreBucket, getESQL } from './calculate_esql_risk_scores';
+import {
+  buildEuidRuntimeMappingWithStoredFieldFastPath,
+  buildRiskScoreBucket,
+  getBaseScoreESQL,
+  getESQL,
+  getResolutionCompositeQuery,
+  getResolutionScoreESQLByIds,
+} from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 
@@ -16,6 +23,223 @@ describe('Calculate risk scores with ESQL', () => {
     it('matches snapshot', () => {
       const q = getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500);
       expect(q).toMatchSnapshot();
+    });
+
+    it('builds resolution composite query for lookup index pagination', () => {
+      const query = getResolutionCompositeQuery(
+        '.entity_analytics.risk_score.lookup-default',
+        1000,
+        {
+          resolution_target_id: 'user:foo',
+        }
+      );
+
+      expect(query).toEqual({
+        index: '.entity_analytics.risk_score.lookup-default',
+        size: 0,
+        query: {
+          term: {
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+        },
+        aggs: {
+          by_resolution_target: {
+            composite: {
+              size: 1000,
+              sources: [{ resolution_target_id: { terms: { field: 'resolution_target_id' } } }],
+              after: { resolution_target_id: 'user:foo' },
+            },
+          },
+        },
+      });
+    });
+
+    it('scopes query to targetEntityIds when they are provided', () => {
+      const query = getResolutionCompositeQuery(
+        '.entity_analytics.risk_score.lookup-default',
+        1000,
+        undefined,
+        ['user:target-1', 'user:target-2']
+      );
+
+      expect(query.query).toEqual({
+        terms: { resolution_target_id: ['user:target-1', 'user:target-2'] },
+      });
+    });
+
+    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
+      const query = getResolutionCompositeQuery(
+        '.entity_analytics.risk_score.lookup-default',
+        1000
+      );
+
+      expect(query.query).toEqual({
+        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+      });
+    });
+
+    it('builds resolution ESQL query for explicit resolution target ids', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a', 'user:target-z'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
+      );
+      expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
+      expect(query).toContain('BY resolution_target_id');
+      expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+    });
+
+    it('escapes quote and backslash characters in resolution target ID list', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a', 'user:with"quote\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('"user:target-a"');
+      expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
+    });
+
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when resolution target id list contains %s control character', (_label, char) => {
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:target-a', `user:bad${char}@okta`],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('escapes quote and backslash characters in getBaseScoreESQL bounds', () => {
+      const query = getBaseScoreESQL(
+        EntityType.host,
+        { lower: 'host:edge"with-quote', upper: 'host:edge\\with-slash' },
+        10000,
+        3500,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('entity_id > "host:edge\\"with-quote"');
+      expect(query).toContain('entity_id <= "host:edge\\\\with-slash"');
+    });
+
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when getBaseScoreESQL bounds contain %s control character', (_label, char) => {
+      expect(() =>
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: `host:bad${char}` },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+  });
+
+  describe('stored-EUID fast path', () => {
+    describe('buildEuidRuntimeMappingWithStoredFieldFastPath', () => {
+      it('reads the stored kibana.alert.entity.id array first and short-circuits on a type-prefixed match', () => {
+        const mapping = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.host);
+
+        expect(mapping.type).toBe('keyword');
+        const { source } = mapping.script;
+        expect(source).toContain("doc.containsKey('kibana.alert.entity.id')");
+        expect(source).toContain("for (def __id : doc['kibana.alert.entity.id'])");
+        expect(source).toContain("__id.startsWith('host:')");
+        expect(source).toContain('emit(__id); return;');
+        // The full Painless derivation remains as the fallback for alerts written before the stamp.
+        expect(source).toContain('String ___euid = ___euid_rt_eval(doc);');
+      });
+
+      it('guards the fast path with the entity type prefix for user', () => {
+        const { script } = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.user);
+
+        expect(script.source).toContain("__id.startsWith('user:')");
+        expect(script.source).not.toContain("__id.startsWith('host:')");
+      });
+    });
+
+    describe('storedEuidCoalesceClause', () => {
+      it('emits the coalesce clause in getBaseScoreESQL for host, scanning all three array positions', () => {
+        const query = getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:a', upper: 'host:z' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        );
+
+        expect(query).toContain(
+          'EVAL entity_id = CASE(STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "host:")'
+        );
+        expect(query).toContain('MV_SLICE(kibana.alert.entity.id, 1, 1)');
+        expect(query).toContain('MV_SLICE(kibana.alert.entity.id, 2, 2)');
+      });
+
+      it('emits the coalesce clause in getBaseScoreESQL for user', () => {
+        const query = getBaseScoreESQL(
+          EntityType.user,
+          { lower: 'user:a', upper: 'user:z' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        );
+
+        expect(query).toContain(
+          'STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "user:")'
+        );
+      });
+
+      it('emits the coalesce clause in getResolutionScoreESQLByIds for host and user', () => {
+        const hostQuery = getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        );
+        expect(hostQuery).toContain(
+          'STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "host:")'
+        );
+
+        const userQuery = getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:target-a'],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        );
+        expect(userQuery).toContain(
+          'STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "user:")'
+        );
+      });
     });
   });
 

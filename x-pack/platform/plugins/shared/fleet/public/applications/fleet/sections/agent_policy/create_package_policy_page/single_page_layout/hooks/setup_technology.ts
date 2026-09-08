@@ -19,7 +19,7 @@ import { SetupTechnology } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
-  isAgentlessIntegration as isAgentlessIntegrationFn,
+  isAgentlessIntegration,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
   isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
@@ -40,29 +40,38 @@ export const useAgentless = () => {
     return isAgentlessEnabled && !!agentPolicy?.supports_agentless;
   };
 
-  // When an integration has at least a policy template enabled for agentless
-  const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
-    const installSource =
-      packageInfo &&
-      'installationInfo' in packageInfo &&
-      packageInfo.installationInfo?.install_source;
-    const isCustomIntegration = installSource === 'custom' || installSource === 'upload';
+  const getAgentlessStatusForPackage = useCallback(
+    (packageInfo: PackageInfo | undefined, integrationToEnable?: string) => {
+      const installSource =
+        packageInfo &&
+        'installationInfo' in packageInfo &&
+        packageInfo.installationInfo?.install_source;
+      const isCustomIntegration = installSource === 'custom' || installSource === 'upload';
 
-    if (isCustomIntegration && !isAgentlessCustomIntegrationsEnabled) {
-      return false;
-    }
+      if (isCustomIntegration && !isAgentlessCustomIntegrationsEnabled) {
+        return { isAgentless: false, isDefaultDeploymentMode: false };
+      }
 
-    if (isAgentlessEnabled && isAgentlessIntegrationFn(packageInfo)) {
-      return true;
-    }
-    return false;
-  };
+      if (isAgentlessEnabled && isAgentlessIntegration(packageInfo, integrationToEnable)) {
+        return {
+          isAgentless: true,
+          isDefaultDeploymentMode: isAgentlessSetupDefault(
+            isAgentlessDefault,
+            packageInfo,
+            integrationToEnable
+          ),
+        };
+      }
+      return { isAgentless: false, isDefaultDeploymentMode: false };
+    },
+    [isAgentlessEnabled, isAgentlessCustomIntegrationsEnabled, isAgentlessDefault]
+  );
 
   return {
     isAgentlessEnabled,
     isAgentlessDefault,
     isAgentlessAgentPolicy,
-    isAgentlessIntegration,
+    getAgentlessStatusForPackage,
     isServerless,
     isCloud,
   };
@@ -100,7 +109,7 @@ export function useSetupTechnology({
   const allowedSetupTechnologies = useMemo(() => {
     const setupTechnologies = [];
 
-    if (isAgentlessIntegrationFn(packageInfo, integrationToEnable)) {
+    if (isAgentlessIntegration(packageInfo, integrationToEnable)) {
       setupTechnologies.push(SetupTechnology.AGENTLESS);
     }
 

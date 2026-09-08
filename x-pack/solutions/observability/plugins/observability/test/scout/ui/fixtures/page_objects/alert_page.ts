@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { RulesPage } from './rules_page';
 
 export class AlertPage {
@@ -19,10 +19,18 @@ export class AlertPage {
     await this.page.gotoApp(`observability/alerts/${alertId}`);
   }
 
+  async openActionsMenu() {
+    await this.page.testSubj.click('alert-details-header-actions-menu-button');
+  }
+
+  async clickInvestigate() {
+    await this.page.testSubj.click('alertDetailsInvestigate');
+  }
+
   async gotoAlertByRuleId(rulesPage: RulesPage, ruleId: string) {
     await rulesPage.goto(ruleId);
 
-    await expect(this.page.testSubj.locator('ruleName')).toBeVisible();
+    await expect(this.page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
     await this.page.testSubj.waitForSelector('expand-event');
     const expandAlertButtons = await this.page.testSubj.locator('expand-event').all();
@@ -30,7 +38,7 @@ export class AlertPage {
 
     await expandAlertButtons[0].click();
 
-    const alertDetailsLink = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
+    const alertDetailsLink = this.page.testSubj.locator('alertFlyoutAlertDetailsButton');
     await expect(alertDetailsLink).toBeVisible();
     await alertDetailsLink.click();
 

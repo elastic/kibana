@@ -6,24 +6,25 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiShowFor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaVersionBadge } from '@kbn/search-shared-ui';
+import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
-import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
-import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
+import { LicenseBadge } from './license_badge';
+import { docLinks } from '../../../common/doc_links';
+import { verticalSeparatorStyle } from './search_homepage_styles';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin, history, searchNavigation, cloud },
+    services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
 
-  const { isTrial } = useGetLicenseInfo();
   const { user } = useAuthenticatedUser();
 
   useEffect(() => {
@@ -72,25 +73,50 @@ export const SearchHomepagePage = () => {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {(isTrial || (!cloud?.isServerlessEnabled && !cloud?.isCloudEnabled)) && (
-                <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false}>
+                {cloud?.isInTrial() ? (
+                  <TrialUsageBadge cloud={cloud} />
+                ) : !cloud?.isCloudEnabled ? (
                   <LicenseBadge />
+                ) : null}
+              </EuiFlexItem>
+              <EuiShowFor sizes={['m', 'l', 'xl']}>
+                <EuiFlexItem grow={false}>
+                  <span css={verticalSeparatorStyle} />
                 </EuiFlexItem>
-              )}
+                <EuiFlexItem grow={false}>
+                  <CloudLinks cloud={cloud} />
+                </EuiFlexItem>
+              </EuiShowFor>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <ConnectToElasticsearch />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ConnectToElasticsearch />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-
-        <BasicMetricBadges />
+        <EuiFlexGroup>
+          <BasicMetricBadges />
+          <EuiFlexItem grow={false}>
+            <KibanaVersionBadge
+              docLink={
+                cloud?.isServerlessEnabled
+                  ? docLinks.serverlessReleaseNotes
+                  : cloud?.isCloudEnabled
+                  ? docLinks.hostedCloudReleaseNotes
+                  : docLinks.releaseNotes
+              }
+              kibanaVersion={
+                !cloud?.isServerlessEnabled
+                  ? `v${kibanaVersion}`
+                  : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
+                      defaultMessage: 'Changelog',
+                    })
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}

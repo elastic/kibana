@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_row_additional_leading_controls.ts
+
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -31,9 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          // Discover rewrites the compact `_a` hash, so navigateToApp's startsWith URL check never matches.
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
@@ -44,9 +48,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });
@@ -57,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
@@ -68,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
@@ -77,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
@@ -88,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });

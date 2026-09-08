@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { MiddlewareAPI } from '@reduxjs/toolkit';
+import { LENS_DATASOURCE_ID, getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
+
+import type { MiddlewareAPI } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -22,7 +24,7 @@ import { setState, initExisting, initEmpty } from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
 import { initializeSources } from '../../editor_frame_service/editor_frame';
-import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { getEditPath, getFullPath } from '../../../common/constants';
 
 interface PersistedDoc {
   doc: LensDocument;
@@ -43,25 +45,33 @@ export const getFromPreloaded = async ({
   history?: History<unknown>;
 }): Promise<PersistedDoc | undefined> => {
   const { notifications, spaces, attributeService } = lensServices;
-  let doc: LensDocument;
 
   try {
-    const docFromSavedObject = await (initialInput.savedObjectId
-      ? attributeService.loadFromLibrary(initialInput.savedObjectId)
+    // If we already have the attributes for a by reference visualization, avoid loading from the library
+    const docFromSavedObject = await (initialInput.ref_id && !initialInput.attributes
+      ? attributeService.loadFromLibrary(initialInput.ref_id)
       : undefined);
+
     if (!docFromSavedObject) {
+      const { attributes } = initialInput;
+
+      if (!attributes) {
+        throw new Error('Missing attributes');
+      }
+
       return {
-        // @TODO: it would be nice to address this type checks once for all
         doc: {
-          ...initialInput.attributes,
-          type: LENS_EMBEDDABLE_TYPE,
-        } as LensDocument,
+          ...attributes,
+          savedObjectId: initialInput.ref_id,
+        },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
         managed: false,
       };
     }
+
+    // By ref - use docFromSavedObject
     const { sharingSavedObjectProps, attributes, managed } = docFromSavedObject;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
@@ -77,14 +87,12 @@ export const getFromPreloaded = async ({
         }),
       });
     }
-    doc = {
-      ...initialInput,
-      ...attributes,
-      type: LENS_EMBEDDABLE_TYPE,
-    };
 
     return {
-      doc,
+      doc: {
+        ...attributes,
+        savedObjectId: initialInput.ref_id,
+      },
       sharingSavedObjectProps: {
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,
@@ -108,6 +116,7 @@ interface LoaderSharedArgs {
   storage: LensStoreDeps['lensServices']['storage'];
   eventAnnotationService: LensStoreDeps['lensServices']['eventAnnotationService'];
   defaultIndexPatternId: string;
+  http: LensStoreDeps['lensServices']['http'];
 }
 
 type PreloadedState = Omit<
@@ -141,6 +150,7 @@ async function loadFromLocatorState(
       adHocDataViews: lens.persistedDoc?.state.adHocDataViews || initialState.dataViewSpecs,
       references: locatorReferences,
       ...loaderSharedArgs,
+      projectRouting,
     },
     {
       isFullEditor: true,
@@ -199,6 +209,7 @@ async function loadFromEmptyState(
       datasourceStates: lens.datasourceStates,
       adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
       ...loaderSharedArgs,
+      projectRouting,
     },
     {
       isFullEditor: true,
@@ -287,6 +298,7 @@ async function loadFromSavedObject(
       references: [...doc.references, ...(doc.state.internalReferences || [])],
       adHocDataViews: doc.state.adHocDataViews,
       ...loaderSharedArgs,
+      projectRouting,
     },
     { isFullEditor: true }
   );
@@ -296,7 +308,10 @@ async function loadFromSavedObject(
       isSaveable: true,
       sharingSavedObjectProps,
       filters: data.query.filterManager.getFilters(),
-      query: doc.state.query,
+      // For text-based documents the editor's in-flight query is seeded from
+      // the authoritative layer query (with a fallback to a legacy aggregate
+      // slot value); for form-based documents from the chart-scoped filter.
+      query: getRepresentativeQuery(doc) ?? EMPTY_KQL_QUERY,
       searchSessionId:
         !savedObjectId && currentSessionId
           ? currentSessionId
@@ -363,11 +378,12 @@ export async function loadInitial(
     storage: lensServices.storage,
     eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+    http: lensServices.http,
   };
 
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
-    activeDatasourceId = 'textBased';
+    activeDatasourceId = LENS_DATASOURCE_ID.TEXT_BASED;
   }
   if (initialStateFromLocator) {
     const newFilters = initialStateFromLocator.filters
@@ -411,7 +427,8 @@ export async function loadInitial(
 
   if (
     !initialInput ||
-    (initialInput.savedObjectId && initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
+    // TODO is it savedObjectId or ref_id?
+    (initialInput.ref_id && initialInput.ref_id === lens.persistedDoc?.savedObjectId)
   ) {
     const newFilters =
       initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
@@ -447,7 +464,7 @@ export async function loadInitial(
       try {
         return loadFromSavedObject(
           store,
-          initialInput.savedObjectId,
+          initialInput.ref_id,
           persisted,
           loaderSharedArgs,
           lensServices,

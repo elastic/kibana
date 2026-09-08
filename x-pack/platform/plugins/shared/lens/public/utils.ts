@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, type ColorMapping } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -19,10 +19,8 @@ import { emptyTitleText } from '@kbn/visualization-ui-components';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type {
   LensDocument,
-  DateRange,
   Datasource,
   DatasourceMap,
   Visualization,
@@ -35,6 +33,8 @@ import type {
   VisualizationState,
   TriggerEvent,
 } from '@kbn/lens-common';
+import type { LensDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import {
   isOperation,
   isLensBrushEvent,
@@ -65,21 +65,6 @@ export function getAbsoluteDateRange(timefilter: TimefilterContract) {
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
 }
 
-export function convertToAbsoluteDateRange(dateRange: DateRange, now: Date) {
-  const absRange = getAbsoluteTimeRange(
-    {
-      from: dateRange.fromDate as string,
-      to: dateRange.toDate as string,
-    },
-    { forceNow: now }
-  );
-
-  return {
-    fromDate: absRange.from,
-    toDate: absRange.to,
-  };
-}
-
 export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
 }
@@ -92,13 +77,20 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
-export function getActiveDatasourceIdFromDoc(doc?: LensDocument) {
+
+export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasourceId | null {
   if (!doc) {
     return null;
   }
 
   const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  return firstDatasourceFromDoc || null;
+  if (
+    firstDatasourceFromDoc === LENS_DATASOURCE_ID.FORM_BASED ||
+    firstDatasourceFromDoc === LENS_DATASOURCE_ID.TEXT_BASED
+  ) {
+    return firstDatasourceFromDoc as LensDatasourceId;
+  }
+  return null;
 }
 
 export function getActiveVisualizationIdFromDoc(doc?: LensDocument) {
@@ -279,7 +271,7 @@ export function inferTimeField(datatableUtilities: DatatableUtilitiesService, ev
         .map(({ table, column }) => {
           const tableColumn = table.columns[column];
           const hasTimeRange = Boolean(
-            tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
+            tableColumn && datatableUtilities.getColumnTimeRange(tableColumn)
           );
           if (hasTimeRange) {
             return tableColumn.meta.field;
@@ -460,11 +452,16 @@ export function shouldRemoveSource(
   );
 }
 
-export const getColorMappingDefaults = () => {
+export const getColorMappingDefaults = (
+  options: {
+    defaultPaletteId?: ColorMapping.Config['paletteId'];
+  } = {}
+) => {
   if (COLOR_MAPPING_OFF_BY_DEFAULT) {
     return undefined;
   }
-  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+  const defaultPaletteId = options.defaultPaletteId ?? DEFAULT_COLOR_MAPPING_CONFIG.paletteId;
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: defaultPaletteId };
 };
 
 export const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';

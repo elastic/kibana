@@ -76,8 +76,17 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+      cps,
+    } = pluginStart;
 
     return {
       data,
@@ -88,12 +97,22 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
       share,
       storage,
       unifiedSearch,
+      cps,
       ...coreStart,
     };
   }, [coreStart, pluginStart]);
 
   const datePickerDeps = {
-    ...pick(deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'userProfile', 'i18n']),
+    ...pick(deps, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+      'cps',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
 
@@ -138,10 +157,8 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   }, [dataViewId, prevDataViewId]);
   const showComponent = prevDataViewId === undefined || prevDataViewId === dataViewId;
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddableLogRateAnalysis"
       css={{
         width: '100%',

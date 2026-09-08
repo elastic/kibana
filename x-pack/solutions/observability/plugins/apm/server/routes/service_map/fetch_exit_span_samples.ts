@@ -38,6 +38,13 @@ const SPAN_LINK_IDS_LIMIT = 128;
 const MAX_EXIT_SPANS = 10000;
 const MAX_SPAN_LINKS = 1000;
 
+// Safety limits to prevent runaway queries on clusters with large number of
+// traces or traces with a large number of spans (common instrumentation bugs).
+// terminate_after: caps per-shard document scanning
+// timeout: cancels the query if it exceeds the time limit (returning partial results)
+const TERMINATE_AFTER = 1_000_000;
+const QUERY_TIMEOUT = '60s';
+
 type IncomingSpanLink = ServiceMapService & { transactionName: string };
 
 export async function fetchExitSpanSamplesFromTraceIds({
@@ -104,6 +111,8 @@ async function fetchExitSpanIdsFromTraceIds({
     },
 
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     size: 0,
     query: {
       bool: {
@@ -216,6 +225,8 @@ async function fetchSpanLinksFromTraceIds({
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     size: 0,
     query: {
       bool: {
@@ -404,6 +415,8 @@ async function fetchTransactionsFromExitSpans({
       events: [ProcessorEvent.transaction],
     },
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     query: {
       bool: {
         filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
@@ -456,6 +469,8 @@ async function fetchSpansFromSpanLinks({
       events: [ProcessorEvent.span],
     },
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     size: 0,
     query: {
       bool: {

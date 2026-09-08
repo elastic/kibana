@@ -33,6 +33,8 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useBulkAttackAssigneesItems', () => {
+  const mockApplyAssignees = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
@@ -48,7 +50,7 @@ describe('useBulkAttackAssigneesItems', () => {
     } as unknown as ReturnType<typeof useLicense>);
 
     mockUseApplyAttackAssignees.mockReturnValue({
-      applyAssignees: jest.fn(),
+      applyAssignees: mockApplyAssignees,
     } as ReturnType<typeof useApplyAttackAssignees>);
   });
 
@@ -96,5 +98,51 @@ describe('useBulkAttackAssigneesItems', () => {
     const { result } = renderHook(() => useBulkAttackAssigneesItems(), { wrapper });
 
     expect(result.current.panels.length).toBeGreaterThan(0);
+  });
+
+  describe('actions', () => {
+    it('should call applyAssignees with telemetrySource when removing all assignees', async () => {
+      const { result } = renderHook(
+        () =>
+          useBulkAttackAssigneesItems({
+            telemetrySource: 'attacks_page_group_take_action',
+            alertAssignments: ['user-1'],
+          }),
+        { wrapper }
+      );
+
+      const removeAllItem = result.current.items.find(
+        (item) => item.key === 'remove-all-attack-assignees'
+      );
+
+      expect(removeAllItem).toBeDefined();
+
+      if (removeAllItem && removeAllItem.onClick) {
+        await removeAllItem.onClick(
+          [
+            {
+              _id: '1',
+              data: [
+                {
+                  field: 'kibana.alert.workflow_assignee_ids',
+                  value: ['user-1'],
+                },
+              ],
+              ecs: { _id: '1' },
+            },
+          ],
+          false,
+          jest.fn(),
+          jest.fn(),
+          jest.fn()
+        );
+      }
+
+      expect(mockApplyAssignees).toHaveBeenCalledWith(
+        expect.objectContaining({
+          telemetrySource: 'attacks_page_group_take_action',
+        })
+      );
+    });
   });
 });

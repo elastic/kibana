@@ -18,17 +18,17 @@ import { getFieldNamesByType } from './autocomplete';
 export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: [],
   },
   {
     name: 'join_index_with_alias',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: ['join_index_alias_1', 'join_index_alias_2'],
   },
   {
     name: 'lookup_index',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: [],
   },
 ];
@@ -42,17 +42,17 @@ export const lookupIndexFields = [
 export const timeseriesIndices: IndexAutocompleteItem[] = [
   {
     name: 'timeseries_index',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: [],
   },
   {
     name: 'timeseries_index_with_alias',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
   },
   {
     name: 'time_series_index',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: [],
   },
 ];
@@ -209,9 +209,12 @@ export type MockedICommandCallbacks = {
 };
 
 export const getMockCallbacks = (): MockedICommandCallbacks => {
-  const expectedFields = getFieldNamesByType('any');
   return {
     getByType: jest.fn().mockImplementation(async (types, ignoredColumns = []) => {
+      const requestedTypes = Array.isArray(types) ? types : [types];
+      const normalizedRequestedTypes = requestedTypes.length > 0 ? requestedTypes : ['any'];
+      const expectedFields = getFieldNamesByType(normalizedRequestedTypes);
+
       return (
         expectedFields
           // Exclude columns already used (e.g., used in STATS BY or parent function scope)

@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
 import type { ArgumentProps } from '../../../../types/arguments';
 
@@ -43,14 +42,3 @@ export const DateFormatArgInput: FunctionComponent<Props> = ({
     defaultCustomFormat="M/D/YY h:ma"
   />
 );
-
-DateFormatArgInput.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  dateFormats: PropTypes.arrayOf(
-    PropTypes.shape({ value: PropTypes.string, text: PropTypes.string })
-  ).isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
-  argId: PropTypes.string.isRequired,
-};

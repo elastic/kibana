@@ -11,6 +11,7 @@ import {
   getDurationFieldForTransactions,
   calculateThroughputWithRange,
 } from '@kbn/apm-data-access-plugin/server/utils';
+import type { StorageExplorerSummaryStatisticsResponse } from '@kbn/apm-api-shared';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
@@ -183,15 +184,6 @@ async function getMainSummaryStats({
     estimatedIncrementalSize,
     dailyDataGeneration: estimatedIncrementalSize / durationAsDays,
   };
-}
-
-export interface StorageExplorerSummaryStatisticsResponse {
-  tracesPerMinute: number;
-  totalSize: number;
-  diskSpaceUsedPct: number;
-  numberOfServices: number;
-  estimatedIncrementalSize: number;
-  dailyDataGeneration: number;
 }
 
 export async function getSummaryStatistics({

@@ -1,0 +1,124 @@
+name: PR size reminder
+
+# Posts a one-time comment on PRs opened by Nightshift team members when the PR
+# exceeds 500 added lines (excluding generated files), nudging them to split
+# before review. PRs from anyone outside Nightshift are skipped silently.
+
+on:
+  pull_request_target:
+    types: [opened, ready_for_review]
+
+permissions: {}
+
+jobs:
+  pr-size-check:
+    if: >-
+      github.event.pull_request.user.type != 'Bot' &&
+      !github.event.pull_request.draft &&
+      !contains(github.event.pull_request.labels.*.name, 'backport')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify if PR is too large
+        # This reminder is advisory, so it must never fail a contributor's PR. Any error
+        # (API outage, rate limit, token problem) is logged and the check stays green.
+        continue-on-error: true
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const MAX_ADDED_LINES = 500;
+            const MARKER = '<!-- pr-size-reminder -->';
+            const NIGHTSHIFT_TEAMS = [
+              'nightshift',
+              'nightshift-context-and-research-team',
+              'nightshift-sre-agent-team',
+            ];
+            // Machine-written lines shouldn't count against a human review budget.
+            const GENERATED_PATHS = [
+              /(^|\/)yarn\.lock$/,
+              /(^|\/)package-lock\.json$/,
+              /(^|\/)__snapshots__\//,
+              /(^|\/)bundled\.(yaml|json)$/,
+              /(^|\/)translations\/[^/]+\.json$/,
+              /(^|\/)docs\/openapi\//,
+              /^oas_docs\/output\//,
+            ];
+
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+
+            const { data: current } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: pr.number,
+            });
+
+            if (current.additions <= MAX_ADDED_LINES) return;
+
+            let isMember = false;
+            for (const team of NIGHTSHIFT_TEAMS) {
+              try {
+                const { data } = await github.rest.teams.getMembershipForUserInOrg({
+                  org: 'elastic',
+                  team_slug: team,
+                  username: pr.user.login,
+                });
+                if (data.state === 'active') { isMember = true; break; }
+              } catch (e) {
+                // 404 is both "not a member" and "token can't see this team" — either
+                // way we can't confirm membership, so try the next team.
+                if (e.status === 404) continue;
+                core.warning(
+                  `Team membership check for '${team}' failed (HTTP ${e.status}) — the token may lack ` +
+                    `read:org scope. Skipping PR size check: ${e.message}`
+                );
+                return;
+              }
+            }
+
+            // Non-Nightshift authors are out of scope for this reminder.
+            if (!isMember) return;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+
+            if (comments.some((c) => c.body?.includes(MARKER))) return;
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const isGenerated = (filename) => GENERATED_PATHS.some((re) => re.test(filename));
+            const reviewableAdditions = files
+              .filter((f) => !isGenerated(f.filename))
+              .reduce((total, f) => total + f.additions, 0);
+            const generatedAdditions = current.additions - reviewableAdditions;
+
+            if (reviewableAdditions <= MAX_ADDED_LINES) return;
+
+            const body = [
+              MARKER,
+              `## PR size reminder`,
+              ``,
+              `This PR has **${reviewableAdditions} added lines** of reviewable code, which is above ` +
+                `the ${MAX_ADDED_LINES}-line guideline for Nightshift PRs.` +
+                (generatedAdditions > 0
+                  ? ` (${generatedAdditions} added lines in generated files were excluded.)`
+                  : ``),
+              ``,
+              `Large PRs get significantly less review engagement and take longer to merge. Consider splitting this into smaller, focused PRs before requesting review.`,
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr.number,
+              body,
+            });

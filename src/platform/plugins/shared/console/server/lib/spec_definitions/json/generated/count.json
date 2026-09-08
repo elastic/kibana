@@ -26,8 +26,15 @@
       "min_score": "",
       "preference": "",
       "routing": [],
+      "stats": [],
+      "_slice": "",
       "terminate_after": "",
       "q": ""
+    },
+    "data_autocomplete_rules": {
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      }
     },
     "methods": [
       "POST",
@@ -38,6 +45,7 @@
       "{index}/_count"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-count",
     "availability": {
       "stack": true,
       "serverless": true

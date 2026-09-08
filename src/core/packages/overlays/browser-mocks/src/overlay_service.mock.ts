@@ -32,6 +32,7 @@ const createStartContractMock = () => {
 const createMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = lazyObject({
     start: jest.fn().mockReturnValue(createStartContractMock()),
+    closeAllFlyouts: jest.fn(),
   });
   return mocked;
 };

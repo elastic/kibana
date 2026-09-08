@@ -10,17 +10,20 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 
 export const useESQLVariables = ({
   parentApi,
   attributes,
   panelId,
+  layerId,
   closeFlyout,
 }: {
   parentApi: unknown;
   attributes?: TypedLensSerializedState['attributes'];
   panelId?: string;
+  layerId: string;
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
@@ -50,7 +53,7 @@ export const useESQLVariables = ({
       // add a new control
       await parentApi.addNewPanel(
         {
-          panelType: 'esqlControl',
+          panelType: ESQL_CONTROL,
           serializedState: {
             ...controlState,
           },
@@ -60,11 +63,32 @@ export const useESQLVariables = ({
         }
       );
       if (panel && updatedQuery && attributes) {
+        // ES|QL lives exclusively on the text-based layers; update only the
+        // layer being edited — sibling layers keep their own queries
+        const textBasedState = attributes.state.datasourceStates.textBased;
+        const editedLayer = textBasedState?.layers?.[layerId];
+        const updatedTextBasedState =
+          textBasedState && editedLayer
+            ? {
+                ...textBasedState,
+                layers: {
+                  ...textBasedState.layers,
+                  [layerId]: { ...editedLayer, query: { esql: updatedQuery } },
+                },
+              }
+            : undefined;
         panel.updateAttributes({
           ...attributes,
           state: {
             ...attributes.state,
-            query: { esql: updatedQuery },
+            ...(updatedTextBasedState
+              ? {
+                  datasourceStates: {
+                    ...attributes.state.datasourceStates,
+                    textBased: updatedTextBasedState,
+                  },
+                }
+              : {}),
             needsRefresh: true,
           },
         });
@@ -72,7 +96,7 @@ export const useESQLVariables = ({
         await panel.onEdit();
       }
     },
-    [attributes, parentApi, panel, panelId]
+    [attributes, parentApi, panel, panelId, layerId]
   );
 
   const onCancelControl = useCallback(() => {

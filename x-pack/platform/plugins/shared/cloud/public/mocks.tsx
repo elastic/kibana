@@ -22,6 +22,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     cloudId: 'mock-cloud-id',
     deploymentId: 'mock-deployment-id',
     isCloudEnabled: true,
+    isEce: undefined,
     cname: 'cname',
     fetchElasticsearchConfig: jest
       .fn()
@@ -31,6 +32,9 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    managedOtlp: {
+      url: undefined,
+    },
     onboarding: {},
     isServerlessEnabled: false,
     serverless: {
@@ -42,6 +46,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     getUrls: jest.fn().mockReturnValue({}),
     getPrivilegedUrls: jest.fn().mockResolvedValue({}),
     isInTrial: jest.fn().mockReturnValue(false),
+    trialDaysLeft: jest.fn().mockReturnValue(undefined),
     ...mockCloudUrls,
   };
 }
@@ -59,10 +64,14 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   serverless: {
     projectId: undefined,
   },
+  managedOtlp: {
+    url: undefined,
+  },
   fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
   getUrls: jest.fn().mockReturnValue({}),
   getPrivilegedUrls: jest.fn().mockResolvedValue({}),
   isInTrial: jest.fn().mockReturnValue(false),
+  trialDaysLeft: jest.fn().mockReturnValue(undefined),
   ...mockCloudUrls,
 });
 

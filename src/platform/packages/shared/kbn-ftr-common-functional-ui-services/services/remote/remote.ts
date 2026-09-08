@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import type { BrowserConfig } from './webdriver';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
+import { dismissOpenDialog } from './dismiss_open_dialog';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
@@ -19,16 +20,6 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
   type BrowserStorage = 'sessionStorage' | 'localStorage';
-
-  const getSessionStorageItem = async (key: string) => {
-    try {
-      return await driver.executeScript<string>(`return window.sessionStorage.getItem("${key}");`);
-    } catch (error) {
-      if (!error.message.includes(`Failed to read the 'sessionStorage' property from 'Window'`)) {
-        throw error;
-      }
-    }
-  };
 
   const clearBrowserStorage = async (storageType: BrowserStorage) => {
     try {
@@ -96,40 +87,29 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
+    if (lifecycle.isAborting) {
+      return;
+    }
+    // a `beforeunload` dialog leaked by the previous suite blocks `getRect` below (#289092)
+    await dismissOpenDialog(driver, log);
     windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
   lifecycle.beforeEachTest.add(async () => {
+    if (lifecycle.isAborting) {
+      return;
+    }
     await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.afterTestSuite.add(async () => {
+    // skip WebDriver calls that could themselves hang against a dead browser/session
+    if (lifecycle.isAborting) {
+      windowSizeStack.shift();
+      return;
+    }
     await tryWebDriverCall(async () => {
-      // collect error message stashed in SessionStorage that indicate EuiProvider implementation error
-      const euiProviderWarning = await getSessionStorageItem('dev.euiProviderWarning');
-      if (euiProviderWarning != null) {
-        let errorMessage: string;
-        let errorStack: string;
-        let pageHref: string;
-        let pageTitle: string;
-        try {
-          ({
-            message: errorMessage,
-            stack: errorStack,
-            pageHref,
-            pageTitle,
-          } = JSON.parse(euiProviderWarning));
-        } catch (error) {
-          throw new Error(`Found EuiProvider dev error, but the details could not be parsed`);
-        }
-
-        log.error(`pageTitle: ${pageTitle}`);
-        log.error(`pageHref: ${pageHref}`);
-        log.error(`Error: ${errorMessage}`);
-        log.error(`Error stack: ${errorStack}`);
-        throw new Error(`Found EuiProvider dev error on: ${pageHref}`);
-      }
-
+      await dismissOpenDialog(driver, log);
       // global cleanup
       const { width, height } = windowSizeStack.shift()!;
       await driver.manage().window().setRect({ width, height });

@@ -24,6 +24,7 @@ const inferenceEndpointSchema = schema.object({
     provider: schema.string(),
     taskType: schema.string(),
     providerConfig: schema.any(),
+    taskTypeConfig: schema.maybe(schema.any()),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   secrets: schema.object({
@@ -107,25 +108,14 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
-          // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
-          // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
-          // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
-          let taskSettings: Record<string, Record<string, string>> | undefined = config?.headers
-            ? { headers: config.headers }
-            : undefined;
-
-          if (config?.provider === 'anthropic' && config?.providerConfig?.max_tokens) {
-            taskSettings = {
-              ...(taskSettings ?? {}),
-              max_tokens: config.providerConfig.max_tokens,
-            };
-            // This field is unknown to the anthropic service config, so we remove it
-            delete config.providerConfig.max_tokens;
-          }
-
           const serviceSettings = {
             ...unflattenObject(config?.providerConfig ?? {}),
             ...unflattenObject(secrets?.providerSecrets ?? {}),
+          };
+
+          const taskSettingsWithHeaders = {
+            ...unflattenObject(config?.taskTypeConfig ?? {}), // TODO: confirm this unflatten is needed
+            ...(config?.headers ? { headers: config.headers } : {}),
           };
 
           const result = await esClient.inference.put({
@@ -134,7 +124,9 @@ export const getInferenceServicesRoute = (
             inference_config: {
               service: config?.provider,
               service_settings: serviceSettings,
-              ...(taskSettings ? { task_settings: taskSettings } : {}),
+              ...(Object.keys(taskSettingsWithHeaders).length
+                ? { task_settings: taskSettingsWithHeaders }
+                : {}),
             },
           });
 
@@ -226,19 +218,31 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
-          const taskSettings = config?.headers ? { headers: config.headers } : undefined;
+          const taskSettingsWithHeaders = {
+            ...unflattenObject(config?.taskTypeConfig ?? {}),
+            ...(config?.headers ? { headers: config.headers } : {}),
+          };
 
-          // currently update api only allows api_key and num_allocations
+          const adaptiveAllocations = config?.providerConfig?.adaptive_allocations;
+          const numAllocations = config?.providerConfig?.num_allocations;
+
+          let allocationSettings = {};
+          if (adaptiveAllocations) {
+            allocationSettings = { adaptive_allocations: adaptiveAllocations };
+          } else if (numAllocations) {
+            allocationSettings = { num_allocations: numAllocations };
+          }
+
           const body = {
             service_settings: {
               ...(secrets?.providerSecrets?.api_key && {
                 api_key: secrets.providerSecrets.api_key,
               }),
-              ...(config?.providerConfig?.num_allocations !== undefined && {
-                num_allocations: config.providerConfig.num_allocations,
-              }),
+              ...allocationSettings,
             },
-            ...(taskSettings ? { task_settings: taskSettings } : {}),
+            ...(Object.keys(taskSettingsWithHeaders).length
+              ? { task_settings: taskSettingsWithHeaders }
+              : {}),
           };
 
           const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(

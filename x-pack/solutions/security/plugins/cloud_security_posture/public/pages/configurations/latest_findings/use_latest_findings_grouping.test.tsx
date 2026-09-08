@@ -85,6 +85,30 @@ describe('useLatestFindingsGrouping', () => {
     );
   });
 
+  it('includes cloudProvider aggregation for cloud.account.id grouping', () => {
+    renderHook(() =>
+      useLatestFindingsGrouping({
+        groupPanelRenderer: mockGroupPanelRenderer,
+        getGroupStats: mockGetGroupStats,
+        groupingLevel: 0,
+        groupFilters: [],
+        selectedGroup: 'cloud.account.id',
+      })
+    );
+
+    expect(getGroupingQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statsAggregations: expect.arrayContaining([
+          expect.objectContaining({
+            cloudProvider: {
+              terms: { field: 'cloud.provider', size: 1 },
+            },
+          }),
+        ]),
+      })
+    );
+  });
+
   it('calls getGroupingQuery without nullGroupItems when selectedGroup is "none"', () => {
     renderHook(() =>
       useLatestFindingsGrouping({

@@ -20,7 +20,8 @@ import {
 
 import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
-import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
+import { navigateBackToRulesManagement } from '../../../../tasks/rules_management';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -55,7 +56,7 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-// Failing: See https://github.com/elastic/kibana/issues/240136
+// Failing: See https://github.com/elastic/kibana/issues/257365
 describe.skip(
   'Detection ES|QL rules - Rule Creation',
   {
@@ -65,7 +66,8 @@ describe.skip(
     const rule = getEsqlRule();
     const expectedNumberOfRules = 1;
 
-    describe('creation', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/257364
+    describe.skip('creation', () => {
       beforeEach(() => {
         deleteAlertsAndRules();
         login();
@@ -87,15 +89,16 @@ describe.skip(
         getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
 
         // ensures newly created rule is displayed in table
-        goBackToRulesTable();
+        navigateBackToRulesManagement();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
         cy.get(RULE_NAME).should('have.text', rule.name);
       });
 
+      // Failing: See https://github.com/elastic/kibana/issues/240136
       // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
-      it('creates an ES|QL rule and overrides its name', function () {
+      it.skip('creates an ES|QL rule and overrides its name', function () {
         selectEsqlRuleType();
 
         fillDefineEsqlRuleAndContinue(rule);
@@ -135,28 +138,13 @@ describe.skip(
         cy.get(ESQL_QUERY_BAR).should('not.be.visible');
       });
 
-      it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
-        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
+      it('allows non-aggregating ES|QL query without metadata operator (auto-injected at execution)', function () {
+        const nonAggregatingQuery = 'from auditbeat* | limit 5';
         selectEsqlRuleType();
-        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        fillEsqlQueryBar(nonAggregatingQuery);
         getDefineContinueButton().click();
 
-        cy.get(ESQL_QUERY_BAR).contains(
-          'must include the "metadata _id, _version, _index" operator after the source command'
-        );
-      });
-
-      it('shows error when non-aggregating ES|QL query does not return _id field', function () {
-        const invalidNonAggregatingQuery =
-          'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
-
-        selectEsqlRuleType();
-        fillEsqlQueryBar(invalidNonAggregatingQuery);
-        getDefineContinueButton().click();
-
-        cy.get(ESQL_QUERY_BAR).contains(
-          'must include the "metadata _id, _version, _index" operator after the source command'
-        );
+        cy.get(ESQL_QUERY_BAR).should('not.contain', 'metadata _id');
       });
 
       it('shows error when ES|QL query is invalid', function () {
@@ -171,7 +159,7 @@ describe.skip(
         cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
       });
 
-      it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
+      it('shows syntax error when query is syntactically invalid', function () {
         const invalidNonAggregatingQuery = 'from auditbeat* | where true test';
         selectEsqlRuleType();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
@@ -183,9 +171,25 @@ describe.skip(
       });
 
       it('shows confirmation modal about existing non-blocking validation errors', function () {
-        const nonExistingDataSourceQuery = 'from fake* metadata _id, _version, _index | limit 5';
+        const nonExistingDataSourceQuery = 'from fake metadata _id, _version, _index | limit 5';
         selectEsqlRuleType();
         fillEsqlQueryBar(nonExistingDataSourceQuery);
+        getDefineContinueButton().click();
+
+        fillRuleName();
+        fillDescription();
+        getAboutContinueButton().click();
+
+        fillScheduleRuleAndContinue(rule);
+
+        createRuleWithNonBlockingErrors();
+      });
+
+      it('shows confirmation modal when non-aggregating query drops _id', function () {
+        const queryWithDroppedId =
+          'from auditbeat* metadata _id, _version, _index | drop _id | limit 5';
+        selectEsqlRuleType();
+        fillEsqlQueryBar(queryWithDroppedId);
         getDefineContinueButton().click();
 
         fillRuleName();

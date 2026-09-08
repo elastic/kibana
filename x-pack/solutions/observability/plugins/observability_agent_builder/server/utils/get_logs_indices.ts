@@ -28,6 +28,7 @@ export async function getLogsIndices({
       await logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
         savedObjectsClient
       );
+
     const logSources = await logSourcesService.getLogSources();
     return logSources.map(({ indexPattern }) => indexPattern);
   } catch (error) {

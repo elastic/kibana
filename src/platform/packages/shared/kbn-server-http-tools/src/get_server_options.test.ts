@@ -107,4 +107,16 @@ describe('getServerOptions', () => {
 
     expect(getServerOptions(httpConfig).routes!.payload!.timeout).toEqual(9007);
   });
+
+  it('configures max payload size', () => {
+    const options = getServerOptions(
+      createConfig({
+        maxPayload: ByteSizeValue.parse('1kb'),
+      })
+    );
+
+    expect(options).toHaveProperty('routes.compression.deflate.maxOutputLength', 1024);
+    expect(options).toHaveProperty('routes.compression.gzip.maxOutputLength', 1024);
+    expect(options).toHaveProperty('routes.payload.maxBytes', 1024);
+  });
 });

@@ -128,7 +128,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
               <strong>
                 {fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(sampleCount)}
+                  .convertToText(sampleCount)}
               </strong>
             ),
           }}
@@ -143,7 +143,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
               <strong>
                 {fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(totalDocuments ?? 0)}
+                  .convertToText(totalDocuments ?? 0)}
               </strong>
             ),
           }}

@@ -10,6 +10,8 @@
 import type { TabItem } from '@kbn/unified-tabs';
 import { TabInitializationStatus, type TabState } from './types';
 
+export const DEFAULT_EXPANDED_DOC_OWNER = 'discover_main_grid';
+
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
   globalState: {},
@@ -17,22 +19,34 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   previousAppState: {},
   forceFetchOnSelect: false,
   isDataViewLoading: false,
+  isWarningCalloutDismissed: false,
   dataRequestParams: {
     timeRangeAbsolute: undefined,
     timeRangeRelative: undefined,
     searchSessionId: undefined,
     isSearchSessionRestored: false,
   },
-  overriddenVisContextAfterInvalidation: undefined,
-  controlGroupState: undefined,
-  esqlVariables: [],
-  resetDefaultProfileState: {
-    resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-    hideChart: false,
+  attributes: {
+    visContext: undefined,
+    controlGroupState: undefined,
+    timeRestore: false,
   },
+  overriddenVisContextAfterInvalidation: undefined,
+  cascadedDocumentsState: {
+    availableCascadeGroups: [],
+    selectedCascadeGroups: [],
+    columnsMeta: {},
+    cascadedDocumentsMap: {},
+  },
+  esqlVariables: [],
+  profileAppStateDefaults: {
+    resetId: '',
+    fieldsToReset: 'none',
+    snapshotsByProfileId: {},
+  },
+  profileState: {},
   expandedDoc: undefined,
+  expandedDocOwner: undefined,
+  renderDocumentViewMeta: undefined,
   uiState: {},
 };

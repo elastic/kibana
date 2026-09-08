@@ -12,6 +12,7 @@ import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
@@ -36,7 +37,7 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
       from: parse(dateRange?.from ?? '')?.valueOf(),
       to: parse(dateRange?.to ?? '')?.valueOf(),
     },
-    preferredSchema: preferredSchema ?? 'semconv',
+    preferredSchema: preferredSchema ?? DEFAULT_SCHEMA,
   });
 
   return (

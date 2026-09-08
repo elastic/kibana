@@ -13,6 +13,7 @@ describe('generateParamsSchema', () => {
   const mockActions: ConnectorSpec['actions'] = {
     action1: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         message: z.string(),
         foobar: z.number(),
@@ -21,6 +22,7 @@ describe('generateParamsSchema', () => {
     },
     action2: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         bool: z.boolean(),
       }),
@@ -28,6 +30,7 @@ describe('generateParamsSchema', () => {
     },
     action3: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => null,
     },
@@ -44,6 +47,12 @@ describe('generateParamsSchema', () => {
                 message: z.string(),
                 foobar: z.number(),
               }),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
           z
@@ -52,12 +61,24 @@ describe('generateParamsSchema', () => {
               subActionParams: z.object({
                 bool: z.boolean(),
               }),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
           z
             .object({
               subAction: z.literal('action3'),
               subActionParams: z.object({}),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
         ]),
@@ -66,6 +87,102 @@ describe('generateParamsSchema', () => {
   });
 
   it('throws if actions has no keys', () => {
-    expect(() => generateParamsSchema({})).toThrowError('No actions defined');
+    expect(() => generateParamsSchema({})).toThrow('No actions defined');
+  });
+
+  describe('runtime parse behavior', () => {
+    it('parses valid params for action1', () => {
+      const result = generateParamsSchema(mockActions);
+      const parsed = result.schema.parse({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+      });
+      expect(parsed).toEqual({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+      });
+    });
+
+    it('parses reserved fetchOptions', () => {
+      const result = generateParamsSchema(mockActions);
+      const parsed = result.schema.parse({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+        fetchOptions: { max_content_length: 1024 },
+      });
+      expect(parsed).toEqual({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+        fetchOptions: { max_content_length: 1024 },
+      });
+    });
+
+    it('parses valid params for action2', () => {
+      const result = generateParamsSchema(mockActions);
+      const parsed = result.schema.parse({
+        subAction: 'action2',
+        subActionParams: { bool: true },
+      });
+      expect(parsed).toEqual({
+        subAction: 'action2',
+        subActionParams: { bool: true },
+      });
+    });
+
+    it('parses valid params for action3 with empty subActionParams', () => {
+      const result = generateParamsSchema(mockActions);
+      const parsed = result.schema.parse({
+        subAction: 'action3',
+        subActionParams: {},
+      });
+      expect(parsed).toEqual({
+        subAction: 'action3',
+        subActionParams: {},
+      });
+    });
+
+    it('throws for invalid subAction literal', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() => result.schema.parse({ subAction: 'invalid', subActionParams: {} })).toThrow();
+    });
+
+    it('throws when subActionParams is missing', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() => result.schema.parse({ subAction: 'action1' })).toThrow(
+        /subActionParams|Required/
+      );
+    });
+
+    it('throws when subActionParams has wrong shape', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() =>
+        result.schema.parse({
+          subAction: 'action1',
+          subActionParams: { message: 123, foobar: 1 },
+        })
+      ).toThrow(/message|string|number/);
+    });
+
+    it('rejects extra keys at top level due to strict schema', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() =>
+        result.schema.parse({
+          subAction: 'action1',
+          subActionParams: { message: 'x', foobar: 1 },
+          extraTopLevel: true,
+        })
+      ).toThrow(/extraTopLevel|Unrecognized/);
+    });
+
+    it('rejects unknown fetchOptions fields', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() =>
+        result.schema.parse({
+          subAction: 'action1',
+          subActionParams: { message: 'x', foobar: 1 },
+          fetchOptions: { unknown: true },
+        })
+      ).toThrow(/unknown|Unrecognized/);
+    });
   });
 });

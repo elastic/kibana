@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -84,6 +84,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [defaultStartDateValue] = useState<string>(moment().toISOString());
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSaveWithoutFiltersModalVisible, setIsSaveWithoutFiltersModalVisible] = useState(false);
+  const userConfirmedSaveWithoutFiltersRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
 
   const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(!!initialValue?.scopedQuery);
@@ -171,6 +173,15 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
       };
 
+      if (!scopedQueryPayload) {
+        if (userConfirmedSaveWithoutFiltersRef.current) {
+          userConfirmedSaveWithoutFiltersRef.current = false;
+        } else {
+          setIsSaveWithoutFiltersModalVisible(true);
+          return;
+        }
+      }
+
       if (isEditMode) {
         updateMaintenanceWindow(
           { maintenanceWindowId, updateParams: maintenanceWindow },
@@ -240,6 +251,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   );
 
   const modalTitleId = useGeneratedHtmlId();
+  const saveWithoutFiltersModalTitleId = useGeneratedHtmlId();
+
+  const closeSaveWithoutFiltersModal = useCallback(() => {
+    setIsSaveWithoutFiltersModalVisible(false);
+  }, []);
+
+  const confirmSaveWithoutFilters = useCallback(() => {
+    userConfirmedSaveWithoutFiltersRef.current = true;
+    setIsSaveWithoutFiltersModalVisible(false);
+    form.submit();
+  }, [form]);
 
   const modal = useMemo(() => {
     let m;
@@ -274,6 +296,29 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     maintenanceWindowId,
     onSuccess,
     modalTitleId,
+  ]);
+
+  const saveWithoutFiltersModal = useMemo(() => {
+    if (!isSaveWithoutFiltersModalVisible) return null;
+    return (
+      <EuiConfirmModal
+        aria-labelledby={saveWithoutFiltersModalTitleId}
+        title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
+        titleProps={{ id: saveWithoutFiltersModalTitleId }}
+        onCancel={closeSaveWithoutFiltersModal}
+        onConfirm={confirmSaveWithoutFilters}
+        cancelButtonText={i18n.CANCEL}
+        confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
+        data-test-subj="saveWithoutFiltersConfirmModal"
+      >
+        <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
+      </EuiConfirmModal>
+    );
+  }, [
+    isSaveWithoutFiltersModalVisible,
+    saveWithoutFiltersModalTitleId,
+    closeSaveWithoutFiltersModal,
+    confirmSaveWithoutFilters,
   ]);
 
   return (
@@ -438,6 +483,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             {modal}
           </EuiFlexItem>
         )}
+        {saveWithoutFiltersModal}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

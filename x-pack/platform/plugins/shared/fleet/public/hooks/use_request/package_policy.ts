@@ -126,7 +126,10 @@ export const sendGetPackagePolicies = (query: GetPackagePoliciesRequest['query']
   });
 };
 
-export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
+export const useGetOnePackagePolicyQuery = (
+  packagePolicyId: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery<GetOnePackagePolicyResponse, RequestError>(
     ['packagePolicy', packagePolicyId],
     () =>
@@ -134,7 +137,8 @@ export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
         method: 'get',
         version: API_VERSIONS.public.v1,
         path: packagePolicyRouteService.getInfoPath(packagePolicyId),
-      })
+      }),
+    { enabled: options?.enabled }
   );
 };
 
@@ -168,7 +172,9 @@ export function useUpgradePackagePolicyDryRunQuery(
   }
 
   return useQuery<UpgradePackagePolicyDryRunResponse, RequestError>(
-    ['upgradePackagePolicyDryRun', packagePolicyIds, packageVersion],
+    // Sorted ids + no focus refetching, for the same reasons as
+    // `useUpgradeAgentlessPoliciesDryRunQuery`: each spurious refetch is another dry-run POST.
+    ['upgradePackagePolicyDryRun', [...packagePolicyIds].sort(), packageVersion],
     () =>
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getDryRunPath(),
@@ -176,7 +182,10 @@ export function useUpgradePackagePolicyDryRunQuery(
         version: API_VERSIONS.public.v1,
         body: JSON.stringify(body),
       }),
-    { enabled }
+    {
+      enabled,
+      refetchOnWindowFocus: false,
+    }
   );
 }
 

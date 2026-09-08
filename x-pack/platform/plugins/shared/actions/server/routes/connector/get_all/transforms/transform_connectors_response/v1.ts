@@ -7,6 +7,7 @@
 
 import type { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
 import type { GetAllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
+import { omitIngestTokenHashFromConfig } from '../../../common_transforms/omit_ingest_token_hash';
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[]
@@ -23,10 +24,11 @@ export const transformGetAllConnectorsResponse = (
       isMissingSecrets,
       isSystemAction,
       isConnectorTypeDeprecated,
+      authMode,
     }) => ({
       id,
       name,
-      config,
+      config: omitIngestTokenHashFromConfig(config),
       connector_type_id: actionTypeId,
       is_preconfigured: isPreconfigured,
       is_deprecated: isDeprecated,
@@ -34,6 +36,7 @@ export const transformGetAllConnectorsResponse = (
       is_missing_secrets: isMissingSecrets,
       is_system_action: isSystemAction,
       is_connector_type_deprecated: isConnectorTypeDeprecated,
+      ...(authMode !== undefined ? { auth_mode: authMode } : {}),
     })
   );
 };

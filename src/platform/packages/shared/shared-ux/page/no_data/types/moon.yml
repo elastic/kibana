@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-page-no-data-types'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-page-no-data-types'
+  title: '@kbn/shared-ux-page-no-data-types'
   description: Moon project for @kbn/shared-ux-page-no-data-types
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/page/no_data/types
+  sourceRoot: src/platform/packages/shared/shared-ux/page/no_data/types
 dependsOn:
   - '@kbn/shared-ux-card-no-data-types'
 tags:

@@ -92,10 +92,14 @@ async function read(readable, output) {
 }
 
 /**
+ * @typedef {undefined | (SpawnOpts & { description?: string, pipe?: boolean, filter?: Function })} RunOpts
+ * */
+
+/**
  * Run a child process and return it's stdout
  * @param {string} cmd
  * @param {string[]} args
- * @param {undefined | (SpawnOpts & { description?: string, pipe?: boolean })} opts
+ * @param {RunOpts} opts
  */
 export async function run(cmd, args, opts = undefined) {
   const proc = ChildProcess.spawn(cmd === 'node' ? process.execPath : cmd, args, {
@@ -110,8 +114,13 @@ export async function run(cmd, args, opts = undefined) {
   const output = [];
 
   if (opts?.pipe) {
-    proc.stdout.pipe(process.stdout);
-    proc.stderr.pipe(process.stderr);
+    if (opts?.filter) {
+      proc.stdout.filter(opts.filter).pipe(process.stdout);
+      proc.stderr.filter(opts.filter).pipe(process.stderr);
+    } else {
+      proc.stdout.pipe(process.stdout);
+      proc.stderr.pipe(process.stderr);
+    }
   }
 
   const [, , exitCode] = await Promise.all([

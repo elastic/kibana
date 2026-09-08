@@ -8,6 +8,7 @@
  */
 
 import type { InternalConnectorContract } from '../../types/latest';
+import { getStepDeprecationInfo } from '../deprecated_step_metadata';
 
 export function getKibanaConnectors(): InternalConnectorContract[] {
   // TODO: bring the kibana connectors back, with the new approach to schemas generation
@@ -32,5 +33,8 @@ export function getKibanaConnectors(): InternalConnectorContract[] {
     }
   }
 
-  return mergedConnectors;
+  return mergedConnectors.map((connector) => ({
+    ...connector,
+    deprecation: connector.deprecation ?? getStepDeprecationInfo(connector.type),
+  }));
 }

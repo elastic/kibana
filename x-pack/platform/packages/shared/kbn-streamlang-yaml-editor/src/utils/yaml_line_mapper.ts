@@ -37,21 +37,20 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
     const finalLineMap: YamlLineMap = {};
 
     // Get the steps array node from the document
-    const stepsNode = doc.getIn(['steps' as any]) as any;
+    const stepsNode = doc.getIn(['steps']) as YAML.YAMLSeq | undefined;
 
     if (!stepsNode || !stepsNode.items) {
       return finalLineMap;
     }
 
-    // Helper function to recursively process steps
     function processSteps(
-      stepNodes: any[],
+      stepNodes: YAML.ParsedNode[],
       dslSteps: StreamlangStep[],
       lineMap: YamlLineMap,
       yamlValue: string,
       path: string = 'root'
     ) {
-      stepNodes.forEach((stepNode: any, index: number) => {
+      stepNodes.forEach((stepNode: YAML.ParsedNode, index: number) => {
         if (!stepNode.range) {
           return;
         }
@@ -76,24 +75,39 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
         };
 
         // Handle nested condition blocks recursively
-        if (isConditionBlock(dslStep) && dslStep.condition?.steps) {
-          const conditionNode = stepNode.get && stepNode.get('condition');
-          const nestedStepsNode = conditionNode && conditionNode.get && conditionNode.get('steps');
+        if (isConditionBlock(dslStep) && YAML.isMap(stepNode)) {
+          const conditionNode = stepNode.get('condition', true);
 
-          if (nestedStepsNode && nestedStepsNode.items) {
-            processSteps(
-              nestedStepsNode.items,
-              dslStep.condition.steps,
-              lineMap,
-              yamlValue,
-              stepPath
-            );
+          if (YAML.isMap(conditionNode)) {
+            // Process if-branch steps
+            const nestedStepsNode = conditionNode.get('steps', true) as YAML.YAMLSeq | undefined;
+            if (nestedStepsNode?.items && dslStep.condition?.steps) {
+              processSteps(
+                nestedStepsNode.items as YAML.ParsedNode[],
+                dslStep.condition.steps,
+                lineMap,
+                yamlValue,
+                stepPath
+              );
+            }
+
+            // Process else-branch steps
+            const elseStepsNode = conditionNode.get('else', true) as YAML.YAMLSeq | undefined;
+            if (elseStepsNode?.items && dslStep.condition?.else) {
+              processSteps(
+                elseStepsNode.items as YAML.ParsedNode[],
+                dslStep.condition.else,
+                lineMap,
+                yamlValue,
+                `${stepPath}.else`
+              );
+            }
           }
         }
       });
     }
 
-    processSteps(stepsNode.items, parsedDSL.steps, finalLineMap, yamlString);
+    processSteps(stepsNode.items as YAML.ParsedNode[], parsedDSL.steps, finalLineMap, yamlString);
 
     return finalLineMap;
   } catch (error) {

@@ -60,6 +60,15 @@ export const createStubDocRecord = (index: string, id: number) => ({
   value: { index, id },
 });
 
+export const createStubDataStreamDocRecord = (
+  dataStream: string,
+  backingIndex: string,
+  id: number
+) => ({
+  type: 'doc',
+  value: { index: backingIndex, data_stream: dataStream, id },
+});
+
 const createEsClientError = (errorType: string) => {
   const err = new Error(`ES Client Error Stub "${errorType}"`);
   (err as any).meta = {

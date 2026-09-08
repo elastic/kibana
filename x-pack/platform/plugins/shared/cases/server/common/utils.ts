@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -12,15 +13,17 @@ import type {
   SavedObjectReference,
   IBasePath,
 } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
-  Attachment,
+  AttachmentV2,
   AttachmentAttributes,
+  AttachmentAttributesV2,
   Case,
   EventAttachmentPayload,
   User,
@@ -54,10 +57,17 @@ import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 import type {
   AttachmentRequest,
-  AttachmentsFindResponse,
+  AttachmentRequestV2,
+  AttachmentsFindResponseV2,
   CasePostRequest,
-  CasesFindResponse,
+  CasesSearchResponse,
 } from '../../common/types/api';
+import {
+  isEventAttachmentType,
+  isAlertAttachmentType,
+  getIndexFromMetadata,
+  toStringArray,
+} from '../../common/utils/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -69,14 +79,39 @@ export const defaultSortField = 'created_at';
  */
 export const nullUser: User = { username: null, full_name: null, email: null };
 
+/**
+ * A stored template reference is always version-pinned. The create request may omit `version`
+ * (server-side template expansion resolves it to the latest), so by the time a case is persisted
+ * the version must have been stamped — this converts the request shape to the storage shape and
+ * guards the invariant.
+ */
+const pinStoredTemplate = (
+  template: CasePostRequest['template']
+): CaseTransformedAttributes['template'] => {
+  if (template == null) {
+    return template;
+  }
+
+  if (template.version === undefined) {
+    throw new Error(
+      `Cannot persist case: template ${template.id} has no pinned version. Template expansion must resolve the version before the case is saved.`
+    );
+  }
+
+  return { id: template.id, version: template.version };
+};
+
 export const transformNewCase = ({
   user,
-  newCase,
+  newCase: { template, ...newCase },
 }: {
   user: User;
   newCase: CasePostRequest;
 }): CaseTransformedAttributes => ({
   ...newCase,
+  // Re-added only when present so an absent template stays absent (an explicit
+  // `template: undefined` key changes SO create payloads and snapshots).
+  ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
@@ -103,6 +138,7 @@ export const transformCases = ({
   page,
   perPage,
   total,
+  mttr,
 }: {
   casesMap: Map<string, Case>;
   countOpenCases: number;
@@ -111,7 +147,9 @@ export const transformCases = ({
   page: number;
   perPage: number;
   total: number;
-}): CasesFindResponse => ({
+  /** Average resolve time in seconds of the matching cases; only the search API provides it. */
+  mttr?: number | null;
+}): CasesSearchResponse => ({
   page,
   per_page: perPage,
   total,
@@ -119,6 +157,11 @@ export const transformCases = ({
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
+  // Only add the `mttr` key when a value was passed. The public `find` caller passes nothing, so
+  // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseRt`
+  // decode. Do NOT change this to `mttr: mttr ?? null` — that would leak `mttr` onto the public
+  // `_find` response and break its strict decode / OpenAPI contract.
+  ...(mttr !== undefined ? { mttr } : {}),
 });
 
 export const flattenCaseSavedObject = ({
@@ -129,14 +172,14 @@ export const flattenCaseSavedObject = ({
   totalEvents = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
-  comments?: Array<SavedObject<AttachmentAttributes>>;
+  comments?: Array<SavedObject<AttachmentAttributesV2>>;
   totalComment?: number;
   totalAlerts?: number;
   totalEvents?: number;
 }): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
+  comments: flattenAttachmentSavedObjects(comments),
   totalComment,
   totalAlerts,
   totalEvents,
@@ -144,79 +187,127 @@ export const flattenCaseSavedObject = ({
 });
 
 export const transformComments = (
-  comments: SavedObjectsFindResponse<AttachmentAttributes>
-): AttachmentsFindResponse => ({
+  comments: SavedObjectsFindResponse<AttachmentAttributesV2>
+): AttachmentsFindResponseV2 => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
-  comments: flattenCommentSavedObjects(comments.saved_objects),
+  comments: flattenAttachmentSavedObjects(comments.saved_objects),
 });
 
-export const flattenCommentSavedObjects = (
-  savedObjects: Array<SavedObject<AttachmentAttributes>>
-): Attachment[] =>
-  savedObjects.reduce((acc: Attachment[], savedObject: SavedObject<AttachmentAttributes>) => {
-    acc.push(flattenCommentSavedObject(savedObject));
+export const flattenAttachmentSavedObjects = (
+  savedObjects: Array<SavedObject<AttachmentAttributesV2>>
+): AttachmentV2[] =>
+  savedObjects.reduce((acc: AttachmentV2[], savedObject: SavedObject<AttachmentAttributesV2>) => {
+    acc.push(flattenAttachmentSavedObject(savedObject));
     return acc;
   }, []);
 
-export const flattenCommentSavedObject = (
-  savedObject: SavedObject<AttachmentAttributes>
-): Attachment => ({
+export const flattenAttachmentSavedObject = (
+  savedObject: SavedObject<AttachmentAttributesV2>
+): AttachmentV2 => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
 
+/**
+ * Filters out alerts whose index belongs to a linked project (`cluster:index`),
+ * which cannot be resolved through the origin-only alerts ES client.
+ */
+export const filterOriginAlerts = <T extends { index: string }>(alerts: T[]): T[] =>
+  alerts.filter((alert) => !isNonLocalIndexName(alert.index));
+
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment: AttachmentRequestV2
 ): { ids: string[]; indices: string[] } => {
-  if (comment.type === AttachmentType.alert) {
+  if ('alertId' in comment) {
     return {
       ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
       indices: Array.isArray(comment.index) ? comment.index : [comment.index],
     };
   }
 
+  if ('eventId' in comment) {
+    return {
+      ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
+  if ('attachmentId' in comment) {
+    const metadataIndex = getIndexFromMetadata(comment.metadata);
+    return {
+      ids: toStringArray(comment.attachmentId),
+      indices: toStringArray(metadataIndex),
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
-    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    ids: [],
+    indices: [],
   };
 };
 
 /**
- * This functions extracts the ids and indices from an alert comment. It enforces that the alertId and index are either
- * both strings or string arrays that are the same length. If they are arrays they represent a 1-to-1 mapping of
- * id existing in an index at each position in the array. This is not ideal. Ideally an alert comment request would
- * accept an array of objects like this: Array<{id: string; index: string; ruleName: string ruleID: string}> instead.
- *
- * To reformat the alert comment request requires a migration and a breaking API change.
+ * Extracts id/index pairs for an alert/event comment: 1-to-1 arrays, or a scalar `metadata.index`
+ * broadcasting across every id. Pass `strict: true` to throw on an invalid pairing instead of dropping it.
  */
-const getAndValidateAlertInfoFromComment = (comment: AttachmentRequest): AlertInfo[] => {
-  if (!isCommentRequestTypeAlert(comment)) {
+const getAndValidateIndexedAttachmentInfo = (
+  comment: AttachmentRequestV2,
+  isTargetType: (type: string) => boolean,
+  strict: boolean
+): AlertInfo[] => {
+  if (!isTargetType(comment.type)) {
     return [];
   }
 
   const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
-  if (ids.length !== indices.length) {
+  // Only a scalar metadata.index broadcasts; an array (even length 1) must match 1-to-1.
+  const rawMetadataIndex =
+    'attachmentId' in comment ? getIndexFromMetadata(comment.metadata) : undefined;
+  const isBroadcastIndex = typeof rawMetadataIndex === 'string';
+
+  if (!isBroadcastIndex && ids.length !== indices.length) {
+    if (strict) {
+      throw Boom.badRequest(
+        `Attachment of type "${comment.type}" is missing a valid index reference (id count=${ids.length}, index count=${indices.length}).`
+      );
+    }
+
     return [];
   }
 
-  return ids.map((id, index) => ({ id, index: indices[index] }));
+  return ids.map((id, index) => ({ id, index: isBroadcastIndex ? indices[0] : indices[index] }));
 };
 
 /**
- * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
+ * Builds AlertInfo for the alerts in `comments`. Pass `strict: true` only when validating a new
+ * write before it's persisted; reads of already-persisted attachments must stay lenient.
  */
-export const getAlertInfoFromComments = (comments: AttachmentRequest[] = []): AlertInfo[] =>
+export const getAlertInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
-    const alertInfo = getAndValidateAlertInfoFromComment(comment);
-    acc.push(...alertInfo);
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isAlertAttachmentType, strict));
     return acc;
   }, []);
 
-type NewCommentArgs = AttachmentRequest & {
+/**
+ * Same as {@link getAlertInfoFromComments}, but for events (legacy `event` + unified `security.event`).
+ */
+export const getEventInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isEventAttachmentType, strict));
+    return acc;
+  }, []);
+
+export type NewCommentArgs = AttachmentRequestV2 & {
   createdDate: string;
   owner: string;
   email?: string | null;
@@ -232,7 +323,7 @@ export const transformNewComment = ({
   username,
   profile_uid: profileUid,
   ...comment
-}: NewCommentArgs): AttachmentAttributes => {
+}: NewCommentArgs): AttachmentAttributesV2 => {
   return {
     ...comment,
     created_at: createdDate,
@@ -242,15 +333,6 @@ export const transformNewComment = ({
     updated_at: null,
     updated_by: null,
   };
-};
-
-/**
- * A type narrowing function for user comments.
- */
-export const isCommentRequestTypeUser = (
-  context: AttachmentRequest
-): context is UserCommentAttachmentPayload => {
-  return context.type === AttachmentType.user;
 };
 
 /**
@@ -309,25 +391,30 @@ export const isFileAttachmentRequest = (
 export function createAlertUpdateStatusRequest({
   comment,
   status,
+  closingReason,
 }: {
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
   status: CaseStatuses;
+  closingReason?: string;
 }): UpdateAlertStatusRequest[] {
-  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
+  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status, closingReason }));
 }
 
 /**
  * Counts the total alert IDs within a single comment.
  */
-export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributes>) => {
+export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributesV2>) => {
   let totalAlerts = 0;
-  if (comment.attributes.type === AttachmentType.alert) {
-    if (Array.isArray(comment.attributes.alertId)) {
-      totalAlerts += comment.attributes.alertId.length;
-    } else {
-      totalAlerts++;
-    }
+  const { type } = comment.attributes;
+
+  if (type === AttachmentType.alert && 'alertId' in comment.attributes) {
+    const { alertId } = comment.attributes;
+    totalAlerts += Array.isArray(alertId) ? alertId.length : 1;
+  } else if (isAlertAttachmentType(type) && 'attachmentId' in comment.attributes) {
+    const { attachmentId } = comment.attributes as { attachmentId: string | string[] };
+    totalAlerts += Array.isArray(attachmentId) ? attachmentId.length : 1;
   }
+
   return totalAlerts;
 };
 
@@ -379,10 +466,17 @@ export const countEventsForID = ({
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
   return comments.saved_objects.reduce((sum, current) => {
-    if (current.attributes.type === AttachmentType.event) {
-      return sum + [current.attributes.eventId].flat().length;
+    const attrs = current.attributes;
+    if (!isEventAttachmentType(attrs.type)) {
+      return sum;
     }
-
+    if ('attachmentId' in attrs && attrs.attachmentId != null) {
+      const id = attrs.attachmentId;
+      return sum + (Array.isArray(id) ? id.length : 1);
+    }
+    if ('eventId' in attrs && attrs.eventId != null) {
+      return sum + [attrs.eventId].flat().length;
+    }
     return sum;
   }, 0);
 };
@@ -492,8 +586,8 @@ export const getCaseViewPath = (params: {
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
   const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
-  const appRoute = getApplicationRoute(OWNER_INFO, owner);
-  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
+  const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
+  const basePath = `${publicBaseUrlWithSpace}${ownerInfo.appBasePath}${ownerInfo.casesBasePath}`;
 
   if (commentId) {
     const commentPath = normalizePath(

@@ -56,7 +56,6 @@ const filterButtonStyles = {
     css({
       position: 'relative',
       height: euiTheme.size.xl,
-      backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
       borderRadius: euiTheme.border.radius.medium,
       '&::after': {
         content: "''",

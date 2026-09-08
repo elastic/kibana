@@ -7,7 +7,14 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  LogMeta,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -16,16 +23,15 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
-import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
+import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
-import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
@@ -55,11 +61,14 @@ import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
   APP_UI_ID,
-  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
 } from '../common/constants';
+import { registerCaseAttachments } from './cases/attachments/register';
+import { securityAlertAttachmentType } from './cases/attachments/alert';
+import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -72,6 +81,7 @@ import {
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
+import { registerAssetInventoryUsageCollector } from './lib/asset_inventory/telemetry/collectors/register';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
@@ -98,6 +108,8 @@ import {
   createSecurityRuleTypeWrapper,
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
+import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -123,13 +135,15 @@ import {
 } from '../common/endpoint/constants';
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
+import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
-import {
-  registerEntityStoreFieldRetentionEnrichTask,
-  registerEntityStoreSnapshotTask,
-  registerEntityStoreHealthTask,
-} from './lib/entity_analytics/entity_store/tasks';
+import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
+import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
+import { administersMaintainer } from './lib/entity_analytics/maintainers/administers';
+import { supervisesMaintainer } from './lib/entity_analytics/maintainers/supervises';
+import { ownsMaintainer } from './lib/entity_analytics/maintainers/owns';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -141,13 +155,15 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
-import {
-  CASE_ATTACHMENT_TYPE_ID,
-  THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
-} from '../common/threat_intelligence/constants';
+import { registerRoutes as registerThreatIntelRoutes } from './threat_intel/routes';
+import { registerThreatIntelInferenceFeatures } from './threat_intel/inference_features';
+import { ensureThreatIntelBootstrap } from './threat_intel/setup/bootstrap_threat_intel';
+import { createDeferred } from './threat_intel/lib/deferred';
+import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
@@ -159,8 +175,22 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
+import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWorkflowSteps } from './workflows/step_types';
+import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
+import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { SecuritySolutionEventBus } from './events/event_bus';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
+import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
+import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
+import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+
+const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -193,6 +223,25 @@ export class Plugin implements ISecuritySolutionPlugin {
   private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
+  private securityEventBus?: SecuritySolutionEventBus;
+
+  /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
+  private platformCpsEnabled = false;
+  /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
+  private defendCpsFeatureFlagEnabled = false;
+
+  /**
+   * Threat intel routes are registered in `setup()` but depend on start-time
+   * services and a one-time bootstrap. We capture only the start plugins the
+   * route getters actually read and expose them via lazy getters so a request
+   * cannot resolve them before `start()` runs. Narrowed to those four so the
+   * full 20+ plugin start bundle is not held alive for the plugin's lifetime.
+   */
+  private threatIntelStartPlugins?: Pick<
+    SecuritySolutionPluginStartDependencies,
+    'spaces' | 'inference' | 'searchInferenceEndpoints' | 'taskManager'
+  >;
+  private readonly threatIntelBootstrapReady = createDeferred();
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -242,22 +291,56 @@ export class Plugin implements ISecuritySolutionPlugin {
   }
 
   private registerAgentBuilderAttachmentsAndTools(
-    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
+    plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    previewRuleDataClient: IRuleDataClient,
+    securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps
   ): void {
-    if (!agentBuilder) {
+    if (!plugins.agentBuilder) {
       return;
     }
 
-    registerTools(agentBuilder, core, logger).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
-    registerAttachments(agentBuilder).catch((error) => {
+    const agentBuilder = plugins.agentBuilder;
+
+    const experimentalFeatures = this.config.experimentalFeatures;
+    const endpointAppContextService = this.endpointAppContextService;
+
+    registerTools(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      this.productFeaturesService,
+      plugins.ml,
+      {
+        config: this.config,
+        ml: plugins.ml,
+        security: plugins.security,
+        securityRuleTypeOptions,
+        previewRuleDataClient,
+        getStartServices: core.getStartServices,
+        logger,
+        isServerless: this.isServerless,
+      },
+      this.isServerless,
+      this.pluginContext.env.packageInfo.version,
+      plugins.encryptedSavedObjects?.canEncrypt === true
+    );
+    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
-    registerAgents(agentBuilder, core, logger).catch((error) => {
-      this.logger.error(`Error registering security agent: ${error}`);
+
+    registerSkills({
+      agentBuilder,
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      kibanaVersion: this.pluginContext.env.packageInfo.version,
+      logger,
+      ml: plugins.ml,
+      options: { endpointAppContextService },
+    }).catch((error) => {
+      this.logger.error(`Error registering security skills: ${error}`);
     });
   }
 
@@ -274,6 +357,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
+    this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
+    this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
+
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
@@ -281,6 +367,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
+
     productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {
@@ -291,16 +378,38 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    registerRiskScoringTask({
-      getStartServices: core.getStartServices,
-      kibanaVersion: pluginContext.env.packageInfo.version,
-      logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
-      taskManager: plugins.taskManager,
-      telemetry: core.analytics,
-      entityAnalyticsConfig: config.entityAnalytics,
-      experimentalFeatures,
-    });
+    if (experimentalFeatures.entityAnalyticsEntityStoreV2) {
+      registerRiskScoreMaintainer({
+        entityStore: plugins.entityStore,
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        productFeaturesService,
+        entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
+        telemetry: core.analytics,
+      });
+      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+        registerWatchlistMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          logger: this.logger,
+          hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
+        });
+      }
+    } else {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        taskManager: plugins.taskManager,
+        telemetry: core.analytics,
+        entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
+      });
+    }
 
     scheduleEntityAnalyticsMigration({
       getStartServices: core.getStartServices,
@@ -308,51 +417,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+      hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
-    if (!experimentalFeatures.entityStoreDisabled) {
-      registerEntityStoreFieldRetentionEnrichTask({
-        getStartServices: core.getStartServices,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-      });
-
-      registerEntityStoreDataViewRefreshTask({
-        getStartServices: core.getStartServices,
-        appClientFactory,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        entityStoreConfig: config.entityAnalytics.entityStore,
-        experimentalFeatures,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        isServerless: this.isServerless,
-      });
-
-      registerEntityStoreSnapshotTask({
-        getStartServices: core.getStartServices,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-      });
-
-      registerEntityStoreHealthTask({
-        getStartServices: core.getStartServices,
-        appClientFactory,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        entityStoreConfig: config.entityAnalytics.entityStore,
-        experimentalFeatures,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        isServerless: this.isServerless,
-      });
-    }
+    plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
 
     registerPrivilegeMonitoringTask({
       getStartServices: core.getStartServices,
@@ -363,6 +438,80 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures,
       config: this.config,
     });
+
+    registerLeadGenerationTask({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      telemetry: core.analytics,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+      config: this.config,
+      ml: plugins.ml,
+    });
+
+    if (plugins.searchInferenceEndpoints) {
+      // The `SECURITY_INFERENCE_PARENT_FEATURE_ID` parent is registered by
+      // `elastic_assistant`, which `security_solution` depends on (so it sets up
+      // first). We only register child features here.
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+        featureId: 'entity_ai_highlight_summary',
+        featureName: 'Entity AI Highlight Summary',
+        featureDescription: 'Entity AI Highlight Summary inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      if (!experimentalFeatures.siemMigrationsDisabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+          featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
+          featureName: 'Automatic migration',
+          featureDescription: 'Automatic migration inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+        featureId: 'defend_insights',
+        featureName: 'Automatic Troubleshooting',
+        featureDescription: 'Automatic Troubleshooting inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+        featureId: 'attack_discovery',
+        featureName: 'Attack Discovery',
+        featureDescription: 'Attack Discovery inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      if (experimentalFeatures.leadGenerationEnabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+          featureId: 'lead_generation',
+          featureName: 'Threat Hunting Lead Generation',
+          featureDescription: 'Lead generation inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'ai_value_report',
+        featureName: 'AI Value Report',
+        featureDescription: 'AI Value Report inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -384,12 +533,29 @@ export class Plugin implements ISecuritySolutionPlugin {
       (context, request) => requestContextFactory.create(context, request)
     );
 
+    if (experimentalFeatures.threatIntelSupplyEnabled) {
+      // Inference features let operators pick a model per enrichment stage in
+      // Stack Management; no-op when `searchInferenceEndpoints` is unavailable.
+      registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger);
+
+      // Routes are registered now, but their start-time services and the
+      // one-time bootstrap are resolved lazily in `start()`.
+      registerThreatIntelRoutes({
+        router,
+        logger,
+        getSpacesService: () => this.threatIntelStartPlugins?.spaces?.spacesService,
+        getInference: () => this.threatIntelStartPlugins?.inference,
+        getSearchInferenceEndpoints: () => this.threatIntelStartPlugins?.searchInferenceEndpoints,
+        getTaskManager: () => this.threatIntelStartPlugins?.taskManager,
+        getBootstrapReady: () => this.threatIntelBootstrapReady.promise,
+      });
+    }
+
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
       telemetry: core.analytics,
-      httpServiceSetup: core.http,
     });
 
     initUsageCollectors({
@@ -406,10 +572,25 @@ export class Plugin implements ISecuritySolutionPlugin {
       legacySignalsIndex: config.signalsIndex,
     });
 
+    registerAssetInventoryUsageCollector(
+      this.logger,
+      core.getStartServices(),
+      plugins.usageCollection
+    );
+
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    plugins.cases.attachmentFramework.registerExternalReference({
-      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
+    plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
+
+    plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
+      const [coreStart] = await core.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+      const customReasons =
+        (await uiSettingsClient.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY)) ?? [];
+      const allowedReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
+      return allowedReasons.has(closeReason);
     });
 
     const { ruleDataService } = plugins.ruleRegistry;
@@ -440,6 +621,19 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
+    const osquery = plugins.osquery;
+    const getOsqueryResponseActionsAuthzChecker: CreateSecurityRuleTypeWrapperProps['getOsqueryResponseActionsAuthzChecker'] =
+      osquery
+        ? (request) => (actionParams) =>
+            osquery?.checkResponseActionAuthz(request, actionParams) ?? Promise.resolve()
+        : undefined;
+
+    // Resolves the acting user's detection-rules authorization for a request.
+    const getRulesAuthz: CreateSecurityRuleTypeWrapperProps['getRulesAuthz'] = async (request) => {
+      const [coreStart] = await core.getStartServices();
+      return calculateRulesAuthz({ coreStart, request });
+    };
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -461,6 +655,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
+      endpointAppContextService: this.endpointAppContextService,
+      getEntityStore: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.entityStore;
+      },
+      getRulesAuthz,
+      getOsqueryResponseActionsAuthzChecker,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -496,6 +697,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
+
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
@@ -517,7 +722,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled,
+      this.securityEventBus
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -535,6 +742,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
+    registerEndpointExceptionsRoutes(router, this.endpointContext);
     registerScriptsLibraryRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
@@ -619,10 +827,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           threatIntelligenceSearchStrategy
         );
 
-        plugins.cases.attachmentFramework.registerExternalReference({
-          id: CASE_ATTACHMENT_TYPE_ID,
-        });
-
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
@@ -664,6 +868,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
+        isServerless: this.isServerless,
       });
 
       this.trialCompanionMilestoneService.setup({
@@ -675,7 +880,28 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(
+      plugins,
+      core,
+      this.logger,
+      previewRuleDataClient,
+      securityRuleTypeOptions
+    );
+
+    if (plugins.workflowsExtensions) {
+      registerWorkflowSteps(plugins.workflowsExtensions);
+      registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
+      registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
+    }
+
+    setupAlertsCapabilitiesSwitcher({
+      core,
+      logger: this.logger,
+      getSecurityStart: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.security;
+      },
+    });
 
     return {
       setProductFeaturesConfigurator:
@@ -690,7 +916,65 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginStart {
     const { config, logger, productFeaturesService } = this;
 
+    initializeEndpointExceptionsPerPolicyOptInStatus(
+      core.savedObjects,
+      config.experimentalFeatures,
+      logger
+    ).catch(() => {});
+
     this.ruleMonitoringService.start(core, plugins);
+
+    if (config.experimentalFeatures.threatIntelSupplyEnabled) {
+      // Publish start services to the route getters registered in `setup()`.
+      this.threatIntelStartPlugins = plugins;
+
+      // A bootstrap failure must not crash Kibana. Routes that touch plugin-owned
+      // indices observe the rejection via `getBootstrapReady()` and return 503;
+      // the LLM enrichment routes do not gate on it at all. This no-op handler
+      // marks the shared promise handled so a failure does not surface as an
+      // unhandled rejection at startup (before any request has awaited it).
+      this.threatIntelBootstrapReady.promise.catch(() => {});
+
+      // Fire-and-forget: startup must not block on the bootstrap. Route handlers
+      // await `getBootstrapReady()` so requests cannot touch plugin-owned indices
+      // before their templates apply.
+      ensureThreatIntelBootstrap({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger,
+      }).then(
+        () => this.threatIntelBootstrapReady.resolve(),
+        (err) => {
+          logger.error(
+            `Threat intelligence bootstrap failed: ${err instanceof Error ? err.message : err}`
+          );
+          this.threatIntelBootstrapReady.reject(err);
+        }
+      );
+    }
+
+    if (plugins.workflowsExtensions) {
+      // Install once in the global space, then mark ready (install is awaited before ready inside
+      // the helper). Fire-and-forget: startup must not block on it.
+      void installSecurityAlertAnalysisWorkflowAndMarkReady({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger,
+      });
+    }
+
+    if (this.securityEventBus && plugins.workflowsExtensions) {
+      registerSecurityWorkflowEventBridge(
+        this.securityEventBus,
+        plugins.workflowsExtensions,
+        logger
+      );
+    }
+
+    if (this.securityEventBus && plugins.cases) {
+      const securityEventBus = this.securityEventBus;
+      plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
+        forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
+      });
+    }
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([
@@ -718,6 +1002,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
+    plugins.anonymization.registerProfileInitializer(securityAlertsProfileInitializer);
 
     // Assistant Tool and Feature Registration
     const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
@@ -734,7 +1019,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures('management', features);
 
     const manifestManager = new ManifestManager({
-      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),
+      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects),
       savedObjectsClient,
       exceptionListClient,
       artifactClient: new EndpointArtifactClient(
@@ -763,10 +1048,22 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       esClient: core.elasticsearch.client.asInternalUser,
+      clusterClient: core.elasticsearch.client,
+      dataStart: plugins.data,
+      // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+      // resolved, which is not the same as there being none. Defend collapses that to "do not fan
+      // out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+      // almost always a custom role missing `read_project_routing` -- and fanning those out would
+      // put exactly the principals we know least about on `asCurrentUser`. The cost is that such a
+      // role reads origin-only until the predefined roles carry the privilege.
+      isCpsActive: async (request: KibanaRequest): Promise<boolean> =>
+        this.defendCpsFeatureFlagEnabled && (await plugins.cps?.isCpsActive(request)) === true,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
       spacesService: plugins.spaces?.spacesService,
+      agentBuilder: plugins.agentBuilder,
+      getExceptionListClient: this.lists?.getExceptionListClient,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
@@ -913,11 +1210,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (registerIngestCallback) {
       registerIngestCallback(
         'packagePolicyCreate',
-        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+        async (
+          packagePolicy: NewPackagePolicy,
+          _soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          context?: RequestHandlerContext
+        ) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -925,11 +1228,17 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       registerIngestCallback(
         'packagePolicyUpdate',
-        async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
+        async (
+          packagePolicy: UpdatePackagePolicyWithId,
+          _soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          context?: RequestHandlerContext
+        ) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -944,6 +1253,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
         telemetryConfigProvider: this.telemetryConfigProvider,
+        packageService,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {
@@ -986,5 +1296,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
+    this.securityEventBus?.removeAllListeners();
   }
 }

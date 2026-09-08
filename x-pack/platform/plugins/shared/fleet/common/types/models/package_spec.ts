@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
+import type {
+  DeprecationInfo,
+  RegistryElasticsearch,
+  RegistryPolicyTemplate,
+  RegistryProviderPermissions,
+  RegistrySection,
+  RegistryVarsEntry,
+} from './epm';
 
 export interface RegistryVarGroupOption {
   name: string;
@@ -23,7 +30,17 @@ export interface RegistryVarGroup {
   selector_title: string;
   description?: string;
   required?: boolean; // When true, all vars in the selected option are treated as required
+  show_divider?: boolean; // When false, suppresses the automatic horizontal divider rendered after this var_group's stream section
   options: RegistryVarGroupOption[];
+}
+
+export interface PackageDependency {
+  package: string;
+  version: string;
+}
+
+export interface PackageRequires {
+  content?: PackageDependency[];
 }
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
@@ -37,6 +54,7 @@ export interface PackageSpecManifest {
   source?: {
     license: string;
   };
+  requires?: PackageRequires;
   type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
@@ -47,6 +65,7 @@ export interface PackageSpecManifest {
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   var_groups?: RegistryVarGroup[];
+  sections?: RegistrySection[];
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
@@ -62,6 +81,11 @@ export interface PackageSpecManifest {
     }>;
     datasets?: DiscoveryDataset[];
   };
+  deprecated?: DeprecationInfo;
+  /** Package-level cloud provider permissions (package-spec 3.7.0+). */
+  provider_permissions?: RegistryProviderPermissions[];
+  /** Groups related packages (e.g. nginx, nginx_otel) under a shared technology tile. */
+  group?: string;
 }
 export interface DiscoveryDataset {
   name: string;
@@ -149,6 +173,7 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
+  deprecated?: DeprecationInfo;
   kibana?: {
     version?: string;
   };

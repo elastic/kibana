@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './icons';
+// This package is deprecated - all navigation icons have been replaced with EUI icons
+// Use EUI icon names directly in navigation trees (e.g., 'productAgent', 'productML', etc.)

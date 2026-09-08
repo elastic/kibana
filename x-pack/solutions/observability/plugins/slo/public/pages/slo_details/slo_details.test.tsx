@@ -171,7 +171,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -188,7 +188,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -301,7 +301,7 @@ describe('SLO Details Page', () => {
     fireEvent.click(button!);
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(
+      expect(mockNavigate).toHaveBeenCalledWith(
         paths.sloCreateWithEncodedForm(encodeURIComponent(encode(transformSloToCloneState(slo))))
       );
     });
@@ -329,13 +329,13 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(deleteModalConfirmButton!);
 
-    expect(mockDelete).toBeCalledWith({
+    expect(mockDelete).toHaveBeenCalledWith({
       id: slo.id,
       name: slo.name,
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slos);
     });
   });
 
@@ -346,7 +346,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: new ActiveAlerts({ [`${slo.id}|${ALL_VALUE}`]: 2 }),
+      data: new ActiveAlerts([[{ id: slo.id, instanceId: ALL_VALUE }, 2]]),
     });
 
     render(<SloDetailsPage />);

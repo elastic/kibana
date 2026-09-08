@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
+import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys-server';
 import { registerStatusRoutes } from './status';
 import { registerApiKeyRoutes } from './api_key_routes';
 import { registerStatsRoutes } from './size_stats';
@@ -19,6 +20,7 @@ export function defineRoutes(
   routerContextData: RouterContextData
 ) {
   registerApiKeyRoutes(router, logger);
+  registerSearchApiKeysRoutes(router, logger);
   registerStatusRoutes(router, logger);
   registerStatsRoutes(router, logger, routerContextData);
 }

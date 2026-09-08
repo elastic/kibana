@@ -29,6 +29,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter as getQueryFilterNoLoadFields } from './get_query_filter';
 import { getQueryFilterLoadFields } from './get_query_filter_load_fields';
 import { getDataTierFilter } from './get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from './get_data_stream_namespace_filter';
 
 /**
  * EQL and threat_match rules support tier filtering too, but it is implemented inside rule executors
@@ -83,7 +84,15 @@ export const getFilter = async ({
     ? await getDataTierFilter({ uiSettingsClient: services.uiSettingsClient })
     : [];
 
-  const mergedFilters = [...(filters ? filters : []), ...dataTiersFilters];
+  const dataStreamNamespaceFilters = ruleTypesSupportingTierFilters.has(type)
+    ? await getDataStreamNamespaceFilter({ uiSettingsClient: services.uiSettingsClient })
+    : [];
+
+  const mergedFilters = [
+    ...(filters ? filters : []),
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
 
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
@@ -110,7 +119,11 @@ export const getFilter = async ({
         return getQueryFilter({
           query: savedObject.attributes.query.query,
           language: savedObject.attributes.query.language,
-          filters: [...savedObject.attributes.filters, ...dataTiersFilters],
+          filters: [
+            ...savedObject.attributes.filters,
+            ...dataTiersFilters,
+            ...dataStreamNamespaceFilters,
+          ],
           index,
           exceptionFilter,
           fields,

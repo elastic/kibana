@@ -6,10 +6,17 @@
  */
 
 import type { ToolSelection } from '../tools';
+import type { UserIdAndName } from '../base/users';
+import type { AgentAccessControl } from './access_control';
 
 /**
- * The type of an agent.
- * Only one type for now, this enum is mostly here for future-proofing.
+ * ID of the default agent type
+ */
+export const chatAgentTypeId = 'chat';
+
+/**
+ * @deprecated agent types are now an open set of registered type ids. Use plain strings
+ * (e.g. {@link chatAgentTypeId}) instead.
  */
 export enum AgentType {
   chat = 'chat',
@@ -21,17 +28,23 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the AI index available to every chat agent by default.
+ */
+export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
   /**
-   * Id of the agent
+   * ID of the agent
    */
   id: string;
   /**
-   * The type of the agent (only for type for now, here for future-proofing)
+   * ID of the agent type this agent derives from.
+   * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
-  type: AgentType;
+  type: string;
   /**
    * Human-readable name for the agent.
    */
@@ -45,6 +58,26 @@ export interface AgentDefinition {
    * Built-in agents are readonly, user-created agent are not.
    */
   readonly: boolean;
+  /**
+   * Access control controls who can read, run, write, delete, and manage this agent.
+   */
+  access_control?: AgentAccessControl;
+  /**
+   * Agent owner metadata.
+   */
+  created_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was created.
+   */
+  created_at?: string;
+  /**
+   * Metadata for who last updated the agent.
+   */
+  updated_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was last updated.
+   */
+  updated_at?: string;
   /**
    * Optional labels used to organize or filter agents
    */
@@ -70,17 +103,8 @@ export interface AgentDefinition {
 export interface AgentConfiguration {
   /**
    * Custom instruction for the agent.
-   *
-   * Instructions specified that way will be added to both the research and answer prompts.
-   * For custom per-step instructions, use the `research` and `answer` configuration fields instead.
    */
   instructions?: string;
-  /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
-   *
-   * This will impact both the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead.
-   */
-  replace_default_instructions?: boolean;
 
   /**
    * List of tools exposed to the agent
@@ -88,36 +112,41 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
-   * Custom configuration for the research step of the agent.
+   * Optional list of skill IDs exposed to the agent.
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
-  research?: AgentResearchStepConfiguration;
+  skill_ids?: string[];
 
   /**
-   * Custom configuration for the answer step of the agent.
+   * When true, enables built-in Elastic capabilities for the agent.
    */
-  answer?: AgentAnswerStepConfiguration;
-}
+  enable_elastic_capabilities?: boolean;
 
-export interface AgentResearchStepConfiguration {
   /**
-   * Custom instruction for the agent's research step.
+   * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
-  instructions?: string;
-  /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
-   */
-  replace_default_instructions?: boolean;
-}
+  workflow_ids?: string[];
 
-export interface AgentAnswerStepConfiguration {
   /**
-   * Custom instruction for the agent's answer step.
+   * Optional list of plugin IDs assigned to this agent.
+   * Skills contributed by these plugins will be available to the agent during execution.
    */
-  instructions?: string;
+  plugin_ids?: string[];
+
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   * Optional list of connector IDs associated with this agent.
+   * When set, SML search filters connector results to only those in this list.
+   * When undefined, all connectors remain visible (backward compatibility).
    */
-  replace_default_instructions?: boolean;
+  connector_ids?: string[];
+
+  /**
+   * Optional list of AI indices IDs associated with this agent.
+   * When set, if Context Engine is enabled, the agent will first search through these indices
+   * to answer questions before potentially querying the raw data, in order to improve
+   * the accuracy and token efficiency.
+   * */
+  ai_indices?: string[];
 }
 
 /**
@@ -129,8 +158,8 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
- * (like research/answer step configs) are internal implementation details.
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
+ * are internal implementation details.
  *
  * This type is used for:
  * - API input validation (converse endpoint)
@@ -138,5 +167,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;

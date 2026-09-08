@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type ScoutPage } from '@kbn/scout';
+import { type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 export class BrowseIntegrationPage {
@@ -16,7 +17,7 @@ export class BrowseIntegrationPage {
   }
 
   async searchForIntegration(integrationName: string) {
-    const searchInput = this.page.getByTestId('browseIntegrations.searchBar.input');
+    const searchInput = this.page.getByTestId('epmList.searchBar');
     await searchInput.fill(integrationName);
   }
 
@@ -66,5 +67,9 @@ export class BrowseIntegrationPage {
 
   async expectIntegrationCardToBeVisible(integrationName: string) {
     return expect(this.page.getByTestId(`integration-card:epr:${integrationName}`)).toBeVisible();
+  }
+
+  async expectCollectionCardToBeVisible(groupId: string) {
+    return expect(this.page.getByTestId(`integration-card:collection:${groupId}`)).toBeVisible();
   }
 }

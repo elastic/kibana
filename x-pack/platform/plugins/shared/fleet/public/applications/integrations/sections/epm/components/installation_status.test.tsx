@@ -174,7 +174,7 @@ describe('InstallationStatus', () => {
     const icon = getByTestId('compressed-installed-icon');
 
     expect(icon).toBeInTheDocument();
-    expect(icon).toHaveAttribute('data-euiicon-type', 'warningFilled');
+    expect(icon).toHaveAttribute('data-euiicon-type', 'warningFill');
 
     userEvent.hover(icon);
 
@@ -199,7 +199,7 @@ describe('InstallationStatus', () => {
     const icon = getByTestId('compressed-installed-icon');
 
     expect(icon).toBeInTheDocument();
-    expect(icon).toHaveAttribute('data-euiicon-type', 'warningFilled');
+    expect(icon).toHaveAttribute('data-euiicon-type', 'warningFill');
 
     userEvent.hover(icon);
 
@@ -222,6 +222,6 @@ describe('InstallationStatus', () => {
     const icon = getByTestId('compressed-active-icon');
 
     expect(icon).toBeInTheDocument();
-    expect(icon).toHaveAttribute('data-euiicon-type', 'checkInCircleFilled');
+    expect(icon).toHaveAttribute('data-euiicon-type', 'checkCircleFill');
   });
 });

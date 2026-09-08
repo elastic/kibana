@@ -42,7 +42,7 @@ export const AddProcessorButton = forwardRef<HTMLButtonElement, Props>((props, r
         data-test-subj="addProcessorButton"
         disabled={editor.mode.id !== 'idle'}
         iconSide="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onClick}
         buttonRef={ref}
       >

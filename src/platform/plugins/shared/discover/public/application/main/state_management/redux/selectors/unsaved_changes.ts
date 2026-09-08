@@ -19,11 +19,15 @@ import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
 import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -74,39 +78,42 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    const tabState = selectTab(state, tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    // Normalize both sides against the same tab type to avoid phantom changes.
+    const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
+
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
+        profileStateRegistry: services.profileStateRegistry,
         initialAppState: getInitialAppState({
-          initialUrlState: undefined,
+          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
           dataView: getSerializedSearchSourceDataViewDetails(
             persistedTab.serializedSearchSource,
             state.savedDataViews
           ),
           services,
+          defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
         }),
       }),
-      timeRestore: Boolean(persistedTab.timeRestore),
+      overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
+      currentDataView: undefined,
+      tabType,
     });
 
-    const tabState = selectTab(state, tabId);
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-    const normalizedTab = tabStateContainer
-      ? fromSavedSearchToSavedObjectTab({
-          tab: tabState,
-          savedSearch: tabStateContainer.savedSearchState.getState(),
-          services,
-        })
-      : fromTabStateToSavedObjectTab({
-          tab: tabState,
-          timeRestore: Boolean(persistedTab.timeRestore),
-          services,
-        });
+    const normalizedTab = fromTabStateToSavedObjectTab({
+      tab: tabState,
+      currentDataView,
+      services,
+      tabType,
+    });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
@@ -182,7 +189,7 @@ const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
     ? searchSource.index.id
     : searchSource.index;
 
-const searchSourceComparator: TabComparators['serializedSearchSource'] = (
+export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,
   searchSourceB
 ) => {
@@ -215,6 +222,7 @@ const TAB_COMPARATORS: TabComparators = {
   columns: fieldComparator('columns', []),
   grid: fieldComparator('grid', {}),
   hideChart: fieldComparator('hideChart', false),
+  hideTable: fieldComparator('hideTable', false),
   // isTextBasedQuery is derived from the query itself and can be ignored
   isTextBasedQuery: NOOP_COMPARATOR,
   // usesAdHocDataView is derived from the data view itself and can be ignored
@@ -234,6 +242,9 @@ const TAB_COMPARATORS: TabComparators = {
   chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
+  documentsDisplayMode: fieldComparator('documentsDisplayMode', 'table'),
+  jsonModeSettings: fieldComparator('jsonModeSettings', {}),
+  esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {
     // ignore the order of keys when comparing JSON strings
@@ -241,4 +252,5 @@ const TAB_COMPARATORS: TabComparators = {
     const testB = JSON.parse(b ?? '{}');
     return isEqual(testA, testB);
   },
+  tabTypeState: fieldComparator('tabTypeState', undefined),
 };

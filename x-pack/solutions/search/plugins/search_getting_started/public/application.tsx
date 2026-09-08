@@ -14,23 +14,24 @@ import { Router } from '@kbn/shared-ux-router';
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { SearchGettingStartedServicesContextDeps } from './types';
-import { SearchGettingStartedPage } from './components/search_getting_started';
+import { GettingStartedView } from './components/getting_started_view';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
 
 export const renderApp = async (
   core: CoreStart,
   services: SearchGettingStartedServicesContextDeps,
   element: HTMLElement,
-  queryClient: QueryClient
+  queryClient: QueryClient,
+  kibanaVersion: string
 ) => {
   ReactDOM.render(
     core.rendering.addContext(
-      <KibanaContextProvider services={{ ...core, ...services }}>
+      <KibanaContextProvider services={{ ...core, ...services, kibanaVersion }}>
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <QueryClientProvider client={queryClient}>
             <I18nProvider>
               <Router history={services.history}>
-                <SearchGettingStartedPage />
+                <GettingStartedView />
               </Router>
             </I18nProvider>
           </QueryClientProvider>

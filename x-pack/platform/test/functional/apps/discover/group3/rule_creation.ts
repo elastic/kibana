@@ -5,30 +5,50 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: Cover with a unit test, then DELETE. The first two `it` blocks are
+ * setup written as tests, and the only assertion in the file is that the `ruleLinkedDashboards`
+ * section renders — static markup in
+ * x-pack/platform/packages/shared/response-ops/rule_form/src/rule_details/rule_dashboards.tsx,
+ * which has no test file yet while its siblings (rule_details.test.tsx,
+ * rule_investigation_guide_editor.test.tsx) do. A jest test there covers this for every consumer,
+ * not just Discover, and drops an esArchiver load plus a browser from CI.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { openDiscoverSearchThresholdRuleFlyout } from '../open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover rule creation', function () {
     const { common } = getPageObjects(['common', 'settings', 'shareSavedObjectsToSpace']);
-    const find = getService('find');
     const testSubjects = getService('testSubjects');
+    const retry = getService('retry');
+    const esArchiver = getService('esArchiver');
+    const kibanaServer = getService('kibanaServer');
+
+    before('initialize tests', async () => {
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+    });
+
+    after('clean up archives', async () => {
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
+    });
 
     it('navigate to Discover', () => {
       return common.navigateToApp('discover');
     });
 
     it('begin creating rule', async () => {
-      await testSubjects.click('app-menu-overflow-button');
-      await find.clickByButtonText('Alerts');
-      await find.clickByButtonText('Create search threshold rule');
-      await find.clickByButtonText('Details');
+      await openDiscoverSearchThresholdRuleFlyout({ testSubjects, retry });
+      await testSubjects.click('ruleFormStep-details');
     });
 
     it('should have the "Related dashboards" section', async () => {
-      const linkedDashboardsElement = await find.byCssSelector(
-        '[data-test-subj="ruleLinkedDashboards"]'
-      );
+      const linkedDashboardsElement = await testSubjects.find('ruleLinkedDashboards');
       expect(linkedDashboardsElement).to.be.ok();
       expect(await linkedDashboardsElement.isDisplayed()).to.be(true);
     });

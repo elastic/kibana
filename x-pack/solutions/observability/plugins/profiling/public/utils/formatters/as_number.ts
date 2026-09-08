@@ -6,6 +6,7 @@
  */
 
 import { NOT_AVAILABLE_LABEL } from '../../../common';
+const units = ['', 'k', 'm', 'b', 't', 'q'];
 
 export function asNumber(value: number): string {
   if (isNaN(value) || !Number.isFinite(value)) {
@@ -16,21 +17,25 @@ export function asNumber(value: number): string {
     return '0';
   }
 
+  // Round the value once to get the base precision
   value = Math.round(value * 100) / 100;
   if (Math.abs(value) < 0.01) {
     return '~0.00';
   }
-  if (Math.abs(value) < 1e3) {
-    return value.toString();
+
+  let unitIndex = 0;
+
+  while (unitIndex < units.length - 1 && Math.abs(value) >= 1e3) {
+    value = value / 1e3;
+    unitIndex += 1;
   }
 
-  if (Math.abs(value) < 1e6) {
-    return `${asNumber(value / 1e3)}k`;
+  if (unitIndex === units.length - 1 && Math.abs(value) >= 1e3) {
+    return NOT_AVAILABLE_LABEL;
   }
 
-  if (Math.abs(value) < 1e9) {
-    return `${asNumber(value / 1e6)}m`;
-  }
+  // Round after scaling to match the original recursive behavior
+  value = Math.round(value * 100) / 100;
 
-  return `${asNumber(value / 1e9)}b`;
+  return `${value.toString()}${units[unitIndex]}`;
 }

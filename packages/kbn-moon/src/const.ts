@@ -10,9 +10,9 @@
 export const MOON_CONFIG_KEY_ORDER = [
   '$schema',
   'id',
-  'type',
+  'layer',
   'owners',
-  'toolchain',
+  'toolchains',
   '*', // everything else
   'tags',
   'fileGroups',
@@ -26,7 +26,7 @@ export const MOON_CONST = {
   EXTENSION_FILE_NAME: 'moon.extend.yml',
   JEST_CONFIG_FILES: ['jest.config.js', 'jest.config.cjs', 'jest.config.json'],
   ESLINT_CONFIG_FILES: ['.eslintrc.js', '.eslintrc.json'],
-  PROJECT_TYPE_UNKNOWN: 'unknown',
+  PROJECT_LAYER_UNKNOWN: 'unknown',
   DEFAULT_TOOLCHAIN: 'node',
   TAG_JEST_UNIT: 'jest-unit-tests',
   TAG_DEV: 'dev',

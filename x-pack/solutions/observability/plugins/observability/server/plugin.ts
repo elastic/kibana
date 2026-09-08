@@ -31,8 +31,11 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import { getLogsFeature } from './features/logs_feature';
+import { getObservabilityAlertsFeature } from './features/alerts_feature';
 import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
@@ -50,6 +53,7 @@ import { uiSettings } from './ui_settings';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
+import { observabilityAlertAttachmentType } from './cases/attachments/alert';
 import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -69,10 +73,12 @@ interface PluginSetup {
 
 interface PluginStart {
   alerting: AlertingServerStart;
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
+  nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
@@ -101,9 +107,11 @@ export class ObservabilityPlugin
       plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+      plugins.cases.attachmentFramework.registerAttachment(observabilityAlertAttachmentType);
     }
 
     plugins.features.registerKibanaFeature(getLogsFeature());
+    plugins.features.registerKibanaFeature(getObservabilityAlertsFeature());
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -115,7 +123,7 @@ export class ObservabilityPlugin
 
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
+    registerRuleTypes(plugins.alerting, core, core.http.basePath, config, this.logger, {
       alertsLocator,
       logsLocator,
     });
@@ -152,6 +160,7 @@ export class ObservabilityPlugin
             alertDetailsContextualInsightsService,
           },
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+          nightshiftInvestigations: pluginStart.nightshiftInvestigations,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
@@ -171,7 +180,10 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
-      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
+      // The managed OTLP service URL was historically set via `xpack.observability.managedOtlpServiceUrl`.
+      // It is now sourced from `xpack.cloud.managed_otlp.url` (surfaced on the cloud plugin's setup contract);
+      // the observability config value is kept as a fallback for deployments that have not yet migrated.
+      managedOtlpServiceUrl: plugins.cloud?.managedOtlp?.url || config.managedOtlpServiceUrl,
     };
   }
 

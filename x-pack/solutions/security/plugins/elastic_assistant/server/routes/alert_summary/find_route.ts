@@ -16,7 +16,7 @@ import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/imp
 import { FindAlertSummaryRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import _ from 'lodash';
-import { getPrompt, promptDictionary } from '../../lib/prompt';
+import { getPrompt, getInferenceConnectorById, promptDictionary } from '../../lib/prompt';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import type { EsAlertSummarySchema } from '../../ai_assistant_data_clients/alert_summary/types';
@@ -60,8 +60,6 @@ export const findAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
             return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAlertSummaryDataClient();
-          const actions = ctx.elasticAssistant.actions;
-          const actionsClient = await actions.getActionsClientWithRequest(request);
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
           const result = await dataClient?.findDocuments<EsAlertSummarySchema>({
             perPage: query.per_page,
@@ -72,7 +70,10 @@ export const findAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
             fields: query.fields?.map((f) => _.snakeCase(f)),
           });
           const prompt = await getPrompt({
-            actionsClient,
+            getInferenceConnectorById: getInferenceConnectorById(
+              ctx.elasticAssistant.inference,
+              request
+            ),
             connectorId: query.connector_id,
             promptId: promptDictionary.alertSummary,
             promptGroupId: promptGroupId.aiForSoc,

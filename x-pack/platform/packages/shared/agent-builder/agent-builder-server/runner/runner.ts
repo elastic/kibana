@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest, PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { ToolType } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi, ToolType } from '@kbn/agent-builder-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 import type { InternalToolDefinition } from '../tools/internal';
@@ -91,6 +91,7 @@ export type ScopedRunInternalToolFn = <TParams = Record<string, unknown>>(
  * Context bound to a run execution.
  * Contains metadata associated with the run's current state.
  * Will be attached to errors thrown during a run.
+ * It is serializable.
  */
 export interface RunContext {
   /**
@@ -103,20 +104,32 @@ export interface RunContext {
   stack: RunContextStackEntry[];
 }
 
+export interface RunAgentStackEntry {
+  type: 'agent';
+  agentId: string;
+  conversationId?: string;
+  executionId?: string;
+}
+
+export interface RunToolStackEntry {
+  type: 'tool';
+  toolId: string;
+  toolCallId?: string;
+  source?: ToolCallSource;
+}
+
 /**
  * Represents an element in the run context's stack.
  * Used to follow nested / chained execution.
  */
-export type RunContextStackEntry =
-  /** tool invocation */
-  | { type: 'tool'; toolId: string }
-  /** agent invocation */
-  | { type: 'agent'; agentId: string };
+export type RunContextStackEntry = RunAgentStackEntry | RunToolStackEntry;
+
+export type ToolCallSource = 'agent' | 'user' | 'mcp' | 'unknown';
 
 /**
- * Params for {@link RunToolFn}
+ * Describes the tool call itself: which tool, with what, and how to observe it.
  */
-export interface RunToolParams<TParams = Record<string, unknown>> {
+export interface ToolInvocationParams<TParams = Record<string, unknown>> {
   /**
    * ID of the tool to call.
    */
@@ -133,25 +146,54 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    * Optional source of the tool invocation.
    * Defaults to 'unknown'.
    */
-  source?: 'agent' | 'user' | 'mcp' | 'unknown';
-  /**
-   * Optional prompt storage state to use for tool invocation.
-   */
-  promptState?: PromptStorageState;
+  source?: ToolCallSource;
   /**
    * Optional event handler.
    */
   onEvent?: ToolEventHandlerFn;
-  /**
-   * The request that initiated that run.
-   */
-  request: KibanaRequest;
   /**
    * Optional genAI connector id to use as default.
    * If unspecified, will use internal logic to use the default connector
    * (EIS if there, otherwise openAI, otherwise any GenAI)
    */
   defaultConnectorId?: string;
+  /**
+   * Optional abort signal for the run (e.g. from the request).
+   * Propagated to hooks so they can respect cancellation.
+   */
+  abortSignal?: AbortSignal;
+}
+
+/**
+ * What a run is permitted to do that would otherwise need a live user to approve it.
+ *
+ * Grants are inherited by any sub-agents the run spawns, and apply to that run only.
+ */
+export interface RunApprovals {
+  /**
+   * Destructive APIs the run may call without a user confirmation.
+   */
+  autoApprovedApis?: AutoApprovedApi[];
+}
+
+/**
+ * Params for {@link RunToolFn}
+ * Adds the fields that only a caller establishing a new run can supply.
+ */
+export interface RunToolParams<TParams = Record<string, unknown>>
+  extends ToolInvocationParams<TParams> {
+  /**
+   * The request that initiated that run.
+   */
+  request: KibanaRequest;
+  /**
+   * Optional prompt storage state to use for tool invocation.
+   */
+  promptState?: PromptStorageState;
+  /**
+   * Pre-approvals for actions the run would otherwise refuse for want of a live user.
+   */
+  approvals?: RunApprovals;
 }
 
 export type RunInternalToolParams<TParams = Record<string, unknown>> = Omit<
@@ -162,17 +204,28 @@ export type RunInternalToolParams<TParams = Record<string, unknown>> = Omit<
 };
 
 /**
- * Params for {@link ScopedRunner.runTool}
+ * Params for a tool invocation whose dispatcher already holds the request and resolves the
+ * prompt state itself, such as the tool registry or an executable tool. Unlike
+ * {@link ScopedRunnerRunToolsParams}, the run is not established yet, so `approvals`
+ * still applies.
  */
-export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
+export type RequestBoundRunToolParams<TParams = Record<string, unknown>> = Omit<
   RunToolParams<TParams>,
   'request' | 'promptState'
 >;
 
+/**
+ * Params for {@link ScopedRunner.runTool}
+ */
+export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> =
+  ToolInvocationParams<TParams>;
+
 export type ScopedRunnerRunInternalToolParams<TParams = Record<string, unknown>> = Omit<
-  RunInternalToolParams<TParams>,
-  'request' | 'promptState'
->;
+  ToolInvocationParams<TParams>,
+  'toolId'
+> & {
+  tool: InternalToolDefinition<ToolType, any, any>;
+};
 
 /**
  * Public agentBuilder API to execute a tools.

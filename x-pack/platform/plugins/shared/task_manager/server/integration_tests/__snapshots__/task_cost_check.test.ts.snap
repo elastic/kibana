@@ -36,6 +36,14 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.http",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.http-system",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.index",
   },
   Object {
@@ -141,6 +149,10 @@ Array [
   Object {
     "cost": 10,
     "taskType": "alerting:siem.indicatorRule",
+  },
+  Object {
+    "cost": 10,
+    "taskType": "entity_store:v2:legacy_security_assets_migration",
   },
 ]
 `;

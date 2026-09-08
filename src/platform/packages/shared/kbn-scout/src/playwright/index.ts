@@ -13,9 +13,10 @@ import './peggy_setup';
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
+export { extendPlaywrightPage } from './fixtures/scope/test/scout_page/single_thread';
 
 // Matchers
-export { expect } from './expect';
+export { expect } from './matchers/ui';
 
 // Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
@@ -27,6 +28,7 @@ export type {
   PageObjects, // can be extended with solution specific Page Objects
 } from './fixtures/scope/test';
 export { browserAuthFixture } from './fixtures/scope/test';
+export { networkFixture } from './fixtures/scope/test';
 
 // Test and worker fixtures (can be extended with solution specific fixtures)
 export type {
@@ -36,20 +38,35 @@ export type {
   ScoutParallelWorkerFixtures,
 } from './test/ui';
 
+// Worker primitives (for optional packages such as @kbn/scout-synthtrace)
+export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
+export type { EsArchiverFixture } from './fixtures/scope/worker';
+export type { NetworkFixture } from './fixtures/scope/test';
+
 // API services (can be extended with solution specific API services)
 export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 
-export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
+// Raw HTTP client fixture, for UI suites that need to call Kibana routes directly
+export { apiClientFixture } from './fixtures/scope/worker';
 
 // Other worker types
-export type { SamlAuth, SynthtraceFixture, RequestAuthFixture } from './fixtures/scope/worker';
+export type {
+  LinkedProjectFixture,
+  SamlAuth,
+  RequestAuthFixture,
+  ScoutSpaceParallelFixture,
+  SpaceSolutionView,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
+} from './fixtures/scope/worker';
 
 // Tagging utility
 export { tags } from './tags';
 
 // Test entrypoints
-export { test, spaceTest, lighthouseTest, globalSetupHook } from './test/ui';
+export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
 export { apiTest } from './test/api';
 
 // Test helpers for EUI components
@@ -57,3 +74,12 @@ export * from './eui_components';
 
 // Test helpers for Kibana components
 export * from './ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  ListingTable,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './page_objects';
+export type { ContentListUrlState } from './page_objects';

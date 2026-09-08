@@ -18,6 +18,8 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { EsqlPluginStart } from '@kbn/esql/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -34,6 +36,8 @@ export interface StatefulSearchBarDeps {
   isScreenshotMode?: boolean;
   kql: { autocomplete: KqlPluginStart['autocomplete'] };
   cps: CPSPluginStart;
+  esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -168,6 +172,8 @@ export function createSearchBar({
   isScreenshotMode = false,
   kql,
   cps,
+  esql,
+  licensing,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -241,6 +247,8 @@ export function createSearchBar({
           usageCollection,
           kql,
           cps,
+          esql,
+          licensing,
           ...core,
         }}
       >
@@ -278,6 +286,7 @@ export function createSearchBar({
             }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onQueryChange={props.onQueryChange}
             onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
@@ -306,6 +315,9 @@ export function createSearchBar({
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
             esqlQueryStats={props.esqlQueryStats}
+            enableResourceBrowser={props.enableResourceBrowser}
+            enableDateRangePicker={props.enableDateRangePicker}
+            esqlApproximation={props.esqlApproximation}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

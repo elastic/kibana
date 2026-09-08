@@ -112,8 +112,13 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-   * Delete an exception list using the `id` or `list_id` field.
-   */
+      * Delete an exception list using the `id` or `list_id` field.
+
+Before deleting an exception list that is linked to detection rules, remove or unlink the
+exception list from those rules. Deleting a linked exception list can leave rules referencing
+an exception list that no longer exists.
+
+      */
   deleteExceptionList(props: DeleteExceptionListProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
@@ -251,11 +256,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };

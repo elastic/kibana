@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import type { ZodSchema } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema, type JsonSchema7Type } from 'zod-to-json-schema';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
 import type { ToolDefinition } from '@langchain/core/language_models/base';
@@ -28,18 +28,12 @@ export const toolDefinitionToInference = (
     if (isLangChainTool(tool)) {
       definitions[tool.name] = {
         description: tool.description ?? tool.name,
-        schema: tool.schema
-          ? isZodSchema(tool.schema)
-            ? zodSchemaToInference(tool.schema)
-            : jsonSchemaToInference(tool.schema)
-          : undefined,
+        schema: tool.schema ? resolveToolSchema(tool.schema) : undefined,
       };
     } else if (isToolDefinition(tool)) {
       definitions[tool.function.name] = {
         description: tool.function.description ?? tool.function.name,
-        schema: isZodSchema(tool.function.parameters)
-          ? zodSchemaToInference(tool.function.parameters)
-          : (pick(tool.function.parameters, ['type', 'properties', 'required']) as ToolSchema),
+        schema: resolveToolSchema(tool.function.parameters),
       };
     }
   });
@@ -65,10 +59,35 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
   return 'type' in def && def.type === 'function' && 'function' in def && typeof def === 'object';
 }
 
-function zodSchemaToInference(schema: ZodSchema): ToolSchema {
-  return pick(zodToJsonSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
+function isZodV4(schema: unknown): boolean {
+  return schema != null && typeof schema === 'object' && '_zod' in schema;
 }
 
-function jsonSchemaToInference(schema: JsonSchema7Type): ToolSchema {
-  return pick(schema, ['type', 'properties', 'required']) as ToolSchema;
+/**
+ * Resolves a tool schema to a ToolSchema object, handling Zod v4, Zod v3,
+ * and plain JSON Schema inputs.
+ *
+ * LangChain's `isZodSchema` only recognizes Zod v3 schemas, so Zod v4
+ * schemas must be checked separately to avoid falling through to the
+ * plain JSON Schema path (which would produce empty/broken schemas).
+ */
+function resolveToolSchema(schema: unknown): ToolSchema {
+  // Zod v4: use native toJSONSchema
+  if (isZodV4(schema)) {
+    return pick(z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' }), [
+      'type',
+      'properties',
+      'required',
+    ]) as ToolSchema;
+  }
+  // Zod v3: use zod-to-json-schema
+  if (isZodSchema(schema as Record<string, unknown>)) {
+    return pick(zodToJsonSchema(schema as Parameters<typeof zodToJsonSchema>[0]), [
+      'type',
+      'properties',
+      'required',
+    ]) as ToolSchema;
+  }
+  // Plain JSON Schema object
+  return pick(schema as JsonSchema7Type, ['type', 'properties', 'required']) as ToolSchema;
 }

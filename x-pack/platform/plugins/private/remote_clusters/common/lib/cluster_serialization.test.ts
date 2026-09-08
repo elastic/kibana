@@ -12,7 +12,53 @@ describe('cluster_serialization', () => {
   describe('deserializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
       // @ts-ignore
-      expect(() => deserializeCluster('foo', 'bar')).toThrowError();
+      expect(() => deserializeCluster('foo', 'bar')).toThrow();
+    });
+
+    it('should deserialize boolean-like string values from ES settings', () => {
+      expect(
+        deserializeCluster('test_cluster', {
+          seeds: ['localhost:9300'],
+          connected: true,
+          mode: 'sniff',
+          initial_connect_timeout: '30s',
+          // ES cluster settings can return booleans as strings (e.g. "false")
+          skip_unavailable: 'false' as any,
+        })
+      ).toEqual({
+        name: 'test_cluster',
+        mode: 'sniff',
+        seeds: ['localhost:9300'],
+        isConnected: true,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+        nodeConnections: null,
+      });
+    });
+
+    it('should deserialize numeric string values from ES settings', () => {
+      expect(
+        deserializeCluster('test_cluster', {
+          proxy_address: 'localhost:9300',
+          mode: 'proxy',
+          connected: true,
+          initial_connect_timeout: '30s',
+          proxy_socket_connections: '18' as any,
+          skip_unavailable: 'true' as any,
+          server_name: 'my_server_name',
+        })
+      ).toEqual({
+        name: 'test_cluster',
+        mode: 'proxy',
+        proxyAddress: 'localhost:9300',
+        isConnected: true,
+        initialConnectTimeout: '30s',
+        skipUnavailable: true,
+        proxySocketConnections: 18,
+        serverName: 'my_server_name',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
     });
 
     it('should deserialize a complete default cluster object', () => {
@@ -318,7 +364,7 @@ describe('cluster_serialization', () => {
   describe('serializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
       // @ts-ignore
-      expect(() => serializeCluster('foo')).toThrowError();
+      expect(() => serializeCluster('foo')).toThrow();
     });
 
     it('should serialize a cluster that has a deprecated proxy setting', () => {

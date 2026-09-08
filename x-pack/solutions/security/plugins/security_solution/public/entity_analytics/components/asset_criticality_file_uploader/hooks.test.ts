@@ -8,8 +8,9 @@
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useFileValidation } from './hooks';
+import { useFileValidation, useNavigationSteps } from './hooks';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
+import { FileUploaderSteps } from './types';
 
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
@@ -30,62 +31,106 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 describe('useFileValidation', () => {
-  const validLine = 'user,user-001,low_impact';
-  const invalidLine = 'user,user-001,low_impact,extra_field';
+  const headerRow = 'type,user.email,user.name,criticality_level';
+  const validLine = 'user,user-001@elastic.co,user-001,low_impact';
+  const extraLine = 'user,user-002@elastic.co,user-002,medium_impact';
 
-  test('should call onError when an error occurs', () => {
+  test('should call onError for invalid file type', () => {
     const onErrorMock = jest.fn();
     const onCompleteMock = jest.fn();
-    const invalidFileType = 'invalid file type';
 
     const { result } = renderHook(
-      () => useFileValidation({ onError: onErrorMock, onComplete: onCompleteMock }),
+      () =>
+        useFileValidation({
+          onError: onErrorMock,
+          onComplete: onCompleteMock,
+        }),
       { wrapper: TestProviders }
     );
-    result.current(new File([invalidLine], 'test.csv', { type: invalidFileType }));
+    result.current(new File([validLine], 'test.csv', { type: 'invalid file type' }));
 
     expect(onErrorMock).toHaveBeenCalled();
     expect(onCompleteMock).not.toHaveBeenCalled();
   });
 
-  test('should call onComplete when file validation is complete', async () => {
+  test('should call onComplete with all rows valid and no invalid lines', async () => {
     const onErrorMock = jest.fn();
     const onCompleteMock = jest.fn();
     const fileName = 'test.csv';
+    const csvContent = `${headerRow}\n${validLine}\n${extraLine}`;
 
     const { result } = renderHook(
-      () => useFileValidation({ onError: onErrorMock, onComplete: onCompleteMock }),
+      () =>
+        useFileValidation({
+          onError: onErrorMock,
+          onComplete: onCompleteMock,
+        }),
       { wrapper: TestProviders }
     );
-    result.current(new File([`${validLine}\n${invalidLine}`], fileName, { type: 'text/csv' }));
+    result.current(new File([csvContent], fileName, { type: 'text/csv' }));
 
     await waitFor(() => {
       expect(onErrorMock).not.toHaveBeenCalled();
       expect(onCompleteMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          validatedFile: {
+          validatedFile: expect.objectContaining({
             name: fileName,
-            size: 61,
-            validLines: {
-              text: validLine,
-              count: 1,
-            },
             invalidLines: {
-              text: invalidLine,
-              count: 1,
-              errors: [
-                {
-                  message: 'Expected 3 columns, got 4',
-                  index: 1,
-                },
-              ],
+              text: '',
+              count: 0,
+              errors: [],
             },
-          },
-          processingEndTime: expect.any(String),
-          processingStartTime: expect.any(String),
-          tookMs: expect.any(Number),
+          }),
         })
       );
     });
+  });
+
+  test('should subtract 1 from count to exclude the header row', async () => {
+    const onCompleteMock = jest.fn();
+    const fileName = 'test.csv';
+    const csvContent = `${headerRow}\n${validLine}\n${extraLine}`;
+
+    const { result } = renderHook(
+      () =>
+        useFileValidation({
+          onError: jest.fn(),
+          onComplete: onCompleteMock,
+        }),
+      { wrapper: TestProviders }
+    );
+    result.current(new File([csvContent], fileName, { type: 'text/csv' }));
+
+    await waitFor(() => {
+      expect(onCompleteMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          validatedFile: expect.objectContaining({
+            validLines: expect.objectContaining({
+              count: 2, // 3 total rows - 1 header row
+            }),
+          }),
+        })
+      );
+    });
+  });
+});
+
+describe('useNavigationSteps', () => {
+  const goToFirstStep = jest.fn();
+  const filePickerState = { step: FileUploaderSteps.FILE_PICKER as const, isLoading: false };
+  const resultState = { step: FileUploaderSteps.RESULT as const, validLinesAsText: '' };
+
+  test('renders select-file and results steps', () => {
+    const { result } = renderHook(() => useNavigationSteps(filePickerState, goToFirstStep));
+
+    expect(result.current).toHaveLength(2);
+    expect(result.current[0].title).toMatch(/select a file/i);
+    expect(result.current[1].title).toMatch(/results/i);
+  });
+
+  test('result step is always last', () => {
+    const { result } = renderHook(() => useNavigationSteps(resultState, goToFirstStep));
+
+    expect(result.current[result.current.length - 1].title).toMatch(/results/i);
   });
 });

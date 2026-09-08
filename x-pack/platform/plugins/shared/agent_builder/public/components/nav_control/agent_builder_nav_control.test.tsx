@@ -16,6 +16,13 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 import { AgentBuilderNavControl } from './agent_builder_nav_control';
 
+const mockIsOpen$ = new BehaviorSubject(false);
+const mockChrome = {
+  sidebar: {
+    getApp: () => ({ isOpen$: () => mockIsOpen$ }),
+  },
+};
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
@@ -30,23 +37,25 @@ const mockUseUiPrivileges = useUiPrivileges as jest.MockedFunction<typeof useUiP
 describe('AgentBuilderNavControl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsOpen$.next(false);
   });
 
-  it('toggles the flyout when the nav button is clicked', () => {
-    const toggleConversationFlyout = jest.fn();
+  it('toggles the sidebar when the nav button is clicked', () => {
+    const toggleChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          toggleConversationFlyout,
-          openConversationFlyout: jest.fn(),
+          toggleChat,
+          openChat: jest.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
           completeOpenChat: jest.fn(),
         },
+        chrome: mockChrome,
       },
     } as any);
 
@@ -56,25 +65,26 @@ describe('AgentBuilderNavControl', () => {
       </IntlProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open Agent Builder' }));
-    expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'AI Agent' }));
+    expect(toggleChat).toHaveBeenCalledTimes(1);
   });
 
-  it('toggles the flyout on Cmd/Ctrl+; keyboard shortcut', () => {
-    const toggleConversationFlyout = jest.fn();
+  it('toggles the sidebar on Cmd/Ctrl+; keyboard shortcut', () => {
+    const toggleChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          toggleConversationFlyout,
-          openConversationFlyout: jest.fn(),
+          toggleChat,
+          openChat: jest.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
           completeOpenChat: jest.fn(),
         },
+        chrome: mockChrome,
       },
     } as any);
 
@@ -86,12 +96,12 @@ describe('AgentBuilderNavControl', () => {
 
     // Provide both ctrlKey and metaKey so the assertion is platform-independent
     fireEvent.keyDown(window, { key: ';', code: 'Semicolon', ctrlKey: true, metaKey: true });
-    expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
+    expect(toggleChat).toHaveBeenCalledTimes(1);
   });
 
-  it('opens the flyout when openChat$ emits Agent', () => {
-    const toggleConversationFlyout = jest.fn();
-    const openConversationFlyout = jest.fn();
+  it('opens the sidebar when openChat$ emits Agent', () => {
+    const toggleChat = jest.fn();
+    const openChat = jest.fn();
     const completeOpenChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
@@ -99,13 +109,14 @@ describe('AgentBuilderNavControl', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          toggleConversationFlyout,
-          openConversationFlyout,
+          toggleChat,
+          openChat,
         },
         aiAssistantManagementSelection: {
           openChat$,
           completeOpenChat,
         },
+        chrome: mockChrome,
       },
     } as any);
 
@@ -119,7 +130,7 @@ describe('AgentBuilderNavControl', () => {
       openChat$.next(AIChatExperience.Agent);
     });
 
-    expect(openConversationFlyout).toHaveBeenCalledTimes(1);
+    expect(openChat).toHaveBeenCalledTimes(1);
     expect(completeOpenChat).toHaveBeenCalledTimes(1);
   });
 });

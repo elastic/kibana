@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const singleMetricESQLDatatableAttributes: LensAttributes = {
   title: 'Single metric datatable',
@@ -42,7 +43,7 @@ export const singleMetricESQLDatatableAttributes: LensAttributes = {
       },
     },
     filters: [],
-    query: { esql: 'FROM kibana_sample_data_logs | STATS COUNT(*) ' },
+    query: { language: 'kuery', query: '' },
     visualization: {
       layerId: '2f980b0d-7877-4ae2-9b0e-8cc3058d146d',
       layerType: 'data',
@@ -66,7 +67,7 @@ export const singleMetricESQLDatatableAttributes: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -90,7 +91,7 @@ export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
         },
       ],
     },
-    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -165,7 +166,7 @@ export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -271,7 +272,7 @@ export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
       },
     },
     filters: [],
-    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    query: { language: 'kuery', query: '' },
     visualization: {
       layerId: '6a3b6914-09c5-4a98-9e92-335c2b75acf0',
       layerType: 'data',
@@ -317,7 +318,7 @@ export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const fullConfigESQLDatatableAttributes: LensAttributes = {
@@ -399,7 +400,7 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
       rowHeightLines: 4,
       paging: { enabled: true, size: 20 },
     },
-    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -532,7 +533,7 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttributes = {
@@ -571,9 +572,7 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
         direction: 'desc',
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_logs | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -683,5 +682,5 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };

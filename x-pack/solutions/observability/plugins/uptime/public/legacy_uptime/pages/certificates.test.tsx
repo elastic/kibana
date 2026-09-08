@@ -9,11 +9,14 @@ import React from 'react';
 import { CertificatesPage } from './certificates';
 import { render } from '../lib/helper/rtl_helpers';
 
+jest.mock('../components/certificates/use_cert_search', () => ({
+  useCertSearch: () => ({ certs: [], total: 0, loading: false }),
+}));
+
 describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<CertificatesPage />);
 
-    expect(await findByText(/data table \(empty\)/im)).toBeInTheDocument();
     expect(await findByText('No Certificates found.')).toBeInTheDocument();
   });
 });

@@ -13,7 +13,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
+import { KibanaServices, useCurrentUser, useKibana } from '../../../lib/kibana';
 import { licenseService } from '../../../hooks/use_license';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
@@ -36,6 +36,7 @@ jest.mock('../../../hooks/use_license', () => {
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+const KibanaServicesMock = KibanaServices as jest.Mocked<typeof KibanaServices>;
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
@@ -59,6 +60,7 @@ describe('When using useEndpointPrivileges hook', () => {
         show: true,
       },
     };
+    KibanaServicesMock.getBuildFlavor.mockReturnValue('traditional');
 
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 

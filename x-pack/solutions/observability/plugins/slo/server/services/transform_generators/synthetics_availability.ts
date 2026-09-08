@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
@@ -28,10 +27,6 @@ import { InvalidTransformError } from '../../errors';
 import { getFilterRange } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -45,7 +40,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
-      slo
+      slo,
+      this.getProjectRouting(slo)
     );
   }
 
@@ -108,6 +104,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private async buildSource(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': this.spaceId } },
@@ -144,10 +141,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     }
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
-
-    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     return {
       index: SYNTHETICS_INDEX_PATTERN,

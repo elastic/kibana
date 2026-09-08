@@ -10,8 +10,11 @@ import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 
-const CCS_TOKEN = ':';
-
+/**
+ * Validates the index_search tool config: ensures the pattern resolves to at least one
+ * search source (index, alias, or data stream). Cross-cluster search (CCS) patterns
+ * (e.g. cluster:index*) are allowed and passed through to listSearchSources.
+ */
 export const validateConfig = async ({
   config,
   esClient,
@@ -19,11 +22,6 @@ export const validateConfig = async ({
   config: IndexSearchToolConfig;
   esClient: ElasticsearchClient;
 }) => {
-  const { pattern } = config;
-  if (pattern.includes(CCS_TOKEN)) {
-    throw createBadRequestError(`Cross-cluster search is not supported by the index_search tool`);
-  }
-
   const {
     indices,
     aliases,

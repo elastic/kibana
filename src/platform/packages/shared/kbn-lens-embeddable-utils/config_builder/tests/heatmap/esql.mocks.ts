@@ -9,6 +9,7 @@
 
 import type { HeatmapVisualizationState } from '@kbn/lens-common';
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 
 export const simple: LensAttributes = {
@@ -60,9 +61,7 @@ export const simple: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_logs\n| STATS count() BY extension.keyword, geo.dest | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       shape: 'heatmap',
       layerId: 'cce2e334-74f6-4cd3-a04c-3a889f66e2de',
@@ -100,12 +99,12 @@ export const simple: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [],
 } satisfies LensAttributes;
 
-export const withXAndYAxes: LensAttributes = {
+export const withXAndYAxes = {
   title: 'Lens Heatmap - ESQL - With X and Y Axes',
   description: 'Count of records with timestamp on x-axis',
   state: {
@@ -164,9 +163,7 @@ export const withXAndYAxes: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_logs\n| STATS count() BY extension.keyword, geo.dest | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       shape: 'heatmap',
       layerId: 'cce2e334-74f6-4cd3-a04c-3a889f66e2de',
@@ -205,7 +202,24 @@ export const withXAndYAxes: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [],
+} satisfies LensAttributes;
+
+export const withSortPredicates: LensAttributes = {
+  ...withXAndYAxes,
+  title: 'Lens Heatmap - ESQL - With Sort Predicates',
+  description: 'Heatmap with x-axis ascending and y-axis descending sort',
+  state: {
+    ...withXAndYAxes.state,
+    visualization: {
+      ...withXAndYAxes.state.visualization,
+      gridConfig: {
+        ...(withXAndYAxes.state.visualization as HeatmapVisualizationState).gridConfig,
+        xSortPredicate: 'asc',
+        ySortPredicate: 'desc',
+      },
+    },
+  },
 } satisfies LensAttributes;

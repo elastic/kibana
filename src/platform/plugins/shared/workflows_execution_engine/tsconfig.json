@@ -13,13 +13,17 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
+    "@kbn/apm-utils",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
+    "@kbn/connector-specs",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
+    "@kbn/eval-kql",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-security-server",
     "@kbn/cloud-plugin",
     "@kbn/utility-types",
     "@kbn/zod",
@@ -28,8 +32,14 @@
     "@kbn/es-mappings",
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
+    "@kbn/usage-api-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/crypto",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/es-errors",
+    "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
+    "@kbn/i18n"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

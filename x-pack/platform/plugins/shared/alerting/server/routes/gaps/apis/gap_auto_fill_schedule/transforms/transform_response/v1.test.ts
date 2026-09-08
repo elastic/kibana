@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_EXCLUDED_GAP_REASONS } from '../../../../../../../common/constants';
 import type { GapAutoFillSchedulerResponse } from '../../../../../../application/gaps/auto_fill_scheduler/result/types';
 import { transformToGapAutoFillSchedulerResponseBody } from './v1';
 
@@ -41,6 +42,7 @@ describe('transformToGapAutoFillSchedulerResponseBody', () => {
       updated_at: '2024-01-01T00:00:00.000Z',
       rule_types: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
       scope: ['internal'],
+      excluded_reasons: DEFAULT_EXCLUDED_GAP_REASONS,
     });
   });
 });

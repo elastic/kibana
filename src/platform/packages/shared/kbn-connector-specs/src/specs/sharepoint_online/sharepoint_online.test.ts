@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -85,14 +85,6 @@ interface SharePointSearchResponse {
   }>;
 }
 
-/**
- * Test result structure
- */
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('SharepointOnline', () => {
   const mockClient = {
     get: jest.fn(),
@@ -110,8 +102,112 @@ describe('SharepointOnline', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports oauth_client_credentials auth', () => {
+      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('lists delegated auth (ears, oauth_authorization_code) before app-only credentials', () => {
+      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toEqual([
+        'ears',
+        'oauth_authorization_code',
+        'oauth_client_credentials',
+        'oauth_client_credentials_private_key_jwt',
+      ]);
+    });
+
+    it('marks ears (Quick Connect) as recommended', () => {
+      const recommended = (SharepointOnline.auth?.types as Array<string | AuthTypeDef>)
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.isRecommended))
+        .map((t) => t.type);
+      expect(recommended).toEqual(['ears']);
+    });
+
+    it('supports ears auth with microsoft provider and SharePoint scopes', () => {
+      const earsType = (
+        SharepointOnline.auth?.types as Array<
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: { meta?: { scope?: Record<string, unknown> } };
+            }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'ears');
+      expect(earsType).toBeDefined();
+      expect(earsType).toMatchObject({
+        type: 'ears',
+        defaults: {
+          provider: 'microsoft',
+          scope: 'Sites.Selected Files.Read.All offline_access',
+        },
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+      });
+    });
+
+    it('supports oauth_authorization_code with correct Microsoft defaults', () => {
+      const oauthType = (
+        SharepointOnline.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'Sites.Selected Files.Read.All offline_access',
+        },
+      });
+    });
+
+    it('supports oauth_client_credentials_private_key_jwt with Microsoft defaults', () => {
+      const certType = (
+        SharepointOnline.auth?.types as Array<
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: { meta?: Record<string, Record<string, unknown>> };
+            }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_client_credentials_private_key_jwt');
+      expect(certType).toBeDefined();
+      expect(certType).toMatchObject({
+        type: 'oauth_client_credentials_private_key_jwt',
+        defaults: {
+          scope: 'https://graph.microsoft.com/.default',
+        },
+        overrides: {
+          meta: {
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+            },
+          },
+        },
+      });
+    });
+  });
+
   describe('getAllSites action', () => {
-    it('should list all sites', async () => {
+    const appOnlyContext = {
+      ...mockContext,
+      secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+    } as unknown as ActionContext;
+
+    const delegatedContext = {
+      ...mockContext,
+      secrets: { authType: 'oauth_authorization_code' },
+    } as unknown as ActionContext;
+
+    it('should list all sites with app-only auth via /sites/getAllSites', async () => {
       const mockResponse = {
         data: {
           value: [
@@ -131,7 +227,7 @@ describe('SharepointOnline', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = (await SharepointOnline.actions.getAllSites.handler(
-        mockContext,
+        appOnlyContext,
         {}
       )) as SharePointListResponse<SharePointSite>;
 
@@ -143,9 +239,82 @@ describe('SharepointOnline', () => {
           },
         }
       );
-      expect(mockContext.log.debug).toHaveBeenCalledWith('SharePoint listing all sites');
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint listing all sites (app-only auth)'
+      );
       expect(result).toEqual(mockResponse.data);
       expect(result.value).toHaveLength(2);
+    });
+
+    it('should treat oauth_client_credentials as app-only (uses /sites/getAllSites)', async () => {
+      const certContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      const mockResponse = { data: { value: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getAllSites.handler(certContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint listing all sites (app-only auth)'
+      );
+    });
+
+    it('should fall back to /sites?search= with delegated auth', async () => {
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              id: 'site-1',
+              displayName: 'Site 1',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getAllSites.handler(delegatedContext, {
+        search: 'contoso',
+      })) as SharePointListResponse<SharePointSite>;
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites', {
+        params: {
+          search: 'contoso',
+          $select: 'id,displayName,webUrl,siteCollection',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should use wildcard search when no search term with delegated auth', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getAllSites.handler(
+        delegatedContext,
+        {}
+      )) as SharePointListResponse<SharePointSite>;
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites', {
+        params: {
+          search: '*',
+          $select: 'id,displayName,webUrl,siteCollection',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should handle empty site list', async () => {
@@ -157,7 +326,7 @@ describe('SharepointOnline', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = (await SharepointOnline.actions.getAllSites.handler(
-        mockContext,
+        appOnlyContext,
         {}
       )) as SharePointListResponse<SharePointSite>;
 
@@ -165,14 +334,14 @@ describe('SharepointOnline', () => {
       expect(result.value).toHaveLength(0);
     });
 
-    it('should work with undefined input', async () => {
+    it('should work with undefined input for app-only auth', async () => {
       const mockResponse = {
         data: { value: [] },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = (await SharepointOnline.actions.getAllSites.handler(
-        mockContext,
+        appOnlyContext,
         undefined
       )) as SharePointListResponse<SharePointSite>;
 
@@ -190,9 +359,9 @@ describe('SharepointOnline', () => {
     it('should propagate API errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Access denied'));
 
-      await expect(SharepointOnline.actions.getAllSites.handler(mockContext, {})).rejects.toThrow(
-        'Access denied'
-      );
+      await expect(
+        SharepointOnline.actions.getAllSites.handler(appOnlyContext, {})
+      ).rejects.toThrow('Access denied');
     });
   });
 
@@ -281,6 +450,12 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSitePages.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSitePages requires a siteId');
+    });
   });
 
   describe('getSitePageContents action', () => {
@@ -326,6 +501,24 @@ describe('SharepointOnline', () => {
           pageId: 'missing-page',
         })
       ).rejects.toThrow('Page not found');
+    });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSitePageContents.handler(mockContext, {
+          siteId: '',
+          pageId: 'page-123',
+        })
+      ).rejects.toThrow('getSitePageContents requires a siteId');
+    });
+
+    it('should throw when pageId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSitePageContents.handler(mockContext, {
+          siteId: 'site-123',
+          pageId: '',
+        })
+      ).rejects.toThrow('getSitePageContents requires a pageId');
     });
   });
 
@@ -418,6 +611,12 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteDrives.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSiteDrives requires a siteId');
+    });
   });
 
   describe('getSiteLists action', () => {
@@ -506,6 +705,12 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
+    });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteLists.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSiteLists requires a siteId');
     });
 
     it('should reject pagination params for getSiteLists', () => {
@@ -616,6 +821,24 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteListItems.handler(mockContext, {
+          siteId: '',
+          listId: 'list-123',
+        })
+      ).rejects.toThrow('getSiteListItems requires a siteId');
+    });
+
+    it('should throw when listId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteListItems.handler(mockContext, {
+          siteId: 'site-123',
+          listId: '',
+        })
+      ).rejects.toThrow('getSiteListItems requires a listId');
+    });
   });
 
   describe('getDriveItems action', () => {
@@ -671,6 +894,14 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
     });
+
+    it('should throw when driveId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getDriveItems.handler(mockContext, { driveId: '' })
+      ).rejects.toThrow(
+        'getDriveItems requires a driveId. Use getSiteDrives to list available drives for a site.'
+      );
+    });
   });
 
   describe('downloadDriveItem action', () => {
@@ -699,10 +930,28 @@ describe('SharepointOnline', () => {
         text: 'Hello',
       });
     });
+
+    it('should throw when driveId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+          driveId: '',
+          itemId: 'item-456',
+        })
+      ).rejects.toThrow('downloadDriveItem requires a driveId');
+    });
+
+    it('should throw when itemId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+          driveId: 'drive-123',
+          itemId: '',
+        })
+      ).rejects.toThrow('downloadDriveItem requires an itemId');
+    });
   });
 
   describe('downloadItemFromURL action', () => {
-    it('should download content as text', async () => {
+    it('should download content as base64', async () => {
       const mockResponse = {
         data: Uint8Array.from([72, 101, 108, 108, 111]),
         headers: {
@@ -722,8 +971,16 @@ describe('SharepointOnline', () => {
       expect(result).toEqual({
         contentType: 'text/plain',
         contentLength: '5',
-        text: 'Hello',
+        base64: 'SGVsbG8=',
       });
+    });
+
+    it('should throw when downloadUrl is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.downloadItemFromURL.handler(mockContext, {
+          downloadUrl: '',
+        })
+      ).rejects.toThrow('downloadItemFromURL requires a downloadUrl');
     });
   });
 
@@ -829,10 +1086,21 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Invalid request');
     });
+
+    it('should throw when neither siteId nor relativeUrl is provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSite.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSite requires either a siteId or a relativeUrl');
+    });
   });
 
   describe('search action', () => {
-    it('should search with default entity types', async () => {
+    const appOnlySearchContext = {
+      ...mockContext,
+      secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+    } as unknown as ActionContext;
+
+    it('should search with default entity types using app-only auth (includes region)', async () => {
       const mockResponse = {
         data: {
           value: [
@@ -857,7 +1125,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.search.handler(mockContext, {
+      const result = (await SharepointOnline.actions.search.handler(appOnlySearchContext, {
         query: 'test document',
       })) as SharePointSearchResponse;
 
@@ -877,6 +1145,87 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.value[0].hitsContainers[0].hits).toHaveLength(1);
+    });
+
+    it('should search with oauth_client_credentials treating it as app-only (includes region)', async () => {
+      const certSearchContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: { value: [{ hitsContainers: [{ hits: [], total: 0 }] }] },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.search.handler(certSearchContext, {
+        query: 'test document',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/search/query',
+        {
+          requests: [
+            {
+              entityTypes: ['site'],
+              query: {
+                queryString: 'test document',
+              },
+              region: 'NAM',
+            },
+          ],
+        }
+      );
+    });
+
+    it('should search with delegated auth (omits region)', async () => {
+      const delegatedSearchContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              hitsContainers: [
+                {
+                  hits: [
+                    {
+                      hitId: '1',
+                      resource: {
+                        '@odata.type': '#microsoft.graph.driveItem',
+                        name: 'Document.docx',
+                      },
+                    },
+                  ],
+                  total: 1,
+                },
+              ],
+            },
+          ],
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.search.handler(delegatedSearchContext, {
+        query: 'test document',
+      })) as SharePointSearchResponse;
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/search/query',
+        {
+          requests: [
+            {
+              entityTypes: ['site'],
+              query: {
+                queryString: 'test document',
+              },
+            },
+          ],
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should search with custom entity types', async () => {
@@ -904,7 +1253,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.search.handler(mockContext, {
+      const result = (await SharepointOnline.actions.search.handler(appOnlySearchContext, {
         query: 'project site',
         entityTypes: ['site', 'list'],
       })) as SharePointSearchResponse;
@@ -944,7 +1293,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.search.handler(mockContext, {
+      const result = (await SharepointOnline.actions.search.handler(appOnlySearchContext, {
         query: 'documents',
         from: 10,
         size: 25,
@@ -1002,6 +1351,12 @@ describe('SharepointOnline', () => {
           query: 'test',
         })
       ).rejects.toThrow('Invalid search query');
+    });
+
+    it('should throw when query is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.search.handler(mockContext, { query: '' })
+      ).rejects.toThrow('search requires a query string');
     });
   });
 
@@ -1092,6 +1447,8 @@ describe('SharepointOnline', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = SharepointOnline.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -1103,14 +1460,10 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/');
-      expect(result.ok).toBe(true);
-      expect(result.message).toBe('Successfully connected to SharePoint Online: Contoso');
+      expect(result).toEqual({});
     });
 
     it('should handle site without display name', async () => {
@@ -1122,37 +1475,21 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
-      expect(result.ok).toBe(true);
-      expect(result.message).toBe('Successfully connected to SharePoint Online: Unknown');
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid credentials');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle network errors', async () => {
+    it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
+  ConvertUiamAPIKeysResponse,
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
@@ -17,18 +21,15 @@ import type {
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
-import { HTTPAuthorizationHeader } from '../../http_authentication';
-
-const UIAM_CREDENTIALS_PREFIX = 'essu_';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
  */
 export interface UiamAPIKeysOptions {
   logger: Logger;
-  clusterClient: IClusterClient;
   license: SecurityLicense;
   uiam: UiamServicePublic;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 /**
@@ -37,15 +38,15 @@ export interface UiamAPIKeysOptions {
  */
 export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
-  private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
+  private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 
-  constructor({ logger, clusterClient, license, uiam }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam, getCurrentUser }: UiamAPIKeysOptions) {
     this.logger = logger;
-    this.clusterClient = clusterClient;
     this.license = license;
     this.uiam = uiam;
+    this.getCurrentUser = getCurrentUser;
   }
 
   /**
@@ -72,26 +73,34 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     let result: GrantAPIKeyResult;
 
     // Provided credential must be a UIAM credential with appropriate prefix
-    if (!UiamAPIKeys.isUiamCredential(authorization)) {
+    if (!isUiamCredential(authorization)) {
       const nonUiamCredentialError =
         'Cannot grant API key: provided credential is not compatible with UIAM';
       this.logger.error(nonUiamCredentialError);
       throw new Error(nonUiamCredentialError);
-    } else {
-      try {
-        const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
+    }
 
-        result = {
-          id,
-          name: description,
-          api_key: key,
-        };
+    try {
+      // UIAM requires Kibana's client authentication alongside session tokens and internal API keys,
+      // and rejects an external API key that arrives with it. The `internal` flag is absent both
+      // when no API key was involved (a session token) and when the credential cannot be retrieved
+      // from the Core's internal state e.g., for a fake request, carrying a key Kibana granted
+      // itself, and both of those need client authentication.
+      const isExternalApiKey = this.getCurrentUser(request)?.api_key?.internal === false;
+      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params, {
+        includeClientAuthentication: !isExternalApiKey,
+      });
 
-        this.logger.debug('API key was granted successfully');
-      } catch (e) {
-        this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-        throw e;
-      }
+      result = {
+        id,
+        name: description,
+        api_key: key,
+      };
+
+      this.logger.debug('API key was granted successfully');
+    } catch (e) {
+      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
+      throw e;
     }
 
     return result;
@@ -118,7 +127,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     this.logger.debug(`Trying to invalidate API key ${id}`);
 
-    if (!UiamAPIKeys.isUiamCredential(authorization)) {
+    if (!isUiamCredential(authorization)) {
       const uiamCredentialError = 'Cannot invalidate API key: not a UIAM API key';
       this.logger.error(uiamCredentialError);
       throw new Error(uiamCredentialError);
@@ -138,6 +147,10 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       const errorMessage = `Failed to invalidate API key ${id}: ${getDetailedErrorMessage(e)}`;
       this.logger.error(errorMessage);
 
+      const code = Boom.isBoom(e)
+        ? (e.output.payload as Record<string, any>)?.error?.code
+        : undefined;
+
       return {
         invalidated_api_keys: [],
         previously_invalidated_api_keys: [],
@@ -146,6 +159,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
           {
             type: 'exception',
             reason: errorMessage,
+            ...(code ? { code } : {}),
           },
         ],
       };
@@ -153,35 +167,32 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   /**
-   * Creates a scoped Elasticsearch client authenticated with an API key.
+   * Converts Elasticsearch API keys into UIAM API keys.
    *
-   * This method creates a scoped cluster client that authenticates using the provided API key.
-   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
-   * authentication headers.
-   *
-   * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication
+   * @param keys Array containing the keys to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
-  getScopedClusterClientWithApiKey(apiKey: string) {
-    const authorization = new HTTPAuthorizationHeader('ApiKey', apiKey);
-    return this.clusterClient.asScoped({
-      headers: {
-        authorization: authorization.toString(),
-        ...(UiamAPIKeys.isUiamCredential(authorization)
-          ? this.uiam.getEsClientAuthenticationHeader()
-          : {}),
-      },
-    });
+  async convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug(`Trying to convert ${keys.length} API key(s)`);
+
+    try {
+      return await this.uiam.convertApiKeys(keys);
+    } catch (e) {
+      this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
   }
 
   /**
-   * Checks if the given authorization credentials are UIAM credentials.
-   *
-   * @param authorization The HTTP authorization header to check.
-   * @returns True if the credentials start with UIAM_CREDENTIALS_PREFIX, false otherwise.
+   * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
+   * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
    */
-  static isUiamCredential(authorization: HTTPAuthorizationHeader) {
-    return authorization.credentials.startsWith(UIAM_CREDENTIALS_PREFIX);
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
+    return this.uiam.getInternalCallerAttestationHeaders(credential);
   }
 
   /**

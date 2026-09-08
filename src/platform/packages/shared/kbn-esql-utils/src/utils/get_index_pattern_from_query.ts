@@ -6,10 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, getIndexFromPromQLParams, isSubQuery } from '@kbn/esql-language';
-import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@kbn/esql-language';
+import { Parser, isSubQuery } from '@elastic/esql';
+import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
+import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
-function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
+const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
+const ALL_SOURCE_COMMANDS = new Set(
+  esqlCommandRegistry.getSourceCommandNames().map((commandName) => commandName.toUpperCase())
+);
+const SOURCE_SELECTOR_SEPARATOR = '::';
+
+export interface ESQLIndexPatterns {
+  indexPattern: string;
+  indexPatternWithoutRemoteClusterPrefix: string;
+}
+
+function getPromQLSources(commands: ESQLCommand[]): string[] {
   const promqlCommand = commands.find(({ name }) => name === 'promql');
   if (!promqlCommand) {
     return [];
@@ -19,28 +31,65 @@ function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
   return index ? [index] : [];
 }
 
-function getSourcesFromAst(commands: ESQLCommand[]): string[] {
-  const sourceCommand = commands.find(({ name }) => ['from', 'ts'].includes(name));
+function getDirectIndexSources(commands: ESQLCommand[]): ESQLSource[] {
+  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
   if (!sourceCommand) {
     return [];
   }
 
-  const args = sourceCommand.args as ESQLSource[];
-  return args
-    .filter((arg): arg is ESQLSource => arg.sourceType === 'index')
-    .map((index) => index.name);
+  return (sourceCommand.args as ESQLSource[]).filter(
+    (arg): arg is ESQLSource => arg.sourceType === 'index'
+  );
 }
 
-function extractSubquerySources(sourceCommand: ESQLCommand): string[] {
-  const subqueryArgs = sourceCommand.args.filter(isSubQuery);
-  const subquerySources: string[] = [];
-
-  for (const subquery of subqueryArgs) {
-    const sources = getSourcesFromAst(subquery.child.commands);
-    subquerySources.push(...sources);
+function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
+  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
+  if (!sourceCommand) {
+    return [];
   }
 
-  return subquerySources;
+  const directSources = (sourceCommand.args as ESQLSource[]).filter(
+    (arg): arg is ESQLSource => arg.sourceType === 'index'
+  );
+
+  const subquerySources = sourceCommand.args
+    .filter(isSubQuery)
+    .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
+
+  return [...directSources, ...subquerySources];
+}
+
+function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
+  if (!source.prefix || !source.index) {
+    return source.name;
+  }
+
+  const selector = source.selector ? `${SOURCE_SELECTOR_SEPARATOR}${source.selector.value}` : '';
+
+  return `${source.index.value}${selector}`;
+}
+
+export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns {
+  if (!esql?.trim()) {
+    return { indexPattern: '', indexPatternWithoutRemoteClusterPrefix: '' };
+  }
+
+  const { root } = Parser.parse(esql);
+  const indexSources = getIndexSources(root.commands);
+  const promqlSources = getPromQLSources(root.commands);
+
+  const indexPattern = [...indexSources.map((source) => source.name), ...promqlSources];
+  const indexPatternWithoutRemoteClusterPrefix = [
+    ...indexSources.map(getSourceNameWithoutRemoteClusterPrefix),
+    ...promqlSources,
+  ];
+
+  return {
+    indexPattern: [...new Set(indexPattern)].join(','),
+    indexPatternWithoutRemoteClusterPrefix: [
+      ...new Set(indexPatternWithoutRemoteClusterPrefix),
+    ].join(','),
+  };
 }
 
 /**
@@ -51,27 +100,36 @@ function extractSubquerySources(sourceCommand: ESQLCommand): string[] {
  * @returns Comma-separated string of unique index names, or empty string if no sources found
  */
 export function getIndexPatternFromESQLQuery(esql?: string): string {
+  return getIndexPatternsFromESQLQuery(esql).indexPattern;
+}
+
+/**
+ * @param esql - The ES|QL query string to parse
+ * @param supportedSourceCommands - Source command set to match, defaults to FROM and TS
+ * @returns The source command name, or an empty string if not found
+ */
+export function getSourceCommandFromESQLQuery(
+  esql: string | undefined,
+  supportedSourceCommands: Set<string> = INDEX_SOURCE_COMMANDS
+): string {
   if (!esql?.trim()) {
     return '';
   }
 
   const { root } = Parser.parse(esql);
-  const allSources: string[] = [];
+  const sourceCommand = root.commands.find(({ name }) =>
+    supportedSourceCommands.has(name.toUpperCase())
+  );
 
-  // Get sources from main query
-  const mainSources = getSourcesFromAst(root.commands);
-  const promqlSources = getPromQLSourcesFromAst(root.commands);
-  allSources.push(...mainSources, ...promqlSources);
+  return sourceCommand?.name.toUpperCase() ?? '';
+}
 
-  // Get sources from subqueries
-  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
-  if (sourceCommand) {
-    const subquerySources = extractSubquerySources(sourceCommand);
-    allSources.push(...subquerySources);
-  }
-
-  // Remove duplicates
-  const uniqueSources = [...new Set(allSources)];
-
-  return uniqueSources.join(',');
+/**
+ * Retrieves the source command name from an ES|QL query,
+ * matching any source command (FROM, TS, PROMQL, etc.)
+ * @param esql - The ES|QL query string to parse
+ * @returns The source command name, or an empty string if not found
+ */
+export function getAnySourceCommandFromESQLQuery(esql?: string): string {
+  return getSourceCommandFromESQLQuery(esql, ALL_SOURCE_COMMANDS);
 }

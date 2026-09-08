@@ -9,9 +9,11 @@ export type {
   AttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
+  ImageAttachmentRepresentation,
   AttachmentValidationResult,
   AgentFormattedAttachment,
   AttachmentFormatContext,
+  AttachmentResolveContext,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,
@@ -21,6 +23,7 @@ export type {
   StaticEsqlAttachmentBoundedTool,
 } from './tools';
 export type {
+  AttachmentSnapshot,
   AttachmentStateManager,
   AttachmentUpdateInput,
   ResolvedAttachmentRef,

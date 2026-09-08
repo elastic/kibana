@@ -78,6 +78,17 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
         >
           {reinstallButton}
         </EuiToolTip>
+      ) : isCustomPackage ? (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.customTooltip"
+              defaultMessage="This is a custom integration and cannot be automatically reinstalled."
+            />
+          }
+        >
+          {reinstallButton}
+        </EuiToolTip>
       ) : (
         reinstallButton
       )}

@@ -1,0 +1,54 @@
+# MV_UNION
+
+The MV_UNION function returns all unique values from the combined input fields, performing a set union. Null values are treated as empty sets, and the function returns `null` only if both fields are null.
+
+## Syntax
+
+`MV_UNION(field1, field2)`
+
+### Parameters
+
+#### field1
+
+Multivalue expression. Null values are treated as empty sets.
+
+#### field2
+
+Multivalue expression. Null values are treated as empty sets.
+
+## Examples
+
+Combine two arrays of integers and return all unique values:
+```esql
+ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+Combine two arrays of long integers and return all unique values:
+```esql
+ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+Combine two arrays of boolean values and return all unique values:
+```esql
+ROW a = [true, false], b = [false]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+Combine two arrays of floating-point numbers and return all unique values:
+```esql
+ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+Combine two arrays of strings and return all unique values:
+```esql
+ROW a = ["one", "two", "three"], b = ["two", "four"]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```

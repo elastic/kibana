@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-examples-plugin'
+  title: '@kbn/search-examples-plugin'
   description: Moon project for @kbn/search-examples-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/search_examples
+  sourceRoot: examples/search_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -34,11 +33,13 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/shared-ux-router'
   - '@kbn/search-types'
-  - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/react-kibana-mount'
   - '@kbn/search-response-warnings'
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
+  - '@kbn/ui-callout'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -51,5 +52,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}

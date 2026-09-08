@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { DEFAULT_EXCLUDED_GAP_REASONS } from '../../../../../../common/constants';
 import type { RulesClientContext } from '../../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
@@ -83,15 +84,17 @@ export async function updateGapAutoFillScheduler(
   }
 
   // Authorize against any newly requested rule types in the update params
+  const ruleTypeIdConsumersPairs = params.ruleTypes.map((ruleType) => ({
+    ruleTypeId: ruleType.type,
+    consumers: [ruleType.consumer],
+  }));
+
   try {
-    for (const ruleType of params.ruleTypes) {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation: WriteOperations.UpdateGapAutoFillScheduler,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation: WriteOperations.UpdateGapAutoFillScheduler,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
   } catch (error) {
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({
@@ -121,6 +124,10 @@ export async function updateGapAutoFillScheduler(
     scope: updatedScope,
     ruleTypes: updatedRuleTypes,
     ruleTypeConsumerPairs: Array.from(new Set(updatedRuleTypes.map(toRuleTypeKey))),
+    excludedReasons:
+      params.excludedReasons ??
+      schedulerSo.attributes?.excludedReasons ??
+      DEFAULT_EXCLUDED_GAP_REASONS,
     updatedAt: now,
     updatedBy: username ?? undefined,
   };

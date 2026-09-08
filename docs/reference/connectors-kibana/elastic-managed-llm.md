@@ -10,6 +10,10 @@ applies_to:
 Elastic provides built-in LLMs through managed AI connectors.  
 These connectors are accessed and managed through the [Elastic {{infer-cap}} Service (EIS)](docs-content://explore-analyze/elastic-inference/eis.md), which is the single entry point for using Elastic Managed LLMs.
 
+::::{note}
+**`Elastic-Managed-LLM`** is also the connector ID of Elastic's built-in managed connector in earlier versions. In 9.3, the default model behind this connector was replaced. Existing configurations and saved conversations are migrated automatically to the current default model on more recent versions, so no action is required.
+::::
+
 ## Prerequisites
 
 * Requires the `manage_inference` [cluster privilege](https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster) (the built-in `inference_admin` role grants this privilege)
@@ -26,7 +30,7 @@ The Elastic Managed LLMs use third party service providers for {{infer}}. Refer 
 
 ## Data protection
 
-Customer projects or deployments hosted in any cloud service provider or region have access to Elastic Managed LLMs in the AWS US region `us-east-1`.
+Customer projects or deployments hosted in any cloud service provider or region have access to Elastic Managed LLMs.
 All data is encrypted in transit. The LLMs are configured for zero data retention: none of the prompts or outputs are stored by the service provider.
 
 Only request metadata is logged in AWS CloudWatch.

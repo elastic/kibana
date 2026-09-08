@@ -225,4 +225,21 @@ describe('extractPropertyPathsFromKql', () => {
       expect(result).toEqual(expect.arrayContaining(['field']));
     });
   });
+
+  describe('range queries', () => {
+    it('should extract field from range query with >', () => {
+      const result = extractPropertyPathsFromKql('age > 30');
+      expect(result).toContain('age');
+    });
+
+    it('should extract field from range query with >=', () => {
+      const result = extractPropertyPathsFromKql('timestamp >= "2024-01-01"');
+      expect(result).toContain('timestamp');
+    });
+
+    it('should extract field from range query with <', () => {
+      const result = extractPropertyPathsFromKql('price < 100');
+      expect(result).toContain('price');
+    });
+  });
 });

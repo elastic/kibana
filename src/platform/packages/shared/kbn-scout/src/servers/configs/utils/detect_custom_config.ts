@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import type { CliSupportedServerModes } from '../../../types';
+import type { ScoutTestTarget } from '@kbn/scout-info';
 
 /**
  * Detects if the playwright config path indicates a custom config directory.
@@ -32,29 +32,28 @@ export function detectCustomConfigDir(playwrightConfigPath: string): string | nu
  * Determines the config root directory based on playwright config path, optional config dir, and mode.
  * Returns the root directory where the config file should be located.
  * @param playwrightConfigPath path to the playwright config file
- * @param mode The server mode (e.g., 'serverless=es', 'stateful')
- * @param configDir Optional custom config directory name (e.g., 'uiam_local')
- * @returns The root directory path for the config (e.g., 'default/serverless', 'custom/uiam_local/serverless')
+ * @param testTarget The test target definition (based on location, architecture and domain)
+ * @param serverConfigSet Server configuration set to use (e.g., 'uiam_local')
+ * @returns The root directory path for the config (e.g., 'default/serverless', 'uiam_local/serverless')
  */
 export function getConfigRootDir(
   playwrightConfigPath: string,
-  mode: CliSupportedServerModes,
-  configDir?: string
+  testTarget: ScoutTestTarget,
+  serverConfigSet?: string
 ): string {
-  const baseDir = path.join(__dirname, '..'); // configs base directory
-  const modeDir = mode === 'stateful' ? 'stateful' : 'serverless';
+  const configSetsRoot = path.join(__dirname, '..', 'config_sets');
 
   // If configDir is explicitly provided, use it
-  if (configDir) {
-    return path.join(baseDir, 'custom', configDir, modeDir);
+  if (serverConfigSet) {
+    return path.join(configSetsRoot, serverConfigSet, testTarget.arch);
   }
 
   // Otherwise, check if playwright path indicates a custom config
   const customConfigDir = detectCustomConfigDir(playwrightConfigPath);
   if (customConfigDir) {
-    return path.join(baseDir, 'custom', customConfigDir, modeDir);
+    return path.join(configSetsRoot, customConfigDir, testTarget.arch);
   }
 
   // Default config
-  return path.join(baseDir, 'default', modeDir);
+  return path.join(configSetsRoot, 'default', testTarget.arch);
 }

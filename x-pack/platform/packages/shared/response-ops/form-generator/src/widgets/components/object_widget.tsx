@@ -28,19 +28,22 @@ export const ObjectWidget: React.FC<ObjectWidgetProps> = ({
   path: rootPath,
   schema,
   formConfig,
+  meta,
 }) => {
   const fields = getFieldsFromSchema({
     schema,
     rootPath,
     formConfig,
+    meta,
   });
 
   return fields.map((field) => {
+    const isHidden = Boolean(meta.getMeta(field.schema).hidden);
     return (
-      <>
-        {renderField({ field })}
-        <EuiSpacer size="m" />
-      </>
+      <React.Fragment key={field.path}>
+        {renderField({ field, meta })}
+        {!isHidden && <EuiSpacer size="m" />}
+      </React.Fragment>
     );
   });
 };

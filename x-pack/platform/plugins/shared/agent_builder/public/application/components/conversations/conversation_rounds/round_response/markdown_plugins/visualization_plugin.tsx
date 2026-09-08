@@ -6,18 +6,24 @@
  */
 import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
-  visualizationElement,
-  type VisualizationElementAttributes,
-  type TabularDataResult,
+  type EsqlResults,
   type VisualizationResult,
   ToolResultType,
 } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  visualizationElement,
+  type VisualizationElementAttributes,
+} from '@kbn/agent-builder-common/tools/custom_rendering';
+import {
+  VisualizeESQL,
+  InlineVisualization,
+  type VisualizationServices,
+} from '@kbn/agent-builder-visualizations';
 
 import type { AgentBuilderStartDependencies } from '../../../../../../types';
-import { VisualizeESQL } from '../../../../tools/esql/visualize_esql';
-import { VisualizeLens } from '../../../../tools/esql/visualize_lens';
 import { createTagParser, findToolResult } from './utils';
 
 export const visualizationTagParser = createTagParser({
@@ -26,12 +32,6 @@ export const visualizationTagParser = createTagParser({
     toolResultId: extractAttr(value, visualizationElement.attributes.toolResultId),
     chartType: extractAttr(value, visualizationElement.attributes.chartType),
   }),
-  assignAttributes: (node, attributes) => {
-    node.type = visualizationElement.tagName;
-    node.toolResultId = attributes.toolResultId;
-    node.chartType = attributes.chartType;
-    delete node.value;
-  },
   createNode: (attributes, position) => ({
     type: visualizationElement.tagName,
     toolResultId: attributes.toolResultId,
@@ -41,14 +41,25 @@ export const visualizationTagParser = createTagParser({
 });
 
 export function createVisualizationRenderer({
+  application,
   startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
 }: {
+  application: ApplicationStart;
   startDependencies: AgentBuilderStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
+  const services: VisualizationServices = {
+    application,
+    lens: startDependencies.lens,
+    dataViews: startDependencies.dataViews,
+    uiActions: startDependencies.uiActions,
+    unifiedSearch: startDependencies.unifiedSearch,
+    embeddable: startDependencies.embeddable,
+  };
+
   return (props: VisualizationElementAttributes) => {
     const { toolResultId, chartType } = props;
 
@@ -66,9 +77,12 @@ export function createVisualizationRenderer({
       </EuiCode>
     );
 
-    // First, look for tabular data results (from execute_esql)
-    let toolResult: TabularDataResult | VisualizationResult | undefined =
-      findToolResult<TabularDataResult>(steps, toolResultId, ToolResultType.tabularData);
+    // First, look for esql results (from execute_esql)
+    let toolResult: EsqlResults | VisualizationResult | undefined = findToolResult<EsqlResults>(
+      steps,
+      toolResultId,
+      ToolResultType.esqlResults
+    );
 
     // If not found, look for visualization results (from create_visualization)
     if (!toolResult) {
@@ -83,20 +97,21 @@ export function createVisualizationRenderer({
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
     }
 
-    // Handle visualization result (pre-built Lens config)
+    // Handle visualization result (pre-built Lens config or Vega spec).
     if (toolResult.type === 'visualization') {
-      const { visualization } = toolResult.data;
+      const { data } = toolResult;
+
       return (
-        <VisualizeLens
-          lensConfig={visualization}
-          dataViews={startDependencies.dataViews}
-          lens={startDependencies.lens}
-          uiActions={startDependencies.uiActions}
+        <InlineVisualization
+          services={services}
+          renderer={data.renderer}
+          visualization={data.visualization}
+          timeRange={data.time_range}
         />
       );
     }
 
-    const { columns, query } = toolResult.data;
+    const { columns, query, time_range: resultTimeRange } = toolResult.data;
 
     if (!query) {
       return <EuiText>Unable to find esql query for {ToolResultAttribute}.</EuiText>;
@@ -104,12 +119,11 @@ export function createVisualizationRenderer({
 
     return (
       <VisualizeESQL
-        lens={startDependencies.lens}
-        dataViews={startDependencies.dataViews}
-        uiActions={startDependencies.uiActions}
+        services={services}
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
+        timeRange={resultTimeRange}
       />
     );
   };

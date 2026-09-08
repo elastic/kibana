@@ -37,12 +37,6 @@ export const HelpMenu = React.memo(() => {
           target: '_blank',
           rel: 'noopener',
         },
-        {
-          linkType: 'discuss',
-          href: 'https://discuss.elastic.co/c/security',
-          target: '_blank',
-          rel: 'noopener',
-        },
       ],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

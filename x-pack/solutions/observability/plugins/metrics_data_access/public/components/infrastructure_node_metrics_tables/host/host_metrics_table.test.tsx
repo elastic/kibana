@@ -13,6 +13,12 @@ import { createStartServicesAccessorMock, createMetricsClientMock } from '../tes
 import { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
 import { HostMetricsTable } from './host_metrics_table';
 import IntegratedHostMetricsTable from './integrated_host_metrics_table';
+import {
+  SYSTEM_CPU_CORES,
+  SYSTEM_CPU_TOTAL_NORM_PCT,
+  SYSTEM_MEMORY_TOTAL,
+  SYSTEM_MEMORY_USED_PCT,
+} from '../shared/constants';
 import { metricByField } from './use_host_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
@@ -145,10 +151,10 @@ function createHost(
     id: name,
     rows: [
       {
-        [metricByField['system.cpu.cores']]: coreCount,
-        [metricByField['system.cpu.total.norm.pct']]: cpuUsagePct,
-        [metricByField['system.memory.total']]: memoryBytes,
-        [metricByField['system.memory.used.pct']]: memoryUsagePct,
+        [metricByField[SYSTEM_CPU_CORES]]: coreCount,
+        [metricByField[SYSTEM_CPU_TOTAL_NORM_PCT]]: cpuUsagePct,
+        [metricByField[SYSTEM_MEMORY_TOTAL]]: memoryBytes,
+        [metricByField[SYSTEM_MEMORY_USED_PCT]]: memoryUsagePct,
       } as MetricsExplorerSeries['rows'][number],
     ],
   };

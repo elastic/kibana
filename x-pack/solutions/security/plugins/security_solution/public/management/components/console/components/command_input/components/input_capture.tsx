@@ -14,7 +14,7 @@ import type {
 } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -24,6 +24,10 @@ const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
   'xpack.securitySolution.inputCapture.ariaPlaceHolder',
   { defaultMessage: 'Enter a command' }
 );
+
+const ARIA_LABEL_MESSAGE = i18n.translate('xpack.securitySolution.inputCapture.ariaLabel', {
+  defaultMessage: 'Response console input',
+});
 
 const deSelectTextOnPage = () => {
   const selection = getSelection();
@@ -83,7 +87,15 @@ export type InputCaptureProps = PropsWithChildren<{
     /** Keyboard control keys from the keyboard event */
     eventDetails: Pick<
       KeyboardEvent,
-      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey' | 'code'
+      | 'key'
+      | 'altKey'
+      | 'ctrlKey'
+      | 'keyCode'
+      | 'metaKey'
+      | 'repeat'
+      | 'shiftKey'
+      | 'code'
+      | 'preventDefault'
     >;
   }) => void;
   /** Sets an interface that allows interactions with this component's focus/blur states */
@@ -175,16 +187,19 @@ export const InputCapture = memo<InputCaptureProps>(
 
         const currentTextSelection = getTextSelection();
 
-        const eventDetails = pick(ev, [
-          'key',
-          'altKey',
-          'ctrlKey',
-          'keyCode',
-          'metaKey',
-          'repeat',
-          'shiftKey',
-          'code',
-        ]);
+        const eventDetails = {
+          ...pick(ev, [
+            'key',
+            'altKey',
+            'ctrlKey',
+            'keyCode',
+            'metaKey',
+            'repeat',
+            'shiftKey',
+            'code',
+          ]),
+          preventDefault: ev.preventDefault.bind(ev),
+        };
 
         onCapture({
           value: newValue,
@@ -223,6 +238,7 @@ export const InputCapture = memo<InputCaptureProps>(
           repeat: false,
           shiftKey: false,
           code: 'MetaLeft',
+          preventDefault: ev.preventDefault.bind(ev),
         };
 
         onCapture({
@@ -308,6 +324,7 @@ export const InputCapture = memo<InputCaptureProps>(
       >
         <div
           role="textbox"
+          aria-label={ARIA_LABEL_MESSAGE}
           aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
           tabIndex={0}
           ref={focusEleRef}
@@ -327,6 +344,7 @@ export const InputCapture = memo<InputCaptureProps>(
           </div>
           <div className="textSelectionBoundaryHelper"> </div>
           <input
+            name="inputCapture"
             ref={hiddenInputEleRef}
             type="text"
             value=""

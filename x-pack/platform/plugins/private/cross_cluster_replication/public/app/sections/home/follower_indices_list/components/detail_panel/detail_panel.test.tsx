@@ -25,7 +25,7 @@ jest.mock('../../../../../services/routing', () => {
     routing: {
       getFollowerIndexPath: jest.fn(() => '/follower-index-path'),
       navigate: jest.fn(),
-      _reactRouter: {
+      reactRouter: {
         getUrlForApp: jest.fn(() => '/mock-url'),
       },
     },

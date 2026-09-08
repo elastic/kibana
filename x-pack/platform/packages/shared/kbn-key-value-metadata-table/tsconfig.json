@@ -6,11 +6,12 @@
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
-    "**/*.ts", "**/*.tsx", "../../../../../typings/emotion.d.ts"
+    "**/*.ts", "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"

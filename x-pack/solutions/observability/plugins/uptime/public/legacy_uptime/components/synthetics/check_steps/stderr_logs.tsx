@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
@@ -142,6 +142,7 @@ export const StdErrorLogs = ({
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );

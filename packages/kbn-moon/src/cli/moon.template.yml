@@ -1,7 +1,5 @@
 $schema: https://moonrepo.dev/schemas/project.json
-type: unknown
-toolchain:
-  default: node
+layer: unknown
 language: typescript
 
 tasks: {}

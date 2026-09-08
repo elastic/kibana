@@ -5,9 +5,34 @@
  * 2.0.
  */
 
-import { withActiveInferenceSpan } from '@kbn/inference-tracing';
-import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
-import { ROOT_CONTEXT, context } from '@opentelemetry/api';
+import { createWithActiveSpan, type WithActiveSpanOptions } from '@kbn/tracing-utils';
+import { ROOT_CONTEXT, context, propagation, trace } from '@opentelemetry/api';
+
+const EVALS_TRACER = trace.getTracer('@kbn/evals');
+const withActiveEvalsSpan = createWithActiveSpan({
+  tracer: EVALS_TRACER,
+});
+
+export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
+  const baggage = propagation.getBaggage(context.active());
+  const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
+
+  return context.with(parentContext, () =>
+    withActiveEvalsSpan(
+      name,
+      {
+        ...opts,
+        attributes: {
+          'instrumentationScope.name': '@kbn/evals',
+          'task.name': name,
+          ...opts.attributes,
+        },
+      },
+      parentContext,
+      cb
+    )
+  );
+}
 
 /**
  * Use this wrapper when you want to include trace-based metrics with evaluations and use qualitative evaluators within the
@@ -15,18 +40,40 @@ import { ROOT_CONTEXT, context } from '@opentelemetry/api';
  */
 export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
   // Execute callback in the context with baggage
-  return context.with(ROOT_CONTEXT, () => {
-    return withActiveInferenceSpan(
+  const baggage = propagation.getBaggage(context.active());
+  const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
+
+  return context.with(parentContext, () =>
+    withActiveEvalsSpan(
       name,
       {
         ...opts,
         attributes: {
-          'inscrumentationScope.name': '@kbn/evals',
+          'instrumentationScope.name': '@kbn/evals',
           'evaluator.name': name, // Set on this span too
           ...opts.attributes,
         },
       },
+      parentContext,
       cb
-    );
-  });
+    )
+  );
+}
+
+export function getCurrentTraceId(): string | null {
+  try {
+    const activeSpan = trace.getActiveSpan();
+    if (!activeSpan) {
+      return null;
+    }
+
+    const spanContext = activeSpan.spanContext();
+    if (!spanContext.traceId) {
+      return null;
+    }
+
+    return spanContext.traceId;
+  } catch {
+    return null;
+  }
 }

@@ -13,6 +13,10 @@
       "scroll_id": "",
       "rest_total_hits_as_int": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "scroll": "",
+      "scroll_id": ""
+    },
     "methods": [
       "GET",
       "POST"
@@ -22,6 +26,7 @@
       "_search/scroll/{scroll_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-scroll",
     "availability": {
       "stack": true,
       "serverless": true

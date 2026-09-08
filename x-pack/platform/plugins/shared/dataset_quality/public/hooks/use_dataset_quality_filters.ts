@@ -24,9 +24,9 @@ export const useDatasetQualityFilters = () => {
     service,
     (state) =>
       state.matches('initializing') ||
-      (state.matches('main.integrations.fetching') &&
-        (state.matches('main.stats.datasets.fetching') ||
-          state.matches('main.stats.degradedDocs.fetching')))
+      (state.matches({ main: { integrations: 'fetching' } }) &&
+        (state.matches({ main: { stats: { datasets: 'fetching' } } }) ||
+          state.matches({ main: { stats: { degradedDocs: 'fetching' } } })))
   );
 
   const authorizedDatasetTypes = useSelector(service, (state) =>

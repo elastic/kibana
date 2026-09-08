@@ -13,6 +13,7 @@ import type { TestCase } from '@playwright/test/reporter';
 import { globSync } from 'fast-glob';
 import path from 'node:path';
 import { SCOUT_CONFIG_MANIFEST_PATH_GLOB } from '@kbn/scout-info';
+import type { ScoutTestChannel } from '@kbn/scout-info';
 
 let git: SimpleGit;
 
@@ -24,8 +25,8 @@ export const getGitSHA1ForPath = async (p: string) => {
 export interface ScoutConfigManifest {
   path: string;
   exists: boolean;
-  lastModified: string;
   sha1: string;
+  testChannels: ScoutTestChannel[];
   tests: {
     id: string;
     title: string;

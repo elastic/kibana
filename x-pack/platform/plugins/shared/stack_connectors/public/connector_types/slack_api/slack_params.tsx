@@ -240,6 +240,7 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
         <TextMessage
           index={index}
           onChange={onTextChange}
+          messageVariables={messageVariables}
           value={textValue}
           errors={(errors.text ?? []) as string[]}
         />

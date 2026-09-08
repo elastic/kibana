@@ -23,12 +23,15 @@ import type {
   BulkActionsReducerAction,
   TimelineItem,
   BulkEditTagsFlyoutState,
+  BulkAddToChatConfig,
+  OpenChatService,
 } from '../types';
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
+  ADD_TO_CHAT,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
   EDIT_TAGS,
   MARK_AS_UNTRACKED,
@@ -41,7 +44,7 @@ import { MUTE_SELECTED, UNMUTE_SELECTED } from '../translations';
 
 interface BulkActionsProps {
   ruleTypeIds?: string[];
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
   additionalBulkActions?: PublicAlertsDataGridProps['additionalBulkActions'];
@@ -49,6 +52,8 @@ interface BulkActionsProps {
   hideBulkActions?: boolean;
   application: ApplicationStart;
   casesService?: CasesService;
+  agentBuilderService?: OpenChatService;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
   http: HttpStart;
   notifications: NotificationsStart;
 }
@@ -114,14 +119,16 @@ const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: strin
 const getCaseAttachments = ({
   alerts,
   caseId,
+  owner,
   groupAlertsByRule,
 }: {
   caseId: string;
+  owner: string;
   groupAlertsByRule?: CasesService['helpers']['groupAlertsByRule'];
   alerts?: TimelineItem[];
 }) => {
   const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
-  return groupAlertsByRule?.(filteredAlerts) ?? [];
+  return groupAlertsByRule?.(filteredAlerts, owner) ?? [];
 };
 
 const addItemsToInitialPanel = ({
@@ -168,6 +175,7 @@ export const useBulkAddToCaseActions = ({
       content: ALERTS_ALREADY_ATTACHED_TO_CASE,
     },
   });
+  const caseOwner = casesConfig?.owner?.[0];
 
   return useMemo(() => {
     return isCasesContextAvailable &&
@@ -183,14 +191,9 @@ export const useBulkAddToCaseActions = ({
             disableOnQuery: true,
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
-              const caseAttachments = alerts
-                ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
-                : [];
-              const dataArray = alerts ? alerts.map((alert) => alert.data) : [];
-              const observables = casesService?.helpers.getObservablesFromEcs(dataArray);
               createCaseFlyout.open({
-                attachments: caseAttachments,
-                observables,
+                getAttachments: (owner) =>
+                  alerts ? casesService?.helpers.groupAlertsByRule(alerts, owner) ?? [] : [],
               });
             },
           },
@@ -204,19 +207,17 @@ export const useBulkAddToCaseActions = ({
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
                   if (theCase == null) {
-                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                    return alerts && caseOwner
+                      ? casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? []
+                      : [];
                   }
 
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
+                    owner: theCase.owner,
                     groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
                   });
-                },
-                getObservables: ({ theCase }) => {
-                  if (!alerts || theCase == null) return [];
-                  const dataArray = alerts.map((alert) => alert.data);
-                  return casesService?.helpers.getObservablesFromEcs(dataArray) ?? [];
                 },
               });
             },
@@ -224,6 +225,7 @@ export const useBulkAddToCaseActions = ({
         ]
       : [];
   }, [
+    caseOwner,
     casesService?.helpers,
     createCaseFlyout,
     isCasesContextAvailable,
@@ -408,6 +410,45 @@ export const useBulkMuteActions = ({
   );
 };
 
+export const useBulkAddToChatActions = ({
+  agentBuilderService,
+  bulkAddToChatConfig,
+}: {
+  agentBuilderService?: OpenChatService;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
+}) => {
+  const { convertAlertToAttachment, initialMessage, onAddedToChat } = bulkAddToChatConfig ?? {};
+
+  const onAddToChatClick = useCallback(
+    (alerts?: TimelineItem[]) => {
+      if (!agentBuilderService || !convertAlertToAttachment) return;
+      const items = alerts ?? [];
+      agentBuilderService.openChat({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        initialMessage,
+        attachments: convertAlertToAttachment(items),
+      });
+      onAddedToChat?.(items.length);
+    },
+    [agentBuilderService, convertAlertToAttachment, initialMessage, onAddedToChat]
+  );
+
+  return useMemo(() => {
+    if (!agentBuilderService || !convertAlertToAttachment) return [];
+    return [
+      {
+        label: ADD_TO_CHAT,
+        key: 'bulk-add-to-chat',
+        disableOnQuery: true,
+        disabledLabel: ADD_TO_CHAT,
+        'data-test-subj': 'bulk-add-to-chat',
+        onClick: onAddToChatClick,
+      },
+    ];
+  }, [agentBuilderService, convertAlertToAttachment, onAddToChatClick]);
+};
+
 const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
@@ -422,6 +463,8 @@ export function useBulkActions({
   notifications,
   application,
   casesService,
+  agentBuilderService,
+  bulkAddToChatConfig,
 }: BulkActionsProps): UseBulkActions {
   const {
     bulkActionsStore: [bulkActionsState, updateBulkActionsState],
@@ -491,16 +534,28 @@ export function useBulkActions({
           },
         ];
   }, [tagsAction, application?.capabilities]);
+  const addToChatActions = useBulkAddToChatActions({
+    agentBuilderService,
+    bulkAddToChatConfig,
+  });
 
   const initialItems = useMemo(() => {
     const isSiem = ruleTypeIds?.some(isSiemRuleType);
     return [
       ...caseBulkActions,
+      ...addToChatActions,
       ...(isSiem ? [] : untrackBulkActions),
       ...(isSiem ? [] : tagsBulkActions),
       ...(isSiem ? [] : muteBulkActions),
     ];
-  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions, muteBulkActions]);
+  }, [
+    caseBulkActions,
+    ruleTypeIds,
+    untrackBulkActions,
+    tagsBulkActions,
+    muteBulkActions,
+    addToChatActions,
+  ]);
 
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {

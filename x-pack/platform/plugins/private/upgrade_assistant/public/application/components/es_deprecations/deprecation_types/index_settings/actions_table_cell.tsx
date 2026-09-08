@@ -42,7 +42,7 @@ export const IndexSettingsActionsCell: React.FunctionComponent<Props> = ({ openF
       <EuiLink onClick={openFlyout} data-test-subj={'deprecation-indexSetting'}>
         <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="indexSettingsActionsCell">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="indexSettings" />
+            <EuiIcon type="indexSettings" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionText}</EuiText>

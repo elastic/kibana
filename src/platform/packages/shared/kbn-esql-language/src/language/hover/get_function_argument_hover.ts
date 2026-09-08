@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { within } from '../../ast';
+import { within, isESQLNamedParamLiteral } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { TIME_SYSTEM_PARAMS } from '../../commands';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
-import { isESQLNamedParamLiteral, type ESQLAstItem, type ESQLFunction } from '../../types';
 import { fromCache, setToCache } from './hover_cache';
 
 const TIME_SYSTEM_DESCRIPTIONS = {

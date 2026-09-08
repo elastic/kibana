@@ -13,6 +13,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { WorkflowSchema, WorkflowSchemaForAutocomplete } from './schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 
 describe('Legacy workflow format (backward compatibility)', () => {
   it('should accept legacy array format inputs with array type and defaults', () => {
@@ -21,19 +23,23 @@ describe('Legacy workflow format (backward compatibility)', () => {
       enabled: false,
       description: 'This is a new workflow',
       tags: ['workflow', 'example'],
-      triggers: [{ type: 'manual' }],
-      inputs: [
+      triggers: [
         {
-          name: 'people',
-          type: 'array',
-          default: ['alice', 'bob', 'charlie'],
-          description: 'List of people to greet',
-        },
-        {
-          name: 'greeting',
-          type: 'string',
-          default: 'Hello',
-          description: 'The greeting message to use',
+          type: 'manual',
+          inputs: [
+            {
+              name: 'people',
+              type: 'array',
+              default: ['alice', 'bob', 'charlie'],
+              description: 'List of people to greet',
+            },
+            {
+              name: 'greeting',
+              type: 'string',
+              default: 'Hello',
+              description: 'The greeting message to use',
+            },
+          ],
         },
       ],
       consts: {
@@ -54,29 +60,48 @@ describe('Legacy workflow format (backward compatibility)', () => {
     // Test WorkflowSchema (strict validation)
     const result = WorkflowSchema.safeParse(workflow);
     expect(result.success).toBe(true);
+    const manualTrigger = result.data?.triggers?.find((trigger) => isManualTrigger(trigger));
+
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger?.inputs);
+
+    expect(manualTrigger).toBeDefined();
+
     if (result.success) {
       // After transformation, inputs should be in JSON Schema format
-      expect(result.data.inputs).toBeDefined();
-      expect(result.data.inputs?.properties).toBeDefined();
-      expect(result.data.inputs?.properties?.people).toBeDefined();
-      expect(result.data.inputs?.properties?.greeting).toBeDefined();
-      expect(result.data.inputs?.properties?.people?.type).toBe('array');
-      expect(result.data.inputs?.properties?.people?.default).toEqual(['alice', 'bob', 'charlie']);
-      expect(result.data.inputs?.properties?.greeting?.type).toBe('string');
-      expect(result.data.inputs?.properties?.greeting?.default).toBe('Hello');
+      expect(jsonSchemaInputs).toBeDefined();
+      expect(jsonSchemaInputs?.properties).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.people).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.greeting).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.people?.type).toBe('array');
+      expect(jsonSchemaInputs?.properties?.people?.default).toEqual(['alice', 'bob', 'charlie']);
+      expect(jsonSchemaInputs?.properties?.greeting?.type).toBe('string');
+      expect(jsonSchemaInputs?.properties?.greeting?.default).toBe('Hello');
     }
 
     // Test WorkflowSchemaForAutocomplete (lenient validation for Monaco)
     const autocompleteResult = WorkflowSchemaForAutocomplete.safeParse(workflow);
     expect(autocompleteResult.success).toBe(true);
+
+    const manualTriggerAutocomplete = autocompleteResult.data?.triggers?.find((trigger) =>
+      isManualTrigger(trigger)
+    );
+
+    if (!manualTriggerAutocomplete) {
+      fail('Manual trigger should be defined');
+    }
+
     if (autocompleteResult.success) {
       // For autocomplete, inputs can remain as array format
-      expect(autocompleteResult.data.inputs).toBeDefined();
+      expect(manualTriggerAutocomplete.inputs).toBeDefined();
       // It can be either array or object format
       expect(
-        Array.isArray(autocompleteResult.data.inputs) ||
-          (typeof autocompleteResult.data.inputs === 'object' &&
-            'properties' in autocompleteResult.data.inputs)
+        Array.isArray(manualTriggerAutocomplete.inputs) ||
+          (typeof manualTriggerAutocomplete.inputs === 'object' &&
+            'properties' in manualTriggerAutocomplete.inputs)
       ).toBe(true);
     }
   });
@@ -85,18 +110,22 @@ describe('Legacy workflow format (backward compatibility)', () => {
     const workflow = {
       name: 'Legacy workflow',
       enabled: true,
-      triggers: [{ type: 'manual' }],
-      inputs: [
+      triggers: [
         {
-          name: 'username',
-          type: 'string',
-          required: true,
-          default: 'admin',
-        },
-        {
-          name: 'age',
-          type: 'number',
-          default: 25,
+          type: 'manual',
+          inputs: [
+            {
+              name: 'username',
+              type: 'string',
+              required: true,
+              default: 'admin',
+            },
+            {
+              name: 'age',
+              type: 'number',
+              default: 25,
+            },
+          ],
         },
       ],
       steps: [{ name: 'step1', type: 'console', with: { message: 'test' } }],
@@ -104,15 +133,24 @@ describe('Legacy workflow format (backward compatibility)', () => {
 
     const result = WorkflowSchema.safeParse(workflow);
     expect(result.success).toBe(true);
+
+    const manualTrigger = result.data?.triggers?.find((trigger) => isManualTrigger(trigger));
+
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger?.inputs);
+
     if (result.success) {
       // Should be transformed to JSON Schema format
-      expect(result.data.inputs).toBeDefined();
-      expect(result.data.inputs?.properties).toBeDefined();
-      expect(result.data.inputs?.properties?.username).toBeDefined();
-      expect(result.data.inputs?.properties?.age).toBeDefined();
-      expect(result.data.inputs?.required).toContain('username');
-      expect(result.data.inputs?.properties?.username?.default).toBe('admin');
-      expect(result.data.inputs?.properties?.age?.default).toBe(25);
+      expect(jsonSchemaInputs).toBeDefined();
+      expect(jsonSchemaInputs?.properties).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.username).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.age).toBeDefined();
+      expect(jsonSchemaInputs?.required).toContain('username');
+      expect(jsonSchemaInputs?.properties?.username?.default).toBe('admin');
+      expect(jsonSchemaInputs?.properties?.age?.default).toBe(25);
     }
   });
 
@@ -122,12 +160,20 @@ describe('Legacy workflow format (backward compatibility)', () => {
     const workflowData = parse(yamlContent);
 
     const result = WorkflowSchema.safeParse(workflowData);
+    const manualTrigger = result.data?.triggers?.find((trigger) => isManualTrigger(trigger));
+
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger?.inputs);
+
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.inputs?.properties).toBeDefined();
-      expect(result.data.inputs?.properties?.analystEmail).toBeDefined();
-      expect(result.data.inputs?.properties?.severity?.default).toBe('medium');
-      expect(result.data.inputs?.properties?.priority?.default).toBe('P2');
+      expect(jsonSchemaInputs?.properties).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.analystEmail).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.severity?.default).toBe('medium');
+      expect(jsonSchemaInputs?.properties?.priority?.default).toBe('P2');
     }
   });
 });

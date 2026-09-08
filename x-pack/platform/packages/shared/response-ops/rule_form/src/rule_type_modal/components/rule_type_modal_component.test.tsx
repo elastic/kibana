@@ -153,7 +153,7 @@ describe('RuleTypeModalComponent', () => {
     {
       id: 'ruleType1',
       description: 'The first test rule type',
-      iconClass: 'beaker',
+      iconClass: 'flask',
       documentationUrl: 'https://example.com/docs/ruleType1',
       validate: () => ({ isValid: true, errors: [] }),
       ruleParamsExpression: () => <div>Rule Type 1 Params</div>,

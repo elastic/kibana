@@ -52,7 +52,7 @@ export const metricsConfigSchema: Type<MetricsConfig> = schema.object({
   interval: schema.duration({ defaultValue: '10s' }),
   timeout: schema.maybe(schema.duration()),
   exporters: schema.oneOf(
-    [metricsExporterConfigSchema, schema.arrayOf(metricsExporterConfigSchema)],
+    [metricsExporterConfigSchema, schema.arrayOf(metricsExporterConfigSchema, { maxSize: 25 })],
     { defaultValue: [] }
   ),
 });

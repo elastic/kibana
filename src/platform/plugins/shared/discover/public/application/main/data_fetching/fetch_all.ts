@@ -8,11 +8,11 @@
  */
 
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -43,7 +43,7 @@ export interface CommonFetchParams {
   internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
-  savedSearch: SavedSearch;
+  searchSource: ISearchSource;
   searchSessionId: string;
   services: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
@@ -72,7 +72,7 @@ export function fetchAll(
     scopedProfilesManager,
     scopedEbtManager,
     inspectorAdapters,
-    savedSearch,
+    searchSource: originalSearchSource,
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
@@ -80,7 +80,7 @@ export function fetchAll(
   const { data, expressions } = services;
 
   try {
-    const searchSource = savedSearch.searchSource.createChild();
+    const searchSource = originalSearchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
@@ -120,35 +120,20 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
+          esqlApproximation: currentTab.appState.esqlApproximation ?? false,
         })
       : fetchDocuments(searchSource, params);
-    const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
 
-    const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent(
-      'discoverFetchAllRequestsOnly'
-    );
-
-    // Calculate query range in seconds
-    const queryRangeSeconds = currentTab.dataRequestParams.timeRangeAbsolute
-      ? getTimeDifferenceInSeconds(currentTab.dataRequestParams.timeRangeAbsolute)
-      : 0;
+    const fetchAllRequestsOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent({
+      eventName: 'discoverFetchAllRequestsOnly',
+      query,
+      timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+    });
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent(
-          {
-            queryRangeSeconds,
-            requests: params.inspectorAdapters.requests?.getRequestsSince(
-              fetchAllRequestOnlyTracker.startTime
-            ),
-          },
-          {
-            meta: {
-              fetchType,
-            },
-          }
-        );
+        fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
           const fetchStatus =
@@ -237,10 +222,10 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, services, savedSearch, getCurrentTab } = params;
+  const { dataSubjects, services, searchSource: originalSearchSource, getCurrentTab } = params;
 
   try {
-    const searchSource = savedSearch.searchSource.createChild();
+    const searchSource = originalSearchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);

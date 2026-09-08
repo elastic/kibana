@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -21,5 +22,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/data-views-plugin",
     "@kbn/search-types",
+    "@kbn/test-jest-helpers",
   ]
 }

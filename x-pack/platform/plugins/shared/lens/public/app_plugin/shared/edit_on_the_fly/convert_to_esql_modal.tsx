@@ -11,12 +11,10 @@ import type {
   EuiBasicTableColumn,
   EuiConfirmModalProps,
   EuiTableSelectionType,
-  IconType,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCallOut,
   EuiCodeBlock,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -26,32 +24,15 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LensLayerType } from '@kbn/lens-common';
-import type { OriginalColumn } from '../../../../common/types';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { esql } from '@elastic/esql';
+
 import { layerTypes } from '../../..';
-
-type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
-
-/**
- * Conversion data from generateEsqlQuery.
- */
-export interface EsqlConversionData {
-  esAggsIdMap: Record<string, OriginalColumn[]>;
-  partialRows: boolean;
-}
-
-export interface ConvertibleLayer {
-  id: string;
-  icon: IconType;
-  name: string;
-  type: LayerType;
-  query: string;
-  isConvertibleToEsql: boolean;
-  conversionData: EsqlConversionData;
-}
+import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
   data: (count: number) =>
@@ -100,7 +81,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         itemIdToExpandedRowMapValues[layer.id] = (
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layer.query}
+              {esql(layer.query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         );
@@ -117,7 +98,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         field: 'icon',
         name: '',
         width: euiTheme.size.l,
-        render: (icon: string) => <EuiIcon type={icon} />,
+        render: (icon: string) => <EuiIcon type={icon} aria-hidden={true} />,
       },
       {
         field: 'name',
@@ -148,9 +129,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
 
           return (
-            <EuiButtonIcon
-              onClick={() => toggleDetails(layer)}
-              aria-label={
+            <EuiToolTip
+              content={
                 isExpanded
                   ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
                       defaultMessage: 'Collapse',
@@ -159,9 +139,23 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                       defaultMessage: 'Expand',
                     })
               }
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-              disabled={!layer.isConvertibleToEsql}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={() => toggleDetails(layer)}
+                aria-label={
+                  isExpanded
+                    ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
+                        defaultMessage: 'Collapse',
+                      })
+                    : i18n.translate('xpack.lens.config.expandAriaLabel', {
+                        defaultMessage: 'Expand',
+                      })
+                }
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                disabled={!layer.isConvertibleToEsql}
+              />
+            </EuiToolTip>
           );
         },
       },
@@ -224,6 +218,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         defaultMessage: 'Switch to query mode',
       })}
       confirmButtonDisabled={!isConfirmButtonEnabled}
+      data-test-subj="lnsConvertToEsqlModal"
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {
@@ -237,9 +232,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         </EuiLink>
       </p>
 
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
+      <KbnWarningCallout
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
           defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,
@@ -275,7 +268,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layers[0].query}
+              {esql(layers[0].query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         </EuiFlexGroup>

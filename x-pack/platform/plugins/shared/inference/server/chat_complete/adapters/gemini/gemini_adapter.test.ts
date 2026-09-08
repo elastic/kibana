@@ -33,6 +33,8 @@ describe('geminiAdapter', () => {
       connectorId: 'test-connector-id',
       config: {},
       capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
     processVertexStreamMock.mockReset().mockImplementation(() => tap(noop));
     processVertexResponseMock.mockReset().mockImplementation(() => tap(noop));
@@ -91,6 +93,47 @@ describe('geminiAdapter', () => {
       });
     });
 
+    it('forwards `maxContentLength` for buffered (invokeAIRaw) requests', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeAIRaw',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards `maxContentLength` for streaming (invokeStream) requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too.
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeStream',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
     it('correctly format tools', () => {
       geminiAdapter
         .chatComplete({
@@ -114,6 +157,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     type: 'string',
                     description: 'foo',
+                  },
+                  bar: {
+                    type: 'string',
+                    description: 'bar',
+                    enum: ['a', 'b'],
                   },
                 },
                 required: ['foo'],
@@ -144,7 +192,11 @@ describe('geminiAdapter', () => {
                 properties: {
                   foo: {
                     description: 'foo',
-                    enum: [],
+                    type: 'string',
+                  },
+                  bar: {
+                    description: 'bar',
+                    enum: ['a', 'b'],
                     format: 'enum',
                     type: 'string',
                   },
@@ -310,6 +362,38 @@ describe('geminiAdapter', () => {
             },
           },
         ],
+      });
+    });
+
+    it('filters out messages with empty parts and re-merges consecutive same-role messages', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'first',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: '',
+              toolCalls: [],
+            },
+            {
+              role: MessageRole.User,
+              content: 'second',
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { messages } = getCallParams();
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toEqual({
+        role: 'user',
+        parts: [{ text: 'first' }, { text: 'second' }],
       });
     });
 

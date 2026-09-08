@@ -68,7 +68,6 @@ import type {
   FleetServerAgent,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
-import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
@@ -84,7 +83,7 @@ import {
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
 
@@ -186,7 +185,7 @@ export const assignFleetAgentToNewPolicy = async ({
       retry_on_conflict: 5,
       doc: update,
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 type FleetAgentCheckInUpdateDoc = Pick<
@@ -265,7 +264,7 @@ export const checkInFleetAgent = async (
       retry_on_conflict: 5,
       doc: update,
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -287,7 +286,7 @@ export const fetchFleetAgents = async (
       },
       query: options,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -372,7 +371,7 @@ export const fetchFleetServerHostList = async (
       },
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -417,7 +416,7 @@ export const fetchAgentPolicyEnrollmentKey = async (
       },
       query: { kuery: `policy_id: "${agentPolicyId}"` },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.items[0]);
 
   if (!apiKey) {
@@ -446,7 +445,7 @@ export const fetchAgentPolicyList = async (
       query: options,
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -465,7 +464,7 @@ export const fetchAgentPolicy = async (
       headers: { 'elastic-api-version': '2023-10-31' },
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -487,7 +486,7 @@ export const deleteAgentPolicy = async (
       headers: { 'elastic-api-version': '2023-10-31' },
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -509,7 +508,7 @@ export const fetchIntegrationPolicyList = async (
       query: options,
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -534,15 +533,17 @@ export const getAgentVersionMatchingCurrentStack = async (
 
   const agentVersions = await pRetry<string[]>(
     async () => {
-      return axios
-        .get('https://artifacts-api.elastic.co/v1/versions')
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) =>
-          map(
-            response.data.versions.filter(isValidArtifactVersion),
-            (version) => version.split('-SNAPSHOT')[0]
-          )
-        );
+      const url = 'https://artifacts-api.elastic.co/v1/versions';
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`[GET ${url}] ${response.status} ${response.statusText}`);
+      }
+
+      const { versions } = (await response.json()) as { versions: string[] };
+      return map(
+        versions.filter(isValidArtifactVersion),
+        (version) => version.split('-SNAPSHOT')[0]
+      );
     },
     { maxTimeout: 10000 }
   );
@@ -590,6 +591,8 @@ interface ElasticArtifactSearchResponse {
 
 interface GetAgentDownloadUrlResponse {
   url: string;
+  /** The URL to the SHA512 hash file for integrity validation */
+  shaUrl: string;
   /** The file name (ex. the `*.tar.gz` file) */
   fileName: string;
   /** The directory name that the download archive will be extracted to (same as `fileName` but no file extensions) */
@@ -621,12 +624,12 @@ export const getAgentDownloadUrl = async (
 
   const searchResult: ElasticArtifactSearchResponse = await pRetry(
     async () => {
-      return axios
-        .get<ElasticArtifactSearchResponse>(artifactSearchUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      const response = await fetch(artifactSearchUrl);
+      if (!response.ok) {
+        throw new Error(`[GET ${artifactSearchUrl}] ${response.status} ${response.statusText}`);
+      }
+
+      return (await response.json()) as ElasticArtifactSearchResponse;
     },
     { maxTimeout: 10000 }
   );
@@ -639,6 +642,7 @@ export const getAgentDownloadUrl = async (
 
   return {
     url: searchResult.packages[agentFile].url,
+    shaUrl: searchResult.packages[agentFile].sha_url,
     fileName: agentFile,
     dirName: fileNameWithoutExtension,
   };
@@ -658,12 +662,12 @@ export const getLatestAgentDownloadVersion = async (
   const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await pRetry(
     async () => {
-      return axios
-        .get<{ versions: string[] }>(artifactsUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      const response = await fetch(artifactsUrl);
+      if (!response.ok) {
+        throw new Error(`[GET ${artifactsUrl}] ${response.status} ${response.statusText}`);
+      }
+
+      return (await response.json()) as { versions: string[] };
     },
     { maxTimeout: 10000 }
   );
@@ -719,7 +723,7 @@ export const unEnrollFleetAgent = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   return data;
 };
@@ -745,7 +749,7 @@ export const getAgentPolicyEnrollmentKey = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   return data.items?.[0]?.api_key;
 };
@@ -764,7 +768,7 @@ export const generateFleetServiceToken = async (
       body: {},
     })
     .then((response) => response.data.value)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   logger.verbose(`New service token created: ${serviceToken}`);
 
@@ -779,7 +783,7 @@ export const fetchFleetOutputs = async (kbnClient: KbnClient): Promise<GetOutput
       headers: { 'elastic-api-version': '2023-10-31' },
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 export const getFleetElasticsearchOutputHost = async (
@@ -853,7 +857,7 @@ export const enrollHostVmWithFleet = async ({
   const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
 
   const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
-    ? await downloadAndStoreAgent(agentUrlInfo.url)
+    ? await downloadAndStoreAgent(agentUrlInfo.url, undefined, agentUrlInfo.shaUrl)
     : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
 
   log.info(`Installing Elastic Agent`);
@@ -865,15 +869,27 @@ export const enrollHostVmWithFleet = async ({
     if (useAgentCache) {
       const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
 
-      log.debug(
-        `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
-      );
-      const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
+      try {
+        log.debug(
+          `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
+        );
+        const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
 
-      log.debug(`Extracting download archive on host VM`);
-      await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
+        log.debug(`Extracting download archive on host VM`);
+        await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
 
-      await downloadsMount.unmount();
+        await downloadsMount.unmount();
+      } catch (mountError) {
+        log.warning(
+          `Mount failed (${mountError.message}). Falling back to file transfer via 'multipass transfer'`
+        );
+        const vmDestPath = `/home/ubuntu/${agentDownload.filename}`;
+        await hostVm.upload(agentDownload.fullFilePath, vmDestPath);
+
+        log.debug(`Extracting download archive on host VM`);
+        await hostVm.exec(`tar -zxf ${vmDestPath}`);
+        await hostVm.exec(`rm -f ${vmDestPath}`);
+      }
     } else {
       log.debug(`Downloading Elastic Agent to host VM`);
       await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
@@ -948,7 +964,7 @@ export const createAgentPolicy = async ({
       body,
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 interface GetOrCreateDefaultAgentPolicyOptions {
@@ -1023,7 +1039,7 @@ export const createIntegrationPolicy = async (
       },
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -1042,7 +1058,7 @@ export const fetchPackageInfo = async (
       method: 'GET',
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 interface AddMicrosoftDefenderForEndpointToAgentPolicyOptions {
@@ -1463,6 +1479,212 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
     enabled: true,
     inputs: [
       {
+        type: 'cel',
+        policy_template: 'sentinel_one',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.application',
+            },
+            vars: {
+              interval: {
+                value: '24h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              max_executions: {
+                value: 1000,
+                type: 'integer',
+              },
+              site_ids: {
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-application'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.application_risk',
+            },
+            vars: {
+              interval: {
+                value: '24h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              site_ids: {
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-application_risk'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.threat_event',
+            },
+            vars: {
+              initial_interval: {
+                value: '48h',
+                type: 'text',
+              },
+              interval: {
+                value: '24h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              max_executions: {
+                value: 1000,
+                type: 'integer',
+              },
+              site_ids: {
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-threat_event'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.unified_alert',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '1m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              http_client_timeout: {
+                value: '60s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-unified_alert'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+        vars: {
+          url: {
+            type: 'url',
+            value: consoleUrl,
+          },
+          api_token: {
+            type: 'password',
+            value: apiToken,
+          },
+          proxy_url: {
+            type: 'text',
+          },
+          ssl: {
+            value:
+              '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+            type: 'yaml',
+          },
+        },
+      },
+      {
         type: 'httpjson',
         policy_template: 'sentinel_one',
         enabled: true,
@@ -1475,7 +1697,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
+                value: '48h',
                 type: 'text',
               },
               interval: {
@@ -1503,7 +1725,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
+                value: '48h',
                 type: 'text',
               },
               interval: {
@@ -1531,7 +1753,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
+                value: '48h',
                 type: 'text',
               },
               interval: {
@@ -1559,7 +1781,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
+                value: '48h',
                 type: 'text',
               },
               interval: {
@@ -1587,12 +1809,24 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
+                value: '48h',
                 type: 'text',
               },
               interval: {
                 value: '30s',
                 type: 'text',
+              },
+              enable_star_rule_enrichment: {
+                value: false,
+                type: 'bool',
+              },
+              max_executions: {
+                value: 1000,
+                type: 'integer',
+              },
+              page_size: {
+                value: 100,
+                type: 'integer',
               },
               tags: {
                 value: ['forwarded', 'sentinel_one-threat'],
@@ -1610,10 +1844,11 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
         ],
         vars: {
           url: {
-            type: 'text',
+            type: 'url',
             value: consoleUrl,
           },
           enable_request_tracer: {
+            value: false,
             type: 'bool',
           },
           api_token: {
@@ -1621,6 +1856,9 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             value: apiToken,
           },
           proxy_url: {
+            type: 'text',
+          },
+          site_ids: {
             type: 'text',
           },
           ssl: {
@@ -1751,7 +1989,7 @@ export const copyAgentPolicy = async ({
       },
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -1767,7 +2005,7 @@ export const ensureFleetSetup = memoize(
         headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         method: 'POST',
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
 
     if (!setupResponse.data.isInitialized) {
       log.verbose(`Fleet setup response:`, setupResponse);
@@ -1831,7 +2069,7 @@ export const enableFleetSpaceAwareness = memoize(async (kbnClient: KbnClient): P
       headers: { 'Elastic-Api-Version': '1' },
       method: 'POST',
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 });
 
 /**
@@ -1849,7 +2087,7 @@ export const fetchIntegrationPolicy = async (
       method: 'GET',
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.item);
 };
 
@@ -1880,7 +2118,7 @@ export const updateIntegrationPolicy = async (
       body: fullPolicyData,
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.item);
 };
 
@@ -1920,7 +2158,7 @@ export const updateAgentPolicy = async (
       body: fullPolicyData,
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.item);
 };
 
@@ -2029,7 +2267,7 @@ export const installIntegration = async (
       method: 'POST',
       path: epmRouteService.getInstallPath(integrationName, version),
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -2098,173 +2336,179 @@ export const addCrowdStrikeIntegrationToAgentPolicy = async ({
   );
 
   return createIntegrationPolicy(kbnClient, {
-    name: integrationPolicyName,
-    description: `Created by script: ${__filename}`,
-    policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
-    enabled: true,
-    inputs: [
-      {
-        type: 'cel',
-        policy_template: 'crowdstrike',
-        enabled: true,
-        vars: {
-          client_id: {
-            value: clientId,
-            type: 'text',
-          },
-          client_secret: {
-            value: clientSecret,
-            type: 'password',
-          },
-          url: {
-            value: apiUrl,
-            type: 'text',
-          },
-          token_url: {
-            value: `${apiUrl}/oauth2/token`,
-            type: 'text',
-          },
-          scopes: {
-            value: [],
-            type: 'text',
-          },
-          enable_request_tracer: {
-            value: false,
-            type: 'bool',
-          },
-          proxy_url: {
-            type: 'text',
-          },
-        },
-        streams: [
-          {
-            enabled: true,
-            data_stream: {
-              type: 'logs',
-              dataset: 'crowdstrike.alert',
-            },
-            vars: {
-              initial_interval: {
-                value: '30m',
-                type: 'text',
-              },
-              interval: {
-                value: '30s',
-                type: 'text',
-              },
-              batch_size: {
-                value: 1000,
-                type: 'text',
-              },
-              http_client_timeout: {
-                value: '30s',
-                type: 'text',
-              },
-              tags: {
-                value: ['forwarded', 'crowdstrike-alert'],
-                type: 'text',
-              },
-              preserve_original_event: {
-                value: false,
-                type: 'bool',
-              },
-              preserve_duplicate_custom_fields: {
-                value: false,
-                type: 'bool',
-              },
-              processors: {
-                type: 'yaml',
-              },
-            },
-          },
-          {
-            enabled: true,
-            data_stream: {
-              type: 'logs',
-              dataset: 'crowdstrike.host',
-            },
-            vars: {
-              initial_interval: {
-                value: '24h',
-                type: 'text',
-              },
-              interval: {
-                value: '5m',
-                type: 'text',
-              },
-              batch_size: {
-                value: 1000,
-                type: 'text',
-              },
-              http_client_timeout: {
-                value: '30s',
-                type: 'text',
-              },
-              tags: {
-                value: ['forwarded', 'crowdstrike-host'],
-                type: 'text',
-              },
-              preserve_original_event: {
-                value: false,
-                type: 'bool',
-              },
-              preserve_duplicate_custom_fields: {
-                value: false,
-                type: 'bool',
-              },
-              processors: {
-                type: 'yaml',
-              },
-            },
-          },
-          {
-            enabled: false,
-            data_stream: {
-              type: 'logs',
-              dataset: 'crowdstrike.vulnerability',
-            },
-            vars: {
-              initial_interval: {
-                value: '24h',
-                type: 'text',
-              },
-              interval: {
-                value: '5m',
-                type: 'text',
-              },
-              batch_size: {
-                value: 1000,
-                type: 'text',
-              },
-              http_client_timeout: {
-                value: '30s',
-                type: 'text',
-              },
-              tags: {
-                value: ['forwarded', 'crowdstrike-vulnerability'],
-                type: 'text',
-              },
-              preserve_original_event: {
-                value: false,
-                type: 'bool',
-              },
-              preserve_duplicate_custom_fields: {
-                value: false,
-                type: 'bool',
-              },
-              processors: {
-                type: 'yaml',
-              },
-            },
-          },
-        ],
-      },
-    ],
     package: {
       name: packageName,
       title: packageTitle,
       version: packageVersion,
     },
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    namespace: '',
+    inputs: {
+      // @ts-expect-error This format is valid - according to the "Preview API request" on the UI, but types in fleet do not seem to have been updated.
+      'crowdstrike-logfile': {
+        enabled: false,
+        streams: {
+          'crowdstrike.falcon': {
+            enabled: false,
+            vars: {
+              paths: ['/var/log/crowdstrike/falconhoseclient/output*'],
+              tags: ['forwarded', 'crowdstrike-falcon'],
+              preserve_original_event: false,
+            },
+          },
+          'crowdstrike.fdr': {
+            enabled: false,
+            vars: {
+              paths: ['/var/log/falcon_data_replicator.log'],
+              enrich_host_metadata: true,
+              keep_metadata: true,
+              metadata_ttl: '168h',
+              preserve_original_event: false,
+              tags: ['forwarded', 'crowdstrike-fdr'],
+              prune_fields: true,
+            },
+          },
+        },
+      },
+      'crowdstrike-aws-s3': {
+        enabled: false,
+        streams: {
+          'crowdstrike.fdr': {
+            enabled: false,
+            vars: {
+              enrich_metadata: true,
+              keep_metadata: true,
+              metadata_ttl: '168h',
+              metadata_cache_capacity: 0,
+              metadata_cache_write_interval: 0,
+              long_fields: 'index_long_fields',
+              long_fields_max_length: 1024,
+              enable_deduplication: false,
+              enable_geoip_observer_ip: true,
+              enable_geoip_source_ip: true,
+              enable_geoip_destination_ip: true,
+              preserve_original_event: false,
+              endpoint: '',
+              default_region: '',
+              fips_enabled: false,
+              tags: ['forwarded', 'crowdstrike-fdr'],
+              max_number_of_messages: 5,
+              number_of_workers: 5,
+              prune_fields: true,
+            },
+          },
+        },
+      },
+      'crowdstrike-streaming': {
+        enabled: true,
+        vars: {},
+        streams: {
+          'crowdstrike.falcon': {
+            enabled: true,
+            vars: {
+              url: apiUrl,
+              token_url: `${apiUrl}/oauth2/token`,
+              client_id: clientId,
+              client_secret: clientSecret,
+              app_id: `elastic-dev-${CURRENT_USERNAME}`,
+              retry_max_attempts: '50',
+              retry_infinite_retries: false,
+              retry_wait_min: '1s',
+              retry_wait_max: '30s',
+              tags: ['forwarded', 'crowdstrike-falcon'],
+              preserve_original_event: false,
+            },
+          },
+        },
+      },
+      'crowdstrike-cel': {
+        enabled: true,
+        vars: {
+          client_id: clientId,
+          client_secret: clientSecret,
+          url: apiUrl,
+          token_url: `${apiUrl}/oauth2/token`,
+          ssl: '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+        },
+        streams: {
+          'crowdstrike.alert': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              batch_size: 1000,
+              http_client_timeout: '30s',
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-alert'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+          'crowdstrike.host': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              batch_size: 5000,
+              http_client_timeout: '30s',
+              gov_cloud: false,
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-host'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+          'crowdstrike.identity_protection_assessment': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              data_sources: [],
+              http_client_timeout: '30s',
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-identity-protection-assessment'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+              enable_nested_assessment_factors: false,
+            },
+          },
+          'crowdstrike.identity_protection_timeline': {
+            enabled: true,
+            vars: {
+              initial_interval: '24h',
+              interval: '30s',
+              batch_size: 100,
+              http_client_timeout: '60s',
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-identity_protection_timeline'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+          'crowdstrike.vulnerability': {
+            enabled: true,
+            vars: {
+              initial_interval: '2160h',
+              interval: '30s',
+              batch_size: 5000,
+              http_client_timeout: '30s',
+              facet: ['host_info', 'remediation', 'cve', 'evaluation_logic'],
+              enable_request_tracer: false,
+              max_executions: 1000,
+              tags: ['forwarded', 'crowdstrike-vulnerability'],
+              preserve_original_event: false,
+              preserve_duplicate_custom_fields: false,
+            },
+          },
+        },
+      },
+    },
+    create_dataset_templates: true,
   });
 };

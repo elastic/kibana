@@ -13,7 +13,6 @@ import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -29,6 +28,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import {
   BACK_BUTTON_LABEL,
@@ -120,19 +121,17 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
       <EuiFlyoutBody>
         {createErrors.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.createErrors',
                 { defaultMessage: 'Error creating pipeline' }
               )}
-              color="danger"
-              iconType="error"
             >
               {createErrors.map((message, i) => (
                 <p key={`createError.${i}`}>{message}</p>
               ))}
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer />
           </>
         )}
@@ -285,7 +284,7 @@ export const AddInferencePipelineFooter: React.FC<
         {previousStep !== undefined ? (
           <EuiButtonEmpty
             flush="both"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={() =>
               onAddInferencePipelineStepChange(previousStep as AddInferencePipelineSteps)
             }
@@ -298,7 +297,7 @@ export const AddInferencePipelineFooter: React.FC<
         {nextStep !== undefined ? (
           <EuiButton
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             iconSide="right"
             onClick={() => onAddInferencePipelineStepChange(nextStep as AddInferencePipelineSteps)}
             disabled={!isContinueButtonEnabled}

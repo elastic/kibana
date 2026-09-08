@@ -685,7 +685,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
         expect(actionsTelemetry.runs > 0).to.be(true);
-        expect(actionsTelemetry.count_total).to.equal(24);
+        expect(actionsTelemetry.count_total).to.equal(32);
       });
 
       verifyActionsTelemetry(actionsTelemetry);

@@ -6,14 +6,28 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AgentType } from '@kbn/agent-builder-common';
+import type { AgentAccessControl, CurrentUser, UserIdAndName } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  chatAgentTypeId,
+  getDefaultAgentAccessControl,
+} from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
-import type { AgentProperties, AgentConfigurationProperties } from './storage';
-import type { PersistedAgentDefinition } from '../types';
+import type { AgentConfigurationProperties, AgentProperties } from './storage';
+import type { PersistedAgentDefinition, PersistedAgentDefinitionWithPermissions } from '../types';
+import {
+  getAgentPermissions,
+  isAgentOwner,
+  normalizeAccessControl,
+  redactAccessControlForCaller,
+} from '../../access_control';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
-const defaultAgentType = AgentType.chat;
+const defaultAgentType = chatAgentTypeId;
+
+const readOwner = (id?: string, name?: string): UserIdAndName | undefined =>
+  id || name ? { id, username: name ?? 'unknown' } : undefined;
 
 export const fromEs = (document: Document): PersistedAgentDefinition => {
   if (!document._source) {
@@ -23,45 +37,98 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
   const configuration: AgentConfigurationProperties =
     document._source.configuration ?? document._source.config;
 
+  // backward compatibility with M1 - we check the document id.
+  const resolvedId = document._source.id ?? document._id;
+
   return {
-    // backward compatibility with M1 - we check the document id.
-    id: document._source.id ?? document._id,
-    type: document._source.type,
+    id: resolvedId,
+    type: document._source.type ?? defaultAgentType,
     name: document._source.name,
     description: document._source.description,
     labels: document._source.labels,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
+    access_control: normalizeAccessControl(document._source),
+    created_by: readOwner(document._source.created_by_id, document._source.created_by_name),
+    created_at: document._source.created_at,
+    updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
+    updated_at: document._source.updated_at,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
+      skill_ids: configuration.skill_ids,
+      enable_elastic_capabilities:
+        configuration.enable_elastic_capabilities ??
+        (resolvedId === agentBuilderDefaultAgentId ? true : undefined),
+      workflow_ids: configuration.workflow_ids,
+      plugin_ids: configuration.plugin_ids,
+      connector_ids: configuration.connector_ids,
+      ai_indices: configuration.ai_indices,
     },
+  };
+};
+
+export const withPermissions = ({
+  document,
+  user,
+}: {
+  document: Required<Document>;
+  user: CurrentUser;
+}): PersistedAgentDefinitionWithPermissions => {
+  const source = document._source;
+  const redactedDefinition = redactAccessControlForCaller({
+    definition: fromEs(document),
+    source,
+    user,
+  });
+
+  return {
+    ...redactedDefinition,
+    permissions: getAgentPermissions({
+      source,
+      user,
+    }),
   };
 };
 
 export const createRequestToEs = ({
   profile,
+  user,
   space,
   creationDate,
 }: {
   profile: AgentCreateRequest;
+  user: UserIdAndName;
   space: string;
   creationDate: Date;
 }): AgentProperties => {
   return {
     id: profile.id,
     name: profile.name,
-    type: defaultAgentType,
+    type: profile.type ?? defaultAgentType,
     space,
     description: profile.description,
     labels: profile.labels,
     avatar_color: profile.avatar_color,
     avatar_symbol: profile.avatar_symbol,
+    created_by_id: user.id,
+    created_by_name: user.username,
+    access_control: profile.access_control
+      ? { access_mode: profile.access_control.access_mode, entries: [] }
+      : getDefaultAgentAccessControl(),
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
+      skill_ids: profile.configuration.skill_ids,
+      enable_elastic_capabilities: profile.configuration.enable_elastic_capabilities,
+      workflow_ids: profile.configuration.workflow_ids,
+      plugin_ids: profile.configuration.plugin_ids,
+      connector_ids: profile.configuration.connector_ids,
+      ai_indices: profile.configuration.ai_indices,
     },
     created_at: creationDate.toISOString(),
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: creationDate.toISOString(),
   };
 };
@@ -71,26 +138,73 @@ export const updateRequestToEs = ({
   currentProps,
   update,
   updateDate,
+  user,
 }: {
   agentId: string;
   currentProps: AgentProperties;
   update: AgentUpdateRequest;
   updateDate: Date;
+  user?: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
+  const { configuration, access_control, ...restUpdate } = update;
+  const currentAccessControl = normalizeAccessControl(currentProps);
+
+  // Strip legacy fields from the persisted doc: `access_control` and `config` are now the source of
+  // truth, so any leftover `visibility`/`acl`/`configuration` is migrated into them and discarded.
+  const {
+    visibility,
+    acl,
+    configuration: _legacyConfiguration,
+    ...restCurrentProps
+  } = currentProps;
 
   const updated: AgentProperties = {
-    ...currentProps,
-    ...update,
+    ...restCurrentProps,
+    ...restUpdate,
     id: agentId,
-    // Explicitly omit configuration to ensure migration
-    configuration: undefined,
+    access_control: access_control
+      ? { ...currentAccessControl, access_mode: access_control.access_mode }
+      : currentAccessControl,
     config: {
       ...currentConfig,
-      ...update.configuration,
+      ...configuration,
     },
+    ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),
   };
 
+  if (
+    currentProps.created_by_id === undefined &&
+    currentProps.created_by_name !== undefined &&
+    user?.id &&
+    isAgentOwner({
+      owner: { username: currentProps.created_by_name },
+      currentUser: user,
+    })
+  ) {
+    updated.created_by_id = user.id;
+  }
+
   return updated;
+};
+
+export const accessControlUpdateToEs = ({
+  currentProps,
+  access_control,
+  updateDate,
+  user,
+}: {
+  currentProps: AgentProperties;
+  access_control: AgentAccessControl;
+  updateDate: Date;
+  user: UserIdAndName;
+}): AgentProperties => {
+  return {
+    ...currentProps,
+    access_control,
+    updated_by_id: user.id,
+    updated_by_name: user.username,
+    updated_at: updateDate.toISOString(),
+  };
 };

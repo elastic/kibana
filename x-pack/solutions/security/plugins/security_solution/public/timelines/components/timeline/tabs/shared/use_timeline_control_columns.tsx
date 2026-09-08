@@ -8,6 +8,8 @@
 import React, { useEffect, useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { getDefaultControlColumn } from '../../body/control_columns';
@@ -20,14 +22,16 @@ interface UseTimelineControlColumnArgs {
   timelineId: string;
   refetch: () => void;
   events: TimelineItem[];
+  rawEvents: EsHitRecord[];
   eventIdToNoteIds: Record<string, string[]>;
-  onToggleShowNotes: (eventId?: string) => void;
+  onToggleShowNotes: (eventId?: string, eventData?: DataTableRecord & TimelineItem) => void;
 }
 
 export const useTimelineControlColumn = ({
   timelineId,
   refetch,
   events,
+  rawEvents,
   eventIdToNoteIds,
   onToggleShowNotes,
 }: UseTimelineControlColumnArgs) => {
@@ -61,15 +65,30 @@ export const useTimelineControlColumn = ({
          * the number of rows in the table currently rendered.
          *
          * */
-        if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
+        if (
+          'rowIndex' in props &&
+          (props.rowIndex >= events.length || props.rowIndex >= rawEvents.length)
+        )
+          return <></>;
+
+        // We are creating this object here so we can pass it to the cell action, which will then pass it to the flyout.
+        // This way we can use the same flyout content code between Security Solution and Discover.
+        const esHitRecord: DataTableRecord = buildDataTableRecord(rawEvents[props.rowIndex]);
+        const eventData: DataTableRecord & TimelineItem = {
+          ...esHitRecord,
+          ...events[props.rowIndex],
+        };
+
         return (
           <TimelineControlColumnCellRender
             ariaRowindex={props.rowIndex}
             columnValues=""
             disablePinAction={!canWriteTimelines}
             ecsData={events[props.rowIndex].ecs}
+            eventData={eventData}
             eventId={events[props.rowIndex]?._id}
             eventIdToNoteIds={eventIdToNoteIds}
+            hit={esHitRecord}
             refetch={refetch}
             showNotes={canReadNotes}
             timelineId={timelineId}
@@ -83,6 +102,7 @@ export const useTimelineControlColumn = ({
       eventIdToNoteIds,
       events,
       onToggleShowNotes,
+      rawEvents,
       refetch,
       timelineId,
     ]

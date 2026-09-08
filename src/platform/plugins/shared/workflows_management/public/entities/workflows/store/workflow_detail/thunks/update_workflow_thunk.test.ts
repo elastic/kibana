@@ -9,7 +9,8 @@
 
 import { parseDocument } from 'yaml';
 
-import type { EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
+import type { EsWorkflow, UpdatedWorkflowResponseDto, WorkflowDetailDto } from '@kbn/workflows';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
 import { updateWorkflowThunk } from './update_workflow_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
@@ -23,6 +24,11 @@ jest.mock('./load_workflow_thunk');
 // eslint-disable-next-line import/order
 import { loadWorkflowThunk } from './load_workflow_thunk';
 const mockLoadWorkflowThunk = loadWorkflowThunk as jest.MockedFunction<typeof loadWorkflowThunk>;
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 // Mock the query client
 jest.mock('../../../../../shared/lib/query_client', () => ({
@@ -45,6 +51,14 @@ const mockWorkflow: WorkflowDetailDto = {
 };
 
 const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
+const defaultUpdateWorkflowResponse: UpdatedWorkflowResponseDto = {
+  id: 'test-workflow-1',
+  lastUpdatedAt: '2023-01-01T00:00:00Z',
+  lastUpdatedBy: 'user1',
+  enabled: false,
+  valid: true,
+  validationErrors: [],
+};
 
 describe('updateWorkflowThunk', () => {
   let store: MockStore;
@@ -59,6 +73,9 @@ describe('updateWorkflowThunk', () => {
     mockServices = getMockServices(store);
     store.dispatch(setWorkflow(mockWorkflow));
     store.dispatch(setYamlString(mockWorkflow.yaml));
+
+    // default
+    mockWorkflowApi.updateWorkflow.mockResolvedValue(defaultUpdateWorkflowResponse);
 
     // Default mock implementation for loadWorkflowThunk
     // Server now preserves formatting, so it returns the same YAML with updated fields
@@ -142,13 +159,9 @@ describe('updateWorkflowThunk', () => {
       enabled: false,
     };
 
-    mockServices.http.put.mockResolvedValue(undefined);
-
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-      body: JSON.stringify(workflowUpdate),
-    });
+    expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith('test-workflow-1', workflowUpdate);
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['workflows', 'test-workflow-1'],
@@ -164,13 +177,9 @@ describe('updateWorkflowThunk', () => {
       enabled: true,
     };
 
-    mockServices.http.put.mockResolvedValue(undefined);
-
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-      body: JSON.stringify(workflowUpdate),
-    });
+    expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith('test-workflow-1', workflowUpdate);
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['workflows', 'test-workflow-1'],
@@ -188,9 +197,7 @@ describe('updateWorkflowThunk', () => {
 
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-      body: JSON.stringify(workflowUpdate),
-    });
+    expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith('test-workflow-1', workflowUpdate);
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['workflows', 'test-workflow-1'],
@@ -211,7 +218,7 @@ describe('updateWorkflowThunk', () => {
       name: 'Updated Workflow',
     };
 
-    mockServices.http.put.mockRejectedValue(error);
+    mockWorkflowApi.updateWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(
       updateWorkflowThunk({
@@ -238,7 +245,7 @@ describe('updateWorkflowThunk', () => {
       enabled: false,
     };
 
-    mockServices.http.put.mockRejectedValue(error);
+    mockWorkflowApi.updateWorkflow.mockRejectedValue(error);
 
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
@@ -259,7 +266,7 @@ describe('updateWorkflowThunk', () => {
       name: 'Updated Workflow',
     };
 
-    mockServices.http.put.mockRejectedValue(error);
+    mockWorkflowApi.updateWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(
       updateWorkflowThunk({
@@ -285,13 +292,9 @@ describe('updateWorkflowThunk', () => {
       tags: ['tag1', 'tag2'],
     };
 
-    mockServices.http.put.mockResolvedValue(undefined);
-
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-      body: JSON.stringify(workflowUpdate),
-    });
+    expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith('test-workflow-1', workflowUpdate);
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['workflows', 'test-workflow-1'],
@@ -311,13 +314,12 @@ describe('updateWorkflowThunk', () => {
         enabled: false,
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
 
       // Verify loadWorkflowThunk was called to sync with server
       expect(mockLoadWorkflowThunk).toHaveBeenCalledWith({ id: 'test-workflow-1' });
@@ -338,13 +340,12 @@ describe('updateWorkflowThunk', () => {
         name: 'New Workflow Name',
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
 
       const state = store.getState();
       expect(state.detail.yamlString).toContain('name: New Workflow Name');
@@ -360,13 +361,12 @@ describe('updateWorkflowThunk', () => {
         description: 'New description',
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
 
       const state = store.getState() as RootState;
       expect(state.detail.yamlString).toContain('description: New description');
@@ -382,13 +382,12 @@ describe('updateWorkflowThunk', () => {
         tags: ['tag1', 'tag2'],
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
 
       const state = store.getState() as RootState;
       expect(state.detail.yamlString).toContain('tags:');
@@ -406,14 +405,12 @@ describe('updateWorkflowThunk', () => {
         description: 'Updated description',
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
-
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
       expect(mockLoadWorkflowThunk).toHaveBeenCalledWith({ id: 'test-workflow-1' });
 
       const state = store.getState() as RootState;
@@ -433,13 +430,12 @@ describe('updateWorkflowThunk', () => {
         yaml: 'name: Direct YAML Update\nsteps: []',
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
 
       expect(mockLoadWorkflowThunk).not.toHaveBeenCalled();
 
@@ -457,13 +453,12 @@ describe('updateWorkflowThunk', () => {
       // Empty update or update with fields that don't affect YAML
       const workflowUpdate: Partial<EsWorkflow> = {};
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith(
+        'test-workflow-1',
+        workflowUpdate
+      );
 
       expect(mockLoadWorkflowThunk).not.toHaveBeenCalled();
 
@@ -482,8 +477,6 @@ describe('updateWorkflowThunk', () => {
         enabled: false,
       };
 
-      mockServices.http.put.mockResolvedValue(undefined);
-
       await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
       // Verify YAML string was updated to reflect the new enabled value
@@ -500,8 +493,6 @@ describe('updateWorkflowThunk', () => {
       const workflowUpdate: Partial<EsWorkflow> = {
         enabled: false,
       };
-
-      mockServices.http.put.mockResolvedValue(undefined);
 
       await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
@@ -530,8 +521,6 @@ steps: []`;
       const workflowUpdate: Partial<EsWorkflow> = {
         enabled: false,
       };
-
-      mockServices.http.put.mockResolvedValue(undefined);
 
       await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 

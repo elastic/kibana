@@ -58,6 +58,7 @@ describe('archiveMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Archive a maintenance window.",
         "tags": Array [
           "oas-tag:maintenance-window",
@@ -89,8 +90,9 @@ describe('archiveMaintenanceWindowRoute', () => {
         id: 'test-id',
         schedule: {
           custom: {
-            duration: '60m',
+            duration: '1h',
             recurring: {
+              every: '1w',
               occurrences: 2,
             },
             start: '2023-02-26T00:00:00.000Z',

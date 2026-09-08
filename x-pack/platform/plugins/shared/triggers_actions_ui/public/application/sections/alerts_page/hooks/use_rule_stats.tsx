@@ -25,13 +25,13 @@ const Divider = styled.div`
 interface Props {
   ruleTypeIds?: string[];
   consumers?: string[];
+  enabled?: boolean;
 }
 
-export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
+export const useRuleStats = ({ ruleTypeIds, consumers, enabled = true }: Props = {}) => {
   const {
     http,
     notifications: { toasts },
-    application: { isAppRegistered },
   } = useKibana().services;
   const [loading, setLoading] = useState<boolean>(false);
   const [stats, setStats] = useState({
@@ -42,14 +42,7 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
     snoozed: 0,
   });
 
-  const unifiedRulesPageEnabled = isAppRegistered('rules');
-  const manageRulesHref = useMemo(
-    () =>
-      unifiedRulesPageEnabled
-        ? http.basePath.prepend('/app/rules')
-        : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
-    [http.basePath, unifiedRulesPageEnabled]
-  );
+  const manageRulesHref = http.basePath.prepend('/app/rules');
 
   const loadRuleStats = useCallback(async () => {
     setLoading(true);
@@ -89,10 +82,16 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
   }, [consumers, http, ruleTypeIds, toasts]);
 
   useEffect(() => {
-    loadRuleStats();
-  }, [loadRuleStats]);
+    if (enabled) {
+      loadRuleStats();
+    }
+  }, [enabled, loadRuleStats]);
 
   return useMemo(() => {
+    if (!enabled) {
+      return [];
+    }
+
     const disabledStatsComponent = (
       <Stat
         title={stats.disabled}
@@ -157,6 +156,7 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
       </EuiButtonEmpty>,
     ].reverse();
   }, [
+    enabled,
     loading,
     manageRulesHref,
     stats.disabled,

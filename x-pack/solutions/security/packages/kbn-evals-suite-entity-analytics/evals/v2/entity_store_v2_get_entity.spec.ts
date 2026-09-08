@@ -1,0 +1,173 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout-security';
+import { evaluate } from '../../src/evaluate';
+
+/**
+ * Entity Store V2 - get_entity tool routing evals.
+ *
+ * These specs validate that the entity-analytics skill correctly routes known-entity
+ * lookup queries to the `security.get_entity` tool when Entity Store V2 is enabled.
+ * This includes profile retrieval, point-in-time profile snapshots on a specific
+ * date, and alert contribution questions. Risk-score *time series* / chart
+ * prompts belong in `entity_store_v2_get_entity_risk_score_history.spec.ts`
+ * (`security.get_entity_risk_score_history`) — `get_entity`'s
+ * profile_history is entity-store attribute snapshots, not the risk score series.
+ *
+ * Tool routing assertions work without pre-seeded data; the tool may return
+ * "entity not found" but the call itself must still be made. For grounded
+ * criteria (verifying actual profile fields, risk inputs, etc.) seed the entity
+ * store using the security-documents-generator populate script.
+ */
+evaluate.describe(
+  'SIEM Entity Analytics V2 Skill - Get Entity',
+  { tag: tags.serverless.security.complete },
+  () => {
+    evaluate('entity store v2: get entity questions', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'entity-analytics-v2: get entity',
+          description:
+            'Questions that should route to the security.get_entity tool in Entity Store V2 mode',
+          examples: [
+            {
+              input: {
+                question: "Tell me about the entity Cielo39's current risk profile",
+              },
+              output: {
+                criteria: [
+                  'Retrieve and summarise the current risk profile for Cielo39, or clearly state the entity was not found.',
+                  'Include risk score and risk level if available.',
+                  'Do not fabricate entity data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "Cielo39" or equivalent (prefixed or non-prefixed form).',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question:
+                  "Show me user jsmith123's full profile including changes in criticality and watchlists over the last 30 days",
+              },
+              output: {
+                criteria: [
+                  "Retrieve jsmith123's profile with attribute history over the last 30 days, or clearly state the entity was not found.",
+                  'Summarise any notable changes in asset criticality, watchlists, or behaviors over the interval.',
+                  'Do not fabricate entity data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "jsmith123" and an interval parameter of "30d" or equivalent.',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question: "What did user jsmith123's profile look like on March 15th?",
+              },
+              output: {
+                criteria: [
+                  "Retrieve jsmith123's profile snapshot for March 15th, or clearly state that no snapshot data is available for that date.",
+                  'Present the profile data as it existed on that specific date.',
+                  'Do not fabricate historical profile data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "jsmith123" and a date parameter corresponding to March 15th in ISO 8601 format.',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question:
+                  'What is the current risk profile for host server1, and is that risk score up to date?',
+              },
+              output: {
+                criteria: [
+                  'Retrieve and summarise the current risk profile for host server1, or clearly state the entity was not found.',
+                  'Include risk score, risk level, and asset criticality where available.',
+                  'If the risk score grounding signal reports the risk-score maintainer as stopped or never_started, explicitly caveat that risk scores are stale or unavailable rather than implying they are current.',
+                  'If the risk score grounding signal reports started, do not add an unnecessary "scoring is current" caveat.',
+                  'Do not fabricate entity data or a risk score grounding status.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "server1" and optionally entityType "host".',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question: 'Which alerts contributed to user jsmith123 having a high risk score?',
+              },
+              output: {
+                criteria: [
+                  "Retrieve jsmith123's entity profile including the alert inputs that contributed to the risk score, or clearly state no risk score or alert data is available.",
+                  'Summarise the contributing alerts where available (e.g. rule names, severity).',
+                  'Do not fabricate alert or risk data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "jsmith123"; the response should include risk_score_inputs if the entity has a risk score.',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question: 'Which watchlists is host server01 on?',
+              },
+              output: {
+                criteria: [
+                  "Call security.get_entity — the entity's watchlist memberships are on the entity profile (entity.attributes.watchlists). Or clearly state the entity was not found.",
+                  "Answer from the entity profile; do NOT iterate/enumerate all watchlists looking for this entity's memberships — the profile already has them.",
+                  'Do not fabricate entity or watchlist data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "server01" or "host:server01".',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);

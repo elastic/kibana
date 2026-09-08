@@ -18,6 +18,10 @@ import {
 } from '../common';
 
 import { validateDuration } from './lib/parse_date';
+import {
+  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+  INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+} from './inbound/constants';
 
 export enum AllowedHosts {
   Any = '*',
@@ -29,6 +33,34 @@ export enum EnabledActionTypes {
 
 const MAX_MAX_ATTEMPTS = 10;
 const MIN_MAX_ATTEMPTS = 1;
+
+function tlsCertRequiresKeyValidator(configPath: string) {
+  return function validate(rawConfig: { certificate?: string; key?: string }): string | undefined {
+    if (rawConfig.certificate && !rawConfig.key) {
+      return `must specify [${configPath}.key] when [${configPath}.certificate] is specified`;
+    }
+    if (rawConfig.key && !rawConfig.certificate) {
+      return `must specify [${configPath}.certificate] when [${configPath}.key] is specified`;
+    }
+  };
+}
+
+const tlsVerificationModeSchema = schema.oneOf(
+  [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+  { defaultValue: 'full' }
+);
+
+const relaySSLConfigSchema = schema.object(
+  {
+    verificationMode: tlsVerificationModeSchema,
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+  },
+  { validate: tlsCertRequiresKeyValidator('relay.ssl') }
+);
 
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
@@ -48,8 +80,8 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
-// We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
-// The list can be overwritten only if it's not already been set in the config.
+// We leverage the enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
+// The list can be overwritten only if it has not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
   schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
   {
@@ -72,6 +104,17 @@ const rateLimiterSchema = schema.recordOf(
     limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
   })
 );
+
+const oauthAuthorizationCodeRateLimitsSchema = schema.object({
+  authorize: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+  }),
+  callback: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+  }),
+});
 
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
@@ -109,6 +152,17 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
+  relay: schema.maybe(
+    schema.object({
+      url: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.uri({ scheme: ['https', 'http'] }),
+        schema.uri({ scheme: ['https'] })
+      ),
+      ssl: schema.maybe(relaySSLConfigSchema),
+    })
+  ),
   microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
@@ -179,6 +233,7 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usage: schema.maybe(
     schema.object({
       url: schema.maybe(schema.string()),
@@ -200,11 +255,43 @@ export const configSchema = schema.object({
     })
   ),
   rateLimiter: schema.maybe(rateLimiterSchema),
+  auth: schema.object({
+    oauth_authorization_code: schema.object({
+      rate_limits: oauthAuthorizationCodeRateLimitsSchema,
+    }),
+    ears: schema.maybe(
+      schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        enableExperimental: schema.boolean({ defaultValue: false }),
+        url: schema.maybe(schema.uri({ scheme: ['https'] })),
+        ssl: schema.maybe(
+          schema.object(
+            {
+              verificationMode: tlsVerificationModeSchema,
+              certificate: schema.maybe(schema.string()),
+              key: schema.maybe(schema.string()),
+            },
+            { validate: tlsCertRequiresKeyValidator('auth.ears.ssl') }
+          )
+        ),
+      })
+    ),
+  }),
+  inboundEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
+    maxEmitted: schema.number({
+      defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+      min: 1,
+      max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+    }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
 export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
+export type OAuthRateLimiterConfig = TypeOf<typeof oauthAuthorizationCodeRateLimitsSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express

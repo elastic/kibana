@@ -21,17 +21,19 @@ export function CorrelationsProgressControls({
   onCancel: () => void;
   isRunning: boolean;
 }) {
+  const progressPercent = Math.round(progress * 100);
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem data-test-subj="apmCorrelationsProgressTitle">
+          <EuiFlexItem data-test-subj={`apmCorrelationsProgress_${progressPercent}`}>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 data-test-subj="apmCorrelationsProgressTitleMessage"
                 id="xpack.apm.correlations.progressTitle"
                 defaultMessage="Progress: {progress}%"
-                values={{ progress: Math.round(progress * 100) }}
+                values={{ progress: progressPercent }}
               />
             </EuiText>
           </EuiFlexItem>
@@ -40,7 +42,7 @@ export function CorrelationsProgressControls({
               aria-label={i18n.translate('xpack.apm.correlations.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
-              value={Math.round(progress * 100)}
+              value={progressPercent}
               max={100}
               size="m"
             />

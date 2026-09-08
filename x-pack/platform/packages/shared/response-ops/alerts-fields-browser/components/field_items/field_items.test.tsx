@@ -276,7 +276,12 @@ describe('field_items', () => {
 
       const columns = getFieldColumns(getFieldColumnsParams);
       const { getByTestId } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+        <EuiInMemoryTable
+          tableCaption="Fields"
+          items={fieldItems}
+          itemId="name"
+          columns={columns}
+        />
       );
 
       getByTestId(`field-${timestampFieldId}-checkbox`).click();
@@ -296,7 +301,12 @@ describe('field_items', () => {
       });
 
       const { getByTestId, getAllByText } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+        <EuiInMemoryTable
+          tableCaption="Fields"
+          items={fieldItems}
+          itemId="name"
+          columns={columns}
+        />
       );
 
       expect(getAllByText('Name').at(0)).toBeInTheDocument();
@@ -321,7 +331,12 @@ describe('field_items', () => {
         ...getFieldColumnsParams,
       });
       const { getByTestId, getAllByText, queryAllByText, queryByTestId } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+        <EuiInMemoryTable
+          tableCaption="Fields"
+          items={fieldItems}
+          itemId="name"
+          columns={columns}
+        />
       );
 
       expect(getAllByText('Name').at(0)).toBeInTheDocument();
@@ -348,7 +363,12 @@ describe('field_items', () => {
       });
 
       const { getByText } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+        <EuiInMemoryTable
+          tableCaption="Fields"
+          items={fieldItems}
+          itemId="name"
+          columns={columns}
+        />
       );
 
       expect(getByText('Cases')).toBeInTheDocument();

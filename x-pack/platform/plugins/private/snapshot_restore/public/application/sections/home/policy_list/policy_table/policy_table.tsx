@@ -371,7 +371,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
-        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"
@@ -385,7 +384,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         key="createNewPolicy"
         {...reactRouterNavigate(history, linkToAddPolicy())}
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createPolicyButton"
       >
         <FormattedMessage

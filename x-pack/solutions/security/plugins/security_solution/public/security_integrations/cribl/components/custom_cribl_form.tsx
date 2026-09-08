@@ -9,26 +9,33 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { INVALID_NAMESPACE_CHARACTERS, isValidNamespace } from '@kbn/fleet-plugin/common';
 import type {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getFleetManagedIndexTemplates } from '../api/api';
 import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
 import {
   getPolicyConfigValueFromRouteEntries,
   getRouteEntriesFromPolicyConfig,
 } from '../../../../common/security_integrations/cribl/translator';
+import {
+  DATA_ID_MAX_LENGTH,
+  isValidDataId,
+} from '../../../../common/security_integrations/cribl/sanitize';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
@@ -38,12 +45,18 @@ const getDefaultRouteEntry = () => {
   };
 };
 
+const NAMESPACE_MAX_LENGTH = 100;
+
+const sanitizeNamespaceInput = (value: string): string =>
+  value.toLowerCase().replace(INVALID_NAMESPACE_CHARACTERS, '').slice(0, NAMESPACE_MAX_LENGTH);
+
 interface RouteEntryComponentProps {
   index: number;
   routeEntries: RouteEntry[];
   datastreamOpts: string[];
   onChangeCriblDataId(index: number, value: string): void;
   onChangeDatastream(index: number, value: string): void;
+  onChangeNamespace(index: number, value: string | undefined): void;
   onDeleteEntry(index: number): void;
 }
 
@@ -54,9 +67,24 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
     datastreamOpts,
     onChangeCriblDataId,
     onChangeDatastream,
+    onChangeNamespace,
     onDeleteEntry,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const routeEntry = routeEntries[index]; // the route entry for this row
+    const namespaceValidation = routeEntry.namespace
+      ? isValidNamespace(routeEntry.namespace, false)
+      : undefined;
+    const isNamespaceInvalid = !!(namespaceValidation && !namespaceValidation.valid);
+    const isDataIdInvalid = !!routeEntry.dataId && !isValidDataId(routeEntry.dataId);
+    const dataIdError = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.invalidDataId',
+      {
+        defaultMessage:
+          "Invalid Cribl dataId. Only letters, numbers, '.', '_', and '-' are allowed (max {maxLength} characters).",
+        values: { maxLength: DATA_ID_MAX_LENGTH },
+      }
+    );
 
     const options = datastreamOpts.map((o) => ({
       label: o,
@@ -64,29 +92,44 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
 
     const selectedOption = options.filter((o) => o.label === routeEntry.datastream);
 
+    const removeEntryLabel = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.removeEntry',
+      { defaultMessage: 'Remove entry' }
+    );
+
     return (
       <>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Cribl _dataId field">
+            <EuiFormRow
+              label="Cribl _dataId field"
+              isInvalid={isDataIdInvalid}
+              error={isDataIdInvalid ? dataIdError : undefined}
+            >
               <EuiFieldText
                 value={routeEntry.dataId}
+                isInvalid={isDataIdInvalid}
                 onChange={(e) => onChangeCriblDataId(index, e.currentTarget.value)}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiFlexItem grow={false}>
+            <span
+              style={{ display: 'inline-flex', alignItems: 'center', blockSize: euiTheme.size.xxl }}
+            >
               {i18n.translate('xpack.securitySolution.securityIntegration.cribl.mapsTo', {
                 defaultMessage: 'MAPS TO',
               })}
-            </EuiFlexItem>
+            </span>
           </EuiFormRow>
-          <EuiFlexItem>
-            <EuiFormRow label="Datastream">
+          {/* minWidth: 0 overrides flex default (min-width: auto) to prevent
+             the combo box selection pill from resizing the column */}
+          <EuiFlexItem style={{ minWidth: 0 }}>
+            <EuiFormRow label="Datastream" fullWidth>
               <EuiComboBox
                 placeholder="Select"
                 singleSelection
+                fullWidth
                 options={options}
                 selectedOptions={selectedOption}
                 onChange={(o) => {
@@ -99,16 +142,39 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
               />
             </EuiFormRow>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              label="Namespace"
+              isInvalid={isNamespaceInvalid}
+              error={namespaceValidation?.error}
+            >
+              <EuiFieldText
+                placeholder="default"
+                value={routeEntry.namespace ?? ''}
+                isInvalid={isNamespaceInvalid}
+                onChange={(e) => {
+                  const sanitized = sanitizeNamespaceInput(e.currentTarget.value);
+                  onChangeNamespace(index, sanitized === '' ? undefined : sanitized);
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              onClick={() => onDeleteEntry(index)}
-              isDisabled={routeEntries.length === 1}
-              aria-label="entryDeleteButton"
-              className="itemEntryDeleteButton"
-              data-test-subj="itemEntryDeleteButton"
-            />
+            <span
+              style={{ display: 'inline-flex', alignItems: 'center', blockSize: euiTheme.size.xxl }}
+            >
+              <EuiToolTip content={removeEntryLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="danger"
+                  iconType="trash"
+                  onClick={() => onDeleteEntry(index)}
+                  isDisabled={routeEntries.length === 1}
+                  aria-label={removeEntryLabel}
+                  className="itemEntryDeleteButton"
+                  data-test-subj="itemEntryDeleteButton"
+                />
+              </EuiToolTip>
+            </span>
           </EuiFormRow>
         </EuiFlexGroup>
       </>
@@ -175,6 +241,16 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       updateCriblPolicy(newValues);
     };
 
+    const onChangeNamespace = (index: number, value: string | undefined) => {
+      const newValues = [...routeEntries];
+      newValues[index] = {
+        ...routeEntries[index],
+        namespace: value || undefined,
+      };
+      setRouteEntries(newValues);
+      updateCriblPolicy(newValues);
+    };
+
     const onAddEntry = () => {
       const newValues = [...routeEntries, getDefaultRouteEntry()];
       setRouteEntries(newValues);
@@ -197,10 +273,19 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
         },
       };
 
+      const allNamespacesValid = updatedRouteEntries.every(
+        (entry) => !entry.namespace || isValidNamespace(entry.namespace, false).valid
+      );
+      const allDataIdsValid = updatedRouteEntries.every(
+        (entry) => !entry.dataId || isValidDataId(entry.dataId)
+      );
+
       // must have at least one filled in and all entries must have both filled in or neither
       const isValid =
         hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
-        allRouteEntriesArePaired(updatedRouteEntries);
+        allRouteEntriesArePaired(updatedRouteEntries) &&
+        allNamespacesValid &&
+        allDataIdsValid;
 
       onChange({
         isValid,
@@ -212,7 +297,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       <>
         {missingReqPermissions && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount={false}
               size="s"
               title={i18n.translate(
@@ -221,15 +306,15 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                   defaultMessage: 'Be sure you have the necessary privileges',
                 }
               )}
-              iconType="question"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
-                  defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
+                    defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
+                  />
+                </p>
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}
@@ -252,13 +337,14 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                 datastreamOpts={datastreamOpts}
                 onChangeCriblDataId={onChangeCriblDataId}
                 onChangeDatastream={onChangeDatastream}
+                onChangeNamespace={onChangeNamespace}
                 onDeleteEntry={onDeleteEntry}
               />
             ))}
             <EuiSpacer size="s" />
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton fill size="s" iconType="plusInCircle" onClick={onAddEntry}>
+                <EuiButton fill size="s" iconType="plusCircle" onClick={onAddEntry}>
                   <FormattedMessage
                     id="xpack.securitySolution.securityIntegration.cribl.addButton"
                     defaultMessage="Add"

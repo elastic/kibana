@@ -8,29 +8,52 @@
 export type {
   Attachment,
   UnknownAttachment,
-  AttachmentInput,
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
+  ConnectorAttachment,
 } from './attachments';
+
+export type {
+  StaleAttachment,
+  FreshAttachment,
+  AttachmentStaleCheckResult,
+  FreshAttachmentStalenessCheckError,
+} from './stale_check';
+export { isFreshAttachmentStalenessCheckError } from './stale_check';
 export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
+  connectorAttachmentDataSchema,
+  imageAttachmentDataSchema,
+  CONNECTOR_TAG_PREFIX,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
+  type TimeRange,
+  screenContextTimeRangeSchema,
   type EsqlAttachmentData,
+  type ConnectorAttachmentData,
+  type ImageAttachmentData,
+  type SupportedImageMimeType,
 } from './attachment_types';
 
 export type {
   VersionedAttachment,
+  VersionedAttachmentWithOrigin,
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentRefOperation,
   AttachmentRefActor,
   AttachmentDiff,
-  VersionedAttachmentInput,
+  AttachmentInput,
+  AttachmentGroup,
+  ConversationAttachment,
+  UpdateOriginResponse,
 } from './versioned_attachment';
 export {
   ATTACHMENT_REF_OPERATION,
@@ -40,14 +63,18 @@ export {
   attachmentVersionRefSchema,
   attachmentRefOperationSchema,
   attachmentRefActorSchema,
-  versionedAttachmentInputSchema,
+  attachmentInputSchema,
+  attachmentGroupSchema,
   attachmentDiffSchema,
+  isAttachmentGroup,
   getLatestVersion,
   getVersion,
   createVersionId,
   parseVersionId,
   isAttachmentActive,
   getActiveAttachments,
+  isVersionedAttachmentWithOrigin,
   hashContent,
   estimateTokens,
+  getContentKey,
 } from './versioned_attachment';

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-theme'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-theme'
+  title: '@kbn/ui-theme'
   description: Moon project for @kbn/ui-theme
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-ui-theme
+  sourceRoot: src/platform/packages/shared/kbn-ui-theme
 tags:
   - shared-common
   - package

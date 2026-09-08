@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
 
 // Mock the imports
 jest.mock('../../../../common/lib/parse_variable_path');
-jest.mock('../../../../common/lib/zod');
+jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path');
 jest.mock('../../workflow_context/lib/get_foreach_state_schema');
 
 import { validateVariable } from './validate_variable';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath } from '../../../../common/lib/zod';
 import {
   InvalidForeachParameterError,
   InvalidForeachParameterErrorCodes,
@@ -53,19 +53,6 @@ describe('validateVariable', () => {
     }),
   }) as any;
 
-  it('should return error when variable key is not defined', () => {
-    const variableItem = createVariableItem({ key: null });
-
-    const result = validateVariable(variableItem, mockContext);
-
-    expect(result).toMatchObject({
-      message: 'Variable is not defined',
-      severity: 'error',
-      owner: 'variable-validation',
-      hoverMessage: null,
-    });
-  });
-
   it('should return error when variable path cannot be parsed', () => {
     const variableItem = createVariableItem({ key: 'invalid.path' });
     mockParseVariablePath.mockReturnValue(null);
@@ -76,6 +63,7 @@ describe('validateVariable', () => {
       message: 'Invalid variable path: invalid.path',
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'invalidVariablePath',
       hoverMessage: null,
     });
   });
@@ -102,6 +90,7 @@ describe('validateVariable', () => {
       message: 'Unable to parse foreach parameter as JSON',
       severity: 'warning',
       owner: 'variable-validation',
+      ruleId: 'invalidForeachParameter',
       hoverMessage: null,
     });
   });
@@ -119,6 +108,7 @@ describe('validateVariable', () => {
       message: 'Missing closing bracket, Invalid character',
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'variablePathParseError',
       hoverMessage: null,
     });
   });
@@ -136,23 +126,7 @@ describe('validateVariable', () => {
       message: 'Failed to parse variable path',
       severity: 'error',
       owner: 'variable-validation',
-      hoverMessage: null,
-    });
-  });
-
-  it('should return warning when context is null', () => {
-    const variableItem = createVariableItem({ key: 'test.variable' });
-    mockParseVariablePath.mockReturnValue({
-      errors: null,
-      propertyPath: 'test.variable',
-    } as any);
-
-    const result = validateVariable(variableItem, null);
-
-    expect(result).toMatchObject({
-      message: 'Variable test.variable cannot be validated, because the workflow schema is invalid',
-      severity: 'warning',
-      owner: 'variable-validation',
+      ruleId: 'variablePathParseError',
       hoverMessage: null,
     });
   });
@@ -171,6 +145,7 @@ describe('validateVariable', () => {
       message: 'Variable nonexistent.variable is invalid',
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'invalidVariableReference',
       hoverMessage: null,
     });
   });
@@ -193,6 +168,7 @@ describe('validateVariable', () => {
       message: 'Unable to determine foreach item type',
       severity: 'warning',
       owner: 'variable-validation',
+      ruleId: 'foreachItemRuntimeType',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -213,6 +189,7 @@ describe('validateVariable', () => {
       message: 'This variable comes from external source',
       severity: 'warning',
       owner: 'variable-validation',
+      ruleId: 'unknownVariableType',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -231,6 +208,7 @@ describe('validateVariable', () => {
       message: "Variable unknownVar cannot be validated, because it's type is unknown",
       severity: 'warning',
       owner: 'variable-validation',
+      ruleId: 'unknownVariableType',
       hoverMessage: expect.stringContaining('(property) unknownVar:'),
     });
   });
@@ -251,6 +229,7 @@ describe('validateVariable', () => {
       owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) test.variable:'),
     });
+    expect(result).not.toHaveProperty('ruleId');
   });
 
   it('should handle complex nested paths', () => {

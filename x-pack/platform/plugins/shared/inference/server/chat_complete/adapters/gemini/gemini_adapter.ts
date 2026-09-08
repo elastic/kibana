@@ -34,6 +34,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
     timeout,
+    maxContentLength,
     stream = false,
   }) => {
     const connector = executor.getConnector();
@@ -57,6 +58,9 @@ export const geminiAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
+          ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
+            ? { maxContentLength }
+            : {}),
         },
       });
     });
@@ -154,13 +158,28 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
               )
             : {},
         };
-      case 'string':
+      case 'string': {
+        const enumValues = def.enum
+          ? (def.enum as string[])
+          : def.const
+          ? [def.const as string]
+          : undefined;
+        // Vertex AI treats `format: 'enum'` as a promise that `enum` is
+        // non-empty and rejects the request otherwise, so only emit an enum
+        // schema when the schema actually constrains the value to an enum/const.
+        if (enumValues?.length) {
+          return {
+            type: Gemini.SchemaType.STRING,
+            format: 'enum',
+            description: def.description,
+            enum: enumValues,
+          };
+        }
         return {
           type: Gemini.SchemaType.STRING,
-          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
         };
+      }
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,
@@ -188,15 +207,8 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
 
 const skipThoughtSignatureHash = 'skip_thought_signature_validator';
 
-function messagesToGemini({
-  messages,
-  useThoughtSignature,
-}: {
-  messages: Message[];
-  useThoughtSignature: boolean;
-}): GeminiMessage[] {
-  let mapped = messages.map(messageToGeminiMapper()).reduce<GeminiMessage[]>((output, message) => {
-    // merging consecutive messages from the same user, as Gemini requires multi-turn messages
+function mergeConsecutiveSameRole(messages: GeminiMessage[]): GeminiMessage[] {
+  return messages.reduce<GeminiMessage[]>((output, message) => {
     const previousMessage = output.length ? output[output.length - 1] : undefined;
     if (previousMessage?.role === message.role) {
       previousMessage.parts.push(...message.parts);
@@ -205,13 +217,25 @@ function messagesToGemini({
     }
     return output;
   }, []);
+}
+
+function messagesToGemini({
+  messages,
+  useThoughtSignature,
+}: {
+  messages: Message[];
+  useThoughtSignature: boolean;
+}): GeminiMessage[] {
+  // Filter empty-part messages first, then merge so roles always alternate.
+  const mapped = mergeConsecutiveSameRole(
+    messages.map(messageToGeminiMapper()).filter((message) => message.parts.length > 0)
+  );
 
   if (useThoughtSignature) {
-    mapped = mapped.map((message, index, array) => {
-      if (index < array.length - 1) {
+    mapped.forEach((message, index) => {
+      if (index < mapped.length - 1) {
         addThoughtSignatureToFirstFunctionCall(message);
       }
-      return message;
     });
   }
 

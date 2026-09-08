@@ -37,6 +37,8 @@ import type {
 } from '../constants';
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
+export type MetricDensity = 'compact' | 'default';
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
@@ -50,13 +52,14 @@ export interface MetricArguments {
   secondaryTrendVisuals?: string;
   secondaryTrendBaseline?: number | string;
   secondaryTrendPalette?: [string, string, string];
+  secondaryTrendTextPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   primaryAlign: MetricStyle['valueTextAlign'];
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
+  density: MetricDensity;
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
@@ -64,8 +67,8 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
-  secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
-  applyColorTo: 'background' | 'value';
+  secondaryNameVisibility: SecondaryNameVisibility;
+  applyColorTo?: 'background' | 'value';
 }
 
 export type MetricInput = Datatable;

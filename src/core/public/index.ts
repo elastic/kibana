@@ -60,11 +60,7 @@ export type {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeDocTitle,
@@ -72,7 +68,6 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
 export type {
   Plugin,
@@ -230,6 +225,7 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreServiceAccountsService,
   CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';
 

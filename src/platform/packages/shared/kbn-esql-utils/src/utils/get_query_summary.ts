@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-language';
-import { esqlCommandRegistry, Parser, type ESQLCommandSummary } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@elastic/esql/types';
+import { Parser } from '@elastic/esql';
+import { esqlCommandRegistry, type ESQLCommandSummary } from '@kbn/esql-language';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 
 function processCommand(
@@ -56,7 +57,7 @@ function processCommand(
  * @returns An object containing sets of new columns, renamed column pairs, metadata columns, aggregates, and grouping.
  */
 export function getQuerySummary(query: string): ESQLCommandSummary {
-  const { root } = Parser.parseQuery(query);
+  const { root } = Parser.parse(query);
 
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();

@@ -94,7 +94,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                   )
                 }
               >
-                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} aria-hidden={true} />
                 <FormattedMessage
                   id="xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.sloDetailsLink"
                   defaultMessage="SLO details"
@@ -123,7 +123,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                         'xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.thresholdBreachedTitle',
                         { defaultMessage: 'Threshold breached' }
                       )}
-                      <EuiIcon type="warning" style={{ marginLeft: '4px' }} />
+                      <EuiIcon type="warning" style={{ marginLeft: '4px' }} aria-hidden={true} />
                     </span>
                   </EuiText>
                 </EuiFlexItem>
@@ -143,7 +143,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                             {
                               defaultMessage: 'Alert when > {threshold}x',
                               values: {
-                                threshold: numeral(actionGroupWindow!.burnRateThreshold).format(
+                                threshold: numeral(actionGroupWindow?.burnRateThreshold).format(
                                   '0.[00]'
                                 ),
                               },
@@ -162,7 +162,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               slo={slo}
               dataTimeRange={chartTimeRange}
               alertTimeRange={alertTimeRange}
-              threshold={actionGroupWindow!.burnRateThreshold}
+              threshold={actionGroupWindow?.burnRateThreshold}
               variant="danger"
             />
           </EuiFlexItem>

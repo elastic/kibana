@@ -18,6 +18,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -27,6 +28,7 @@ import type {
   ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
   ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionGetIncidentParams,
   ExecutorSubActionCloseIncidentParams,
   ExecutorSubActionCommonFieldsParams,
   ServiceNowPublicConfigurationType,
@@ -79,6 +81,7 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -194,6 +197,15 @@ async function executor(
     data = await api.closeIncident({
       externalService,
       params: closeIncidentParams,
+      logger,
+    });
+  }
+
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    data = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
       logger,
     });
   }

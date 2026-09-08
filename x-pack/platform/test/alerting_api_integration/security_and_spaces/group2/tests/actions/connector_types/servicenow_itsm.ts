@@ -161,6 +161,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: null,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -219,6 +220,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -257,7 +259,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -279,7 +281,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -478,7 +480,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'getChoices' | 'closeIncident'`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'getChoices' | 'closeIncident'\n  → at subAction`,
               });
             });
         });
@@ -496,7 +498,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
               });
             });
         });
@@ -519,7 +521,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams\": Unrecognized key(s) in object: 'savedObjectId'`,
+                message: `error validating action params: ✖ Unrecognized key: "savedObjectId"\n  → at subActionParams\n✖ Invalid input: expected object, received undefined\n  → at subActionParams.incident`,
               });
             });
         });
@@ -546,7 +548,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
               });
             });
         });
@@ -573,7 +575,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
               });
             });
         });
@@ -670,7 +672,30 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   errorSource: TaskErrorSource.USER,
-                  message: `error validating action params: Field \"subActionParams.fields\": Required`,
+                  message: `error validating action params: ✖ Invalid input: expected array, received undefined\n  → at subActionParams.fields`,
+                });
+              });
+          });
+        });
+
+        describe('getIncident', () => {
+          it('should fail when externalId is not provided', async () => {
+            await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getIncident',
+                  subActionParams: {},
+                },
+              })
+              .then((resp: any) => {
+                expect(resp.body).to.eql({
+                  connector_id: simulatedActionId,
+                  status: 'error',
+                  retry: false,
+                  errorSource: TaskErrorSource.USER,
+                  message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.externalId`,
                 });
               });
           });
@@ -715,13 +740,13 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
+                  ['execute-start', { equal: 12 }],
+                  ['execute', { equal: 12 }],
                 ]),
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events[events.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(283);
           });
         });
@@ -893,6 +918,51 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
+          });
+        });
+
+        describe('getIncident', () => {
+          it('should get the incident', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getIncident',
+                  subActionParams: {
+                    externalId: '123',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {
+                sys_id: '123',
+                number: 'INC01',
+                sys_created_on: '2020-03-10 12:24:20',
+                sys_updated_on: '2020-03-10 12:24:20',
+              },
+            });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 4 }],
+                  ['execute', { gte: 4 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[events.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });

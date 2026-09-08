@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiPanel } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { NodeSubMenuComponents } from './submenu';
 
@@ -120,21 +120,6 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string; windowHe
   overflow: hidden;
   contain: strict;
   background-color: ${(props) => props.backgroundColor};
-`;
-
-/**
- * The Panel, styled for use in `ResolverMap`.
- */
-export const StyledPanel = styled(EuiPanel)`
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  overflow: auto;
-  width: 25em;
-  max-width: 50%;
-  border-radius: 0;
-  border-top: none;
 `;
 
 /**

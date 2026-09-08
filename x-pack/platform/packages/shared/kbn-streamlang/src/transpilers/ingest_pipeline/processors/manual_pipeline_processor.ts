@@ -6,19 +6,67 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestPipelineManualIngestPipelineProcessor } from '../../../../types/processors/ingest_pipeline_processors';
+import type { Condition } from '../../../../types/conditions';
+import type { ManualIngestPipelineProcessor } from '../../../../types/processors';
 import {
   type ElasticsearchProcessorType,
   elasticsearchProcessorTypes,
 } from '../../../../types/processors/manual_ingest_pipeline_processors';
 import type { IngestPipelineTranspilationOptions } from '..';
+import {
+  conditionToPainless,
+  conditionToPainlessCheck,
+} from '../../../conditions/condition_to_painless';
+
+/**
+ * Combines a parent condition (Streamlang Condition from the `where` clause) with
+ * a nested processor's existing `if` condition (raw Painless string from user).
+ *
+ * When both exist, the parent condition is compiled and checked first. If it fails,
+ * the processor is skipped. Otherwise, the nested condition is evaluated.
+ */
+function combineIfConditions(
+  parentCondition: Condition | undefined,
+  nestedIf: string | undefined
+): string | undefined {
+  if (!parentCondition && !nestedIf) {
+    return undefined;
+  }
+  if (!parentCondition) {
+    return nestedIf;
+  }
+  if (!nestedIf) {
+    // Only parent condition - compile it directly
+    return conditionToPainless(parentCondition);
+  }
+
+  // Both conditions exist - combine them using conditionToPainlessCheck
+  // which sets a variable instead of returning, allowing us to chain conditions
+  const parentConditionCheck = conditionToPainlessCheck(parentCondition, '_parentConditionMet');
+
+  return `
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+${parentConditionCheck}
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+${nestedIf}
+`;
+}
 
 export const processManualIngestPipelineProcessors = (
-  manualIngestPipelineProcessor: IngestPipelineManualIngestPipelineProcessor,
+  manualIngestPipelineProcessor: Omit<ManualIngestPipelineProcessor, 'where' | 'action'> & {
+    if?: Condition;
+    tag?: string;
+  },
   transpilationOptions?: IngestPipelineTranspilationOptions
 ) => {
   // manual_ingest_pipeline processor is a special case, since it has nested Elasticsearch-level processors and doesn't support if
-  // directly - we need to add it to each nested processor
+  // directly - we need to add it to each nested processor.
+  const parentCondition = manualIngestPipelineProcessor.if;
+
   return manualIngestPipelineProcessor.processors.flatMap((nestedProcessor) => {
     const nestedType = Object.keys(nestedProcessor)[0];
     if (!elasticsearchProcessorTypes.includes(nestedType as ElasticsearchProcessorType)) {
@@ -43,6 +91,10 @@ export const processManualIngestPipelineProcessors = (
         `Invalid processor config for "${nestedType}" in manual_ingest_pipeline processor. Expected an object.`
       );
     }
+
+    const nestedIf = nestedConfig.if as string | undefined;
+    const combinedIf = combineIfConditions(parentCondition, nestedIf);
+
     return {
       [nestedType]: {
         ...nestedConfig,
@@ -54,11 +106,7 @@ export const processManualIngestPipelineProcessors = (
               ...(manualIngestPipelineProcessor.on_failure || []),
             ]
           : manualIngestPipelineProcessor.on_failure,
-        ...(!nestedConfig.if &&
-        'if' in manualIngestPipelineProcessor &&
-        manualIngestPipelineProcessor.if
-          ? { if: manualIngestPipelineProcessor.if }
-          : {}),
+        ...(combinedIf ? { if: combinedIf } : {}),
       },
     } as IngestProcessorContainer;
   });

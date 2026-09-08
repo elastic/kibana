@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 
@@ -22,7 +22,7 @@ const getHash = (reindexOp: ReindexSavedObject) => {
   // This needs further investigation, see: https://github.com/elastic/kibana/issues/123752
   const { reindexOptions, ...attributes } = reindexOp.attributes;
   return createHash('sha256')
-    .update(stringify({ id: reindexOp.id, ...attributes }))
+    .update(stableStringify({ id: reindexOp.id, ...attributes }))
     .digest('base64');
 };
 

@@ -7,7 +7,7 @@
 
 import xml2js from 'xml2js';
 
-interface BaseXmlElement {
+export interface BaseXmlElement {
   $?: { [key: string]: string }; // XML attributes
   _?: string; // Text content
 }
@@ -73,7 +73,7 @@ export class XmlParser {
     elementName: string,
     attrName?: string,
     attrValue?: string
-  ): XmlElement[] | XmlElement | string | undefined {
+  ): Array<XmlElement> | XmlElement | string | undefined {
     if (typeof source !== 'object' || source === null) {
       return undefined;
     }
@@ -138,5 +138,52 @@ export class XmlParser {
     }
 
     return undefined;
+  }
+
+  protected getStrValue(val: BaseXmlElement | Array<string> | string): string {
+    if (this.isBaseXmlElement(val)) {
+      return val._ ? val._.trim() : '';
+    }
+
+    if (Array.isArray(val)) {
+      return val[0].trim();
+    }
+
+    return val.trim();
+  }
+
+  private isBaseXmlElement(obj: unknown): obj is BaseXmlElement {
+    return Boolean(obj && typeof obj === 'object' && ('_' in obj || '$' in obj));
+  }
+
+  /**
+   * Recursively transforms all properties named `elementName` in `source`.
+   * This method mutates the provided object tree in place.
+   */
+  protected transformAllDeep(
+    source: unknown,
+    elementName: string,
+    transform: (value: unknown) => unknown
+  ): void {
+    const walk = (node: unknown): void => {
+      if (Array.isArray(node)) {
+        node.forEach((item) => walk(item));
+        return;
+      }
+
+      if (node === null || typeof node !== 'object') {
+        return;
+      }
+
+      const nodeObject = node as Record<string, unknown>;
+      Object.entries(nodeObject).forEach(([key, value]) => {
+        if (key === elementName) {
+          nodeObject[key] = transform(value);
+        }
+        walk(nodeObject[key]);
+      });
+    };
+
+    walk(source);
   }
 }

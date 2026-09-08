@@ -4,23 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ts-type-check-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ts-type-check-cli'
+  title: '@kbn/ts-type-check-cli'
   description: Moon project for @kbn/ts-type-check-cli
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-ts-type-check-cli
+  sourceRoot: packages/kbn-ts-type-check-cli
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
   - '@kbn/dev-cli-errors'
+  - '@kbn/dev-proc-runner'
+  - '@kbn/dev-validation-runner'
+  - '@kbn/dev-utils'
+  - '@kbn/moon'
   - '@kbn/ts-projects'
   - '@kbn/dev-cli-runner'
   - '@kbn/std'
@@ -36,16 +39,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

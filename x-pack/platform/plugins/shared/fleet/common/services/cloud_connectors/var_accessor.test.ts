@@ -454,7 +454,7 @@ describe('Cloud Connector Var Accessor', () => {
       expect(credentials).toEqual({
         tenantId: 'tenant-123',
         clientId: 'client-456',
-        azureCredentialsCloudConnectorId: 'connector-789',
+        azure_credentials_cloud_connector_id: 'connector-789',
       });
     });
 
@@ -543,7 +543,7 @@ describe('Cloud Connector Var Accessor', () => {
         {
           tenantId: 'new-tenant',
           clientId: 'new-client',
-          azureCredentialsCloudConnectorId: 'new-connector',
+          azure_credentials_cloud_connector_id: 'new-connector',
         },
         'azure',
         packageInfo

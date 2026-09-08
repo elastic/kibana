@@ -6,15 +6,23 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { WorkflowComboBoxOption } from '@kbn/agent-builder-browser';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
-export const useListWorkflows = () => {
+interface ListWorkflowsResponse {
+  results: WorkflowComboBoxOption[];
+}
+
+export const useListWorkflows = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { toolsService } = useAgentBuilderServices();
 
   const result = useQuery({
     queryKey: queryKeys.tools.workflows.list(),
-    queryFn: () => toolsService.listWorkflows({}),
+    queryFn: async (): Promise<ListWorkflowsResponse> => {
+      return await toolsService.listWorkflows({ page: 1, limit: 1000 });
+    },
+    enabled,
   });
 
   return {

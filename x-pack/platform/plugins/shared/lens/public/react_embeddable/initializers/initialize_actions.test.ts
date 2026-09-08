@@ -15,9 +15,9 @@ import {
   getLensRuntimeStateMock,
   createUnifiedSearchApi,
   getLensInternalApiMock,
-  mockDynamicActionsManager,
+  getTextBasedLensSerializedStateMock,
 } from '../mocks';
-import { createEmptyLensState } from '../helper';
+import { mockDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 const DATAVIEW_ID = 'myDataView';
 
 jest.mock('../../app_plugin/show_underlying_data', () => {
@@ -67,7 +67,7 @@ function setupActionsApi(
         nowProvider: { ...services.data.nowProvider, get: jest.fn(() => new Date()) },
       },
     },
-    mockDynamicActionsManager()
+    mockDrilldownsManager()
   );
   return api;
 }
@@ -76,16 +76,12 @@ describe('Dashboard actions', () => {
   describe('Drilldowns', () => {
     it('should expose drilldowns for DSL based visualization', async () => {
       const api = setupActionsApi();
-      expect(api.enhancements).toBeDefined();
+      expect(api.setDrilldowns).toBeDefined();
     });
 
-    it('should not expose drilldowns for ES|QL chart types', async () => {
-      const api = setupActionsApi(
-        createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
-          esql: 'FROM index',
-        })
-      );
-      expect(api.enhancements).toBeUndefined();
+    it('should expose drilldowns for ES|QL chart types', async () => {
+      const api = setupActionsApi(getTextBasedLensSerializedStateMock());
+      expect(api.setDrilldowns).toBeDefined();
     });
   });
 
@@ -128,13 +124,21 @@ describe('Dashboard actions', () => {
 
     it('should expose the "explore in discover" capability for ES|QL chart types', async () => {
       const api = setupActionsApi(
-        createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
-          esql: 'FROM index',
-        }),
+        getTextBasedLensSerializedStateMock(),
         visualizationContextMockOverrides
       );
       api.loadViewUnderlyingData();
       expect(api.canViewUnderlyingData$.getValue()).toBe(true);
+    });
+
+    it('should pass the authoritative ES|QL layer query to the underlying data args', async () => {
+      const esql = 'FROM index | LIMIT 10';
+      const api = setupActionsApi(
+        getTextBasedLensSerializedStateMock(esql),
+        visualizationContextMockOverrides
+      );
+      api.loadViewUnderlyingData();
+      expect(api.getViewUnderlyingDataArgs()).toEqual(expect.objectContaining({ query: { esql } }));
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -151,14 +151,13 @@ describe('CaseConnector', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"string\\",
-            \\"received\\": \\"undefined\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"incident\\",
               \\"name\\"
             ],
-            \\"message\\": \\"Required\\"
+            \\"message\\": \\"Invalid input: expected string, received undefined\\"
           }
         ]"
       `);
@@ -178,14 +177,13 @@ describe('CaseConnector', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"string\\",
-            \\"received\\": \\"boolean\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"incident\\",
               \\"name\\"
             ],
-            \\"message\\": \\"Expected string, received boolean\\"
+            \\"message\\": \\"Invalid input: expected string, received boolean\\"
           }
         ]"
       `);
@@ -206,14 +204,13 @@ describe('CaseConnector', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"array\\",
-            \\"received\\": \\"null\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"incident\\",
               \\"foo\\"
             ],
-            \\"message\\": \\"Expected array, received null\\"
+            \\"message\\": \\"Invalid input: expected array, received null\\"
           }
         ]"
       `);
@@ -235,15 +232,14 @@ describe('CaseConnector', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"number\\",
-            \\"received\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"incident\\",
               \\"bar\\",
               \\"check\\"
             ],
-            \\"message\\": \\"Expected number, received string\\"
+            \\"message\\": \\"Invalid input: expected number, received string\\"
           }
         ]"
       `);
@@ -393,14 +389,13 @@ describe('CaseConnector', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"string\\",
-            \\"received\\": \\"number\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"incident\\",
               \\"externalId\\"
             ],
-            \\"message\\": \\"Expected string, received number\\"
+            \\"message\\": \\"Invalid input: expected string, received number\\"
           }
         ]"
       `);

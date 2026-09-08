@@ -17,6 +17,7 @@ import {
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -26,6 +27,7 @@ import type {
   ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
   ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionGetIncidentParams,
   ExecutorSubActionCommonFieldsParams,
   ServiceNowPublicConfigurationType,
 } from '@kbn/connector-schemas/servicenow';
@@ -76,6 +78,7 @@ export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -176,6 +179,15 @@ async function executor(
     data = await api.getChoices({
       externalService,
       params: getChoicesParams,
+      logger,
+    });
+  }
+
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    data = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
       logger,
     });
   }

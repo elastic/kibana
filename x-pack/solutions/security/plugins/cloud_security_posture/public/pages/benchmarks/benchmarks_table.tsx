@@ -145,7 +145,11 @@ const getBenchmarkTableColumns = (
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+            <CISBenchmarkIcon
+              type={benchmarkId}
+              name={getBenchmarkApplicableTo(benchmarkId)}
+              size={'l'}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
         </EuiFlexGroup>
@@ -172,7 +176,7 @@ const getBenchmarkTableColumns = (
           <EuiButtonEmpty
             data-test-subj={EMPTY_EVALUATION_TEST_SUBJECT}
             href={integrationLink}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             flush="left"
           >
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {

@@ -8,16 +8,20 @@
  */
 
 import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { type QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createTestQueryClient } from './query_client_wrapper';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 
 interface TestWrapperProps {
   children: React.ReactNode;
   store?: Store;
-  routerHistory?: string[];
+  queryClient?: QueryClient;
+  routerHistory?: React.ComponentProps<typeof MemoryRouter>['initialEntries'];
 }
 
 /**
@@ -25,16 +29,23 @@ interface TestWrapperProps {
  * for testing Kibana components.
  *
  * @param store - The Redux store to use
+ * @param queryClient - Optional QueryClient for React Query hooks
  * @param routerHistory - Optional array of routes to simulate browser history
  * @param children - The component(s) to render within the providers
  */
-export function TestWrapper({ store, routerHistory, children }: TestWrapperProps) {
+export function TestWrapper({ store, queryClient, routerHistory, children }: TestWrapperProps) {
   const reduxStore = store ?? createMockStore();
+  const client = queryClient ?? createTestQueryClient();
+
   return (
-    <MemoryRouter initialEntries={routerHistory}>
-      <I18nProvider>
-        <ReduxProvider store={reduxStore}>{children}</ReduxProvider>
-      </I18nProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={client}>
+      <MemoryRouter initialEntries={routerHistory}>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <ReduxProvider store={reduxStore}>{children}</ReduxProvider>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }

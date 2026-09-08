@@ -11,10 +11,27 @@
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * Placeholder feature flag for testing experimental features infrastructure.
-   * This should be removed once the first real experimental feature is added.
+   * Enables the "Export Results" button and server-side streaming export endpoints
+   * for downloading osquery results as NDJSON, JSON, or CSV files.
    */
-  _placeholder: false,
+  exportResults: true,
+  /**
+   * Enables RFC 5545 RRULE-based recurrence scheduling for packs and pack queries
+   * as an alternative to native interval-based scheduling. When enabled, the
+   * pack form and pack query flyout expose a Schedule section, the API accepts
+   * `schedule_type` / `interval` (pack-level) / `rrule_schedule` fields, and the
+   * Fleet config fans the pack-level schedule onto each query that doesn't have
+   * its own override. Requires osquerybeat with RRULE support.
+   */
+  rruleScheduling: true,
+  /**
+   * Enables osquery cross-project search (CPS) read support on serverless. When enabled, osquery
+   * result and action-response reads fan out across linked projects as the current user, and the
+   * read-only CPS project picker is registered on osquery pages. Fan-out additionally requires the
+   * request to resolve at least one linked project via `cps.isCpsActive()`, so a serverless project
+   * with no linked projects reads exactly as it did before CPS. Has no effect on stateful Kibana.
+   */
+  crossProjectSearch: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

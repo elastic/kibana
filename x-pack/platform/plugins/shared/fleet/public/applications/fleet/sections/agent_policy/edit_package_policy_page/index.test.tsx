@@ -26,13 +26,19 @@ import {
   useGetPackagePolicies,
   sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
-import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
+import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
+
+import { ExperimentalFeaturesService } from '../../../services';
 
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
 let lastStepConfigureProps: any;
+
+jest.mock('../../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
 
 jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
   return {
@@ -107,6 +113,35 @@ jest.mock('../../../hooks', () => {
                 package: 'nginx',
                 path: 'access',
               },
+              {
+                type: 'logs',
+                dataset: 'nginx.error',
+                title: 'Nginx error logs',
+                release: 'experimental',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'logfile',
+                    vars: [
+                      {
+                        name: 'paths',
+                        type: 'text',
+                        title: 'Paths',
+                        multi: true,
+                        required: true,
+                        show_user: true,
+                        default: ['/var/log/nginx/error.log*'],
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    title: 'Nginx error logs',
+                    description: 'Collect Nginx error logs',
+                    enabled: true,
+                  },
+                ],
+                package: 'nginx',
+                path: 'error',
+              },
             ],
             latestVersion: version,
             keepPoliciesUpToDate: false,
@@ -166,7 +201,7 @@ jest.mock('../../../hooks', () => {
 jest.mock('../../../../integrations/hooks', () => {
   return {
     ...jest.requireActual('../../../../integrations/hooks'),
-    useGetOnePackagePolicy: jest.fn(),
+    useGetOnePackagePolicyQuery: jest.fn(),
     useConfirmForceInstall: jest.fn(),
   };
 });
@@ -214,6 +249,13 @@ const mockPackagePolicy = {
             paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
           },
         },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'nginx.error' },
+          vars: {
+            paths: { value: ['/var/log/nginx/error.log*'], type: 'text' },
+          },
+        },
       ],
       vars: undefined,
     },
@@ -249,10 +291,13 @@ describe('edit package policy page', () => {
     (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableVarGroups: true,
+    } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
 
-    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicy,
       },
@@ -349,6 +394,10 @@ describe('edit package policy page', () => {
             streams: [
               {
                 ...mockPackagePolicy.inputs[0].streams[0],
+                enabled: false,
+              },
+              {
+                ...mockPackagePolicy.inputs[0].streams[1],
                 enabled: false,
               },
             ],
@@ -495,7 +544,7 @@ describe('edit package policy page', () => {
 
   it('should not show confirmation modal if package is on agentless policy', async () => {
     (sendBulkGetAgentPoliciesForRq as MockFn).mockResolvedValue({ data: [{ agents: 1 }] });
-    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicyAgentless,
       },
@@ -545,7 +594,7 @@ describe('edit package policy page', () => {
   it('passes existing var_group selections to configure step', async () => {
     const varGroupSelections = { auth_method: 'oauth' };
 
-    (useGetOnePackagePolicy as MockFn).mockReturnValueOnce({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValueOnce({
       data: {
         item: { ...mockPackagePolicy, var_group_selections: varGroupSelections },
       },
@@ -744,6 +793,38 @@ describe('edit package policy page', () => {
           })
         )
       );
+    });
+  });
+
+  describe('agentless policies UI kill switch', () => {
+    it('skips the package-policy read when the isAgentless hint is set and the switch is on', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+        enableAgentlessPoliciesUI: true,
+      } as any);
+      testRenderer.history.push('?isAgentless=true');
+      render();
+
+      await waitFor(() => {
+        expect(useGetOnePackagePolicyQuery).toHaveBeenCalledWith('nginx-1', { enabled: false });
+      });
+    });
+
+    it('ignores the isAgentless hint and keeps the package-policy read when the switch is off', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+        enableAgentlessPoliciesUI: false,
+      } as any);
+      testRenderer.history.push('?isAgentless=true');
+      render();
+
+      await waitFor(() => {
+        expect(useGetOnePackagePolicyQuery).toHaveBeenCalledWith('nginx-1', { enabled: true });
+      });
+      // The form then loads through the legacy package-policy read path.
+      await waitFor(() => {
+        expect(renderResult.getByDisplayValue('nginx-1')).toBeInTheDocument();
+      });
     });
   });
 });

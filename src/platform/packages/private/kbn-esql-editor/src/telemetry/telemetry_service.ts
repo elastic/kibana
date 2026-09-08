@@ -15,11 +15,12 @@ import type {
   ControlTriggerSource,
   TelemetryLatencyProps,
 } from '@kbn/esql-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
@@ -28,12 +29,34 @@ import {
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
+  ESQL_RESOURCE_BROWSER_OPENED,
+  ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
+  ESQL_VISOR_NL_SUBMITTED,
+  ESQL_COMMENT_TO_ESQL_SUBMITTED,
+  ESQL_COMMENT_TO_ESQL_REVIEWED,
+  ESQL_FIX_WITH_AI_SUBMITTED,
+  ESQL_FIX_WITH_AI_REVIEWED,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
+import { reportEsqlError } from '../report_error';
+
+export enum AiReviewAction {
+  ACCEPT = 'accept',
+  REJECT = 'reject',
+}
+
+export enum ResourceBrowserType {
+  DATA_SOURCES = 'data_sources',
+  FIELDS = 'fields',
+}
+export enum ResourceBrowserOpenedFrom {
+  AUTOCOMPLETE = 'autocomplete',
+  BADGE = 'badge',
+}
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -42,8 +65,10 @@ export class ESQLEditorTelemetryService {
     try {
       this._analytics.reportEvent(eventType, eventData);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to report telemetry event', error);
+      reportEsqlError(error, {
+        errorType: 'TelemetryEvent',
+        labels: { event_type: eventType },
+      });
     }
   }
 
@@ -51,8 +76,10 @@ export class ESQLEditorTelemetryService {
     try {
       reportPerformanceMetricEvent(this._analytics, eventData);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to report performance metric event', error);
+      reportEsqlError(error, {
+        errorType: 'TelemetryPerformance',
+        labels: { event_name: eventData.eventName },
+      });
     }
   }
 
@@ -64,6 +91,11 @@ export class ESQLEditorTelemetryService {
       value1: payload.queryLength,
       key2: 'query_lines' as const,
       value2: payload.queryLines,
+
+      ...(payload.callbacksDuration !== undefined
+        ? { key3: 'callbacks_duration' as const, value3: Math.round(payload.callbacksDuration) }
+        : {}),
+
       meta: {
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
@@ -98,8 +130,7 @@ export class ESQLEditorTelemetryService {
         commandData = JSON.parse(decodedData) as IndexEditorCommandArgs;
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to parse hover message command data', error);
+      reportEsqlError(error, { errorType: 'HoverMessageParse' });
     }
 
     if (commandData) {
@@ -209,6 +240,28 @@ export class ESQLEditorTelemetryService {
     });
   }
 
+  public trackResourceBrowserOpened(payload: {
+    browserType: ResourceBrowserType;
+    openedFrom: ResourceBrowserOpenedFrom;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
+      browser_type: payload.browserType,
+      opened_from: payload.openedFrom,
+    });
+  }
+
+  public trackResourceBrowserItemToggled(payload: {
+    browserType: ResourceBrowserType;
+    openedFrom: ResourceBrowserOpenedFrom;
+    action: DataSourceSelectionChange;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
+      browser_type: payload.browserType,
+      opened_from: payload.openedFrom,
+      action: payload.action,
+    });
+  }
+
   public trackInitLatency(duration: number, sessionId?: string) {
     this._reportPerformanceEvent({
       eventName: 'esql_editor_init_latency',
@@ -232,5 +285,79 @@ export class ESQLEditorTelemetryService {
     this._reportPerformanceEvent(
       this._buildBaseLatencyEvent('esql_editor_validation_latency', payload)
     );
+  }
+
+  public trackVisorNlSubmitted(params: {
+    nlLength: number;
+    contextQueryLength: number;
+    success: boolean;
+    errorCode?: string;
+    durationMs: number;
+    generatedQueryLength?: number;
+  }) {
+    this._reportEvent(ESQL_VISOR_NL_SUBMITTED, {
+      nl_length: params.nlLength,
+      context_query_length: params.contextQueryLength,
+      success: params.success,
+      duration_ms: params.durationMs,
+      ...(params.errorCode !== undefined ? { error_code: params.errorCode } : {}),
+      ...(params.generatedQueryLength !== undefined
+        ? { generated_query_length: params.generatedQueryLength }
+        : {}),
+    });
+  }
+
+  public trackCommentToEsqlSubmitted(params: {
+    nlLength: number;
+    isCompletion: boolean;
+    contextQueryLength: number;
+    success: boolean;
+    errorCode?: string;
+    durationMs: number;
+    generatedLineCount?: number;
+  }) {
+    this._reportEvent(ESQL_COMMENT_TO_ESQL_SUBMITTED, {
+      nl_length: params.nlLength,
+      is_completion: params.isCompletion,
+      context_query_length: params.contextQueryLength,
+      success: params.success,
+      duration_ms: params.durationMs,
+      ...(params.errorCode !== undefined ? { error_code: params.errorCode } : {}),
+      ...(params.generatedLineCount !== undefined
+        ? { generated_line_count: params.generatedLineCount }
+        : {}),
+    });
+  }
+
+  public trackCommentToEsqlReviewed(params: { action: AiReviewAction; linesGenerated: number }) {
+    this._reportEvent(ESQL_COMMENT_TO_ESQL_REVIEWED, {
+      action: params.action,
+      lines_generated: params.linesGenerated,
+    });
+  }
+
+  public trackFixWithAiSubmitted(params: {
+    errorCode?: string;
+    queryLength: number;
+    success: boolean;
+    durationMs: number;
+    changedLineCount?: number;
+  }) {
+    this._reportEvent(ESQL_FIX_WITH_AI_SUBMITTED, {
+      query_length: params.queryLength,
+      success: params.success,
+      duration_ms: params.durationMs,
+      ...(params.errorCode !== undefined ? { error_code: params.errorCode } : {}),
+      ...(params.changedLineCount !== undefined
+        ? { changed_line_count: params.changedLineCount }
+        : {}),
+    });
+  }
+
+  public trackFixWithAiReviewed(params: { action: AiReviewAction; linesChanged: number }) {
+    this._reportEvent(ESQL_FIX_WITH_AI_REVIEWED, {
+      action: params.action,
+      lines_changed: params.linesChanged,
+    });
   }
 }

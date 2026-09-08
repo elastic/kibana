@@ -15,6 +15,7 @@ import {
   isAgentPrivilegeLevelChangeSupported,
   isRootPrivilegeRequired,
 } from '../../../../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
 import type { Agent } from '../../../types';
 
 import {
@@ -29,17 +30,20 @@ import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
+  AgentRemoveCollectorModal,
   AgentUpgradeAgentModal,
   FleetServerCloudUnhealthyCallout,
   FleetServerMissingEncryptionKeyCallout,
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
+import { isAgentSelectable as isAgentSelectableService } from '../services/is_agent_selectable';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
 import { AgentRollbackModal } from '../components/agent_rollback_modal';
+import { AgentPolicyYamlFlyout } from '../../../components';
 
 import type { SelectionMode } from './components/types';
 
@@ -54,6 +58,7 @@ import {
   AgentMigrateFlyout,
   ChangeAgentPrivilegeLevelFlyout,
 } from './components';
+import { AddCollectorFlyout } from './components/add_collector_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -95,7 +100,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     undefined
   );
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
+  const [agentToViewPolicy, setAgentToViewPolicy] = useState<Agent | undefined>(undefined);
   const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+  const [agentToRemoveCollector, setAgentToRemoveCollector] = useState<Agent | undefined>(
+    undefined
+  );
+
+  const [isAddCollectorFlyoutOpen, setAddCollectorFlyoutOpen] = useState(false);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -130,6 +141,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    scheduledActionsCount,
+    scheduledActionsCapped,
     isUsingFilter,
     onTableChange,
     clearFilters: clearFiltersFromSession,
@@ -150,15 +163,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     clearFiltersFromSession();
   }, [setDraftKuery, clearFiltersFromSession]);
 
+  // `agentPoliciesIndexedById` is keyed by base policy id; resolve with suffix stripped so that
+  // agents on a version-specific variant (`my-policy#9.2`) look up correctly.
+  const getAgentPolicy = useCallback(
+    (agent?: Agent | null) =>
+      agent?.policy_id
+        ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+        : undefined,
+    [agentPoliciesIndexedById]
+  );
+
   const unsupportedMigrateAgents = useMemo(() => {
     const protectedAgents = Array.isArray(selectedAgents)
-      ? selectedAgents.filter(
-          (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
-        )
+      ? selectedAgents.filter((agent) => getAgentPolicy(agent)?.is_protected)
       : [];
     const fleetAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter((agent) =>
-          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+          getAgentPolicy(agent)?.package_policies?.some(
             (p) => p.package?.name === FLEET_SERVER_PACKAGE
           )
         )
@@ -167,7 +188,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ? selectedAgents.filter((agent) => !isAgentMigrationSupported(agent))
       : [];
     return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
-  }, [selectedAgents, agentPoliciesIndexedById]);
+  }, [selectedAgents, getAgentPolicy]);
 
   const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
     const alreadyUnprivilegedAgents = Array.isArray(selectedAgents)
@@ -177,14 +198,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       : [];
     const rootAccessNeededAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter((agent) =>
-          isRootPrivilegeRequired(
-            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies || []
-          )
+          isRootPrivilegeRequired(getAgentPolicy(agent)?.package_policies || [])
         )
       : [];
     const fleetServerAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter((agent) =>
-          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+          getAgentPolicy(agent)?.package_policies?.some(
             (p) => p.package?.name === FLEET_SERVER_PACKAGE
           )
         )
@@ -198,11 +217,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ...fleetServerAgents,
       ...unsupportedVersionAgents,
     ];
-  }, [selectedAgents, agentPoliciesIndexedById]);
+  }, [selectedAgents, getAgentPolicy]);
 
   const renderActions = (agent: Agent) => {
-    const agentPolicy =
-      typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
+    const agentPolicy = getAgentPolicy(agent);
 
     // refreshing agent tags passed to TagsAddRemove component
     if (agentToAddRemoveTags?.id === agent.id && !isEqual(agent.tags, agentToAddRemoveTags.tags)) {
@@ -225,19 +243,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
         onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
         onViewAgentJsonClick={() => setAgentToViewJson(agent)}
+        onViewAgentPolicyClick={() => setAgentToViewPolicy(agent)}
         onRollbackClick={() => setAgentToRollback(agent)}
+        onRemoveCollectorClick={() => setAgentToRemoveCollector(agent)}
       />
     );
   };
 
   const isAgentSelectable = useCallback(
-    (agent: Agent) => {
-      if (!agent.active) return false;
-      if (!agent.policy_id) return true;
-      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-      const isHosted = agentPolicy?.is_managed === true;
-      return !isHosted;
-    },
+    (agent: Agent) => isAgentSelectableService(agent, agentPoliciesIndexedById),
     [agentPoliciesIndexedById]
   );
 
@@ -272,18 +286,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const agentToUnenrollHasFleetServer = useMemo(() => {
-    if (!agentToUnenroll || !agentToUnenroll.policy_id) {
-      return false;
-    }
-
-    const agentPolicy = agentPoliciesIndexedById[agentToUnenroll.policy_id];
-
-    if (!agentPolicy) {
-      return false;
-    }
-
-    return policyHasFleetServer(agentPolicy);
-  }, [agentToUnenroll, agentPoliciesIndexedById]);
+    const agentPolicy = getAgentPolicy(agentToUnenroll);
+    return agentPolicy ? policyHasFleetServer(agentPolicy) : false;
+  }, [agentToUnenroll, getAgentPolicy]);
 
   // Missing Encryption key
   const [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout] =
@@ -312,6 +317,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
+      {isAddCollectorFlyoutOpen && (
+        <EuiPortal>
+          <AddCollectorFlyout
+            onClose={() => setAddCollectorFlyoutOpen(false)}
+            onClickViewAgents={() => {
+              setAddCollectorFlyoutOpen(false);
+              fetchData();
+            }}
+          />
+        </EuiPortal>
+      )}
       {isAgentActivityFlyoutOpen ? (
         <EuiPortal>
           <AgentActivityFlyout
@@ -353,6 +369,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         <EuiPortal>
           <AgentReassignAgentPolicyModal
             agents={[agentToReassign]}
+            agentCount={1}
             onClose={() => {
               setAgentToReassign(undefined);
               refreshAgents();
@@ -374,11 +391,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToRemoveCollector && (
+        <EuiPortal>
+          <AgentRemoveCollectorModal
+            agents={[agentToRemoveCollector]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRemoveCollector(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
       {agentToGetUninstallCommand?.policy_id && (
         <EuiPortal>
           <UninstallCommandFlyout
             target="agent"
-            policyId={agentToGetUninstallCommand.policy_id}
+            policyId={removeVersionSuffixFromPolicyId(agentToGetUninstallCommand.policy_id)}
             onClose={() => {
               setAgentToGetUninstallCommand(undefined);
               refreshAgents({ refreshTags: true });
@@ -421,7 +450,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             // close popover if agent is going to disappear from view to prevent UI error
             if (
               tagsToAdd.length > 0 &&
-              (selectedTags[0] === 'No Tags' || kuery.includes('not tags:*'))
+              (selectedTags[0] === 'No tags' || kuery.includes('not tags:*'))
             ) {
               setShowTagsAddRemove(false);
             }
@@ -483,6 +512,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToViewPolicy && agentToViewPolicy.policy_id && (
+        <EuiPortal>
+          <AgentPolicyYamlFlyout
+            policyId={agentToViewPolicy.policy_id}
+            revision={agentToViewPolicy.policy_revision}
+            onClose={() => setAgentToViewPolicy(undefined)}
+          />
+        </EuiPortal>
+      )}
       {showUnhealthyCallout && (
         <>
           {cloud?.deploymentUrl ? (
@@ -529,10 +567,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
+        onClickAddCollector={() => setAddCollectorFlyoutOpen(true)}
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        scheduledActionsCount={scheduledActionsCount}
+        scheduledActionsCapped={scheduledActionsCapped}
         sortField={sort.field}
         sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}
@@ -580,6 +621,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         clearFilters={clearFilters}
         queryHasChanged={queryHasChanged}
       />
+      <EuiSpacer size="l" />
     </>
   );
 };

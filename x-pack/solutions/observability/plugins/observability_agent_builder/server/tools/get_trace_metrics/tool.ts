@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -15,6 +15,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } from '..';
@@ -25,16 +26,26 @@ const getTraceMetricsSchema = z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
       'KQL filter to scope the data. Examples: \'service.name: "frontend"\', \'service.name: "checkout" AND transaction.name: "POST /api/cart"\', \'host.name: "web-*"\'.'
     ),
   groupBy: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .default('service.name')
     .describe(
       'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields for meaningful aggregations.'
     ),
+  latencyType: z
+    .enum(['avg', 'p95', 'p99'])
+    .describe('Aggregation type for latency metric.')
+    .default('avg'),
+  sortBy: z
+    .enum(['latency', 'throughput', 'failureRate'])
+    .describe('Metric to sort the results by.')
+    .default('latency'),
 });
 
 export function createGetTraceMetricsTool({
@@ -49,7 +60,14 @@ export function createGetTraceMetricsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTraceMetricsSchema> = {
     id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves trace metrics (throughput, failure rate, latency) for APM data with flexible filtering and grouping. 
+    annotations: {
+      title: 'Get Trace Metrics',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    description: `Retrieves trace metrics (throughput, failure rate, latency) for APM data with flexible filtering and grouping.
         
 Trace metrics are:
 - Throughput: requests per minute
@@ -84,11 +102,14 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, kqlFilter, groupBy }, context) => {
+    handler: async (
+      { start, end, kqlFilter, groupBy = 'service.name', latencyType = 'avg', sortBy = 'latency' },
+      context
+    ) => {
       const { request } = context;
 
       try {
-        const { items } = await getToolHandler({
+        const traceMetrics = await getToolHandler({
           core,
           plugins,
           request,
@@ -97,15 +118,15 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           end,
           kqlFilter,
           groupBy,
+          latencyType,
+          sortBy,
         });
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: {
-                items,
-              },
+              data: traceMetrics,
             },
           ],
         };

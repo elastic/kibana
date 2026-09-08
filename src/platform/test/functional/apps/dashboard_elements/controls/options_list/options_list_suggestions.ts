@@ -7,37 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const { dashboardControls, dashboard, header } = getPageObjects([
-    'dashboardControls',
-    'dashboard',
-    'header',
-  ]);
+  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
+  /**
+   * Purpose: Suggestions smoke test
+   *
+   * Migration: See if can be broken into unit tests and API tests
+   */
   describe('Dashboard options list suggestions', () => {
     let controlId: string;
 
     before(async () => {
-      await dashboard.ensureDashboardIsInEditMode();
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'animals-*',
-        fieldName: 'sound.keyword',
-      });
+      await dashboard.loadDashboardInEditMode('Test Options List Control');
       controlId = (await dashboardControls.getAllControlIds())[0];
-      await dashboard.clickQuickSave();
-      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await dashboardControls.deleteAllPinnedControls();
-      await dashboard.clickQuickSave();
+      await dashboard.clickDiscardChanges();
     });
 
     describe('sorting', () => {
@@ -133,6 +125,35 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     });
 
     describe('searching', () => {
+      it('wildcard searching works as expected', async () => {
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('r');
+        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+          (result, [key, docCount]) => {
+            if (key.includes('r')) return { ...result, [key]: docCount };
+            return { ...result };
+          },
+          {}
+        );
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          {
+            suggestions: containsR,
+            invalidSelections: [],
+          },
+          true
+        );
+        await dashboardControls.optionsListPopoverClearSearch();
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
+
+      it('prefix searching causes unsaved changes', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.controlEditorSave();
+        await dashboard.ensureHasUnsavedChangesNotification();
+      });
+
       it('prefix searching works as expected', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSearchForOption('G');
@@ -148,35 +169,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           controlId,
           {
             suggestions: startsWithG,
-            invalidSelections: [],
-          },
-          true
-        );
-        await dashboardControls.optionsListPopoverClearSearch();
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
-      it('wildcard searching causes unsaved changes', async () => {
-        await dashboardControls.editExistingControl(controlId);
-        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
-        await dashboardControls.controlEditorSave();
-        await dashboard.ensureHasUnsavedChangesNotification();
-      });
-
-      it('wildcard searching works as expected', async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSearchForOption('r');
-        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
-          (result, [key, docCount]) => {
-            if (key.includes('r')) return { ...result, [key]: docCount };
-            return { ...result };
-          },
-          {}
-        );
-        await dashboardControls.ensureAvailableOptionsEqual(
-          controlId,
-          {
-            suggestions: containsR,
             invalidSelections: [],
           },
           true
@@ -202,7 +194,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('returning to default search technique should remove unsaved changes', async () => {
         await dashboardControls.editExistingControl(controlId);
-        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
         await dashboardControls.controlEditorSave();
         await dashboard.ensureMissingUnsavedChangesNotification();
       });

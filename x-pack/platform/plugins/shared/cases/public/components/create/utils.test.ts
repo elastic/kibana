@@ -6,14 +6,15 @@
  */
 
 import {
-  getInitialCaseValue,
   trimUserFormData,
   getOwnerDefaultValue,
   createFormDeserializer,
   createFormSerializer,
 } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -35,8 +36,8 @@ describe('utils', () => {
         customFields: [],
         description: '',
         settings: {
-          syncAlerts: true,
-          extractObservables: true,
+          syncAlerts: false,
+          extractObservables: false,
         },
         severity: 'low',
         tags: [],
@@ -59,13 +60,21 @@ describe('utils', () => {
         description: '',
         owner: 'foobar',
         settings: {
-          syncAlerts: true,
-          extractObservables: true,
+          syncAlerts: false,
+          extractObservables: false,
         },
         severity: 'low',
         tags: [],
         title: '',
       });
+    });
+
+    it('defaults sync alerts/extract observables on for the security solution owner', () => {
+      expect(getInitialCaseValue({ owner: 'securitySolution' })).toEqual(
+        expect.objectContaining({
+          settings: { syncAlerts: true, extractObservables: true },
+        })
+      );
     });
 
     it('returns extra fields', () => {
@@ -260,6 +269,26 @@ describe('utils', () => {
       });
     });
 
+    it('omits legacy custom fields when includeLegacyCustomFields is false', () => {
+      expect(
+        createFormSerializer(
+          [],
+          casesConfigurationsMock,
+          {
+            ...dataToSerialize,
+            customFields: {
+              test_key_1: 'first value',
+              test_key_2: true,
+            },
+          },
+          { includeLegacyCustomFields: false }
+        )
+      ).toEqual({
+        ...serializedFormData,
+        customFields: [],
+      });
+    });
+
     it('trims form data', () => {
       const untrimmedData = {
         title: '  title  ',
@@ -277,6 +306,35 @@ describe('utils', () => {
         description: untrimmedData.description.trim(),
         category: untrimmedData.category.trim(),
         tags: ['tag 1', 'tag 2'],
+      });
+    });
+
+    it('includes extended_fields in serialized output when present', () => {
+      const extendedFields = { customKey: 'customValue' };
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          [CASE_EXTENDED_FIELDS]: extendedFields,
+        })
+      ).toEqual({ ...serializedFormData, extended_fields: extendedFields });
+    });
+
+    it('omits extended_fields from serialized output when not present', () => {
+      expect(createFormSerializer([], casesConfigurationsMock, dataToSerialize)).toEqual(
+        serializedFormData
+      );
+    });
+
+    it('serializes templateId and templateVersion into a template object', () => {
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          templateId: 'tmpl-1',
+          templateVersion: 2,
+        })
+      ).toEqual({
+        ...serializedFormData,
+        template: { id: 'tmpl-1', version: 2 },
       });
     });
   });

@@ -21,6 +21,7 @@ import type {
   FillStyle,
   YAxisConfig,
   PointVisibility,
+  AreaFillOption,
 } from '@kbn/expression-xy-plugin/common';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
@@ -122,8 +123,10 @@ export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
 
 export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
 
-// Persisted parts of the state
-export interface XYState {
+/**
+ * Runtime state... use XYPersistedLayerConfig for persisted state (i.e. what gets saved in the saved object)
+ */
+export interface XYVisualizationState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
@@ -145,6 +148,7 @@ export interface XYState {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;

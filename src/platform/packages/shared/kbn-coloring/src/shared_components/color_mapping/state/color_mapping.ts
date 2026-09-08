@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from 'redux-toolkit-v1';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '../config';
 import {
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
@@ -29,7 +30,7 @@ export interface RootState {
 const initialState: RootState['colorMapping'] = {
   assignments: [],
   specialAssignments: [],
-  paletteId: 'eui',
+  paletteId: KbnPalette.Default,
   colorMode: { type: 'categorical' },
 };
 

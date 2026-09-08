@@ -76,13 +76,20 @@ export function DataPreviewChart({
 
   const indicator = watch('indicator');
   const groupBy = watch('groupBy');
+  const projectRoutings = watch('settings.projectRoutings');
 
   const {
     data: previewData,
     isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range, groupBy);
+  } = useDebouncedGetPreviewData({
+    isIndicatorValid: isIndicatorSectionValid,
+    indicator,
+    range,
+    groupBy,
+    projectRoutings,
+  });
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&
@@ -300,7 +307,7 @@ export function DataPreviewChart({
                 yAccessors={['value']}
                 data={(previewData?.results ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
-                  value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                  value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
                   events: datum.events,
                 }))}
               />
@@ -316,7 +323,7 @@ export function DataPreviewChart({
                   yAccessors={['value']}
                   data={data.map((datum) => ({
                     date: new Date(datum.date).getTime(),
-                    value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                    value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
                     events: datum.events,
                   }))}
                 />

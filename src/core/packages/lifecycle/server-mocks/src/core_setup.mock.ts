@@ -23,6 +23,7 @@ import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
@@ -34,6 +35,7 @@ import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
@@ -75,6 +77,7 @@ export function createCoreSetupMock({
     logging: loggingServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createSetup(),
     userProfile: userProfileServiceMock.createSetup(),
@@ -90,6 +93,7 @@ export function createCoreSetupMock({
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
+    userStorage: userStorageServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),

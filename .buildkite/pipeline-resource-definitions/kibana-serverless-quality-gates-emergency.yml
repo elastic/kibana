@@ -19,7 +19,7 @@ spec:
       description: Kibana serverless emergency release quality gates
     spec:
       repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+      pipeline_file: .buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
       provider_settings:
         trigger_mode: none
       teams:

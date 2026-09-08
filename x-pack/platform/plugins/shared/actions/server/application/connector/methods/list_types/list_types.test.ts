@@ -28,10 +28,13 @@ import { ActionsClient } from '../../../../actions_client/actions_client';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 import { getConnectorType } from '../../../../fixtures';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let actionTypeRegistry: ActionTypeRegistry;
+let authTypeRegistry: AuthTypeRegistry;
 
 describe('listTypes()', () => {
   let actionsClient: ActionsClient;
@@ -56,11 +59,13 @@ describe('listTypes()', () => {
       inMemoryConnectors: [],
     };
     actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
     actionsClient = new ActionsClient({
       logger: loggingSystemMock.create().get(),
       kibanaIndices: ['.kibana'],
       scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],
       actionExecutor: actionExecutorMock.create(),
@@ -100,6 +105,7 @@ describe('listTypes()', () => {
         isSystemActionType: false,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
   });
@@ -138,6 +144,7 @@ describe('listTypes()', () => {
         isSystemActionType: false,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
       {
         id: 'my-connector-type-2',
@@ -150,6 +157,7 @@ describe('listTypes()', () => {
         enabledInLicense: true,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
   });
@@ -181,6 +189,7 @@ describe('listTypes()', () => {
         isSystemActionType: false,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
       {
         id: '.cases',
@@ -193,6 +202,7 @@ describe('listTypes()', () => {
         enabledInLicense: true,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
   });

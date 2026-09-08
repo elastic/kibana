@@ -43,6 +43,10 @@ export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
     apiKeyId: {
       type: 'keyword',
     },
+    uiamApiKeyId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     // NO NEED TO BE INDEXED
     // actionId: {
     //   type: 'keyword',
@@ -91,6 +95,68 @@ export const connectorTokenMappings: SavedObjectsTypeMappingDefinition = {
     // },
     // updatedAt: {
     //   type: 'date',
+    // },
+    // refreshToken: {
+    //   type: 'binary',
+    // },
+    // refreshTokenExpiresAt: {
+    //   type: 'date',
+    // },
+  },
+};
+
+export const userConnectorTokenMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    profileUid: {
+      type: 'keyword',
+    },
+    userCloudId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    connectorId: {
+      type: 'keyword',
+    },
+    credentialType: {
+      type: 'keyword',
+    },
+  },
+};
+
+export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    state: {
+      type: 'keyword',
+    },
+    connectorId: {
+      type: 'keyword',
+    },
+    expiresAt: {
+      type: 'date',
+    },
+    // NO NEED TO BE INDEXED
+    // codeVerifier: {
+    //   type: 'binary',
+    // },
+    // redirectUri: {
+    //   type: 'keyword',
+    // },
+    // scope: {
+    //   type: 'keyword',
+    // },
+    // createdAt: {
+    //   type: 'date',
+    // },
+    // createdBy: {
+    //   type: 'keyword',
+    // },
+    // kibanaReturnUrl: {
+    //   type: 'keyword',
+    // },
+    // spaceId: {
+    //   type: 'keyword',
     // },
   },
 };

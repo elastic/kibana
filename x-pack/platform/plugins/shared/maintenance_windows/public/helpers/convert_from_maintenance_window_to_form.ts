@@ -15,11 +15,11 @@ import type {
 } from '@kbn/response-ops-recurring-schedule-form/types';
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
 import type { RRuleParams } from '@kbn/alerting-types';
-import type { MaintenanceWindow } from '../../common';
+import type { MaintenanceWindowUI } from '../../common';
 import type { FormProps } from '../components/schema';
 
 export const convertFromMaintenanceWindowToForm = (
-  maintenanceWindow: MaintenanceWindow
+  maintenanceWindow: MaintenanceWindowUI
 ): FormProps => {
   const startDate = maintenanceWindow.rRule.dtstart;
   const endDate = moment(startDate).add(maintenanceWindow.duration);

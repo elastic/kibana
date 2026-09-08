@@ -7,43 +7,73 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
   EuiWindowEvent,
+  useEuiTheme,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { Schedule } from '../../../attack_discovery/pages/header/schedule';
+import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_attack_discovery_controls';
+import { Actions } from '../../../attack_discovery/pages/header/actions';
+import { SCHEDULE_TAB_ID } from '../../../attack_discovery/pages/settings_flyout/constants';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
+import { useLocalStorage } from '../../../common/components/local_storage';
+import { getSettingKey } from '../../../common/components/local_storage/helpers';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
+import { IconSparkles } from '../../../common/icons/sparkles';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
 import { SearchBarSection } from './search_bar/search_bar_section';
-import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import { TypeFilter } from './filters/type_filter';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
 
 import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
+import { KPIsSection } from './kpis/kpis_section';
+import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
+import { WorkflowsPromotionCallout } from './workflows_promotion_callout';
+import { GenerationsControlCenterFlyout } from './generations_control_center';
+import { GENERATIONS_BUTTON } from './generations_control_center/translations';
+
+import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/results/history/types';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
+export const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
+export const ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID = 'attacks-page-generations-button';
+export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
+export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
+export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
+export const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
+const GROUP_FILTERS_MAX_WIDTH = 640;
+const FILTERS_SECTION_MIN_WIDTH = 480;
+
+const ATTACKS_PAGE = 'attacks';
+const FILTER_CATEGORY = 'filters';
+const TYPE_FILTER_SETTING_NAME = 'typeFilter';
+const ASSIGNEES_FILTER_SETTING_NAME = 'assigneesFilter';
+const CONNECTOR_FILTER_SETTING_NAME = 'connectorFilter';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -52,6 +82,11 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const VerticalDivider = styled(EuiFlexItem)`
+  align-self: stretch;
+  border-left: ${({ theme: { euiTheme } }) => euiTheme.border.thin};
 `;
 
 export interface AttacksPageContentProps {
@@ -68,15 +103,33 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useLocalStorage<string[]>({
+    key: getSettingKey({
+      category: FILTER_CATEGORY,
+      page: ATTACKS_PAGE,
+      setting: TYPE_FILTER_SETTING_NAME,
+    }),
+    defaultValue: [],
+    isInvalidDefault: (value) => !Array.isArray(value),
+  });
+  const [selectedConnectorNames, setSelectedConnectorNames] = useLocalStorage<string[]>({
+    key: getSettingKey({
+      category: FILTER_CATEGORY,
+      page: ATTACKS_PAGE,
+      setting: CONNECTOR_FILTER_SETTING_NAME,
+    }),
+    defaultValue: [],
+    isInvalidDefault: (value) => !Array.isArray(value),
+  });
   const {
-    services: { settings },
+    services: { settings, telemetry },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
   const { from } = useGlobalTime();
@@ -84,17 +137,80 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     http,
     isAssistantEnabled: true,
     start: from,
-    scheduled: true,
+    includeAllAuthors: true,
   });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  // showing / hiding the schedules flyout:
-  const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
+  // Drives the tour's optional attack-details step. Derived from the table's
+  // grouped results (which honor every active filter) instead of a standalone
+  // query, and kept `undefined` until those results load so the tour treats
+  // attack presence as unknown (never as `false`) in the meantime.
+  const [hasAttacks, setHasAttacks] = useState<boolean | undefined>(undefined);
+  const onAttackIdsChange = useCallback(
+    (attackIds: string[] | undefined) =>
+      setHasAttacks(attackIds === undefined ? undefined : attackIds.length > 0),
+    []
+  );
+
+  const {
+    connectorId,
+    isLoading,
+    localStorageAttackDiscoveryMaxAlerts,
+    onGenerate,
+    openFlyout,
+    settingsFlyout,
+  } = useAttackDiscoveryControls();
+
+  const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
+
+  const openControlCenter = useCallback(() => {
+    telemetry.reportEvent(AttacksEventTypes.GenerationsControlCenterOpened, {
+      source: 'attacks_page_header',
+    });
+    setIsControlCenterOpen(true);
+  }, [telemetry]);
+
+  const closeControlCenter = useCallback(() => setIsControlCenterOpen(false), []);
+
+  const handleOpenFlyout = useCallback(
+    (tabId: string) => {
+      openFlyout(tabId);
+      if (tabId === SCHEDULE_TAB_ID) {
+        telemetry.reportEvent(AttacksEventTypes.ScheduleFlyoutOpened, {
+          source: 'attacks_page_header',
+        });
+      } else {
+        telemetry.reportEvent(AttacksEventTypes.SettingsFlyoutOpened, {
+          source: 'attacks_page_header',
+        });
+      }
+    },
+    [openFlyout, telemetry]
+  );
+
+  const handleGenerate = useCallback(
+    async (overrideOptions?: SettingsOverrideOptions) => {
+      telemetry.reportEvent(AttacksEventTypes.GenerateClicked, {
+        source: 'attacks_page_header',
+      });
+      return onGenerate(overrideOptions);
+    },
+    [onGenerate, telemetry]
+  );
+
   const openSchedulesFlyout = useCallback(() => {
-    setShowSchedulesFlyout(true);
-  }, []);
-  const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
-  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+    handleOpenFlyout(SCHEDULE_TAB_ID);
+  }, [handleOpenFlyout]);
+
+  const [assignees, setAssignees] = useLocalStorage<AssigneesIdsSelection[]>({
+    key: getSettingKey({
+      category: FILTER_CATEGORY,
+      page: ATTACKS_PAGE,
+      setting: ASSIGNEES_FILTER_SETTING_NAME,
+    }),
+    defaultValue: [],
+    isInvalidDefault: (value) => !Array.isArray(value),
+  });
 
   const onAssigneesSelectionChange = useCallback(
     (newAssignees: AssigneesIdsSelection[]) => {
@@ -102,7 +218,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
         setAssignees(newAssignees);
       }
     },
-    [assignees]
+    [assignees, setAssignees]
   );
   const [statusFilter, setStatusFilter] = useState<Status[]>([]);
   const [pageFilters, setPageFilters] = useState<Filter[]>();
@@ -121,60 +237,167 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     if (!isTableLoading) pageFilterHandler.reload();
   }, [isTableLoading, pageFilterHandler]);
 
-  return (
-    <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
-      <EuiWindowEvent event="resize" handler={noop} />
-      <SearchBarSection dataView={dataView} />
-      <SecuritySolutionPageWrapper
-        noPadding={globalFullScreen}
-        data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
-      >
-        <Display show={!globalFullScreen}>
-          <HeaderPage title={PAGE_TITLE}>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <FilterByAssigneesPopover
-                  selectedUserIds={assignees}
-                  onSelectionChange={onAssigneesSelectionChange}
-                />
+  const pageContent = useMemo(
+    () => (
+      <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
+        <EuiWindowEvent event="resize" handler={noop} />
+        <SearchBarSection dataView={dataView} />
+        <SecuritySolutionPageWrapper
+          noPadding={globalFullScreen}
+          data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
+        >
+          <Display show={!globalFullScreen}>
+            <HeaderPage
+              title={
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+                  <EuiFlexItem grow={false}>{PAGE_TITLE}</EuiFlexItem>
+                  <EuiSpacer size="m" />
+                  <EuiFlexItem
+                    grow={false}
+                    style={{ marginLeft: euiTheme.size.s, marginTop: euiTheme.size.s }}
+                  >
+                    <IconSparkles />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="m"
+                data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
+                    iconType="listBullet"
+                    onClick={openControlCenter}
+                    size="s"
+                  >
+                    {GENERATIONS_BUTTON}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <Actions
+                    isLoading={isLoading}
+                    onGenerate={handleGenerate}
+                    openFlyout={handleOpenFlyout}
+                    isDisabled={connectorId == null}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </HeaderPage>
+            <EuiHorizontalRule margin="none" />
+            <EuiSpacer size="l" />
+            <WorkflowsPromotionCallout />
+            <WelcomeTourCallout />
+            <AttacksTour />
+            <EuiFlexGroup direction="row" responsive={false} wrap={true}>
+              <EuiFlexItem grow={1} style={{ maxWidth: GROUP_FILTERS_MAX_WIDTH }}>
+                <EuiFlexGroup direction="row" responsive={false}>
+                  <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_TYPE_FILTER_TEST_ID}>
+                    <TypeFilter
+                      selectedTypes={selectedTypes}
+                      setSelectedTypes={setSelectedTypes}
+                      compressed={true}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID}>
+                    <FilterByAssigneesPopover
+                      selectedUserIds={assignees}
+                      onSelectionChange={onAssigneesSelectionChange}
+                      compressed={true}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID}>
+                    <ConnectorFilter
+                      aiConnectors={aiConnectors}
+                      connectorNames={aiConnectorNames}
+                      selectedConnectorNames={selectedConnectorNames}
+                      setSelectedConnectorNames={setSelectedConnectorNames}
+                      compressed={true}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <ConnectorFilter
-                  aiConnectors={aiConnectors}
-                  connectorNames={aiConnectorNames}
-                  selectedConnectorNames={selectedConnectorNames}
-                  setSelectedConnectorNames={setSelectedConnectorNames}
+              <VerticalDivider grow={false} aria-hidden={true} />
+              <EuiFlexItem
+                grow={1}
+                style={{ minWidth: FILTERS_SECTION_MIN_WIDTH }}
+                data-test-subj={ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID}
+              >
+                <FiltersSection
+                  dataView={dataView}
+                  pageFilters={pageFilters}
+                  setStatusFilter={setStatusFilter}
+                  setPageFilters={setPageFilters}
+                  setPageFilterHandler={setPageFilterHandler}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </HeaderPage>
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="l" />
-          <FiltersSection
-            dataView={dataView}
+            <EuiSpacer size="l" />
+          </Display>
+
+          <EuiSpacer />
+          <KPIsSection
             pageFilters={pageFilters}
-            setStatusFilter={setStatusFilter}
-            setPageFilters={setPageFilters}
-            setPageFilterHandler={setPageFilterHandler}
+            assignees={assignees}
+            selectedConnectorNames={selectedConnectorNames}
+            selectedTypes={selectedTypes}
+            dataView={dataView}
           />
-          <EuiSpacer size="l" />
-        </Display>
 
-        <TableSection
-          dataView={dataView}
-          statusFilter={statusFilter}
-          pageFilters={pageFilters}
-          assignees={assignees}
-          selectedConnectorNames={selectedConnectorNames}
-          openSchedulesFlyout={openSchedulesFlyout}
-        />
+          <EuiSpacer />
+          <TableSection
+            dataView={dataView}
+            statusFilter={statusFilter}
+            pageFilters={pageFilters}
+            assignees={assignees}
+            selectedConnectorNames={selectedConnectorNames}
+            selectedTypes={selectedTypes}
+            openSchedulesFlyout={openSchedulesFlyout}
+            onAttackIdsChange={onAttackIdsChange}
+          />
 
-        {showSchedulesFlyout && <SchedulesFlyout onClose={onCloseSchedulesFlyout} />}
-      </SecuritySolutionPageWrapper>
-    </StyledFullHeightContainer>
+          {settingsFlyout}
+
+          {isControlCenterOpen && (
+            <GenerationsControlCenterFlyout
+              aiConnectors={aiConnectors}
+              localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+              onClose={closeControlCenter}
+            />
+          )}
+        </SecuritySolutionPageWrapper>
+      </StyledFullHeightContainer>
+    ),
+    [
+      aiConnectorNames,
+      aiConnectors,
+      assignees,
+      closeControlCenter,
+      connectorId,
+      dataView,
+      euiTheme.size.s,
+      globalFullScreen,
+      handleGenerate,
+      handleOpenFlyout,
+      isControlCenterOpen,
+      isLoading,
+      localStorageAttackDiscoveryMaxAlerts,
+      onAssigneesSelectionChange,
+      onAttackIdsChange,
+      openControlCenter,
+      openSchedulesFlyout,
+      pageFilters,
+      selectedConnectorNames,
+      selectedTypes,
+      setSelectedConnectorNames,
+      setSelectedTypes,
+      settingsFlyout,
+      statusFilter,
+    ]
   );
+
+  return <AttacksTourProvider hasAttacks={hasAttacks}>{pageContent}</AttacksTourProvider>;
 });
 AttacksPageContent.displayName = 'AttacksPageContent';

@@ -65,12 +65,20 @@ export class DatasetQualityServerPlugin
       });
     };
 
+    const getIsSecurityEnabled = async () => {
+      return await core.getStartServices().then(async ([, pluginsStartContracts]) => {
+        const license = await pluginsStartContracts.licensing.getLicense();
+        return license.getFeature('security').isEnabled;
+      });
+    };
+
     registerRoutes({
       core,
       logger: this.logger,
       repository: getDatasetQualityServerRouteRepository(),
       plugins: resourcePlugins,
       getEsCapabilities,
+      getIsSecurityEnabled,
     });
 
     if (plugins.alerting) {

@@ -8,11 +8,9 @@
 import type { RootSchema } from '@elastic/ebt/client';
 import type {
   StreamEndpointLatencyProps,
-  StreamsSystemIdentificationIdentifiedProps,
-  StreamsDescriptionGeneratedProps,
-  StreamsSignificantEventsQueriesGeneratedProps,
-  StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
+  StreamsProcessingPipelineSuggestedProps,
+  StreamsAgentToolEventCreateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -68,24 +66,24 @@ const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
   },
 };
 
-const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdentificationIdentifiedProps> =
+const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
   {
-    count: {
+    duration_ms: {
       type: 'long',
       _meta: {
-        description: 'The number of systems identified',
+        description: 'The duration of the pipeline suggestion generation in milliseconds',
       },
     },
-    input_tokens_used: {
+    steps_used: {
       type: 'long',
       _meta: {
-        description: 'The number of input tokens used for the generation request',
+        description: 'The number of reasoning steps the LLM took to generate the suggestion',
       },
     },
-    output_tokens_used: {
-      type: 'long',
+    success: {
+      type: 'boolean',
       _meta: {
-        description: 'The number of output tokens used for the generation request',
+        description: 'Whether the pipeline suggestion was generated successfully',
       },
     },
     stream_type: {
@@ -102,90 +100,29 @@ const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdent
     },
   };
 
-const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
     _meta: {
-      description: 'The number of input tokens used for the generation request',
+      description: 'Whether the event creation succeeded',
     },
   },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-};
-
-const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignificantEventsQueriesGeneratedProps> =
-  {
-    count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of significant events queries generated',
-      },
-    },
-    systems_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems used to generate the queries',
-      },
-    },
-    input_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of input tokens used for the generation request',
-      },
-    },
-    output_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of output tokens used for the generation request',
-      },
-    },
-    stream_type: {
+  stream_names: {
+    type: 'array',
+    items: {
       type: 'keyword',
       _meta: {
-        description: 'The type of the stream: wired or classic',
+        description: 'A stream name',
       },
     },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-  };
-
-const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
     _meta: {
-      description: 'The number of input tokens used for the generation request',
+      description: 'The names of the Streams associated with the event',
     },
   },
-  output_tokens_used: {
-    type: 'long',
+  error_message: {
+    type: 'text',
     _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of cached tokens used for the generation request',
+      description: 'Error message when event creation fails',
       optional: true,
     },
   },
@@ -194,8 +131,6 @@ const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> 
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsSystemIdentificationIdentifiedSchema,
-  streamsDescriptionGeneratedSchema,
-  streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
+  streamsProcessingPipelineSuggestedSchema,
+  streamsAgentToolEventCreateSchema,
 };

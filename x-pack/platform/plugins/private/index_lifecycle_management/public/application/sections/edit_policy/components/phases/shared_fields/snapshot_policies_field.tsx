@@ -11,7 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiDescribedFormGroup, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { ComboBoxField, useFormData, useKibana } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
@@ -51,7 +52,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
       <FieldLoadingError
         resendRequest={resendRequest}
         data-test-subj="policiesErrorCallout"
-        aria-label={i18n.translate(
+        buttonLabel={i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.deletePhase.reloadPoliciesLabel',
           {
             defaultMessage: 'Reload policies',
@@ -75,68 +76,68 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
     calloutContent = (
       <>
         <EuiSpacer size="m" />
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           data-test-subj="noPoliciesCallout"
-          color="warning"
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedTitle"
               defaultMessage="No snapshot policies found"
             />
           }
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedMessage"
-            defaultMessage="{link} to automate the creation and deletion of cluster snapshots."
-            values={{
-              link: (
-                <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
-                  {i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedLink',
-                    {
-                      defaultMessage: 'Create a snapshot lifecycle policy',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedMessage"
+              defaultMessage="{link} to automate the creation and deletion of cluster snapshots."
+              values={{
+                link: (
+                  <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
+                    {i18n.translate(
+                      'xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedLink',
+                      {
+                        defaultMessage: 'Create a snapshot lifecycle policy',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
       </>
     );
   } else if (selectedSnapshotPolicy && !data.includes(selectedSnapshotPolicy)) {
     calloutContent = (
       <>
         <EuiSpacer size="m" />
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           data-test-subj="customPolicyCallout"
-          color="warning"
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyTitle"
               defaultMessage="Policy name not found"
             />
           }
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
-            defaultMessage="Enter the name of an existing snapshot policy, or {link} with this name."
-            values={{
-              link: (
-                <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
-                  {i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyLink',
-                    {
-                      defaultMessage: 'create a new policy',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
+              defaultMessage="Enter the name of an existing snapshot policy, or {link} with this name."
+              values={{
+                link: (
+                  <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
+                    {i18n.translate(
+                      'xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyLink',
+                      {
+                        defaultMessage: 'create a new policy',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
       </>
     );
   }

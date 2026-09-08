@@ -11,9 +11,14 @@ import { SearchQueryActions, TelemetryEventTypes } from './types';
 
 describe('TelemetryService', () => {
   const service = new TelemetryService();
-
   const mockCoreStart = coreMock.createSetup();
-  service.setup({ analytics: mockCoreStart.analytics });
+  let telemetry: ReturnType<typeof service.start>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    service.setup({ analytics: mockCoreStart.analytics });
+    telemetry = service.start();
+  });
 
   it('should register all events', () => {
     expect(mockCoreStart.analytics.registerEventType).toHaveBeenCalledTimes(
@@ -22,8 +27,6 @@ describe('TelemetryService', () => {
   });
 
   it('should report search query event with the properties', async () => {
-    const telemetry = service.start();
-
     telemetry.reportSearchQuerySubmitted({
       kueryFields: ['service.name', 'span.id'],
       action: SearchQueryActions.Submit,
@@ -37,6 +40,48 @@ describe('TelemetryService', () => {
         kueryFields: ['service.name', 'span.id'],
         action: SearchQueryActions.Submit,
         timerange: 'now-15h-now',
+      }
+    );
+  });
+
+  it('should report slo info shown event with empty properties', async () => {
+    telemetry.reportSloInfoShown();
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.SLO_INFO_SHOWN,
+      {}
+    );
+  });
+
+  it('should report metrics callout date range selection event with the properties', async () => {
+    telemetry.reportMetricsCalloutDateRangeSelected({
+      calloutType: 'overlap',
+      selectedInstrumentationType: 'classic_apm',
+    });
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED,
+      {
+        calloutType: 'overlap',
+        selectedInstrumentationType: 'classic_apm',
+      }
+    );
+  });
+
+  it('should report metrics callout loaded event with the properties', async () => {
+    telemetry.reportMetricsCalloutLoaded({
+      calloutType: 'non_overlap',
+      shownInstrumentationType: 'otel_native',
+    });
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.METRICS_CALLOUT_LOADED,
+      {
+        calloutType: 'non_overlap',
+        shownInstrumentationType: 'otel_native',
       }
     );
   });

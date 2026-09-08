@@ -11,11 +11,13 @@ import type {
   VisualizationMap,
   DatasourceMap,
   TypedLensSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
 
 export function getStateManagementForInlineEditing(
-  activeDatasourceId: 'formBased' | 'textBased',
+  initialDatasourceId: LensDatasourceId,
   getAttributes: () => TypedLensSerializedState['attributes'],
   updateAttributes: (
     newAttributes: TypedLensSerializedState['attributes'],
@@ -25,36 +27,55 @@ export function getStateManagementForInlineEditing(
   datasourceMap: DatasourceMap,
   extractFilterReferences: FilterManager['extract']
 ) {
+  const resolveActiveDatasourceId = (explicit?: LensDatasourceId): LensDatasourceId => {
+    return explicit ?? getActiveDatasourceIdFromDoc(getAttributes()) ?? initialDatasourceId;
+  };
+
   const updatePanelState = (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationType?: string
+    visualizationType?: string,
+    datasourceId?: LensDatasourceId,
+    allDatasourceStates?: DatasourceStates
   ) => {
-    const viz = getAttributes();
+    const vis = getAttributes();
+    const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
+    // drop loading/uninitialized entries so they never get serialized into the attributes
+    const loadedDatasourceStates = Object.fromEntries(
+      Object.entries(allDatasourceStates ?? {}).filter(
+        ([, { isLoading, state }]) => !isLoading && state !== null && state !== undefined
+      )
+    );
+    // the active datasource must be the *first* key: getActiveDatasourceIdFromDoc
+    // resolves the active datasource from the first key of the serialized states
+    const { [activeDatasourceId]: _active, ...otherLoadedDatasourceStates } =
+      loadedDatasourceStates;
     const datasourceStates: DatasourceStates = {
+      // always guarantee the active datasource state is present
       [activeDatasourceId]: {
         isLoading: false,
         state: datasourceState,
       },
+      ...otherLoadedDatasourceStates,
     };
-    const newViz = mergeToNewDoc(
-      viz,
+    const newVis = mergeToNewDoc(
+      vis,
       {
-        activeId: visualizationType || viz.visualizationType,
+        activeId: visualizationType || vis.visualizationType,
         state: visualizationState,
         selectedLayerId: null,
       },
       datasourceStates,
-      viz.state.query,
-      viz.state.filters,
+      vis.state.query,
+      vis.state.filters,
       activeDatasourceId,
-      viz.state.adHocDataViews || {},
+      vis.state.adHocDataViews || {},
       { visualizationMap, datasourceMap, extractFilterReferences }
     );
     const newDoc: TypedLensSerializedState['attributes'] = {
-      ...viz,
-      ...newViz,
-      visualizationType: newViz?.visualizationType ?? viz.visualizationType,
+      ...vis,
+      ...newVis,
+      visualizationType: newVis?.visualizationType ?? vis.visualizationType,
     };
 
     if (newDoc.state) {

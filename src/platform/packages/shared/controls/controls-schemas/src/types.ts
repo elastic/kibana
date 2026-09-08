@@ -8,11 +8,12 @@
  */
 
 import type React from 'react';
+import type { BehaviorSubject } from 'rxjs';
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { controlSchema, dataControlSchema } from './control_schema';
+import type { z } from '@kbn/zod';
+import type { controlTitleSchema, dataControlSchema } from './control_schema';
 import type {
-  controlsGroupSchema,
+  getControlsGroupSchema,
   controlWidthSchema,
   pinnedControlSchema,
 } from './controls_group_schema';
@@ -27,41 +28,57 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
-export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
-export type PinnedControlState = ControlsGroupState[number];
-export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
-  order: number;
-  type: PinnedControlState['type'];
+/**
+ * Collect every key from each branch of a discriminated union, then build a
+ * single object type where each key is optional and typed as the union of its
+ * non-`never` types across the variants.
+ */
+type AllKeysOfUnion<T> = T extends unknown ? keyof T : never;
+type LooseUnion<T> = {
+  [K in AllKeysOfUnion<T>]?: T extends unknown
+    ? K extends keyof T
+      ? [T[K]] extends [never]
+        ? never
+        : T[K]
+      : never
+    : never;
 };
-export type ControlWidth = TypeOf<typeof controlWidthSchema>;
-export type ControlState = TypeOf<typeof controlSchema>;
 
-export type DataControlState = TypeOf<typeof dataControlSchema>;
+export type ControlsGroupState = z.output<ReturnType<typeof getControlsGroupSchema>>;
+export type PinnedControlState = ControlsGroupState[number];
+export type PinnedControlLayoutState = z.output<typeof pinnedControlSchema> & {
+  order: number;
+  type: string;
+};
 
-export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
+export type ControlWidth = z.output<typeof controlWidthSchema>;
+export type ControlState = z.output<typeof controlTitleSchema>;
 
-export type OptionsListDSLControlState = TypeOf<typeof optionsListDSLControlSchema>;
-export type OptionsListESQLControlState = TypeOf<typeof optionsListESQLControlSchema>;
+export type StrictDataControlState = z.output<typeof dataControlSchema>;
+export type DataControlState = LooseUnion<StrictDataControlState>;
+
+export type OptionsListDisplaySettings = z.output<typeof optionsListDisplaySettingsSchema>;
+
+export type OptionsListDSLControlState = LooseUnion<z.output<typeof optionsListDSLControlSchema>>;
+export type OptionsListESQLControlState = z.output<typeof optionsListESQLControlSchema>;
 export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
-export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqueSchema>;
-export type OptionsListSelection = TypeOf<typeof optionsListSelectionSchema>;
-export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;
+export type OptionsListSearchTechnique = z.output<typeof optionsListSearchTechniqueSchema>;
+export type OptionsListSelection = z.output<typeof optionsListSelectionSchema>;
+export type OptionsListSortingType = z.output<typeof optionsListSortSchema>;
 
-export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
-export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
+export type RangeSliderControlState = LooseUnion<z.output<typeof rangeSliderControlSchema>>;
+export type RangeSliderValue = z.output<typeof rangeValueSchema>;
 
 export type TimeSlice = [number, number];
-export type TimeSliderControlState = TypeOf<typeof timeSliderControlSchema>;
+export type TimeSliderControlState = z.output<typeof timeSliderControlSchema>;
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
-
-// This value only exists for control saved objects prior to version 9.4
-export interface LegacyIgnoreParentSettings {
-  ignoreFilters?: boolean;
-  ignoreQuery?: boolean;
-  ignoreTimerange?: boolean;
-  ignoreValidations?: boolean;
+export interface PublishesTooltipLabel {
+  tooltipLabel$: BehaviorSubject<string>;
 }
+
+export const apiPublishesTooltipLabel = (api: unknown): api is PublishesTooltipLabel =>
+  Boolean((api as PublishesTooltipLabel)?.tooltipLabel$);

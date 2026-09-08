@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 
-import { APP_ID } from '../constants';
+import { APP_ID, EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
 const TRANSLATIONS = Object.freeze({
@@ -43,6 +43,7 @@ export const endpointListSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
           id: 'endpoint_list_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -54,6 +55,7 @@ export const endpointListSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readEndpointList`],
           id: 'endpoint_list_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -85,6 +87,8 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeTrustedApplications`,
@@ -92,6 +96,7 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'trusted_applications_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -100,9 +105,15 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedApplications', 'readTrustedApplications'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readTrustedApplications`,
+          ],
           id: 'trusted_applications_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -135,6 +146,8 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeTrustedDevices`,
@@ -142,6 +155,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'trusted_devices_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -150,9 +164,10 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedDevices', 'readTrustedDevices'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedDevices`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readTrustedDevices`],
           id: 'trusted_devices_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -184,6 +199,8 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-deleteHostIsolationExceptions`,
@@ -191,6 +208,7 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'host_isolation_exceptions_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -199,9 +217,15 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readHostIsolationExceptions`,
+          ],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -231,6 +255,8 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeBlocklist`,
@@ -238,6 +264,7 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'blocklist_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -246,9 +273,10 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
           ui: ['writeBlocklist', 'readBlocklist'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -279,6 +307,8 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeEventFilters`,
@@ -286,6 +316,7 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'event_filters_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -294,9 +325,10 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEventFilters', 'readEventFilters'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -328,6 +360,7 @@ export const policyManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
           id: 'policy_management_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: ['policy-settings-protection-updates-note'],
@@ -339,6 +372,7 @@ export const policyManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readPolicyManagement`],
           id: 'policy_management_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -368,6 +402,7 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -379,6 +414,7 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -408,6 +444,7 @@ export const scriptsManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeScriptsManagement`, `${APP_ID}-readScriptsManagement`],
           id: 'scripts_management_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -419,12 +456,70 @@ export const scriptsManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readScriptsManagement`],
           id: 'scripts_management_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
           },
           ui: ['readScriptsManagement'],
+        },
+      ],
+    },
+  ],
+});
+
+export const customYaraSignaturesSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.customYaraSignatures',
+    { defaultMessage: 'Custom YARA Signatures' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.customYaraSignatures.description',
+    {
+      defaultMessage: 'Management of custom YARA signatures used with Elastic Defend.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [
+            'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
+            'lists-read',
+            'lists-summary',
+            `${APP_ID}-writeCustomYaraSignatures`,
+            `${APP_ID}-readCustomYaraSignatures`,
+          ],
+          id: 'custom_yara_signatures_all',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+            read: [],
+          },
+          ui: ['writeCustomYaraSignatures', 'readCustomYaraSignatures'],
+        },
+        {
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readCustomYaraSignatures`,
+          ],
+          id: 'custom_yara_signatures_read',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readCustomYaraSignatures'],
         },
       ],
     },
@@ -448,6 +543,7 @@ export const hostIsolationSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -477,6 +573,7 @@ export const processOperationsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -505,6 +602,7 @@ export const fileOperationsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -536,6 +634,7 @@ export const executeActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -566,6 +665,7 @@ export const scanActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -596,6 +696,7 @@ export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -607,6 +708,7 @@ export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -646,6 +748,8 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-showEndpointExceptions`,
@@ -661,7 +765,12 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             read: [],
           },
           ui: ['showEndpointExceptions'],
-          api: ['lists-read', 'lists-summary', `${APP_ID}-showEndpointExceptions`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-showEndpointExceptions`,
+          ],
         },
       ],
     },
@@ -740,6 +849,7 @@ export const socManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-socManagement`],
           id: 'soc_management_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],

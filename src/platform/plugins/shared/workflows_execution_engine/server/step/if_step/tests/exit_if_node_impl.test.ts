@@ -19,6 +19,8 @@ describe('ExitIfNodeImpl', () => {
   beforeEach(() => {
     mockStepExecutionRuntime = {
       finishStep: jest.fn().mockResolvedValue(undefined),
+      getCurrentStepState: jest.fn().mockReturnValue(undefined),
+      setCurrentStepState: jest.fn(),
     } as any;
 
     mockWorkflowRuntime = {
@@ -28,14 +30,46 @@ describe('ExitIfNodeImpl', () => {
     impl = new ExitIfNodeImpl(mockStepExecutionRuntime, mockWorkflowRuntime);
   });
 
-  it('should finish step', async () => {
-    await impl.run();
-    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledTimes(1);
-    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith();
+  it('should finish step with conditionResult from step state', () => {
+    mockStepExecutionRuntime.getCurrentStepState.mockReturnValue({ conditionResult: true });
+    impl.run();
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({ conditionResult: true });
   });
 
-  it('should go to the next node', async () => {
-    await impl.run();
+  it('should finish step with empty object when conditionResult is false', () => {
+    mockStepExecutionRuntime.getCurrentStepState.mockReturnValue({ conditionResult: false });
+    impl.run();
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({});
+  });
+
+  it('should finish step with empty object when step state is undefined', () => {
+    mockStepExecutionRuntime.getCurrentStepState.mockReturnValue(undefined);
+    impl.run();
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({});
+  });
+
+  it('should clear step state after reading it', () => {
+    mockStepExecutionRuntime.getCurrentStepState.mockReturnValue({ conditionResult: true });
+    impl.run();
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(undefined);
+  });
+
+  it('should clear step state before calling finishStep', () => {
+    const callOrder: string[] = [];
+    mockStepExecutionRuntime.setCurrentStepState.mockImplementation(() => {
+      callOrder.push('setCurrentStepState');
+    });
+    mockStepExecutionRuntime.finishStep.mockImplementation(() => {
+      callOrder.push('finishStep');
+    });
+    mockStepExecutionRuntime.getCurrentStepState.mockReturnValue({ conditionResult: true });
+
+    impl.run();
+    expect(callOrder).toEqual(['setCurrentStepState', 'finishStep']);
+  });
+
+  it('should go to the next node', () => {
+    impl.run();
     expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 });

@@ -11,6 +11,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   containsAllTerms,
   evaluate,
+  tags,
   selectEvaluators,
   type Example,
   type TaskOutput,
@@ -76,7 +77,7 @@ const createNoopLogger = (): Logger =>
 
 evaluate.describe(
   'llm_tasks.retrieveDocumentation (task-level retriever evals)',
-  { tag: '@svlOblt' },
+  { tag: tags.serverless.observability.complete },
   () => {
     let installedBySuite = false;
 
@@ -136,7 +137,7 @@ evaluate.describe(
 
     evaluate(
       'retrieves docs for baseline queries',
-      async ({ phoenixClient, esClient, connector }) => {
+      async ({ executorClient, esClient, connector }) => {
         const logger = createNoopLogger();
         const searchService = new SearchService({
           logger,
@@ -187,9 +188,9 @@ evaluate.describe(
           ],
         };
 
-        await phoenixClient.runExperiment(
+        await executorClient.runExperiment(
           {
-            dataset,
+            datasets: [dataset],
             task: async (
               example: RetrieverTaskDatasetExample
             ): Promise<RetrieveDocumentationTaskOutput> => {
@@ -213,6 +214,7 @@ evaluate.describe(
             {
               name: 'NonEmptyDocuments',
               kind: 'CODE' as const,
+              direction: 'maximize',
               evaluate: async ({ output, metadata }) => {
                 const minDocs = typeof metadata?.minDocs === 'number' ? metadata.minDocs : 1;
                 const count = output?.documents?.length ?? 0;
@@ -222,6 +224,7 @@ evaluate.describe(
             {
               name: 'RequiredTermsInRetrievedContent',
               kind: 'CODE' as const,
+              direction: 'maximize',
               evaluate: async ({ output, metadata }) => {
                 const requiredTerms =
                   Array.isArray(metadata?.requiredTerms) &&
@@ -245,6 +248,7 @@ evaluate.describe(
             {
               name: 'HasElasticDocsUrl',
               kind: 'CODE' as const,
+              direction: 'maximize',
               evaluate: async ({ output }) => {
                 const urls = (output?.documents ?? []).map((d) => d.url);
                 const ok = urls.some((u) => typeof u === 'string' && u.startsWith('https://'));

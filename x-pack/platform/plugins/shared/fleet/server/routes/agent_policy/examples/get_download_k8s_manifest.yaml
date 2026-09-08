@@ -1,0 +1,31 @@
+responses:
+  200:
+    description: 'Successful response — returns the Kubernetes manifest as a YAML file download'
+    content:
+      application/json:
+        examples:
+          getDownloadK8sManifestExample:
+            description: 'The Kubernetes manifest download'
+            value: 'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: agent-node-datastreams\n  namespace: kube-system\n'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'No manifest was found'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Agent manifest not found'

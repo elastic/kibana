@@ -45,7 +45,7 @@ export const AgentDetailsIntegrationOutputs: React.FunctionComponent<{
           if (current.enabled) {
             const agentUnit = getOutputUnitsByPackageAndInputType(
               agent.components,
-              packagePolicy,
+              current.id ?? packagePolicy.id,
               current.type
             );
 

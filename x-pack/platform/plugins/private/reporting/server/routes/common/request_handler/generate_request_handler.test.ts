@@ -22,6 +22,7 @@ import type {
   ReportingJobResponse,
   ReportingRequestHandlerContext,
   ReportingSetup,
+  ReportingUser,
 } from '../../../types';
 import { GenerateRequestHandler } from './generate_request_handler';
 
@@ -94,7 +95,7 @@ describe('Handle request to generate', () => {
 
     requestHandler = new GenerateRequestHandler({
       reporting: reportingCore,
-      user: { username: 'testymcgee' },
+      user: { username: 'testymcgee' } as ReportingUser,
       context: mockContext,
       path: '/api/reporting/test/generate/pdf',
       req: mockRequest,
@@ -169,7 +170,7 @@ describe('Handle request to generate', () => {
       });
 
       const { _id, created_at, ...snapObj } = report;
-      expect(snapObj.payload.version).toBe('7.14.0');
+      expect(snapObj.payload.version).toBe(reportingCore.getKibanaPackageInfo().version);
     });
   });
 
@@ -252,7 +253,7 @@ describe('Handle request to generate', () => {
     test('disallows invalid browser timezone', async () => {
       const handler = new GenerateRequestHandler({
         reporting: reportingCore,
-        user: { username: 'testymcgee' },
+        user: { username: 'testymcgee' } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         req: {
@@ -268,17 +269,7 @@ describe('Handle request to generate', () => {
         await handler.getJobParams();
       } catch (err) {
         expect(err.statusCode).toBe(400);
-        expect(err.body).toMatchInlineSnapshot(`
-          "invalid params: [
-            {
-              \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
-              \\"path\\": [
-                \\"browserTimezone\\"
-              ]
-            }
-          ]"
-        `);
+        expect(err.body).toEqual('invalid params: browserTimezone: Invalid timezone');
       }
     });
 

@@ -226,7 +226,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
                   },
                 ]);
               }}
-              iconType="plusInCircle"
+              iconType="plusCircle"
             >
               <FormattedMessage
                 id="xpack.fleet.manageAutoUpgradeAgents.addVersionButton"

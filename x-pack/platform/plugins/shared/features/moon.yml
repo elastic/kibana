@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/features-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/features-plugin'
+  title: '@kbn/features-plugin'
   description: Moon project for @kbn/features-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/features
+  sourceRoot: x-pack/platform/plugins/shared/features
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/utility-types'
@@ -38,16 +38,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

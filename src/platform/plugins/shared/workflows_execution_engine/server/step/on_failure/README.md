@@ -36,20 +36,27 @@ steps:
 
 ### Retry
 
-Retries the step on failure with configurable attempts and delay.
+Retries the step on failure with configurable attempts and delay. Supports fixed delay or exponential backoff.
 
 ```yaml
 on-failure:
   retry:
-    max-attempts: 3  # Required: minimum 1
-    delay: "5s"      # Optional: duration format (e.g., "5s", "1m", "2h")
+    max-attempts: 3   # Required: minimum 1
+    delay: "5s"       # Optional: duration (e.g., "5s", "1m"). Base delay for fixed; initial delay for exponential.
+    condition: "..."   # Optional: expression (e.g. "${{error.type == 'NetworkError'}}"). Default: always retry.
+    strategy: fixed    # Optional: "fixed" (default) or "exponential"
+    multiplier: 2     # Optional: for exponential backoff (default 2). Ignored when strategy is fixed.
+    max-delay: "5m"    # Optional: cap for exponential backoff. Ignored when strategy is fixed.
+    jitter: false     # Optional: add jitter to delay to avoid thundering herd (default false).
 ```
 
 **Behavior:**
 - Retries up to `max-attempts` times
-- Waits `delay` between retries (if specified)
-- Workflow enters `WAITING` state if delay exceeds task manager threshold
+- **Fixed strategy** (default): same `delay` between each retry
+- **Exponential strategy**: delay = initial × `multiplier`^attempt, capped by `max-delay` (e.g. 1s, 2s, 4s with multiplier 2)
+- Waits between retries (if delay configured); workflow enters `WAITING` state if delay exceeds task manager threshold
 - Workflow fails if all retries are exhausted
+- **Condition**: when set, retry only if the expression evaluates to true (e.g. `${{error.type == "TimeoutError"}}`). Use to retry only on transient errors.
 
 ### Fallback
 
@@ -108,6 +115,30 @@ on-failure:
 **Flow:** Retry → Fallback → Continue
 
 **Note:** Without `continue: true`, the workflow will fail after executing fallback steps. The fallback executes, but the original error is re-thrown, causing the workflow to fail.
+
+## Recovery patterns
+
+### Which errors to retry
+
+- **Transient (good candidates for retry):** network errors, timeouts, 5xx, rate limits. Use `condition` to retry only these (e.g. `${{error.type == "TimeoutError"}}` or `${{error.type == "ConnectorExecutionError"}}`).
+- **Permanent (avoid retrying):** validation, 4xx auth, bad config. Omit retry or use `condition` to exclude (e.g. `${{error.type != "ValidationError"}}`).
+
+### Graceful degradation
+
+To keep the workflow **completed** after a step fails but fallback ran: use **fallback + continue**.
+
+```yaml
+on-failure:
+  retry:
+    max-attempts: 2
+    delay: "1s"
+  fallback:
+    - name: backup-step
+      type: ...
+  continue: true
+```
+
+Flow: retry → fallback → continue. Without `continue: true`, the workflow still **fails** after fallback (the original error is re-thrown).
 
 ## Restrictions
 

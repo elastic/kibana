@@ -15,6 +15,7 @@ import type {
   VisualizationContextHelper,
   LensInternalApi,
 } from '@kbn/lens-common';
+import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
@@ -97,7 +98,8 @@ export function buildUserMessagesHelpers(
   internalApi: LensInternalApi,
   { coreStart, data, visualizationMap, datasourceMap, spaces }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  getConsumerMessages?: () => UserMessage[]
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: (messages: UserMessage[]) => void;
@@ -172,7 +174,7 @@ export function buildUserMessagesHelpers(
         datasourceMap,
         dataViewObject.indexPatterns
       ),
-      query: activeAttributes.state.query,
+      query: getRepresentativeQuery(activeAttributes) ?? EMPTY_KQL_QUERY,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',
@@ -201,8 +203,26 @@ export function buildUserMessagesHelpers(
       }) ?? []),
       ...(activeVisualization?.getUserMessages?.(activeVisualizationState, {
         frame: framePublicAPI,
+        setState: (newStateOrUpdater) => {
+          const newVisState =
+            typeof newStateOrUpdater === 'function'
+              ? newStateOrUpdater(activeVisualizationState)
+              : newStateOrUpdater;
+          internalApi.updateAttributes({
+            ...activeAttributes,
+            state: {
+              ...activeAttributes.state,
+              visualization: newVisState,
+            },
+          });
+        },
       }) ?? [])
     );
+
+    const consumerMessages = getConsumerMessages?.() ?? [];
+
+    // When an internal error occurs (block chart rendering), the consumer message is not displayed.
+    userMessages.push(...consumerMessages);
 
     return handleMessageOverwriteFromConsumer(
       filterAndSortUserMessages(

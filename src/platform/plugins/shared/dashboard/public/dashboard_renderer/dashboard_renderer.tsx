@@ -8,16 +8,24 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiLoadingElastic,
+  EuiLoadingSpinner,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import type { DashboardCreationOptions } from '..';
@@ -25,11 +33,12 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
-import { coreServices, screenshotModeService } from '../services/kibana_services';
+import { coreServices, uiActionsService } from '../services/kibana_services';
 
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
+import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 /**
  * Props for the {@link DashboardRenderer} component.
@@ -41,6 +50,12 @@ export interface DashboardRendererProps {
   savedObjectId?: string;
   /** Whether to show a plain spinner instead of the Elastic loading animation. */
   showPlainSpinner?: boolean;
+  /**
+   * Flyout type for panel flyouts (Settings, Lens config, etc.) opened from this dashboard.
+   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout
+   * (e.g. Agent Builder canvas).
+   */
+  panelFlyoutType?: EuiFlyoutProps['type'];
   /** Callback for redirecting within the dashboard application. */
   dashboardRedirect?: DashboardRedirect;
   /** Function that returns the creation options for the dashboard. */
@@ -52,46 +67,75 @@ export interface DashboardRendererProps {
    * @param internalApi - The {@link DashboardInternalApi} instance.
    */
   onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
+  /**
+   * Callback invoked when the dashboard API is destroyed.
+   */
+  onApiCleanup?: () => void;
 }
 
 export function DashboardRenderer({
   locator,
   savedObjectId,
   showPlainSpinner,
+  panelFlyoutType,
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
+  onApiCleanup,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
-  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-  const [dashboardInternalApi, setDashboardInternalApi] = useState<
-    DashboardInternalApi | undefined
+  const [dashboard, setDashboard] = useState<
+    | {
+        api: DashboardApi;
+        internalApi: DashboardInternalApi;
+        showControlGroup: boolean;
+      }
+    | undefined
   >();
   const [error, setError] = useState<Error | undefined>();
 
+  const euiPaddingS = useEuiPaddingSize('s');
+  const styles = useMemo(
+    () => ({
+      renderer: css({
+        display: 'flex',
+        flex: 'auto',
+        width: '100%',
+        flexDirection: 'column',
+        '&.dashboardViewport--loading': {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        '& .controlGroup': {
+          padding: `0 ${euiPaddingS}`,
+        },
+      }),
+    }),
+    [euiPaddingS]
+  );
+
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
-    if (dashboardApi) dashboardApi.locator = locator;
-  }, [dashboardApi, locator]);
+    if (dashboard?.api) dashboard.api.locator = locator;
+  }, [dashboard?.api, locator]);
 
   useEffect(() => {
     if (
-      dashboardInternalApi &&
-      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+      dashboard &&
+      dashboard?.internalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
     ) {
-      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+      dashboard.internalApi.setDashboardContainerRef(dashboardContainerRef.current);
     }
-  }, [dashboardInternalApi]);
+  }, [dashboard]);
 
   useEffect(() => {
     if (error) setError(undefined);
-    if (dashboardApi) setDashboardApi(undefined);
-    if (dashboardInternalApi) setDashboardInternalApi(undefined);
+    if (dashboard) setDashboard(undefined);
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId, panelFlyoutType })
       .then((results) => {
         if (!results) return;
         if (canceled) {
@@ -100,12 +144,22 @@ export function DashboardRenderer({
         }
 
         cleanupDashboardApi = results.cleanup;
-        setDashboardApi(results.api);
-        setDashboardInternalApi(results.internalApi);
+        setDashboard({
+          api: results.api,
+          internalApi: results.internalApi,
+          showControlGroup: results.useControlsIntegration ?? true,
+        });
         onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
-        if (!canceled) setError(err);
+        if (!canceled) {
+          apm.captureError(err, {
+            labels: {
+              error_type: 'LoadDashboardFailure',
+            },
+          });
+          setError(err);
+        }
       });
 
     return () => {
@@ -116,13 +170,11 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  const isDashboardViewportLoading = !dashboardApi && !error;
+  const isDashboardViewportLoading = !dashboard && !error;
 
-  const viewportClasses = classNames(
-    'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': isDashboardViewportLoading }
-  );
+  const viewportClasses = classNames('dashboardViewport', {
+    'dashboardViewport--loading': isDashboardViewportLoading,
+  });
 
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
@@ -150,14 +202,13 @@ export function DashboardRenderer({
       );
     }
 
-    return dashboardApi && dashboardInternalApi ? (
+    return dashboard ? (
       <div
-        className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
-          if (dashboardInternalApi && dashboardInternalApi.dashboardContainerRef$.value !== e) {
-            dashboardInternalApi.setDashboardContainerRef(e);
+          if (dashboard.internalApi.dashboardContainerRef$.value !== e) {
+            dashboard.internalApi.setDashboardContainerRef(e);
           }
           dashboardContainerRef.current = e;
         }}
@@ -166,11 +217,14 @@ export function DashboardRenderer({
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
-          <DashboardContext.Provider value={dashboardApi}>
-            <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport />
-            </DashboardInternalContext.Provider>
-          </DashboardContext.Provider>
+          <KibanaContextProvider services={{ uiActions: uiActionsService }}>
+            <DashboardContext.Provider value={dashboard.api}>
+              <DashboardInternalContext.Provider value={dashboard.internalApi}>
+                {dashboard.showControlGroup && <DashboardControlsRenderer />}
+                <DashboardViewport />
+              </DashboardInternalContext.Provider>
+            </DashboardContext.Provider>
+          </KibanaContextProvider>
         </ExitFullScreenButtonKibanaProvider>
       </div>
     ) : (
@@ -180,28 +234,16 @@ export function DashboardRenderer({
 
   return (
     <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
-      {dashboardViewport?.current && dashboardApi && (
+      {dashboardViewport?.current && dashboard && (
         <ParentClassController
           viewportRef={dashboardViewport.current}
-          dashboardApi={dashboardApi}
+          dashboardApi={dashboard.api}
         />
       )}
       {renderDashboardContents()}
     </div>
   );
 }
-
-const styles = {
-  renderer: css({
-    display: 'flex',
-    flex: 'auto',
-    width: '100%',
-    '&.dashboardViewport--loading': {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  }),
-};
 
 /**
  * Maximizing a panel in Dashboard only works if the parent div has a certain class. This

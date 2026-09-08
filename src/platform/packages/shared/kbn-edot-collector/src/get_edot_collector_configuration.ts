@@ -7,26 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
+
+export interface EdotCollectorParams {
+  elasticsearchEndpoint: string;
+  username: string;
+  password: string;
+}
 
 /**
- * Generates the OpenTelemetry Collector configuration for the EDOT Collector.
+ * Returns the EDOT Collector configuration as a plain object.
+ * Useful when callers need to extend the config before serializing.
  *
  * @param elasticsearchEndpoint - The Elasticsearch endpoint URL
  * @param username - Elasticsearch username
  * @param password - Elasticsearch password
- * @returns YAML configuration string for the EDOT Collector
  */
-export function getEdotCollectorConfiguration({
+export function getEdotCollectorConfig({
   elasticsearchEndpoint,
   username,
   password,
-}: {
-  elasticsearchEndpoint: string;
-  username: string;
-  password: string;
-}): string {
-  const config = {
+}: EdotCollectorParams): Record<string, unknown> {
+  return {
+    extensions: {
+      health_check: {
+        endpoint: '0.0.0.0:13133',
+      },
+    },
     receivers: {
       otlp: {
         protocols: {
@@ -43,35 +50,25 @@ export function getEdotCollectorConfiguration({
       elasticapm: {},
     },
     processors: {
-      elastictrace: {},
+      elasticapm: {},
     },
     exporters: {
       elasticsearch: {
         endpoint: elasticsearchEndpoint,
         user: username,
         password,
+        tls: elasticsearchEndpoint.startsWith('https://') ? { insecure_skip_verify: true } : {},
         mapping: {
           mode: 'otel',
-        },
-        logs_dynamic_index: {
-          enabled: true,
-        },
-        metrics_dynamic_index: {
-          enabled: true,
-        },
-        traces_dynamic_index: {
-          enabled: true,
-        },
-        flush: {
-          interval: '1s',
         },
       },
     },
     service: {
+      extensions: ['health_check'],
       pipelines: {
         traces: {
           receivers: ['otlp'],
-          processors: ['elastictrace'],
+          processors: ['elasticapm'],
           exporters: ['elasticapm', 'elasticsearch'],
         },
         metrics: {
@@ -89,6 +86,18 @@ export function getEdotCollectorConfiguration({
       },
     },
   };
+}
 
-  return yaml.dump(config);
+/**
+ * Generates the OpenTelemetry Collector configuration for the EDOT Collector.
+ *
+ * The `yaml-1.1` schema keeps values like a literal `yes` or `0123456` password
+ * quoted, so they stay strings for the collector's YAML 1.1 parser rather than
+ * being read as a boolean or an octal number. `singleQuote` matches the quoting
+ * style the collector config has always been written in.
+ *
+ * @returns YAML configuration string for the EDOT Collector
+ */
+export function getEdotCollectorConfiguration(params: EdotCollectorParams): string {
+  return stringify(getEdotCollectorConfig(params), { schema: 'yaml-1.1', singleQuote: true });
 }

@@ -8,9 +8,16 @@
 import type { Observable } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
-import type { DocLinksServiceSetup, HttpResources, IBasePath, Logger } from '@kbn/core/server';
+import type {
+  DocLinksServiceSetup,
+  HttpResources,
+  I18nServiceSetup,
+  IBasePath,
+  Logger,
+} from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineAnalyticsRoutes } from './analytics';
@@ -21,6 +28,8 @@ import { defineAuthorizationRoutes } from './authorization';
 import { defineDeprecationsRoutes } from './deprecations';
 import { defineSecurityFeatureRoutes } from './feature_check';
 import { defineIndicesRoutes } from './indices';
+import { defineOAuthRoutes } from './oauth';
+import { defineOAuthMetadataRoutes } from './oauth_metadata';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
@@ -57,9 +66,12 @@ export interface RouteDefinitionParams {
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  serverlessProjectId: string | undefined;
+  serverlessProjectType: KibanaSolution | undefined;
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
   docLinks: DocLinksServiceSetup;
+  i18n: I18nServiceSetup;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
@@ -67,6 +79,8 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineApiKeysRoutes(params);
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
+  defineOAuthMetadataRoutes(params);
+  defineOAuthRoutes(params);
   defineSessionManagementRoutes(params);
   defineUserProfileRoutes(params);
   defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)

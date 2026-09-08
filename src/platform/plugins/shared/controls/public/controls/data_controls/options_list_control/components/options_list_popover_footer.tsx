@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiButtonGroup,
@@ -18,11 +19,11 @@ import {
   EuiProgress,
   useEuiBackgroundColor,
   useEuiPaddingSize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type ViewMode } from '@kbn/presentation-publishing';
 
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -40,13 +41,15 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = () => {
-  const { euiTheme } = useEuiTheme();
   const { componentApi } = useOptionsListContext();
 
-  const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
-    componentApi.exclude$,
-    componentApi.dataLoading$,
-    componentApi.allowExpensiveQueries$
+  const [exclude, viewMode, isPartial, loading] = useBatchedPublishingSubjects(
+    isDSLOptionsListApi(componentApi) ? componentApi.exclude$ : new BehaviorSubject(false),
+    isDSLOptionsListApi(componentApi)
+      ? componentApi.viewMode$
+      : new BehaviorSubject('view' as ViewMode),
+    isDSLOptionsListApi(componentApi) ? componentApi.isPartial$ : new BehaviorSubject(false),
+    componentApi.dataLoading$
   );
 
   return (
@@ -81,20 +84,22 @@ export const OptionsListPopoverFooter = () => {
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) =>
-                componentApi.setExclude(optionId === 'optionsList__excludeResults')
-              }
+              onChange={(optionId) => {
+                if (!isDSLOptionsListApi(componentApi)) return;
+                componentApi.setExclude?.(optionId === 'optionsList__excludeResults');
+              }}
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
-          {!allowExpensiveQueries && (
-            <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
+          {isPartial && (
+            <EuiFlexItem grow={false}>
               <EuiIconTip
-                type="warning"
-                color={euiTheme.colors.textWarning}
-                content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
-                aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
+                size="m"
+                type="partial"
+                title={OptionsListStrings.popover.getPartialResultsTitle()}
+                aria-label={OptionsListStrings.popover.getPartialResultsTitle()}
+                content={OptionsListStrings.popover.getPartialResultsTooltip(viewMode)}
               />
             </EuiFlexItem>
           )}

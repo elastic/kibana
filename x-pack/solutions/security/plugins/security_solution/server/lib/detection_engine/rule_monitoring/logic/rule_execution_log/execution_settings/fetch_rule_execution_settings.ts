@@ -6,14 +6,13 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isMissingUiamApiKeyMessage } from '@kbn/alerting-plugin/server';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { ConfigType } from '../../../../../../config';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../../../plugin_contract';
 
-import {
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-} from '../../../../../../../common/constants';
+import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '../../../../../../../common/constants';
 import type { RuleExecutionSettings } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { LogLevelSetting } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
@@ -21,7 +20,8 @@ export const fetchRuleExecutionSettings = async (
   config: ConfigType,
   logger: Logger,
   core: SecuritySolutionPluginCoreSetupDependencies,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  ruleResultService?: PublicRuleResultService
 ): Promise<RuleExecutionSettings> => {
   try {
     const ruleExecutionSettings = await withSecuritySpan('fetchRuleExecutionSettings', async () => {
@@ -43,6 +43,18 @@ export const fetchRuleExecutionSettings = async (
     const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
     logger.error(`${logMessage}: ${logReason}`);
 
+    // This fetch authenticates with the rule's own API key, so a UIAM rejection here means the
+    // key is broken for the whole run — but a rule that does no further authenticated work (for
+    // example one that exits early on "no matching indices") would surface it nowhere else.
+    // Recording it as a run error makes the failure visible and lets the alerting task runner's
+    // UIAM API key repair see it. The alerting plugin owns the match so this cannot drift from the
+    // healer that consumes it.
+    // Every other failure keeps the long-standing behavior of silently falling back to defaults.
+    const reason = e instanceof Error ? e.message : String(e);
+    if (isMissingUiamApiKeyMessage(reason)) {
+      ruleResultService?.addLastRunError(`${logMessage}: ${reason}`);
+    }
+
     return getRuleExecutionSettingsDefault(config);
   }
 };
@@ -52,22 +64,18 @@ const getRuleExecutionSettingsFrom = (
   advancedSettings: Record<string, unknown>
 ): RuleExecutionSettings => {
   const featureFlagEnabled = config.experimentalFeatures.extendedRuleExecutionLoggingEnabled;
-
-  const advancedSettingEnabled = getSetting<boolean>(
-    advancedSettings,
-    EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-    false
-  );
-  const advancedSettingMinLevel = getSetting<LogLevelSetting>(
-    advancedSettings,
-    EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-    LogLevelSetting.off
-  );
+  const minLevel = featureFlagEnabled
+    ? getSetting<LogLevelSetting>(
+        advancedSettings,
+        EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
+        LogLevelSetting.info
+      )
+    : LogLevelSetting.off;
 
   return {
     extendedLogging: {
-      isEnabled: featureFlagEnabled && advancedSettingEnabled,
-      minLevel: advancedSettingMinLevel,
+      isEnabled: featureFlagEnabled && minLevel !== LogLevelSetting.off,
+      minLevel,
     },
   };
 };
@@ -78,7 +86,7 @@ const getRuleExecutionSettingsDefault = (config: ConfigType): RuleExecutionSetti
   return {
     extendedLogging: {
       isEnabled: featureFlagEnabled,
-      minLevel: featureFlagEnabled ? LogLevelSetting.error : LogLevelSetting.off,
+      minLevel: featureFlagEnabled ? LogLevelSetting.info : LogLevelSetting.off,
     },
   };
 };

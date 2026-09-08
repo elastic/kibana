@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { WorkflowsSearchParams } from '@kbn/workflows';
+import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
+
+export const ruleKeys = {
+  all: ['rule'] as const,
+  lists: () => [...ruleKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    filter?: string;
+    search?: string;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleKeys.lists(), filters] as const,
+  details: () => [...ruleKeys.all, 'details'] as const,
+  detail: (id: string) => [...ruleKeys.details(), id] as const,
+  allTags: () => [...ruleKeys.all, 'tags'] as const,
+  tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+};
+
+export const ruleTemplateKeys = {
+  all: ['ruleTemplate'] as const,
+  lists: () => [...ruleTemplateKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleTemplateKeys.lists(), filters] as const,
+};
+
+export const workflowKeys = {
+  all: ['workflow'] as const,
+  details: () => [...workflowKeys.all, 'details'] as const,
+  detail: (id: string) => [...workflowKeys.details(), id] as const,
+  searches: () => [...workflowKeys.all, 'search'] as const,
+  search: (params: Pick<WorkflowsSearchParams, 'query' | 'tags'>) =>
+    [...workflowKeys.searches(), params] as const,
+};
+
+export const matcherSuggestionKeys = {
+  all: ['matcherSuggestions'] as const,
+  ruleEventFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'ruleEventFields', { matcher: matcher || undefined }] as const,
+};
+
+export const actionPolicyKeys = {
+  all: ['actionPolicy'] as const,
+  detail: (id: string) => [...actionPolicyKeys.all, 'detail', id] as const,
+  lists: () => [...actionPolicyKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string[];
+    enabled?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...actionPolicyKeys.lists(), filters] as const,
+  allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+  linkedForRule: (ruleId: string) =>
+    [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
+};
+
+export const executionHistoryKeys = {
+  all: ['executionHistory'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    ruleIds?: string[];
+    outcome?: PolicyExecutionOutcomeFilter;
+    episodeIds?: string[];
+    startDate?: string;
+  }) => [...executionHistoryKeys.all, 'list', filters] as const,
+  newEventsSince: (
+    since: string,
+    filters: {
+      search?: string;
+      ruleIds?: string[];
+      outcome?: PolicyExecutionOutcomeFilter;
+    } = {}
+  ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
+};
+
+export const ruleExecutionKeys = {
+  all: ['ruleExecution'] as const,
+  list: (filters: ListRuleExecutionsUiParams) =>
+    [...ruleExecutionKeys.all, 'list', filters] as const,
+};
+
+export const userProfileKeys = {
+  all: ['userProfile'] as const,
+  bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
+};

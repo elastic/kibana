@@ -95,6 +95,24 @@ const originalCasesWithAssignee = [
   { ...createCaseSavedObjectResponse({ overrides: { assignees: [{ uid: '1' }] } }), id: '1' },
 ].map((so) => transformSavedObjectToExternalModel(so));
 
+const originalCasesWithEnrichedAssignee = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        assignees: [
+          {
+            uid: '1',
+            username: 'user_one',
+            full_name: 'User One',
+            email: 'user_one@example.com',
+          },
+        ],
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
 export const patchAssigneesCasesRequest = {
   cases: [
     {
@@ -130,6 +148,24 @@ export const patchAddRemoveAssigneesCasesRequest = {
         assignees: [{ uid: '2' }],
       },
       originalCase: originalCasesWithAssignee[0],
+    },
+  ],
+};
+
+/**
+ * Retains an identity-enriched assignee and adds a uid-only one. Used to assert that
+ * user-action diffs compare by uid (not deep equality), otherwise the retained assignee
+ * is incorrectly recorded as delete+add.
+ */
+export const patchAddAssigneeWithEnrichedOriginalRequest = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        assignees: [{ uid: '1' }, { uid: '2' }],
+      },
+      originalCase: originalCasesWithEnrichedAssignee[0],
     },
   ],
 };
@@ -956,6 +992,206 @@ export const getExtractObservablesUserActions = ({
             settings: { extractObservables: true },
           },
           type: 'settings',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
+const originalCasesWithExtendedFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: { extended_fields: { risk_score: 'low', severity: 'medium' } },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+export const patchExtendedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        extended_fields: { risk_score: 'high' },
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const patchUpdateExtendedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        extended_fields: { risk_score: 'high', severity: 'medium' },
+      },
+      originalCase: originalCasesWithExtendedFields[0],
+    },
+  ],
+};
+
+// A case with a linked pair: v1 `priority` ⇄ v2 `priority_as_keyword`.
+const originalCasesWithPairedFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
+        extended_fields: { priority_as_keyword: 'low' },
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+/**
+ * One paired edit: both representations of the linked field change, and the
+ * pairing adapter recorded the link. The extended_fields user action is
+ * canonical; the duplicate customFields action is suppressed (#282474).
+ */
+export const patchPairedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' }],
+        extended_fields: { priority_as_keyword: 'high' },
+      },
+      originalCase: originalCasesWithPairedFields[0],
+      pairedCustomFieldStorageKeys: { priority: 'priority_as_keyword' },
+    },
+  ],
+};
+
+/**
+ * A paired clear: the storage key is deleted from extended_fields, which the
+ * extended_fields activity does not record — the customFields action stays the
+ * only record of the edit and must not be suppressed.
+ */
+export const patchPairedClearCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }],
+        extended_fields: {},
+      },
+      originalCase: originalCasesWithPairedFields[0],
+      pairedCustomFieldStorageKeys: { priority: 'priority_as_keyword' },
+    },
+  ],
+};
+
+export const getExtendedFieldsUserActions = ({
+  isMock,
+  payload,
+}: {
+  isMock: boolean;
+  payload: Record<string, string>;
+}): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_update_extended_fields',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            extended_fields: payload,
+          },
+          type: 'extended_fields',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
+export const patchTemplateCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        template: { id: 'tmpl-1', version: 3 },
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const patchRemoveTemplateCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        template: null,
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const getTemplateUserActions = ({
+  isMock,
+  payload,
+}: {
+  isMock: boolean;
+  payload: { id: string; version: number; name?: string } | null;
+}): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_change_applied_template',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            template: payload,
+          },
+          type: 'template',
         },
         references: [
           {

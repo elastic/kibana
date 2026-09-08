@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
-test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () => {
+test.describe('Infrastructure Inventory - Alerts Flyout', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsPrivilegedUser();
     await inventoryPage.addDismissK8sTourInitScript();
@@ -17,41 +19,37 @@ test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () 
 
   test(
     'Should open inventory rule flyout',
-    { tag: ['@svlOblt'] },
+    { tag: tags.serverless.observability.complete },
     async ({ pageObjects: { inventoryPage } }) => {
-      await test.step('open alerts menu', async () => {
-        await inventoryPage.alertsHeaderButton.click();
-        await expect(inventoryPage.alertsMenu).toBeVisible();
-      });
-
-      await test.step('open infrastructure rules submenu', async () => {
-        await inventoryPage.inventoryAlertsMenuOption.click();
-        await expect(inventoryPage.alertsMenu).toContainText('Infrastructure rules');
-      });
-
       await test.step('open inventory rule flyout', async () => {
-        await inventoryPage.createInventoryRuleButton.click();
-        await expect(inventoryPage.alertsFlyout).toBeVisible();
+        await inventoryPage.openInventoryRuleFlyout();
         await expect(inventoryPage.alertsFlyoutRuleDefinitionSection).toBeVisible();
         await expect(inventoryPage.alertsFlyoutRuleTypeName).toHaveText('Inventory');
       });
     }
   );
 
+  test(
+    'Should show related dashboards on the inventory rule details step',
+    { tag: tags.serverless.observability.complete },
+    async ({ pageObjects: { inventoryPage } }) => {
+      await test.step('open the inventory rule flyout', async () => {
+        await inventoryPage.openInventoryRuleFlyout();
+      });
+
+      await test.step('open the Details step and show the related dashboards section', async () => {
+        await inventoryPage.alertsFlyoutDetailsStep.click();
+        // The dashboards selector fetches saved objects, so allow extra time under CI contention.
+        await expect(inventoryPage.alertsFlyoutLinkedDashboards).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    }
+  );
+
   test('Should open metrics threshold rule flyout', async ({ pageObjects: { inventoryPage } }) => {
-    await test.step('open alerts menu', async () => {
-      await inventoryPage.alertsHeaderButton.click();
-      await expect(inventoryPage.alertsMenu).toBeVisible();
-    });
-
-    await test.step('open metrics rules submenu', async () => {
-      await inventoryPage.metricsAlertsMenuOption.click();
-      await expect(inventoryPage.alertsMenu).toContainText('Metrics rules');
-    });
-
     await test.step('open metrics threshold rule flyout', async () => {
-      await inventoryPage.createMetricsThresholdRuleButton.click();
-      await expect(inventoryPage.alertsFlyout).toBeVisible();
+      await inventoryPage.openMetricsThresholdRuleFlyout();
       await expect(inventoryPage.alertsFlyoutRuleDefinitionSection).toBeVisible();
       await expect(inventoryPage.alertsFlyoutRuleTypeName).toHaveText('Metric threshold');
     });
@@ -59,7 +57,7 @@ test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () 
 
   test(
     'Should not have option to create custom threshold rule',
-    { tag: ['@svlOblt'] },
+    { tag: tags.serverless.observability.complete },
     async ({ pageObjects: { inventoryPage } }) => {
       await test.step('open alerts menu', async () => {
         await inventoryPage.alertsHeaderButton.click();

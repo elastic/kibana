@@ -7,9 +7,24 @@
 
 import { of, throwError, from } from 'rxjs';
 import type { ElasticsearchClient, AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import { HealthDiagnosticServiceImpl } from './health_diagnostic_service';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
+import {
+  IntegrationResolverImpl,
+  type IntegrationResolver,
+} from './health_diagnostic_integration_resolver';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
+import {
+  NotAllowedError,
+  PermissionError,
+  QueryType,
+  type ApiExecutableQuery,
+  type HealthDiagnosticQuery,
+  type IndexQuery,
+  type ApiQuery,
+  type ResolvedQuery,
+} from './health_diagnostic_service.types';
 import { artifactService } from '../artifact';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
@@ -21,13 +36,22 @@ import {
   createMockQueryExecutor,
   createMockDocument,
   createMockArtifactData,
+  createMockPackageService,
+  createMockApiQueryV3,
+  createMockQueryV2,
 } from './__mocks__';
+import { TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT } from '../event_based/events';
 
 jest.mock('./health_diagnostic_receiver');
+jest.mock('./health_diagnostic_integration_resolver');
 jest.mock('../artifact');
 
 const MockedCircuitBreakingQueryExecutorImpl = CircuitBreakingQueryExecutorImpl as jest.MockedClass<
   typeof CircuitBreakingQueryExecutorImpl
+>;
+
+const MockedIntegrationResolverImpl = IntegrationResolverImpl as jest.MockedClass<
+  typeof IntegrationResolverImpl
 >;
 
 describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticService', () => {
@@ -38,6 +62,8 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
   let mockTelemetryConfigProvider: jest.Mocked<TelemetryConfigProvider>;
   let mockQueryExecutor: jest.Mocked<CircuitBreakingQueryExecutorImpl>;
+  let mockPackageService: ReturnType<typeof createMockPackageService>;
+  let mockResolver: jest.Mocked<IntegrationResolver>;
 
   const mockDocument = createMockDocument();
 
@@ -48,23 +74,44 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
     mockAnalytics = createMockAnalytics();
     mockTelemetryConfigProvider = createMockTelemetryConfigProvider();
     mockQueryExecutor = createMockQueryExecutor();
+    mockPackageService = createMockPackageService([]);
+
+    mockResolver = {
+      resolve: jest.fn().mockImplementation((queries: HealthDiagnosticQuery[]) =>
+        Promise.resolve(
+          queries.map((q): ResolvedQuery => {
+            if ('_raw' in q) {
+              return { kind: 'skipped', query: q, reason: 'parse_failure' };
+            }
+            return { kind: 'executable', query: q as IndexQuery };
+          })
+        )
+      ),
+    } as jest.Mocked<IntegrationResolver>;
 
     MockedCircuitBreakingQueryExecutorImpl.mockImplementation(() => mockQueryExecutor);
+    MockedIntegrationResolverImpl.mockImplementation(
+      () => mockResolver as unknown as IntegrationResolverImpl
+    );
     service = new HealthDiagnosticServiceImpl(mockLogger);
   };
 
   const setupDefaultArtifact = (overrides = {}) => {
-    (artifactService.getArtifact as jest.Mock).mockResolvedValue({
-      data: createMockArtifactData(overrides),
+    (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+      if (artifactId === 'health-diagnostic-queries-v2') {
+        return Promise.resolve({ data: createMockArtifactData(overrides) });
+      }
+      return Promise.resolve({ data: '' }); // v1: empty by default
     });
   };
 
   const startService = async () => {
     await service.start({
       taskManager: mockTaskManager,
-      esClient: mockEsClient,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
       analytics: mockAnalytics,
       telemetryConfigProvider: mockTelemetryConfigProvider,
+      packageService: mockPackageService as unknown as PackageService,
     });
   };
 
@@ -90,6 +137,8 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(result[0]).toMatchObject({
           name: 'test-query',
           passed: true,
+          status: 'success',
+          descriptorVersion: 2,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -132,6 +181,99 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
       });
 
+      describe('query attribute filtering', () => {
+        test('should silently skip queries with unrecognised versions — no stat doc, debug log only', async () => {
+          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+            data: `---
+id: unknown-version-query
+name: unknown-version-query
+version: 99
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`,
+          });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(0);
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+          expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('unknown version'),
+            expect.anything()
+          );
+          expect(mockLogger.warn).not.toHaveBeenCalledWith(
+            'Skipping query that failed to parse',
+            expect.anything()
+          );
+        });
+
+        test('should emit a skipped stat for queries missing the enabled attribute', async () => {
+          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+            data: `---
+id: no-enabled-query
+name: no-enabled-query
+index: test-index
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`,
+          });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(1);
+          expect(result[0]).toMatchObject({
+            status: 'skipped',
+            skipReason: 'parse_failure',
+            passed: false,
+          });
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        });
+
+        test('should execute valid queries and silently drop unknown-version queries', async () => {
+          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+            data: `---
+id: valid-query-1
+name: valid-query-1
+index: test-index
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true
+---
+id: unknown-version-query
+name: unknown-version-query
+version: 99
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`,
+          });
+
+          mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(1);
+          expect(result[0]).toMatchObject({
+            name: 'valid-query-1',
+            status: 'success',
+            passed: true,
+          });
+          expect(result.find((r) => r.name === 'unknown-version-query')).toBeUndefined();
+          expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
+        });
+      });
+
       test('should include circuit breaker stats in successful execution', async () => {
         const lastExecutionByQuery = { 'test-query': 1640995200000 };
         mockQueryExecutor.search.mockReturnValue(of(mockDocument));
@@ -156,6 +298,27 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         );
       });
 
+      test('should return failed stat when search() throws synchronously instead of rejecting the batch', async () => {
+        await startService();
+
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const error = new Error('Unhandled QueryType: UNKNOWN');
+        mockQueryExecutor.search.mockImplementation(() => {
+          throw error;
+        });
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: false,
+          status: 'failed',
+          failure: { message: 'Unhandled QueryType: UNKNOWN' },
+        });
+        expect(mockLogger.warn).toHaveBeenCalledWith('Error running query', expect.any(Object));
+      });
+
       test('should handle query execution errors', async () => {
         await startService();
 
@@ -169,12 +332,14 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(result[0]).toMatchObject({
           name: 'test-query',
           passed: false,
+          status: 'failed',
+          descriptorVersion: 2,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
           },
         });
-        expect(mockLogger.error).toHaveBeenCalledWith(
+        expect(mockLogger.warn).toHaveBeenCalledWith(
           'Error running query',
           expect.objectContaining({ error })
         );
@@ -206,15 +371,78 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         });
       });
 
-      test('should handle artifact service errors gracefully', async () => {
+      test('should log debug (not warn) for PermissionError', async () => {
         await startService();
 
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const permissionError = new PermissionError('Missing read privileges');
+        mockQueryExecutor.search.mockReturnValue(throwError(() => permissionError));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: false,
+          failure: {
+            message: 'Missing read privileges',
+            reason: undefined,
+          },
+        });
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          'Permission error running query.',
+          expect.objectContaining({ error: permissionError })
+        );
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      test('should continue with v2 queries when v1 artifact fails', async () => {
+        await startService();
+        (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+          if (artifactId === 'health-diagnostic-queries-v1') {
+            return Promise.reject(new Error('v1 not found'));
+          }
+          return Promise.resolve({ data: createMockArtifactData() });
+        });
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe('test-query');
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Error getting health diagnostic queries',
+          expect.any(Object)
+        );
+      });
+
+      test('should continue with v1 queries when v2 artifact fails', async () => {
+        await startService();
+        (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+          if (artifactId === 'health-diagnostic-queries-v2') {
+            return Promise.reject(new Error('v2 not found'));
+          }
+          return Promise.resolve({ data: createMockArtifactData() });
+        });
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe('test-query');
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Error getting health diagnostic queries',
+          expect.any(Object)
+        );
+      });
+
+      test('should return empty array when both artifacts fail', async () => {
+        await startService();
         (artifactService.getArtifact as jest.Mock).mockRejectedValue(
           new Error('Artifact not found')
         );
-        const lastExecutionByQuery = {};
 
-        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+        const result = await service.runHealthDiagnosticQueries({});
 
         expect(result).toEqual([]);
         expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -306,6 +534,95 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             numDocs: 0,
             traceId: expect.any(String),
           })
+        );
+      });
+
+      it('reports per-integration stats for a successful v2 query', async () => {
+        const resolution = {
+          name: 'endpoint',
+          version: '8.14.2',
+          indices: ['logs-endpoint.events.process-*'],
+        };
+        mockResolver.resolve.mockResolvedValue([
+          { kind: 'executable', query: createMockQueryV2(QueryType.DSL), resolution },
+        ]);
+
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(1);
+        expect(result[0].integration).toMatchObject({
+          name: 'endpoint',
+          version: '8.14.2',
+          indices: ['logs-endpoint.events.process-*'],
+        });
+      });
+
+      it('emits skipped stats EBT when integration is not installed', async () => {
+        mockResolver.resolve.mockResolvedValue([
+          {
+            kind: 'skipped',
+            query: createMockQueryV2(QueryType.DSL),
+            reason: 'integration_not_installed',
+          },
+        ]);
+
+        await service.runHealthDiagnosticQueries({});
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT.eventType,
+          expect.objectContaining({
+            status: 'skipped',
+            skipReason: 'integration_not_installed',
+            passed: false,
+          })
+        );
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('runHealthDiagnosticQueries — API queries', () => {
+      const buildResolvedApiQuery = (overrides: Partial<ApiQuery> = {}): ApiExecutableQuery => ({
+        kind: 'executable_api',
+        query: createMockApiQueryV3(overrides),
+      });
+
+      beforeEach(async () => {
+        await startService();
+      });
+
+      it('dispatches executable_api to executeApiQuery, not executeQuery', async () => {
+        mockResolver.resolve.mockResolvedValue([buildResolvedApiQuery()]);
+        mockQueryExecutor.searchApi.mockReturnValue(from([]));
+        await service.runHealthDiagnosticQueries({});
+        expect(mockQueryExecutor.searchApi).toHaveBeenCalled();
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      it('returns stats with status: failed when NotAllowedError is thrown', async () => {
+        mockResolver.resolve.mockResolvedValue([buildResolvedApiQuery()]);
+        mockQueryExecutor.searchApi.mockReturnValue(
+          throwError(() => new NotAllowedError('_dangerous/path'))
+        );
+        const stats = await service.runHealthDiagnosticQueries({});
+        expect(stats).toHaveLength(1);
+        expect(stats[0].status).toBe('failed');
+      });
+
+      it('NotAllowedError instanceof check works correctly (setPrototypeOf guard)', () => {
+        const err = new NotAllowedError('_dangerous/path');
+        expect(err instanceof NotAllowedError).toBe(true);
+        expect(err instanceof Error).toBe(true);
+      });
+
+      it('sends QUERY_STATS_EVENT EBT for an API query', async () => {
+        mockResolver.resolve.mockResolvedValue([buildResolvedApiQuery()]);
+        mockQueryExecutor.searchApi.mockReturnValue(from([{ id: 'foo' }]));
+        await service.runHealthDiagnosticQueries({});
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT.eventType,
+          expect.objectContaining({ status: 'success' })
         );
       });
     });

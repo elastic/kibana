@@ -6,7 +6,11 @@
  */
 import { BehaviorSubject } from 'rxjs';
 import { defaultDoc } from '../mocks/services_mock';
-import { deserializeState, getStructuredDatasourceStates } from './helper';
+import {
+  deserializeState,
+  getStructuredDatasourceStates,
+  saveUpdatedLinkedAnnotationsToLibrary,
+} from './helper';
 import { makeEmbeddableServices } from './mocks';
 import expect from 'expect';
 import type {
@@ -14,14 +18,18 @@ import type {
   TextBasedPersistedState,
   DatasourceState,
   StructuredDatasourceStates,
+  XYByReferenceAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYVisualizationState,
 } from '@kbn/lens-common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 describe('Embeddable helpers', () => {
   describe('deserializeState', () => {
     function getServices() {
       return makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
         visOverrides: { id: 'lnsXY' },
-        dataOverrides: { id: 'form_based' },
+        dataOverrides: { id: 'formBased' },
       });
     }
     it('should forward a by value state', async () => {
@@ -35,7 +43,7 @@ describe('Embeddable helpers', () => {
 
     it('should wrap Lens doc/attributes into component state shape', async () => {
       const services = getServices();
-      const runtimeState = await deserializeState(services, defaultDoc);
+      const runtimeState = await deserializeState(services, { attributes: defaultDoc });
       expect(runtimeState).toEqual(
         expect.objectContaining({
           attributes: { ...defaultDoc, references: defaultDoc.references },
@@ -46,10 +54,44 @@ describe('Embeddable helpers', () => {
     it('load a by-ref doc from the attribute service', async () => {
       const services = getServices();
       await deserializeState(services, {
-        savedObjectId: '123',
+        ref_id: '123',
       });
 
       expect(services.attributeService.loadFromLibrary).toHaveBeenCalledWith('123');
+    });
+
+    it('should drop a legacy aggregate slot value from by-value attributes (self-heal)', async () => {
+      const services = getServices();
+      const legacyDoc = {
+        ...defaultDoc,
+        state: {
+          ...defaultDoc.state,
+          // legacy dual-written copy — dead data, ignored at read time
+          query: { esql: 'FROM index | LIMIT 10' },
+          datasourceStates: {
+            textBased: {
+              layers: { layer1: { query: { esql: 'FROM index | LIMIT 10' }, columns: [] } },
+            },
+          },
+        },
+      } as unknown as typeof defaultDoc;
+      const runtimeState = await deserializeState(services, { attributes: legacyDoc });
+      expect(runtimeState.attributes.state.query).toBeUndefined();
+      // the layer query stays authoritative
+      expect(runtimeState.attributes.state.datasourceStates).toEqual(
+        legacyDoc.state.datasourceStates
+      );
+    });
+
+    it('should keep the chart-scoped KQL filter of by-value attributes', async () => {
+      const services = getServices();
+      const kqlQuery = { query: 'bytes > 100', language: 'kuery' };
+      const doc = {
+        ...defaultDoc,
+        state: { ...defaultDoc.state, query: kqlQuery },
+      } as unknown as typeof defaultDoc;
+      const runtimeState = await deserializeState(services, { attributes: doc });
+      expect(runtimeState.attributes.state.query).toEqual(kqlQuery);
     });
 
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
@@ -58,7 +100,7 @@ describe('Embeddable helpers', () => {
         .fn()
         .mockRejectedValueOnce(new Error('not found'));
       const runtimeState = await deserializeState(services, {
-        savedObjectId: '123',
+        ref_id: '123',
       });
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();
@@ -111,4 +153,146 @@ describe('Embeddable helpers', () => {
       expect(result.textBased).toEqual(textBasedDSStateMock);
     });
   });
+
+  describe('saveUpdatedLinkedAnnotationsToLibrary', () => {
+    const mockEventAnnotationService = {
+      updateAnnotationGroup: jest.fn(() => Promise.resolve()),
+    } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
+
+    const baseAnnotation = {
+      id: 'ann-1',
+      type: 'manual' as const,
+      key: { type: 'point_in_time' as const, timestamp: '2025-01-01T00:00:00.000Z' },
+      label: 'Event',
+      color: '#FF0000',
+    };
+
+    const lastSavedConfig = {
+      annotations: [{ ...baseAnnotation, color: '#0000FF' }],
+      indexPatternId: 'idx-1',
+      ignoreGlobalFilters: false,
+      title: 'Test Group',
+      description: '',
+      tags: [],
+    };
+
+    function makeByRefLayer(
+      overrides?: Partial<XYByReferenceAnnotationLayerConfig>
+    ): XYByReferenceAnnotationLayerConfig {
+      return {
+        layerId: 'layer-1',
+        layerType: 'annotations',
+        annotations: [baseAnnotation],
+        indexPatternId: 'idx-1',
+        ignoreGlobalFilters: false,
+        annotationGroupId: 'group-1',
+        __lastSaved: lastSavedConfig,
+        ...overrides,
+      };
+    }
+
+    function makeVisState(layers: XYVisualizationState['layers']): XYVisualizationState {
+      return {
+        preferredSeriesType: 'bar_stacked',
+        legend: { isVisible: true, position: 'right' },
+        layers,
+      } as XYVisualizationState;
+    }
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should handle frozen (immutable) visualization state without throwing', async () => {
+      const byRefLayer = makeByRefLayer();
+      const visState = makeVisState([byRefLayer]);
+
+      // Simulate immer/Redux frozen state
+      const frozenVisState = deepFreeze(visState);
+
+      await expect(
+        saveUpdatedLinkedAnnotationsToLibrary(frozenVisState, mockEventAnnotationService)
+      ).resolves.not.toThrow();
+
+      expect(mockEventAnnotationService.updateAnnotationGroup).toHaveBeenCalledTimes(1);
+    });
+
+    it('should save modified by-reference annotation layers to the library', async () => {
+      const byRefLayer = makeByRefLayer();
+      const visState = makeVisState([byRefLayer]);
+
+      await saveUpdatedLinkedAnnotationsToLibrary(visState, mockEventAnnotationService);
+
+      expect(mockEventAnnotationService.updateAnnotationGroup).toHaveBeenCalledWith(
+        expect.objectContaining({
+          annotations: byRefLayer.annotations,
+          indexPatternId: byRefLayer.indexPatternId,
+          title: lastSavedConfig.title,
+        }),
+        'group-1'
+      );
+    });
+
+    it('should skip layers that have no unsaved changes', async () => {
+      const unchangedLayer = makeByRefLayer({
+        annotations: lastSavedConfig.annotations,
+      });
+      const visState = makeVisState([unchangedLayer]);
+
+      await saveUpdatedLinkedAnnotationsToLibrary(visState, mockEventAnnotationService);
+
+      expect(mockEventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
+    });
+
+    it('should skip non-annotation layers', async () => {
+      const dataLayer: XYDataLayerConfig = {
+        layerId: 'data-layer',
+        layerType: 'data',
+        seriesType: 'bar',
+        accessors: ['col-1'],
+      } as XYDataLayerConfig;
+      const visState = makeVisState([dataLayer]);
+
+      await saveUpdatedLinkedAnnotationsToLibrary(visState, mockEventAnnotationService);
+
+      expect(mockEventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
+    });
+
+    it('should return updated vis state with synced __lastSaved', async () => {
+      const byRefLayer = makeByRefLayer();
+      const visState = makeVisState([byRefLayer]);
+
+      const result = await saveUpdatedLinkedAnnotationsToLibrary(
+        visState,
+        mockEventAnnotationService
+      );
+
+      const updatedLayer = (result as XYVisualizationState)
+        .layers[0] as XYByReferenceAnnotationLayerConfig;
+      expect(updatedLayer.__lastSaved.annotations).toEqual(byRefLayer.annotations);
+    });
+
+    it('should propagate errors from updateAnnotationGroup (e.g. deleted group)', async () => {
+      const failingService = {
+        updateAnnotationGroup: jest.fn(() => Promise.reject(new Error('Not Found'))),
+      } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
+
+      const byRefLayer = makeByRefLayer();
+      const visState = makeVisState([byRefLayer]);
+
+      await expect(saveUpdatedLinkedAnnotationsToLibrary(visState, failingService)).rejects.toThrow(
+        'Not Found'
+      );
+    });
+  });
 });
+
+function deepFreeze<T extends object>(obj: T): T {
+  Object.freeze(obj);
+  for (const value of Object.values(obj)) {
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+      deepFreeze(value);
+    }
+  }
+  return obj;
+}

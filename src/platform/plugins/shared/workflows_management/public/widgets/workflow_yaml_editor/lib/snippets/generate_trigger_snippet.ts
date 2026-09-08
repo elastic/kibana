@@ -9,12 +9,22 @@
 
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
-import type { TriggerType } from '@kbn/workflows';
+import { isTriggerType } from '@kbn/workflows';
+
+/** Comment added above condition in custom trigger snippets to explain KQL and event.* usage. */
+const CUSTOM_TRIGGER_CONDITION_COMMENT =
+  'Filter the subscription by using KQL, use event.* to target event properties';
+
+const CONNECTOR_ID_COMMENT = 'Id of the connector instance this trigger is bound to';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
   monacoSuggestionFormat?: boolean;
   withTriggersSection?: boolean;
+  /** Default KQL condition for custom triggers (used when inserting trigger from UI). */
+  defaultCondition?: string;
+  /** When true, include a `connector-id` field (connector-event triggers). */
+  requiresConnectorId?: boolean;
 }
 
 /**
@@ -27,8 +37,14 @@ interface GenerateTriggerSnippetOptions {
  * @returns The formatted YAML trigger snippet as a string
  */
 export function generateTriggerSnippet(
-  triggerType: TriggerType,
-  { full, monacoSuggestionFormat, withTriggersSection }: GenerateTriggerSnippetOptions = {}
+  triggerType: string,
+  {
+    full,
+    monacoSuggestionFormat,
+    withTriggersSection,
+    defaultCondition,
+    requiresConnectorId,
+  }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -69,10 +85,15 @@ export function generateTriggerSnippet(
       break;
 
     default:
-      parameters = {};
+      // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
+      parameters = {
+        ...(requiresConnectorId ? { 'connector-id': '' } : {}),
+        on: { condition: defaultCondition ?? '' },
+      };
       break;
   }
 
+  let result: string;
   if (full) {
     const trigger = [
       {
@@ -81,14 +102,29 @@ export function generateTriggerSnippet(
       },
     ];
     if (withTriggersSection) {
-      return stringify({ triggers: trigger }, stringifyOptions);
+      result = stringify({ triggers: trigger }, stringifyOptions);
+    } else {
+      result = stringify(trigger, stringifyOptions);
     }
-    return stringify(trigger, stringifyOptions);
+  } else {
+    result = stringify([{ type: triggerType, ...parameters }], stringifyOptions)
+      .replace('- type:', '')
+      .trim();
   }
 
-  return stringify([{ type: triggerType, ...parameters }], stringifyOptions)
-    .replace('- type:', '')
-    .trim();
+  // Add a comment above condition for custom triggers so users know they can use KQL and event.*
+  if (!isTriggerType(triggerType) && result.includes('condition:')) {
+    result = result.replace(
+      /(on:\n)(\s+)(condition:)/,
+      `$1$2# ${CUSTOM_TRIGGER_CONDITION_COMMENT}\n$2$3`
+    );
+  }
+
+  if (requiresConnectorId && result.includes('connector-id:')) {
+    result = result.replace(/(^|\n)(\s*)(connector-id:)/, `$1$2# ${CONNECTOR_ID_COMMENT}\n$2$3`);
+  }
+
+  return result;
 }
 
 /**

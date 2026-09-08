@@ -8,6 +8,7 @@
 import React from 'react';
 import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import { render, renderHook, screen } from '@testing-library/react';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
@@ -23,11 +24,19 @@ jest.mock('../../../../../common/hooks/use_license', () => ({
     isEnterprise: () => true,
   }),
 }));
+const useLicenseMock = useLicense as jest.Mock;
 
 jest.mock('../../unified_components/data_table/use_timeline_unified_data_table_context');
 jest.mock('../../../../../common/components/user_privileges');
 
-const useLicenseMock = useLicense as jest.Mock;
+const rawEvents = mockTimelineData.map(
+  (event) =>
+    ({
+      _id: event._id,
+      _index: 'test-index',
+      fields: {},
+    } as unknown as EsHitRecord)
+);
 
 describe('useTimelineControlColumns', () => {
   const refetchMock = jest.fn();
@@ -40,6 +49,7 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: [],
+            rawEvents: [],
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -59,6 +69,7 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: [],
+            rawEvents: [],
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -79,6 +90,7 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: [],
+            rawEvents: [],
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -148,6 +160,7 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: mockTimelineData,
+            rawEvents,
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -180,6 +193,7 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: mockTimelineData,
+            rawEvents,
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),

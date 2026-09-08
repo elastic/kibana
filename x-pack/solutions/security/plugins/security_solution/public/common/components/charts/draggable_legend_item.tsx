@@ -10,17 +10,13 @@ import numeral from '@elastic/numeral';
 import React, { useMemo } from 'react';
 import styled from '@emotion/styled';
 
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { CellActionsRenderer } from '../cell_actions/cell_actions_renderer';
 import { useUiSetting$ } from '../../lib/kibana';
 import { EMPTY_VALUE_LABEL } from './translation';
 import { hasValueToDisplay } from '../../utils/validators';
-import {
-  SecurityCellActions,
-  SecurityCellActionType,
-  SecurityCellActionsTrigger,
-  CellActionsMode,
-} from '../cell_actions';
+import { SecurityCellActions, SecurityCellActionType, CellActionsMode } from '../cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
 
 const CountFlexItem = styled(EuiFlexItem)`
@@ -104,7 +100,7 @@ const DraggableLegendItemComponent: React.FC<{
             <SecurityCellActions
               mode={CellActionsMode.INLINE}
               visibleCellActions={0}
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{ field, value }}
               sourcererScopeId={sourcererScopeId}
               metadata={{ scopeId }}

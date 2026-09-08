@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
 import {
@@ -24,6 +25,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   ]);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('logSynthtraceEsClient');
+  const retry = getService('retry');
+  const browser = getService('browser');
   const type = 'logs';
 
   const failedDatasetName = datasetNames[1];
@@ -110,6 +113,25 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should go to discover page in ES|QL mode when the open in discover button is clicked', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failedDataStreamName,
+        });
+
+        await PageObjects.datasetQuality.openFailedDocsFlyout();
+
+        await testSubjects.click('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover');
+
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${failedDataStreamName}::failures`);
+        });
       });
     });
   });

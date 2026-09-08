@@ -43,7 +43,7 @@ describe('UpdateAttacksModal', () => {
   it('should render modal with correct title', () => {
     render(<UpdateAttacksModal {...defaultProps} />);
 
-    expect(screen.getByText(/update alerts\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/update attacks\?/i)).toBeInTheDocument();
   });
 
   it('should render modal body with alert counts', () => {
@@ -112,13 +112,13 @@ describe('UpdateAttacksModal', () => {
   it('should render correct title for assignees action type', () => {
     render(<UpdateAttacksModal {...defaultProps} />);
 
-    expect(screen.getByText(/update alerts\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/update attacks\?/i)).toBeInTheDocument();
   });
 
   it('should render correct title for tags action type', () => {
     render(<UpdateAttacksModal {...defaultProps} />);
 
-    expect(screen.getByText(/update alerts\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/update attacks\?/i)).toBeInTheDocument();
   });
 
   it('should handle singular attack discovery count', () => {

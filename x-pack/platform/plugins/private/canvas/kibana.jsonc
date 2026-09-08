@@ -23,7 +23,6 @@
       "expressions",
       "features",
       "inspector",
-      "presentationUtil",
       "uiActions",
       "share",
       "contentManagement",
@@ -38,9 +37,10 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "lens",
       "maps",
-      "fieldFormats"
+      "fieldFormats",
+      "savedSearch",
+      "presentationUtil"
     ]
   }
 }

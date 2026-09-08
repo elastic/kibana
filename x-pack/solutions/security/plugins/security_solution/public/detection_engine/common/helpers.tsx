@@ -19,7 +19,7 @@ import type {
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
@@ -248,14 +248,14 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     references,
     severity: {
       value: severity as Severity,
-      mapping: fillEmptySeverityMappings(severityMapping),
-      isMappingChecked: severityMapping.length > 0,
+      mapping: fillEmptySeverityMappings(severityMapping ?? []),
+      isMappingChecked: (severityMapping?.length ?? 0) > 0,
     },
     tags,
     riskScore: {
       value: riskScore,
       mapping: requiredOptional(riskScoreMapping),
-      isMappingChecked: riskScoreMapping.length > 0,
+      isMappingChecked: (riskScoreMapping?.length ?? 0) > 0,
     },
     falsePositives,
     investigationFields: investigationFields?.field_names ?? [],
@@ -273,16 +273,19 @@ const severitySortMapping = {
   critical: 3,
 };
 
-export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
+export const fillEmptySeverityMappings = (
+  mappings: SeverityMapping | undefined
+): SeverityMapping => {
+  const safeMappings = mappings ?? [];
   const missingMappings: SeverityMapping = Object.values(SeverityLevel).flatMap((severityLevel) => {
-    const isSeverityLevelInMappings = mappings.some(
+    const isSeverityLevelInMappings = safeMappings.some(
       (mapping) => mapping.severity === severityLevel
     );
     return isSeverityLevelInMappings
       ? []
       : [{ field: '', value: '', operator: 'equals', severity: severityLevel }];
   });
-  return [...mappings, ...missingMappings].sort(
+  return [...safeMappings, ...missingMappings].sort(
     (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
   );
 };

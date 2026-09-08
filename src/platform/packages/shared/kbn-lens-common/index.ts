@@ -11,6 +11,7 @@ export type {
   IndexPatternField,
   DateRange,
   PersistableFilter,
+  OriginalColumn,
   SortingHint,
   ValueLabelConfig,
   IndexPattern,
@@ -88,8 +89,6 @@ export type {
   InitializationOptions,
   LensInspector,
   ILensDocumentService,
-  CheckDuplicateTitleOptions,
-  CheckDuplicateTitleProps,
   LensSaveResult,
   DatasourceFixAction,
   LensAttributesService,
@@ -114,6 +113,8 @@ export type {
   DatasourceStates,
   DatasourceState,
   TextBasedField,
+  ColumnBuildHints,
+  BuildColumnBaseOptions,
 } from './datasources/types';
 
 export type {
@@ -186,6 +187,10 @@ export type {
   DatatableColumnArgs,
   DatatableColumnResult,
   ColumnState,
+  ColumnCellDecorationMode,
+  CellDecorationFillMode,
+  CellDecorationValueRange,
+  CellDecorationFillConfig,
   RowHeightMode,
   DataGridDensity,
   DatatableVisualizationState,
@@ -196,6 +201,7 @@ export type {
   LensToggleAction,
   LensPagesizeAction,
 } from './visualizations/datatable/types';
+export { COLUMN_CELL_DECORATION_MODE } from './visualizations/datatable/types';
 export type { GaugeAccessors, GaugeVisualizationState } from './visualizations/gauge/types';
 export type { HeatmapPalette, HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type {
@@ -207,8 +213,17 @@ export type {
   ValueFontMode,
   SecondaryTrendType,
   SecondaryTrend,
+  SecondaryNameVisibility,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
+  PrimaryMetricFontSize,
+  IconPosition,
+  Alignment,
+  PrimaryMetricPosition,
+  MetricDensity,
+  MetricStyleTemplateId,
+  MetricStyleTemplatePresetId,
+  MetricLayoutWithDefault,
 } from './visualizations/metric/types';
 export type {
   SharedPartitionLayerState,
@@ -237,8 +252,23 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYVisualizationState,
 } from './visualizations/xy/types';
+export type {
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from './visualizations/xy/persistence';
+export {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+  isRuntimeByReferenceAnnotationsLayer,
+} from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
@@ -271,7 +301,6 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
-  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
@@ -319,9 +348,11 @@ export {
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
   LEGACY_SINGLE_ROW_HEIGHT_MODE,
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
 } from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,
+  LENS_GAUGE_DEFAULT_COLOR_STEPS,
   GAUGE_SHAPES,
   GAUGE_TICKS_POSITIONS,
   GAUGE_LABEL_MAJOR_MODES,
@@ -333,32 +364,38 @@ export {
 export {
   LENS_HEATMAP_ID,
   LENS_HEATMAP_CHART_SHAPES,
-  LENS_HEATMAP_CHART_NAMES,
   LENS_HEATMAP_GROUP_ID,
   HEATMAP_NAME,
   HEATMAP_LEGEND_NAME,
   HEATMAP_GRID_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_PARAMS,
+  LENS_HEATMAP_DEFAULT_COLOR_STEPS,
 } from './visualizations/heatmap/constants';
 export {
   LEGACY_METRIC_LABEL_POSITION,
   LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION,
   LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE,
   LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT,
+  LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS,
 } from './visualizations/legacy_metric/constants';
 export {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_ID,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
   LENS_METRIC_DEFAULT_TRENDLINE_NAME,
-  METRIC_TRENDLINE_NAME,
+  LENS_METRIC_STYLE_TEMPLATE,
+  LENS_METRIC_TRENDLINE_NAME,
   LENS_METRIC_LABEL_POSITION,
   LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   LENS_METRIC_AVAILABLE_METRIC_ICONS,
 } from './visualizations/metric/constants';
+export { inferStyleTemplate, getEffectiveIconAlign } from './visualizations/metric/utils';
 export {
   PARTITION_CHART_TYPES,
   PARTITION_EMPTY_SIZE_RADIUS,
@@ -367,6 +404,7 @@ export {
   LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
 } from './visualizations/partition/constants';
 export {
+  LENS_TAGCLOUD_ID,
   TAGCLOUD_ORIENTATION,
   TAGCLOUD_SCALE_OPTIONS,
   LENS_TAGCLOUD_DEFAULT_STATE,
@@ -374,8 +412,6 @@ export {
 export {
   YAxisModes,
   SeriesTypes,
-  visualizationSubtypes,
-  visualizationTypes,
   AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
@@ -390,4 +426,112 @@ export {
   getFormulaColumnsFromLayer,
   getReferencedColumnIds,
   cleanupFormulaReferenceColumns,
+  isColumnOfType,
+  isColumnFormatted,
+  getSafeName,
 } from './datasources/form_based/helpers';
+
+export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
+export { LENS_DATASOURCE_ID } from './embeddable/types';
+export type { LensDatasourceId } from './embeddable/types';
+export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';
+export { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './esql/constants';
+export {
+  buildTrendlineBucketExpression,
+  appendTimeBucketToEsqlQuery,
+  buildTrendlineQueryWithMetricFieldMap,
+  queryHasStatsCommand,
+  queryHasTsSourceCommand,
+} from './esql/trendline_query';
+export type {
+  ESQLExpressionWithParams,
+  EsqlOperationColumnMap,
+  EsqlSupportedOperation,
+  GetSerializedFormatFn,
+  ToEsqlFn,
+  UiSettingsReader,
+} from './esql/operations';
+export { getToEsqlFn, getEsqlOperationMeta, getDefaultLabelFn } from './esql/operations';
+export type { EsqlOperationMeta } from './esql/operations/registry';
+export {
+  esqlOperationMetaRegistry,
+  countEsqlMeta,
+  cardinalityEsqlMeta,
+  percentileEsqlMeta,
+  metricEsqlMeta,
+  dateHistogramEsqlMeta,
+} from './esql/operations/registry';
+export {
+  getCountSerializedFormat,
+  getCardinalitySerializedFormat,
+  getDateHistogramSerializedFormat,
+} from './esql/operations';
+export { parseTimeShiftWrapper, resolveTimeShift } from './esql/time_shift';
+export { convertToAbsoluteDateRange } from './esql/date_range';
+export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
+export {
+  esqlConversionFailureReasonMessages,
+  getFailureTooltip,
+} from './esql/to_esql_failure_reasons';
+export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
+export type { GetDefaultLabelFn } from './esql/operations';
+export {
+  defaultLabelRegistry,
+  getCountDefaultLabel,
+  getCardinalityDefaultLabel,
+  getPercentileDefaultLabel,
+  getDateHistogramDefaultLabel,
+  getStaticValueDefaultLabel,
+  buildMetricDefaultLabel,
+  countLabel,
+  ofNameCount,
+  ofNameCardinality,
+  ofNamePercentile,
+  ofNameMetric,
+  ofNameStaticValue,
+  staticValueLabelDefault,
+  ALLOWED_DECIMAL_DIGITS,
+  STATIC_VALUE_ID,
+} from './esql/operations';
+export {
+  DEFAULT_TIME_SCALE,
+  unitSuffixes,
+  unitSuffixesLong,
+  adjustTimeScaleLabelSuffix,
+} from './datasources/time_scale_utils';
+export { createEsAggsIdMapEntry } from './esql/create_es_aggs_id_map_entry';
+export type { ColumnRoles, EsqlQueryResult } from './esql/generate_esql_query';
+export {
+  extractAggId,
+  generateEsqlQuery,
+  isEsqlQueryFailure,
+  isEsqlQuerySuccess,
+} from './esql/generate_esql_query';
+export {
+  countToESQL,
+  cardinalityToESQL,
+  percentileToESQL,
+  buildMetricToESQL,
+  dateHistogramToESQL,
+  rangesToESQL,
+  toEsqlRegistry,
+  DATE_HISTOGRAM_ID,
+  RANGE_ID,
+  AUTO_INTERVAL,
+  DEFAULT_DATE_HISTOGRAM_INTERVAL,
+  hasDateRange,
+  restrictedInterval,
+  getTimeZoneAndInterval,
+  mapToEsqlInterval,
+} from './esql/operations';
+export {
+  isTextBasedAttributes,
+  hasTextBasedLayers,
+  getTextBasedLayerQueries,
+  getRepresentativeQuery,
+  getChartScopedFilterQuery,
+  withLegacyAggregateQuerySlot,
+  dropLegacyAggregateQuerySlot,
+  EMPTY_KQL_QUERY,
+} from './esql/lens_attributes_queries';
+export type { MinimalLensAttributes, MinimalLensState } from './esql/lens_attributes_queries';

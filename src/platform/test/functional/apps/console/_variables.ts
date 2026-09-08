@@ -72,6 +72,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET ${index3}');
+        await PageObjects.console.waitForSelectedRequestsCount(1);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -90,6 +91,26 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET _search\n');
         await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
+        await PageObjects.console.waitForSelectedRequestsCount(1);
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
+      });
+    });
+
+    describe('with inline variable interpolation in request body', () => {
+      it('should send a successful request', async () => {
+        await PageObjects.console.openConfig();
+        await PageObjects.console.addNewVariable({ name: 'queryType', value: 'all' });
+        await PageObjects.console.openConsole();
+        await PageObjects.console.clickClearInput();
+        await PageObjects.console.enterText('\n GET _search\n');
+        await PageObjects.console.enterText(`{\n\t"query": {"match_\${queryType}": {}}`);
+        await PageObjects.console.waitForSelectedRequestsCount(1);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 

@@ -6,12 +6,63 @@
  */
 
 import type { CDPSession } from '@kbn/scout';
-import { test, tags, expect } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { evaluateDiscoverBundlePluginAssertion } from '../fixtures/discover_bundle_expectations';
 import { testData } from '../fixtures';
+
+/**
+ * Shared bundle labels produced by the unified RSPack build (split chunks + shell).
+ * In RSPack dist mode, unnamed split chunks are labelled 'rspack-chunk' by
+ * getLogicalBundlePluginLabel. In dev mode, named labels like 'plugin-discover' appear.
+ * Named lazy split chunks (lazy_*, from dynamic import() magic comments) are handled
+ * dynamically in evaluateDiscoverBundlePluginAssertion and do not need to be listed here.
+ */
+const SHARED_BUNDLE_LABELS: readonly string[] = [
+  'core',
+  'kibana',
+  'one_discover_shared_deps',
+  'rspack-chunk',
+  'shared-core',
+  'shared-misc',
+  'shared-packages',
+  'shared-plugins',
+  'shared-root-packages',
+  'shared-solution-packages',
+  'vendors',
+  'vendors-heavy',
+];
+
+function getExpectedDiscoverPluginIds(projectType: string | undefined): string[] {
+  return [
+    'aiops',
+    'discover',
+    'embeddable',
+    'eventAnnotation',
+    'expressionXY',
+    'kbn-ui-shared-deps-npm',
+    'kql',
+    'lens',
+    'maps',
+    ...(projectType === 'security' ? ['securitySolution'] : []),
+    'unifiedSearch',
+  ];
+}
+
+/**
+ * In RSPack dist mode, named plugin entry chunks (plugin-discover, etc.) are preloaded
+ * during bootstrap and NOT re-fetched during SPA navigation, so only on-demand split
+ * chunks with numeric IDs are captured by CDP. Per-plugin size assertions are not
+ * meaningful in that mode, so only total size and bundle count are checked.
+ */
+const BUNDLE_SIZE_LIMITS = {
+  totalSize: 3 * 1024 * 1024,
+  bundleCount: 70,
+} as const;
 
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     let cdp: CDPSession;
 
@@ -29,7 +80,7 @@ test.describe(
       cdp = await context.newCDPSession(page);
       await cdp.send('Network.enable');
       await page.gotoApp('home');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('homeApp', { timeout: 20000 });
       await perfTracker.waitForJsLoad(cdp); // Ensure JS bundles are fully loaded
     });
 
@@ -48,47 +99,37 @@ test.describe(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      const currentUrl = page.url();
-      expect(currentUrl).toContain('app/discover#/');
+      await pageObjects.discover.waitUntilTabIsLoaded();
 
-      // Ensure all JS bundles are loaded
-      await perfTracker.waitForJsLoad(cdp);
+      // Ensure all JS bundles are loaded (longer timeout to account for lazy-loaded plugins like aiops)
+      await perfTracker.waitForJsLoad(cdp, 5000);
 
       // Collect and validate stats
+      const currentUrl = page.url();
+      expect(currentUrl).toContain('app/discover#/');
       const stats = perfTracker.collectJsBundleStats(currentUrl);
+      const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
+
       expect(
         stats.totalSize,
-        `Total bundles size loaded on page should not exceed 3.1 MB`
-      ).toBeLessThan(3.1 * 1024 * 1024);
+        `Total bundles size loaded on page should not exceed ${(
+          BUNDLE_SIZE_LIMITS.totalSize /
+          (1024 * 1024)
+        ).toFixed(1)} MB`
+      ).toBeLessThan(BUNDLE_SIZE_LIMITS.totalSize);
       expect(
         stats.bundleCount,
-        `Total bundle chunks count loaded on page should not exceed 100`
-      ).toBeLessThan(100);
-      expect(
-        stats.plugins.map((p) => p.name),
-        'Unexpected plugins were loaded on page'
-      ).toStrictEqual([
-        'aiops',
-        'discover',
-        'eventAnnotation',
-        'expressionXY',
-        'kbn-ui-shared-deps-npm',
-        'kql',
-        'lens',
-        'maps',
-        'presentationPanel',
-        ...(config.projectType === 'security' ? ['securitySolution'] : []),
-        'unifiedSearch',
-      ]);
-      // Validate individual plugin bundle sizes
-      expect(
-        stats.plugins.find((p) => p.name === 'discover')?.totalSize,
-        `Total 'discover' bundles size should not exceed 650 KB`
-      ).toBeLessThan(650 * 1024);
-      expect(
-        stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize,
-        `Total 'unifiedSearch' bundles size should not exceed 450 KB`
-      ).toBeLessThan(450 * 1024);
+        `Total bundle chunks count loaded on page should not exceed ${BUNDLE_SIZE_LIMITS.bundleCount}`
+      ).toBeLessThan(BUNDLE_SIZE_LIMITS.bundleCount);
+
+      const expectedPlugins = getExpectedDiscoverPluginIds(config.projectType);
+      // Throws with the offending bundle labels when unexpected plugins were loaded
+      const onlyExpectedBundlesLoaded = evaluateDiscoverBundlePluginAssertion(
+        loadedPluginNames,
+        expectedPlugins,
+        SHARED_BUNDLE_LABELS
+      );
+      expect(onlyExpectedBundlesLoaded).toBe(true);
     });
 
     test('measures Performance Metrics before and after Discover load', async ({
@@ -101,7 +142,7 @@ test.describe(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('discoverLayoutResizableContainer', { timeout: 20000 });
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 

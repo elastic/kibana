@@ -103,6 +103,10 @@ describe('STATS Validation', () => {
         ]);
       });
 
+      test('allows bare fields in STATS when source command is TS', () => {
+        statsExpectErrors('TS a_index | stats doubleField', []);
+      });
+
       test('various errors', () => {
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField', [
           'Unknown column "wrongField"',
@@ -173,6 +177,21 @@ describe('STATS Validation', () => {
           ['Function PERCENTILE not allowed in BY']
         );
       });
+
+      const parenthesizedByErrors: Array<[string, string[]]> = [
+        ['from a_index | stats avg(doubleField) by (wrongField)', ['Unknown column "wrongField"']],
+        [
+          'from a_index | stats avg(doubleField) by (percentile(doubleField, 20))',
+          ['Function PERCENTILE not allowed in BY'],
+        ],
+      ];
+
+      test.each(parenthesizedByErrors)(
+        'validates errors inside parenthesized BY expressions: %s',
+        (query, expectedErrors) => {
+          statsExpectErrors(query, expectedErrors);
+        }
+      );
 
       describe('constant-only parameters', () => {
         test('no errors', () => {

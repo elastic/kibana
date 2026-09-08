@@ -7,27 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { IconType, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
-/** @public */
+/**
+ * @deprecated Use `AppHeaderBadge` from `@kbn/core-chrome-browser`.
+ * @public
+ */
 export interface ChromeBadge {
   text: string;
   tooltip: string;
   iconType?: IconType;
 }
 
-/** @public */
+/**
+ * @deprecated Use `AppHeaderBadge` from `@kbn/core-chrome-browser`.
+ * @public
+ */
 export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
   badgeText: string;
   toolTipProps?: Partial<EuiToolTipProps>;
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 
-/** @public */
+/**
+ * @example
+ * ```tsx
+ * chrome.setHeaderBanner({ content: <MyBanner /> });
+ * ```
+ *
+ * @public
+ */
 export interface ChromeUserBanner {
-  content: MountPoint<HTMLDivElement>;
+  content: ReactNode;
 }
 
 /** @public */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionTypeConfig, ActionTypeSecrets, ValidatorServices } from '../types';
 import type { ExecutorParams, SubActionConnectorType, ValidateFn, Validators } from './types';

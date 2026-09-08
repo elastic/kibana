@@ -16,7 +16,7 @@ describe('Node Type and Label', () => {
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node);
       expect(nodeType).toBe('master');
       expect(nodeTypeLabel).toBe('Master Node');
-      expect(nodeTypeClass).toBe('starFilled');
+      expect(nodeTypeClass).toBe('starFill');
     });
     it('type is indicated by string', () => {
       const node = {};
@@ -24,7 +24,7 @@ describe('Node Type and Label', () => {
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, type);
       expect(nodeType).toBe('master');
       expect(nodeTypeLabel).toBe('Master Node');
-      expect(nodeTypeClass).toBe('starFilled');
+      expect(nodeTypeClass).toBe('starFill');
     });
   });
   it('when type is generic node', () => {

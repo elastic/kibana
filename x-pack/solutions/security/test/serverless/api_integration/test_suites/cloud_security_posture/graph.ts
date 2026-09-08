@@ -10,8 +10,14 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Agent } from 'supertest';
-import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type {
+  EdgeDataModel,
+  GraphRequest,
+  GraphResponse,
+  NodeDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { result } from './utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const fleetFinalPipelineId = '.fleet_final_pipeline-1';
   let supertestViewer: Pick<Agent, 'post'>;
 
   const postGraph = (agent: Pick<Agent, 'post'>, body: GraphRequest) => {
@@ -35,6 +42,24 @@ export default function ({ getService }: FtrProviderContext) {
     // see details: https://github.com/elastic/kibana/issues/208903
     this.tags(['failsOnMKI']);
     before(async () => {
+      // Create a no-op fleet final pipeline to prevent errors when loading
+      // the logs_gcp_audit archive, whose index template references this pipeline.
+      // The pipeline is shared by Fleet-managed indices in this serverless test env,
+      // so avoid overwriting or deleting it when it already exists.
+      try {
+        await es.ingest.getPipeline({ id: fleetFinalPipelineId });
+      } catch (error) {
+        if (!(error instanceof esErrors.ResponseError) || error.statusCode !== 404) {
+          throw error;
+        }
+
+        await es.ingest.putPipeline({
+          id: fleetFinalPipelineId,
+          description: 'No-op pipeline for testing',
+          processors: [],
+        });
+      }
+
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts',
         { docsOnly: true }
@@ -87,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin@example.com',
+                      'user.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -103,19 +128,25 @@ export default function ({ getService }: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(3);
-        expect(response.body).to.have.property('edges').length(2);
-        expect(response.body).not.to.have.property('messages');
+        const body = response.body as GraphResponse;
 
-        response.body.nodes.forEach((node: any) => {
-          expect(node).to.have.property('color');
+        expect(body).to.have.property('nodes').length(3);
+        expect(body).to.have.property('edges').length(2);
+        expect(body).not.to.have.property('messages');
+
+        body.nodes.forEach((node: NodeDataModel) => {
+          expect('color' in node).to.be(true);
+          if (!('color' in node)) {
+            throw new Error(`node color missing [node: ${node.id}]`);
+          }
+
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
         });
 
-        response.body.edges.forEach((edge: any) => {
+        body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'subdued',

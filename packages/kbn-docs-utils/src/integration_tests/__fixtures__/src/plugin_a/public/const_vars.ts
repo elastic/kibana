@@ -84,9 +84,18 @@ export const aNum = 10;
 export const literalString = 'HI';
 
 // Expected issues:
-//   missing comments (2):
-//     line 32 - a
+//   missing comments (1):
 //     line 45 - foo
+//   param doc mismatches (2):
+//     line 19 - notAnArrowFn
+//     line 24 - aPropertyMisdirection
+//   missing complex type info (1):
+//     line 32 - a
+//   missing returns (4):
+//     line 19 - notAnArrowFn
+//     line 24 - aPropertyMisdirection
+//     line 29 - aPropertyInlineFn
+//     line 59 - aUnionProperty
 //   no references (14):
 //     line 18 - aPretendNamespaceObj
 //     line 19 - notAnArrowFn

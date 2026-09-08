@@ -132,9 +132,6 @@ describe('V2 algorithm', () => {
     it('creates the SO indices, storing modelVersions in meta.mappingVersions', async () => {
       expect(result[0].status === 'skipped');
       expect(await getMappingMeta()).toEqual({
-        indexTypesMap: {
-          '.kibana': ['another-type', 'no-mv-type', 'some-type'],
-        },
         mappingVersions: {
           'another-type': '10.1.0',
           'no-mv-type': '10.0.0',
@@ -170,12 +167,6 @@ describe('V2 algorithm', () => {
           'some-type': '10.1.0',
           'another-type': '10.2.0',
           'no-mv-type': '10.0.0',
-        });
-      });
-
-      it('stores a breakdown of indices => types in the meta', () => {
-        expect(indexMetaAfterMigration?.indexTypesMap).toEqual({
-          '.kibana': ['another-type', 'no-mv-type', 'some-type'],
         });
       });
 
@@ -249,12 +240,6 @@ describe('V2 algorithm', () => {
         'another-type': '10.2.0',
         'no-mv-type': '10.0.0',
         'some-type': '10.1.0',
-      });
-    });
-
-    it('stores a breakdown of indices => types in the meta', () => {
-      expect(indexMetaAfterMigration?.indexTypesMap).toEqual({
-        '.kibana': ['another-type', 'no-mv-type', 'some-type'],
       });
     });
 

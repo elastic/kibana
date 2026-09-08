@@ -8,13 +8,13 @@
 import { type StringOrNumberOrBoolean } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { useEffect, useMemo, useState } from 'react';
-import type { Suggestion } from '../components/data_management/shared/autocomplete_selector';
-import { selectPreviewRecords } from '../components/data_management/stream_detail_enrichment/state_management/simulation_state_machine/selectors';
-import { useSimulatorSelector } from '../components/data_management/stream_detail_enrichment/state_management/stream_enrichment_state_machine';
+import type { Suggestion } from '../components/stream_management/data_management/shared/autocomplete_selector';
+import { selectPreviewRecords } from '../components/stream_management/data_management/stream_detail_enrichment/state_management/simulation_state_machine/selectors';
+import { useSimulatorSelector } from '../components/stream_management/data_management/stream_detail_enrichment/state_management/stream_enrichment_state_machine';
 import {
   selectPreviewDocuments,
   useStreamSamplesSelector,
-} from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
+} from '../components/stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
 const MAX_RECORDS_STORED = 1000;
 

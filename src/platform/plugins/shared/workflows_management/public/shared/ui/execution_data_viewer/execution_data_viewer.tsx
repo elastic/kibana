@@ -22,13 +22,15 @@ const SearchTermStorageKey = 'workflows_management.step_execution.searchTerm';
 const ViewModeOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'table',
+    'data-test-subj': 'workflowViewMode_table',
     label: i18n.translate('workflows.jsonDataTable.viewMode.table', {
       defaultMessage: 'Table',
     }),
-    iconType: 'tableDensityNormal',
+    iconType: 'table',
   },
   {
     id: 'json',
+    'data-test-subj': 'workflowViewMode_json',
     label: i18n.translate('workflows.jsonDataTable.viewMode.json', {
       defaultMessage: 'JSON',
     }),
@@ -76,7 +78,7 @@ export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
 
     return (
       <EuiFlexGroup
-        data-test-subj={'jsonDataTable'}
+        data-test-subj="workflowJsonDataViewer"
         direction="column"
         gutterSize="none"
         responsive={false}

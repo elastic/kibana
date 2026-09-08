@@ -25,6 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
       refresh: 'wait_for',
       document: {
         action_id: actionId,
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
         '@timestamp': new Date().toISOString(),
         expiration: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         agent_selection: { all: true },
@@ -85,6 +87,26 @@ export default function ({ getService }: FtrProviderContext) {
       expect(detailsResponse.body.data).to.have.property('queries');
       expect(detailsResponse.body.data.queries).to.be.an('array');
       expect(detailsResponse.body.data.queries[0].action_id).to.be(queryActionId);
+    });
+
+    it('returns an error when creating a live query with agent_all and no enrolled agents', async () => {
+      const response = await supertest
+        .post('/api/osquery/live_queries')
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', osqueryPublicApiVersion)
+        .send({
+          agent_all: true,
+          query: 'select 1;',
+        });
+
+      // Assert non-200 rather than exact 400 because the error path depends on Fleet
+      // availability. With Fleet agents enrolled, createActionHandler throws
+      // CustomHttpRequestError('No agents found for selection', 400) which the route
+      // catches and returns as 400. In FTR (no Fleet agents/server), the Fleet API
+      // call inside parseAgentSelection fails first, falling to the generic catch
+      // block which returns 500. Both are valid error responses for this contract test.
+      expect(response.status).to.be.greaterThan(399);
+      expect(response.body).to.have.property('message');
     });
 
     it('fetches live query results for specific query', async () => {

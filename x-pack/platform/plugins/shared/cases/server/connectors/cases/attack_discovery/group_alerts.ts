@@ -11,7 +11,7 @@ import {
   transformInternalReplacements,
 } from '@kbn/elastic-assistant-common';
 
-import { MAX_DOCS_PER_PAGE, MAX_TITLE_LENGTH, MAX_OPEN_CASES } from '../../../../common/constants';
+import { MAX_DOCS_PER_PAGE, MAX_TITLE_LENGTH } from '../../../../common/constants';
 import { AttackDiscoveryExpandedAlertsSchema } from './schema';
 import type { CaseAlert, CasesGroupedAlerts } from '../types';
 
@@ -25,12 +25,6 @@ export const groupAttackDiscoveryAlerts = (alerts: CaseAlert[]): CasesGroupedAle
     undefined,
     { stripUnknownKeys: true }
   );
-
-  if (attackDiscoveryAlerts.length > MAX_OPEN_CASES) {
-    throw new Error(
-      `Circuit breaker: Attack discovery alerts grouping would create more than the maximum number of allowed cases ${MAX_OPEN_CASES}.`
-    );
-  }
 
   /**
    * For each attack discovery alert we would like to create one separate case.

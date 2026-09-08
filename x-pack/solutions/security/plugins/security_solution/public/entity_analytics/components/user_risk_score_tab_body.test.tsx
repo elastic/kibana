@@ -13,15 +13,21 @@ import { UserRiskScoreQueryTabBody } from './user_risk_score_tab_body';
 import { UsersType } from '../../explore/users/store/model';
 import { useRiskScore } from '../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScore } from '../api/hooks/use_entity_store_risk_score';
+import { useEntityStoreRiskScoreKpi } from '../api/hooks/use_entity_store_risk_score_kpi';
 
 jest.mock('../api/hooks/use_risk_score_kpi');
 jest.mock('../api/hooks/use_risk_score');
+jest.mock('../api/hooks/use_entity_store_risk_score');
+jest.mock('../api/hooks/use_entity_store_risk_score_kpi');
 jest.mock('../../common/containers/query_toggle');
 jest.mock('../../common/lib/kibana');
 
 describe('All users query tab body', () => {
   const mockUseRiskScore = useRiskScore as jest.Mock;
   const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
+  const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as jest.Mock;
+  const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     indexNames: [],
@@ -57,6 +63,31 @@ describe('All users query tab body', () => {
         critical: 12,
       },
     });
+    mockUseEntityStoreRiskScore.mockReturnValue({
+      loading: false,
+      data: [],
+      error: undefined,
+      hasEngineBeenInstalled: true,
+      inspect: { dsl: [], response: [] },
+      isAuthorized: true,
+      isInspected: false,
+      refetch: jest.fn(),
+      totalCount: 0,
+    });
+    mockUseEntityStoreRiskScoreKpi.mockReturnValue({
+      loading: false,
+      error: undefined,
+      inspect: { dsl: [], response: [] },
+      isModuleDisabled: false,
+      refetch: jest.fn(),
+      severityCount: {
+        unknown: 0,
+        low: 0,
+        moderate: 0,
+        high: 0,
+        critical: 0,
+      },
+    });
   });
 
   it('toggleStatus=true, do not skip', () => {
@@ -67,6 +98,8 @@ describe('All users query tab body', () => {
     );
     expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
     expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseEntityStoreRiskScore.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseEntityStoreRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 
   it('toggleStatus=false, skip', () => {
@@ -78,5 +111,7 @@ describe('All users query tab body', () => {
     );
     expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
     expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseEntityStoreRiskScore.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseEntityStoreRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 });

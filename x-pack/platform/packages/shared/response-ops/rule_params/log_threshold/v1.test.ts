@@ -44,6 +44,13 @@ describe('logThresholdParamsSchema', () => {
           value: 1,
         },
       ],
+      [
+        {
+          field: 'bytes',
+          comparator: 'less than',
+          value: 10,
+        },
+      ],
     ],
   };
 
@@ -139,5 +146,53 @@ describe('logThresholdParamsSchema', () => {
         ],
       })
     ).not.toThrow();
+  });
+
+  it('rejects ratio criteria with a single nested array', () => {
+    expect(() =>
+      logThresholdParamsSchema.validate({
+        ...base,
+        criteria: [
+          [
+            {
+              field: 'log.level',
+              comparator: 'does not equal',
+              value: 'test',
+            },
+          ],
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects ratio criteria with more than two nested arrays', () => {
+    expect(() =>
+      logThresholdParamsSchema.validate({
+        ...base,
+        criteria: [
+          [
+            {
+              field: 'bytes',
+              comparator: 'more than',
+              value: 1,
+            },
+          ],
+          [
+            {
+              field: 'bytes',
+              comparator: 'less than',
+              value: 10,
+            },
+          ],
+          [
+            {
+              field: 'bytes',
+              comparator: 'equals',
+              value: 5,
+            },
+          ],
+        ],
+      })
+    ).toThrow();
   });
 });

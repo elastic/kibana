@@ -7,14 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiSkeletonText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { getRelevantAnomalyFields } from './get_relevant_anomaly_fields';
 import { useMlKibana } from '../../application/contexts/kibana';
 
@@ -159,7 +160,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           {unifiedSearch ? (
             <unifiedSearch.ui.SearchBar
               appName="ML"
-              iconType="search"
+              iconType="magnify"
               placeholder={i18n.translate('xpack.ml.anomalyDetectionAlert.kqlFilter.placeholder', {
                 defaultMessage: 'Filter anomalies using KQL syntax',
               })}
@@ -197,19 +198,17 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           {errors && errors.length > 0 && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.translate('xpack.ml.anomalyDetectionAlert.kqlFilter.errorTitle', {
                   defaultMessage: 'Invalid KQL query',
                 })}
-                color="danger"
-                iconType="alert"
                 size="s"
               >
                 {errors.map((error, index) => (
                   <p key={index}>{error}</p>
                 ))}
-              </EuiCallOut>
+              </KbnDangerCallout>
             </>
           )}
         </div>

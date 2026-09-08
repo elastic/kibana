@@ -12,8 +12,6 @@ import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import {
   apiHasSerializedChildState,
   apiIsPresentationContainer,
-} from '@kbn/presentation-containers';
-import {
   apiAppliesFilters,
   apiAppliesTimeslice,
   apiHasParentApi,

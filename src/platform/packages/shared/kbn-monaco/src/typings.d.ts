@@ -11,3 +11,35 @@
 declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
 declare module 'monaco-editor/esm/vs/basic-languages/css/css';
 declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+
+// Monaco internal services
+declare module 'monaco-editor/esm/vs/editor/standalone/browser/standaloneServices' {
+  interface StandaloneServicesType {
+    get<T>(serviceId: unknown): T;
+  }
+  export const StandaloneServices: StandaloneServicesType;
+}
+
+declare module 'monaco-editor/esm/vs/platform/undoRedo/common/undoRedo' {
+  export const IUndoRedoService: symbol;
+}
+
+declare module 'monaco-editor/esm/vs/platform/actions/common/actions.js' {
+  export interface MenuItem {
+    command?: {
+      id: string;
+      title: string | { value: string; original: string };
+    };
+    when?: {
+      serialize(): string;
+    };
+  }
+
+  export const MenuId: {
+    EditorContext: unknown;
+  };
+
+  export const MenuRegistry: {
+    getMenuItems(menuId: unknown): MenuItem[];
+  };
+}

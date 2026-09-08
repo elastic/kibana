@@ -105,7 +105,7 @@ describe('HierarchicalActionsMenu', () => {
         <HierarchicalActionsMenu
           items={basicMenuItems}
           button={{
-            props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
+            props: { iconType: 'chevronSingleDown', iconSide: 'right', color: 'primary' },
             children: 'Actions',
           }}
           data-test-subj="customBtn"

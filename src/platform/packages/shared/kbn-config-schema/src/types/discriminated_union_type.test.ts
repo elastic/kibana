@@ -148,7 +148,7 @@ describe('DiscriminatedUnionType', () => {
 
       expect(() => {
         catchAllType.validate(input);
-      }).toThrowError();
+      }).toThrow();
     });
 
     it('should invalidate bad fallback schema', () => {
@@ -180,7 +180,9 @@ describe('DiscriminatedUnionType', () => {
       const input = { type: 'str', string: 'test' };
       expect(() =>
         forbidSchema.validate({ ...input, unknown: 'thing' })
-      ).toThrowErrorMatchingInlineSnapshot(`"[unknown]: definition for this key is missing"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[unknown]: Additional properties are not allowed ('unknown' was unexpected)"`
+      );
     });
   });
 

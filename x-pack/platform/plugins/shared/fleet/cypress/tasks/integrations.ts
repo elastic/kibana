@@ -19,10 +19,15 @@ import { CONFIRM_MODAL } from '../screens/navigation';
 
 import { request } from './common';
 
-export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
+export const addIntegration = ({
+  useExistingPolicy,
+  skipButtonClick,
+}: { useExistingPolicy?: boolean; skipButtonClick?: boolean } = {}) => {
   cy.intercept('/api/fleet/agent_status?*').as('agentStatus');
 
-  cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+  if (!skipButtonClick) {
+    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+  }
   if (useExistingPolicy) {
     cy.getBySel(EXISTING_HOSTS_TAB).click();
     cy.wait('@agentStatus');
@@ -108,11 +113,14 @@ export function scrollToIntegration(selector: string) {
   });
 }
 
-export function calculateAssetCount(packageInfo: any): number {
+export function calculateAssetCount(
+  packageInfo: any,
+  { includeKnowledgeBase = true }: { includeKnowledgeBase?: boolean } = {}
+): number {
   const packageAssets = packageInfo?.assets || {};
 
   // Calculate total asset count from all services and types
-  return Object.values(packageAssets).reduce((total: number, serviceAssets: any) => {
+  const assetCount = Object.values(packageAssets).reduce((total: number, serviceAssets: any) => {
     return (
       total +
       Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
@@ -120,4 +128,10 @@ export function calculateAssetCount(packageInfo: any): number {
       }, 0)
     );
   }, 0);
+
+  const knowledgeBaseAssetCount = includeKnowledgeBase
+    ? 0
+    : packageAssets.elasticsearch?.knowledge_base?.length ?? 0;
+
+  return assetCount - knowledgeBaseAssetCount;
 }

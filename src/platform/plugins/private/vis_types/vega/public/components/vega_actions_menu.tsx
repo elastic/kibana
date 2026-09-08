@@ -8,7 +8,13 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -34,13 +40,20 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const button = (
-    <EuiButtonIcon
-      iconType="wrench"
-      onClick={onButtonClick}
-      aria-label={i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {
         defaultMessage: 'Vega editor options',
       })}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="wrench"
+        onClick={onButtonClick}
+        aria-label={i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {
+          defaultMessage: 'Vega editor options',
+        })}
+      />
+    </EuiToolTip>
   );
 
   const items = [
@@ -60,6 +73,9 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVega.editor.vegaEditorOptionsPopoverAriaLabel', {
+        defaultMessage: 'Vega editor options',
+      })}
       id="actionsMenu"
       button={button}
       isOpen={isPopoverOpen}

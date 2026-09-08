@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -39,12 +39,13 @@ export const getAddAlertsTableAction = (
       const hasAccessToAnyRuleTypes = await checkRuleTypesPermissions(http);
       return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
     },
-    execute: async ({ embeddable }) => {
+    execute: async ({ embeddable, returnFocus }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
       openLazyFlyout({
         core: coreServices,
         parentApi: embeddable,
+        returnFocus,
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           const { ConfigEditor } = await import('../components/config_editor');
           return (

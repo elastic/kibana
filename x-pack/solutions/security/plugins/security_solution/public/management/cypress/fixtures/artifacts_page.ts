@@ -49,6 +49,11 @@ export interface ArtifactsFixtureType {
   };
 }
 
+/**
+ * Live Cypress fork of the Scout cases in
+ * `test/scout/edr_artifacts/ui/fixtures/artifact_tabs_test_data.ts`.
+ * If you change a criteriaConditions string here, update the other.
+ */
 export const getArtifactsListTestDataForArtifact = (
   artifact: keyof typeof ENDPOINT_ARTIFACT_LISTS
 ) => getArtifactsListTestsData().find(({ tabId }) => tabId === artifact) as ArtifactsFixtureType;
@@ -544,7 +549,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          selector: 'trustedDevices-form-fieldSelect',
+          selector: 'trustedDevices-form-entry0fieldSelect',
         },
         {
           type: 'click',
@@ -552,7 +557,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'input',
-          selector: 'trustedDevices-form-valueField',
+          selector: 'trustedDevices-form-entry0valueField',
           value: 'test-host',
         },
       ],
@@ -585,11 +590,11 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'clear',
-          selector: 'trustedDevices-form-valueField',
+          selector: 'trustedDevices-form-entry0valueField',
         },
         {
           type: 'input',
-          selector: 'trustedDevices-form-valueField',
+          selector: 'trustedDevices-form-entry0valueField',
           value: 'updated-host',
         },
       ],

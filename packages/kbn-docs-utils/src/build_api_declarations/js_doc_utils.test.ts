@@ -9,19 +9,27 @@
 
 import Path from 'path';
 import type { Node } from 'ts-morph';
-import { Project } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import {
   getJSDocParamComment,
   getJSDocReturnTagComment,
   getJSDocTags,
   getJSDocs,
   getCommentsFromNode,
+  type PluginContext,
 } from './js_doc_utils';
 
 import { isNamedNode } from '../tsmorph_utils';
+import { ApiScope } from '../types';
 
 let project: Project;
 let sourceFile: ReturnType<Project['getSourceFile']>;
+let pluginSourceFile: ReturnType<Project['getSourceFile']>;
+const pluginContext: PluginContext = {
+  pluginId: 'pluginA',
+  scope: ApiScope.CLIENT,
+  docId: 'kibPluginAPluginApi',
+};
 
 function getNodeByName(name: string): Node | undefined {
   if (!sourceFile) return undefined;
@@ -41,6 +49,14 @@ function getNodeByName(name: string): Node | undefined {
   return undefined;
 }
 
+function getInterfaceMemberNode(interfaceName: string, memberName: string): Node | undefined {
+  if (!pluginSourceFile) {
+    return undefined;
+  }
+
+  return pluginSourceFile.getInterface(interfaceName)?.getProperty(memberName);
+}
+
 beforeAll(() => {
   const tsConfigFilePath = Path.resolve(
     __dirname,
@@ -53,7 +69,11 @@ beforeAll(() => {
   sourceFile = project.getSourceFile(
     Path.resolve(__dirname, '../integration_tests/__fixtures__/src/plugin_a/public/fns.ts')
   );
+  pluginSourceFile = project.getSourceFile(
+    Path.resolve(__dirname, '../integration_tests/__fixtures__/src/plugin_a/public/plugin.ts')
+  );
   expect(sourceFile).toBeDefined();
+  expect(pluginSourceFile).toBeDefined();
 });
 
 describe('getJSDocParamComment', () => {
@@ -112,20 +132,21 @@ describe('getJSDocParamComment', () => {
     expect(comment[0]).toContain('crazy parameter');
   });
 
-  it('does not extract property-level parameter comments (current limitation)', () => {
-    // This test documents current behavior: property-level @param tags like @param obj.hi
-    // are not currently extracted. This will be fixed in Phase 4.1.
+  it('extracts property-level parameter comments for destructured params', () => {
     const node = getNodeByName('crazyFunction');
     expect(node).toBeDefined();
 
-    // Current behavior: property-level tags are not found
     const comment = getJSDocParamComment(node!, 'obj.hi');
-    expect(comment).toBeDefined();
-    expect(comment.length).toBe(0); // Currently returns empty, should be fixed in Phase 4.1
+    expect(comment.length).toBeGreaterThan(0);
+    expect(comment[0]).toContain('Greeting');
 
-    // Also test with destructured parameter name format
-    const comment2 = getJSDocParamComment(node!, '{ fn1, fn2 }.fn1');
-    expect(comment2.length).toBe(0); // Currently returns empty
+    const comment2 = getJSDocParamComment(node!, 'fns.fn1');
+    expect(comment2.length).toBeGreaterThan(0);
+    expect(comment2[0]).toContain('first function');
+
+    const nested = getJSDocParamComment(node!, 'fns.fn1.foo.param');
+    expect(nested.length).toBeGreaterThan(0);
+    expect(nested[0]).toContain('nested parameter for foo');
   });
 
   it('works with JSDoc array input', () => {
@@ -150,6 +171,29 @@ describe('getJSDocParamComment', () => {
 
     const commentUpper = getJSDocParamComment(node!, 'A');
     expect(commentUpper.length).toBe(0); // Case-sensitive, so 'A' won't match 'a'
+  });
+
+  it('handles malformed @param with type but no name', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * @param {Object}
+       */
+      function malformedParam(obj: object) {}
+      `
+    );
+
+    const func = testSourceFile.getFunction('malformedParam');
+    expect(func).toBeDefined();
+
+    // Should not throw, and should return empty array since param name is missing in JSDoc.
+    const comment = getJSDocParamComment(func!, 'obj');
+    expect(comment).toEqual([]);
   });
 });
 
@@ -183,6 +227,23 @@ describe('getJSDocReturnTagComment', () => {
     const comment = getJSDocReturnTagComment(jsDocs!);
     expect(comment).toBeDefined();
     expect(comment.length).toBeGreaterThan(0);
+  });
+
+  it('renders local JSDoc links with the existing doc id helper format', () => {
+    const node = getInterfaceMemberNode('Start', 'getSearchLanguage');
+    expect(node).toBeDefined();
+
+    const comment = getJSDocReturnTagComment(node!, pluginContext);
+    expect(comment).toEqual([
+      'The currently selected ',
+      {
+        pluginId: 'pluginA',
+        scope: 'public',
+        docId: 'kibPluginAPluginApi',
+        section: 'def-public.SearchLanguage',
+        text: 'SearchLanguage',
+      },
+    ]);
   });
 });
 
@@ -235,6 +296,80 @@ describe('getJSDocTags', () => {
   });
 });
 
+describe('getCommentsFromNode link parsing', () => {
+  it('renders local identifier links as local references', () => {
+    const node = getInterfaceMemberNode('Setup', 'getSearchService2');
+    expect(node).toBeDefined();
+
+    const comment = getCommentsFromNode(node!, pluginContext);
+    expect(comment).toEqual([
+      '\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way ',
+      {
+        pluginId: 'pluginA',
+        scope: 'public',
+        docId: 'kibPluginAPluginApi',
+        section: 'def-public.getSearchService',
+        text: 'getSearchService',
+      },
+      ' is typed.\n',
+    ]);
+  });
+
+  it('keeps external url links as plain text labels', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * A {@link https://example.com/docs helper-function} type.
+       */
+      export interface HelperDelegate {}
+      `
+    );
+
+    const node = testSourceFile.getInterface('HelperDelegate');
+    expect(node).toBeDefined();
+
+    const comment = getCommentsFromNode(node!, pluginContext);
+    expect(comment).toEqual(['\nA ', 'helper-function', ' type.']);
+  });
+
+  it('supports the space-delimited display text form for local links', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * {@link RecentlyAccessed APIs} for recently accessed history.
+       */
+      export interface RecentlyAccessed {}
+      `
+    );
+
+    const node = testSourceFile.getInterface('RecentlyAccessed');
+    expect(node).toBeDefined();
+
+    const comment = getCommentsFromNode(node!, pluginContext);
+    expect(comment).toEqual([
+      '\n',
+      {
+        pluginId: 'pluginA',
+        scope: 'public',
+        docId: 'kibPluginAPluginApi',
+        section: 'def-public.RecentlyAccessed',
+        text: 'APIs',
+      },
+      ' for recently accessed history.',
+    ]);
+  });
+});
+
 describe('getJSDocs', () => {
   it('extracts JSDoc from function declaration', () => {
     const node = getNodeByName('notAnArrowFn');
@@ -271,6 +406,93 @@ describe('getJSDocs', () => {
     const jsDocs = getJSDocs(arrowFnVar!);
     expect(jsDocs).toBeDefined();
     expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('handles property assignments by inheriting variable statement JSDoc when they have no own comment', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent docs.
+       * @param input Parent input.
+       * @returns Parent result.
+       */
+      export const api = {
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = testSourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const jsDocs = getJSDocs(property);
+    expect(jsDocs).toBeDefined();
+    expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('does not inherit variable statement JSDoc when property assignment has its own comment', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent docs.
+       */
+      export const api = {
+        /** Child docs. */
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = testSourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const jsDocs = getJSDocs(property);
+    expect(jsDocs).toBeUndefined();
+
+    const comments = getCommentsFromNode(property!, pluginContext);
+    expect(comments).toBeDefined();
+    expect(comments![0]).toContain('Child docs');
+  });
+
+  it('does not fall through to line comments for JSDocable nodes without JSDoc', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      // stray line comment
+      export function noJsDoc(): string {
+        return 'ok';
+      }
+      `
+    );
+
+    const func = testSourceFile.getFunction('noJsDoc');
+    expect(func).toBeDefined();
+
+    const jsDocs = getJSDocs(func!);
+    expect(jsDocs).toEqual([]);
+
+    const comments = getCommentsFromNode(func!, pluginContext);
+    expect(comments).toEqual([]);
   });
 
   it('handles variable declaration with grandparent JSDoc (line 39 coverage)', () => {
@@ -359,38 +581,23 @@ describe('getCommentsFromNode', () => {
   });
 });
 
-describe('property-level JSDoc parameter tags (future enhancement)', () => {
-  it('currently does not support dot notation in parameter names', () => {
-    // This test documents the current limitation
-    // In Phase 4.1, we'll enhance getJSDocParamComment to support:
-    // - @param obj.prop
-    // - @param { fn1, fn2 }.fn1
-    // - @param obj.nested.prop
-
+describe('property-level JSDoc parameter tags', () => {
+  it('supports dot notation in parameter names', () => {
     const node = getNodeByName('crazyFunction');
     expect(node).toBeDefined();
 
-    // Current behavior: dot notation is not supported
     const comment1 = getJSDocParamComment(node!, 'obj.hi');
-    expect(comment1.length).toBe(0);
+    expect(comment1.length).toBeGreaterThan(0);
 
-    const comment2 = getJSDocParamComment(node!, 'obj.nested.prop');
-    expect(comment2.length).toBe(0);
-
-    // Future: should support destructured parameter names
-    const comment3 = getJSDocParamComment(node!, '{ fn1, fn2 }.fn1');
-    expect(comment3.length).toBe(0);
+    const comment3 = getJSDocParamComment(node!, 'fns.fn1');
+    expect(comment3.length).toBeGreaterThan(0);
   });
 
-  it('should support nested property access patterns (future)', () => {
-    // This test documents expected future behavior after Phase 4.1
-    // When property-level JSDoc is implemented, these should work:
-    // - @param obj.prop
-    // - @param obj.nested.prop
-    // - @param { destructured }.prop
-    // - @param { destructured }.nested.prop
+  it('supports nested property access patterns', () => {
+    const node = getNodeByName('crazyFunction');
+    expect(node).toBeDefined();
 
-    // For now, we just document that this is not yet supported
-    expect(true).toBe(true); // Placeholder test
+    const nested = getJSDocParamComment(node!, 'fns.fn1.foo.param');
+    expect(nested.length).toBeGreaterThan(0);
   });
 });

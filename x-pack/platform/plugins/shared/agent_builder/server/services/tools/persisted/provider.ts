@@ -10,7 +10,11 @@ import type { ToolType } from '@kbn/agent-builder-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
+import type {
+  WritableToolProvider,
+  ToolProviderFn,
+  ToolProviderListFilters,
+} from '../tool_provider';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
 import { isEnabledDefinition } from '../tool_types/definitions';
 import { createClient } from './client';
@@ -94,8 +98,11 @@ export const createPersistedToolClient = ({
       return convertPersistedDefinition({ tool, definition, context: conversionContext() });
     },
 
-    async list() {
-      const tools = await toolClient.list();
+    async list(filters?: ToolProviderListFilters) {
+      const tools = await toolClient.list({
+        types: filters?.types,
+        tags: filters?.tags,
+      });
       const context = conversionContext();
       return tools
         .filter((tool) => {

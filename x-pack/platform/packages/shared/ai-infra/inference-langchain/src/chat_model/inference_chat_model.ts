@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodSchema } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
@@ -32,6 +32,7 @@ import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
@@ -64,7 +65,10 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   model?: string;
   signal?: AbortSignal;
   timeout?: number;
+  maxContentLength?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -74,6 +78,8 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   temperature?: number;
   model?: string;
   timeout?: number;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -105,6 +111,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected model?: string;
   protected signal?: AbortSignal;
   protected timeout?: number;
+  protected maxContentLength?: number;
+  protected sessionId?: string;
+  protected cacheControl?: ChatCompleteCacheControl;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -117,7 +126,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.model = args.model;
     this.signal = args.signal;
     this.timeout = args.timeout;
+    this.maxContentLength = args.maxContentLength;
     this.maxRetries = args.maxRetries;
+    this.sessionId = args.sessionId;
+    this.cacheControl = args.cacheControl;
   }
 
   static lc_name() {
@@ -132,6 +144,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       'tool_choice',
       'temperature',
       'model',
+      'cacheControl',
+      'sessionId',
     ];
   }
 
@@ -177,24 +191,36 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   override bindTools(tools: BindToolsInput[], kwargs?: Partial<InferenceChatModelCallOptions>) {
     // conversion will be done at call time for simplicity's sake
     // so we just need to implement this method with the default behavior to support tools
-    return this.bind({
+    return this.withConfig({
       tools,
       ...kwargs,
-    } as Partial<InferenceChatModelCallOptions>);
+    });
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
+    const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
+    const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+    const resolvedToolChoice = options.tool_choice ?? 'auto';
+
     return {
       connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
-      toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
+      // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
+      // Only forward tool params when we actually have tools.
+      tools: hasTools ? inferredTools : undefined,
+      // Default to `auto` when tools are present so OpenAI-compatible endpoints that require an
+      // explicit tool choice can still accept the request.
+      toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
       timeout: options.timeout ?? this.timeout,
+      maxContentLength: this.maxContentLength,
+      cacheControl: options.cacheControl ?? this.cacheControl,
+      sessionId: options.sessionId ?? this.sessionId,
     };
   }
 
@@ -340,7 +366,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema as unknown as ZodSchema),
+            parameters:
+              '_zod' in (schema as object)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
           },
         },
       ];

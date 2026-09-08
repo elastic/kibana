@@ -7,56 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { timeRangeSchema } from '@kbn/es-query-server';
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  getAsCodeTagsSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export const searchRequestBodySchema = schema.object({
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The page of dashboards to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of dashboards to return per page',
-      },
-    })
-  ),
-  search: schema.maybe(
-    schema.string({
-      meta: {
+export const searchResponseBodySchema = z
+  .object({
+    data: z
+      .array(
+        z
+          .object({
+            id: z.string().meta({ description: 'The dashboard ID.' }),
+            data: z
+              .object({
+                description: z
+                  .string()
+                  .optional()
+                  .meta({ description: 'A short description of the dashboard.' }),
+                tags: getAsCodeTagsSchema(
+                  'Tag IDs associated with this dashboard.',
+                  100
+                ).optional(),
+                time_range: timeRangeSchema.optional(),
+                title: z.string().meta({ description: 'The dashboard title.' }),
+                access_control: accessControlSchema,
+              })
+              .strict(),
+            meta: asCodeMetaSchema,
+          })
+          .strict()
+      )
+      .max(PAGINATION_MAX_SIZE)
+      .meta({
         description:
-          'An Elasticsearch simple_query_string query that filters the dashboards in the response by "title" and "description"',
-      },
-    })
-  ),
-  tags: schema.maybe(
-    schema.object({
-      included: schema.maybe(schema.arrayOf(schema.string())),
-      excluded: schema.maybe(schema.arrayOf(schema.string())),
-    })
-  ),
-});
-
-export const searchResponseBodySchema = schema.object({
-  dashboards: schema.arrayOf(
-    schema.object({
-      id: schema.string(),
-      data: schema.object({
-        description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
-        time_range: schema.maybe(timeRangeSchema),
-        title: schema.string(),
-        access_control: accessControlSchema,
+          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
       }),
-      meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    })
-  ),
-  total: schema.number(),
-  page: schema.number(),
-});
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();

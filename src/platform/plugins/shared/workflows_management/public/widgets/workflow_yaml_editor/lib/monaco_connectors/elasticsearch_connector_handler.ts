@@ -65,8 +65,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // Generate console format
       const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
 
-      // Create hover content with enhanced formatting and shadowed icons
-      const content = [
+      const bodyLines = [
         `**Endpoint**: \`${requestInfo.method} ${requestInfo.url}\``,
         '',
         this.getDescription(connector, requestInfo),
@@ -83,11 +82,11 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
         '',
         '---',
         `<span style="text-shadow: 0 0 3px rgba(255,255,0,0.4); opacity: 0.7;">💡</span> _Click Ctrl+Space (Ctrl+I on Mac) inside the "with:" block to see all available options_`,
-      ]
-        .filter((line) => line !== null)
-        .join('\n');
+      ].filter((line) => line !== null);
 
-      return this.createMarkdownContent(content);
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(connector.stability, bodyLines)
+      );
     } catch (error) {
       // console.warn('ElasticsearchMonacoConnectorHandler: Error generating hover content', error);
       return null;

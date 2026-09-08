@@ -7,7 +7,14 @@
 
 import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { get } from 'lodash';
-import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import type { InfraMetadata } from '../../../../../common/http_api';
@@ -140,14 +147,21 @@ export const MetadataDetails = (props: Props) => {
     <MetadataContainer>
       {filteredFields.length > NUMBER_OF_COLUMNS ? (
         <Controls>
-          <EuiButtonIcon
-            data-test-subj="infraMetadataDetailsButton"
-            iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-            onClick={toggleIsOpen}
-            aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
               defaultMessage: 'Show more details',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraMetadataDetailsButton"
+              iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+              onClick={toggleIsOpen}
+              aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
+                defaultMessage: 'Show more details',
+              })}
+            />
+          </EuiToolTip>
         </Controls>
       ) : null}
       <EuiFlexGrid columns={NUMBER_OF_COLUMNS} style={{ flexGrow: 1 }} gutterSize="s">

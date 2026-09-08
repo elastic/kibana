@@ -20,8 +20,8 @@
     "optionalPlugins": [
       "security",
       "screenshotMode",
-      "embeddableEnhanced"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

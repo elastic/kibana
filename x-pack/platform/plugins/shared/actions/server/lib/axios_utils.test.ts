@@ -21,7 +21,6 @@ import {
 } from './axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
-import { getCustomAgents } from './get_custom_agents';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import { httpResponseUserErrorCodes } from './create_and_throw_user_error';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -66,6 +65,30 @@ describe('request', () => {
       maxContentLength: 1000000,
       timeout: 360000,
     });
+  });
+
+  test('throws when URL is not in allowedHosts', async () => {
+    configurationUtilities.ensureUriAllowed = jest.fn().mockImplementation(() => {
+      throw new Error(
+        'target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+    });
+
+    await expect(
+      request({
+        axios,
+        url: 'https://disallowed.host/path',
+        logger,
+        configurationUtilities,
+      })
+    ).rejects.toThrow(
+      'target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts'
+    );
+
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+      'https://disallowed.host/path'
+    );
+    expect(axiosMock).not.toHaveBeenCalled();
   });
 
   test('it fetch correctly with defaults', async () => {
@@ -174,7 +197,6 @@ describe('request', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
-    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, TestUrl);
 
     const res = await request({
       axios,
@@ -182,6 +204,9 @@ describe('request', () => {
       logger,
       configurationUtilities,
     });
+
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
 
     expect(axiosMock).toHaveBeenCalledWith(TestUrl, {
       method: 'get',
@@ -303,6 +328,53 @@ describe('request', () => {
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
   });
 
+  test('it passes proxy auth to HttpsProxyAgent when proxySettings has credentials', async () => {
+    await request({
+      axios,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      proxyOverrides: {
+        proxyUrl: 'https://proxyuser:proxypass@myproxy:8080',
+        proxySSLSettings: {
+          verificationMode: 'full',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+      },
+    });
+
+    expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpsAgent } = axiosMock.mock.calls[0][1];
+    expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
+    expect(httpsAgent.proxy.username).toBe('proxyuser');
+    expect(httpsAgent.proxy.password).toBe('proxypass');
+  });
+
+  test('it does not set proxy auth on HttpsProxyAgent when proxySettings has no credentials', async () => {
+    await request({
+      axios,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      proxyOverrides: {
+        proxyUrl: 'https://myproxy:8080',
+        proxySSLSettings: {
+          verificationMode: 'full',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+      },
+    });
+
+    expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpsAgent } = axiosMock.mock.calls[0][1];
+    expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
+    expect(httpsAgent.proxy.auth).toBeUndefined();
+  });
+
   test('it does not proxy with proxyOnlyHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxySSLSettings: {
@@ -412,6 +484,27 @@ describe('request', () => {
     expect(axiosMock.mock.calls.length).toBe(2);
     expect(axiosMock.mock.calls[0][1]!.timeout).toBe(360000);
     expect(axiosMock.mock.calls[1][1]!.timeout).toBe(360001);
+  });
+
+  test('should use keepAlive when provided', async () => {
+    await request({
+      axios,
+      url: '/test',
+      data: { id: '123' },
+      logger,
+      configurationUtilities,
+      keepAlive: true,
+    });
+    expect(axiosMock).toHaveBeenCalledWith(
+      '/test',
+      expect.objectContaining({
+        method: 'get',
+        data: { id: '123' },
+        httpsAgent: expect.objectContaining({
+          options: expect.objectContaining({ keepAlive: true }),
+        }),
+      })
+    );
   });
 
   test('throw an error if you use baseUrl in your axios instance', async () => {
@@ -529,6 +622,39 @@ describe('patch', () => {
       timeout: 360000,
       beforeRedirect: expect.any(Function),
     });
+  });
+
+  test('caller-provided maxContentLength overrides the global default', async () => {
+    await request({
+      axios: axiosMock as jest.Mocked<AxiosInstance>,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      maxContentLength: 50 * 1024 * 1024, // 50MB caller override
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith(
+      TestUrl,
+      expect.objectContaining({
+        maxContentLength: 50 * 1024 * 1024, // should use caller value, not the 1MB default
+      })
+    );
+  });
+
+  test('global default maxContentLength is used when caller does not provide one', async () => {
+    await request({
+      axios: axiosMock as jest.Mocked<AxiosInstance>,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith(
+      TestUrl,
+      expect.objectContaining({
+        maxContentLength: 1000000, // global default from configurationUtilities mock
+      })
+    );
   });
 });
 

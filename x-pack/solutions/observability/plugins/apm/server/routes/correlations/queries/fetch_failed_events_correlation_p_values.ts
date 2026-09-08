@@ -5,14 +5,16 @@
  * 2.0.
  */
 import { termQuery } from '@kbn/observability-plugin/server';
-import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import type {
+  CommonCorrelationsQueryParams,
+  EntityType,
+} from '../../../../common/correlations/types';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME, PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { fetchDurationRanges } from './fetch_duration_ranges';
-import { getEventType } from '../utils';
+import { getEventTypeFromEntityType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFailedEventsCorrelationPValues = async ({
@@ -24,14 +26,16 @@ export const fetchFailedEventsCorrelationPValues = async ({
   query,
   rangeSteps,
   fieldName,
+  entityType,
+  includeHistogram = true,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   rangeSteps: number[];
   fieldName: string;
+  entityType: EntityType;
+  includeHistogram?: boolean;
 }) => {
-  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
-  const searchMetrics = false; // failed transactions correlations does not search metrics documents
-  const eventType = getEventType(chartType, searchMetrics);
+  const eventType = getEventTypeFromEntityType(entityType);
 
   const commonQuery = getCommonCorrelationsQuery({
     start,
@@ -89,23 +93,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
       0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    const { durationRanges: histogram } = await fetchDurationRanges({
-      apmEventClient,
-      chartType,
-      start,
-      end,
-      environment,
-      kuery,
-      query: {
-        bool: {
-          filter: [query, ...termQuery(fieldName, bucket.key)],
-        },
-      },
-      rangeSteps,
-      searchMetrics,
-    });
-
-    result.push({
+    const base = {
       fieldName,
       fieldValue: bucket.key,
       doc_count: bucket.doc_count,
@@ -118,8 +106,27 @@ export const fetchFailedEventsCorrelationPValues = async ({
       // Percentage of time the term appears in successful transactions
       successPercentage:
         (bucket.bg_count - bucket.doc_count) / (overallResult.bg_count - overallResult.doc_count),
-      histogram,
-    });
+    };
+
+    if (includeHistogram) {
+      const { durationRanges: histogram } = await fetchDurationRanges({
+        apmEventClient,
+        entityType,
+        start,
+        end,
+        environment,
+        kuery,
+        query: {
+          bool: {
+            filter: [query, ...termQuery(fieldName, bucket.key)],
+          },
+        },
+        rangeSteps,
+      });
+      result.push({ ...base, histogram });
+    } else {
+      result.push(base);
+    }
   }
 
   return result;

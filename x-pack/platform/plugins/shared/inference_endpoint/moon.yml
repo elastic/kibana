@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-endpoint-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
-toolchain:
+  defaultOwner: '@elastic/search-ml-ux'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-endpoint-plugin'
+  title: '@kbn/inference-endpoint-plugin'
   description: Moon project for @kbn/inference-endpoint-plugin
   channel: ''
-  owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/inference_endpoint
+  owner: '@elastic/search-ml-ux'
+  sourceRoot: x-pack/platform/plugins/shared/inference_endpoint
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
@@ -28,7 +27,6 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -37,16 +35,4 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

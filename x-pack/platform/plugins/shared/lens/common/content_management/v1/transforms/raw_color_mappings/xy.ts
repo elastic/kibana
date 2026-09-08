@@ -6,7 +6,7 @@
  */
 
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
-import type { XYLayerConfig, XYState } from '../../../../../public';
+import type { XYLayerConfig, XYVisualizationState } from '../../../../../public';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,
@@ -25,7 +25,7 @@ interface DeprecatedColorMappingLayer extends Omit<DeprecatedSplitAccessorLayer,
  *
  * @deprecated
  */
-export interface DeprecatedColorMappingsXYState extends Omit<XYState, 'layers'> {
+export interface DeprecatedColorMappingsXYState extends Omit<XYVisualizationState, 'layers'> {
   layers: Array<DeprecatedColorMappingLayer | XYLayerConfig>;
 }
 
@@ -39,15 +39,15 @@ function isDeprecatedColorMappingLayer(
 }
 
 export const convertXYToRawColorMappings = (
-  state: XYState | DeprecatedColorMappingsXYState,
+  state: XYVisualizationState | DeprecatedColorMappingsXYState,
   datasourceStates?: Readonly<GeneralDatasourceStates>
-): XYState => {
+): XYVisualizationState => {
   const getColumnMeta = getColumnMetaFn(datasourceStates);
   const hasDeprecatedColorMappings = state.layers.some((layer) => {
     return layer.layerType === 'data' && isDeprecatedColorMapping(layer.colorMapping);
   });
 
-  if (!hasDeprecatedColorMappings) return state as XYState;
+  if (!hasDeprecatedColorMappings) return state as XYVisualizationState;
 
   const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
     if (isDeprecatedColorMappingLayer(layer)) {

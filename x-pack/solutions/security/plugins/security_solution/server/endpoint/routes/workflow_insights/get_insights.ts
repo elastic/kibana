@@ -35,7 +35,6 @@ export const registerGetInsightsRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

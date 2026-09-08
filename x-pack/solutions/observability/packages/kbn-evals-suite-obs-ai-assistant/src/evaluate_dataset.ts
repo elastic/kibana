@@ -38,11 +38,11 @@ export type EvaluateObservabilityAIAssistantDataset = ({
 
 export function createEvaluateObservabilityAIAssistantDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: ChatClient;
 }): EvaluateObservabilityAIAssistantDataset {
   return async function evaluateObservabilityAIAssistantDataset({
@@ -66,9 +66,9 @@ export function createEvaluateObservabilityAIAssistantDataset({
      */
     const useQualitativeEvaluators = process.env.USE_QUALITATIVE_EVALUATORS === 'true';
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({
             messages: input.question,
@@ -132,6 +132,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize' as const,
     evaluate: async ({ input, output, expected, metadata }: any) => {
       const criteria = expected.criteria ?? [];
       const result = await evaluators

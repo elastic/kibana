@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { GetRuleMigrationPrebuiltRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationPrebuiltRulesRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../../common/siem_migrations/constants';

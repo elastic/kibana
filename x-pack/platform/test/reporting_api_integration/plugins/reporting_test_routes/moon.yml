@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reporting-test-routes'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reporting-test-routes'
+  title: '@kbn/reporting-test-routes'
   description: Moon project for @kbn/reporting-test-routes
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes
+  sourceRoot: x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes
 dependsOn:
   - '@kbn/core'
   - '@kbn/reporting-plugin'

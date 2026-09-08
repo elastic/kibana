@@ -32,7 +32,6 @@ import type {
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
-  AttachmentType,
   EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -53,28 +52,35 @@ import {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
+  isLegacyAttachmentRequest,
+  isLegacyCommentAttachment,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
-  isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
   isCommentRequestTypeEvent,
 } from '../common/utils';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
+import { parseUnifiedAttachmentWithSchema } from './attachments/validators';
+import type {
+  AttachmentRequest,
+  AttachmentRequestV2,
+  CasesFindRequestSortFields,
+} from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
-export const decodeCommentRequest = (
-  comment: AttachmentRequest,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
-) => {
-  if (isCommentRequestTypeUser(comment)) {
+export const decodeCommentRequest = (comment: AttachmentRequest) => {
+  if (isLegacyCommentAttachment(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
     decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
@@ -126,7 +132,7 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeEvent(comment)) {
     decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment, externalRefRegistry);
+    decodeExternalReferenceAttachment(comment);
   } else if (isCommentRequestTypePersistableState(comment)) {
     decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
@@ -139,21 +145,58 @@ export const decodeCommentRequest = (
   }
 };
 
-const decodeExternalReferenceAttachment = (
-  attachment: ExternalReferenceAttachmentPayload,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
-) => {
+const decodeExternalReferenceAttachment = (attachment: ExternalReferenceAttachmentPayload) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
     decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
   } else {
     decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
   }
+};
 
-  const metadata = attachment.externalReferenceMetadata;
-  if (externalRefRegistry.has(attachment.externalReferenceAttachmentTypeId)) {
-    const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
+/** Validates a unified attachment via the registered `schema`. */
+const decodeUnifiedAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
 
-    attachmentType.schemaValidator?.(metadata);
+  const attachmentType = unifiedRegistry.get(attachment.type);
+
+  if (!attachmentType.schema) {
+    throw badRequest(`Attachment type '${attachment.type}' does not define a schema.`);
+  }
+
+  parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
+};
+
+export const decodeUnifiedCommentRequest = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (
+    isUnifiedValueAttachmentRequest(attachment) ||
+    isUnifiedReferenceAttachmentRequest(attachment)
+  ) {
+    decodeUnifiedAttachment(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
+  }
+};
+
+export const decodeCommentRequestV2 = (
+  attachment: AttachmentRequestV2,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isLegacyAttachmentRequest(attachment)) {
+    decodeCommentRequest(attachment);
+  } else if (isUnifiedAttachmentRequest(attachment)) {
+    decodeUnifiedCommentRequest(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
   }
 };
 
@@ -575,8 +618,8 @@ export const getCaseToUpdate = (
         if (arraysDifference(value, currentValue)) {
           acc[key] = value;
         }
-      } else if (isPlainObject(currentValue) && isPlainObject(value)) {
-        if (!deepEqual(currentValue, value)) {
+      } else if (isPlainObject(value)) {
+        if (currentValue === undefined || !deepEqual(currentValue, value)) {
           acc[key] = value;
         }
       } else if (currentValue !== undefined && value !== currentValue) {
@@ -733,16 +776,12 @@ export const buildAttachmentRequestFromFileJSON = ({
 }: {
   owner: string;
   fileMetadata: FileJSON;
-}): AttachmentRequest => ({
+}): AttachmentRequestV2 => ({
   owner,
-  type: AttachmentType.externalReference,
-  externalReferenceId: fileMetadata.id,
-  externalReferenceStorage: {
-    type: ExternalReferenceStorageType.savedObject,
+  type: FILE_ATTACHMENT_TYPE,
+  attachmentId: fileMetadata.id,
+  metadata: {
     soType: FILE_SO_TYPE,
-  },
-  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-  externalReferenceMetadata: {
     files: [
       {
         name: fileMetadata.name,

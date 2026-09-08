@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { groupBy, keyBy, mapValues } from 'lodash';
+import { minimatch } from 'minimatch';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter, kqlFilter as toKqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
@@ -212,13 +213,8 @@ async function getTextFieldSampleValues(
   );
 }
 
-/** Converts a wildcard pattern to a regex */
-function wildcardToRegex(pattern: string): RegExp {
-  return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`);
-}
-
 /** Determines the category for a field type */
-function getFieldCategory(
+export function getFieldCategory(
   fieldType: string
 ): 'keyword' | 'numeric' | 'date' | 'boolean' | 'text' | 'unsupported' {
   if (KEYWORD_TYPES.includes(fieldType)) return 'keyword';
@@ -229,7 +225,7 @@ function getFieldCategory(
   return 'unsupported';
 }
 
-interface ResolvedValidField {
+export interface ResolvedValidField {
   field: string;
   fieldType: string;
   category: ReturnType<typeof getFieldCategory>;
@@ -238,28 +234,29 @@ interface ResolvedErrorField {
   input: string;
   error: string;
 }
-type ResolvedField = ResolvedValidField | ResolvedErrorField;
+export type ResolvedField = ResolvedValidField | ResolvedErrorField;
 
 /** Resolves an input (field name or wildcard) to concrete fields or an error */
-function resolveInputToConcreteFields(
+export function resolveInputToConcreteFields(
   input: string,
   allFieldNames: string[],
   fieldNameToTypeMap: Record<string, string | undefined>
 ): ResolvedField[] {
   const isWildcard = input.includes('*');
-  const matchingFields = isWildcard
-    ? allFieldNames.filter((f) => wildcardToRegex(input).test(f) && fieldNameToTypeMap[f])
-    : fieldNameToTypeMap[input]
-    ? [input]
-    : [];
+  if (!isWildcard) {
+    const fieldType = fieldNameToTypeMap[input];
+    if (fieldType) {
+      return [{ field: input, fieldType, category: getFieldCategory(fieldType) }];
+    }
+    return [{ input, error: `Field "${input}" not found` }];
+  }
+
+  const matchingFields = allFieldNames.filter(
+    (f) => minimatch(f, input, { dot: true }) && fieldNameToTypeMap[f]
+  );
 
   if (matchingFields.length === 0) {
-    return [
-      {
-        input,
-        error: isWildcard ? `No fields match pattern "${input}"` : `Field "${input}" not found`,
-      },
-    ];
+    return [{ input, error: `No fields match pattern "${input}"` }];
   }
 
   return matchingFields.map((field) => ({

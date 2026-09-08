@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
@@ -17,8 +17,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from '@kbn/attack-discovery-schedules-common';
 import type { ElasticAssistantPluginRouter } from '../../types';
-import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from '../../lib/attack_discovery/schedules/constants';
 import { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from '../../lib/attack_discovery/data_generator_rule/constants';
 import { getScheduledIndexPattern } from '../../lib/attack_discovery/persistence/get_scheduled_index_pattern';
 import { generateAttackDiscoveryAlertHash } from '../../lib/attack_discovery/persistence/transforms/transform_to_alert_documents';

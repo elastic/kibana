@@ -11,6 +11,7 @@ import { useEntityAnalyticsRoutes } from '../api';
 
 export const usePrivilegedMonitoringPrivileges = () => {
   const { fetchPrivilegeMonitoringPrivileges } = useEntityAnalyticsRoutes();
+  // TODO: remove this hook when privmon UI is retired. https://github.com/elastic/security-team/issues/16105
   return useQuery<PrivMonPrivilegesResponse, SecurityAppError>({
     queryKey: ['GET', 'FETCH_PRIVILEGED_MONITORING_PRIVILEGES'],
     queryFn: fetchPrivilegeMonitoringPrivileges,

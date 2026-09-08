@@ -8,11 +8,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   TypedLensSerializedState,
+  DatasourceStates,
   FramePublicAPI,
   UserMessagesGetter,
   LensDocument,
   LensInspector,
+  LensDatasourceId,
 } from '@kbn/lens-common';
+import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 
 export interface FlyoutWrapperProps {
@@ -25,23 +28,32 @@ export interface FlyoutWrapperProps {
   isNewPanel?: boolean;
   isSaveable?: boolean;
   onCancel?: () => void;
-  onApply?: () => void;
+  onApply?: () => void | Promise<void>;
   navigateToLensEditor?: () => void;
   isReadOnly?: boolean;
   applyButtonLabel?: string;
+  /** Tooltip to show when Apply button is disabled */
+  applyButtonDisabledTooltip?: string;
 }
+
+/** Callback for updating the visualization and datasources state. */
+export type LensPanelStateUpdater = (
+  datasourceState: unknown,
+  visualizationState: unknown,
+  visualizationId?: string,
+  /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
+  datasourceId?: LensDatasourceId,
+  /** All datasource states from the editor store, so non-active loaded states are preserved. */
+  allDatasourceStates?: DatasourceStates
+) => void;
 
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensSerializedState['attributes'];
-  /** Callback for updating the visualization and datasources state.*/
-  updatePanelState: (
-    datasourceState: unknown,
-    visualizationState: unknown,
-    visualizationId?: string
-  ) => void;
+  /** Callback for updating the visualization and datasources state. */
+  updatePanelState: LensPanelStateUpdater;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
@@ -50,7 +62,7 @@ export interface EditConfigPanelProps {
   /** Contains the active data, necessary for some panel configuration such as coloring */
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */
-  updateByRefInput?: (soId: string) => void;
+  updateByRefInput?: (soId: string, attrs: TypedLensSerializedState['attributes']) => void;
   /** Callback for closing the edit flyout */
   closeFlyout?: () => void;
   /** Boolean used for adding a flyout wrapper */
@@ -76,8 +88,10 @@ export interface EditConfigPanelProps {
   isNewPanel?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
-  /** Apply button handler */
-  onApply?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Apply button handler — may return updated attributes (e.g. with synced __lastSaved) */
+  onApply?: (
+    attrs: TypedLensSerializedState['attributes']
+  ) => Promise<TypedLensSerializedState['attributes'] | void> | void;
   /** Cancel button handler */
   onCancel?: () => void;
   // Lens panels allow read-only "edit" where the user can look and tweak the existing chart, without
@@ -109,6 +123,8 @@ export interface LayerConfigurationProps {
   panelId?: string;
   closeFlyout?: () => void;
   editorContainer?: HTMLElement;
+  /** Callback to report text-based query state changes */
+  onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }
 
 export interface LayerTabsProps {

@@ -11,15 +11,15 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { NodeDataDefinition } from 'cytoscape';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import type { ContentsProps } from '.';
+import { isEdge } from './utils';
+import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -28,20 +28,19 @@ const INITIAL_STATE: Partial<DependencyReturn> = {
   previousPeriod: undefined,
 };
 
-export function DependencyContents({ elementData, environment, start, end }: ContentsProps) {
-  const nodeData = elementData as NodeDataDefinition;
-
+export function DependencyContents({ selection, environment, start, end }: ContentsProps) {
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
-
   const { offset, comparisonEnabled } = query;
-
   const apmRouter = useApmRouter();
 
-  const dependencyName = nodeData.label;
+  const isNode = !isEdge(selection);
+  const dependencyName = isNode ? selection.data.label : undefined;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -63,6 +62,12 @@ export function DependencyContents({ elementData, environment, start, end }: Con
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
+  const trackEvent = useUiTracker();
+
+  if (!isNode) {
+    return null;
+  }
+
   const detailsUrl = dependencyName
     ? apmRouter.link('/dependencies/overview', {
         query: {
@@ -71,8 +76,6 @@ export function DependencyContents({ elementData, environment, start, end }: Con
         } as TypeOf<ApmRoutes, '/dependencies/overview'>['query'],
       })
     : undefined;
-
-  const trackEvent = useUiTracker();
 
   return (
     <>

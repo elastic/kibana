@@ -87,6 +87,20 @@ export const DISABLED_BADGE_LABEL = i18n.translate(
   }
 );
 
+export const MANAGED_BADGE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.workflows.managedBadgeLabel',
+  {
+    defaultMessage: 'Managed',
+  }
+);
+
+export const MANAGED_BADGE_TOOLTIP = i18n.translate(
+  'xpack.stackConnectors.components.workflows.managedBadgeTooltip',
+  {
+    defaultMessage: 'Elastic manages this workflow.',
+  }
+);
+
 export const SELECTED_WORKFLOW_DISABLED_ERROR = i18n.translate(
   'xpack.stackConnectors.components.workflows.selectedWorkflowDisabledError',
   {
@@ -126,7 +140,7 @@ export const EMPTY_STATE_DESCRIPTION = i18n.translate(
 export const EMPTY_STATE_BUTTON_TEXT = i18n.translate(
   'xpack.stackConnectors.components.workflows.emptyStateButtonText',
   {
-    defaultMessage: 'Create your first workflow',
+    defaultMessage: 'Create workflow',
   }
 );
 

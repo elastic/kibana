@@ -55,7 +55,14 @@ export function ChooseColumnPopover({
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      aria-label={i18n.translate('esql.flyout.chooseColumnPopoverLabel', {
+        defaultMessage: 'Choose a column',
+      })}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+    >
       <EuiSelectable
         aria-label={i18n.translate('esql.flyout.chooseColumnList.label', {
           defaultMessage: 'Select a column',

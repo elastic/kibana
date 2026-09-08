@@ -14,9 +14,39 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { SystemFlyoutService } from './system_flyout_service';
+import type { SystemFlyoutRef } from './system_flyout_ref';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlaySystemFlyoutStart } from '@kbn/core-overlays-browser';
 import React from 'react';
+
+interface FlyoutManagerEvent {
+  type: 'CLOSE_SESSION';
+  session: {
+    mainFlyoutId: string;
+    childFlyoutId: string | null;
+    childHistory?: Array<{ flyoutId: string; title: string }>;
+  };
+}
+
+const eventListeners = new Set<(event: FlyoutManagerEvent) => void>();
+const mockSubscribeToEvents = jest.fn((listener: (event: FlyoutManagerEvent) => void) => {
+  eventListeners.add(listener);
+  return () => {
+    eventListeners.delete(listener);
+  };
+});
+
+const emitEvent = (event: FlyoutManagerEvent) => {
+  eventListeners.forEach((listener) => listener(event));
+};
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    getFlyoutManagerStore: jest.fn(() => ({ subscribeToEvents: mockSubscribeToEvents })),
+  };
+});
 
 const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
 const i18nMock = i18nServiceMock.createStartContract();
@@ -26,6 +56,8 @@ const userProfileMock = userProfileServiceMock.createStart();
 beforeEach(() => {
   mockReactDomRender.mockClear();
   mockReactDomUnmount.mockClear();
+  mockSubscribeToEvents.mockClear();
+  eventListeners.clear();
 });
 
 afterEach(() => {
@@ -58,6 +90,161 @@ describe('SystemFlyoutService', () => {
   });
 
   describe('openSystemFlyout()', () => {
+    it('pressing Back keeps the parent flyout open and closes the child flyout', () => {
+      // When Back is pressed in a child flyout, EUI emits CLOSE_SESSION with the
+      // parent as mainFlyoutId (destination) and the child as childFlyoutId (being removed).
+      // A child opened in a separate React root (session='inherit') must be closed
+      // explicitly via the subscription; EUI cannot reach across roots reliably.
+      // The parent (session='start') must NOT be closed — it is the Back destination.
+      const parentRef = systemFlyouts.open(<div>Parent flyout</div>, {
+        id: 'parent-flyout',
+        session: 'start',
+      });
+      const childRef = systemFlyouts.open(<div>Child flyout</div>, {
+        id: 'child-flyout',
+        session: 'inherit',
+      });
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: { mainFlyoutId: 'parent-flyout', childFlyoutId: 'child-flyout' },
+      });
+
+      // Child (session='inherit') is explicitly closed by the subscription
+      expect((childRef as SystemFlyoutRef).isClosed).toBe(true);
+      // Parent (session='start') stays open — it is the Back destination.
+      // EUI calls the onClose prop if the whole session later ends; we don't close it here.
+      expect((parentRef as SystemFlyoutRef).isClosed).toBe(false);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+    });
+
+    it('closing the top flyout also closes child flyouts in the session', () => {
+      // Closing the top flyout ends the entire session. EUI emits CLOSE_SESSION with
+      // the same structure as Back (mainFlyoutId = parent, childFlyoutId = child).
+      // The child flyout in its separate React root must be closed via the subscription.
+      // The parent flyout (session='start') is closed by EUI via the onClose prop.
+      const parentRef = systemFlyouts.open(<div>Parent flyout</div>, {
+        id: 'parent-flyout',
+        session: 'start',
+      });
+      const childRef = systemFlyouts.open(<div>Child flyout</div>, {
+        id: 'child-flyout',
+        session: 'inherit',
+      });
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: { mainFlyoutId: 'parent-flyout', childFlyoutId: 'child-flyout' },
+      });
+
+      expect((childRef as SystemFlyoutRef).isClosed).toBe(true);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+      // Parent closing is handled by EUI via onClose — not by our subscription
+      expect((parentRef as SystemFlyoutRef).isClosed).toBe(false);
+    });
+
+    it('closes child flyouts in childHistory when the session ends', () => {
+      // When a session has navigated through multiple child flyouts, the previous
+      // children are tracked in childHistory. All of them must be closed when the
+      // session ends, not just the currently active child.
+      const parentRef = systemFlyouts.open(<div>Parent</div>, {
+        id: 'parent-flyout-demo',
+        session: 'start',
+      });
+      const child1Ref = systemFlyouts.open(<div>Child 1</div>, {
+        id: 'child-flyout-demo-1',
+        session: 'inherit',
+      });
+      const child2Ref = systemFlyouts.open(<div>Child 2</div>, {
+        id: 'child-flyout-demo-2',
+        session: 'inherit',
+      });
+
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: {
+          mainFlyoutId: 'parent-flyout-demo',
+          childFlyoutId: 'child-flyout-demo-2',
+          childHistory: [{ flyoutId: 'child-flyout-demo-1', title: 'Child 1' }],
+        },
+      });
+
+      // Both child flyouts are closed: child2 via childFlyoutId, child1 via childHistory
+      expect((child1Ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect((child2Ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(2);
+      // Parent (session='start') is closed by EUI via onClose, not our subscription
+      expect((parentRef as SystemFlyoutRef).isClosed).toBe(false);
+    });
+
+    it('pressing Back to return to Session X does not close Session X (regression)', () => {
+      // Regression: with Session X and Session Y both open, pressing Back in Session Y
+      // emits CLOSE_SESSION with Session X as mainFlyoutId (destination) and
+      // Session Y as childFlyoutId (being removed). The old code closed any flyout
+      // whose ID matched mainFlyoutId OR childFlyoutId, which incorrectly closed
+      // Session X — the flyout the user was navigating back TO.
+      const refX = systemFlyouts.open(<div>Session X</div>, { id: 'session-x', session: 'start' });
+      const refY = systemFlyouts.open(<div>Session Y</div>, { id: 'session-y', session: 'start' });
+
+      // Back in Session Y: session-x is where we are going, session-y is being closed
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: { mainFlyoutId: 'session-x', childFlyoutId: 'session-y' },
+      });
+
+      // Session X must remain open — it is the Back destination
+      expect((refX as SystemFlyoutRef).isClosed).toBe(false);
+      // Session Y is handled by EUI via onClose; our subscription does not close it
+      expect((refY as SystemFlyoutRef).isClosed).toBe(false);
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+
+    it('pressing Back from child2 to child1 does not close child1', () => {
+      // When navigating from child1 to child2 and then pressing Back, EUI fires
+      // CLOSE_SESSION with child2 as childFlyoutId (being removed) and no entry for
+      // child1 in childHistory (child1 is the destination, not a flyout being closed).
+      // This verifies our childHistory check does not accidentally close the Back destination.
+      const child1Ref = systemFlyouts.open(<div>Child 1</div>, {
+        id: 'child-flyout-1',
+        session: 'inherit',
+      });
+      const child2Ref = systemFlyouts.open(<div>Child 2</div>, {
+        id: 'child-flyout-2',
+        session: 'inherit',
+      });
+
+      // Back in child2: child2 is removed, child1 is the destination (not in childHistory)
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: {
+          mainFlyoutId: 'parent-flyout',
+          childFlyoutId: 'child-flyout-2',
+          childHistory: [],
+        },
+      });
+
+      expect((child2Ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect((child1Ref as SystemFlyoutRef).isClosed).toBe(false);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not close a child flyout when a different session ends', () => {
+      const childRef = systemFlyouts.open(<div>Child flyout</div>, {
+        id: 'child-flyout',
+        session: 'inherit',
+      });
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: { mainFlyoutId: 'unrelated-parent', childFlyoutId: 'unrelated-child' },
+      });
+
+      expect((childRef as SystemFlyoutRef).isClosed).toBe(false);
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+
     it('renders a system flyout to the DOM', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       systemFlyouts.open(<div>System flyout content</div>);
@@ -227,6 +414,34 @@ describe('SystemFlyoutService', () => {
       expect(targetElement.children.length).toBe(0);
 
       testService.stop();
+    });
+  });
+
+  describe('closeAllFlyouts()', () => {
+    it('closes all active flyouts', () => {
+      systemFlyouts.open(<div>Flyout 1</div>);
+      systemFlyouts.open(<div>Flyout 2</div>);
+
+      expect(targetDomElement.children.length).toBe(2);
+      mockReactDomUnmount.mockClear();
+
+      service.closeAllFlyouts();
+
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(2);
+      expect(targetDomElement.children.length).toBe(0);
+    });
+
+    it('is a no-op when no flyouts are open', () => {
+      expect(() => service.closeAllFlyouts()).not.toThrow();
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+
+    it('allows new flyouts to be opened after closing all', () => {
+      systemFlyouts.open(<div>Flyout 1</div>);
+      service.closeAllFlyouts();
+
+      expect(() => systemFlyouts.open(<div>Flyout 2</div>)).not.toThrow();
+      expect(targetDomElement.children.length).toBe(1);
     });
   });
 

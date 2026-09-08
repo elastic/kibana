@@ -10,8 +10,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { CircuitBreakerResult } from './health_diagnostic_circuit_breakers.types';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
+export { NotAllowedError } from './health_diagnostic_errors';
 
 /**
  * Enum defining the types of actions that can be applied to data,
@@ -54,6 +56,7 @@ export enum QueryType {
 
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
+  isServerless: boolean;
 }
 
 export interface HealthDiagnosticServiceStart {
@@ -61,6 +64,7 @@ export interface HealthDiagnosticServiceStart {
   esClient: ElasticsearchClient;
   analytics: AnalyticsServiceStart;
   telemetryConfigProvider: TelemetryConfigProvider;
+  packageService: PackageService;
 }
 
 export interface HealthDiagnosticService {
@@ -82,59 +86,96 @@ export interface HealthDiagnosticQueryConfig {
 }
 
 /**
- * Defines a health diagnostic query configuration with scheduling and filtering options.
+ * An index-targeting diagnostic query. Produced from v1, v2, and v3 DSL/EQL/ESQL
+ * descriptors. Exactly one of `index` or `integrations` is set.
  */
-export interface HealthDiagnosticQuery {
-  /**
-   * A unique identifier for this query.
-   */
+export interface IndexQuery {
+  kind: 'index';
   id: string;
-  /**
-   * A descriptive name for this query.
-   */
   name: string;
-  /**
-   * The index pattern on which this query will be executed.
-   */
-  index: string;
-  /**
-   * Only include indices in the specified tiers. Note that if the `index`
-   * hasn't a life cycle management or we are on serverless, this will be
-   * ignored.
-   */
-  tiers?: string[];
-  /**
-   * Specifies the query type, as defined by the QueryType enum.
-   */
-  type: QueryType;
-  /**
-   * The query string to be executed against the data store.
-   */
-  query: string;
-  /**
-   * A cron expression that schedules when the query should be run.
-   */
   scheduleCron: string;
-  /**
-   * Optional mapping of dot-separated paths to associated actions for filtering results.
-   */
   filterlist: Record<string, Action>;
-  /**
-   * Optional flag indicating whether this query is active and should be executed.
-   */
-  enabled?: boolean;
-  /**
-   * Query size
-   */
+  enabled: boolean;
+  type: QueryType;
+  query: string;
   size?: number;
-  /**
-   * Optional RSA public key identifier used for encrypting fields marked with `encrypt` action
-   * in the filterlist. Required when the filterlist contains any `encrypt` actions.
-   * This ID corresponds to keys configured in the plugin-level `encryption_public_keys` map.
-   * Example: "rsa-keypair-v1-2025-q4"
-   */
+  tiers?: string[];
+  index?: string;
+  integrations?: string[];
+  datastreamTypes?: string[];
   encryptionKeyId?: string;
 }
+
+/**
+ * An ES HTTP API diagnostic query. Produced from v3 API descriptors.
+ */
+export interface ApiQuery {
+  kind: 'api';
+  id: string;
+  name: string;
+  scheduleCron: string;
+  filterlist: Record<string, Action>;
+  enabled: boolean;
+  api: string;
+  pathParams?: Record<string, string>;
+  queryParams?: Record<string, string | number>;
+  responsePath?: string;
+  responsePathKey?: string;
+  integrations?: string[];
+  encryptionKeyId?: string;
+}
+
+/**
+ * Produced when the parser fails to produce a valid descriptor.
+ *
+ * `unknown_version` — the descriptor carries a version number the current code
+ * does not recognise (future descriptor). Kibana silently drops it: debug log
+ * only, no telemetry stat doc.
+ *
+ * `invalid_descriptor` — the version is known but the descriptor is malformed
+ * (missing required fields, etc.). A warning is logged and a skipped stat doc
+ * is sent so the problem is visible in telemetry.
+ */
+export interface ParseFailureQuery {
+  id?: string;
+  name?: string;
+  _raw: unknown;
+  failureReason: 'unknown_version' | 'invalid_descriptor';
+}
+
+export type HealthDiagnosticQuery = IndexQuery | ApiQuery | ParseFailureQuery;
+
+/**
+ * Result of resolving a v2 query's integration patterns against Fleet.
+ */
+export interface IntegrationResolution {
+  name: string;
+  version: string;
+  indices: string[];
+}
+
+export type ExecutableQuery =
+  | { kind: 'executable'; query: IndexQuery }
+  | { kind: 'executable'; query: IndexQuery; resolution: IntegrationResolution };
+
+export type ApiExecutableQuery =
+  | { kind: 'executable_api'; query: ApiQuery }
+  | { kind: 'executable_api'; query: ApiQuery; resolution: IntegrationResolution };
+
+export type SkipReason =
+  | 'datastreams_not_matched'
+  | 'integration_not_installed'
+  | 'parse_failure'
+  | 'fleet_unavailable'
+  | 'unsupported_query';
+
+export interface SkippedQuery {
+  kind: 'skipped';
+  query: HealthDiagnosticQuery;
+  reason: SkipReason;
+}
+
+export type ResolvedQuery = ExecutableQuery | ApiExecutableQuery | SkippedQuery;
 
 export interface HealthDiagnosticQueryResult {
   name: string;
@@ -145,18 +186,33 @@ export interface HealthDiagnosticQueryResult {
 }
 
 export interface HealthDiagnosticQueryStats {
+  // existing — unchanged
   name: string;
   started: string;
   finished: string;
   traceId: string;
   numDocs: number;
+  /** Kept for downstream backward compatibility. Derived from `status`. */
   passed: boolean;
   failure?: HealthDiagnosticQueryFailure;
   fieldNames: string[];
   circuitBreakers?: Record<string, unknown>;
+  // new fields
+  descriptorVersion: number;
+  status: 'success' | 'failed' | 'skipped';
+  skipReason?: SkipReason;
+  integration?: IntegrationResolution;
 }
 
 export interface HealthDiagnosticQueryFailure {
   message: string;
   reason?: CircuitBreakerResult;
+}
+
+export class PermissionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PermissionError';
+    Object.setPrototypeOf(this, PermissionError.prototype);
+  }
 }

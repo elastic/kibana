@@ -20,7 +20,19 @@ const OKTA_PACKAGE_NAME = 'entityanalytics_okta';
 describe(
   'Privileged User Monitoring - Integrations onboarding',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+            'disable:entityAnalyticsNewHomePageEnabled',
+            'disable:entityAnalyticsWatchlistEnabled',
+          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+        ],
+      },
+    },
   },
   () => {
     before(() => {

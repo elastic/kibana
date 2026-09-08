@@ -11,14 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiTextColor, EuiSpacer, EuiLink, useEuiTheme } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfiguration, UseField, globalFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
+import type { FormInternal } from '../../../../types';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
+import { ForceMergeIndexSwitchField } from './force_merge_index_switch_field';
+import { ForceMergeOnCloneSwitchField } from './force_merge_on_clone_switch_field';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -100,12 +104,15 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const forceMergeIndexPath = `phases.${phase}.actions.searchable_snapshot.force_merge_index`;
 
   const [formData] = useFormData({
-    watch: globalFields.searchableSnapshotRepo.path,
+    watch: [globalFields.searchableSnapshotRepo.path, forceMergeIndexPath],
   });
 
   const searchableSnapshotGlobalRepo = get(formData, globalFields.searchableSnapshotRepo.path);
+  const forceMergeIndexValue = get(formData, forceMergeIndexPath) as boolean | undefined;
+  const isForceMergeIndexEnabled = forceMergeIndexValue ?? true;
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
@@ -119,8 +126,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     )
   );
   const fullyMountedSearchableSnapshotLink = docLinks.links.elasticsearch.ilmSearchableSnapshot;
-  const partiallyMountedSearchableSnapshotLink =
-    docLinks.links.elasticsearch.searchableSnapshotSharedCache;
+  const partiallyMountedSearchableSnapshotLink = docLinks.links.snapshotRestore.searchableSnapshot;
+
   const i18nTexts = geti18nTexts(
     phase,
     fullyMountedSearchableSnapshotLink,
@@ -146,7 +153,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
               <FieldLoadingError
                 resendRequest={resendRequest}
                 data-test-subj="repositoriesErrorCallout"
-                aria-label={i18n.translate(
+                buttonLabel={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.reloadSnapshotRepositoriesLabel',
                   {
                     defaultMessage: 'Reload snapshot repositories',
@@ -168,72 +175,72 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             );
           } else if (repos.length === 0) {
             calloutContent = (
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount={false}
-                color="warning"
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle',
                   { defaultMessage: 'No snapshot repositories found' }
                 )}
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundBody"
-                  defaultMessage="{link} to use searchable snapshots."
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={getUrlForApp('management', {
-                          path: `data/snapshot_restore/add_repository`,
-                        })}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
-                          {
-                            defaultMessage: 'Create a snapshot repository',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiCallOut>
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundBody"
+                    defaultMessage="{link} to use searchable snapshots."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={getUrlForApp('management', {
+                            path: `data/snapshot_restore/add_repository`,
+                          })}
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                            {
+                              defaultMessage: 'Create a snapshot repository',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                }
+              />
             );
           } else if (
             searchableSnapshotGlobalRepo &&
             !repos.includes(searchableSnapshotGlobalRepo)
           ) {
             calloutContent = (
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount={false}
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle',
                   { defaultMessage: 'Repository name not found' }
                 )}
-                color="warning"
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody"
-                  defaultMessage="Enter the name of an existing repository, or {link} with this name."
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={getUrlForApp('management', {
-                          path: `data/snapshot_restore/add_repository`,
-                        })}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.indexLifecycleMgmt.editPolicy.createSnapshotRepositoryLink',
-                          {
-                            defaultMessage: 'create a new snapshot repository',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiCallOut>
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody"
+                    defaultMessage="Enter the name of an existing repository, or {link} with this name."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={getUrlForApp('management', {
+                            path: `data/snapshot_restore/add_repository`,
+                          })}
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.indexLifecycleMgmt.editPolicy.createSnapshotRepositoryLink',
+                            {
+                              defaultMessage: 'create a new snapshot repository',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                }
+              />
             );
           }
         }
@@ -251,6 +258,34 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
                 noSuggestions: !!(error || repos.length === 0),
               }}
             />
+
+            <EuiSpacer size="m" />
+
+            <UseField<boolean | undefined, FormInternal>
+              path={forceMergeIndexPath}
+              defaultValue={
+                policy.phases[phase]?.actions?.searchable_snapshot?.force_merge_index ?? true
+              }
+              component={ForceMergeIndexSwitchField}
+              componentProps={{
+                phase,
+              }}
+            />
+
+            <EuiSpacer size="m" />
+            {isForceMergeIndexEnabled ? (
+              <UseField<boolean | undefined, FormInternal>
+                path={`phases.${phase}.actions.searchable_snapshot.force_merge_on_clone`}
+                defaultValue={
+                  policy.phases[phase]?.actions?.searchable_snapshot?.force_merge_on_clone ?? true
+                }
+                component={ForceMergeOnCloneSwitchField}
+                componentProps={{
+                  phase,
+                }}
+              />
+            ) : null}
+
             {calloutContent && (
               <>
                 <EuiSpacer size="s" />
@@ -268,7 +303,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
 
     if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount={false}
           size="s"
           title={i18n.translate(
@@ -283,22 +318,20 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
       );
     } else if (isDisabledDueToLicense) {
       infoCallout = (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount={false}
           data-test-subj="searchableSnapshotDisabledDueToLicense"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',
             { defaultMessage: 'Enterprise license required' }
           )}
-          iconType="question"
-        >
-          {i18n.translate(
+          text={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody',
             {
               defaultMessage: 'To create a searchable snapshot an enterprise license is required.',
             }
           )}
-        </EuiCallOut>
+        />
       );
     }
 

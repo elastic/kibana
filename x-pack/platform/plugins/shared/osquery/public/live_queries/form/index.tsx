@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -18,10 +18,7 @@ import {
   replaceParamsQuery,
 } from '../../../common/utils/replace_params_query';
 import { QueryPackSelectable } from './query_pack_selectable';
-import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import { useKibana } from '../../common/lib/kibana';
-import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
-import { SavedQueryFlyout } from '../../saved_queries';
 import { usePacks } from '../../packs/use_packs';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
@@ -29,9 +26,9 @@ import type { AgentSelection } from '../../agents/types';
 import type { AddToTimelineHandler } from '../../types';
 import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
-import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 import { AlertAttachmentContext } from '../../common/contexts';
+import { PackQueriesStatusTable } from './pack_queries_status_table';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
@@ -58,7 +55,8 @@ type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
   defaultValue?: DefaultLiveQueryFormFields;
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
+  redirectsOnSuccess?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
   formType?: FormType;
@@ -70,6 +68,7 @@ interface LiveQueryFormProps {
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
   onSuccess,
+  redirectsOnSuccess,
   queryField = true,
   formType = 'steps',
   enabled = true,
@@ -87,8 +86,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const hooksForm = useHookForm<LiveQueryFormFields>();
-  const { handleSubmit, watch, setValue, resetField, clearErrors, getFieldState, register } =
-    hooksForm;
+  const { handleSubmit, watch, setValue, resetField, clearErrors, register } = hooksForm;
 
   const canRunSingleQuery = useMemo(
     () =>
@@ -99,21 +97,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions]
   );
 
-  const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
   const [isLive, setIsLive] = useState(false);
 
-  const queryState = getFieldState('query');
   const watchedValues = watch();
-  const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
-  const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
   const { queryType } = watchedValues;
   const {
     data,
     isLoading,
     mutateAsync,
-    isError,
-    isSuccess,
     reset: cleanupLiveQuery,
   } = useCreateLiveQuery({ onSuccess });
 
@@ -127,19 +119,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     register('alertIds');
   }, [register]);
 
-  const queryStatus = useMemo(() => {
-    if (isError || queryState.error) return 'danger';
-    if (isLoading) return 'loading';
-    if (isSuccess) return 'complete';
-
-    return 'incomplete';
-  }, [isError, isLoading, isSuccess, queryState]);
-
-  const resultsStatus = useMemo(
-    () => (queryStatus === 'complete' ? 'incomplete' : 'disabled'),
-    [queryStatus]
-  );
-
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
       // Temporary, frontend solution for params substitution. To be removed once alert_ids refactored in create_live_query_route
@@ -148,26 +127,23 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ? replaceParamsQuery(values.query, alertAttachmentContext).result
           : values.query;
 
-      const serializedData = pickBy(
-        {
-          agentSelection: values.agentSelection,
-          saved_query_id: values.savedQueryId,
-          query,
-          alert_ids: values.alertIds,
-          pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
-          ecs_mapping: values.ecs_mapping,
-          ...(queryType === 'query' ? { timeout: values.timeout } : {}),
-        },
-        (value) => !isEmpty(value) || isNumber(value)
-      ) as unknown as LiveQueryFormFields;
+      const serializedData = {
+        ...pickBy(
+          {
+            agentSelection: values.agentSelection,
+            saved_query_id: values.savedQueryId,
+            query,
+            alert_ids: values.alertIds,
+            pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
+            ecs_mapping: values.ecs_mapping,
+            ...(queryType === 'query' ? { timeout: values.timeout } : {}),
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        ),
+      } as unknown as LiveQueryFormFields;
       await mutateAsync(serializedData);
     },
     [alertAttachmentContext, mutateAsync, queryType]
-  );
-
-  const serializedData: SavedQuerySOFormData = useMemo(
-    () => savedQueryDataSerializer(watchedValues),
-    [watchedValues]
   );
 
   const { data: packsData, isFetched: isPackDataFetched } = usePacks({});
@@ -176,19 +152,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     () => (
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd">
-          {formType === 'steps' && queryType !== 'pack' && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                disabled={!permissions.writeSavedQueries || resultsStatus === 'disabled'}
-                onClick={handleShowSaveQueryFlyout}
-              >
-                <FormattedMessage
-                  id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
-                  defaultMessage="Save for later"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiButton
               id="submit-button"
@@ -205,45 +168,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     ),
-    [
-      formType,
-      queryType,
-      permissions.writeSavedQueries,
-      resultsStatus,
-      handleShowSaveQueryFlyout,
-      enabled,
-      isLoading,
-      handleSubmit,
-      onSubmit,
-    ]
+    [enabled, isLoading, handleSubmit, onSubmit]
   );
 
-  const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
   const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
-
-  const resultsStepContent = useMemo(
-    () =>
-      singleQueryDetails?.action_id ? (
-        <ResultTabs
-          actionId={singleQueryDetails?.action_id}
-          startDate={liveQueryDetails?.['@timestamp']}
-          ecsMapping={serializedData.ecs_mapping}
-          endDate={singleQueryDetails?.expiration}
-          agentIds={singleQueryDetails?.agents}
-          liveQueryActionId={liveQueryActionId}
-          addToTimeline={addToTimeline}
-        />
-      ) : null,
-    [
-      addToTimeline,
-      singleQueryDetails?.action_id,
-      singleQueryDetails?.expiration,
-      singleQueryDetails?.agents,
-      liveQueryDetails,
-      serializedData.ecs_mapping,
-      liveQueryActionId,
-    ]
-  );
 
   useEffect(() => {
     if (defaultValue) {
@@ -329,15 +257,24 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
-              <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
+              {data?.action_id && !redirectsOnSuccess ? (
+                <EuiFlexItem>
+                  <PackQueriesStatusTable
+                    actionId={liveQueryActionId}
+                    data={liveQueryDetails?.queries}
+                    startDate={liveQueryDetails?.['@timestamp']}
+                    expirationDate={liveQueryDetails?.expiration}
+                    agentIds={liveQueryDetails?.agents}
+                    showResultsHeader
+                    tags={liveQueryDetails?.tags}
+                    addToTimeline={addToTimeline}
+                  />
+                </EuiFlexItem>
+              ) : null}
             </>
           )}
         </EuiFlexGroup>
       </FormProvider>
-
-      {showSavedQueryFlyout ? (
-        <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={serializedData} />
-      ) : null}
     </>
   );
 };

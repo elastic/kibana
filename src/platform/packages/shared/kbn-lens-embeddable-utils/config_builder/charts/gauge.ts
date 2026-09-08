@@ -10,7 +10,6 @@
 import type { FormBasedPersistedState, GaugeVisualizationState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensGaugeConfig } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,
@@ -18,6 +17,7 @@ import {
   mapToFormula,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
+import { DEFAULT_LAYER_ID } from '../constants';
 
 const ACCESSOR = 'metric_formula_accessor';
 

@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,6 +24,8 @@ import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
@@ -44,15 +47,33 @@ interface WorkflowExecutionListItemProps {
   isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
+  executedByProfile?: UserProfileWithAvatar;
+  executedByLabel?: string;
+  triggeredBy?: string;
+  showExecutor?: boolean;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
+  ({
+    status,
+    isTestRun,
+    startedAt,
+    duration,
+    executedByProfile,
+    executedByLabel,
+    triggeredBy,
+    showExecutor = false,
+    selected,
+    onClick,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
     const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
+    const executedByDisplayName = executedByProfile?.user
+      ? getUserDisplayName(executedByProfile.user)
+      : executedByLabel;
     const formattedDuration = useMemo(() => {
       if (duration) {
         return formatDuration(duration);
@@ -70,7 +91,14 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     }, [selected, onClick, styles]);
 
     return (
-      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
+      <EuiPanel
+        onClick={onClick}
+        hasShadow={false}
+        paddingSize="m"
+        hasBorder
+        css={panelCss}
+        data-test-subj="workflowExecutionListItem"
+      >
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
@@ -91,7 +119,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               <EuiFlexItem>
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
-                    <EuiText size="xs" tabIndex={0} color="subdued">
+                    <EuiText size="xs" tabIndex={0} color="subdued" css={{ whiteSpace: 'nowrap' }}>
                       <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
@@ -106,34 +134,72 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {formattedDuration && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
-                {isTestRun && (
-                  <EuiFlexItem>
-                    <EuiIconTip
-                      type="flask"
-                      color={euiTheme.colors.backgroundFilledText}
-                      title={i18n.translate(
-                        'workflows.workflowExecutionListItem.testRunIconTitle',
-                        {
-                          defaultMessage: 'Test Run',
-                        }
-                      )}
-                    />
-                  </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.metadataContainer}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {status === ExecutionStatus.WAITING_FOR_INPUT && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+                    {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                      defaultMessage: 'Action is required',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              {isTestRun && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="flask"
+                    color={euiTheme.colors.backgroundFilledText}
+                    title={i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
+                      defaultMessage: 'Test Run',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
+              {showExecutor && executedByDisplayName && (
+                <EuiFlexItem grow={false} css={styles.executedByContainer}>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <UserAvatar
+                        user={executedByProfile?.user ?? { username: executedByDisplayName }}
+                        avatar={executedByProfile?.data?.avatar}
+                        size="s"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {executedByDisplayName}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={styles.durationContainer}>
+                {formattedDuration && (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="clock" color="subdued" aria-hidden={true} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {formattedDuration}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="clock" color="subdued" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {formattedDuration}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -155,4 +221,16 @@ const componentStyles = {
         transform: 'none',
       },
     }),
+  metadataContainer: css({
+    minWidth: '200px',
+  }),
+  executedByContainer: css({
+    minWidth: '80px',
+    justifyContent: 'flex-end',
+  }),
+  durationContainer: css({
+    minWidth: '112px',
+    width: '112px',
+    justifyContent: 'flex-end',
+  }),
 };

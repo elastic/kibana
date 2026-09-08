@@ -159,7 +159,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError('You should register at least one subAction for your connector type');
+    ).rejects.toThrow('You should register at least one subAction for your connector type');
   });
 
   it('throws if the sub action is not registered', async () => {
@@ -176,7 +176,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -198,7 +198,7 @@ describe('Executor', () => {
     } catch (e) {
       expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       expect(e.message).toBe(
-        'Request validation failed (Error: [foo]: definition for this key is missing)'
+        "Request validation failed (Error: [foo]: Additional properties are not allowed ('foo' was unexpected))"
       );
     }
   });
@@ -217,7 +217,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -236,7 +236,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -255,9 +255,52 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Request validation failed (Field \\"id\\": Required)"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Request validation failed (✖ Invalid input: expected string, received undefined
+        → at id)"
+    `);
+  });
+
+  describe('includes Zod v4 error format in validation failure message', () => {
+    it.each([
+      ['a wrong key is provided', { wrongKey: 'value' }],
+      ['an empty object is provided', {}],
+      ['id is null', { id: null }],
+      ['id is undefined', { id: undefined }],
+      ['id is a number', { id: 123 }],
+      ['id is an array', { id: [] }],
+      ['id is a boolean', { id: true }],
+    ])('throws a Request validation failed error when %s', async (_, subActionParams) => {
+      await expect(
+        createExecutor(TestExecutor)({
+          actionId,
+          params: { subAction: 'echo', subActionParams },
+          config,
+          secrets,
+          services,
+          configurationUtilities: mockedActionsConfig,
+          logger,
+          connectorUsageCollector,
+        })
+      ).rejects.toThrow(/Request validation failed/);
+    });
+
+    it('includes Zod v4 format markers in the error message', async () => {
+      const error = await createExecutor(TestExecutor)({
+        actionId,
+        params: { subAction: 'echo', subActionParams: { wrongKey: 'value' } },
+        config,
+        secrets,
+        services,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+        connectorUsageCollector,
+      }).catch((e) => e);
+
+      expect(error.message).toMatch(/Request validation failed/);
+      expect(error.message).toMatch(/✖|Invalid input|expected string|received/);
+      expect(error.message).toMatch(/→ at|id/);
+    });
   });
 
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {

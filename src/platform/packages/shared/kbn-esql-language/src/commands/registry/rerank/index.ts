@@ -37,7 +37,7 @@ export const rerankCommand: ICommand = {
       'FROM movies | RERANK "star wars" ON title WITH { "inference_id": "reranker" }',
       'FROM books | RERANK rerank_score = "hobbit" ON title, description WITH { "inference_id": "my_reranker" }',
     ],
-    preview: true,
+    preview: false,
     hidden: false,
   },
 };

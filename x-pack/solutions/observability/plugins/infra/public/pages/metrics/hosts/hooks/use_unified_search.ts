@@ -12,6 +12,7 @@ import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 import type { HostsViewQuerySubmittedParams } from '../../../../services/telemetry';
@@ -121,7 +122,7 @@ export const useUnifiedSearch = () => {
     (preferredSchema: HostsState['preferredSchema']) => {
       setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
 
-      inventoryPrefill.setPrefillState({ schema: preferredSchema ?? 'ecs' });
+      inventoryPrefill.setPrefillState({ schema: preferredSchema ?? DEFAULT_SCHEMA });
 
       updateTopbarMenuVisibilityBySchema(preferredSchema);
       triggerDataRefresh();
@@ -205,7 +206,7 @@ export const useUnifiedSearch = () => {
     inventoryPrefill.reset();
     inventoryPrefill.setPrefillState({
       nodeType: 'host',
-      schema: searchCriteria.preferredSchema ?? 'ecs',
+      schema: searchCriteria.preferredSchema ?? DEFAULT_SCHEMA,
     });
     updateTopbarMenuVisibilityBySchema(searchCriteria.preferredSchema);
 

@@ -27,7 +27,7 @@ export const isDataViewSelection = (dataView: string) => {
       .get('li')
       // @ts-ignore
       .filter((_, element) => element.textContent.includes(dataView))
-      .should('have.attr', 'aria-checked', 'true')
+      .should('have.attr', 'aria-selected', 'true')
   );
 };
 

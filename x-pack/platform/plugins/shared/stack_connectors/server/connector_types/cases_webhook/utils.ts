@@ -40,8 +40,13 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
   requiredAttributesToBeInTheResponse?: string[];
 }) => {
   const requiredContentType = 'application/json';
-  const contentType = res.headers['content-type'];
+  const contentType = res.headers['content-type'] as string | undefined;
   const data = res.data;
+
+  // If status is 204 and there is no data, we just return
+  if (res.status === 204 && isEmpty(data) && requiredAttributesToBeInTheResponse.length === 0) {
+    return;
+  }
 
   /**
    * Check that the content-type of the response is application/json.

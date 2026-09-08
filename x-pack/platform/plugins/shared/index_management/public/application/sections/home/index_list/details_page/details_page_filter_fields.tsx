@@ -14,6 +14,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +41,7 @@ export const MappingsFilter: React.FC<Props> = ({
   state,
 }) => {
   const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const dispatch = useDispatch();
 
   const isClearAllFilterDisabled = !isAddingFields
@@ -92,7 +94,7 @@ export const MappingsFilter: React.FC<Props> = ({
   );
   const filterByFieldTypeButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isDisabled={isJSONVisible}
       onClick={() => setIsFilterPopoverVisible((v) => !v)}
@@ -142,6 +144,7 @@ export const MappingsFilter: React.FC<Props> = ({
         anchorPosition="downCenter"
         data-test-subj="indexDetailsMappingsFilter"
         panelPaddingSize="none"
+        aria-labelledby={popoverTitleId}
       >
         <EuiSelectable
           searchable
@@ -157,6 +160,7 @@ export const MappingsFilter: React.FC<Props> = ({
           options={
             !isAddingFields ? state.filter.selectedOptions : previousState.filter.selectedOptions
           }
+          listProps={{ paddingSize: 's' }}
           onChange={(options) => {
             if (!isAddingFields) {
               setSelectedOptions(options);
@@ -169,6 +173,7 @@ export const MappingsFilter: React.FC<Props> = ({
             <div style={{ width: 200 }}>
               <EuiPopoverTitle
                 paddingSize="s"
+                id={popoverTitleId}
                 data-test-subj="indexDetailsMappingsFilterByFieldTypeSearch"
               >
                 {search}

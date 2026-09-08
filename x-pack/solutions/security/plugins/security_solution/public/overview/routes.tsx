@@ -13,7 +13,7 @@ import {
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
   ENTITY_ANALYTICS_PATH,
-  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
@@ -38,10 +38,10 @@ const DetectionResponseRoutes = () => (
 );
 
 const EntityAnalyticsRoutes = () => {
-  const isThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+  const isNewHomePageEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsNewHomePageEnabled');
 
-  if (isThreatHuntingEnabled) {
-    return <Redirect to={ENTITY_ANALYTICS_THREAT_HUNTING_PATH} />;
+  if (isNewHomePageEnabled) {
+    return <Redirect to={ENTITY_ANALYTICS_HOME_PAGE_PATH} />;
   }
 
   return (

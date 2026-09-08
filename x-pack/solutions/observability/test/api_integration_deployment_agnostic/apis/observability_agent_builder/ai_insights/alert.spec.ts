@@ -8,16 +8,12 @@
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { generateApmErrorData, indexAll, type ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { timerange } from '@kbn/synthtrace-client';
 import { APM_ALERTS_INDEX } from '../../apm/alerts/helpers/alerting_helper';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  createLlmProxyActionConnector,
-  deleteActionConnector,
-} from '../utils/llm_proxy/action_connectors';
+import { setupLlmProxy, teardownLlmProxy } from '../utils/llm_proxy/llm_test_helpers';
 import { createRule, deleteRules } from '../utils/alerts/alerting_rules';
 
 const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the alert.';
@@ -34,7 +30,6 @@ const alertRuleData = {
 };
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const log = getService('log');
   const samlAuth = getService('samlAuth');
   const alertingApi = getService('alertingApi');
   const kibanaServer = getService('kibanaServer');
@@ -105,15 +100,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         alertId = alertDoc._id as string;
         alertIndexName = alertDoc._index as string;
 
-        llmProxy = await createLlmProxy(log);
-        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+        ({ llmProxy, connectorId } = await setupLlmProxy(getService));
       });
 
       after(async () => {
-        llmProxy.close();
-        await deleteActionConnector(getService, { actionId: connectorId });
+        await teardownLlmProxy(getService, { llmProxy, connectorId });
+        await apmSynthtraceEsClient?.clean();
 
-        await apmSynthtraceEsClient.clean();
         await alertingApi.cleanUpAlerts({
           roleAuthc,
           ruleId: createdRuleId,
@@ -161,9 +154,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(status).to.be(200);
         expect(body.context).to.be.a('string');
 
-        // Context should contain APM service summary and errors from the synthetic data
+        // Context should contain APM service summary and log groups from the synthetic data
         expect(body.context).to.contain('<apmServiceSummary>');
-        expect(body.context).to.contain('<apmErrors>');
+        expect(body.context).to.contain('<logGroups>');
       });
 
       it('returns no related signals when alert has no service.name', async () => {
@@ -194,14 +187,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body.context).to.be('No related signals available.');
       });
 
-      it('returns 404 when alert does not exist', async () => {
+      it('returns HTTP 200 with an SSE error when alert does not exist', async () => {
         llmProxy.clear();
 
-        const { status } = await observabilityAgentBuilderApi.editor({
+        const nonExistentAlertId = 'non-existent-alert-id';
+        const { status, body } = await observabilityAgentBuilderApi.editor({
           endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
-          params: { body: { alertId: 'non-existent-alert-id' } },
+          params: { body: { alertId: nonExistentAlertId } },
         });
-        expect(status).to.be(404);
+
+        expect(status).to.be(200);
+        expect(body.summary).to.be('');
+        expect(body.context).to.be('');
+        expect(body.streamError).to.be.ok();
+        expect(body.streamError!.message).to.contain(
+          `Unable to retrieve alert details for alert with id of "${nonExistentAlertId}"`
+        );
+        expect(body.streamError!.retryable).to.be(true);
       });
     });
   });

@@ -43,6 +43,9 @@ const externals = {
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
+  // JSX runtime exports for SWC's importSource: '@emotion/react'
+  '@emotion/react/jsx-runtime': '__kbnSharedDeps__.EmotionReactJsxRuntime',
+  '@emotion/react/jsx-dev-runtime': '__kbnSharedDeps__.EmotionReactJsxDevRuntime',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -51,7 +54,6 @@ const externals = {
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
-  'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
   'react-use': '__kbnSharedDeps__.ReactUse',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
@@ -70,11 +72,16 @@ const externals = {
   'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
   'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
   'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTsThrowReporter',
+  'zod/v4': '__kbnSharedDeps__.Zod',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
+  'redux-toolkit-v1': '__kbnSharedDeps__.ReduxjsToolkitV1',
+  'react-redux-v7': '__kbnSharedDeps__.ReactReduxV7',
+  'redux-v4': '__kbnSharedDeps__.ReduxV4',
+  'reselect-v4': '__kbnSharedDeps__.ReselectV4',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
   'chroma-js': '__kbnSharedDeps__.ChromaJs',
   // cache some used methods of the react-use library
@@ -96,6 +103,7 @@ const externals = {
     'useToggle',
     'useUnmount',
     'useUpdateEffect',
+    'useObservable',
   ].reduce((memo, subset) => {
     memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
     return memo;
@@ -108,6 +116,8 @@ const externals = {
   numeral: '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
+  '@elastic/esql': '__kbnSharedDeps__.ElasticEsql',
+  '@elastic/esql/types': '__kbnSharedDeps__.ElasticEsqlTypes',
   '@kbn/datemath': '__kbnSharedDeps__.KbnDatemath',
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/components/provider/nested':
@@ -124,6 +134,7 @@ const externals = {
    */
   tslib: '__kbnSharedDeps__.TsLib',
   uuid: '__kbnSharedDeps__.Uuid',
+  inversify: '__kbnSharedDeps__.Inversify',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/crypto-browser': '__kbnSharedDeps__.KbnCryptoBrowser',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
@@ -148,6 +159,10 @@ const externals = {
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
   '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
+  '@kbn/core-di-browser': '__kbnSharedDeps__.KbnCoreDi',
+  '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
+  '@kbn/core-chrome-browser-context': '__kbnSharedDeps__.KbnCoreChromeBrowserContext',
+  '@kbn/core-user-profile-browser-context': '__kbnSharedDeps__.KbnCoreUserProfileBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

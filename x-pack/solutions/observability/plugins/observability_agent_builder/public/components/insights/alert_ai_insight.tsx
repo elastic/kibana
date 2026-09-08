@@ -66,6 +66,7 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
       title={i18n.translate('xpack.observabilityAgentBuilder.alertAiInsight.titleLabel', {
         defaultMessage: 'Help me understand this alert',
       })}
+      insightType="alert"
       createStream={createStream}
       buildAttachments={buildAttachments}
     />

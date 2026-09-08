@@ -7,7 +7,8 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Case } from '../../../common/types/domain';
+import type { Case, CaseStatuses } from '../../../common/types/domain';
+import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
 import type {
@@ -18,7 +19,14 @@ import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 export interface GetCaseIdsByAlertIdArgs {
   alertId: string;
+  /**
+   * Authorization + owner filter scoped to the legacy `cases-comments` saved object type.
+   */
   filter?: KueryNode;
+  /**
+   * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
+   */
+  unifiedFilter?: KueryNode;
 }
 
 export interface PushedArgs {
@@ -45,11 +53,13 @@ export interface GetCasesArgs {
 export interface FindCommentsArgs {
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
+  mode?: AttachmentMode;
 }
 
 export interface FindCaseCommentsArgs {
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
+  mode?: AttachmentMode;
 }
 
 export interface CreateCaseArgs extends IndexRefresh {
@@ -65,7 +75,15 @@ export interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes>;
   originalCase: CaseSavedObjectTransformed;
+  closeReason?: string;
   version?: string;
+  /**
+   * v1 customFields key → linked `extended_fields` storage key for fields the
+   * pairing adapter synchronized in this update. When the canonical
+   * `extended_fields` user action records the same edit, the duplicate legacy
+   * `customFields` user action for that key is suppressed (#282474).
+   */
+  pairedCustomFieldStorageKeys?: Record<string, string>;
 }
 
 export type PatchCaseArgs = PatchCase;
@@ -79,6 +97,14 @@ export interface CasesMapWithPageInfo {
   page: number;
   perPage: number;
   total: number;
+}
+
+export interface CasesSearchStats {
+  statusStats: {
+    [status in CaseStatuses]: number;
+  };
+  /** Average of `duration` (seconds) across the matching cases; null when none has closed. */
+  mttr: number | null;
 }
 
 export interface GetTagsArgs {

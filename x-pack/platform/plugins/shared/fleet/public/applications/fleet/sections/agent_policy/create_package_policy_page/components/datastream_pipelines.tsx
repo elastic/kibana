@@ -221,7 +221,7 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
           <EuiButtonEmpty
             size="xs"
             flush="left"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="datastreamAddCustomIngestPipelineBtn"
             href={addPipelineUrl}
           >

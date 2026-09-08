@@ -12,12 +12,11 @@ import type {
   DatasourcePublicAPI,
   VisualizationToolbarProps,
 } from '@kbn/lens-common';
-import type { XYState, XYDataLayerConfig } from '../types';
+import type { XYVisualizationState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { XyStyleSettings } from './style_settings';
 import { XyAxisSettings } from './axis_settings';
@@ -25,7 +24,7 @@ import { XyAxisSettings } from './axis_settings';
 describe('xy style settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): XYState {
+  function testState(): XYVisualizationState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -50,7 +49,9 @@ describe('xy style settings', () => {
     };
   });
 
-  const renderComponent = (overrideProps?: Partial<VisualizationToolbarProps<XYState>>) => {
+  const renderComponent = (
+    overrideProps?: Partial<VisualizationToolbarProps<XYVisualizationState>>
+  ) => {
     const state = testState();
     const rtlRender = render(
       <XyStyleSettings frame={frame} setState={jest.fn()} state={state} {...overrideProps} />
@@ -153,16 +154,16 @@ describe('xy style settings', () => {
         },
       });
 
-      await userEvent.click(getRightAxisButton());
+      fireEvent.click(getRightAxisButton());
       expect(
         within(screen.getByTestId('yRight-axis')).queryByTestId('lnsshowEndzones')
       ).not.toBeInTheDocument();
 
-      await userEvent.click(getBottomAxisButton());
+      fireEvent.click(getBottomAxisButton());
       expect(
         within(screen.getByTestId('x-axis')).queryByTestId('lnsshowEndzones')
       ).toBeInTheDocument();
-      await userEvent.click(getLeftAxisButton());
+      fireEvent.click(getLeftAxisButton());
       expect(
         within(screen.getByTestId('yLeft-axis')).queryByTestId('lnsshowEndzones')
       ).not.toBeInTheDocument();
@@ -267,10 +268,10 @@ describe('xy style settings', () => {
           }}
         />
       );
-      await userEvent.click(getLeftAxisButton());
+      fireEvent.click(getLeftAxisButton());
       expect(screen.getByTestId('lnsXY_axisExtent_lowerBound')).toHaveValue(123);
       expect(screen.getByTestId('lnsXY_axisExtent_upperBound')).toHaveValue(456);
-      await userEvent.click(getRightAxisButton());
+      fireEvent.click(getRightAxisButton());
       const selectedButton = getSelectedButtonInGroup(
         'lnsXY_axisBounds_groups',
         within(screen.getByTestId('yRight-axis'))

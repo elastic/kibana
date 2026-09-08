@@ -38,8 +38,8 @@ describe('useRootProfile', () => {
   it('should return rootProfileLoading as true', async () => {
     const { result } = render();
     expect(result.current.rootProfileLoading).toBe(true);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeUndefined();
     // avoid act warning
     await waitFor(() => new Promise((resolve) => resolve(null)));
   });
@@ -48,8 +48,8 @@ describe('useRootProfile', () => {
     const { result } = render();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
-      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
   });
 
@@ -57,18 +57,18 @@ describe('useRootProfile', () => {
     const { result, rerender } = render();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
-      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
     act(() => mockSolutionNavId$.next(SolutionType.Observability));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeUndefined();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
-      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
   });
 });

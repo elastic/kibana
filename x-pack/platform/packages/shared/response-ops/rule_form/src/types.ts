@@ -93,7 +93,6 @@ export interface RuleFormState<
   selectedRuleType: RuleTypeWithDescription;
   selectedRuleTypeModel: RuleTypeModel<Params>;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
-  showMustacheAutocompleteSwitch?: boolean;
   metadata?: MetaData;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
@@ -112,3 +111,5 @@ export interface ValidationResult {
 }
 
 export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'uiActions'>;
+
+export type ShowRequestActivePage = 'create' | 'update';

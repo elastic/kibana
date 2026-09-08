@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const SLO_ERROR_BUDGET_ID = 'SLO_ERROR_BUDGET_EMBEDDABLE';
-export const ADD_SLO_ERROR_BUDGET_ACTION_ID = 'CREATE_SLO_ERROR_BUDGET_EMBEDDABLE';
+export {
+  SLO_ERROR_BUDGET_ID,
+  ADD_SLO_ERROR_BUDGET_ACTION_ID,
+} from '../../../../common/embeddables/error_budget/constants';

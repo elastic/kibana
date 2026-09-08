@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   formatDate,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -36,6 +37,7 @@ export const StdErrorLogs = ({
   summaryMessage,
   hideTitle = false,
   pageSize = 5,
+  remoteName,
 }: {
   checkGroup?: string;
   timestamp?: string;
@@ -43,7 +45,9 @@ export const StdErrorLogs = ({
   summaryMessage?: string;
   hideTitle?: boolean;
   pageSize?: number;
+  remoteName?: string;
 }) => {
+  const isRemote = Boolean(remoteName);
   const columns = [
     {
       field: '@timestamp',
@@ -69,7 +73,7 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ checkGroup });
+  const { items, loading } = useStdErrorLogs({ checkGroup, remoteName });
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
 
@@ -111,16 +115,18 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
-                <EuiButtonEmpty
-                  data-test-subj="syntheticsStdErrorLogsButton"
-                  href={discoverLink}
-                  iconType="discoverApp"
-                  isDisabled={!discoverLink}
-                >
-                  {VIEW_IN_DISCOVER_LABEL}
-                </EuiButtonEmpty>
-              </EuiLink>
+              <EuiToolTip content={isRemote ? VIEW_IN_DISCOVER_REMOTE_TOOLTIP : undefined}>
+                <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
+                  <EuiButtonEmpty
+                    data-test-subj="syntheticsStdErrorLogsButton"
+                    href={isRemote ? undefined : discoverLink}
+                    iconType="discoverApp"
+                    isDisabled={isRemote || !discoverLink}
+                  >
+                    {VIEW_IN_DISCOVER_LABEL}
+                  </EuiButtonEmpty>
+                </EuiLink>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           {summaryMessage && (
@@ -154,6 +160,7 @@ export const StdErrorLogs = ({
           pageSizeOptions: [2, 5, 10, 20, 50],
         }}
         onTableChange={onTableChange}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );
@@ -175,6 +182,13 @@ export const VIEW_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.viewInDiscover',
   {
     defaultMessage: 'View in discover',
+  }
+);
+
+export const VIEW_IN_DISCOVER_REMOTE_TOOLTIP = i18n.translate(
+  'xpack.synthetics.monitorList.viewInDiscover.remoteUnavailable',
+  {
+    defaultMessage: 'Open on the source cluster to view these logs in Discover.',
   }
 );
 

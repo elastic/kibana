@@ -19,7 +19,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiCallOut,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -29,15 +28,18 @@ import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
 import { DiagnosticResults } from './diagnostic_results';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
+import type { ServiceMapSelection } from '../popover/popover_content';
+import { callApmApi as callLegacyApmApi } from '../../../../services/rest/create_call_apm_api';
+
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  selectedNode: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition;
+  /** Selected node or edge from the service map. When omitted the form starts with an empty source node. */
+  selection?: ServiceMapSelection;
 }
 
 function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolean {
@@ -52,15 +54,10 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
   return false;
 }
 
-export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFlyoutProps) {
-  const { euiTheme } = useEuiTheme();
+export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/service-map',
-    '/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  } = useAnyOfApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const {
     services: { notifications },
@@ -69,7 +66,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setFormState] = useState<DiagnosticFormState>({
-    sourceNode: selectedNode.id,
+    sourceNode: selection?.id ?? '',
     destinationNode: undefined,
     traceId: undefined,
     isValid: false,
@@ -94,7 +91,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
     try {
       if (start && end && form.sourceNode && form.destinationNode) {
-        const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
+        const response = await callLegacyApmApi('POST /internal/apm/diagnostics/service-map', {
           params: {
             body: {
               start,
@@ -153,13 +150,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        style={{
-          overflowY: 'auto',
-          maxHeight: 'calc(100vh - 200px)',
-          padding: euiTheme.size.base,
-        }}
-      >
+      <EuiFlyoutBody>
         <DiagnosticConfigurationForm
           sourceNode={form.sourceNode}
           onSelectionUpdate={handleSelectionUpdate}

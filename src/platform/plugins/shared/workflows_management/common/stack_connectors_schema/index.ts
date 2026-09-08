@@ -27,8 +27,8 @@ export { SlackParamsSchema, SlackResponseSchema } from './slack';
 // Email connector schemas
 export { EmailParamsSchema, EmailResponseSchema } from './email';
 
-// Webhook connector schemas
-export { WebhookParamsSchema, WebhookResponseSchema } from './webhook';
+// HTTP connector schemas
+export { HttpParamsSchema, HttpResponseSchema } from './http';
 
 // Jira connector schemas
 export {
@@ -114,12 +114,7 @@ export {
 } from './cases_webhook';
 
 // Slack API connector schemas
-export {
-  SlackApiPostMessageParamsSchema,
-  SlackApiGetChannelsParamsSchema,
-  SlackApiGetUsersParamsSchema,
-  SlackApiResponseSchema,
-} from './slack_api';
+export { SlackApiResponseSchema } from './slack_api';
 
 // Tines connector schemas
 export {
