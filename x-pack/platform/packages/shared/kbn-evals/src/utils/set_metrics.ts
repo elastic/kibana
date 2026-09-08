@@ -18,7 +18,7 @@ export interface SetMetrics {
  *
  * Computes set-based Precision, Recall, and F1 for an unordered predicted set
  * against an expected set.
- *
+ */
 export const calculateSetMetrics = <T extends string | number>(
   predicted: Set<T>,
   expected: Set<T>
