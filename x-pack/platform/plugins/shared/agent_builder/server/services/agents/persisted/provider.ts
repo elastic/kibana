@@ -158,7 +158,9 @@ export const toInternalDefinition = ({
 }): InternalAgentDefinition => {
   return {
     ...definition,
-    readonly: false,
+    // AB-004: package-managed agents persist readonly=true; only unflagged
+    // persisted agents are user-editable.
+    readonly: definition.readonly ?? false,
     isAvailable: async (ctx) => {
       const availability = availabilityByAgentId.get(definition.id);
       return availability
