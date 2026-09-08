@@ -38,7 +38,7 @@ interface LensApiWorkerFixtures extends ScoutWorkerFixtures {
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, LensApiWorkerFixtures>({
   lensHelper: [
-    async ({ kbnClient }, use) => {
+    async ({ kbnClient, apiServices }, use) => {
       const createSampleDataView: LensHelper['createSampleDataView'] = async () => {
         await kbnClient.savedObjects.create({
           type: 'index-pattern',
@@ -57,11 +57,11 @@ export const apiTest = baseApiTest.extend<ScoutTestFixtures, LensApiWorkerFixtur
       };
 
       const createTag: LensHelper['createTag'] = async (name) => {
-        const so = await kbnClient.savedObjects.create({
+        const response = await apiServices.savedObjects.create({
           type: 'tag',
           attributes: { name, description: '', color: '#FFFFFF' },
         });
-        return so.id;
+        return response.data.id;
       };
 
       await use({ createSampleDataView, loadLensExampleDocs, createTag });
