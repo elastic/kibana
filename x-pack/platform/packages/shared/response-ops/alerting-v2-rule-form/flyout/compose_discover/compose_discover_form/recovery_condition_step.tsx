@@ -146,8 +146,18 @@ export function RecoveryConditionStep({
         </>
       )}
 
-      <EuiSpacer size="m" />
-      <RecoveryDelayField />
+      {/*
+       * Recovery delay only applies to condition-based recovery. When recovery is
+       * disabled ('none'), the delay is inert (and rejected by the write API), so we
+       * hide it. `no_data_strategy: 'recover'` does not re-enable it — the director
+       * bypasses recovering gating for no-data recovery.
+       */}
+      {state.recoveryType !== 'none' && (
+        <>
+          <EuiSpacer size="m" />
+          <RecoveryDelayField />
+        </>
+      )}
     </>
   );
 }

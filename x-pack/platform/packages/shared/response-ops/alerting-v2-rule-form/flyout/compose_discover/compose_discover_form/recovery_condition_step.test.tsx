@@ -120,6 +120,24 @@ describe('RecoveryConditionStep', () => {
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
 
+  it('renders the recovery delay field when recovery type is default', () => {
+    renderRecoveryStep({ recoveryType: 'default' });
+
+    expect(screen.getByTestId('recoveryDelayFormRow')).toBeInTheDocument();
+  });
+
+  it('renders the recovery delay field when recovery type is custom', () => {
+    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
+
+    expect(screen.getByTestId('recoveryDelayFormRow')).toBeInTheDocument();
+  });
+
+  it('hides the recovery delay field when recovery type is none (delay is inert)', () => {
+    renderRecoveryStep({ recoveryType: 'none' });
+
+    expect(screen.queryByTestId('recoveryDelayFormRow')).not.toBeInTheDocument();
+  });
+
   it('renders query summaries and edit button in custom mode', () => {
     renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
 

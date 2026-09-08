@@ -50,6 +50,21 @@ export const resolveRecoveryStrategy = (
   return formValues.query.recovery != null ? ('query' as const) : undefined;
 };
 
+/**
+ * Recovery is enabled only for condition-based strategies (`no_breach` / `query`).
+ * `none`/unset means condition-based recovery never fires, so the recovering delay
+ * thresholds (`recovering_count` / `recovering_timeframe`) are inert and must not be
+ * emitted — the write API rejects them (see `isRecoveryTransitionConsistentWithStrategy`).
+ * `no_data_strategy: 'recover'` does NOT re-enable them: the director bypasses recovering
+ * gating for no-data recovery (see `count_timeframe_strategy`).
+ */
+export const isRecoveryEnabled = (
+  formValues: Pick<FormValues, 'kind' | 'recoveryStrategy' | 'query'>
+): boolean => {
+  const strategy = resolveRecoveryStrategy(formValues);
+  return strategy != null && strategy !== 'none';
+};
+
 // ---------------------------------------------------------------------------
 // FormValues → API request
 // ---------------------------------------------------------------------------
@@ -95,16 +110,20 @@ const mapStateTransition = (formValues: FormValues) => {
     }
   }
 
-  if (recoveryMode === DELAY_MODE.immediate) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_MODE.duration) {
-    if (stateTransition?.recoveringTimeframe != null) {
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    }
-    if (stateTransition?.recoveringCount != null) {
+  // Recovering thresholds are only meaningful when recovery is enabled; emitting them
+  // while recovery is disabled is inert and rejected by the write API.
+  if (isRecoveryEnabled(formValues)) {
+    if (recoveryMode === DELAY_MODE.immediate) {
+      out.recovering_count = 0;
+    } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
+    } else if (recoveryMode === DELAY_MODE.duration) {
+      if (stateTransition?.recoveringTimeframe != null) {
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      }
+      if (stateTransition?.recoveringCount != null) {
+        out.recovering_count = stateTransition.recoveringCount;
+      }
     }
   }
 
