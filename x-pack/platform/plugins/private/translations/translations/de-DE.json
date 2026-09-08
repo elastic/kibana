@@ -60263,8 +60263,6 @@
     "xpack.watcher.sections.watchList.subhead": "Achten Sie auf Änderungen oder Anomalien in Ihren Daten und ergreifen Sie bei Bedarf Maßnahmen.",
     "xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateDescriptionText": "Uhr konnte nicht aktiviert werden",
     "xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateDescriptionText": "Uhr konnte nicht deaktiviert werden",
-    "xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText": "Watcher-Dokumentation",
-    "xpack.watcher.sections.watchList.watcherLearnMoreLinkText": "Weitere Informationen",
     "xpack.watcher.sections.watchList.watchTable.actionDeleteAriaLabel": "Uhr „{name}“ löschen",
     "xpack.watcher.sections.watchList.watchTable.actionDeleteTooltipLabel": "Löschen",
     "xpack.watcher.sections.watchList.watchTable.actionEditAriaLabel": "Uhr „{name}“ bearbeiten",

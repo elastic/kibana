@@ -60011,8 +60011,6 @@
     "xpack.watcher.sections.watchList.subhead": "Surveillez les modifications ou anomalies dans vos données, et prenez les mesures qui s'imposent, le cas échéant.",
     "xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateDescriptionText": "Impossible d'activer l'alerte",
     "xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateDescriptionText": "Impossible de désactiver l'alerte",
-    "xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText": "Documents Watcher",
-    "xpack.watcher.sections.watchList.watcherLearnMoreLinkText": "En savoir plus.",
     "xpack.watcher.sections.watchList.watchTable.actionDeleteAriaLabel": "Supprimer l'alerte \"{name}\"",
     "xpack.watcher.sections.watchList.watchTable.actionDeleteTooltipLabel": "Supprimer",
     "xpack.watcher.sections.watchList.watchTable.actionEditAriaLabel": "Modifier l'alerte \"{name}\"",

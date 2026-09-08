@@ -60472,8 +60472,6 @@
     "xpack.watcher.sections.watchList.subhead": "监视您的数据中的更改或异常，并在需要时采取操作。",
     "xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateDescriptionText": "无法激活监视",
     "xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateDescriptionText": "无法停用监视",
-    "xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText": "Watcher 文档",
-    "xpack.watcher.sections.watchList.watcherLearnMoreLinkText": "了解详情。",
     "xpack.watcher.sections.watchList.watchTable.actionDeleteAriaLabel": "删除监视“{name}”",
     "xpack.watcher.sections.watchList.watchTable.actionDeleteTooltipLabel": "删除",
     "xpack.watcher.sections.watchList.watchTable.actionEditAriaLabel": "编辑监视“{name}”",
