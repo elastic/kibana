@@ -4457,7 +4457,7 @@ describe('xy_visualization', () => {
           ],
           annotationGroups
         )
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 

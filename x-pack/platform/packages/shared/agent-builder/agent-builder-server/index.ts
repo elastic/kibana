@@ -27,7 +27,9 @@ export type {
   ScopedRunnerRunToolsParams,
   RunContext,
   RunContextStackEntry,
+  RunApprovals,
   RunToolParams,
+  RequestBoundRunToolParams,
   RunToolFn,
   Runner,
   RunToolReturn,
@@ -160,3 +162,9 @@ export type {
 } from './plugin_contract';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
+export type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from './availability';
