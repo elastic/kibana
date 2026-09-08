@@ -388,11 +388,11 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
             {viewsPendingDelete.length === 1
               ? i18n.translate('esqlViews.deleteModal.body', {
                   defaultMessage:
-                    'This permanently deletes the view from Elasticsearch. This action cannot be undone.',
+                    'This permanently deletes the view from Elasticsearch and cannot be undone. Saved ES|QL queries that still use this view will start returning errors.',
                 })
               : i18n.translate('esqlViews.deleteModal.bulkBody', {
                   defaultMessage:
-                    'This permanently deletes {count} views from Elasticsearch. This action cannot be undone.',
+                    'This permanently deletes {count} views from Elasticsearch and cannot be undone. Saved ES|QL queries that still use these views will start returning errors.',
                   values: { count: viewsPendingDelete.length },
                 })}
           </p>

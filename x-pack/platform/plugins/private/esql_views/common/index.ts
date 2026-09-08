@@ -16,7 +16,7 @@ export const PLUGIN_NAME = i18n.translate('esqlViews.pluginName', {
 export const LIST_BREADCRUMB = [
   {
     text: PLUGIN_NAME,
-    href: '#/management/kibana/esqlViews',
+    href: '#/management/data/esqlViews',
   },
 ];
 

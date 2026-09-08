@@ -528,6 +528,9 @@ function createNavTree({
                 link: 'management:data_federation',
               },
               {
+                link: 'management:esqlViews',
+              },
+              {
                 link: 'management:data_quality',
               },
             ],
@@ -686,9 +689,6 @@ function createNavTree({
               },
               {
                 link: 'management:objects',
-              },
-              {
-                link: 'management:esqlViews',
               },
               {
                 link: 'management:tags',

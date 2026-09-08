@@ -20,7 +20,7 @@ import { selectTab } from '../../../state_management/redux';
 import { literalizeEsqlQueryParams } from './literalize_esql_query_params';
 
 const getManageEsqlViewsUrl = (services: DiscoverServices): string =>
-  services.application.getUrlForApp('management', { path: '/kibana/esqlViews' });
+  services.application.getUrlForApp('management', { path: '/data/esqlViews' });
 
 /**
  * Entry point into the `esql_views` plugin's create flow (V2 flyout), pre-filled with the

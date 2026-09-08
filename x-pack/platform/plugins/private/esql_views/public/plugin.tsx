@@ -28,12 +28,13 @@ export class EsqlViewsPlugin
   implements Plugin<void, EsqlViewsPublicStart, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
-    management.sections.section.kibana.registerApp({
+    management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      // Places this entry right after Saved Objects (order: 1) and before
-      // Tags (order: 1.5) in the classic Stack Management sidebar.
-      order: 1.1,
+      // Places this entry immediately after ES|QL Data Federation (order: 2)
+      // in the classic Stack Management Data section.
+      order: 2.1,
+      redirectFrom: 'kibana/esqlViews',
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
         const [coreStart, pluginsStart] = await core.getStartServices();

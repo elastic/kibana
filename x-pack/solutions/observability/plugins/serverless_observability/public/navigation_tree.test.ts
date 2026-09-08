@@ -177,6 +177,13 @@ describe('Navigation Tree', () => {
     expect((indicesSection as any).children).toContainEqual(
       expect.objectContaining({ link: 'management:data_federation' })
     );
+
+    const federationIndex = (indicesSection as any).children.findIndex(
+      (child: { link?: string }) => child.link === 'management:data_federation'
+    );
+    expect((indicesSection as any).children[federationIndex + 1]).toEqual(
+      expect.objectContaining({ link: 'management:esqlViews' })
+    );
   });
 
   describe('filterForFeatureAvailability', () => {

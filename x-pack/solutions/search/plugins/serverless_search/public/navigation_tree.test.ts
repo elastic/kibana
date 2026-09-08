@@ -81,8 +81,15 @@ describe('Navigation Tree', () => {
     );
 
     expect(indicesSection).toBeDefined();
-    expect(indicesSection?.children).toContainEqual(
+    const indicesChildren = indicesSection?.children ?? [];
+    const federationIndex = indicesChildren.findIndex(
+      (child: { link?: string }) => child.link === 'management:data_federation'
+    );
+    expect(indicesChildren[federationIndex]).toEqual(
       expect.objectContaining({ link: 'management:data_federation' })
+    );
+    expect(indicesChildren[federationIndex + 1]).toEqual(
+      expect.objectContaining({ link: 'management:esqlViews' })
     );
   });
 

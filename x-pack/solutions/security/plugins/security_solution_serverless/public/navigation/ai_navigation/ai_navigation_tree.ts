@@ -225,6 +225,7 @@ export const createAiNavigationTree = (
             { link: 'management:cross_cluster_replication' },
             { link: 'management:remote_clusters' },
             { link: 'management:migrate_data' },
+            { link: 'management:esqlViews' },
           ],
         },
         {
@@ -233,7 +234,6 @@ export const createAiNavigationTree = (
             { link: 'management:dataViews' },
             { link: 'management:spaces' },
             { link: 'management:objects' },
-            { link: 'management:esqlViews' },
             { link: 'management:filesManagement' },
             { link: 'management:reporting' },
             { link: 'management:tags' },

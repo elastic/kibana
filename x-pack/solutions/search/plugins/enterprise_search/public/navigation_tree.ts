@@ -174,6 +174,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:index_management' },
                     { link: 'management:data_federation' },
+                    { link: 'management:esqlViews' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -355,7 +356,6 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:dataViews' },
                     { link: 'management:filesManagement' },
                     { link: 'management:objects' },
-                    { link: 'management:esqlViews' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
                     { link: 'management:spaces' },
