@@ -33,7 +33,13 @@ export const EvaluationExperimentSummary = lazySchema(() =>
     /**
      * The distinct models the experiment's evaluators judged with, the one that produced the most scores first, so the listing can show when they differ. Capped at 20, which no realistic experiment reaches. `evaluator_model` is the first.
      */
-    evaluator_models: z.array(Model).max(20).optional(),
+    evaluator_models: z
+      .array(Model)
+      .max(20)
+      .optional()
+      .describe(
+        "The distinct models the experiment's evaluators judged with, the one that produced the most scores first, so the listing can show when they differ. Capped at 20, which no realistic experiment reaches. `evaluator_model` is the first."
+      ),
     git_branch: z.string().max(256).nullable().optional(),
     git_commit_sha: z.string().max(256).nullable().optional(),
     total_repetitions: z.number().int().optional(),
@@ -47,27 +53,35 @@ export const GetEvaluationExperimentsRequestQuery = lazySchema(() =>
     /**
      * Filter by suite ID
      */
-    suite_id: z.string().max(256).optional(),
+    suite_id: z.string().max(256).optional().describe('Filter by suite ID'),
     /**
      * Filter by task model ID
      */
-    model_id: z.string().max(256).optional(),
+    model_id: z.string().max(256).optional().describe('Filter by task model ID'),
     /**
      * Filter by git branch
      */
-    branch: z.string().max(256).optional(),
+    branch: z.string().max(256).optional().describe('Filter by git branch'),
     /**
      * Free-text filter matching experiment name or git branch
      */
-    search: z.string().max(256).optional(),
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Free-text filter matching experiment name or git branch'),
     /**
      * Filter by dataset ID
      */
-    dataset_id: z.string().max(1024).optional(),
+    dataset_id: z.string().max(1024).optional().describe('Filter by dataset ID'),
     /**
      * Filter by CI build ID (metadata.ci.build_id)
      */
-    build_id: z.string().max(256).optional(),
+    build_id: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Filter by CI build ID (metadata.ci.build_id)'),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })

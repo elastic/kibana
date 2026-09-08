@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import type { InstrumentationProfileProbeResult } from './evidence/evidence_service';
+
 export type TraceReadinessErrorKind = 'not_ready' | 'unresolvable';
 
 export class TraceReadinessError extends Error {
-  constructor(message: string, public readonly kind: TraceReadinessErrorKind) {
+  constructor(
+    message: string,
+    public readonly kind: TraceReadinessErrorKind,
+    public readonly profiles?: InstrumentationProfileProbeResult[]
+  ) {
     super(message);
     this.name = 'TraceReadinessError';
   }

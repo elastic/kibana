@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Model } from '../common_attributes.gen';
+import { InstrumentationProfile, Model } from '../common_attributes.gen';
 
 export const EvaluateResultEvaluator = lazySchema(() =>
   z.object({
@@ -26,11 +26,18 @@ export const EvaluateResultEvaluator = lazySchema(() =>
     /**
      * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
      */
-    direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
+    direction: z
+      .enum(['maximize', 'minimize', 'neutral'])
+      .optional()
+      .describe(
+        'Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).'
+      ),
     /**
      * Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model.
      */
-    model: Model.optional(),
+    model: Model.optional().describe(
+      "Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model."
+    ),
   })
 );
 export type EvaluateResultEvaluator = z.infer<typeof EvaluateResultEvaluator>;
@@ -82,16 +89,12 @@ export const EvaluateRequestBody = lazySchema(() =>
        */
       instrumentation: z
         .object({
-          profile: z
-            .enum([
-              'elastic-inference',
-              'otel-genai-events',
-              'otel-genai-attributes',
-              'claude-code',
-            ])
-            .default('elastic-inference'),
+          profile: InstrumentationProfile,
         })
-        .optional(),
+        .optional()
+        .describe(
+          'Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.'
+        ),
     }),
     evaluators: z
       .array(

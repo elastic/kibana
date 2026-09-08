@@ -32,7 +32,11 @@ export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() 
     /**
      * When provided, fetches examples for all experiments in this execution
      */
-    execution_id: z.string().max(1024).optional(),
+    execution_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('When provided, fetches examples for all experiments in this execution'),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<

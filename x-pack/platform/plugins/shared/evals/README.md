@@ -81,6 +81,8 @@ The plugin reads from the following indices:
 | `.evaluation-dataset-examples` | Datasets API          | Dataset examples           |
 | `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators    |
 | `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
+| `logs-*`                       | OTLP / EDOT collector | OpenTelemetry log events   |
+| `logs-*`                       | OTLP / EDOT collector | OpenTelemetry log events   |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -214,6 +216,32 @@ Evaluator routes reconstruct a normalized evidence round (`input.message`, `resp
 | `claude-code`                 | Log event `user_prompt` (string)                            | Log event `api_response_body` (`anthropic_message`)          | `claude_code.tool` spans (`prefixed_json`) |
 
 Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/evaluators/evidence/profiles.ts).
+
+`GET /internal/evals/traces/{traceId}/evidence` exposes that normalized round for external harnesses. It defaults to auto-detection, unlike `_validate` and `_evaluate`, whose default is `elastic-inference`. Pass `profile` to select a convention explicitly and `wait=none|stable|complete` to control readiness:
+
+- `none` performs one extraction pass and returns `readiness: immediate`.
+- `stable` requires non-empty evidence and an unchanged profile and complete normalized round spanning five seconds. With the current retry schedule, the earliest result is normally about 7.5 seconds.
+- `complete` additionally requires a non-empty response and root span. Trace-only profiles need two consecutive equal polls, normally about 0.5 seconds. Profiles reading any evidence from logs also use the five-second stability window. Rootless traces exhaust the approximately 27.5-second retry budget and return the latest non-empty round as `best_effort`.
+
+A syntactically valid but nonexistent trace ID also consumes the full `stable` or `complete` budget before returning `404`. Whole-round comparison means `_evaluate` now resets completion when input or tool evidence changes, making it slightly stricter than the former response-only check.
+
+The endpoint returns full, potentially sensitive message and tool content for one turn. It does not persist the reconstructed evidence, and multi-turn reconstruction is not supported.
+
+### Reading normalized trace evidence
+
+`GET /internal/evals/traces/{traceId}/evidence` exposes the same single-turn evidence used by evaluators without running an evaluator or persisting the result. It returns full reconstructed message and tool content. Unlike `_evaluate` and `_validate`, which default to `elastic-inference`, omitting the `profile` query parameter enables auto-detection.
+
+The optional `wait` query parameter controls export-skew handling:
+
+| Mode       | Behavior |
+| ---------- | -------- |
+| `none`     | Returns one extraction pass immediately. This is the default. |
+| `stable`   | Waits for non-empty evidence and an unchanged selected profile and complete normalized round spanning five seconds. It does not require a root span. The earliest result normally arrives after about 7.5 seconds with the current retry schedule. |
+| `complete` | Also requires a non-empty response and root span. Trace-only profiles need consecutive equal polls and can normally finish after about 0.5 seconds. Profiles reading any item from `logs-*` use the same five-second stability window as `stable`. Rootless traces use the full approximately 27.5-second budget and return `best_effort` evidence when available. |
+
+Well-formed but nonexistent trace IDs consume the full `stable` or `complete` wait budget before returning `404`. Whole-round comparison includes input and tool steps, so `_evaluate` now resets its readiness baseline when those change as well as when the response changes.
+
+The endpoint requires `read_evals` and performs telemetry searches as the current user. It can therefore return less evidence than `_evaluate`, `_validate`, and `_resolve_instrumentation`, which use the internal Elasticsearch client. Elasticsearch narrows `traces-*` and `logs-*` to indices the caller can read, so missing index privileges may appear as a trace-not-found `404`. Access to the route remains scoped by the active Kibana space through the feature privilege; trace documents do not receive an additional space filter.
 
 ## UI pages
 
