@@ -16,7 +16,10 @@ import {
   createQuantitativeCorrectnessEvaluators,
   createGroundednessAnalysisEvaluator,
   createQuantitativeGroundednessEvaluator,
+  createCriteriaEvaluator,
+  type EvaluationCriterion,
 } from '@kbn/evals';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -28,8 +31,11 @@ import { runRejudge, type CellJudge, type RejudgeScore } from '../../matrix/run_
 import {
   collectExamples,
   selectAdapter,
+  buildStructuredReferences,
   REFERENCE_ADAPTERS,
 } from '../../matrix/reference_adapters';
+import { selectJury, checkJuryCoverage, JURY_ADAPTERS } from '../../matrix/jury_adapters';
+import type { JuryAdapter, JuryArgs } from '../../matrix/jury_adapters';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix_rejudge';
 
@@ -44,7 +50,11 @@ const DEFAULT_OUT_DIR = 'target/llm_matrix_rejudge';
 async function loadReferences(
   datasetPath: string,
   log?: { info: (msg: string) => void }
-): Promise<Map<string, string>> {
+): Promise<{
+  references: Map<string, string>;
+  structured: Map<string, Record<string, unknown>>;
+  adapterName: string;
+}> {
   const resolved = Path.resolve(process.cwd(), datasetPath);
   if (!Fs.existsSync(resolved)) {
     throw createFlagError(`--dataset path does not exist: ${resolved}`);
@@ -82,7 +92,11 @@ async function loadReferences(
     );
   }
 
-  return references;
+  return {
+    references,
+    structured: buildStructuredReferences(examples),
+    adapterName: adapter.name,
+  };
 }
 
 export const rejudgeCmd: Command<any> = {
@@ -110,12 +124,15 @@ export const rejudgeCmd: Command<any> = {
       'execution-id',
       'from-matrix',
       'profile',
+      'suite',
     ],
     boolean: ['blind', 'dry-run'],
     help: `
       --config           Matrix config JSON (selects models/suites).
       --judge            Judge tag recorded on results, e.g. "haiku". Required.
       --dataset          Path to the suite dataset module supplying references. Required.
+      --suite            Suite id selecting the jury (evaluator set) to recompute.
+                         Defaults to the jury matching the dataset's reference adapter.
       --from-matrix      scores.debug.json from a rendered matrix; re-judges
                          exactly the executions that matrix published
       --execution-id     Re-judge specific execution ids (comma separated).
@@ -161,8 +178,26 @@ export const rejudgeCmd: Command<any> = {
     );
 
     const config = configPath ? loadMatrixConfig(configPath) : undefined;
-    const references = await loadReferences(datasetPath, log);
+    const { references, structured, adapterName } = await loadReferences(datasetPath, log);
     log.info(`Loaded ${references.size} dataset reference(s) from ${datasetPath}`);
+
+    // The jury is resolved from the suite the scores belong to, not from the
+    // dataset path. An unregistered suite is a hard error: falling back to the
+    // persona jury is what silently produced Factuality/Relevance verdicts for
+    // an Attack Discovery replay, which look like scores but grade the wrong
+    // artefact with the wrong rubric.
+    const suiteFlag = flagsReader.string('suite');
+    const jury = selectJury(suiteFlag ?? adapterName);
+    if (!jury) {
+      throw createFlagError(
+        `No jury adapter for suite "${suiteFlag ?? adapterName}". ` +
+          `Known juries: ${JURY_ADAPTERS.map((j) => `${j.name} (${j.suiteIds.join(', ')})`).join(
+            '; '
+          )}. Add one in matrix/jury_adapters.ts rather than replaying with a ` +
+          `jury built for a different suite.`
+      );
+    }
+    log.info(`Jury "${jury.name}" recomputes: ${jury.evaluatorNames.join(', ')}`);
 
     // Only consult the profile when one was asked for: envFromDatasetsProfile
     // shells out to Vault, which blocks for minutes when no Vault is reachable.
@@ -225,7 +260,7 @@ export const rejudgeCmd: Command<any> = {
       executionIds,
       modelIds: modelFilter.size > 0 ? [...modelFilter] : undefined,
       configModelIds: config?.models.flatMap((m) => [m.id, ...(m.matchIds ?? [])]),
-      suiteIds: config ? [...new Set(config.columns.flatMap((c) => c.suites))] : undefined,
+      suiteIds: config ? [...new Set(config.columns.flatMap((c) => c.suites))] : [...jury.suiteIds],
       asOf: asOfFlag ? Date.parse(asOfFlag) : undefined,
     });
     log.info(`Fetched ${docs.length} score document(s) from ${esUrl}`);
@@ -233,7 +268,10 @@ export const rejudgeCmd: Command<any> = {
     // planReplay both builds the judgeable cells and reports why the rest are
     // unusable. A second extractor over the same documents could silently
     // disagree with the plan it is reported alongside.
-    const plan = planReplay(docs as never[], (id) => references.get(id));
+    const plan = planReplay(docs as never[], (id) => references.get(id), {
+      jury,
+      structuredReferenceFor: (id) => structured.get(id),
+    });
     const cellsToJudge = plan.cells;
     log.info(`Replay plan: ${summarizePlan(plan)}`);
 
@@ -277,6 +315,7 @@ export const rejudgeCmd: Command<any> = {
       kbnUrl: judgeKbnUrl,
       apiKey: process.env.JUDGE_KBN_API_KEY ?? evaluationsKbnApiKey,
       connectorId,
+      jury,
       log,
     });
 
@@ -286,6 +325,28 @@ export const rejudgeCmd: Command<any> = {
       judgeTag: blind ? `${judgeTag}-blind` : judgeTag,
       concurrency,
     });
+
+    // A replay that produced none of the jury's evaluators has measured
+    // something other than the column it claims to refresh. Failing here stops
+    // an artifact that would look publishable but silently swap the instrument.
+    const coverage = checkJuryCoverage(
+      jury,
+      results.flatMap((r) => r.scores)
+    );
+    if (!coverage.ok && results.length > 0) {
+      throw createFailError(
+        `Rejudge produced no "${jury.name}" evaluators ` +
+          `(expected any of ${jury.evaluatorNames.join(', ')}; got ${
+            coverage.unexpected.join(', ') || 'nothing'
+          }). Refusing to write an artifact that does not refresh this suite's column.`
+      );
+    }
+    if (coverage.missing.length > 0) {
+      log.warning(
+        `Jury "${jury.name}" did not produce: ${coverage.missing.join(', ')} ` +
+          `(examples lacking that annotation are skipped by the evaluator).`
+      );
+    }
 
     Fs.mkdirSync(outDir, { recursive: true });
     const outFile = Path.join(outDir, `rejudge-${judgeTag}${blind ? '-blind' : ''}.json`);
@@ -325,11 +386,13 @@ function createInferenceJudge({
   kbnUrl,
   apiKey,
   connectorId,
+  jury,
   log,
 }: {
   kbnUrl: string;
   apiKey?: string;
   connectorId: string;
+  jury: JuryAdapter;
   log: ToolingLog;
 }): CellJudge {
   const fetchImpl = (async (path: string, options: any = {}) => {
@@ -353,6 +416,71 @@ function createInferenceJudge({
 
   const inferenceClient = createRestClient({ fetch: fetchImpl, bindTo: { connectorId } });
 
+  // Each jury builds the evaluators its suite's column is actually made of.
+  // The persona pair is no longer assumed: running it against a suite that
+  // grades something else produces confident verdicts about the wrong artefact.
+  const evaluate = buildJuryEvaluator({ jury, inferenceClient, log });
+
+  return async (cell) => {
+    const args = jury.toArgs(cell);
+    if (!args) {
+      // planReplay filters these out, so reaching here means the plan and the
+      // jury disagree -- fail loudly rather than emit an empty score set that
+      // would average into the column as if the model had performed badly.
+      throw new Error(
+        `Cell ${cell.executionId}/${cell.exampleId} is not gradable by the "${jury.name}" jury`
+      );
+    }
+    return evaluate(args);
+  };
+}
+
+/**
+ * Build the scoring function for a jury.
+ *
+ * persona-matrix keeps its two-stage shape: the correctness and groundedness
+ * analyses run once, then the quantitative evaluators read those analyses off
+ * the output rather than paying for a second judge call.
+ *
+ * attack-discovery runs its own Criteria and Rubric evaluators, which need a
+ * `DefaultEvaluators.criteria` factory rather than a pre-built evaluator, since
+ * the criteria list differs per example.
+ */
+function buildJuryEvaluator({
+  jury,
+  inferenceClient,
+  log,
+}: {
+  jury: JuryAdapter;
+  inferenceClient: BoundInferenceClient;
+  log: ToolingLog;
+}): (args: JuryArgs) => Promise<{ scores: RejudgeScore[]; analyses?: Record<string, unknown> }> {
+  if (jury.name === 'attack-discovery') {
+    // AD's Criteria and Rubric evaluators live in a private, solutions-side
+    // functional-tests package that a platform package must not import. Both
+    // are thin wrappers over the shared criteria judge, so the jury rebuilds
+    // them from the same primitive rather than inverting the dependency.
+    // The rubric is mirrored from the suite; see jury_adapters.ts.
+    return async (args) => {
+      const scores: RejudgeScore[] = [];
+      for (const spec of jury.criteriaFor?.(args) ?? []) {
+        const evaluator = createCriteriaEvaluator({
+          inferenceClient,
+          criteria: spec.criteria as EvaluationCriterion[],
+          log,
+        });
+        const result = await evaluator.evaluate(spec.args as never);
+        scores.push({
+          name: spec.name,
+          score: result?.score ?? null,
+          label: result?.label ?? undefined,
+          explanation: result?.explanation ?? undefined,
+        });
+      }
+      return { scores };
+    };
+  }
+
   const correctness = createCorrectnessAnalysisEvaluator({ inferenceClient, log });
   const groundedness = createGroundednessAnalysisEvaluator({ inferenceClient, log });
   const quantitative = [
@@ -360,17 +488,10 @@ function createInferenceJudge({
     createQuantitativeGroundednessEvaluator(),
   ];
 
-  return async (cell) => {
-    const args = {
-      input: { question: cell.question },
-      output: { messages: [{ message: cell.agentResponse }], steps: cell.steps },
-      expected: { expected: cell.expected },
-      metadata: {},
-    };
-
+  return async (args) => {
     const [correctnessResult, groundednessResult] = await Promise.all([
-      correctness.evaluate(args as any),
-      groundedness.evaluate(args as any),
+      correctness.evaluate(args as never),
+      groundedness.evaluate(args as never),
     ]);
 
     // The quantitative evaluators are pure functions of the two analyses, so
@@ -386,7 +507,7 @@ function createInferenceJudge({
 
     const scores: RejudgeScore[] = [];
     for (const evaluator of quantitative) {
-      const result = await evaluator.evaluate(enriched as any);
+      const result = await evaluator.evaluate(enriched as never);
       scores.push({
         name: evaluator.name ?? 'unknown',
         score: result?.score ?? null,

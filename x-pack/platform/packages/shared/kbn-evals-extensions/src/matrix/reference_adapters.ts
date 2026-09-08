@@ -214,3 +214,27 @@ export function collectExamples(mod: Record<string, unknown>): DatasetExample[] 
 export function selectAdapter(examples: DatasetExample[]): ReferenceAdapter | undefined {
   return REFERENCE_ADAPTERS.find((adapter) => adapter.matches(examples));
 }
+
+/**
+ * Build the STRUCTURED ground truth, keyed the same way as the prose reference.
+ *
+ * `build()` renders truth as prose because the correctness judge compares text.
+ * Suite-native evaluators do not: Attack Discovery's Criteria evaluator wants
+ * the `criteria[]` array and its Rubric evaluator wants the `attackDiscoveries`
+ * objects. Re-deriving those from the rendered prose would mean parsing back out
+ * of a lossy format, so the raw `output` is exposed under the same key the
+ * prose lookup uses -- positional for AD, `example.id` elsewhere.
+ */
+export function buildStructuredReferences(
+  examples: DatasetExample[]
+): Map<string, Record<string, unknown>> {
+  const refs = new Map<string, Record<string, unknown>>();
+  examples.forEach((example, index) => {
+    const output = example?.output;
+    if (!output || typeof output !== 'object') {
+      return;
+    }
+    refs.set(example.id ?? String(index), output as Record<string, unknown>);
+  });
+  return refs;
+}

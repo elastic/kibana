@@ -76,6 +76,9 @@ export type {
 export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
 export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
+// Exposed so judge-replay tooling can rebuild a suite's criteria evaluator
+// outside an eval run, where `DefaultEvaluators` is not constructed.
+export { createCriteriaEvaluator } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
   Example,

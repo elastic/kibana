@@ -269,3 +269,61 @@ describe('summarizePlan', () => {
     expect(summarizePlan(planReplay([doc(), broken], refs))).toContain('1 unreplayable');
   });
 });
+
+describe('planReplay with a suite jury', () => {
+  /** Minimal AD-shaped jury: grades `output.insights`, ignores the transcript. */
+  const adJury = {
+    name: 'attack-discovery',
+    suiteIds: ['attack-discovery-agent-builder'],
+    evaluatorNames: ['Criteria', 'Rubric'],
+    toArgs: (cell: any) =>
+      Array.isArray(cell.taskOutput?.insights) && cell.taskOutput.insights.length > 0
+        ? { input: {}, output: {}, expected: {}, metadata: {} }
+        : null,
+  };
+
+  /** An AD cell: structured insights, but no final agent message. */
+  const adDoc = doc({
+    example: { id: '0', input: { question: 'Run attack discovery' }, output: {} },
+    metadata: { execution_id: 'exec-ad', suite_id: 'attack-discovery-agent-builder' },
+    task: {
+      model: { id: 'm' },
+      output: { messages: [], insights: [{ title: 'Suspicious curl' }] },
+    },
+  });
+
+  it('replays a cell the persona contract would have skipped', () => {
+    // Without a jury this cell is "missing agent response" -- the defect that
+    // made 433 of 800 AD cells look unreplayable.
+    expect(planReplay([adDoc], refs).cells).toHaveLength(0);
+
+    const plan = planReplay([adDoc], refs, { jury: adJury as any });
+    expect(plan.cells).toHaveLength(1);
+    expect(plan.skipped).toHaveLength(0);
+  });
+
+  it('carries the raw task output and suite id onto the cell', () => {
+    const [cell] = planReplay([adDoc], refs, { jury: adJury as any }).cells;
+    expect((cell.taskOutput as any).insights).toHaveLength(1);
+    expect(cell.suiteId).toBe('attack-discovery-agent-builder');
+  });
+
+  it('skips a cell the jury cannot grade, naming the jury', () => {
+    const empty = doc({
+      example: { id: '0', input: { question: 'q' }, output: {} },
+      metadata: { execution_id: 'exec-ad', suite_id: 'attack-discovery-agent-builder' },
+      task: { model: { id: 'm' }, output: { messages: [], insights: [] } },
+    });
+    const plan = planReplay([empty], refs, { jury: adJury as any });
+    expect(plan.cells).toHaveLength(0);
+    expect(plan.skipped[0].reason).toContain('attack-discovery');
+  });
+
+  it('passes structured references through to the cell', () => {
+    const [cell] = planReplay([adDoc], refs, {
+      jury: adJury as any,
+      structuredReferenceFor: () => ({ criteria: ['c1'] }),
+    }).cells;
+    expect(cell.expectedStructured).toEqual({ criteria: ['c1'] });
+  });
+});

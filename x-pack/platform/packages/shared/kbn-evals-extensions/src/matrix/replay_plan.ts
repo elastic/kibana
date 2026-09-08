@@ -6,6 +6,7 @@
  */
 
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
+import type { JuryAdapter } from './jury_adapters';
 
 /**
  * Replay planning for judge-only re-scoring.
@@ -66,6 +67,26 @@ export interface ReplayCell {
    * be read back but never filtered on.
    */
   steps: unknown[];
+  /**
+   * The raw `task.output` object, retained verbatim.
+   *
+   * Suites other than persona-matrix grade a different slice of the output than
+   * the message transcript: Attack Discovery's Criteria and Rubric evaluators
+   * read `output.insights`. Flattening every cell to question/response/steps
+   * discards that payload, so a non-persona jury would receive an empty
+   * submission and score it N/A.
+   */
+  taskOutput?: unknown;
+  /**
+   * Structured ground truth, when the suite has one.
+   *
+   * `expected` is the prose rendering the correctness judge compares against;
+   * suites whose evaluators consume the original objects (AD's `criteria[]` and
+   * `attackDiscoveries`) need them unflattened.
+   */
+  expectedStructured?: unknown;
+  /** Golden `metadata.suite_id`, used to resolve the jury for this cell. */
+  suiteId?: string;
   /** Source document's timestamp, retained for provenance. */
   recordedAt: string;
 }
@@ -122,8 +143,19 @@ export function agentSteps(output: unknown): unknown[] {
  */
 export function planReplay(
   docs: EvaluationScoreDocument[],
-  referenceFor: ReferenceLookup
+  referenceFor: ReferenceLookup,
+  options: {
+    /**
+     * Jury for the suite being replayed. When supplied it defines
+     * replayability; when omitted the persona-matrix contract
+     * (question + prose reference + final message) applies.
+     */
+    jury?: JuryAdapter;
+    /** Structured ground truth lookup, for juries that grade objects. */
+    structuredReferenceFor?: (exampleId: string) => unknown;
+  } = {}
 ): ReplayPlan {
+  const { jury, structuredReferenceFor } = options;
   const cells = new Map<string, ReplayCell>();
   const skipped: PlanIssue[] = [];
   const seenSkips = new Set<string>();
@@ -141,10 +173,35 @@ export function planReplay(
     const expected = exampleId ? referenceFor(exampleId) : undefined;
     const agentResponse = lastAgentMessage(doc.task?.output);
 
+    const candidate: ReplayCell = {
+      executionId,
+      exampleId,
+      modelId: doc.task?.model?.id ?? '',
+      question: typeof question === 'string' ? question : '',
+      expected: typeof expected === 'string' ? expected : '',
+      agentResponse: agentResponse ?? '',
+      steps: agentSteps(doc.task?.output),
+      taskOutput: doc.task?.output,
+      expectedStructured: exampleId ? structuredReferenceFor?.(exampleId) : undefined,
+      suiteId: doc.metadata?.suite_id,
+      recordedAt: doc['@timestamp'],
+    };
+
     const missing: string[] = [];
     if (typeof question !== 'string' || !question) missing.push('question');
-    if (typeof expected !== 'string' || !expected) missing.push('dataset reference');
-    if (!agentResponse) missing.push('agent response');
+
+    if (jury) {
+      // The jury decides what a replayable cell looks like for its suite.
+      // Attack Discovery grades `output.insights`, so requiring a final agent
+      // message here would skip cells that are perfectly gradable -- the
+      // defect that made 433 of 800 AD cells look unreplayable.
+      if (!jury.toArgs(candidate)) {
+        missing.push(`gradable ${jury.name} output`);
+      }
+    } else {
+      if (typeof expected !== 'string' || !expected) missing.push('dataset reference');
+      if (!agentResponse) missing.push('agent response');
+    }
 
     if (missing.length > 0) {
       if (!seenSkips.has(key)) {
@@ -158,16 +215,7 @@ export function planReplay(
       continue;
     }
 
-    cells.set(key, {
-      executionId,
-      exampleId,
-      modelId: doc.task?.model?.id ?? '',
-      question: question as string,
-      expected: expected as string,
-      agentResponse: agentResponse as string,
-      steps: agentSteps(doc.task?.output),
-      recordedAt: doc['@timestamp'],
-    });
+    cells.set(key, candidate);
   }
 
   // A cell whose first document was incomplete but whose later documents carry

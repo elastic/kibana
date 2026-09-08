@@ -60,12 +60,83 @@ describe('fetchScoreDocs', () => {
     expect(body(0).query.bool.filter).toContainEqual({ terms: { 'task.model.id': ['chosen'] } });
   });
 
-  it('collapses to one document per execution', async () => {
+  it('collapses to one execution group and pulls its members', async () => {
     // A trajectory is stored once per evaluator (~15 docs); collapsing is what
-    // turns a 42k-document read into a ~2.8k-trajectory read.
+    // turns a 42k-document read into a ~2.8k-trajectory read. The members let
+    // the caller prefer a payload-bearing document over an empty sibling.
     await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], executionIds: ['e1'] });
 
-    expect(body(0).collapse).toEqual({ field: 'metadata.execution_id' });
+    expect(body(0).collapse).toEqual({
+      field: 'metadata.execution_id',
+      inner_hits: { name: 'members', size: 50, _source: expect.any(Array) },
+    });
+  });
+
+  it('resolves the newest execution per model instead of trusting collapse order', async () => {
+    // A suite re-runs an example across many executions; the newest is the one
+    // whose trajectories were captured. The first call per example is the
+    // resolution aggregation, the second the document fetch.
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          aggregations: {
+            by_model: {
+              buckets: [
+                {
+                  key: 'm1',
+                  latest: {
+                    hits: { hits: [{ _source: { metadata: { execution_id: 'new-exec' } } }] },
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      })
+      .mockResolvedValueOnce(okResponse([{ _source: { example: { id: 'a' } } }]));
+
+    await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], modelIds: ['m1'] });
+
+    // Resolution query: newest document per model bucket.
+    expect(body(0).aggs.by_model.aggs.latest.top_hits.sort).toEqual([
+      { '@timestamp': { order: 'desc' } },
+    ]);
+    // Document fetch: scoped to the resolved execution.
+    expect(body(1).query.bool.filter).toContainEqual({
+      terms: { 'metadata.execution_id': ['new-exec'] },
+    });
+  });
+
+  it('prefers a payload-bearing group member over an empty representative', async () => {
+    const empty = { _source: { task: { output: {} } } };
+    const withInsights = {
+      _source: { task: { output: { insights: [{ title: 'x' }] } }, example: { id: 'a' } },
+    };
+
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        hits: {
+          hits: [
+            {
+              _source: empty._source,
+              inner_hits: { members: { hits: { hits: [empty, withInsights] } } },
+            },
+          ],
+        },
+      }),
+    });
+
+    const docs = await fetchScoreDocs({
+      esUrl,
+      apiKey,
+      exampleIds: ['a'],
+      executionIds: ['e1'],
+    });
+
+    expect(docs).toHaveLength(1);
+    expect((docs[0] as any).task.output.insights).toHaveLength(1);
   });
 
   it('queries once per example and returns every hit', async () => {
