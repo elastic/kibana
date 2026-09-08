@@ -16,24 +16,30 @@ import type { ESQLColumn } from '@kbn/es-types';
  * feature needs would be downloaded far more widely than it is used.
  *
  * Memoized: the engine is built once and reused, as it was when constructed at module scope.
+ * The memo is cleared when the load fails, so a transient failure is retried.
  */
 let enginePromise: Promise<Liquid> | undefined;
 
 const getEngine = (): Promise<Liquid> => {
   if (!enginePromise) {
-    enginePromise = import('liquidjs').then(
-      ({ Liquid: LiquidEngine }) =>
-        new LiquidEngine({
-          strictFilters: false,
-          strictVariables: false,
-          dynamicPartials: false,
-          relativeReference: false,
-          outputEscape: 'escape',
-          renderLimit: 1_000,
-          memoryLimit: 100_000_000,
-          parseLimit: 1_000_000,
-        })
-    );
+    enginePromise = import('liquidjs')
+      .then(
+        ({ Liquid: LiquidEngine }) =>
+          new LiquidEngine({
+            strictFilters: false,
+            strictVariables: false,
+            dynamicPartials: false,
+            relativeReference: false,
+            outputEscape: 'escape',
+            renderLimit: 1_000,
+            memoryLimit: 100_000_000,
+            parseLimit: 1_000_000,
+          })
+      )
+      .catch((error) => {
+        enginePromise = undefined;
+        throw error;
+      });
   }
   return enginePromise;
 };
