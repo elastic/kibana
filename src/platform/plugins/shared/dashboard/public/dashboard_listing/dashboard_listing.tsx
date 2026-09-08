@@ -44,6 +44,8 @@ export const DashboardListing = ({
   const history = useHistory();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+
   const tabs = useMemo(
     () =>
       getDashboardListingTabs({
@@ -112,8 +114,6 @@ export const DashboardListing = ({
     },
     [tabs, activeTabId]
   );
-
-  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
 
   const onImportSuccess = useCallback((id: string, title: string) => {
     setRefreshListBouncer((b) => !b);
