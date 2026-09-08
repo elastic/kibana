@@ -15,8 +15,6 @@ import type {
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type { estypes } from '@elastic/elasticsearch';
-
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentStatus, ListWithKuery } from '../../types';
@@ -98,13 +96,6 @@ export interface AgentClient {
       pitKeepAlive?: string;
       getStatusSummary?: boolean;
       /**
-       * Optional ES `_source` filtering, passed through verbatim.
-       * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
-       * other `Agent` property is `undefined` despite its non-optional type. Only use this when
-       * you know exactly which fields the caller reads.
-       */
-      _source?: estypes.SearchRequest['_source'];
-      /**
        * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
        * requires. Defaults to true. Forced on when `getStatusSummary` is true.
        */
@@ -155,7 +146,6 @@ class AgentClientImpl implements AgentClient {
       pitId?: string;
       pitKeepAlive?: string;
       getStatusSummary?: boolean;
-      _source?: estypes.SearchRequest['_source'];
       includeStatusRuntimeField?: boolean;
     }
   ) {
