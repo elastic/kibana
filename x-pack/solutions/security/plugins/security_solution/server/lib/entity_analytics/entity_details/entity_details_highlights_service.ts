@@ -186,10 +186,7 @@ export const entityDetailsHighlightsServiceFactory = ({
       include_unmapped: true,
     }));
 
-  const getRiskScoreData = async (
-    entityType: string,
-    entityIdentifier: string
-  ) => {
+  const getRiskScoreData = async (entityType: string, entityIdentifier: string) => {
     const getRiskScore = createGetRiskScores({
       logger,
       esClient,
@@ -545,7 +542,18 @@ export const entityDetailsHighlightsServiceFactory = ({
     anomalyFromDate,
     anomalyToDate,
   }: GetDataFnOpts) => {
-    const anonymizedRiskScore = await getRiskScoreData(entityType, entityIdentifier);
+    const typedEntityType = entityType as EntityType;
+    const enrichedEntityService = new EnrichEntityService({
+      entityStoreClient,
+      esClient,
+      experimentalFeatures,
+      logger,
+      ml,
+      request,
+      soClient,
+      spaceId,
+      uiSettingsClient,
+    });
 
     const { entities: enrichedEntities } = await enrichedEntityService.getEnrichedEntities({
       anomalyFromDate,

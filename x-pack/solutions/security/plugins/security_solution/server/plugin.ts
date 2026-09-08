@@ -385,6 +385,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       productFeaturesService,
       entityAnalyticsConfig: config.entityAnalytics,
+      experimentalFeatures,
       telemetry: core.analytics,
     });
     if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
@@ -392,6 +393,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityStore: plugins.entityStore,
         getStartServices: core.getStartServices,
         logger: this.logger,
+        hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
       });
     }
 
