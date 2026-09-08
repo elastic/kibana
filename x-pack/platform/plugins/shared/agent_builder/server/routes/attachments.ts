@@ -111,7 +111,7 @@ export function registerAttachmentRoutes({
         tags: ['attachment', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
-          since: '9.4.0',
+          since: '9.6.0',
         },
       },
     })
