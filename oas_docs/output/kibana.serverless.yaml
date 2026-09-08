@@ -2117,6 +2117,17 @@ paths:
         content:
           application/json:
             examples:
+              createConversationFromTemplateExample:
+                description: Example request applying a conversation template and seeding metadata (each key must be declared by the template)
+                value:
+                  metadata:
+                    on_call: true
+                    services:
+                      - checkout
+                      - payments
+                    severity: high
+                  template_id: incident-response
+                  title: Incident triage
               createConversationRequestExample:
                 description: Example request for creating a private shared conversation with a custom title and two members
                 value:
@@ -2180,6 +2191,25 @@ paths:
                 conversation_id:
                   description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
                   maxLength: 256
+                  type: string
+                metadata:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - items:
+                          maxLength: 2000
+                          type: string
+                        maxItems: 100
+                        type: array
+                  description: Initial metadata values. Each key must be declared by the referenced template; each value is validated against the field definition (type, options, min/max, regex, max_length). Requires `template_id`.
+                  type: object
+                template_id:
+                  description: Optional ID of a conversation template to apply. When set, the template seeds default metadata and any caller-supplied `metadata` is validated against the template field definitions.
+                  maxLength: 256
+                  minLength: 1
                   type: string
                 title:
                   description: Title for the conversation. Defaults to "New conversation".
@@ -63114,62 +63144,51 @@ paths:
                   type: object
                   properties:
                     additionalIndexPatterns:
-                      default: []
                       items:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
                       type: array
                     delay:
-                      default: 1m
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
-                      default: 10000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     excludedIndexPatterns:
-                      default: []
                       items:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
                       type: array
                     fieldHistoryLength:
-                      default: 10
                       maximum: 9007199254740991
                       minimum: -9007199254740991
                       type: integer
                     frequency:
-                      default: 1m
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
-                      default: 3h
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
-                      default: 50000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     maxLogsPerWindow:
-                      default: 100000
                       maximum: 9007199254740991
                       minimum: 0
                       type: integer
                     maxLogsPerWindowCapBehavior:
-                      default: drop
                       enum:
                         - defer
                         - drop
                       type: string
                     maxTimeWindowSize:
-                      default: 15m
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
@@ -71686,62 +71705,51 @@ paths:
                   type: object
                   properties:
                     additionalIndexPatterns:
-                      default: []
                       items:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
                       type: array
                     delay:
-                      default: 1m
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
-                      default: 10000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     excludedIndexPatterns:
-                      default: []
                       items:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
                       type: array
                     fieldHistoryLength:
-                      default: 10
                       maximum: 9007199254740991
                       minimum: -9007199254740991
                       type: integer
                     frequency:
-                      default: 1m
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
-                      default: 3h
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
-                      default: 50000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     maxLogsPerWindow:
-                      default: 100000
                       maximum: 9007199254740991
                       minimum: 0
                       type: integer
                     maxLogsPerWindowCapBehavior:
-                      default: drop
                       enum:
                         - defer
                         - drop
                       type: string
                     maxTimeWindowSize:
-                      default: 15m
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
@@ -77722,6 +77730,7 @@ paths:
                   input:
                     approved: true
                     comment: Approved by analyst
+                  stepExecutionId: step-exec-a1b2c3d4
             schema:
               additionalProperties: false
               type: object
@@ -77731,6 +77740,11 @@ paths:
                     nullable: true
                   description: Input data to resume the execution with.
                   type: object
+                stepExecutionId:
+                  description: Step execution ID of the HITL wait to claim. When omitted, the server looks up the waiting step.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
               required:
                 - input
       responses:
@@ -77760,7 +77774,8 @@ paths:
                 "input": {
                   "approved": true,
                   "comment": "Approved by analyst"
-                }
+                },
+                "stepExecutionId": "step-exec-a1b2c3d4"
               }'
         - lang: Console
           source: |
@@ -77769,7 +77784,8 @@ paths:
               "input": {
                 "approved": true,
                 "comment": "Approved by analyst"
-              }
+              },
+              "stepExecutionId": "step-exec-a1b2c3d4"
             }
       x-state: Generally available
       x-metaTags:
@@ -113112,6 +113128,36 @@ components:
         - direction
       title: security_query_roles_sort
       type: object
+    Kibana_HTTP_APIs_security_role_data_source_privileges:
+      additionalProperties: false
+      description: The data source privileges entry.
+      properties:
+        names:
+          items:
+            description: A list of data source names or wildcard patterns to which the permissions in this entry apply.
+            maxLength: 1000
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+        privileges:
+          description: The data source privileges that role members have for the specified data sources.
+          items:
+            enum:
+              - create
+              - read_metadata
+              - delete
+              - read
+              - manage
+            type: string
+          maxItems: 5
+          minItems: 1
+          type: array
+      required:
+        - names
+        - privileges
+      title: security_role_data_source_privileges
+      type: object
     Kibana_HTTP_APIs_security_role_elasticsearch:
       additionalProperties: false
       description: The Elasticsearch cluster, index, and remote cluster security privileges for the role.
@@ -113122,6 +113168,8 @@ components:
             type: string
           maxItems: 100
           type: array
+        global:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
         indices:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_indices_privileges'
@@ -113144,6 +113192,56 @@ components:
           maxItems: 100
           type: array
       title: security_role_elasticsearch
+      type: object
+    Kibana_HTTP_APIs_security_role_global_privileges:
+      additionalProperties: false
+      description: Global privileges for the role.
+      properties:
+        application:
+          additionalProperties: false
+          type: object
+          properties:
+            manage:
+              additionalProperties: false
+              type: object
+              properties:
+                applications:
+                  items:
+                    description: A list of application names that the role can manage at the global privilege scope.
+                    maxLength: 100
+                    type: string
+                  maxItems: 1000
+                  type: array
+              required:
+                - applications
+        data_source:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_data_source_privileges'
+          maxItems: 1000
+          type: array
+        profile:
+          additionalProperties: false
+          type: object
+          properties:
+            write:
+              additionalProperties: false
+              type: object
+              properties:
+                applications:
+                  items:
+                    description: A list of application names whose user profile data the role can write at the global privilege scope.
+                    maxLength: 100
+                    type: string
+                  maxItems: 1000
+                  type: array
+              required:
+                - applications
+        role:
+          additionalProperties: true
+          description: Global role privileges.
+          type: object
+          properties: {}
+      title: security_role_global_privileges
       type: object
     Kibana_HTTP_APIs_security_role_indices_privileges:
       additionalProperties: false
@@ -118976,6 +119074,10 @@ components:
                 includeRetests:
                   type: boolean
                 locationsThreshold:
+                  type: number
+                pendingThreshold:
+                  maximum: 100
+                  minimum: 1
                   type: number
                 recoveryStrategy:
                   enum:
