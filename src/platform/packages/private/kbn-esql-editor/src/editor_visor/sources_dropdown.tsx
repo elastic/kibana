@@ -52,11 +52,19 @@ const shrinkableContainerCss = css`
 interface SourcesDropdownProps {
   // Currently selected data sources
   currentSources: string[];
-  // Callback when the selected data sources change
+  // Callback when the selected data sources change via user interaction
   onChangeSources: (newSources: string[]) => void;
+  // Callback when the first available source is auto-selected on initial load
+  onAutoSelectSources: (newSources: string[]) => void;
+  isDisabled?: boolean;
 }
 
-export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDropdownProps) {
+export function SourcesDropdown({
+  currentSources,
+  onChangeSources,
+  onAutoSelectSources,
+  isDisabled,
+}: SourcesDropdownProps) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [fetchedSources, setFetchedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const euiTheme = useEuiTheme();
@@ -123,9 +131,9 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
     hasAutoSelectedDefaultSource.current = true;
 
     if (!currentSources.length) {
-      onChangeSources([fetchedSources[0].label]);
+      onAutoSelectSources([fetchedSources[0].label]);
     }
-  }, [currentSources.length, fetchedSources, onChangeSources]);
+  }, [currentSources.length, fetchedSources, onAutoSelectSources]);
 
   const sourcesOptions = useMemo(() => {
     const existingLabels = new Set(fetchedSources.map((option) => option.label));
@@ -196,27 +204,26 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
       gutterSize="s"
       responsive={false}
       data-test-subj="ESQLEditor-visor-sources-dropdown"
+      css={isDisabled ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
     >
-      <>
-        <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-          <EuiFormControlLayout compressed isDropdown fullWidth>
-            <EuiPopover
-              id={popoverId}
-              aria-label={i18n.translate('esqlEditor.visor.sourcesDropdownPopoverLabel', {
-                defaultMessage: 'Data sources',
-              })}
-              button={createTrigger()}
-              isOpen={isPopoverOpen}
-              closePopover={() => setPopoverIsOpen(false)}
-              panelPaddingSize="none"
-              display="block"
-              panelStyle={{ width: POPOVER_WIDTH }}
-            >
-              <EuiContextMenuPanel items={items} />
-            </EuiPopover>
-          </EuiFormControlLayout>
-        </EuiFlexItem>
-      </>
+      <EuiFlexItem grow={true} css={shrinkableContainerCss}>
+        <EuiFormControlLayout compressed isDropdown fullWidth>
+          <EuiPopover
+            id={popoverId}
+            aria-label={i18n.translate('esqlEditor.visor.sourcesDropdownPopoverLabel', {
+              defaultMessage: 'Data sources',
+            })}
+            button={createTrigger()}
+            isOpen={isPopoverOpen}
+            closePopover={() => setPopoverIsOpen(false)}
+            panelPaddingSize="none"
+            display="block"
+            panelStyle={{ width: POPOVER_WIDTH }}
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </EuiFormControlLayout>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

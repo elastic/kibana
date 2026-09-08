@@ -61,16 +61,6 @@ const listItems = [
   {
     title: (
       <>
-        <kbd>{COMMAND_KEY}</kbd> <kbd>K</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
-      defaultMessage: 'Open quick search',
-    }),
-  },
-  {
-    title: (
-      <>
         <kbd>{COMMAND_KEY}</kbd> <kbd>I</kbd>
       </>
     ),

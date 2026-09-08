@@ -28,8 +28,7 @@ import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
-import { DataSourceBrowser } from '@kbn/esql-resource-browser';
-import { FieldsBrowser } from '@kbn/esql-resource-browser';
+import { DataSourceBrowser, FieldsBrowser } from '@kbn/esql-resource-browser';
 import { useStableCallback } from '@kbn/react-hooks';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -39,13 +38,12 @@ import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
-import { useCommentToEsql, useGhostLineHint } from './comment_to_esql';
+import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
-import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
@@ -79,10 +77,7 @@ import {
   type StarredQueryMetadata,
 } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
-import {
-  EsqlEditorActionsProvider,
-  useHasEsqlEditorActionsProvider,
-} from './editor_actions_context';
+import { EsqlEditorActionsProvider } from './editor_actions_context';
 import {
   registerCustomCommands,
   addEditorKeyBindings,
@@ -126,6 +121,8 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   queryStats,
   enableResourceBrowser = false,
+  onESQLDocsFlyoutVisibilityChanged,
+  onVisorNlResultReady,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -230,12 +227,13 @@ const ESQLEditorInternal = function ESQLEditor({
     useState<EsqlStarredQueriesService | null>(null);
   const [isCurrentQueryStarred, setIsCurrentQueryStarred] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
+  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const isVisorOpenRef = useRef(false);
+  isVisorOpenRef.current = isVisorOpen;
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
-  const isVisorOpenRef = useRef(isVisorOpen);
 
   const trimmedQuery = useMemo(() => getTrimmedQuery(code ?? ''), [code]);
 
@@ -367,8 +365,7 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     esqlVariablesRef.current = esqlVariables;
     controlsContextRef.current = controlsContext;
-    isVisorOpenRef.current = isVisorOpen;
-  }, [esqlVariables, controlsContext, isVisorOpen]);
+  }, [esqlVariables, controlsContext]);
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
@@ -500,28 +497,26 @@ const ESQLEditorInternal = function ESQLEditor({
     [onSuggestionsReady, telemetryService]
   );
 
-  const { editorActions, onClickQueryHistory, onToggleVisor } = useEsqlEditorActions({
+  const { editorActions, onClickQueryHistory } = useEsqlEditorActions({
     code,
     isHistoryOpen,
     isLanguageComponentOpen,
     isCurrentQueryStarred,
     editorIsInline: Boolean(editorIsInline),
     onUpdateAndSubmitQuery,
-    onVisorClosed: () => editorRef.current?.focus(),
     starredQueriesService,
     trimmedQuery,
-    isVisorOpenRef,
     setIsHistoryOpen,
     setIsLanguageComponentOpen,
     setIsCurrentQueryStarred,
-    setIsVisorOpen,
     trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
+    isVisorOpenRef,
+    setIsVisorOpen,
   });
   useEsqlEditorActionsRegistration(editorActions);
 
   // Stable proxies for callbacks captured by long-lived Monaco command closures
   const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
-  const stableOnToggleVisor = useStableCallback(onToggleVisor);
   const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
 
   const expandToFitContent = useCallback(() => {
@@ -583,6 +578,9 @@ const ESQLEditorInternal = function ESQLEditor({
   });
 
   const isNlToEsqlEnabled = useNlToEsqlCheck();
+
+  const onUpdateAndSubmitQueryRef = useRef(onUpdateAndSubmitQuery);
+  onUpdateAndSubmitQueryRef.current = onUpdateAndSubmitQuery;
 
   // Forward-declared so the comment-to-esql hook can hide an already-visible
   // ghost hint when generation starts; populated below by useGhostLineHint.
@@ -667,6 +665,22 @@ const ESQLEditorInternal = function ESQLEditor({
     onAfterInsert: expandToFitContent,
   });
 
+  const visorNlOnSubmit = useCallback(
+    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH),
+    [onUpdateAndSubmitQuery]
+  );
+
+  const { showVisorReview } = useVisorNlToEsql({
+    editorRef,
+    editorModel,
+    onSubmit: visorNlOnSubmit,
+    onAfterInsert: expandToFitContent,
+  });
+
+  useEffect(() => {
+    onVisorNlResultReady?.(showVisorReview);
+  }, [showVisorReview, onVisorNlResultReady]);
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
     editorModel,
@@ -719,7 +733,7 @@ const ESQLEditorInternal = function ESQLEditor({
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
-          justifyContent="spaceBetween"
+          justifyContent="flexEnd"
           alignItems="center"
           css={css`
             padding: ${theme.euiTheme.size.s};
@@ -737,9 +751,6 @@ const ESQLEditorInternal = function ESQLEditor({
             >
               {queryRunButtonProperties.label}
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ESQLMenu hideHistory={hideQueryHistory} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
@@ -833,7 +844,6 @@ const ESQLEditorInternal = function ESQLEditor({
                   const keyBindingDisposables = addEditorKeyBindings(
                     editor,
                     stableOnQuerySubmit,
-                    stableOnToggleVisor,
                     stableOnPrettifyQuery,
                     () => onGenerateFromCommentRef.current()
                   );
@@ -934,16 +944,16 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      {!hideQuickSearch && (
+      {!hideQuickSearch && Boolean(editorIsInline) && (
         <QuickSearchVisor
           query={code}
-          isInline={Boolean(editorIsInline)}
-          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
+          isSpaceReduced={isSpaceReduced}
+          isInline
           isVisible={isVisorOpen}
+          onNlResult={showVisorReview}
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
-          onToggleVisor={onToggleVisor}
           telemetryService={telemetryService}
         />
       )}
@@ -989,6 +999,8 @@ const ESQLEditorInternal = function ESQLEditor({
         dataErrorsControl={dataErrorsControl}
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
+        hideQueryHistory={hideQueryHistory}
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         {...editorMessages}
         onErrorClick={onErrorClick}
       />
@@ -1107,17 +1119,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
 const ESQLEditorWithState = withRestorableState(ESQLEditorInternal);
 
-export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => {
-  const hasProvider = useHasEsqlEditorActionsProvider();
-
-  if (hasProvider) {
-    return <ESQLEditorWithState {...props} />;
-  }
-
-  return (
-    <EsqlEditorActionsProvider>
-      <ESQLEditorWithState {...props} />
-    </EsqlEditorActionsProvider>
-  );
-};
+export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => (
+  <EsqlEditorActionsProvider>
+    <ESQLEditorWithState {...props} />
+  </EsqlEditorActionsProvider>
+);
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

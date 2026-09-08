@@ -196,10 +196,10 @@ export class ESQLService extends FtrService {
 
   public async isQuickSearchVisorVisible() {
     const visorContainer = await this.testSubjects.find('ESQLEditor-quick-search-visor');
-    const visorWrapper = await visorContainer.findByCssSelector(':scope > div');
-    const opacity = await visorWrapper.getComputedStyle('opacity');
-
-    return opacity === '1';
+    return await this.browser.execute(
+      'return !arguments[0].hasAttribute("inert");',
+      visorContainer._webElement
+    );
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
@@ -304,7 +304,7 @@ export class ESQLService extends FtrService {
   }
 
   public async toggleQuickSearchVisor(open: boolean) {
-    await this.testSubjects.click('ESQLEditor-toggle-quick-search-visor');
+    await this.testSubjects.click('esql-menu-button');
     await this.retry.try(async () => {
       expect(await this.isQuickSearchVisorVisible()).to.be(open);
     });
