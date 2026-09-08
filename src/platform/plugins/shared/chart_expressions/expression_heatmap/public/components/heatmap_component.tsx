@@ -415,7 +415,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const appliedTimeRange = xAxisColumn
       ? datatableUtilities.getColumnTimeRange(xAxisColumn)
       : undefined;
-    
+
     const isDateX = xAxisMeta?.type === 'date';
     const isTimeBasedSwimLane = isDateX && Boolean(dateHistogramMeta?.interval);
     const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
@@ -433,7 +433,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     let chartData = formattedTable.table.rows.filter(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
-    
+
     // A date x-axis is time-based only when it's a form-based date-histogram swimlane
     // (`dateHistogramMeta.interval`) or an ES|QL date column (which never carries histogram meta but
     // is inherently chronological). A form-based non-histogram date axis (e.g. top-values of a date
