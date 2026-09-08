@@ -23,7 +23,7 @@ import { useStreamingContext, useStreamRecord } from '../context/streaming/strea
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 5_000;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -79,11 +79,6 @@ export const useConversation = () => {
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
     // Shared conversations can be written to by other participants, so poll for their rounds.
-    // Reading `data` here keeps the decision consistent with what's rendered and self-correcting:
-    // once the owner unshares, the next payload flips the predicate and the timer is torn down.
-    // Hidden tabs don't poll (`refetchIntervalInBackground` defaults to false), and `enabled:
-    // false` tears the timer down, so the gates above already suppress polling in every window
-    // where the cache is authoritative — don't weaken them.
     refetchInterval: (data) =>
       isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
   });

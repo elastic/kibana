@@ -204,7 +204,7 @@ describe('useConversation polling', () => {
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    await advance(60_000);
+    await advance(10_000);
 
     expect(mockGet).toHaveBeenCalledTimes(1);
 
@@ -218,7 +218,7 @@ describe('useConversation polling', () => {
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    await advance(60_000);
+    await advance(10_000);
 
     expect(mockGet).toHaveBeenCalledTimes(1);
 
@@ -232,7 +232,7 @@ describe('useConversation polling', () => {
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    await advance(30_000);
+    await advance(5_000);
 
     expect(mockGet).toHaveBeenCalledTimes(2);
 
@@ -246,11 +246,11 @@ describe('useConversation polling', () => {
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    await advance(30_000);
+    await advance(5_000);
 
     expect(mockGet).toHaveBeenCalledTimes(2);
 
-    await advance(30_000);
+    await advance(5_000);
 
     expect(mockGet).toHaveBeenCalledTimes(3);
 
@@ -266,11 +266,11 @@ describe('useConversation polling', () => {
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    await advance(30_000);
+    await advance(5_000);
 
     expect(mockGet).toHaveBeenCalledTimes(2);
 
-    await advance(60_000);
+    await advance(10_000);
 
     expect(mockGet).toHaveBeenCalledTimes(2);
 
@@ -296,7 +296,7 @@ describe('useConversation polling', () => {
 
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
-    await advance(60_000);
+    await advance(10_000);
 
     expect(mockGet).not.toHaveBeenCalled();
 
@@ -313,7 +313,7 @@ describe('useConversation polling', () => {
 
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
-    await advance(60_000);
+    await advance(10_000);
 
     expect(mockGet).not.toHaveBeenCalled();
 
@@ -329,7 +329,7 @@ describe('useConversation polling', () => {
     await waitFor(() => expect(result.current.conversation).toBeDefined());
     const firstConversation = result.current.conversation;
 
-    await advance(30_000);
+    await advance(5_000);
 
     expect(mockGet).toHaveBeenCalledTimes(2);
     expect(result.current.conversation).toBe(firstConversation);
