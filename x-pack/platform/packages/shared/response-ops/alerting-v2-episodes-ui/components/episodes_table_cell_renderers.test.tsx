@@ -461,4 +461,44 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
     expect(screen.getByTestId('episodeRuleCellBreachQuery')).toHaveTextContent('FROM My Rule');
   });
+
+  it('renders classic rule via rules cache when resolved by classic fallback', () => {
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      supports_actions: false,
+      supports_timeline: false,
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic CPU Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
+  });
+
+  it('renders classic rule name without query when rowHeight > 1 and rule has no query', () => {
+    const v1Rule = {
+      metadata: { name: 'Classic CPU Rule' },
+    } as unknown as Rule;
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      supports_actions: false,
+      supports_timeline: false,
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ 'v1-rule-id': v1Rule }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
+    expect(screen.queryByRole('code')).not.toBeInTheDocument();
+  });
 });
