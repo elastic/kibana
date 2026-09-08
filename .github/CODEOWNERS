@@ -843,6 +843,7 @@ src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/inspect_component @elastic/appex-sharedux
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
+src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints @elastic/kibana-security
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-presentation
@@ -929,7 +930,6 @@ src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
 src/platform/test/common/plugins/otel_metrics @elastic/obs-signals-metrics-team
 src/platform/test/health_gateway/plugins/status @elastic/kibana-core
-src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
 src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
@@ -1145,7 +1145,7 @@ x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/rna-project-team
-x-pack/platform/packages/shared/response-ops/alerting-v2-utils @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-utils @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
@@ -1335,7 +1335,6 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-s
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
-x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
@@ -2493,8 +2492,6 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
-/src/platform/test/interactive_setup_api_integration/ @elastic/kibana-security
-/src/platform/test/interactive_setup_functional/ @elastic/kibana-security
 /src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
