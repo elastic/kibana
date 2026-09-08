@@ -335,20 +335,14 @@ steps:
 
 
       - name: apply_risk_score_tuning
-        type: kibana.request
+        type: security.patchRule
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_risk_score == true }}
         on-failure:
           continue: true
         with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
+          patch:
             id: "{{ foreach.item.0 }}"
             risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
             severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
