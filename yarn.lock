@@ -1922,12 +1922,7 @@
     "@elastic/esql-types" "^4.24.0"
     tslib "2.8.1"
 
-"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.23.0":
-  version "4.23.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.23.0.tgz#58906041d87b7e3070c9091066f5869b0fa68f33"
-  integrity sha512-EJacEr+WVbmgi1IUZTt8UGEzLYeR1wlg/wb6LJj+QfCicXeSajoSkoyDO5Msu7aj3L1spGcYJVDUqR5I2FErdA==
-
-"@elastic/esql-definitions@^4.24.0":
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.23.0", "@elastic/esql-definitions@^4.24.0":
   version "4.24.0"
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.24.0.tgz#39e1e49a1beaf92d8d48b70982b62a3f47a4453b"
   integrity sha512-C546jdmNynpxuYdoOOxDgy2kX80EQoy93ZWU9xggNfZ29JF3Qefg0bp2IizrMRM3qy1lUin0Wj6rcKcWauXOcA==
