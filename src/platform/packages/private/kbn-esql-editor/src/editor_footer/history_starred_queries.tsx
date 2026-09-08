@@ -161,7 +161,7 @@ export const getTableColumns = (
         }
       },
       width: isOnReducedSpaceLayout ? 'auto' : '80px',
-      align: 'center',
+      align: 'center' as const,
       css: { height: '100%' }, // Vertically align icon
     },
     {
