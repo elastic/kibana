@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
+import { EuiBadge, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -63,6 +63,15 @@ const systemWatchBadgeTooltip = i18n.translate(
   }
 );
 
+// TODO: Remove this once non-clickable badges are focusable in AppHeader - tracked in https://github.com/elastic/kibana-team/issues/4062
+const renderSystemWatchBadge = ({ badgeText }: { badgeText: string }) => (
+  <EuiToolTip content={systemWatchBadgeTooltip}>
+    <span tabIndex={0}>
+      <EuiBadge color="hollow">{badgeText}</EuiBadge>
+    </span>
+  </EuiToolTip>
+);
+
 export const WatchStatusPage = ({
   match: {
     params: { id },
@@ -85,10 +94,23 @@ export const WatchStatusPage = ({
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
+  const deleteReturnFocusRef = useRef<(() => void) | undefined>();
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb, statusBreadcrumb]);
   }, [id, setBreadcrumbs]);
+
+  useEffect(() => {
+    if (watchesToDelete.length > 0) {
+      return;
+    }
+    const restoreFocus = deleteReturnFocusRef.current;
+    if (!restoreFocus) {
+      return;
+    }
+    deleteReturnFocusRef.current = undefined;
+    restoreFocus();
+  }, [watchesToDelete]);
 
   const errorCode = getPageErrorCode(watchDetailError);
   const watchName = watchDetail?.name;
@@ -157,7 +179,8 @@ export const WatchStatusPage = ({
               overflow: true,
               isDestructive: true,
               testId: 'deleteWatchButton',
-              run: () => {
+              run: (params) => {
+                deleteReturnFocusRef.current = params?.returnFocus;
                 setWatchesToDelete([watchDetail.id]);
               },
             },
@@ -175,8 +198,7 @@ export const WatchStatusPage = ({
           ? [
               {
                 label: systemWatchBadgeLabel,
-                tooltip: systemWatchBadgeTooltip,
-                color: 'hollow',
+                renderCustomBadge: renderSystemWatchBadge,
               },
             ]
           : undefined
@@ -249,11 +271,13 @@ export const WatchStatusPage = ({
           <DeleteWatchesModal
             callback={(deleted?: string[]) => {
               if (deleted) {
+                deleteReturnFocusRef.current = undefined;
                 goToWatchList();
               }
               setWatchesToDelete([]);
             }}
             watchesToDelete={watchesToDelete}
+            restoreMenuFocus
           />
         </>
       </WatchDetailsContext.Provider>
