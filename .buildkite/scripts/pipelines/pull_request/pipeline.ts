@@ -758,6 +758,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
+    console.error('Testing GitHub stacked PR handling: exiting before uploading pipeline steps');
+    process.exit(1);
+
     flushCancelOnGateFailureMetadata();
     emitPipeline(pipeline);
   } catch (ex) {
