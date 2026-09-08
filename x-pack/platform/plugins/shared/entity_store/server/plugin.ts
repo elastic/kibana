@@ -39,7 +39,7 @@ import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
-import { registerUsageCollector } from './telemetry/usage_collector';
+import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
@@ -69,7 +69,7 @@ export class EntityStorePlugin
     this.logger.debug('Registering telemetry events');
     registerTelemetry(core.analytics);
     if (plugins.usageCollection) {
-      registerUsageCollector(plugins.usageCollection);
+      registerEntityStoreUsageCollector(plugins.usageCollection);
     }
 
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();

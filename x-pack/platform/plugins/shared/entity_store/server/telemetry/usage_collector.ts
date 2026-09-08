@@ -9,22 +9,27 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { EntityStoreGlobalStateOverrides } from '../domain/saved_objects/global_state/constants';
 import { EntityStoreGlobalStateTypeName } from '../domain/saved_objects/global_state/types';
 
-// TODO(legacy-config-migration): remove this entire collector and the code listed below once
-// legacy_global_state_doc_count has been consistently 0 across the fleet for two major versions
-// (signal: no non-zero reports in usage data for the past two releases).
+// Entity store usage collector. Add new fields here as needed — they all land under
+// stack_stats.kibana.plugins.entity_store.* in the telemetry cluster.
 //
+// Querying in the kibana-core space at stack-telemetry.elastic.dev:
+// FROM all-xpack-phone-home
+// | WHERE `stack_stats.kibana.plugins.entity_store.legacy_global_state_doc_count` > 0
+// | STATS total_legacy_clusters = COUNT_DISTINCT(cluster_uuid)
+//
+// TODO(legacy-config-migration): remove legacy_global_state_doc_count (and related code below) once the query above returns 0
 // Code to delete when that condition is met:
-//   - this file + its registration in plugin.ts
+//   - the legacy_global_state_doc_count field in the schema + fetch logic below
 //   - global_state/legacy_defaults.ts
 //   - the `defaultsVersion === 'legacy'` branch in global_state/index.ts (getWithLatestDefaults)
 //   - the `defaultsVersion` field in EntityStoreGlobalStateOverrides (constants.ts)
-//   - optionally: add a model version 5 data_backfill to strip `defaultsVersion` from stored docs;
+//   - optionally: add a model version 5 data_backfill to strip `defaultsVersion` from stored docs
 
 interface EntityStoreUsage {
   legacy_global_state_doc_count: number;
 }
 
-export const registerUsageCollector = (usageCollection: UsageCollectionSetup): void => {
+export const registerEntityStoreUsageCollector = (usageCollection: UsageCollectionSetup): void => {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<EntityStoreUsage>({
       type: 'entity_store',
@@ -34,7 +39,7 @@ export const registerUsageCollector = (usageCollection: UsageCollectionSetup): v
           type: 'long',
           _meta: {
             description:
-              'Number of entity store global state docs still in legacy config format (defaultsVersion !== latest). Reaches 0 when all stores have been written to at least once after the 10.4 upgrade.',
+              'Number of entity store global state docs still in legacy config format (defaultsVersion !== latest). Reaches 0 when all stores have been written to at least once',
           },
         },
       },
