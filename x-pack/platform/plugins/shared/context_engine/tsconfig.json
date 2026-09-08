@@ -73,6 +73,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/react-hooks",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/workflows-management-plugin"
   ]
 }

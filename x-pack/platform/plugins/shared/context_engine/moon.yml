@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/react-hooks'
   - '@kbn/esql-utils'
+  - '@kbn/workflows-management-plugin'
 tags:
   - plugin
   - prod

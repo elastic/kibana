@@ -113,7 +113,7 @@ export interface PutAiIndexResponse {
   status: 'created' | 'updated';
 }
 
-export interface DeleteAiIndexResponse {  
+export interface DeleteAiIndexResponse {
   acknowledged: boolean;
   errors: string[];
 }

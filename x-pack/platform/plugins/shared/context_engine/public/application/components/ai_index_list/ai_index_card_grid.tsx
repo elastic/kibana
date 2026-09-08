@@ -7,7 +7,11 @@
 
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGrid, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useContentListItems, useContentListPhase, useContentListSearch } from '@kbn/content-list-provider';
+import {
+  useContentListItems,
+  useContentListPhase,
+  useContentListSearch,
+} from '@kbn/content-list-provider';
 import React, { useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useNavigation } from '../../hooks/use_navigation';

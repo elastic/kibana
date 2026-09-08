@@ -64,7 +64,9 @@ export const deleteAutomationResources = async ({
 
   if (!workflowsManagementApi) {
     const message = 'Workflows management is unavailable.';
-    logger.warn(`Deleted AI index '${aiIndexId}', but could not delete its automations: ${message}`);
+    logger.warn(
+      `Deleted AI index '${aiIndexId}', but could not delete its automations: ${message}`
+    );
     return [`Failed to delete automations: ${message}`];
   }
 
@@ -77,7 +79,9 @@ export const deleteAutomationResources = async ({
       logger.warn(
         `Deleted AI index '${aiIndexId}', but failed to delete ${result.failures.length} of ${workflowIds.length} automations.`
       );
-      return result.failures.map(({ id, error }) => `Failed to delete automation '${id}': ${error}`);
+      return result.failures.map(
+        ({ id, error }) => `Failed to delete automation '${id}': ${error}`
+      );
     }
 
     return [];
