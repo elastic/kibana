@@ -312,6 +312,11 @@ export const topNavStrings = {
       defaultMessage: 'Additional save options',
     }),
   },
+  history: {
+    label: i18n.translate('dashboard.topNav.historyLabel', {
+      defaultMessage: 'History',
+    }),
+  },
   unsavedChangesTooltip: i18n.translate('dashboard.topNav.unsavedChangesTooltip', {
     defaultMessage: 'You have unsaved changes',
   }),

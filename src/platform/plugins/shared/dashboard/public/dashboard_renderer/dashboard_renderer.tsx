@@ -228,12 +228,8 @@ export function DashboardRenderer({
           <KibanaContextProvider services={{ uiActions: uiActionsService }}>
             <DashboardContext.Provider value={dashboard.api}>
               <DashboardInternalContext.Provider value={dashboard.internalApi}>
-                <QueryClientProvider client={dashboardQueryClient}>
-                  <DashboardChangeHistoryProvider dashboardId={savedObjectId ?? 'new-dashboard'}>
-                    {dashboard.showControlGroup && <DashboardControlsRenderer />}
-                    <DashboardViewport />
-                  </DashboardChangeHistoryProvider>
-                </QueryClientProvider>
+                {dashboard.showControlGroup && <DashboardControlsRenderer />}
+                <DashboardViewport />
               </DashboardInternalContext.Provider>
             </DashboardContext.Provider>
           </KibanaContextProvider>
