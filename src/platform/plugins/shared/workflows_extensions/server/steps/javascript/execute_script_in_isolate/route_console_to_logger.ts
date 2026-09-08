@@ -7,5 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './javascript';
+import type { ScriptLogger } from './script_logger';
+
+export const routeConsoleToLogger = (
+  level: string,
+  message: string,
+  logger: ScriptLogger
+): void => {
+  switch (level) {
+    case 'debug':
+      logger.debug(message);
+      return;
+    case 'warn':
+      logger.warn(message);
+      return;
+    case 'error':
+      logger.error(message);
+      return;
+    case 'info':
+    default:
+      logger.info(message);
+  }
+};

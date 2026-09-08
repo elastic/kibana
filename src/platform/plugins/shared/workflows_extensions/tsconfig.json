@@ -28,7 +28,7 @@
     "@kbn/std",
     "@kbn/logging-mocks",
     "@kbn/logging",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
   ],
   "exclude": ["target/**/*"]
 }

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './javascript';
+export const createCatastrophicError = (message: string): Error =>
+  new Error(`Script isolate encountered a catastrophic error${message ? `: ${message}` : ''}`);

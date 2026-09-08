@@ -52,6 +52,7 @@ jszip
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
+isolated-vm
 just-bash
 typescript-7
 immer-v9
