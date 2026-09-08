@@ -1,142 +1,127 @@
-# Packaged multi-source ETL on Kibana
+# Reference architecture: packaged multi-source ETL on Kibana
 
-This reference architecture describes how Kibana packages multi-source
-extract-transform-load (ETL) pipelines using Fleet, Connectors v2, Workflows,
-Agent Builder, and Elasticsearch.
+**Status:** implemented
+**Audience:** architects and package authors
 
-## Architecture overview
+One page describing the platform shape for integrations that ingest from remote
+APIs and analyse the result entirely within the Elastic Stack — no Elastic Agent
+involved.
+
+This page is **product-agnostic**. A concrete implementation appears in the
+appendix as an example, not as the definition.
+
+## The shape
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     Fleet Package                                    │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
-│  │ Manifest │  │ Workflow │  │ ES|QL    │  │ Alerting │            │
-│  │ (vars)   │  │ Assets   │  │ Views    │  │ Templates│            │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘            │
-│       │              │              │              │                  │
-│  ┌────┴──────────────┴──────────────┴──────────────┴─────┐         │
-│  │  Install State Machine (Fleet)                         │         │
-│  └────────────────────────┬──────────────────────────────┘         │
-└───────────────────────────┼─────────────────────────────────────────┘
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-     ┌──────────────┐ ┌──────────┐ ┌──────────────┐
-     │ Connectors   │ │ Workflows│ │ Elasticsearch │
-     │ v2 (ingest)  │ │ (ETL)    │ │ (indices +    │
-     │              │ │          │ │  ES|QL views) │
-     └──────┬───────┘ └────┬─────┘ └──────┬───────┘
-            │              │              │
-            └──────────────┤──────────────┘
-                           │
-                    ┌──────┴───────┐
-                    │ Agent Builder│
-                    │ (analysis)   │
-                    └──────┬───────┘
-                           │
-                    ┌──────┴───────┐
-                    │  Dashboards  │
-                    └──────────────┘
+                         ┌──────────────────────────────────┐
+                         │  Fleet package                   │
+                         │  assets + manifest vars          │
+                         └────────────────┬─────────────────┘
+                                          │ install
+             ┌────────────────────────────┼────────────────────────────┐
+             ▼                            ▼                            ▼
+   ┌──────────────────┐        ┌────────────────────┐       ┌────────────────────┐
+   │  Connectors      │        │  Workflows         │       │  Alerting rule     │
+   │  (ingest plane)  │◀───────│  (scheduled ETL)   │       │  templates         │
+   └────────┬─────────┘  calls └─────────┬──────────┘       └─────────┬──────────┘
+            │                            │ writes                     │ creates
+            ▼                            ▼                            ▼
+   ┌──────────────────┐        ┌────────────────────┐       ┌────────────────────┐
+   │  Remote APIs     │        │  Elasticsearch     │       │  Rules             │
+   │                  │        │  indices + ES|QL   │       │  (disabled)        │
+   └──────────────────┘        └─────────┬──────────┘       └────────────────────┘
+                                         │ reads
+                          ┌──────────────┴───────────────┐
+                          ▼                              ▼
+                ┌────────────────────┐        ┌────────────────────┐
+                │  Agent Builder     │        │  Dashboards        │
+                │  (analysis)        │        │                    │
+                └────────────────────┘        └────────────────────┘
 ```
 
 ## Components
 
-### Fleet package
+| Component | Role | Owns |
+| --- | --- | --- |
+| **Fleet package** | Unit of distribution and upgrade | Assets, manifest vars, install lifecycle |
+| **Connectors** | Ingest plane — authenticated transport to remote APIs | Auth, transport, rate-limit surface |
+| **Workflows** | Scheduled ETL — query, map, write | Checkpoints, pagination, document shape |
+| **Elasticsearch** | Storage and query | Indices, mappings, ES\|QL views |
+| **Agent Builder** | Analysis over stored data | Instructions, tool bindings |
+| **Alerting** | Notification on stored data | Rule params, actions |
+| **Dashboards** | Visualisation | Panels |
 
-A Fleet package bundles all assets needed for an integration:
+## Design rules
 
-- **Manifest** — declares variables, asset types, and install behavior.
-  Includes opt-in flags like `create_alerting_rules: true` and
-  `workflows.default_enabled`.
-- **Workflow assets** — YAML workflow definitions installed via
-  `step_install_workflow_assets`. Dependencies between workflows are
-  respected (dependency-ordered install).
-- **ES|QL view assets** — Curated views installed via
-  `step_install_esql_views`, providing reusable query surfaces.
-- **Alerting rule templates** — JSON templates materialized as disabled
-  rules when `create_alerting_rules: true` is set.
-- **Index templates** — ES index templates for data streams.
+**1. Connectors transport; workflows map.**
+A connector must not emit a product's document shape. The mapping from an API
+record to an index document belongs in the workflow, or the connector becomes
+usable by exactly one consumer and its schema changes ship on the platform
+release cadence.
 
-### Connectors v2 (ingest plane)
+**2. The package ships placeholders, never IDs.**
+A package cannot know the connector IDs of its target stack. Assets ship
+placeholder tokens resolved at install from package policy vars, with
+already-resolved values carried forward on upgrade.
 
-Connectors provide the source-specific ingest logic. Each connector
-fetches data from an external system (GitHub, Slack, Google Drive, etc.)
-and writes raw documents to an Elasticsearch index.
+**3. Analysis reads storage, never the source.**
+Agents and dashboards query Elasticsearch, not the remote API. This keeps
+analysis fast, offline-capable, and free of rate-limit coupling. Ingest is the
+only component that talks to the source.
 
-### Workflows (scheduled ETL)
+**4. Nothing notifies until an operator opts in.**
+Rules install disabled with no actions. The package cannot know where alerts
+should go or whether its thresholds suit the deployment.
 
-Workflows define the scheduled ETL pipeline using stock steps:
+**5. Every scheduled path is bounded and idempotent.**
+Concurrency guards, iteration caps, timeouts, and ID-keyed bulk writes are
+mandatory, not optional hardening. Scheduled work that overlaps or retries
+without idempotence corrupts data quietly.
 
-- `elasticsearch.index` — Single-document upsert by `_id` (idempotent).
-- `elasticsearch.bulk` — Batch upsert with `id_field` for deduplication.
-- `elasticsearch.esql.query` — Read-only ES|QL query.
-- `elasticsearch.esql.materialize` — Query a view and persist results
-  to a snapshot index.
-- `data.loadCheckpoint` — Load checkpoint state for incremental syncs.
-- `ai.agent` — Run an LLM agent for analysis or enrichment.
-- `foreach` — Iterate over a dataset and run sub-steps per item.
-- `workflow.execute` — Call a sub-workflow.
+## Extension points
 
-Workflows are installed disabled or enabled based on the manifest flag
-`workflows.default_enabled`. Schedules are defined in the workflow YAML.
+| To add… | Do this |
+| --- | --- |
+| A new data source | Add a connector spec + ingest workflows to the package |
+| A new query against an existing source | Register a package-shipped query template |
+| New analysis | Add an agent asset binding platform tools |
+| New notification | Add an alerting rule template |
+| A new derived view | Add an ES\|QL view or index template |
 
-### Elasticsearch (indices + views)
+The point of the shape is that each of these is an **asset in a package**, not a
+platform code change.
 
-- **Raw indices** — Populated by connectors.
-- **Enriched indices** — Populated by workflow ETL steps.
-- **Snapshot indices** — Populated by `elasticsearch.esql.materialize`
-  for trend analysis.
-- **ES|QL views** — Curated queries that provide a stable query surface
-  for dashboards and agents.
+## What this is not
 
-### Agent Builder (analysis)
+- **Not agent-based collection.** No Elastic Agent participates. Use a standard
+  integration when data originates on a host you control.
+- **Not hosted agentless.** Hosted agentless still runs an agent that Elastic
+  operates. Here there is no agent at all.
+- **Not a content sync.** For bulk corpus search, an Elasticsearch content
+  connector is the right tool.
 
-Agent Builder agents consume enriched indices and ES|QL views to
-provide natural-language analysis. Agents can:
+## Appendix: SDLC Intelligence as an example
 
-- Query ES|QL views for current state.
-- Run read-only tools against Elasticsearch.
-- Produce structured output validated against declared schemas.
+One implementation of this architecture ingests software delivery activity:
 
-### Dashboards
+| Generic component | SDLC instance |
+| --- | --- |
+| Fleet package | `sdlc_intel` |
+| Connectors | GitHub (GraphQL action connector), plus other SDLC sources |
+| Workflows | ~19 scheduled ingest workflows, checkpointed per source and entity type |
+| Indices | Issues, pull requests, comments, relationships |
+| Agent Builder | Delivery-analysis agents over those indices |
+| Alerting | Delivery-health rule templates |
 
-Dashboards visualize the enriched and snapshot indices. They reference
-ES|QL views for consistent query patterns across visualizations.
+Its choices are illustrative. The GraphQL action-connector plane was required
+because the source exposes some data (Projects V2) only over GraphQL — a
+source-specific constraint, not an architectural rule.
 
-## Install lifecycle
+## Related
 
-1. **Install** — Fleet installs all package assets in dependency order.
-   Workflows are created (disabled by default). Alerting rules are
-   materialized (disabled, action-less).
-
-2. **Configure** — Admin wires connectors, enables workflows, attaches
-   alerting actions, and enables rules.
-
-3. **Run** — Workflows execute on schedule, ingesting and transforming
-   data. Agents analyze the results. Dashboards render in real time.
-
-4. **Upgrade** — Fleet re-runs install steps. Same-ID assets are updated
-   in place (no duplicates). Removed assets are orphaned (not deleted
-   automatically — admin must clean up).
-
-5. **Uninstall** — Fleet removes all package-managed assets.
-
-## Appendix: SDLC Visibility Platform example
-
-The SDLC Visibility Platform is an example integration built on this
-architecture:
-
-- **Sources**: GitHub (catalog, PRs, issues), Slack, Google Drive.
-- **Connectors**: GitHub connector, Slack connector.
-- **Workflows**: Catalog ingestion, PR enrichment, stale-epic detection.
-- **Indices**: `sdlc-epic-phases`, `sdlc-project-items-enriched`.
-- **Views**: `sdlc-epic-phases-view`, `sdlc-project-items-enriched-view`.
-- **Agents**: SDLC analysis agent for development intelligence queries.
-- **Dashboards**: Epic phase distribution, PR throughput, reviewer load.
-- **Alerting**: Stale epic detection, missing PRD, bottleneck reviewer.
-
-## See also
-
-- [Integration alerting templates](integration-alerting-templates.md)
-- [Alerting settings](../configuration-reference/alerting-settings.md)
-- [Fleet settings](../configuration-reference/fleet-settings.md)
+- [Fleet package authoring guide (Kibana-only ETL)](./package-authoring-guide.md)
+- [Workflow ETL cookbook](../workflows/etl-cookbook.md)
+- [Placeholder substitution convention](./placeholder-substitution.md)
+- [Agent Builder fleet agent authoring guide](../agent-builder/fleet-agent-authoring.md)
+- [GitHub action-connector vs content-connector decision guide](../connectors/github-connector-decision.md)
+- [Integration alerting templates enablement guide](./integration-alerting-templates.md)

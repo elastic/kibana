@@ -1,78 +1,99 @@
-# Integration alerting templates enablement
+# Integration alerting templates: behaviour and enablement
 
-Integration packages can ship alerting rule templates that define proactive
-detection rules for common operational issues. This guide explains how these
-templates behave during package installation and how administrators can
-enable them.
+**Status:** implemented
+**Audience:** operators installing integrations that ship alerting rule templates
+**Source of truth:** `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_create_alerting_assets.ts`
 
-## Current behavior (pre-FLEET-002)
+A Fleet package can ship **alerting rule templates** in
+`kibana/alerting_rule_template/`. This page describes what happens to them at
+install time and what an operator must do to get alerts firing.
 
-Alerting rule templates are imported as saved objects during package
-installation. However, they are **not** automatically materialized as live
-alerting rules. An administrator must:
+## The short version
 
-1. Navigate to **Stack Management → Alerts → Rules**.
-2. Find the imported template.
-3. Create a new rule from the template.
-4. Configure the rule schedule, threshold, and actions.
-5. Enable the rule.
+Installing the package **creates the rules, disabled, with no actions**. Nothing
+fires until an operator adds actions and enables them. This is intentional, not
+an oversight.
 
-This means templates are inert until an admin manually creates rules from
-them. No alerts fire until this manual step is completed.
+## Why rules are not enabled on install
 
-## Post-FLEET-002 behavior
+An installed integration cannot know:
 
-When a package manifest includes `create_alerting_rules: true`, shipped
-`alerting_rule_template/*.json` assets are automatically materialized as
-real alerting rules on install. These rules are:
+- **where** alerts should go — no connector or channel is configured yet, and
+- **whether** the thresholds suit this deployment.
 
-- **Created disabled** — no alerts fire until an admin explicitly enables them.
-- **Action-less** — no connectors or notifications are wired. The admin must
-  attach a connector action (Slack, email, webhook) before enabling.
-- **Uninstallable** — removing the package removes the materialized rules.
-- **Upgrade-safe** — re-install or upgrade reconciles rules without creating
-  duplicates.
+A rule enabled on install with no actions would evaluate on a schedule and
+notify nobody, producing load and a false sense of coverage. Worse, one that
+guessed a channel would page a team that never opted in.
 
-### Enablement steps
+So install creates each rule with:
 
-1. Install or upgrade the integration package in **Fleet → Integrations**.
-2. Navigate to the integration's **Alerting** tab.
-3. Review the created (disabled) rules.
-4. For each rule:
-   a. Click **Edit**.
-   b. Attach a connector action (e.g., Slack notification).
-   c. Per NFR-001/002, default the action target to a **team channel or team
-      lead** — never an individual.
-   d. Click **Enable**.
-
-### Manifest opt-in
-
-Package authors add the flag to `manifest.yml`:
-
-```yaml
-create_alerting_rules: true
+```
+enabled: false
+actions: []
 ```
 
-When absent or `false`, the current behavior (templates as saved objects only)
-is preserved. This ensures backward compatibility for existing packages.
+The rule exists, is visible, and is ready — but is inert until an operator
+completes it.
 
-## SDLC integration example
+## Historical behaviour
 
-The SDLC Visibility Platform ships four alerting templates:
+Before this behaviour landed, templates imported as saved objects **only**. No
+rule was created; an admin had to find each template and hand-create a rule from
+it. This caused a recurring support question — *"I installed the integration,
+why are there no rules?"* — because nothing in the UI indicated a manual step
+remained.
 
-| Template | Trigger | Purpose |
-|---|---|---|
-| `sdlc-stale-epic-thin-tickets` | ES\|QL query | Flags epics with fewer than 3 P4 tickets |
-| `sdlc-missing-prd` | ES\|QL query | Flags epics without a linked PRD |
-| `sdlc-bottleneck-reviewer` | ES\|QL query | Flags PRs stuck in review beyond SLA |
-| `sdlc-quarterly-trend` | ES\|QL query | Snapshots epic phase distribution quarterly |
+Rules are now materialised at install. The manual step that remains is adding
+actions and enabling, which is the step that genuinely requires a human
+decision.
 
-With `create_alerting_rules: true` in the SDLC package manifest, these become
-disabled rules on install. An admin attaches a Slack connector targeting the
-`#sec-ai-dev-accelerators` channel and enables each rule.
+## Enablement steps
 
-## See also
+1. **Create a connector** for the destination (Slack, email, PagerDuty, …) under
+   *Stack Management → Connectors*, if one does not exist.
+2. Open *Stack Management → Alerts and Insights → Rules*. Rules from the package
+   appear disabled, named after their templates.
+3. **Open a rule → Actions → add an action**, selecting the connector and the
+   message. Set the action frequency (typically *on active alert*).
+4. **Review the rule params** — thresholds ship as sensible defaults, not as
+   values tuned for your data volume.
+5. **Enable** the rule.
 
-- [Alerting settings](../configuration-reference/alerting-settings.md)
-- [Fleet settings](../configuration-reference/fleet-settings.md)
-- [Connectors and actions](../connectors-kibana/alerting-cases-connectors.md)
+Repeat per rule; enablement is deliberately per-rule so an operator can adopt a
+subset without taking all of them.
+
+### Notification destination
+
+Route integration alerts to the **owning team's channel**, not a general alerts
+channel. Alerts from an integration are actionable by the team that owns the
+integrated system; sending them to a catch-all channel is the most common cause
+of alert fatigue and silent muting.
+
+## Reinstall and upgrade
+
+On reinstall, rules that already exist are **not recreated**, which preserves the
+actions and enabled state an operator configured.
+
+There is one consequence worth knowing: a rule's params are refreshed only where
+the install step detects a data stream pattern change. **Other template content
+edits — for example a changed threshold in a new package version — do not
+propagate to an already-created rule.** To pick those up, delete the rule and
+reinstall the package, which recreates it from the current template.
+
+This is the deliberate trade: preserving operator configuration is worth more
+than automatically pushing template edits over it, since the latter could
+silently retune an alert a team depends on.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Rules exist but never fire | Still disabled, or no actions attached | Add an action, then enable |
+| Rule enabled but nobody notified | `actions: []` — enabling alone does not add a destination | Add an action to the rule |
+| Threshold change in a package upgrade had no effect | Existing rules are not overwritten | Delete the rule and reinstall |
+| No rules at all after install | Package ships no templates, or install failed before the alerting step | Check the package contents and install logs |
+
+## Related
+
+- [Fleet package authoring guide (Kibana-only ETL)](./package-authoring-guide.md)
+- [Reference architecture: packaged multi-source ETL on Kibana](./packaged-etl-architecture.md)

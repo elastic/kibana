@@ -1,61 +1,129 @@
 # Agent Builder fleet agent authoring guide
 
-How to author `kibana/agent/*.yaml` files for package-managed agents.
+**Status:** implemented
+**Audience:** package authors shipping Agent Builder agents
+**Source of truth:** `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_agent_assets.ts`
 
-## File structure
+A Fleet package can ship **Agent Builder agents** so an integration arrives with
+analysis capability, not just data. This page covers the asset format and the
+install contract.
 
-```yaml
-# kibana/agent/my_agent.yaml
-name: my-sdlc-agent
-description: Analyzes SDLC metrics from GitHub data
-instructions: |
-  You are an SDLC analysis agent. Use the available tools to:
-  1. Query GitHub for pull request data
-  2. Identify bottleneck patterns
-  3. Generate summary insights
-tools:
-  - elasticsearch.search
-  - elasticsearch.esql.query
-  - integration_knowledge
-connector_placeholders:
-  - REPLACE_WITH_CONNECTOR_github
-knowledge:
-  - my-integration-kb
+## Asset location
+
+Agents are Kibana assets:
+
+```
+kibana/agent/<name>.yaml
 ```
 
-## Tools
+Each YAML file becomes exactly one agent.
 
-Package agents use platform tools only — no product builtin tools:
-
-| Tool | Purpose |
-|------|---------|
-| `elasticsearch.search` | Query ES indices |
-| `elasticsearch.esql.query` | Run ES|QL queries |
-| `elasticsearch.esql.materialize` | Snapshot query results to index |
-| `integration_knowledge` | Retrieve integration KB content |
-
-## Connector placeholders
-
-Use `REPLACE_WITH_CONNECTOR_*` for connector IDs that resolve at install time.
-
-## Knowledge dependencies
-
-Reference knowledge base docs from the package's `docs/` directory.
-The KB is indexed on install (FLEET-010) and automatically available to the agent (AB-003).
-
-## Agent-id references
-
-Other workflows reference the agent via `REPLACE_WITH_FLEET_AGENT_<name>`:
+## Asset format
 
 ```yaml
-# workflow YAML
-steps:
-  - id: analyze
-    ai.agent:
-      agent_id: "${REPLACE_WITH_FLEET_AGENT_my_agent}"
+name: SDLC delivery analyst
+description: >
+  Answers questions about issue and PR flow across the org, using the
+  SDLC intelligence indices.
+labels:
+  - sdlc
+avatar_color: "#0B64DD"
+avatar_symbol: SD
+configuration:
+  instructions: >
+    You analyse software delivery activity. Prefer aggregate queries over
+    per-record listing. State the time window of every answer.
+  tools:
+    - tool_ids:
+        - platform.core.search
+        - platform.core.list_indices
 ```
 
-## Install
+`name`, `description`, and at least one entry under `configuration.tools` are
+**required**. A file missing any of them fails the install with a message naming
+the offending asset — loudly, rather than importing a half-configured agent.
 
-Agent YAML files are installed by `step_install_agent_assets.ts` during package install.
-Managed agents are read-only in the UI (AB-004) — users cannot edit them directly.
+## Only platform tools may be bound
+
+A packaged agent may bind only tools whose IDs begin with `platform.`.
+
+Binding a user-created tool would make the package's behaviour depend on a
+saved object the package does not own and cannot guarantee exists — on install
+into another space or stack, the agent breaks. That is precisely the coupling
+package-managed agents exist to avoid, so the install **fails** rather than
+importing an agent that will not work.
+
+If your agent needs a capability no platform tool provides, the answer is to add
+the platform tool, not to bind a local one.
+
+## Connector references
+
+Agent YAML goes through the same placeholder substitution as workflow assets, so
+a connector reference is spelled identically:
+
+```yaml
+    connector-id: REPLACE_WITH_GITHUB_CONNECTOR_ID
+```
+
+See the [placeholder substitution convention](../fleet/placeholder-substitution.md).
+Sharing the mechanism is deliberate — an agent and a workflow referencing the
+same connector use the same token.
+
+## Identity and upgrades
+
+The agent ID is derived deterministically from the package name, space, and file
+name:
+
+```
+fleet-<space>-<pkg>-<file>
+```
+
+Two consequences for authors:
+
+- **Renaming a YAML file creates a new agent.** The old one is not updated; it is
+  orphaned. Keep file names stable across versions.
+- **Upgrades overwrite.** Install uses create-or-update against the derived ID,
+  so a new package version replaces the agent definition, including
+  instructions.
+
+Do not attempt to recover the owning package by slicing the ID — hyphenated
+package names make positional slicing wrong. The owning package is recorded in a
+label instead (below).
+
+## Governance metadata
+
+Every packaged agent is installed with:
+
+| Field | Value | Effect |
+| --- | --- | --- |
+| `readonly` | `true` | UI shows a managed badge; instruction edits are warned or blocked |
+| `labels` | `managed_by_package` | Marks the agent as package-managed |
+| `labels` | `fleet-package:<pkgName>` | Identifies the owning package for upgrades |
+
+Author-supplied `labels` are preserved and merged, deduplicated.
+
+The read-only marking matters because upgrades overwrite: an operator who edits a
+managed agent's instructions would silently lose that edit on the next package
+upgrade. Marking it managed makes the ownership explicit up front.
+
+## Graceful degradation
+
+If Agent Builder is unavailable on the target stack, agent installation is
+**skipped with a debug log** — it does not fail the package install. A package
+shipping both data and agents therefore still installs usefully on a stack
+without Agent Builder.
+
+## Checklist
+
+- [ ] One agent per file under `kibana/agent/`
+- [ ] `name`, `description`, and `configuration.tools` present
+- [ ] Only `platform.*` tool IDs bound
+- [ ] Connector references use `REPLACE_WITH_*` placeholders
+- [ ] File names stable across package versions
+- [ ] Instructions state the agent's data scope
+
+## Related
+
+- [Fleet package authoring guide (Kibana-only ETL)](../fleet/package-authoring-guide.md)
+- [Placeholder substitution convention](../fleet/placeholder-substitution.md)
+- [GitHub action-connector vs content-connector decision guide](../connectors/github-connector-decision.md)
