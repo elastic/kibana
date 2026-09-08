@@ -7,6 +7,8 @@
 
 import type {
   FieldCapsFieldCapability,
+  MappingProperty,
+  MappingRuntimeField,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -20,19 +22,6 @@ import type { AiIndexField } from './types';
 
 const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
-
-/**
- * Field name to mapping, as `_mapping` nests it: `properties` holds an object's sub-fields,
- * `fields` a field's multi-fields. Both nest the same shape, hence the recursion.
- */
-interface MappingPropertyMap {
-  [name: string]: {
-    type?: string;
-    properties?: MappingPropertyMap;
-    fields?: MappingPropertyMap;
-  };
-}
-
 export interface AiIndexFieldsDescription {
   fields: AiIndexField[];
   /** Searchable `semantic_text` paths among `fields`. */
@@ -52,17 +41,35 @@ export interface DescribeAiIndexFieldsParams {
  * fields (`mapping.runtime`, composite subfields under `fields`) are included too.
  */
 const flattenMappingTypes = (mapping: MappingTypeMapping): Array<[string, string]> => {
-  const walk = (properties: MappingPropertyMap, prefix: string): Array<[string, string]> =>
+  const joinPath = (prefix: string, name: string) => (prefix ? `${prefix}.${name}` : name);
+
+  const walk = (
+    properties: Record<string, MappingProperty>,
+    prefix: string
+  ): Array<[string, string]> =>
     Object.entries(properties).flatMap(([name, property]) => {
-      const path = prefix ? `${prefix}.${name}` : name;
+      const path = joinPath(prefix, name);
       const own: Array<[string, string]> = property.type ? [[path, property.type]] : [];
+      const subFields = 'properties' in property ? property.properties : undefined;
       return [
         ...own,
-        ...(property.properties ? walk(property.properties, path) : []),
+        ...(subFields ? walk(subFields, path) : []),
         ...(property.fields ? walk(property.fields, path) : []),
       ];
     });
-  return [...walk(mapping.properties ?? {}, ''), ...walk(mapping.runtime ?? {}, '')];
+
+  const runtime = ([name, field]: [string, MappingRuntimeField]): Array<[string, string]> => [
+    [name, field.type],
+    ...Object.entries(field.fields ?? {}).map(([sub, { type }]): [string, string] => [
+      joinPath(name, sub),
+      type,
+    ]),
+  ];
+
+  return [
+    ...walk(mapping.properties ?? {}, ''),
+    ...Object.entries(mapping.runtime ?? {}).flatMap(runtime),
+  ];
 };
 
 /** True only if every `_field_caps` type entry for path supports it. */
