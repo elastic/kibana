@@ -47,7 +47,7 @@ spaceTest.describe(
     // per-test budget is too short for security_solution rule execution.
     spaceTest.setTimeout(5 * 60_000);
 
-    spaceTest.beforeEach(async ({ browserAuth, esClient, kbnClient, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ apiServices, browserAuth, esClient, kbnClient, scoutSpace }) => {
       const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       sourceDataStream = `${SOURCE_DATA_STREAM_PREFIX}-${idSegment}`;
       dataViewId = `scout-dataview-exception-${idSegment}`;
@@ -83,25 +83,19 @@ spaceTest.describe(
       });
 
       // Data-view-backed query rule: `data_view_id` set, no `index`. This is the
-      // path `useFetchIndexPatterns` resolves through `data.dataViews.get`.
-      await kbnClient.request({
-        method: 'POST',
-        path: `/s/${scoutSpace.id}/api/detection_engine/rules`,
-        body: {
-          type: 'query',
-          language: 'kuery',
-          query: '*:*',
-          data_view_id: dataViewId,
-          name: ruleName,
-          description: 'Regression coverage for the exception flyout on a data-view-backed rule',
-          severity: 'high',
-          risk_score: 1,
-          rule_id: `data-view-exception-${idSegment}`,
-          enabled: true,
-          from: '2019-01-01T00:00:00.000Z',
-          interval: '1m',
-        },
-        retries: 0,
+      // path `useFetchIndexPatterns` resolves through `data.dataViews.get`. Shared
+      // with the sibling index-pattern specs via the detectionRule API service.
+      await apiServices.detectionRule.createCustomQueryRule({
+        type: 'query',
+        query: '*:*',
+        data_view_id: dataViewId,
+        name: ruleName,
+        description: 'Regression coverage for the exception flyout on a data-view-backed rule',
+        severity: 'high',
+        risk_score: 1,
+        rule_id: `data-view-exception-${idSegment}`,
+        enabled: true,
+        from: '2019-01-01T00:00:00.000Z',
       });
 
       await browserAuth.loginAsPlatformEngineer();
