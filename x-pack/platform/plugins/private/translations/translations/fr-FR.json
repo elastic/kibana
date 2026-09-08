@@ -22143,7 +22143,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyMultiPlaceholderText": "Sélectionner des stratégies d'agent auxquelles ajouter cette intégration",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText": "Sélectionner une stratégie d'agent à laquelle ajouter cette intégration",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning": "Aucun des agents utilisant la politique d'agent sélectionnée n'est compatible avec cette intégration. Cette intégration nécessite des agents en version {versionCondition}.",
-    "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError": "Aucun des agents utilisant les politiques d'agent sélectionnées n'est compatible avec cette intégration. Cette intégration nécessite des agents sur la version {versionCondition}.",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError": "Cette intégration ne peut être ajoutée qu’une fois par stratégie d’agent.",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "Erreur lors du chargement des stratégies d'agent",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "Erreur lors du chargement des informations de pack",

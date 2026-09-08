@@ -22257,7 +22257,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyMultiPlaceholderText": "この統合を追加するエージェントポリシーを選択",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText": "この統合を追加するエージェントポリシーを選択",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning": "選択されたエージェントポリシーを使用しているエージェントは、いずれもこの統合と互換性がありません。この統合にはバージョン{versionCondition}のエージェントが必要です。",
-    "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError": "選択されたエージェントポリシーを使用しているエージェントは、いずれもこの統合と互換性がありません。この統合にはバージョン {versionCondition}のエージェントが必要です。",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError": "この統合は、エージェントポリシーごとに1回だけ追加できます。",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "エージェントポリシーの読み込みエラー",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "パッケージ情報の読み込みエラー",
