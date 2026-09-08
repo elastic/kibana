@@ -74,7 +74,9 @@ import {
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  MANAGED_OTLP_EXPORTER_DEFAULTS,
 } from '../../common/constants';
+
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
@@ -111,6 +113,7 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
+import { isManagedOtlpEndpoint } from './utils/managed_otlp';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -834,6 +837,21 @@ class OutputService {
       }
       // Kafka does not support proxies — clear any proxy_id silently (#267281)
       data.proxy_id = null;
+    }
+
+    if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
+      if (
+        isManagedOtlpEndpoint(output.otlp_exporter.endpoint) &&
+        output.otlp_exporter.sending_queue !== null
+      ) {
+        data.otlp_exporter = {
+          ...data.otlp_exporter,
+          sending_queue: {
+            ...MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
+            ...output.otlp_exporter.sending_queue,
+          },
+        };
+      }
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
