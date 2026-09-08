@@ -1040,6 +1040,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.workflow_reason": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.workflow_status": Object {
       "array": false,
       "required": false,
