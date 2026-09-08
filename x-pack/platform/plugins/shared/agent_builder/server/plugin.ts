@@ -176,17 +176,23 @@ export class AgentBuilderPlugin
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
-    registerConversationWorkflowSteps(
-      setupDeps.workflowsExtensions,
-      async (request) => {
+    registerConversationWorkflowSteps(setupDeps.workflowsExtensions, {
+      getConversationClient: async (request) => {
         const services = this.serviceManager.internalStart;
         if (!services) {
           throw new Error('Conversation service not available — plugin has not started');
         }
         return services.conversations.getScopedClient({ request });
       },
-      this.isExperimentalEnabled
-    );
+      getAgentRegistry: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Agents service not available — plugin has not started');
+        }
+        return services.agents.getRegistry({ request });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
 
     registerAgentBuilderHandlerContext({ coreSetup });
 

@@ -39,5 +39,9 @@ export function registerWorkflowSteps(
     )
   );
 
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_metadata').then((m) => m.createConversationStepDefinition)
+  );
+
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
 }

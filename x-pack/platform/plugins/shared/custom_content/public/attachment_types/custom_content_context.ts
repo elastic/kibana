@@ -20,7 +20,7 @@ export const customContentContextAttachmentUiDefinition: AttachmentUIDefinition<
   getLabel: (attachment) =>
     attachment.data.panel_title ||
     i18n.translate('xpack.customContent.agentRefine.contextAttachmentLabel', {
-      defaultMessage: 'Custom content panel',
+      defaultMessage: 'Custom panel',
     }),
   getIcon: () => 'sparkles',
   getActionButtons: ({ attachment, isCanvas }) => {
