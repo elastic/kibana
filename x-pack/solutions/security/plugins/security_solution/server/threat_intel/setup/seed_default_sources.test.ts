@@ -316,9 +316,7 @@ describe('seedDefaultSources', () => {
     // Pin the sort field: `_id` needs fielddata that Elasticsearch disables by
     // default, so it throws on a real cluster while a mocked client happily
     // accepts it. A mock cannot catch that, so assert the field explicitly.
-    expect(esClient.search.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ sort: ['_doc'] })
-    );
+    expect(esClient.search.mock.calls[0][0]).toEqual(expect.objectContaining({ sort: ['_doc'] }));
     expect(esClient.search.mock.calls[1][0]).toEqual(
       expect.objectContaining({
         sort: ['_doc'],
