@@ -35,7 +35,9 @@ export const isIacProvisionerEnabled = (): boolean => {
 
 // Providers the IaC Provisioner has blueprints for. Adding one here is not enough on its own:
 // also widen the `provider` literal in server/types/rest_spec/iac_provisioner.ts,
-// server/services/iac_provisioner.ts and common/types/rest_spec/iac_provisioner.ts.
+// server/services/iac_provisioner.ts, common/types/rest_spec/iac_provisioner.ts, and the
+// `cloudProvider !== AWS_CLOUD_PROVIDER` narrowing in
+// server/services/cloud_connectors/iac_key_verification.ts.
 const IAC_PROVISIONER_SUPPORTED_PROVIDERS: readonly CloudProvider[] = [AWS_CLOUD_PROVIDER];
 
 /**

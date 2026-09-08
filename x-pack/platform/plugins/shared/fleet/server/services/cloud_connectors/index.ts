@@ -22,3 +22,12 @@ export {
   type IacIntegrationSelection,
   type ResolvedIacRenderIntegrations,
 } from './iac_integrations';
+
+export {
+  computeIacKeyMismatch,
+  getCurrentIacKey,
+  verifyCloudConnectorIacKey,
+  type GetCurrentIacKeyOptions,
+  type IacKeyMismatchReason,
+  type IacKeyVerification,
+} from './iac_key_verification';
