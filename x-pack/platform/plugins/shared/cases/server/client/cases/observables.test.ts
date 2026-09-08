@@ -234,6 +234,32 @@ describe('addObservable', () => {
 
     expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
+
+  it('does not emit when the persisted case fails response validation', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockCaseService.patchCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, owner: null },
+    } as never);
+
+    await expect(
+      addObservable(
+        caseSO.id,
+        {
+          observable: {
+            typeKey: OBSERVABLE_TYPE_IPV4.key,
+            value: '127.0.0.1',
+            description: '',
+          },
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow();
+
+    expect(mockCaseService.patchCase).toHaveBeenCalled();
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+  });
 });
 
 describe('updateObservable', () => {
@@ -464,6 +490,33 @@ describe('bulkAddObservables', () => {
         mockCasesClient
       )
     ).rejects.toThrow();
+  });
+
+  it('does not emit when the persisted case fails response validation', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockCaseService.patchCase.mockResolvedValue({
+      ...caseSOWithObservables,
+      attributes: { ...caseSOWithObservables.attributes, owner: null },
+    } as never);
+
+    await expect(
+      bulkAddObservables(
+        {
+          caseId: caseSO.id,
+          observables: [
+            {
+              ...mockObservablePost,
+              value: '192.168.0.1',
+            },
+          ],
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow();
+
+    expect(mockCaseService.patchCase).toHaveBeenCalled();
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
 
   it('should return the max number of observables', async () => {

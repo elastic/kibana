@@ -152,13 +152,16 @@ export const extractAndAddObservables = async (
     }
 
     const result = await applyObservablesToCase(caseId, observables, clientArgs);
-    if (result) {
-      // Best-effort path — a bus error here is caught by the outer try and logged.
-      emitObservablesAddedEvent(clientArgs, result.caseWithPatch, result.newlyAddedObservables);
+    if (!result) {
+      logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
+      return;
     }
 
+    // Best-effort path — a bus error here is caught by the outer try and logged.
+    emitObservablesAddedEvent(clientArgs, result.caseWithPatch, result.newlyAddedObservables);
+
     logger.debug(
-      `[extractAndAddObservables] Added ${observables.length} observable(s) to case ${caseId}`
+      `[extractAndAddObservables] Added ${result.newlyAddedObservables.length} observable(s) to case ${caseId}`
     );
   } catch (error) {
     logger.warn(

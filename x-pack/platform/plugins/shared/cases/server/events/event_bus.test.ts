@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CasesEventBus } from './event_bus';
 
 describe('CasesEventBus', () => {
@@ -51,7 +51,8 @@ describe('CasesEventBus', () => {
 
   describe('listener isolation', () => {
     it('isolates a throwing onObservablesAdded subscriber so later subscribers still fire', () => {
-      const eventBus = new CasesEventBus();
+      const logger = loggingSystemMock.createLogger();
+      const eventBus = new CasesEventBus(logger);
       const throwingListener = jest.fn(() => {
         throw new Error('subscriber error');
       });
@@ -71,6 +72,9 @@ describe('CasesEventBus', () => {
 
       expect(throwingListener).toHaveBeenCalledTimes(1);
       expect(laterListener).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Cases event bus listener for "observablesAdded" failed')
+      );
     });
 
     it('isolates a throwing onCaseCreated subscriber so later subscribers still fire', () => {
@@ -161,7 +165,8 @@ describe('CasesEventBus', () => {
     });
 
     it('suppresses async rejections from onObservablesAdded subscribers and still fires later subscribers', async () => {
-      const eventBus = new CasesEventBus();
+      const logger = loggingSystemMock.createLogger();
+      const eventBus = new CasesEventBus(logger);
       const rejectingListener = jest.fn().mockRejectedValue(new Error('async error'));
       const laterListener = jest.fn();
 
@@ -183,6 +188,9 @@ describe('CasesEventBus', () => {
 
       // Let microtasks settle — the rejection is caught internally
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Cases event bus listener for "observablesAdded" failed')
+      );
     });
   });
 

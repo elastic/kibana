@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   CasesEventPayload,
   CasesDomainEventType,
@@ -44,7 +44,7 @@ export type CaseUpdatedEventBusListener<TType extends CasesDomainEventType = Cas
  * Replaces direct client-to-workflows emission with a single bridge listener.
  */
 export class CasesEventBus extends EventEmitter {
-  constructor() {
+  constructor(private readonly logger?: Logger) {
     super();
     this.setMaxListeners(50);
   }
@@ -112,12 +112,17 @@ export class CasesEventBus extends EventEmitter {
         if (result instanceof Promise) {
           // Prevent async listener rejections from becoming unhandled rejections.
           // The Cases mutation has already completed at this point.
-          result.catch(() => {});
+          result.catch((error) => this.logListenerError(eventName, error));
         }
-      } catch {
+      } catch (error) {
         // Isolate sync exceptions so later subscribers still receive the event.
+        this.logListenerError(eventName, error);
       }
     });
+  }
+
+  private logListenerError(eventName: string, error: unknown): void {
+    this.logger?.warn(`Cases event bus listener for "${eventName}" failed: ${error}`);
   }
 
   hasAlertStatusChangedListeners(): boolean {
