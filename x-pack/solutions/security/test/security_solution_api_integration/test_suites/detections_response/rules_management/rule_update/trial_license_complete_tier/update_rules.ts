@@ -967,7 +967,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('should update an existing suspend-process response action', async () => {
+        it('should update a process response action comment and config field', async () => {
           const rule = await createRule(
             supertest,
             log,

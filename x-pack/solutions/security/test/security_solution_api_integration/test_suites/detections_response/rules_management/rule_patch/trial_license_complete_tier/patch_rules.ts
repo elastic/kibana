@@ -803,7 +803,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should persist a process response action with a custom field', async () => {
+        it('should replace response actions with a process action that has a custom field', async () => {
           const responseActions = [
             {
               action_type_id: '.endpoint',
