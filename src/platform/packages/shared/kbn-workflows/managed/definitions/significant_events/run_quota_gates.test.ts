@@ -248,30 +248,21 @@ describe('Significant Events run quota workflow contracts', () => {
     ).toBe(false);
   });
 
-  it('launches investigations only when scheduled consume allows them', () => {
+  it('prevents investigation launch only on explicit denial', () => {
     const guard = findStep(definitions.discovery, 'guard_investigation_quota');
 
     expect(
       evaluateStepCondition(guard, {
-        inputs: { rootTriggeredBy: 'scheduled' },
         steps: { consume_investigation_quota: { output: { allowed: false } } },
       })
     ).toBe(false);
     expect(
       evaluateStepCondition(guard, {
-        inputs: { rootTriggeredBy: 'scheduled' },
         steps: { consume_investigation_quota: { output: { allowed: true } } },
       })
     ).toBe(true);
     expect(
       evaluateStepCondition(guard, {
-        inputs: { rootTriggeredBy: 'scheduled' },
-        steps: { consume_investigation_quota: {} },
-      })
-    ).toBe(false);
-    expect(
-      evaluateStepCondition(guard, {
-        inputs: { rootTriggeredBy: 'manual' },
         steps: { consume_investigation_quota: {} },
       })
     ).toBe(true);
