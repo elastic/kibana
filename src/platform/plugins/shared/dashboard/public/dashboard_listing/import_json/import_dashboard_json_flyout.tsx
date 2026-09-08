@@ -27,7 +27,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { DashboardState } from '../../../common';
 import { dashboardClient } from '../../dashboard_client/dashboard_client';
@@ -133,11 +133,12 @@ export const ImportDashboardJsonFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiText size="s" color="subdued">
-          <p>
+        <KbnInfoCallout
+          title={importDashboardJsonStrings.getInfoCalloutTitle()}
+          text={
             <FormattedMessage
               id="dashboard.importJson.flyout.ndjsonNote"
-              defaultMessage="This importer accepts JSON only. To import an NDJSON file, use {link}."
+              defaultMessage="Trying to import an NDJSON? Do it from {link}."
               values={{
                 link: (
                   <EuiLink
@@ -147,14 +148,14 @@ export const ImportDashboardJsonFlyout = ({
                   >
                     <FormattedMessage
                       id="dashboard.importJson.flyout.ndjsonNoteLink"
-                      defaultMessage="Stack Management &gt; Saved Objects"
+                      defaultMessage="here"
                     />
                   </EuiLink>
                 ),
               }}
             />
-          </p>
-        </EuiText>
+          }
+        />
 
         <EuiSpacer size="m" />
 

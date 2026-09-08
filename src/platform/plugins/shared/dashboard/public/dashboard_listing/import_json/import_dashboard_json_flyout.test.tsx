@@ -65,7 +65,7 @@ describe('ImportDashboardJsonFlyout', () => {
   it('renders the file picker and NDJSON note', () => {
     renderFlyout();
     expect(screen.getByTestId('importDashboardJsonFilePicker')).toBeInTheDocument();
-    expect(screen.getByText(/Stack Management/)).toBeInTheDocument();
+    expect(screen.getByText(/exported from Dashboard application/)).toBeInTheDocument();
   });
 
   it('shows a JSON parse error when the file is not valid JSON', async () => {

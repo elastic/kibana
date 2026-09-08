@@ -18,6 +18,11 @@ export const importDashboardJsonStrings = {
     i18n.translate('dashboard.importJson.flyout.filePickerLabel', {
       defaultMessage: 'Select a JSON file',
     }),
+  getInfoCalloutTitle: () =>
+    i18n.translate('dashboard.importJson.flyout.infoCalloutTitle', {
+      defaultMessage:
+        'Only JSON files that are exported from Dashboard application are supported.',
+    }),
   getImportButtonLabel: () =>
     i18n.translate('dashboard.importJson.flyout.importButton', {
       defaultMessage: 'Import',
