@@ -30,6 +30,13 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import {
+  ALERTING_V2_RULES_LOCATOR,
+  ALERTING_V2_RULE_LIBRARY_LOCATOR,
+  ALERTING_V2_EPISODES_LOCATOR,
+  ALERTING_V2_ACTION_POLICIES_LOCATOR,
+  ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
+} from '@kbn/alerting-v2-constants';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -45,22 +52,23 @@ import type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
 } from '../locators';
-import {
-  ALERTING_V2_RULES_LOCATOR,
-  ALERTING_V2_RULE_LIBRARY_LOCATOR,
-  ALERTING_V2_EPISODES_LOCATOR,
-  ALERTING_V2_ACTION_POLICIES_LOCATOR,
-  ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
-} from '@kbn/alerting-v2-constants';
 
 const resolveLocators = (container: Container): AlertingV2Locators => {
   const share = container.get(PluginStart('share')) as SharePluginStart;
   return {
     rules: share.url.locators.get<AlertingV2RulesLocatorParams>(ALERTING_V2_RULES_LOCATOR)!,
-    ruleLibrary: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(ALERTING_V2_RULE_LIBRARY_LOCATOR)!,
-    episodes: share.url.locators.get<AlertingV2EpisodesLocatorParams>(ALERTING_V2_EPISODES_LOCATOR)!,
-    actionPolicies: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(ALERTING_V2_ACTION_POLICIES_LOCATOR)!,
-    executionHistory: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(ALERTING_V2_EXECUTION_HISTORY_LOCATOR)!,
+    ruleLibrary: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(
+      ALERTING_V2_RULE_LIBRARY_LOCATOR
+    )!,
+    episodes: share.url.locators.get<AlertingV2EpisodesLocatorParams>(
+      ALERTING_V2_EPISODES_LOCATOR
+    )!,
+    actionPolicies: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(
+      ALERTING_V2_ACTION_POLICIES_LOCATOR
+    )!,
+    executionHistory: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(
+      ALERTING_V2_EXECUTION_HISTORY_LOCATOR
+    )!,
   };
 };
 
