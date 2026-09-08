@@ -18,12 +18,9 @@ import {
   selectHasAnyErrors,
 } from './state_management/stream_enrichment_state_machine/selectors';
 
-const interactiveLabel = i18n.translate(
-  'xpack.streams.enrichment.editMode.interactiveAriaLabel',
-  {
-    defaultMessage: 'Interactive visual editor',
-  }
-);
+const interactiveLabel = i18n.translate('xpack.streams.enrichment.editMode.interactiveAriaLabel', {
+  defaultMessage: 'Interactive visual editor',
+});
 
 const yamlLabel = i18n.translate('xpack.streams.enrichment.editMode.yamlAriaLabel', {
   defaultMessage: 'YAML editor',
@@ -36,12 +33,9 @@ const interactiveTooltip = i18n.translate(
   }
 );
 
-const yamlTooltip = i18n.translate(
-  'xpack.streams.enrichment.editMode.yamlDescriptionTooltip',
-  {
-    defaultMessage: 'Edit processors and conditions as YAML',
-  }
-);
+const yamlTooltip = i18n.translate('xpack.streams.enrichment.editMode.yamlDescriptionTooltip', {
+  defaultMessage: 'Edit processors and conditions as YAML',
+});
 
 const errorsTooltip = i18n.translate('xpack.streams.enrichment.editMode.errorsTooltip', {
   defaultMessage: 'Fix errors before switching modes',
@@ -69,8 +63,7 @@ export const EditModeToggle = () => {
 
   const editMode = isInteractiveMode ? 'interactive' : 'yaml';
 
-  const isInteractiveDisabled =
-    interactiveModeIsUnavailable || (hasErrors && !isInteractiveMode);
+  const isInteractiveDisabled = interactiveModeIsUnavailable || (hasErrors && !isInteractiveMode);
   const isYamlDisabled = hasErrors && isInteractiveMode;
 
   const getInteractiveToolTipContent = (): string => {
