@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-alert-details'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: '@elastic/nightshift-sre-agent-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/observability-alert-details'
   description: Moon project for @kbn/observability-alert-details
   channel: ''
-  owner: '@elastic/actionable-obs-team'
+  owner: '@elastic/nightshift-sre-agent-team'
   sourceRoot: x-pack/solutions/observability/packages/alert-details
 dependsOn:
   - '@kbn/i18n'
