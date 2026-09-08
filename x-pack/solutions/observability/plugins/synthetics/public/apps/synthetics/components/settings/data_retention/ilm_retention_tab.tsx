@@ -6,9 +6,10 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { PolicyLink, PolicyNameLabel } from '../policy_link';
 import { useGetIlmPolicies } from '../hooks/use_get_ilm_policies';
@@ -49,8 +50,9 @@ export const IlmRetentionTab = () => {
 
   return (
     <div>
-      <EuiCallOut title={CALLOUT_TITLE} iconType="info">
-        <p>
+      <KbnInfoCallout
+        title={CALLOUT_TITLE}
+        text={
           <FormattedMessage
             id="xpack.synthetics.settingsRoute.retentionCalloutDescription"
             defaultMessage="To change your data retention settings, we recommend creating your own index lifecycle policy and attaching it to the relevant custom Component Template in {stackManagement}. For more information, {docsLink}."
@@ -66,8 +68,8 @@ export const IlmRetentionTab = () => {
               ),
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="m" />
       <EuiBasicTable
         loading={loading}

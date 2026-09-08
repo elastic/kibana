@@ -403,7 +403,7 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboardId\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.",
+              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboard_id\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },
