@@ -84,6 +84,33 @@ describe('flattenForkCommands', () => {
       ).toBe('FROM index | STATS a = COUNT(*) | DROP a');
     });
 
+    it('keeps the non-_fork conjunct of a compound WHERE', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | WHERE _fork == "fork1" AND a > 100',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | WHERE a > 100');
+    });
+
+    it('keeps all non-_fork conjuncts of a nested AND WHERE', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | WHERE a > 100 AND _fork == "fork1" AND a < 500',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | WHERE a > 100 AND a < 500');
+    });
+
+    it('drops the whole WHERE when _fork appears under OR', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | WHERE _fork == "fork1" OR a > 100',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*)');
+    });
+
     it('leaves unknown commands referencing _fork untouched', () => {
       expect(
         flatten('FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL x = _fork', [

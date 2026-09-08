@@ -17,7 +17,7 @@ import {
   isParens,
   isQuery,
 } from '@elastic/esql';
-import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLProperNode, ESQLSingleAstItem } from '@elastic/esql/types';
 import { resolveTrackedColumn } from './scope_walker';
 
 /** Synthetic discriminator column added by FORK to its merged output. */
@@ -92,39 +92,70 @@ const selectForkBranch = (
   return branches.find((branch) => branch.some((c) => c.name === 'stats')) ?? branches[0];
 };
 
-/** Returns true when any expression in the command references `_fork`. */
-const referencesForkDiscriminator = (command: ESQLCommand): boolean => {
+/** Returns true when any expression in the node references `_fork`. */
+const referencesForkDiscriminator = (node: ESQLProperNode): boolean => {
   let found = false;
-  Walker.walk(command, {
-    visitColumn: (node) => {
-      if (node.name === FORK_DISCRIMINATOR_COLUMN) found = true;
+  Walker.walk(node, {
+    visitColumn: (column) => {
+      if (column.name === FORK_DISCRIMINATOR_COLUMN) found = true;
     },
   });
   return found;
 };
 
 /**
+ * Removes `_fork` sub-predicates from a WHERE expression. Conjuncts (AND)
+ * referencing `_fork` are dropped while the remaining side is kept; any other
+ * expression referencing `_fork` (comparison, OR, NOT, ...) cannot be pruned
+ * without changing semantics, so `undefined` is returned to drop it entirely.
+ */
+const pruneForkPredicate = (node: ESQLSingleAstItem): ESQLSingleAstItem | undefined => {
+  if (!referencesForkDiscriminator(node)) return node;
+  if (isFunctionExpression(node) && node.name === 'and') {
+    const [left, right] = node.args;
+    const prunedLeft = Array.isArray(left) ? undefined : pruneForkPredicate(left);
+    const prunedRight = Array.isArray(right) ? undefined : pruneForkPredicate(right);
+    if (prunedLeft && prunedRight) {
+      node.args = [prunedLeft, prunedRight];
+      return node;
+    }
+    return prunedLeft ?? prunedRight;
+  }
+  return undefined;
+};
+
+/**
  * Removes references to the synthetic `_fork` column from commands following
  * an inlined FORK branch; after flattening the column no longer exists.
  *
- * - WHERE filtering on `_fork` is dropped entirely (branch is already chosen)
+ * - WHERE `_fork` sub-predicates under AND are pruned; predicates where the
+ *   `_fork` reference cannot be isolated (e.g. under OR) drop the whole WHERE
  * - KEEP / DROP / SORT entries naming `_fork` are removed; commands left with
  *   no arguments are dropped
  * - RENAME pairs involving `_fork` are removed; empty RENAMEs are dropped
  * - other commands are left untouched
  */
 const removeForkDiscriminatorReferences = (commands: ESQLCommand[], fromIndex: number): void => {
-  // Caveat: a `WHERE _fork == "forkN"` filter is dropped even when it pinned a
-  // different branch than the metric-driven selection; the metric column's
+  // Caveat: a `WHERE _fork == "forkN"` conjunct is dropped even when it pinned
+  // a different branch than the metric-driven selection; the metric column's
   // lineage wins over the user's discriminator filter for trendline purposes.
   for (let i = commands.length - 1; i >= fromIndex; i--) {
     const command = commands[i];
     if (!referencesForkDiscriminator(command)) continue;
 
     switch (command.name) {
-      case 'where':
-        commands.splice(i, 1);
+      case 'where': {
+        const [predicate] = command.args;
+        const pruned = Array.isArray(predicate)
+          ? undefined
+          : pruneForkPredicate(predicate as ESQLSingleAstItem);
+        if (pruned) {
+          command.args = [pruned];
+        } else {
+          commands.splice(i, 1);
+        }
         break;
+      }
       case 'keep':
       case 'drop':
       case 'sort':
