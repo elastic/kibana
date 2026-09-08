@@ -20,9 +20,13 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { useAlertingLocators } from '../../../application/locator_context';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { TakeActionButton } from './take_action_button';
@@ -31,7 +35,6 @@ import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/r
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
-import { useRuleAutoAttach } from '../../../agent_builder/use_rule_auto_attach';
 
 const FLYOUT_TITLE_ID = 'ruleSummaryFlyoutTitle';
 
@@ -69,7 +72,11 @@ export const RuleSummaryFlyout = ({
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { rules } = useAlertingLocators();
-  useRuleAutoAttach(rule);
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
   const detailsHref = rules.useUrl({ ruleId: rule.id });
 
   return (

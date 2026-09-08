@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
-import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
+import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { useAlertingLocators } from '../../application/locator_context';
 
 const mockLocators = useAlertingLocators();
@@ -122,7 +122,8 @@ const mockUpdateMutateAsync = jest.fn();
 const mockCreateInlineWorkflows = jest.fn();
 const mockRollbackWorkflows = jest.fn();
 
-jest.mock('../../agent_builder/use_action_policy_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useActionPolicyAutoAttach: jest.fn(),
 }));
 
@@ -356,7 +357,7 @@ describe('ActionPolicyFormPage', () => {
     it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
       renderPage();
 
-      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(undefined);
+      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(undefined, expect.any(Object));
     });
   });
 
@@ -470,7 +471,10 @@ describe('ActionPolicyFormPage', () => {
 
         renderPage();
 
-        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(EXISTING_POLICY);
+        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(
+          EXISTING_POLICY,
+          expect.any(Object)
+        );
       });
     });
   });
