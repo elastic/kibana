@@ -13,33 +13,31 @@ report_main_step () {
 
 maybe_update_esql_definitions () {
   local latest
-  local installed
+  local current
 
   latest=$(npm view @elastic/esql-definitions version 2>/dev/null)
-  installed=$(node -e "console.log(require('./node_modules/@elastic/esql-definitions/package.json').version)")
+  current=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql'])")
 
-  if [ "$latest" == "$installed" ]; then
-    echo "@elastic/esql-definitions is already up to date ($installed). Skipping version bump."
+  if [ "$latest" == "$current" ]; then
+    echo "@elastic/esql-definitions is already up to date ($current). Skipping version bump."
     return
   fi
 
-  echo "@elastic/esql-definitions: $installed → $latest. Bumping @elastic/esql in package.json."
+  echo "@elastic/esql-definitions: $current → $latest. Bumping @elastic/esql in package.json."
   sed -i "s/\"@elastic\/esql\": \"[^\"]*\"/\"@elastic\/esql\": \"$latest\"/" package.json
   VERSION_BUMPED=true
-
-  .buildkite/scripts/bootstrap.sh
 }
 
 main () {
-  report_main_step "Bootstrapping Kibana"
-
   cd "$KIBANA_DIR"
-
-  .buildkite/scripts/bootstrap.sh
 
   report_main_step "Check for @elastic/esql-definitions updates"
 
   maybe_update_esql_definitions
+
+  report_main_step "Bootstrapping Kibana"
+
+  .buildkite/scripts/bootstrap.sh
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
