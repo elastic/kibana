@@ -674,3 +674,23 @@ Both the raw and namespaced id are checked, so a package cannot claim a core id
 by relying on the namespace prefix. Re-registering the same package is
 idempotent (re-install replaces), and `unregisterConnectorQueryTemplates` only
 ever removes templates owned by that package — core templates are immutable.
+
+### Normalization belongs in the workflow, not the connector (CONN-008)
+
+A connector action must **not** return documents shaped for a particular product's
+index. Ingest workflows map their own documents with `data.set` and write them with
+`elasticsearch.bulk` (`id_field`), which keeps target-schema ownership in the package.
+
+Measured on the SDLC ingest fleet, moving mapping into the connector would have removed
+only the generic `@timestamp`/`sync`/`entity`/`org`/`payload` envelope — **41 of 1668
+workflow YAML lines (2.5%)** — while making every product schema change a Kibana PR. The
+envelope was not even uniform: it fit fewer than half the call sites.
+
+| Ask the platform for | Keep in the workflow |
+|---|---|
+| Pagination, cursors, retry/rate-limit handling | Which API field maps to which index field |
+| Query templates (see CONN-006 — ship them in your package) | The document envelope and `_id` choice |
+| Transport-shaped flattening (`nodes`/`pageInfo`) with no schema knowledge | Anything naming your index's fields |
+
+Rule of thumb: if the change would make the connector unusable for another package that
+stores the same API's data differently, it belongs in the workflow.
