@@ -60,7 +60,7 @@ export const registerSiemRuleMigrationsInvokeRoute = (
           const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
           const rawVendor = String(input.original_rule.vendor ?? 'splunk');
-          if (!(rawVendor in OriginalRuleVendorEnum)) {
+          if (!Object.hasOwn(OriginalRuleVendorEnum, rawVendor)) {
             return res.badRequest({ body: `Unknown vendor: ${rawVendor}` });
           }
           const vendor = rawVendor as OriginalRuleVendor;
