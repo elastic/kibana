@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import { OnSaveProps, SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
@@ -57,12 +57,6 @@ interface DashboardSaveModalProps {
   showAccessContainer?: boolean;
 }
 
-type SaveDashboardHandler = (args: {
-  newTitle: string;
-  newDescription: string;
-  newCopyOnSave: boolean;
-}) => void;
-
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   customModalTitle,
   description,
@@ -87,7 +81,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     accessControl?.accessMode ?? 'default'
   );
 
-  const saveDashboard = React.useCallback<SaveDashboardHandler>(
+  const saveDashboard = React.useCallback<(props: OnSaveProps) => Promise<void>>(
     async ({ newTitle, newDescription, newCopyOnSave }) =>
       onSave({
         newTitle,
