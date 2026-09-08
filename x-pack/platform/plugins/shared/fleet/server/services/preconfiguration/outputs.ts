@@ -68,7 +68,7 @@ export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
 // default output (SERVERLESS_DEFAULT_OUTPUT_ID) as well as the PrivateLink private
 // output (SERVERLESS_PRIVATE_OUTPUT_ID). The union is a no-op for fields already
 // granted by project-controller on the default output.
-const SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT = [
+export const SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT = [
   'is_default',
   'is_default_monitoring',
   'shipper',

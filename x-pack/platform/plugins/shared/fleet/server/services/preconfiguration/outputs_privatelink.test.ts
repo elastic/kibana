@@ -7,7 +7,7 @@
 
 import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
 
-import { getPreconfiguredOutputFromConfig } from './outputs';
+import { getPreconfiguredOutputFromConfig, SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT } from './outputs';
 
 jest.mock('../app_context', () => ({
   appContextService: {
@@ -35,17 +35,6 @@ jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
 jest.mock('../settings');
 
-// The full allow_edit list that Kibana ensures on both serverless managed outputs,
-// mirroring the list project-controller ships on es-default-output.
-const EXPECTED_ALLOW_EDIT = [
-  'is_default',
-  'is_default_monitoring',
-  'shipper',
-  'config_yaml',
-  'preset',
-  'write_to_logs_streams',
-];
-
 describe('getPreconfiguredOutputFromConfig — serverless managed output allow_edit injection', () => {
   const baseConfig = {
     agents: { elasticsearch: { hosts: undefined } },
@@ -69,7 +58,7 @@ describe('getPreconfiguredOutputFromConfig — serverless managed output allow_e
     const res = getPreconfiguredOutputFromConfig(config);
     const defaultOutput = res.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID);
 
-    for (const field of EXPECTED_ALLOW_EDIT) {
+    for (const field of SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT) {
       expect(defaultOutput?.allow_edit).toContain(field);
     }
   });
@@ -101,7 +90,7 @@ describe('getPreconfiguredOutputFromConfig — serverless managed output allow_e
     const res = getPreconfiguredOutputFromConfig(config);
     const privateOutput = res.find((o) => o.id === SERVERLESS_PRIVATE_OUTPUT_ID);
 
-    for (const field of EXPECTED_ALLOW_EDIT) {
+    for (const field of SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT) {
       expect(privateOutput?.allow_edit).toContain(field);
     }
   });
