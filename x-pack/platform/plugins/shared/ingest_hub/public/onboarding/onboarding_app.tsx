@@ -77,7 +77,10 @@ export function detypifyVarsForSession(value: unknown): unknown {
  * Clear must happen first so react-use's useSessionStorage does not re-write stale defaults.
  * Best-effort: any fetch or write error leaves the form empty and the user can start over.
  */
-async function hydrateOnboardingSession(integrationId: string, deploymentId: string): Promise<void> {
+async function hydrateOnboardingSession(
+  integrationId: string,
+  deploymentId: string
+): Promise<void> {
   clearOnboardingSession(integrationId);
   try {
     const { item } = await sendGetCloudOnboardingDeployment(deploymentId);

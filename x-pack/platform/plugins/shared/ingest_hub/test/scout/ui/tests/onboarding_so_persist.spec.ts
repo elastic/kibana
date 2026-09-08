@@ -115,9 +115,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     const soUpdatePromise = page.waitForRequest(
       (req) =>
         req.method() === 'PUT' &&
-        /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(
-          new URL(req.url()).pathname
-        )
+        /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(new URL(req.url()).pathname)
     );
 
     // Mock managed integrations (agentless policy create).

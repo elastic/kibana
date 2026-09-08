@@ -84,9 +84,9 @@ describe('detypifyVarsForSession', () => {
       },
     };
     const result = detypifyVarsForSession(soServiceVars) as typeof soServiceVars;
-    expect(
-      (result as any).svc.varsByDataStream.svc.varsByInput['aws-s3'].regions
-    ).toBe('us-east-1');
+    expect((result as any).svc.varsByDataStream.svc.varsByInput['aws-s3'].regions).toBe(
+      'us-east-1'
+    );
   });
 
   it('produces empty string for an empty array (no items to join)', () => {

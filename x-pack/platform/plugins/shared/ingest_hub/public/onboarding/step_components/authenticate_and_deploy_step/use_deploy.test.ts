@@ -1325,7 +1325,10 @@ describe('toSOServiceVars', () => {
         },
       },
       servicesMap
-    ) as Record<string, { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }>;
+    ) as Record<
+      string,
+      { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }
+    >;
 
     expect(result.svc.varsByDataStream.svc.varsByInput['aws-s3'].regions).toEqual([
       'us-east-1',
@@ -1349,7 +1352,10 @@ describe('toSOServiceVars', () => {
         },
       },
       servicesMap
-    ) as Record<string, { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }>;
+    ) as Record<
+      string,
+      { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }
+    >;
 
     expect(result.svc.varsByDataStream.svc.varsByInput['aws-s3'].queue_url).toBe(
       'https://sqs.example'

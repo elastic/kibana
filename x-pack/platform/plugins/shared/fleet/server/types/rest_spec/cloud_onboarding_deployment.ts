@@ -84,7 +84,8 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   serviceVars: schema.maybe(
     schema.recordOf(schema.string(), ServiceVarsEntrySchema, {
       meta: {
-        description: 'Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.',
+        description:
+          'Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.',
       },
     })
   ),

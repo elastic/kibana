@@ -27,7 +27,12 @@ import {
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 
-export { getRegionFieldName, buildStreamVars, buildPackageInputs, toSOServiceVars } from './package_inputs';
+export {
+  getRegionFieldName,
+  buildStreamVars,
+  buildPackageInputs,
+  toSOServiceVars,
+} from './package_inputs';
 
 export interface UseDeployResult {
   namespace: string;
@@ -184,10 +189,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           connectorId,
           mechanisms: ['agentless'],
           services: selectedServiceIds,
-          serviceVars: toSOServiceVars(
-            storedServiceVars,
-            servicesMap ?? new Map()
-          ) as Record<string, Record<string, unknown>>,
+          serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+            string,
+            Record<string, unknown>
+          >,
           globalRegion,
         }).catch(() => null);
         onboardingDeploymentId = createResp?.item?.id;
