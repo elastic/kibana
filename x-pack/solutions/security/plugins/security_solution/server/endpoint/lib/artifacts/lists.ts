@@ -18,6 +18,7 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
+  DISABLED_ARTIFACT_TAG,
   PROCESS_DESCENDANT_EXTRA_ENTRY,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
@@ -180,10 +181,12 @@ function translateToYaraRules(
     const translatedItems: TranslatedYaraRule[] = [];
 
     for (const exception of exceptions) {
-      const [entry] = exception.entries;
+      if (!(exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
+        const [entry] = exception.entries;
 
-      if (entry?.type === 'match' && typeof entry.value === 'string') {
-        translatedItems.push({ yara_rule_data: entry.value });
+        if (entry?.type === 'match' && typeof entry.value === 'string') {
+          translatedItems.push({ yara_rule_data: entry.value });
+        }
       }
     }
 
