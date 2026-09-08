@@ -53,18 +53,23 @@ export const CreateSavedQueryResponse = lazySchema(() =>
       /**
        * The saved object ID of the saved query.
        */
-      saved_object_id: z.string(),
+      saved_object_id: z.string().describe('The saved object ID of the saved query.'),
       id: SavedQueryId,
       description: SavedQueryDescriptionOrUndefined.optional(),
       query: Query.optional(),
       /**
        * An interval, in seconds, on which to run the query. May be returned as number or string.
        */
-      interval: z.union([z.number().int(), z.string()]).optional(),
+      interval: z
+        .union([z.number().int(), z.string()])
+        .optional()
+        .describe(
+          'An interval, in seconds, on which to run the query. May be returned as number or string.'
+        ),
       /**
        * The query timeout in seconds.
        */
-      timeout: z.number().int().optional(),
+      timeout: z.number().int().optional().describe('The query timeout in seconds.'),
       snapshot: SnapshotOrUndefined.optional(),
       removed: RemovedOrUndefined.optional(),
       platform: PlatformOrUndefined.optional(),
@@ -78,11 +83,14 @@ export const CreateSavedQueryResponse = lazySchema(() =>
       /**
        * Whether the saved query is prebuilt.
        */
-      prebuilt: z.boolean().optional(),
+      prebuilt: z.boolean().optional().describe('Whether the saved query is prebuilt.'),
       /**
        * The saved query version.
        */
-      version: z.union([z.number().int(), z.string()]).optional(),
+      version: z
+        .union([z.number().int(), z.string()])
+        .optional()
+        .describe('The saved query version.'),
     }),
   })
 );
