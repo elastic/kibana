@@ -116,15 +116,12 @@ export const getEcfServiceConfigs = (
 
     // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
-    // Both vars are multi-value; split the comma-joined draft string into individual ARNs
-    // so each can be normalised independently (e.g. log-group `:*` suffix per ARN).
-    const splitArns = (raw: string | undefined): string[] =>
-      raw
-        ? raw
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
+    // Both vars are multi-value; split the comma-joined draft string (or already-typed array
+    // after SO resume) into individual ARNs for per-ARN normalisation.
+    const splitArns = (raw: string | string[] | undefined): string[] => {
+      if (Array.isArray(raw)) return raw.map((s) => s.trim()).filter(Boolean);
+      return raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    };
 
     const bucketArns = enabledInputs.includes('aws-s3')
       ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)

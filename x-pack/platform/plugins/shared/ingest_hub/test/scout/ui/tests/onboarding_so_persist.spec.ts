@@ -18,6 +18,7 @@ import {
 // Session keys for additional step state written/read by hydrateOnboardingSession.
 const AUTHENTICATE_AND_DEPLOY_SESSION_KEY = 'onboarding.aws.authenticateAndDeployStep';
 const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep';
+const STEP_STATE_SESSION_KEY = 'onboarding.aws.stepState';
 
 // Minimal aws manifest with elb (managed_integration) so ManagedIntegrationsSection renders.
 // hide_in_var_group_options forces identityFederationSupported=false on all inputs so
@@ -125,7 +126,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ item: { policy_ids: ['p-e2e-001'] } }),
+          body: JSON.stringify({ item: { id: 'p-e2e-001', name: 'test-policy' } }),
         })
     );
 
@@ -150,10 +151,11 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     expect(soCreateBody.provider).toBe('aws');
     expect(soCreateBody.services).toContain('elb');
 
-    // Verify SO PUT fired with status after allSettled.
+    // Verify SO PUT fired with status and the managed integration policy id after allSettled.
     const soUpdateReq = await soUpdatePromise;
-    const soUpdateBody = soUpdateReq.postDataJSON() as { status: string };
+    const soUpdateBody = soUpdateReq.postDataJSON() as { status: string; packagePolicyIds: string[] };
     expect(soUpdateBody.status).toMatch(/succeeded|failed/);
+    expect(soUpdateBody.packagePolicyIds).toContain('p-e2e-001');
   });
 
   test('?deploymentId= param hydrates session from SO and strips param from URL', async ({
@@ -203,22 +205,26 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
         settingsKey,
         authKey,
         detectKey,
+        stepStateKey,
       }: {
         servicesKey: string;
         settingsKey: string;
         authKey: string;
         detectKey: string;
+        stepStateKey: string;
       }) => ({
         services: JSON.parse(sessionStorage.getItem(servicesKey) ?? 'null'),
         settings: JSON.parse(sessionStorage.getItem(settingsKey) ?? 'null'),
         auth: JSON.parse(sessionStorage.getItem(authKey) ?? 'null'),
         detect: JSON.parse(sessionStorage.getItem(detectKey) ?? 'null'),
+        stepState: JSON.parse(sessionStorage.getItem(stepStateKey) ?? 'null'),
       }),
       {
         servicesKey: SERVICES_STEP_SESSION_KEY,
         settingsKey: SERVICE_SETTINGS_SESSION_KEY,
         authKey: AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
         detectKey: DETECT_AND_REVIEW_SESSION_KEY,
+        stepStateKey: STEP_STATE_SESSION_KEY,
       }
     );
 
@@ -226,5 +232,10 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     expect(sessionState.settings?.globalRegion).toBe('eu-west-1');
     expect(sessionState.auth?.connectorId).toBe('connector-resume-456');
     expect(sessionState.detect?.onboardingDeploymentId).toBe('dep-e2e-resume');
+    // Steps 1-3 must be marked complete so the shell redirects to detect-and-review by default.
+    expect(sessionState.stepState?.services).toBe('complete');
+    expect(sessionState.stepState?.['service-settings']).toBe('complete');
+    expect(sessionState.stepState?.['authenticate-and-deploy']).toBe('complete');
+    expect(sessionState.stepState?.['detect-and-review']).toBe('incomplete');
   });
 });

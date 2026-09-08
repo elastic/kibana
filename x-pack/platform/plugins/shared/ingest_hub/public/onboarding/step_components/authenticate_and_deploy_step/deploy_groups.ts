@@ -216,7 +216,7 @@ export async function deployGroup(
       : {}),
   });
 
-  return { policyId: (response as any)?.data?.item?.policy_ids?.[0] };
+  return { policyId: response?.item?.id };
 }
 
 function extractErrorMessage(reason: unknown): string {
