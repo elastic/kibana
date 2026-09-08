@@ -6,7 +6,11 @@
  */
 
 import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
-import { getEntityDefinitionWithoutId, hasPriorityVariant, resolveExtractionMode } from './registry';
+import {
+  getEntityDefinitionWithoutId,
+  hasPriorityVariant,
+  resolveExtractionMode,
+} from './registry';
 
 /**
  * Tests that all entity definitions parse against the entitySchema (does not throw errors)
