@@ -114,6 +114,9 @@ const referencesForkDiscriminator = (command: ESQLCommand): boolean => {
  * - other commands are left untouched
  */
 const removeForkDiscriminatorReferences = (commands: ESQLCommand[], fromIndex: number): void => {
+  // Caveat: a `WHERE _fork == "forkN"` filter is dropped even when it pinned a
+  // different branch than the metric-driven selection; the metric column's
+  // lineage wins over the user's discriminator filter for trendline purposes.
   for (let i = commands.length - 1; i >= fromIndex; i--) {
     const command = commands[i];
     if (!referencesForkDiscriminator(command)) continue;
