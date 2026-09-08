@@ -36,6 +36,14 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   openSidebarConversation?: () => void;
 }
 
+/** Props passed to attachment renderers in the conversation details flyout. */
+export interface ConversationDetailsRenderProps<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** The attachment to render, with version data selected by the consumer. */
+  attachment: TAttachment;
+}
+
 /**
  * Callbacks available to canvas content renderers.
  */
@@ -179,6 +187,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
+   * Returns a URL (or data URL) to use as a thumbnail image for the attachment.
+   * When provided, renders an <img> instead of an EuiIcon in the pill icon slot.
+   */
+  getThumbnail?: (attachment: TAttachment) => string | undefined;
+  /**
    * Returns header metadata (icon, subtitle, badges) for the attachment header
    * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
    * subtitle, no badges).
@@ -200,6 +213,10 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   renderInlineContent?: (
     props: AttachmentRenderProps<TAttachment>,
     callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /** Render attachment content in the conversation details flyout. */
+  renderConversationDetailsContent?: (
+    props: ConversationDetailsRenderProps<TAttachment>
   ) => ReactNode;
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
