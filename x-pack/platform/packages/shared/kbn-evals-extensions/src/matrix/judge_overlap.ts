@@ -86,8 +86,10 @@ const median = (xs: number[]): number => {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 };
 
+/** NUL cannot occur in a model or example id, so it cannot collide. */
+const SEP = '\u0000';
 const cellKey = (c: { modelId: string; exampleId: string }): string =>
-  `${c.modelId}\u0000${c.exampleId}`;
+  `${c.modelId}${SEP}${c.exampleId}`;
 
 /**
  * Compare judges over the cells they all graded.
@@ -122,23 +124,30 @@ export function analyzeJudgeOverlap(inputs: JudgeOverlapInput[]): JudgeOverlapRe
     );
   }
 
+  const scoreOf = (judgeId: string, key: string) => byJudge.get(judgeId)!.get(key)!.score;
+  const meansByJudge = new Map(
+    judges.map((judgeId) => [judgeId, mean(commonKeys.map((k) => scoreOf(judgeId, k)))])
+  );
+  const grandMean = mean([...meansByJudge.values()]);
   const severities: JudgeSeverity[] = judges.map((judgeId) => ({
     judgeId,
-    mean: mean(commonKeys.map((k) => byJudge.get(judgeId)!.get(k)!.score)),
-    offset: 0,
+    mean: meansByJudge.get(judgeId)!,
+    offset: meansByJudge.get(judgeId)! - grandMean,
   }));
-  const grandMean = mean(severities.map((s) => s.mean));
-  for (const s of severities) s.offset = s.mean - grandMean;
 
-  const models = [...new Set(commonKeys.map((k) => k.split('\u0000')[0]))].sort();
+  const keysByModel = new Map<string, string[]>();
+  for (const key of commonKeys) {
+    const modelId = key.split(SEP)[0];
+    keysByModel.set(modelId, [...(keysByModel.get(modelId) ?? []), key]);
+  }
+  const models = [...keysByModel.keys()].sort();
 
   const perModel: Record<string, Record<string, number>> = {};
   for (const modelId of models) {
-    const keys = commonKeys.filter((k) => k.split('\u0000')[0] === modelId);
-    perModel[modelId] = {};
-    for (const judgeId of judges) {
-      perModel[modelId][judgeId] = mean(keys.map((k) => byJudge.get(judgeId)!.get(k)!.score));
-    }
+    const keys = keysByModel.get(modelId)!;
+    perModel[modelId] = Object.fromEntries(
+      judges.map((judgeId) => [judgeId, mean(keys.map((k) => scoreOf(judgeId, k)))])
+    );
   }
 
   const rankings: Record<string, string[]> = {};
@@ -151,7 +160,7 @@ export function analyzeJudgeOverlap(inputs: JudgeOverlapInput[]): JudgeOverlapRe
   // not reorder anything.
   const offsetOf = new Map(severities.map((s) => [s.judgeId, s.offset]));
   const perCellSpread = commonKeys.map((k) => {
-    const adjusted = judges.map((j) => byJudge.get(j)!.get(k)!.score - offsetOf.get(j)!);
+    const adjusted = judges.map((j) => scoreOf(j, k) - offsetOf.get(j)!);
     return Math.max(...adjusted) - Math.min(...adjusted);
   });
 
