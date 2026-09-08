@@ -58,7 +58,7 @@ Do not run a search then. Do not ask whether it is already covered. The user has
 
 **Run the check** when the request names an outcome with no logic attached: a gap statement, a technique id alone, a behavior description, or a hunt finding.
 
-If the request has an imperative verb but no logic ("create a rule for credential dumping"), run the check, keep it short, and lead with the answer. If nothing matches and the request had an imperative verb, hand off to \`detection-rule-edit\` in the same turn. Otherwise offer. Never make the user ask twice for the same intent.
+If the request has an imperative verb but no logic ("create a rule for credential dumping"), run the check, keep it short, and lead with the answer. If nothing matches, offer \`detection-rule-edit\`. Never make the user ask twice for the same intent.
 
 Automated callers, such as a workflow step, always run the full check. There is no user in the loop who has decided anything.
 
@@ -146,7 +146,7 @@ If both searches return zero rules, say so plainly and return \`no_coverage\`. Z
 
 State which filters you used. A wrong filter looks the same as a real gap, and only the user can tell the two apart.
 
-Know one limit for Step 1: free-text search on installed rules does not search descriptions or queries — only names, index patterns, and MITRE fields. A relevant installed rule whose behavior is expressed only in its description can be missed. When Step 1 finds nothing, say this in one sentence. Step 2 has no such limit: the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions.
+Know one limit for Step 1: the search **filter** on installed rules only matches names, index patterns, and MITRE fields — it does not filter by description or query text. However, every rule result includes its description and query: read both when judging whether a returned rule is an exact behavioral match. A rule whose distinctive behavior is only in its query (e.g. a flag like \`-enc*\`) can still be confirmed once the result arrives. An installed rule whose behavior is expressed only in its description and does not appear in its name or MITRE data can be **missed** by the filter — only then say so in one sentence. Step 2 has no such filter limit: the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions.
 
 ## Structured Output
 

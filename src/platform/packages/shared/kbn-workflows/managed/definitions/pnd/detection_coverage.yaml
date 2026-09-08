@@ -142,22 +142,14 @@ steps:
                 Review the check: /app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
 
           - name: enable_existing_rule
-            type: kibana.request
+            type: security.enableRule
             on-failure:
               continue: true
             if: >-
               ${{ steps.review_enable.output.response.approved == true
                 and steps.coverage_check.output.structured_output.rule_id != '' }}
             with:
-              method: PATCH
-              path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-              headers:
-                kbn-xsrf: string
-                elastic-api-version: "2023-10-31"
-                Content-Type: application/json
-              body:
-                rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-                enabled: true
+              query: 'alert.attributes.params.ruleId: "{{ steps.coverage_check.output.structured_output.rule_id }}"'
       - match: prebuilt_available
         steps:
           - name: review_install
@@ -200,22 +192,14 @@ steps:
                     version: "${{ steps.coverage_check.output.structured_output.prebuilt_version }}"
 
           - name: enable_installed_rule
-            type: kibana.request
+            type: security.enableRule
             on-failure:
               continue: true
             if: >-
               ${{ steps.install_prebuilt_rule.output.summary.succeeded > 0
                 or steps.install_prebuilt_rule.output.summary.skipped > 0 }}
             with:
-              method: PATCH
-              path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-              headers:
-                kbn-xsrf: string
-                elastic-api-version: "2023-10-31"
-                Content-Type: application/json
-              body:
-                rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-                enabled: true
+              query: 'alert.attributes.params.ruleId: "{{ steps.coverage_check.output.structured_output.rule_id }}"'
 
       - match: covered_enabled
         steps:
@@ -259,7 +243,7 @@ steps:
       # `error == null`. A step whose `if` was false is skipped, and a skipped step has no
       # error, so an `error == null` check reports success for work that never ran. A
       # skipped step also has no output, so these read false.
-      rule_enabled: "${{ steps.enable_existing_rule.output.enabled == true or steps.enable_installed_rule.output.enabled == true }}"
+      rule_enabled: "${{ steps.enable_existing_rule.output.succeeded > 0 or steps.enable_existing_rule.output.skipped > 0 or steps.enable_installed_rule.output.succeeded > 0 or steps.enable_installed_rule.output.skipped > 0 }}"
       rule_installed: "${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 }}"
       # An action the analyst approved but the guards then declined is the state a caller
       # must never read as done. One field per action: an `or` chain across steps that did
@@ -267,7 +251,8 @@ steps:
       # action tells the caller which approval went unhonoured.
       enable_approved_not_applied: >-
         ${{ steps.review_enable.output.response.approved == true
-          and not (steps.enable_existing_rule.output.enabled == true) }}
+          and not (steps.enable_existing_rule.output.succeeded > 0
+            or steps.enable_existing_rule.output.skipped > 0) }}
       install_approved_not_applied: >-
         ${{ steps.review_install.output.response.approved == true
           and not (steps.install_prebuilt_rule.output.summary.succeeded > 0
@@ -275,7 +260,8 @@ steps:
       installed_not_enabled: >-
         ${{ (steps.install_prebuilt_rule.output.summary.succeeded > 0
           or steps.install_prebuilt_rule.output.summary.skipped > 0)
-          and not (steps.enable_installed_rule.output.enabled == true) }}
+          and not (steps.enable_installed_rule.output.succeeded > 0
+            or steps.enable_installed_rule.output.skipped > 0) }}
       # Empty when the check produced a verdict; set when it failed or returned nothing, so
       # upstream automation can tell "no gap found" from "no decision made".
       check_error: >-

@@ -140,7 +140,7 @@ describe('Detection Coverage worker', () => {
     // approved action whose guard then declined it. Every flag must assert evidence from
     // the API response.
     it.each([
-      ['rule_enabled', 'steps.enable_existing_rule.output.enabled == true'],
+      ['rule_enabled', 'steps.enable_existing_rule.output.succeeded > 0'],
       ['rule_installed', 'steps.install_prebuilt_rule.output.summary.succeeded > 0'],
     ])('%s asserts mutation evidence, not the absence of an error', (flag, expression) => {
       expect(emit?.[flag]).toContain(expression);
@@ -167,7 +167,7 @@ describe('Detection Coverage worker', () => {
         'steps.install_prebuilt_rule.output.summary.skipped > 0'
       );
       expect(emit?.installed_not_enabled).toContain(
-        'not (steps.enable_installed_rule.output.enabled == true)'
+        'not (steps.enable_installed_rule.output.succeeded > 0'
       );
     });
 
