@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { CreateRuleParams } from './create_rule';
 import { RulesClient } from '../../../../rules_client';
+import { ApiKeyType } from '../../../../task_runner/types';
 import { getRulesClientMockParams } from '../../../../test_utils';
-import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -4906,17 +4906,15 @@ This is the type of text _investigation guides_ will contain.`;
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when UIAM key creation fails in serverless with feature flag enabled', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+    test('should add missing UIAM API key tag when UIAM key creation fails in serverless', async () => {
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
-        featureFlags,
       });
 
       const data = getMockData();
@@ -4967,14 +4965,12 @@ This is the type of text _investigation guides_ will contain.`;
     });
 
     test('should not add missing UIAM API key tag when UIAM key is present', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
-        featureFlags,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       const data = getMockData();
@@ -5026,12 +5022,8 @@ This is the type of text _investigation guides_ will contain.`;
 
     test('should not add missing UIAM API key tag in non-serverless environment', async () => {
       // Non-serverless environment (default rulesClientParams.isServerless = false)
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
       const nonServerlessRulesClient = new RulesClient({
         ...rulesClientParams,
-        featureFlags,
       });
 
       const data = getMockData();
