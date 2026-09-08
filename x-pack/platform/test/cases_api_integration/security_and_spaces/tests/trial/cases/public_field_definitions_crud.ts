@@ -77,9 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns 409 for a duplicate name (case-insensitive)', async () => {
         await requestAs('post', FIELD_DEFINITIONS_URL).send(buildWriteBody('priority')).expect(200);
-        await requestAs('post', FIELD_DEFINITIONS_URL)
-          .send(buildWriteBody('PRIORITY'))
-          .expect(409);
+        await requestAs('post', FIELD_DEFINITIONS_URL).send(buildWriteBody('PRIORITY')).expect(409);
       });
 
       it('returns 400 when the body name does not match the YAML name', async () => {
@@ -107,10 +105,9 @@ export default ({ getService }: FtrProviderContext): void => {
         await requestAs('post', FIELD_DEFINITIONS_URL).send(buildWriteBody('priority')).expect(200);
         await requestAs('post', FIELD_DEFINITIONS_URL).send(buildWriteBody('severity')).expect(200);
 
-        const { body } = await requestAs(
-          'get',
-          `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`
-        ).expect(200);
+        const { body } = await requestAs('get', `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`).expect(
+          200
+        );
 
         expect(body.fieldDefinitions).to.have.length(2);
         expect(body.total).to.eql(2);
@@ -119,10 +116,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('omits legacyKey from list results', async () => {
         await requestAs('post', FIELD_DEFINITIONS_URL).send(buildWriteBody('priority')).expect(200);
-        const { body } = await requestAs(
-          'get',
-          `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`
-        ).expect(200);
+        const { body } = await requestAs('get', `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`).expect(
+          200
+        );
 
         for (const fd of body.fieldDefinitions) {
           expect(fd).not.to.have.property('legacyKey');
@@ -217,10 +213,9 @@ export default ({ getService }: FtrProviderContext): void => {
           204
         );
 
-        const { body } = await requestAs(
-          'get',
-          `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`
-        ).expect(200);
+        const { body } = await requestAs('get', `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`).expect(
+          200
+        );
         expect(body.fieldDefinitions).to.have.length(0);
       });
 
@@ -279,23 +274,24 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // obsOnly manages observability, not securitySolutionFixture — must hide existence (404)
-        await requestAs(
-          'put',
-          `${FIELD_DEFINITIONS_URL}/${created.fieldDefinitionId}`,
-          { user: obsOnly, space: 'space1' }
-        )
+        await requestAs('put', `${FIELD_DEFINITIONS_URL}/${created.fieldDefinitionId}`, {
+          user: obsOnly,
+          space: 'space1',
+        })
           .send(buildWriteBody('priority'))
           .expect(404);
 
-        await requestAs(
-          'delete',
-          `${FIELD_DEFINITIONS_URL}/${created.fieldDefinitionId}`,
-          { user: obsOnly, space: 'space1' }
-        ).expect(404);
+        await requestAs('delete', `${FIELD_DEFINITIONS_URL}/${created.fieldDefinitionId}`, {
+          user: obsOnly,
+          space: 'space1',
+        }).expect(404);
       });
 
       it('owner scoping: a securitySolution user cannot create an observability field definition', async () => {
-        await requestAs('post', FIELD_DEFINITIONS_URL, { user: secOnlyManageTemplates, space: 'space1' })
+        await requestAs('post', FIELD_DEFINITIONS_URL, {
+          user: secOnlyManageTemplates,
+          space: 'space1',
+        })
           .send(buildWriteBody('priority', { owner: 'observabilityFixture' }))
           .expect(403);
       });
@@ -313,14 +309,14 @@ export default ({ getService }: FtrProviderContext): void => {
           `${FIELD_DEFINITIONS_URL}?owner=${OWNER}`,
           { user: superUser, space: 'space1' }
         ).expect(200);
-        expect(listBody.fieldDefinitions.map((fd: { fieldDefinitionId: string }) => fd.fieldDefinitionId))
-          .not.to.contain(created.fieldDefinitionId);
+        expect(
+          listBody.fieldDefinitions.map((fd: { fieldDefinitionId: string }) => fd.fieldDefinitionId)
+        ).not.to.contain(created.fieldDefinitionId);
 
-        await requestAs(
-          'delete',
-          `${FIELD_DEFINITIONS_URL}/${created.fieldDefinitionId}`,
-          { user: superUser, space: 'space1' }
-        ).expect(404);
+        await requestAs('delete', `${FIELD_DEFINITIONS_URL}/${created.fieldDefinitionId}`, {
+          user: superUser,
+          space: 'space1',
+        }).expect(404);
       });
     });
   });

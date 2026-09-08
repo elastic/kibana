@@ -111,7 +111,11 @@ describe('Public Field Definition Routes', () => {
     it('filters by search term against name and description', async () => {
       const fds: FieldDefinition[] = [
         makeFieldDef({ fieldDefinitionId: 'a', name: 'priority', description: 'ticket priority' }),
-        makeFieldDef({ fieldDefinitionId: 'b', name: 'severity', description: 'incident severity' }),
+        makeFieldDef({
+          fieldDefinitionId: 'b',
+          name: 'severity',
+          description: 'incident severity',
+        }),
       ];
       const client = createMockFieldDefinitionsClient();
       client.getFieldDefinitions.mockResolvedValue({ fieldDefinitions: fds, total: 2 });
