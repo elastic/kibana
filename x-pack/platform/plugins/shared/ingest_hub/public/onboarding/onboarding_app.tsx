@@ -57,8 +57,10 @@ export function shouldClearSession(location: {
  * Recursively converts typed SO values back to session-storage-compatible strings.
  * At SO write time, multi-value fields (e.g. `regions`) are stored as string arrays.
  * Session storage expects raw comma-separated strings so that toTyped() can re-convert them.
+ *
+ * @internal Exported for testing only.
  */
-function detypifyVarsForSession(value: unknown): unknown {
+export function detypifyVarsForSession(value: unknown): unknown {
   if (Array.isArray(value)) return value.join(',');
   if (value !== null && typeof value === 'object') {
     const result: Record<string, unknown> = {};

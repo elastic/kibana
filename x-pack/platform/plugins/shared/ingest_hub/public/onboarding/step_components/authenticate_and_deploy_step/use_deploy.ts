@@ -27,7 +27,7 @@ import {
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 
-export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
+export { getRegionFieldName, buildStreamVars, buildPackageInputs, toSOServiceVars } from './package_inputs';
 
 export interface UseDeployResult {
   namespace: string;
