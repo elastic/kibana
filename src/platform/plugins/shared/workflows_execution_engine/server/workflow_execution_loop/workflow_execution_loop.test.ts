@@ -149,7 +149,7 @@ describe('workflowExecutionLoop', () => {
     expect(params.workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
-  it('treats AbortError DOMException as CANCELLED (not FAILED) — e.g. user-initiated cancel', async () => {
+  it('treats AbortError DOMException as CANCELLED (not FAILED) — signal from sync timeout or platform abort', async () => {
     const params = createParams();
     const abortController = new AbortController();
     const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
