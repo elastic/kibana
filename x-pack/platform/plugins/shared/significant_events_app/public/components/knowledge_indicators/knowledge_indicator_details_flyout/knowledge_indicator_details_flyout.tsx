@@ -26,6 +26,7 @@ import {
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type { Streams } from '@kbn/streams-schema';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
@@ -81,10 +82,16 @@ export function KnowledgeIndicatorDetailsFlyout({
   onSelectPage,
 }: Props) {
   const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
     dependencies: {
       start: { share },
     },
   } = useKibana();
+  const canManageContext = getNightshiftCapabilities(nightshift).canManageContext;
   const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -156,7 +163,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [openFeatureInDiscover]);
 
   const featureActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'feature') {
+    if (!canManageContext || knowledgeIndicator.kind !== 'feature') {
       return [];
     }
 
@@ -222,10 +229,17 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature, setDurability]);
+  }, [
+    canManageContext,
+    excludeFeature,
+    isMutating,
+    knowledgeIndicator,
+    restoreFeature,
+    setDurability,
+  ]);
 
   const queryActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'query') {
+    if (!canManageContext || knowledgeIndicator.kind !== 'query') {
       return [];
     }
 
@@ -274,11 +288,14 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [
     activityBlockTooltip,
     blocksActivity,
+    canManageContext,
     isMutating,
     knowledgeIndicator,
     promoteQuery,
     setDurability,
   ]);
+
+  const actionItems = [...openInDiscoverActionItems, ...featureActionItems, ...queryActionItems];
 
   const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
 
@@ -314,30 +331,30 @@ export function KnowledgeIndicatorDetailsFlyout({
             ) : undefined
           }
         >
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
-              button={
-                <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="boxesVertical"
-                    aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
-                    isLoading={isMutating}
-                    isDisabled={isMutating}
-                    onClick={() => setIsActionsMenuOpen((open) => !open)}
-                  />
-                </EuiToolTip>
-              }
-              isOpen={isActionsMenuOpen}
-              closePopover={() => setIsActionsMenuOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-            >
-              <EuiContextMenuPanel
-                items={[...openInDiscoverActionItems, ...featureActionItems, ...queryActionItems]}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
+          {actionItems.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
+                button={
+                  <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="boxesVertical"
+                      aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
+                      isLoading={isMutating}
+                      isDisabled={isMutating}
+                      onClick={() => setIsActionsMenuOpen((open) => !open)}
+                    />
+                  </EuiToolTip>
+                }
+                isOpen={isActionsMenuOpen}
+                closePopover={() => setIsActionsMenuOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+              >
+                <EuiContextMenuPanel items={actionItems} />
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon

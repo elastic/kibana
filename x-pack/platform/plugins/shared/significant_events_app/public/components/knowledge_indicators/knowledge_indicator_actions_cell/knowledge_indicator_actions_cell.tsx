@@ -121,7 +121,9 @@ export function KnowledgeIndicatorActionsCell({
   ]);
 
   const queryActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'query') return [];
+    if (knowledgeIndicator.kind !== 'query') {
+      return [];
+    }
 
     const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
     const isPromoteDisabled =
