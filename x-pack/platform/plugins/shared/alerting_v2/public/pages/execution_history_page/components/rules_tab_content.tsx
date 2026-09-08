@@ -27,6 +27,12 @@ import type { RuleExecutionOutcome, RuleExecutionView } from '@kbn/alerting-v2-s
 import { EXECUTION_HISTORY_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { useFetchRuleExecutions } from '../../../hooks/use_fetch_rule_executions';
+import {
+  RULES_COLUMN_RULE,
+  RULES_COLUMN_DURATION,
+  RULES_COLUMN_RESPONSE,
+  RULES_COLUMN_MESSAGE,
+} from '../translations';
 import { FilteredEmptyState, RulesEmptyState } from './empty_state';
 import { ExecutionHistoryErrorState } from './error_state';
 
@@ -78,9 +84,7 @@ const buildColumns = (
     render: (value: string) => moment(value).format(dateTimeFormat),
   },
   {
-    name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.rule', {
-      defaultMessage: 'Rule',
-    }),
+    name: RULES_COLUMN_RULE,
     width: '15%',
     render: (item: RuleExecutionView) => {
       const ruleName = rulesCache[item.rule.id]?.metadata?.name;
@@ -99,17 +103,13 @@ const buildColumns = (
     },
   },
   {
-    name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.duration', {
-      defaultMessage: 'Duration',
-    }),
+    name: RULES_COLUMN_DURATION,
     width: '10%',
     render: (item: RuleExecutionView) => asDuration(item.timings.duration * MS_TO_US),
   },
   {
     field: 'outcome',
-    name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.response', {
-      defaultMessage: 'Response',
-    }),
+    name: RULES_COLUMN_RESPONSE,
     width: '10%',
     render: (outcome: RuleExecutionView['outcome']) => (
       <EuiBadge
@@ -121,9 +121,7 @@ const buildColumns = (
     ),
   },
   {
-    name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.message', {
-      defaultMessage: 'Message',
-    }),
+    name: RULES_COLUMN_MESSAGE,
     width: '50%',
     render: (item: RuleExecutionView) =>
       item.error?.message ??
