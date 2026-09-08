@@ -19,9 +19,10 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
+  ChromeAiButton,
+  ChromeNewsfeedHandler,
   GlobalSearchConfig,
   ChromeNavLink,
-  GlobalHeaderAiButton,
   ChromeUserBanner,
   ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
@@ -66,7 +67,7 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
-  aiButton: State<ReadonlySet<GlobalHeaderAiButton>>;
+  aiButton: State<ReadonlySet<ChromeAiButton>>;
   globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
@@ -88,7 +89,7 @@ export interface ChromeState {
   feedbackHandler: State<(() => void) | undefined>;
 
   /** Newsfeed handler registered by the newsfeed plugin */
-  newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
+  newsfeedHandler: State<ChromeNewsfeedHandler | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -125,7 +126,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
-  const aiButton = createState<ReadonlySet<GlobalHeaderAiButton>>(new Set());
+  const aiButton = createState<ReadonlySet<ChromeAiButton>>(new Set());
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
@@ -144,9 +145,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
 
   // Newsfeed
-  const newsfeedHandler = createState<
-    { open: () => void; hasNew$: Observable<boolean> } | undefined
-  >(undefined);
+  const newsfeedHandler = createState<ChromeNewsfeedHandler | undefined>(undefined);
 
   return {
     visibility,
