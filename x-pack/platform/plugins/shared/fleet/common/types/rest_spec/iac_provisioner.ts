@@ -8,6 +8,20 @@
 import type { IacProvisionerRenderFlow } from '../../telemetry/iac_provisioner_events';
 import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 
+/** IaCP workflow name for the AWS federated-identity connector. */
+export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'federated_identity' as const;
+
+/**
+ * True when a resolve blueprint id belongs to the given IaCP workflow.
+ * Resolve rows identify a lineage (`federated-identity` or
+ * `aws/federated-identity`); render takes the workflow name
+ * (`federated_identity`).
+ */
+export const blueprintMatchesWorkflow = (blueprintId: string, workflow: string): boolean => {
+  const leaf = (blueprintId.split('/').pop() ?? blueprintId).replace(/-/g, '_');
+  return leaf === workflow;
+};
+
 export interface IacPolicyTemplateSelection {
   /** Policy template name as declared in the integration's package manifest. */
   name: string;
@@ -30,13 +44,19 @@ export interface RenderIacTemplateIntegration {
 export interface RenderIacTemplateRequest {
   provider: typeof AWS_CLOUD_PROVIDER;
   /**
-   * Blueprint to render, taken from a deployable entry in the resolve
-   * response. An unknown id is rejected by the provisioner.
+   * Identity mechanism. Kibana's name for the connector type. IaCP looks
+   * up the matching blueprint lineage and always renders the newest
+   * supported version.
    */
-  blueprintId: string;
+  workflow: string;
   /** The Kibana flow requesting the render; reported in telemetry. */
   flow: IacProvisionerRenderFlow;
   integrations: RenderIacTemplateIntegration[];
+  /**
+   * Stored template digest from this connector. Omit on first render and
+   * after a static-template fallback. Send on dynamic reuse.
+   */
+  templateSha?: string;
   /** Optional user-supplied parameters forwarded to the template. */
   userParams?: Record<string, string>;
 }
@@ -54,6 +74,18 @@ export interface RenderIacTemplateResponse {
   artifactUrl: string;
   /** ISO 8601 UTC timestamp when the pre-signed URL expires. */
   expiresAt: string;
+  /**
+   * Digest of the canonical CloudFormation template. Persist on the
+   * connector at confirmation, then send back as `templateSha` on the
+   * next render.
+   */
+  templateSha: string;
+  /**
+   * True when the caller must send the user through CloudFormation
+   * (first use, stored templateSha no longer matches, or leaving the
+   * static template). False when the stored templateSha still matches.
+   */
+  render: boolean;
   /** Blueprint and version that was actually rendered. */
   blueprint: RenderedIacBlueprint;
 }

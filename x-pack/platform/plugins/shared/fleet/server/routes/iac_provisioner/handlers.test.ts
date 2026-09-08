@@ -74,6 +74,8 @@ const CAI_PACKAGE_INFO = {
 const RENDERED = {
   artifactUrl: 'https://s3.example/rendered',
   expiresAt: '2026-07-28T12:00:00Z',
+  templateSha: 'sha256:661cb7def1c7101f',
+  render: true,
   blueprint: { id: 'federated-identity', version: 'v1' },
 };
 
@@ -85,7 +87,7 @@ const cspmSelection = {
 const renderBody = (overrides: Record<string, unknown> = {}) => ({
   provider: 'aws',
   flow: 'cloud_connector',
-  blueprintId: 'federated-identity',
+  workflow: 'federated_identity',
   integrations: [cspmSelection],
   ...overrides,
 });
@@ -138,7 +140,7 @@ describe('renderIacTemplateHandler', () => {
 
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      blueprintId: 'federated-identity',
+      workflow: 'federated_identity',
       integrations: [
         {
           name: 'cloud_security_posture',
@@ -198,6 +200,32 @@ describe('renderIacTemplateHandler', () => {
     );
   });
 
+  it('forwards templateSha when the caller supplies it', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedRenderTemplate.mockResolvedValue(RENDERED);
+
+    await renderIacTemplateHandler(
+      buildContext(),
+      buildRequest(renderBody({ templateSha: 'sha256:661cb7def1c7101f' })),
+      response
+    );
+
+    expect(mockedRenderTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ templateSha: 'sha256:661cb7def1c7101f' })
+    );
+  });
+
+  it('omits templateSha when the caller does not supply it', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedRenderTemplate.mockResolvedValue(RENDERED);
+
+    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
+
+    expect(mockedRenderTemplate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ templateSha: expect.anything() })
+    );
+  });
+
   it('merges duplicate package entries and unions enabledInputs per policy template', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'aws',
@@ -231,7 +259,7 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedGetPackageInfo).toHaveBeenCalledTimes(1);
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      blueprintId: 'federated-identity',
+      workflow: 'federated_identity',
       integrations: [
         {
           name: 'aws',
@@ -343,7 +371,7 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedGetPackageInfo).toHaveBeenCalledTimes(3);
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      blueprintId: 'federated-identity',
+      workflow: 'federated_identity',
       integrations: [
         {
           name: 'aws',
@@ -545,21 +573,7 @@ describe('resolveIacBlueprintsHandler', () => {
     );
   });
 
-  it('maps a 501 from the provisioner to an empty not-deployable result', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedResolveBlueprints.mockRejectedValue(
-      new IacProvisionerUnavailableError('not implemented', 501)
-    );
-
-    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
-
-    expect(response.ok).toHaveBeenCalledWith({ body: { blueprints: [] } });
-    expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, httpStatus: 501, blueprintCount: 0 })
-    );
-  });
-
-  it('maps other unavailability to 502', async () => {
+  it('maps provider unavailability to 502', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
     mockedResolveBlueprints.mockRejectedValue(new IacProvisionerUnavailableError('timeout', 504));
 

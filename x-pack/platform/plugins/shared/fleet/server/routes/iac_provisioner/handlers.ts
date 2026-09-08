@@ -127,7 +127,8 @@ export const renderIacTemplateHandler: FleetRequestHandler<
   const {
     provider,
     flow,
-    blueprintId,
+    workflow,
+    templateSha,
     integrations: requestedIntegrations,
     userParams,
   } = request.body;
@@ -155,8 +156,9 @@ export const renderIacTemplateHandler: FleetRequestHandler<
 
     const rendered = await iacProvisionerService.renderTemplate({
       provider,
-      blueprintId,
+      workflow,
       integrations,
+      ...(templateSha ? { templateSha } : {}),
       ...(userParams ? { userParams } : {}),
     });
 
@@ -225,22 +227,6 @@ export const resolveIacBlueprintsHandler: FleetRequestHandler<
     });
     return response.ok({ body: resolved });
   } catch (error) {
-    // 501: the provisioner has registered the route but not the resolver yet.
-    // Treat that as "nothing deployable" so the client falls back to the
-    // static template instead of surfacing a 5xx.
-    if (error instanceof IacProvisionerUnavailableError && error.statusCode === 501) {
-      reportIacProvisionerResolveCompleted({
-        flow,
-        success: false,
-        httpStatus: 501,
-        blueprintCount: 0,
-        deployableCount: 0,
-        notCoveredReasons: [],
-        latencyMs: Date.now() - startTime,
-      });
-      return response.ok({ body: { blueprints: [] } });
-    }
-
     return mapIacProvisionerRouteError({
       error,
       flow,

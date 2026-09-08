@@ -18,7 +18,7 @@ const VALID_INTEGRATION = {
 const VALID_BODY = {
   provider: 'aws',
   flow: 'cloud_connector',
-  blueprintId: 'federated-identity',
+  workflow: 'federated_identity',
   integrations: [VALID_INTEGRATION],
 };
 
@@ -57,7 +57,7 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          blueprintId: 'federated-identity',
+          workflow: 'federated_identity',
           integrations: [VALID_INTEGRATION],
         },
         responseType: 'json',
@@ -66,7 +66,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('returns 400 when blueprintId is missing', async ({ apiClient, samlAuth }) => {
+    apiTest('returns 400 when workflow is missing', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
 
       const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {

@@ -42,7 +42,7 @@ const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
 
 const RENDER_REQUEST = {
   provider: 'aws' as const,
-  blueprintId: 'federated-identity',
+  workflow: 'federated_identity',
   integrations: [
     {
       name: 'cloud_security_posture',
@@ -55,6 +55,8 @@ const RENDER_REQUEST = {
 const RENDER_RESPONSE = {
   artifactUrl: ARTIFACT_URL,
   expiresAt: '2026-07-28T12:00:00Z',
+  templateSha: 'sha256:661cb7def1c7101f',
+  render: true,
   blueprint: { id: 'federated-identity', version: 'v1' },
 };
 
@@ -117,6 +119,27 @@ describe('IacProvisionerService', () => {
 
     await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
+    );
+  });
+
+  it('includes templateSha in the render body when the caller supplies it', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
+
+    await iacProvisionerService.renderTemplate({
+      ...RENDER_REQUEST,
+      templateSha: 'sha256:661cb7def1c7101f',
+    });
+
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://iac-provisioner.example/api/v1/render',
+      expect.objectContaining({
+        body: JSON.stringify({
+          ...RENDER_REQUEST,
+          templateSha: 'sha256:661cb7def1c7101f',
+        }),
+      })
     );
   });
 
