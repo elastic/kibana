@@ -4298,6 +4298,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agentic-investigations-common@link:x-pack/platform/packages/shared/kbn-agentic-investigations-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -4619,10 +4623,6 @@
   uid ""
 
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agentic-investigations-common@link:x-pack/platform/packages/shared/kbn-agentic-investigations-common":
   version "0.0.0"
   uid ""
 
