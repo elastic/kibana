@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Liquid } from 'liquidjs';
 import type { ESQLColumn } from '@kbn/es-types';
 
 /**
@@ -15,33 +14,22 @@ import type { ESQLColumn } from '@kbn/es-types';
  * `vendors` chunk — which is pulled by most of the app, so a template engine only this
  * feature needs would be downloaded far more widely than it is used.
  *
- * Memoized: the engine is built once and reused, as it was when constructed at module scope.
- * The memo is cleared when the load fails, so a transient failure is retried.
+ * The module itself is cached by the loader, so this fetches once; only the engine is
+ * constructed per call, which is why no memo is needed. Liquid's own template cache is off,
+ * so a reused instance would buy nothing — revisit if that ever changes.
  */
-let enginePromise: Promise<Liquid> | undefined;
-
-const getEngine = (): Promise<Liquid> => {
-  if (!enginePromise) {
-    enginePromise = import('liquidjs')
-      .then(
-        ({ Liquid: LiquidEngine }) =>
-          new LiquidEngine({
-            strictFilters: false,
-            strictVariables: false,
-            dynamicPartials: false,
-            relativeReference: false,
-            outputEscape: 'escape',
-            renderLimit: 1_000,
-            memoryLimit: 100_000_000,
-            parseLimit: 1_000_000,
-          })
-      )
-      .catch((error) => {
-        enginePromise = undefined;
-        throw error;
-      });
-  }
-  return enginePromise;
+const getEngine = async () => {
+  const { Liquid } = await import('liquidjs');
+  return new Liquid({
+    strictFilters: false,
+    strictVariables: false,
+    dynamicPartials: false,
+    relativeReference: false,
+    outputEscape: 'escape',
+    renderLimit: 1_000,
+    memoryLimit: 100_000_000,
+    parseLimit: 1_000_000,
+  });
 };
 
 function isFiniteNumber(value: unknown): value is number {
