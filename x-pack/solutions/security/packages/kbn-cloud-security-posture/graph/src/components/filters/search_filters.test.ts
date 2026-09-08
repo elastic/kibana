@@ -303,9 +303,9 @@ describe('search_filters', () => {
 
       it('should leave an uncontrolled filter intact and add the new one alongside it', () => {
         // A filter with no `controlledBy` was added by the user in the search bar. Absorbing it
-        // into the graph's OR chip would drop its AND relationship with the rest of the filter bar
-        // (every event matching the new filter would bypass the user's constraint) and hand the
-        // graph ownership of a chip `clearAllFilters` may later remove.
+        // into the graph's OR chip would drop its AND relationship with the rest of the filter bar,
+        // so every event matching the new filter would bypass the user's constraint — and which
+        // chip that happens to be depends on filter order.
         const filters: Filter[] = [buildFilterMock(key, 'another-value')];
 
         // Act
@@ -332,6 +332,25 @@ describe('search_filters', () => {
         // The user's filter is untouched — still uncontrolled, still its own chip.
         expect(newFilters[1]).toEqual(filters[0]);
         expect(newFilters[1].meta.controlledBy).toBeUndefined();
+      });
+
+      it('should OR with an uncontrolled filter when combineWithUserFilters is set', () => {
+        // The investigate-in-timeline handoff folds the origin event ids in with whatever is in
+        // the filter bar, and means "the filtered events *or* the event I opened". ANDing there
+        // would exclude the origin event, since it matches none of the user's filters — the
+        // timeline would open empty.
+        const filters: Filter[] = [buildFilterMock(key, 'another-value')];
+
+        // Act
+        const newFilters = addFilter(dataViewId, filters, key, value, true);
+
+        // Assert
+        expect(newFilters).toHaveLength(1);
+        expect(newFilters[0].meta).toMatchObject({
+          type: FILTERS.COMBINED,
+          relation: BooleanRelation.OR,
+        });
+        expect((newFilters[0].meta as CombinedFilterMeta).params).toHaveLength(2);
       });
 
       it('should combine with an existing filter', () => {
@@ -848,7 +867,7 @@ describe('search_filters', () => {
       it("does not absorb the user's own leading filter into the OR", () => {
         // A filter the user typed has no `controlledBy`. ORing the entity clause into it would let
         // any event matching the entity bypass the user's constraint — the AND is silently lost —
-        // and would relabel their chip as graph-owned, so `clearAllFilters` could remove it.
+        // turning a refinement action ("show *this* entity's actions") into a widening one.
         const userFilter = buildFilterMock('event.category', 'iam');
         const filters = addEntityFilter(dataViewId, [userFilter], entityId, GCP_DSL, {
           'data_stream.dataset': 'gcp.audit',

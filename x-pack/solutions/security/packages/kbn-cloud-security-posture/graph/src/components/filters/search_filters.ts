@@ -534,28 +534,44 @@ export const buildFieldsDsl = (fields: Record<string, string | string[]>): objec
 });
 
 /**
- * Adds a filter to the existing list of filters based on the provided key and value.
- * It will always use the first filter in the list to build a combined filter with the new filter.
+ * Adds a filter to the existing list, OR'ing it with the filter at position 0 when that filter is
+ * one the graph owns.
+ *
+ * A chip the user typed into the search bar is left alone and the new filter becomes its own
+ * top-level chip. The graph's popover actions refine ("show *this* entity's actions"), so they
+ * belong inside the user's scope: `iam AND <entity>` answers the question being asked, where
+ * `iam OR <entity>` pulls in every unrelated event the entity ever produced. Which chip sits at
+ * position 0 is also incidental, so absorbing it makes the result depend on chip order.
+ * Graph-owned filters are still OR'd with each other — actor / target / related are facets of one
+ * entity, and chaining them is additive by design.
+ *
+ * `combineWithUserFilters` opts out, for the investigate-in-timeline handoff. The graph itself
+ * never needs it: the server OR's `originEventIds` against `esQuery` (see `fetch_events_graph`),
+ * so the origin event survives any filter. The timeline is a separate consumer with no such
+ * server-side OR, so that guarantee has to be rebuilt here or the origin event — which matches
+ * none of the user's filters — would be excluded by the conjunction.
  *
  * @param dataViewId - The ID of the data view to which the filter belongs.
  * @param prev - The previous list of filters.
  * @param key - The key for the filter.
  * @param value - The value for the filter.
+ * @param combineWithUserFilters - OR with the leading filter even if the user owns it.
  * @returns A new list of filters with the added filter.
  */
 export const addFilter = (
   dataViewId: string,
   prev: Filter[],
   key: string,
-  value: string | string[]
+  value: string | string[],
+  combineWithUserFilters: boolean = false
 ) => {
   const [firstFilter, ...otherFilters] = prev;
-
+  const mayCombine = combineWithUserFilters || isGraphOwnedFilter(firstFilter);
   if (
     isCombinedFilter(firstFilter) &&
     !firstFilter?.meta?.disabled &&
     firstFilter?.meta?.relation === BooleanRelation.OR &&
-    isGraphOwnedFilter(firstFilter)
+    mayCombine
   ) {
     return [
       {
@@ -575,7 +591,7 @@ export const addFilter = (
     isFilter(firstFilter) &&
     !firstFilter?.meta?.disabled &&
     firstFilter.meta?.type !== 'custom' &&
-    isGraphOwnedFilter(firstFilter)
+    mayCombine
   ) {
     const combinedFilter = buildCombinedFilter(
       BooleanRelation.OR,
