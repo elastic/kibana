@@ -23,6 +23,7 @@ import { renderMatrixHtml } from '../src/matrix/render_matrix_html';
 import type { MatrixTraceData } from '../src/matrix/trace_types';
 import type { AggregatedModelScores } from '../src/matrix/query_matrix_scores';
 import { loadMatrixConfig } from '../src/matrix/load_matrix_config';
+import { deriveJudgeProvenance } from '../src/matrix/judge_provenance';
 
 const readJson = <T>(file: string): T => JSON.parse(fs.readFileSync(file, 'utf8')) as T;
 
@@ -45,11 +46,19 @@ const matrix = buildMatrix(aggregated, config, {
   warning: (message: string) => warnings.push(message),
 });
 
+// Which judge actually graded the admitted runs, counted from the aggregated
+// input rather than asserted. A hardcoded id here silently survives a rejudge
+// that never landed: the board then claims one shared instrument while the
+// rows were graded by several, which is exactly the comparison the CI/spread
+// figures below assume is safe.
+const { judgeModelId, judgeBreakdown } = deriveJudgeProvenance(aggregated);
+
 const provenance = {
   generatedAt: new Date().toISOString(),
   commitSha: process.env.COMMIT_SHA,
   source: 'golden cluster .ds-.evaluation-scores* (wave-2)',
-  judgeModelId: 'google-gemini-3.1-pro',
+  judgeModelId,
+  judgeBreakdown,
   traceCache: process.env.TRACES_JSON ? 'golden .ds-.evaluation-scores* (task.output)' : 'none',
   // Statistical honesty notes ride in the template's own methodologyNotes slot,
   // so nothing in the original layout is removed to make room for them.

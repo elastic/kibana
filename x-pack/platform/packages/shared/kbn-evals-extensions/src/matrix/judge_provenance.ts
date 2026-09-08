@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AggregatedModelScores } from './query_matrix_scores';
+
 /**
  * Judge provenance: who graded a cell, on what backend, and from which family.
  *
@@ -233,5 +235,71 @@ export function auditJudges(rows: JudgeAuditRow[], policy: JudgePolicy = {}): Ju
     sameFamilyDocs,
     violations,
     judgeFamilies: [...families].sort(),
+  };
+}
+
+export interface JudgeShare {
+  judgeModelId: string;
+  /** Number of admitted (model, suite) runs this judge graded. */
+  suites: number;
+  /** Percentage of admitted runs, to one decimal. */
+  share: number;
+}
+
+export interface DerivedJudgeProvenance {
+  /**
+   * A single judge id when every admitted run shares one, otherwise a
+   * `mixed: ...` summary. Never a bare id when the board is not unanimous —
+   * the whole point is that a reader cannot mistake a mixed board for a
+   * unified one.
+   */
+  judgeModelId: string;
+  judgeBreakdown: JudgeShare[];
+}
+
+/**
+ * Derive which judge graded the admitted runs, counted from the aggregated
+ * scores rather than asserted by the caller.
+ *
+ * A hardcoded judge id silently survives a rejudge that never landed: the
+ * board then claims one shared instrument while the rows were graded by
+ * several. That is precisely the assumption the published spread/CI figures
+ * rest on, so it must be measured, not declared.
+ */
+export function deriveJudgeProvenance(aggregated: AggregatedModelScores[]): DerivedJudgeProvenance {
+  const counts = new Map<string, number>();
+  for (const model of aggregated) {
+    for (const suite of model.suites ?? []) {
+      if (suite.judgeModelId) {
+        counts.set(suite.judgeModelId, (counts.get(suite.judgeModelId) ?? 0) + 1);
+      }
+    }
+  }
+
+  const byFrequency = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const total = byFrequency.reduce((sum, [, n]) => sum + n, 0);
+
+  const judgeBreakdown: JudgeShare[] = byFrequency.map(([judgeModelId, suites]) => ({
+    judgeModelId,
+    suites,
+    share: Number(((100 * suites) / total).toFixed(1)),
+  }));
+
+  if (byFrequency.length === 0) {
+    return {
+      judgeModelId: 'unknown (no judge recorded on any admitted suite)',
+      judgeBreakdown,
+    };
+  }
+
+  if (byFrequency.length === 1) {
+    return { judgeModelId: byFrequency[0][0], judgeBreakdown };
+  }
+
+  return {
+    judgeModelId: `mixed: ${judgeBreakdown
+      .map((j) => `${j.judgeModelId} ${j.share.toFixed(1)}%`)
+      .join(', ')}`,
+    judgeBreakdown,
   };
 }

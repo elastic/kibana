@@ -1,0 +1,216 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Extract a pre-aggregated `AggregatedModelScores[]` straight from the golden
+ * cluster, for `render_from_golden.ts` to consume.
+ *
+ * The golden cluster runs with `xpack.evals.enabled=false`, so the normal
+ * `evals ext matrix` CLI cannot read it through the plugin API. This reads the
+ * score documents directly and shapes them exactly like the CLI's aggregation
+ * step, so the renderer downstream is byte-identical either way.
+ *
+ * This exists as a committed script rather than a one-off because the published
+ * board is otherwise unreproducible: without it, regenerating requires
+ * reinventing the extraction, and the artifact's provenance cannot be checked
+ * against the data it claims to summarise.
+ *
+ * Usage:
+ *   source ~/.elastic/golden-cluster-env.sh
+ *   node --require ../../../../../src/setup_node_env \
+ *     scripts/extract_golden_aggregate.ts > /tmp/aggregated.json
+ */
+
+import fs from 'fs';
+
+const ES_URL = process.env.GOLDEN_ES_URL!;
+const ES_KEY = process.env.GOLDEN_ES_API_KEY!;
+const SINCE = process.env.SINCE ?? '2026-09-01';
+const OUT = process.env.OUT_JSON;
+
+if (!ES_URL || !ES_KEY) {
+  throw new Error('GOLDEN_ES_URL and GOLDEN_ES_API_KEY must be set (source golden-cluster-env.sh)');
+}
+
+/** Suites that make up the published board, mapped to their experiment_name. */
+const SUITES: Array<{ suiteId: string; experimentNamePattern: string }> = [
+  { suiteId: 'security-persona-matrix', experimentNamePattern: '*persona-matrix*' },
+  {
+    suiteId: 'attack-discovery-agent-builder',
+    experimentNamePattern: 'attack-discovery-agent-builder*',
+  },
+  {
+    suiteId: 'automatic-migrations',
+    experimentNamePattern: 'agent builder: automatic-migration*',
+  },
+];
+
+interface ScoreDoc {
+  experiment_id: string;
+  experiment_name: string;
+  '@timestamp': string;
+  example?: { id?: string; dataset?: { id?: string; name?: string } };
+  task?: { model?: { id?: string; family?: string; provider?: string } };
+  evaluator?: { name?: string; score?: number; model?: { id?: string } };
+}
+
+const search = async (body: unknown): Promise<{ hits: { hits: Array<{ _source: ScoreDoc }> } }> => {
+  const response = await fetch(`${ES_URL.replace(/\/$/, '')}/.ds-.evaluation-scores*/_search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `ApiKey ${ES_KEY}` },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`ES search failed: ${response.status} ${await response.text()}`);
+  }
+  return (await response.json()) as { hits: { hits: Array<{ _source: ScoreDoc }> } };
+};
+
+const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length;
+
+async function main() {
+  // modelId -> suiteId -> docs
+  const byModel = new Map<string, Map<string, ScoreDoc[]>>();
+
+  for (const suite of SUITES) {
+    let searchAfter: unknown[] | undefined;
+    let fetched = 0;
+    // Page rather than size-capping: a truncated read silently drops whole
+    // models and the board renders as if they never ran.
+    for (;;) {
+      const page: any = await search({
+        size: 5000,
+        // Each score doc carries the model's full transcript under
+        // `task.output`. Pulling whole `_source` makes the reader hold every
+        // transcript on the board in memory at once (observed: ~2GB RSS and no
+        // forward progress). None of it is aggregated here, so ask ES for the
+        // fields this actually reads.
+        _source: [
+          'experiment_id',
+          'experiment_name',
+          '@timestamp',
+          'example.id',
+          'example.dataset.name',
+          'task.model.id',
+          'task.model.family',
+          'task.model.provider',
+          'evaluator.name',
+          'evaluator.score',
+          'evaluator.model.id',
+        ],
+        sort: [{ '@timestamp': 'asc' }, { _doc: 'asc' }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            must: [
+              { wildcard: { experiment_name: { value: suite.experimentNamePattern } } },
+              { range: { '@timestamp': { gte: SINCE } } },
+              { exists: { field: 'evaluator.score' } },
+            ],
+          },
+        },
+      });
+
+      const hits = page.hits.hits as Array<{ _source: ScoreDoc; sort: unknown[] }>;
+      if (hits.length === 0) break;
+
+      for (const hit of hits) {
+        const doc = hit._source;
+        const modelId = doc.task?.model?.id;
+        if (!modelId) continue;
+        if (!byModel.has(modelId)) byModel.set(modelId, new Map());
+        const suites = byModel.get(modelId)!;
+        if (!suites.has(suite.suiteId)) suites.set(suite.suiteId, []);
+        suites.get(suite.suiteId)!.push(doc);
+      }
+
+      searchAfter = hits[hits.length - 1].sort;
+      fetched += hits.length;
+      // Progress on stderr: a silent multi-minute read is indistinguishable
+      // from a hang, and this reads tens of thousands of documents.
+      // eslint-disable-next-line no-console
+      console.error(`[${suite.suiteId}] fetched ${fetched} score doc(s)`);
+      if (hits.length < 5000) break;
+    }
+  }
+
+  const aggregated = [...byModel.entries()].map(([modelId, suiteDocs]) => {
+    const suites = [...suiteDocs.entries()].map(([suiteId, docs]) => {
+      // Newest experiment wins, matching the CLI's newest-execution selection.
+      const newestExperiment = docs.reduce((latest, d) =>
+        d['@timestamp'] > latest['@timestamp'] ? d : latest
+      );
+      const selected = docs.filter((d) => d.experiment_id === newestExperiment.experiment_id);
+
+      // Group by example id: each example is a matrix column.
+      const byDataset = new Map<string, ScoreDoc[]>();
+      for (const doc of selected) {
+        const datasetId = doc.example?.id ?? 'unknown';
+        if (!byDataset.has(datasetId)) byDataset.set(datasetId, []);
+        byDataset.get(datasetId)!.push(doc);
+      }
+
+      const datasets = [...byDataset.entries()].map(([datasetId, datasetDocs]) => {
+        const byEvaluator = new Map<string, number[]>();
+        for (const doc of datasetDocs) {
+          const name = doc.evaluator?.name;
+          const score = doc.evaluator?.score;
+          if (!name || typeof score !== 'number') continue;
+          if (!byEvaluator.has(name)) byEvaluator.set(name, []);
+          byEvaluator.get(name)!.push(score);
+        }
+        return {
+          datasetId,
+          datasetName: datasetDocs[0].example?.dataset?.name ?? datasetId,
+          evaluators: [...byEvaluator.entries()].map(([evaluatorName, scores]) => ({
+            evaluatorName,
+            mean: mean(scores),
+            count: scores.length,
+            min: Math.min(...scores),
+            max: Math.max(...scores),
+          })),
+        };
+      });
+
+      // The judge that actually graded the selected run — carried so the
+      // artifact's provenance can be derived instead of asserted.
+      const judgeModelId = selected.find((d) => d.evaluator?.model?.id)?.evaluator?.model?.id;
+
+      return {
+        suiteId,
+        experimentId: newestExperiment.experiment_id,
+        timestamp: newestExperiment['@timestamp'],
+        judgeModelId,
+        selfJudged: judgeModelId === modelId,
+        datasets,
+      };
+    });
+
+    return {
+      modelId,
+      family: suiteDocs.values().next().value?.[0]?.task?.model?.family,
+      provider: suiteDocs.values().next().value?.[0]?.task?.model?.provider,
+      suites,
+    };
+  });
+
+  const json = JSON.stringify(aggregated, null, 2);
+  if (OUT) {
+    fs.writeFileSync(OUT, json);
+    // eslint-disable-next-line no-console
+    console.error(`wrote ${aggregated.length} model(s) to ${OUT}`);
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(json);
+  }
+}
+
+main().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error(error);
+  process.exit(1);
+});

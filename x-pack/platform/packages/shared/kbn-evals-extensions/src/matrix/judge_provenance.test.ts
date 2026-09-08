@@ -11,7 +11,9 @@ import {
   classifyFamily,
   describeJudge,
   isEisBacked,
+  deriveJudgeProvenance,
 } from './judge_provenance';
+import type { AggregatedModelScores } from './query_matrix_scores';
 
 describe('classifyFamily', () => {
   it.each([
@@ -188,5 +190,77 @@ describe('auditJudges', () => {
   it('handles an empty audit', () => {
     const summary = auditJudges([]);
     expect(summary).toMatchObject({ totalDocs: 0, nonEisDocs: 0, violations: [] });
+  });
+});
+
+const model = (modelId: string, judges: Array<string | undefined>): AggregatedModelScores =>
+  ({
+    modelId,
+    suites: judges.map((judgeModelId, i) => ({
+      suiteId: `suite-${i}`,
+      judgeModelId,
+      datasets: [],
+    })),
+  } as unknown as AggregatedModelScores);
+
+describe('deriveJudgeProvenance', () => {
+  it('reports the bare id only when every admitted run shares one judge', () => {
+    const result = deriveJudgeProvenance([
+      model('openai-gpt-5.5', ['google-gemini-3.1-pro']),
+      model('anthropic-claude-5-sonnet', ['google-gemini-3.1-pro']),
+    ]);
+
+    expect(result.judgeModelId).toBe('google-gemini-3.1-pro');
+    expect(result.judgeBreakdown).toEqual([
+      { judgeModelId: 'google-gemini-3.1-pro', suites: 2, share: 100 },
+    ]);
+  });
+
+  it('refuses to name a single judge when the board is actually mixed', () => {
+    // The regression that motivated this: the artifact declared a unified
+    // gemini judge while the golden rows were mostly haiku-graded. A mixed
+    // board must never render as a bare id.
+    const result = deriveJudgeProvenance([
+      model('a', ['anthropic-claude-4.5-haiku']),
+      model('b', ['anthropic-claude-4.5-haiku']),
+      model('c', ['anthropic-claude-4.5-haiku']),
+      model('d', ['google-gemini-3.1-pro']),
+    ]);
+
+    expect(result.judgeModelId).not.toBe('google-gemini-3.1-pro');
+    expect(result.judgeModelId).toMatch(/^mixed: /);
+    expect(result.judgeModelId).toContain('anthropic-claude-4.5-haiku 75.0%');
+    expect(result.judgeModelId).toContain('google-gemini-3.1-pro 25.0%');
+  });
+
+  it('orders the breakdown by how much of the board each judge graded', () => {
+    const result = deriveJudgeProvenance([
+      model('a', ['gemini', 'haiku', 'haiku']),
+      model('b', ['haiku']),
+    ]);
+
+    expect(result.judgeBreakdown.map((j) => j.judgeModelId)).toEqual(['haiku', 'gemini']);
+    expect(result.judgeBreakdown[0]).toEqual({ judgeModelId: 'haiku', suites: 3, share: 75 });
+    expect(result.judgeBreakdown[1]).toEqual({ judgeModelId: 'gemini', suites: 1, share: 25 });
+  });
+
+  it('says the judge is unknown rather than implying one when none is recorded', () => {
+    const result = deriveJudgeProvenance([model('a', [undefined]), model('b', [undefined])]);
+
+    expect(result.judgeModelId).toMatch(/^unknown/);
+    expect(result.judgeBreakdown).toEqual([]);
+  });
+
+  it('ignores runs with no judge instead of counting them as a judge', () => {
+    const result = deriveJudgeProvenance([model('a', ['gemini', undefined, undefined])]);
+
+    expect(result.judgeModelId).toBe('gemini');
+    expect(result.judgeBreakdown).toEqual([{ judgeModelId: 'gemini', suites: 1, share: 100 }]);
+  });
+
+  it('handles a model that contributed no suites at all', () => {
+    const result = deriveJudgeProvenance([model('a', ['gemini']), model('b', [])]);
+
+    expect(result.judgeModelId).toBe('gemini');
   });
 });
