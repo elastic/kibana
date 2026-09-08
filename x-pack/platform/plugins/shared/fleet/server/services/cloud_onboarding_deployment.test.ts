@@ -219,19 +219,15 @@ describe('cloudOnboardingDeploymentService', () => {
 
     it('persists serviceVars and returns the refreshed deployment', async () => {
       const serviceVars = {
-        cloudtrail: [
-          {
-            regions: ['us-east-1'],
-            s3_bucket_arn: 'arn:aws:s3:::bucket-1',
-            cloudtrail_trail_arn: 'arn:aws:cloudtrail:us-east-1:123:trail/Trail1',
-          },
-          {
-            regions: ['eu-west-1'],
-            s3_bucket_arn: 'arn:aws:s3:::bucket-2',
-            cloudtrail_trail_arn: 'arn:aws:cloudtrail:eu-west-1:123:trail/Trail2',
-          },
-        ],
-        elb_logs: [{ regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::elb-bucket' }],
+        cloudtrail: {
+          regions: ['us-east-1', 'eu-west-1'],
+          s3_bucket_arn: 'arn:aws:s3:::bucket-1',
+          cloudtrail_trail_arn: 'arn:aws:cloudtrail:us-east-1:123:trail/Trail1',
+        },
+        elb_logs: {
+          regions: ['us-east-1'],
+          s3_bucket_arn: 'arn:aws:s3:::elb-bucket',
+        },
       };
       const updatedAttrs = makeAttributes({ serviceVars });
       soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
@@ -247,8 +243,8 @@ describe('cloudOnboardingDeploymentService', () => {
         expect.objectContaining({ serviceVars })
       );
       expect(result.serviceVars).toEqual(serviceVars);
-      expect(result.serviceVars?.cloudtrail).toHaveLength(2);
-      expect(result.serviceVars?.elb_logs).toHaveLength(1);
+      expect(result.serviceVars?.cloudtrail).toHaveProperty('regions');
+      expect(result.serviceVars?.elb_logs).toHaveProperty('s3_bucket_arn');
     });
   });
 
@@ -329,7 +325,7 @@ describe('cloudOnboardingDeploymentService', () => {
       });
 
       it('does not modify serviceVars on retry', async () => {
-        const serviceVars = { cloudtrail: [{ regions: ['us-east-1'] }] };
+        const serviceVars = { cloudtrail: { regions: ['us-east-1'] } };
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
         soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
@@ -372,7 +368,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const attrs = makeAttributes({
           mechanisms: ['agentless'],
           services: ['cloudwatch_metrics'],
-          serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
+          serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
@@ -383,7 +379,7 @@ describe('cloudOnboardingDeploymentService', () => {
           connectorId: 'conn-1',
           mechanisms: ['agentless'],
           services: ['cloudwatch_metrics'],
-          serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
+          serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -401,7 +397,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const attrs = makeAttributes({
           mechanisms: [],
           services: ['cloudwatch_metrics'],
-          serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
+          serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
           packagePolicyIds: ['pkg-aws-002'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
@@ -412,7 +408,7 @@ describe('cloudOnboardingDeploymentService', () => {
           connectorId: 'conn-2',
           mechanisms: [],
           services: ['cloudwatch_metrics'],
-          serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
+          serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -431,9 +427,10 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['cloud_forwarder'],
           services: ['cloudfront_logs'],
           serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
-            ],
+            cloudfront_logs: {
+              regions: ['us-east-1'],
+              s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket',
+            },
           },
           packagePolicyIds: undefined,
         });
@@ -446,9 +443,10 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['cloud_forwarder'],
           services: ['cloudfront_logs'],
           serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
-            ],
+            cloudfront_logs: {
+              regions: ['us-east-1'],
+              s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket',
+            },
           },
         });
 
@@ -491,7 +489,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const attrs = makeAttributes({
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
-          serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
+          serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
           packagePolicyIds: undefined,
           agentPolicyId: undefined,
         });
@@ -503,7 +501,7 @@ describe('cloudOnboardingDeploymentService', () => {
           connectorId: 'conn-6',
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
-          serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
+          serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
