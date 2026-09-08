@@ -266,11 +266,9 @@ export async function setupDependencies({
     workflowLogger,
     workflowTaskManager,
     nodesFactory,
-    // activeExecutionPersistence: the concrete persistence in use for this run
-    // (either the caller-supplied override or the default ES-backed repository).
-    // workflowExecutionRepository: the raw override passed in by the caller;
-    // undefined for async runs, always set for sync runs.
+    // activeExecutionPersistence = resolved persistence (override ?? ES-backed default)
     activeExecutionPersistence: workflowExecutionPersistence,
+    // workflowExecutionRepository = raw caller override; undefined on the async path
     workflowExecutionRepository: workflowExecutionRepositoryOverride,
     esClient,
     telemetryClient,

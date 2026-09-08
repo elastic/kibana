@@ -8,10 +8,10 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type {
+import {
   type EsWorkflowExecution,
   ExecutionStatus,
-  WorkflowExecutionEngineModel,
+  type WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import { executeWorkflowSync } from './execute_workflow_sync';
 import { runWorkflowSync } from './run_workflow_sync';
@@ -146,8 +146,9 @@ describe('executeWorkflowSync', () => {
       getWorkflowsExecutionEngine: mockGetEngine,
     });
 
-    expect(result.result.status).toBe(ExecutionStatus.FAILED);
-    expect(result.result.error).toEqual(failedExecution.error);
+    expect(result.result).toBeDefined();
+    expect(result.result!.status).toBe(ExecutionStatus.FAILED);
+    expect(result.result!.error).toEqual(failedExecution.error);
     expect(runWorkflowSync).not.toHaveBeenCalled();
   });
 
