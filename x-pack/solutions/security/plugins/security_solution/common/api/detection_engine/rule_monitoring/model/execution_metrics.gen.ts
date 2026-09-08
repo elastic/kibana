@@ -21,23 +21,52 @@ export const RuleExecutionMetrics = lazySchema(() =>
     /**
      * Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response
      */
-    total_search_duration_ms: z.number().int().min(0).optional(),
+    total_search_duration_ms: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response'
+      ),
     /**
      * Total time spent indexing documents during current rule execution cycle
      */
-    total_indexing_duration_ms: z.number().int().min(0).optional(),
+    total_indexing_duration_ms: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Total time spent indexing documents during current rule execution cycle'),
     /**
      * Total time spent enriching documents during current rule execution cycle
      */
-    total_enrichment_duration_ms: z.number().int().min(0).optional(),
+    total_enrichment_duration_ms: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Total time spent enriching documents during current rule execution cycle'),
     /**
      * Duration in seconds of execution gap
      */
-    execution_gap_duration_s: z.number().int().min(0).optional(),
+    execution_gap_duration_s: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Duration in seconds of execution gap'),
     /**
      * Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
      */
-    frozen_indices_queried_count: z.number().int().min(0).optional(),
+    frozen_indices_queried_count: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.'
+      ),
     /**
      * Range of the execution gap
      */
@@ -46,13 +75,14 @@ export const RuleExecutionMetrics = lazySchema(() =>
         /**
          * Start date of the execution gap
          */
-        gte: z.string(),
+        gte: z.string().describe('Start date of the execution gap'),
         /**
          * End date of the execution gap
          */
-        lte: z.string(),
+        lte: z.string().describe('End date of the execution gap'),
       })
-      .optional(),
+      .optional()
+      .describe('Range of the execution gap'),
     /**
      * Detected reason for the execution gap
      */
@@ -61,9 +91,12 @@ export const RuleExecutionMetrics = lazySchema(() =>
         /**
          * The type of reason for the gap (rule_disabled or rule_did_not_run)
          */
-        type: z.enum(['rule_disabled', 'rule_did_not_run']),
+        type: z
+          .enum(['rule_disabled', 'rule_did_not_run'])
+          .describe('The type of reason for the gap (rule_disabled or rule_did_not_run)'),
       })
-      .optional(),
+      .optional()
+      .describe('Detected reason for the execution gap'),
   })
 );
 export type RuleExecutionMetrics = z.infer<typeof RuleExecutionMetrics>;
