@@ -8,9 +8,10 @@
 import {
   identifyKIQueries,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+  significantEventsPrompt,
+  type AnalysisTarget,
   type ExistingQuerySummary,
-} from '@kbn/streams-ai';
-import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
+} from '@kbn/nightshift-ai';
 import {
   createMemoryDiscoveryTools,
   MemoryServiceImpl,
@@ -24,7 +25,7 @@ import {
   createSpanLatencyEvaluator,
   createChatCallsEvaluator,
 } from '@kbn/evals';
-import type { Streams } from '@kbn/streams-schema';
+import { getSourcesForStream, getStreamSamplingSource, type Streams } from '@kbn/streams-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
 import {
@@ -374,6 +375,13 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   ...logsStream,
                   name: MANAGED_STREAM_SEARCH_PATTERN,
                 } as Streams.all.Definition;
+                const target: AnalysisTarget = {
+                  id: stream.name,
+                  name: stream.name,
+                  description: stream.description,
+                  sources: getSourcesForStream(stream),
+                  samplingSource: getStreamSamplingSource(stream),
+                };
 
                 const kiTypeCounts = kis.reduce<Record<string, number>>((counts, ki) => {
                   counts[ki.type] = (counts[ki.type] ?? 0) + 1;
@@ -396,7 +404,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
                 const { queries, toolUsage, tokensUsed, queryAttempts, reasoningDiagnostics } =
                   await identifyKIQueries({
-                    stream,
+                    target,
                     esClient,
                     inferenceClient,
                     logger,
@@ -580,10 +588,17 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               const { stream: streamFromApi } = await apiServices.streams.getStreamDefinition(
                 emptyDataStreamTestIndex!
               );
+              const emptyStream = streamFromApi as Streams.all.Definition;
 
               const { queries, queryAttempts, toolUsage, reasoningDiagnostics } =
                 await identifyKIQueries({
-                  stream: streamFromApi as Streams.all.Definition,
+                  target: {
+                    id: emptyStream.name,
+                    name: emptyStream.name,
+                    description: emptyStream.description,
+                    sources: getSourcesForStream(emptyStream),
+                    samplingSource: getStreamSamplingSource(emptyStream),
+                  },
                   esClient,
                   inferenceClient,
                   logger,
