@@ -43,10 +43,7 @@ import {
   getLegacySecurityHistorySnapshotIndexPattern,
   toNeutralHistorySnapshotIndexName,
 } from './history_snapshot_index';
-import {
-  getUpdatesEntitiesDataStreamName,
-  getLegacySecurityUpdatesEntitiesDataStreamName,
-} from './updates_data_stream';
+import { getLegacySecurityUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import {
   getMetadataEntitiesDataStreamName,
   getLegacySecurityMetadataEntitiesDataStreamName,
@@ -369,18 +366,17 @@ async function migrateUpdatesDataStream({
   namespace,
 }: MigrateLegacySecurityAssetsOptions): Promise<void> {
   const legacyStream = getLegacySecurityUpdatesEntitiesDataStreamName(namespace);
-  const newStream = getUpdatesEntitiesDataStreamName(namespace);
 
   if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {
     return;
   }
 
-  // Updates is a short-retention extraction buffer — recreate under the new name.
-  if (!(await isConcreteIndexOrDataStream(esClient, newStream))) {
-    await createDataStream(esClient, newStream, { throwIfExists: false });
-  }
+  // Updates is a short-retention extraction buffer. The neutral updates stream no longer
+  // has a dedicated index template (removed with the LOOKUP JOIN refactor -
+  // https://github.com/elastic/kibana/pull/282545) and is not
+  // created during install, so just delete the legacy source.
   await deleteDataStream(esClient, legacyStream);
-  logger.debug(`Replaced legacy updates data stream ${legacyStream} with ${newStream}`);
+  logger.debug(`Deleted legacy updates data stream ${legacyStream}`);
 }
 
 async function migrateMetadataDataStream({
