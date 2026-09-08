@@ -8,15 +8,13 @@
  */
 
 import type { GaugeVisualizationState } from '@kbn/lens-common';
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
 import type { IdRemapping } from './common';
-import { DEFAULT_LAYER_ID, getCommonNormalizer } from './common';
+import { DEFAULT_LAYER_ID, getCommonNormalizer, getPaletteNormalizer } from './common';
 import { getMetricAccessor } from '../../../../transforms/charts/utils';
-import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 
 type GaugeAttributes = Extract<LensAttributes, { visualizationType: 'lnsGauge' }>;
 
@@ -135,9 +133,6 @@ const alignLegacyTypes: NormalizerConfig<GaugeAttributes> = {
     for (const layer of Object.values(attributes.state.datasourceStates.formBased?.layers ?? {})) {
       for (const col of Object.values(layer.columns)) {
         delete (col as { params?: { parentFormat?: unknown } }).params?.parentFormat;
-        if (col.operationType === 'count') {
-          delete (col as { params?: unknown }).params;
-        }
       }
     }
 
@@ -145,121 +140,22 @@ const alignLegacyTypes: NormalizerConfig<GaugeAttributes> = {
   },
 };
 
-// Canonical ES|QL column order emitted by the transform's `getValueColumns`.
-const ESQL_COLUMN_ORDER = [ACCESSOR_METRIC, ACCESSOR_MAX, ACCESSOR_MIN, ACCESSOR_GOAL];
+const GAUGE_ACCESSOR_IDS = new Set([ACCESSOR_METRIC, ACCESSOR_MAX, ACCESSOR_MIN, ACCESSOR_GOAL]);
 
 /**
  * For ES|QL gauges the transform emits only the accessor columns (metric, max,
- * min, goal in that order) and drops any extra/duplicate columns. Align the
- * original textBased columns to that canonical set and order.
+ * min, goal) and drops any extra/duplicate query columns. The common normalizer
+ * sorts textBased columns alphabetically by `columnId`, so filter extras while
+ * preserving that order rather than imposing a custom sequence.
  */
 const alignESQLColumns: NormalizerConfig<GaugeAttributes> = {
   original: (attributes) => {
     const textBasedLayers = attributes.state.datasourceStates.textBased?.layers ?? {};
     for (const layer of Object.values(textBasedLayers)) {
-      const byId = new Map(layer.columns.map((col) => [col.columnId, col]));
-      layer.columns = ESQL_COLUMN_ORDER.filter((id) => byId.has(id)).map((id) => byId.get(id)!);
+      layer.columns = layer.columns.filter((col) => GAUGE_ACCESSOR_IDS.has(col.columnId));
     }
     return attributes;
   },
-};
-
-/**
- * Gauge-specific color-by-value palette normalizer.
- *
- * This mirrors the exact SO -> API -> SO contract implemented by
- * `fromColorByValueLensStateToAPI` / `fromColorByValueAPIToLensState`
- * (transforms/coloring/coloring.ts, post-#272123). Every adjustment below was
- * validated against a real round-trip of the failing integration panels: in all
- * cases the round-tripped palette renders identically to the original, the diffs
- * are purely the transform canonicalizing how open/closed bounds are encoded.
- *
- * Contract (continuity is the source of truth for open/closed bounds):
- * - `continuity = params.continuity ?? getContinuity(rangeMin, rangeMax)`.
- * - Open above (`above`/`all`): top band is unbounded, so `rangeMax` and the last
- *   stop are encoded as `null` (e.g. Tomcat/IBM MQ/MongoDB/PostgreSQL/vSphere:
- *   `rangeMax 100 -> null`, last `stop 100 -> null`).
- * - Closed above (`none`/`below`): the last step keeps `lte: rangeMax`, so the
- *   last stop is canonicalized to `rangeMax` (e.g. Gigamon: last `stop 8001 ->
- *   10000`).
- * - Open below (`below`/`all`): bottom band is unbounded, so `rangeMin` is encoded
- *   as `null`.
- * - Legacy (non-`custom`) palettes that need the bwc shift (see
- *   https://github.com/elastic/kibana/issues/251135) reconstruct stops as
- *   `[rangeMin, ...originalStops[1..]]`; combined with open-below this nulls the
- *   first stop (e.g. Nvidia `temperature`: `rangeMin 0 -> null`, first
- *   `stop 25 -> null`).
- */
-const alignGaugePalette: NormalizerConfig<GaugeAttributes> = {
-  original: (attributes) => {
-    const palette = attributes.state.visualization.palette as
-      | PaletteOutput<CustomPaletteParams>
-      | undefined;
-    const params = palette?.params;
-
-    if (!palette || !params || !params.stops) {
-      return attributes;
-    }
-
-    const rangeMin = getRangeValue(params.rangeMin);
-    const rangeMax = getRangeValue(params.rangeMax);
-    const isLegacy = palette.name !== 'custom';
-    const continuity = params.continuity ?? getContinuity(rangeMin, rangeMax);
-    const isOpenBelow = continuity === 'below' || continuity === 'all';
-    const isOpenAbove = continuity === 'above' || continuity === 'all';
-
-    const stops = params.stops;
-    const needsPaletteShift =
-      isLegacy &&
-      ((rangeMin !== null && rangeMin === stops.at(0)?.stop) ||
-        (rangeMax !== null && rangeMax !== stops.at(-1)?.stop));
-
-    if (needsPaletteShift) {
-      // The legacy bwc shift + reverse reconstruction collapses to: keep every
-      // stop boundary except the first, which becomes `rangeMin`.
-      stops.forEach((stop, i) => {
-        if (i === 0) {
-          stop.stop = (isOpenBelow ? null : rangeMin) as unknown as number;
-        }
-      });
-    } else if (stops.length > 1) {
-      // Multi-stop palette: the last step's upper bound is `rangeMax` (closed)
-      // or open (`null`).
-      //
-      // A single-stop open-above palette is left untouched: the transform encodes
-      // its openness by appending a trailing same-color step and then merges it
-      // back via `mergeTrailingSameColorStep`, so the lone stop value round-trips
-      // unchanged (e.g. ActiveMQ Broker Memory: single `stop: 100` survives).
-      const lastStop = stops.at(-1);
-      if (lastStop) {
-        lastStop.stop = (isOpenAbove ? null : rangeMax) as unknown as number;
-      }
-    }
-
-    params.rangeMin = (isOpenBelow ? null : rangeMin) as unknown as number;
-    params.rangeMax = (isOpenAbove ? null : rangeMax) as unknown as number;
-    params.continuity = continuity;
-
-    // The transform only emits `colorStops` for non-legacy (`custom`) palettes.
-    if (isLegacy) {
-      delete params.colorStops;
-    }
-
-    // The transform always sets params.name from the root palette name.
-    if (params.name === undefined && palette.name) {
-      params.name = palette.name;
-    }
-
-    return attributes;
-  },
-  ignore: [
-    // The transform recomputes these from the resulting stops; they carry no
-    // rendering information and the original frequently omits or mis-counts them.
-    'state.visualization.palette.params.maxSteps', // recomputed as max(5, stops.length)
-    'state.visualization.palette.params.steps', // recomputed as stops.length
-    'state.visualization.palette.params.progression', // deprecated, always defaulted to 'fixed'
-    'state.visualization.palette.params.reverse', // always pre-applied to stops during the transform
-  ],
 };
 
 export const normalizeGauge = mergeNormalizers<GaugeAttributes>([
@@ -267,9 +163,9 @@ export const normalizeGauge = mergeNormalizers<GaugeAttributes>([
     layerRemapping: [[(visualization as GaugeVisualizationState).layerId, DEFAULT_LAYER_ID]],
     columnRemapping: getColumnRemapping(visualization as GaugeVisualizationState),
   })),
+  getPaletteNormalizer<GaugeAttributes>('state.visualization.palette'),
   alignExtraLayers,
   alignId,
   alignLegacyTypes,
   alignESQLColumns,
-  alignGaugePalette,
 ]);
