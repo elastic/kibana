@@ -908,7 +908,7 @@ Register tabs and template UI definitions using the `conversationTemplates` API 
 class MyPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     // Register a reusable tab
-    agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
+    agentBuilder.conversationTemplates.registerTab('security.entities', () => entitiesTabDefinition);
 
     // Assign a display name, icon, and tabs (in render order) to a template
     agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
@@ -949,7 +949,7 @@ const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition =
 
 class SecurityPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
-    agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
+    agentBuilder.conversationTemplates.registerTab('security.overview', () => createOverviewTab(core));
     agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
@@ -985,6 +985,34 @@ return latestVersion && definition?.renderConversationDetailsContent
     })
   : null;
 ```
+
+### Shared registration context
+
+Both `registerTab` and `registerTemplateUIDefinition` accept a callback that Agent Builder
+invokes once with the same `ConversationTemplateUIContext`. This shared interface is the
+extension point for additional capabilities; consumers only use the methods they need.
+Callbacks that do not need any capabilities can ignore the argument.
+
+```tsx
+agentBuilder.conversationTemplates.registerTab('security.overview', (context) => ({
+  label: overviewTabLabel,
+  content: ({ conversation, attachmentsService }) => (
+    <OverviewTab
+      conversation={conversation}
+      attachmentsService={attachmentsService}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+The registry stores the returned definitions directly. Components capture capabilities at
+registration; hosts continue to supply conversation data and, for tabs, `attachmentsService`
+at render time. No context provider or component wrapper is required.
 
 ### Brief cards
 
