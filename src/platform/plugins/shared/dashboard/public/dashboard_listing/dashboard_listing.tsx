@@ -193,7 +193,7 @@ export const DashboardListing = ({
               label: i18n.translate('dashboard.listing.importJsonButtonLabel', {
                 defaultMessage: 'Import JSON',
               }),
-              iconType: 'importAction',
+              iconType: 'upload',
               testId: 'dashboardListingImportButton',
               run: (params) => {
                 openImportDashboardJsonFlyout({
