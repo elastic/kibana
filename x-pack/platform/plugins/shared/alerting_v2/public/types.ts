@@ -8,7 +8,6 @@
 import type { ComponentType } from 'react';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
-import type { AlertingV2HostApp } from './locators';
 
 export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_flyout';
 export type { AlertingV2PageProps } from './application/composable_pages';
@@ -20,6 +19,4 @@ export interface AlertingV2PublicStart {
   EpisodesPage: ComponentType<AlertingV2PageProps>;
   ActionPoliciesPage: ComponentType<AlertingV2PageProps>;
   ExecutionHistoryPage: ComponentType<AlertingV2PageProps>;
-  setHostApp: (host: AlertingV2HostApp) => void;
-  getHostApp: () => AlertingV2HostApp;
 }

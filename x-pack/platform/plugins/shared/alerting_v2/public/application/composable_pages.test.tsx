@@ -11,6 +11,7 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
+import { createAlertingV2HostApp } from '../locators';
 
 const ALL_CAPABILITIES = {
   alerting_v2_rules: { read: true, all: true },
@@ -199,6 +200,19 @@ describe('composable pages', () => {
       const props = defaultProps();
       renderInRouter(<AlertingV2EpisodesPage {...props} />);
       expect(props.container.get).toHaveBeenCalled();
+    });
+
+    it('accepts a solution hostApp', () => {
+      const hostApp = createAlertingV2HostApp('observability', {
+        rules: '/alerting',
+        ruleLibrary: '/alerting/library',
+        episodes: '/alerting/inbox',
+        actionPolicies: '/alerting/action-policies',
+        executionHistory: '/alerting/execution-history',
+      });
+
+      renderInRouter(<AlertingV2RulesPage {...defaultProps()} hostApp={hostApp} />);
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
     });
   });
 

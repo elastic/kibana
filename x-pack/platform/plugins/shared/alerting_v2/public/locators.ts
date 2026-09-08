@@ -22,12 +22,17 @@ import {
   ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
 } from '@kbn/alerting-v2-constants';
 
+export interface AlertingV2LocatorHost extends SerializableRecord {
+  app: string;
+  basePath: string;
+}
+
 export interface AlertingV2HostApp {
-  rules: { app: string; basePath: string };
-  ruleLibrary: { app: string; basePath: string };
-  episodes: { app: string; basePath: string };
-  actionPolicies: { app: string; basePath: string };
-  executionHistory: { app: string; basePath: string };
+  rules: AlertingV2LocatorHost;
+  ruleLibrary: AlertingV2LocatorHost;
+  episodes: AlertingV2LocatorHost;
+  actionPolicies: AlertingV2LocatorHost;
+  executionHistory: AlertingV2LocatorHost;
 }
 
 const MANAGEMENT_APP_ID = 'management';
@@ -55,9 +60,10 @@ export const MANAGEMENT_HOST: AlertingV2HostApp = {
   },
 };
 
-interface LocatorDeps {
-  getHostApp: () => AlertingV2HostApp;
-}
+const pageHost = (
+  params: { host?: AlertingV2LocatorHost },
+  fallback: AlertingV2LocatorHost
+): AlertingV2LocatorHost => params.host ?? fallback;
 
 // --- Rules locator ---
 
@@ -65,6 +71,7 @@ export interface AlertingV2RulesLocatorParams extends SerializableRecord {
   ruleId?: string;
   page?: 'list' | 'details' | 'sequence_create';
   templateId?: string;
+  host?: AlertingV2LocatorHost;
 }
 
 export class AlertingV2RulesLocatorDefinition
@@ -72,12 +79,10 @@ export class AlertingV2RulesLocatorDefinition
 {
   public readonly id = ALERTING_V2_RULES_LOCATOR;
 
-  constructor(private readonly deps: LocatorDeps) {}
-
   public readonly getLocation = async (
     params: AlertingV2RulesLocatorParams
   ): Promise<KibanaLocation> => {
-    const { app, basePath } = this.deps.getHostApp().rules;
+    const { app, basePath } = pageHost(params, MANAGEMENT_HOST.rules);
 
     if (params.page === 'sequence_create') {
       return { app, path: `${basePath}/sequence/create`, state: {} };
@@ -100,6 +105,7 @@ export class AlertingV2RulesLocatorDefinition
 
 export interface AlertingV2RuleLibraryLocatorParams extends SerializableRecord {
   templateId?: string;
+  host?: AlertingV2LocatorHost;
 }
 
 export class AlertingV2RuleLibraryLocatorDefinition
@@ -107,12 +113,10 @@ export class AlertingV2RuleLibraryLocatorDefinition
 {
   public readonly id = ALERTING_V2_RULE_LIBRARY_LOCATOR;
 
-  constructor(private readonly deps: LocatorDeps) {}
-
   public readonly getLocation = async (
     params: AlertingV2RuleLibraryLocatorParams
   ): Promise<KibanaLocation> => {
-    const { app, basePath } = this.deps.getHostApp().ruleLibrary;
+    const { app, basePath } = pageHost(params, MANAGEMENT_HOST.ruleLibrary);
 
     if (params.templateId) {
       return {
@@ -136,6 +140,7 @@ export interface AlertingV2EpisodesLocatorParams extends SerializableRecord {
     groupingValues?: Record<string, string | null>;
   };
   timeRange?: { from: string; to: string };
+  host?: AlertingV2LocatorHost;
 }
 
 export class AlertingV2EpisodesLocatorDefinition
@@ -143,12 +148,10 @@ export class AlertingV2EpisodesLocatorDefinition
 {
   public readonly id = ALERTING_V2_EPISODES_LOCATOR;
 
-  constructor(private readonly deps: LocatorDeps) {}
-
   public readonly getLocation = async (
     params: AlertingV2EpisodesLocatorParams
   ): Promise<KibanaLocation> => {
-    const { app, basePath } = this.deps.getHostApp().episodes;
+    const { app, basePath } = pageHost(params, MANAGEMENT_HOST.episodes);
 
     if (params.episodeId) {
       return { app, path: `${basePath}/${encodeURIComponent(params.episodeId)}`, state: {} };
@@ -185,6 +188,7 @@ export class AlertingV2EpisodesLocatorDefinition
 export interface AlertingV2ActionPoliciesLocatorParams extends SerializableRecord {
   page?: 'list' | 'create' | 'edit';
   actionPolicyId?: string;
+  host?: AlertingV2LocatorHost;
 }
 
 export class AlertingV2ActionPoliciesLocatorDefinition
@@ -192,12 +196,10 @@ export class AlertingV2ActionPoliciesLocatorDefinition
 {
   public readonly id = ALERTING_V2_ACTION_POLICIES_LOCATOR;
 
-  constructor(private readonly deps: LocatorDeps) {}
-
   public readonly getLocation = async (
     params: AlertingV2ActionPoliciesLocatorParams
   ): Promise<KibanaLocation> => {
-    const { app, basePath } = this.deps.getHostApp().actionPolicies;
+    const { app, basePath } = pageHost(params, MANAGEMENT_HOST.actionPolicies);
 
     if (params.page === 'create') {
       return { app, path: `${basePath}/create`, state: {} };
@@ -215,19 +217,19 @@ export class AlertingV2ActionPoliciesLocatorDefinition
 
 // --- Execution history locator ---
 
-export type AlertingV2ExecutionHistoryLocatorParams = SerializableRecord;
+export interface AlertingV2ExecutionHistoryLocatorParams extends SerializableRecord {
+  host?: AlertingV2LocatorHost;
+}
 
 export class AlertingV2ExecutionHistoryLocatorDefinition
   implements LocatorDefinition<AlertingV2ExecutionHistoryLocatorParams>
 {
   public readonly id = ALERTING_V2_EXECUTION_HISTORY_LOCATOR;
 
-  constructor(private readonly deps: LocatorDeps) {}
-
   public readonly getLocation = async (
-    _params: AlertingV2ExecutionHistoryLocatorParams
+    params: AlertingV2ExecutionHistoryLocatorParams
   ): Promise<KibanaLocation> => {
-    const { app, basePath } = this.deps.getHostApp().executionHistory;
+    const { app, basePath } = pageHost(params, MANAGEMENT_HOST.executionHistory);
     return { app, path: basePath, state: {} };
   };
 }
