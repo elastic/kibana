@@ -72,7 +72,7 @@ export const runWorkflowSync = async ({
     await setup.workflowRuntime.start();
     await workflowExecutionLoop({
       ...setup,
-      workflowExecutionRepository: setup.workflowExecutionPersistence,
+      workflowExecutionRepository: setup.activeExecutionPersistence,
       fakeRequest: request,
       coreStart: dependencies.coreStart,
       signal: abortController.signal,

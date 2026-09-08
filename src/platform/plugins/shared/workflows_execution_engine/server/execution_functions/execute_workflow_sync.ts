@@ -99,7 +99,7 @@ export const executeWorkflowSync = async ({
     scopeStack: workflowExecution.scopeStack ?? [],
     error: workflowExecution.error ?? null,
     startedAt: workflowExecution.startedAt ?? workflowExecution.createdAt,
-    finishedAt: workflowExecution.finishedAt ?? '',
+    finishedAt: workflowExecution.finishedAt ?? new Date().toISOString(),
     cancelRequested: workflowExecution.cancelRequested ?? false,
     duration: workflowExecution.duration ?? 0,
   };

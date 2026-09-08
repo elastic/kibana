@@ -35,5 +35,5 @@ export interface WorkflowExecutionLoopParams {
   coreStart: CoreStart;
   signal: AbortSignal;
   workflowTaskManager: WorkflowTaskManager;
-  executionMode?: WorkflowExecutionMode;
+  executionMode?: WorkflowExecutionMode; // defaults to 'async' when absent
 }
