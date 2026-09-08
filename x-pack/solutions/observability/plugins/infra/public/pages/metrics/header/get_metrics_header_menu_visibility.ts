@@ -9,11 +9,13 @@ import {
   isMetricsHostDetailPath,
   isMetricsHostsPath,
   isMetricsInventoryPath,
+  isMetricsSettingsPath,
 } from './metrics_header_paths';
 
 export interface MetricsHeaderMenuVisibility {
   showAnomalyDetection: boolean;
   showHostsOnboarding: boolean;
+  showSettings: boolean;
 }
 
 /**
@@ -26,5 +28,6 @@ export function getMetricsHeaderMenuVisibility(pathname: string): MetricsHeaderM
       isMetricsHostsPath(pathname) ||
       isMetricsHostDetailPath(pathname),
     showHostsOnboarding: isMetricsHostsPath(pathname) || isMetricsHostDetailPath(pathname),
+    showSettings: !isMetricsSettingsPath(pathname),
   };
 }
