@@ -27,6 +27,9 @@ import { css } from '@emotion/react';
  * They are deliberately CSS-only. There is no state or DOM measurement
  * to justify components, and a style function is trivial to delete.
  *
+ * The API is kept to what call sites actually use. Add an option when a real case
+ * needs it, not before.
+ *
  * When to delete
  * --------------
  * Once new primitives land in `@elastic/eui`. Delete each one as its EUI counterpart ships.
@@ -83,6 +86,10 @@ export interface UnstableRowOptions {
 
 /**
  * A row of **content-sized** things that **always wraps**.
+ *
+ * This is the primitive for leaf content (buttons, badges, chips, a heading beside a
+ * control). Reach for it whenever items should keep their natural width, rather than
+ * asking `unstableRowOrStackCss` not to grow its children.
  */
 export const unstableRowCss = ({
   gap,
@@ -158,27 +165,17 @@ export interface UnstableRowOrStackOptions {
    * @default "stretch"
    */
   align?: Align;
-  /**
-   * Above this many children, always stack. Guards lists whose length varies at runtime
-   * from rendering as a single row of hairlines.
-   */
-  limit?: number;
-  /**
-   * Whether children stretch to fill the line. Defaults to `true`, which is what panels and
-   * cards want.
-   *
-   * Pass `false` for a row of leaf content (buttons, badges) that should keep its own width
-   * and sit at the start of the line. Note that this also applies once stacked, so each
-   * child stays content-sized rather than becoming full width.
-   *
-   * @default true
-   */
-  growItems?: boolean;
 }
 
 /**
  * All-or-nothing: every child on one row, or every child on its own row. Never a partly
  * filled final line.
+ *
+ * Children always fill the line they are on, which is what panels and cards want. For a
+ * row of content-sized leaf items, use `unstableRowCss` instead. (Should a content-sized
+ * variant ever be needed here, the supported way to cap a child is
+ * `max-inline-size: fit-content`. Intrinsic keywords are not valid inside CSS math
+ * functions, so `min(max-content, 100%)` is dropped by the browser.)
  *
  * Prefer this over `unstableAutoGridCss` for a small set of *peer* items, where a ragged
  * trailing row would imply a hierarchy the design does not intend.
@@ -187,27 +184,17 @@ export const unstableRowOrStackCss = ({
   threshold,
   gap,
   align = 'stretch',
-  limit,
-  growItems = true,
 }: UnstableRowOrStackOptions) =>
   css({
     display: 'flex',
     flexWrap: 'wrap',
     gap,
     alignItems: ALIGN_ITEMS[align],
-    '& > *': {
+    // `&&` doubles specificity; a single `&` only ties with EUI's base styles on the child.
+    '&& > *': {
       flexGrow: 1,
       flexBasis: `calc((${threshold} - 100%) * 999)`,
     },
-    // `&&` doubles specificity; a single `&` only ties with EUI's base styles on the child.
-    ...(growItems ? {} : { '&& > *': { maxInlineSize: 'min(max-content, 100%)' } }),
-    ...(limit
-      ? {
-          [`& > :nth-last-child(n + ${limit + 1}), & > :nth-last-child(n + ${limit + 1}) ~ *`]: {
-            flexBasis: '100%',
-          },
-        }
-      : {}),
   });
 
 export interface UnstableAutoGridOptions {

@@ -63,9 +63,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
         paddingSize="xl"
         aria-labelledby="homeDataAdd__title"
       >
-        <div
-          css={unstableRowOrStackCss({ threshold: '50rem', gap: euiTheme.size.l, align: 'end' })}
-        >
+        <div css={unstableRowOrStackCss({ threshold: '50rem', gap: euiTheme.size.l, align: 'end' })}>
           <div>
             <EuiTitle size="s">
               <h2 id="homeDataAdd__title">
@@ -89,13 +87,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
             <EuiSpacer />
 
-            <div
-              css={unstableRowOrStackCss({
-                threshold: '36rem',
-                gap: euiTheme.size.m,
-                growItems: false,
-              })}
-            >
+            <div css={unstableRowOrStackCss({ threshold: '36rem', gap: euiTheme.size.m })}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButton
                 data-test-subj="homeAddData"
