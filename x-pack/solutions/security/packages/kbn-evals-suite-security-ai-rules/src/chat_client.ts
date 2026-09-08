@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import pRetry, { AbortError } from 'p-retry';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
-// These string literals mirror the constants defined in security_solution/common/constants.
-// They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'security.agent';
+// This string literal mirrors the constant defined in security_solution/common/constants.
+// It is inlined here to avoid a package→plugin import boundary violation.
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
@@ -30,10 +30,29 @@ interface RuleToolStep {
 
 interface ConverseResponse {
   steps?: RuleToolStep[];
+  // RoundCompleteEventData declares trace_id as `string | string[]`; coerce to string at the boundary.
+  trace_id?: string | string[];
 }
 
 interface SecurityRuleGenerationLog {
   warning: (msg: string) => void;
+  error?: (msg: string) => void;
+}
+
+/**
+ * HTTP status codes that should NOT be retried — these are deterministic
+ * client errors (bad auth, malformed request, missing connector) where
+ * retrying just wastes budget. Everything else (5xx, network errors,
+ * ECONNRESET/ETIMEDOUT) is treated as transient.
+ */
+const NON_RETRYABLE_HTTP_STATUSES = new Set([400, 401, 403, 404, 422]);
+
+function isNonRetryable(error: unknown): boolean {
+  const status =
+    (error as { response?: { status?: number } })?.response?.status ??
+    (error as { status?: number })?.status ??
+    (error as { statusCode?: number })?.statusCode;
+  return typeof status === 'number' && NON_RETRYABLE_HTTP_STATUSES.has(status);
 }
 
 export class SecurityRuleGenerationClient {
@@ -46,9 +65,19 @@ export class SecurityRuleGenerationClient {
   public async generateRule(prompt: string): Promise<{
     generatedRule?: Partial<ReferenceRule>;
     error?: string;
+    traceId?: string;
+    /**
+     * Tool IDs invoked during the conversation, in order. Powers the trajectory
+     * evaluator. Skill-routing calls (`load_skill`, `read_file`, and the legacy
+     * `filestore.read`) are filtered out because those are SKILL.md loads that
+     * the skill-invocation evaluator already covers.
+     */
+    toolCalls?: string[];
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
+      // `agent_id` intentionally omitted: the converse API defaults to the
+      // default Elastic AI agent. Hardcoding the legacy 'security.agent' id
+      // broke the evals once that agent was removed from the product.
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
       capabilities: { visualizations: true },
@@ -64,16 +93,47 @@ export class SecurityRuleGenerationClient {
       browser_api_tools: [],
     };
 
-    const syncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_API_PATH, {
-      method: 'POST',
-      version: '2023-10-31',
-      body: JSON.stringify(payload),
-    })) as ConverseResponse;
+    const syncResponse = (await pRetry(
+      async () => {
+        try {
+          return (await this.fetch(AGENT_BUILDER_CONVERSE_API_PATH, {
+            method: 'POST',
+            version: '2023-10-31',
+            body: JSON.stringify(payload),
+          })) as ConverseResponse;
+        } catch (err) {
+          // Deterministic client errors (bad auth, malformed request, missing
+          // connector) should NOT be retried — AbortError stops pRetry immediately.
+          if (isNonRetryable(err)) {
+            throw new AbortError(err instanceof Error ? err : new Error(String(err)));
+          }
+          throw err;
+        }
+      },
+      {
+        retries: 2,
+        minTimeout: 2000,
+        onFailedAttempt: (error) => {
+          const remaining = error.retriesLeft;
+          this.log.warning(
+            `converse API call failed (attempt ${error.attemptNumber}): ${error.message}${
+              remaining > 0 ? ` — retrying (${remaining} left)` : ''
+            }`
+          );
+        },
+      }
+    )) as ConverseResponse;
     const extracted = extractRuleFromSyncResponse(syncResponse);
+    const traceId = Array.isArray(syncResponse.trace_id)
+      ? syncResponse.trace_id[0]
+      : syncResponse.trace_id;
+    const toolCalls = extractInvokedToolIds(syncResponse);
 
     if (extracted.ruleData) {
       return {
         generatedRule: mapGeneratedRule(extracted.ruleData),
+        traceId,
+        toolCalls,
       };
     }
 
@@ -84,9 +144,29 @@ export class SecurityRuleGenerationClient {
     );
     return {
       error: extracted.error || 'No rule returned from agent',
+      traceId,
+      toolCalls,
     };
   }
 }
+
+/**
+ * Extracts tool IDs in invocation order from a ConverseResponse, dropping
+ * skill-routing calls (`load_skill`, `read_file`, and the legacy
+ * `filestore.read`) — those are SKILL.md loads, already covered by the
+ * skill-invocation evaluator, and would otherwise dominate the trajectory
+ * evaluator's "extra tools" list.
+ */
+const SKILL_ROUTING_TOOL_IDS = new Set(['load_skill', 'read_file', 'filestore.read']);
+
+const extractInvokedToolIds = (response: ConverseResponse): string[] => {
+  return (
+    response.steps
+      ?.filter((step) => step.type === 'tool_call' && !!step.tool_id)
+      .map((step) => step.tool_id as string)
+      .filter((id) => !SKILL_ROUTING_TOOL_IDS.has(id)) ?? []
+  );
+};
 
 const extractRuleDataFromToolResults = (
   results?: ToolResult[]

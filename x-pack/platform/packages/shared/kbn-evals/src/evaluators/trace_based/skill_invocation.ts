@@ -46,8 +46,15 @@ export function createSkillInvocationEvaluator({
   ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
+      (
+        attributes.gen_ai.tool.name == "load_skill"
+          AND attributes.gen_ai.tool.call.arguments LIKE "*${skillName}*"
+      )
+      OR
+      (
+        attributes.gen_ai.tool.name == "filestore.read"
+          AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+      ),
       1,
       NULL
     )
