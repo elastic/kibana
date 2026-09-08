@@ -379,7 +379,10 @@
     "responsibilities": [
       "Dashboards (incl. Dashboard only mode)",
       "Embeddables",
-      "Input Controls"
+      "Input Controls",
+      "Lens",
+      "Canvas application",
+      "Visualizations (incl. Timelion, TSVB, Vega, ...; excl. map visualization)"
     ]
   },
   {
