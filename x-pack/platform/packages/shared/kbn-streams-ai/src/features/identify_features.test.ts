@@ -6,14 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { BoundInferenceClient, ToolCallback } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 
 jest.mock('@kbn/inference-prompt-utils', () => ({
   executeAsReasoningAgent: jest.fn(),
 }));
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { identifyFeatures } from './identify_features';
+import { identifyFeatures, MAX_IDENTIFIED_FEATURES_PER_ITERATION } from './identify_features';
 
 const executeAsReasoningAgentMock = executeAsReasoningAgent as jest.MockedFunction<
   typeof executeAsReasoningAgent
@@ -23,19 +23,6 @@ const signal = new AbortController().signal;
 const logger = {
   warn: jest.fn(),
 } as unknown as Logger;
-
-const callTool = (
-  callback: ToolCallback,
-  name: string,
-  args: Record<string, unknown>
-): ReturnType<ToolCallback> =>
-  callback({
-    toolCallId: `call-${name}`,
-    function: {
-      name,
-      arguments: args,
-    },
-  });
 
 const createReasoningResponse = (arguments_: Record<string, unknown>) =>
   ({
@@ -52,10 +39,6 @@ const createReasoningResponse = (arguments_: Record<string, unknown>) =>
     tokens: { prompt: 10, completion: 5, total: 15 },
   } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
 
-const emptyReasoningResponse = createReasoningResponse({
-  features: [],
-  ignored_features: [],
-});
 const responseWithoutFinalTool = {
   content: '',
   toolCalls: [],
@@ -68,29 +51,10 @@ describe('identifyFeatures', () => {
   });
 
   it('uses the reasoning-agent tools and validates finalized output', async () => {
-    const searchSimilarFeatures = jest.fn().mockResolvedValue([
-      {
-        id: 'okta',
-        title: 'Okta',
-        description: 'Known Okta feature',
-        confidence: 90,
-      },
-    ]);
     let capturedOptions: Parameters<typeof executeAsReasoningAgent>[0] | undefined;
-    let searchResponse: Awaited<ReturnType<ToolCallback>> | undefined;
 
     executeAsReasoningAgentMock.mockImplementation(async (options) => {
       capturedOptions = options as Parameters<typeof executeAsReasoningAgent>[0];
-      searchResponse = await callTool(
-        capturedOptions.toolCallbacks.search_similar_features,
-        'search_similar_features',
-        {
-          candidate_id: 'okta-sdk',
-          title: 'Okta SDK',
-          description: 'Okta client technology',
-          type: 'technology',
-        }
-      );
       return createReasoningResponse({
         features: [
           {
@@ -143,7 +107,7 @@ describe('identifyFeatures', () => {
 
     const result = await identifyFeatures({
       streamName: 'logs.test',
-      sampleDocuments: [],
+      sampleDocuments: [{ _id: 'doc-1', fields: { message: 'test message' } }],
       inferenceClient,
       systemPrompt: 'system prompt',
       logger,
@@ -156,7 +120,6 @@ describe('identifyFeatures', () => {
         },
       ],
       knownFeatureIds: 'technology: existing, okta',
-      searchSimilarFeatures,
     });
 
     expect(capturedOptions).toEqual(
@@ -167,7 +130,7 @@ describe('identifyFeatures', () => {
           function: 'finalize_features',
         },
         input: {
-          sample_documents: '[]',
+          sample_documents: JSON.stringify([{ _id: 'doc-1', fields: { message: 'test message' } }]),
           previously_identified_features: JSON.stringify([
             {
               id: 'existing',
@@ -212,25 +175,6 @@ describe('identifyFeatures', () => {
         }),
       })
     );
-    expect(searchSimilarFeatures).toHaveBeenCalledWith({
-      candidate_id: 'okta-sdk',
-      title: 'Okta SDK',
-      description: 'Okta client technology',
-      type: 'technology',
-    });
-    expect(searchResponse).toEqual({
-      response: {
-        features: [
-          {
-            id: 'okta',
-            title: 'Okta',
-            description: 'Known Okta feature',
-            confidence: 90,
-          },
-        ],
-        count: 1,
-      },
-    });
     expect(result.features).toEqual([
       expect.objectContaining({
         id: 'okta',
@@ -298,24 +242,23 @@ describe('identifyFeatures', () => {
     ]);
   });
 
-  it('returns a tool error instead of failing when semantic search rejects', async () => {
-    const searchSimilarFeatures = jest.fn().mockRejectedValue(new Error('semantic unavailable'));
-    let searchResponse: Awaited<ReturnType<ToolCallback>> | undefined;
-
-    executeAsReasoningAgentMock.mockImplementation(async (options) => {
-      const callbacks = (options as Parameters<typeof executeAsReasoningAgent>[0]).toolCallbacks;
-      searchResponse = await callTool(
-        callbacks.search_similar_features,
-        'search_similar_features',
-        {
-          candidate_id: 'candidate',
-          title: 'Candidate',
-          description: 'Candidate description',
+  it('caps returned features at MAX_IDENTIFIED_FEATURES_PER_ITERATION', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({
+        features: Array.from({ length: MAX_IDENTIFIED_FEATURES_PER_ITERATION + 1 }, (_, index) => ({
+          id: `feature-${index}`,
           type: 'technology',
-        }
-      );
-      return emptyReasoningResponse;
-    });
+          subtype: 'library',
+          title: `Feature ${index}`,
+          description: `Feature ${index}`,
+          properties: { name: `feature-${index}` },
+          confidence: 80,
+          evidence: ['evidence'],
+          tags: [],
+        })),
+        ignored_features: [],
+      })
+    );
 
     const result = await identifyFeatures({
       streamName: 'logs.test',
@@ -324,56 +267,9 @@ describe('identifyFeatures', () => {
       systemPrompt: 'system prompt',
       logger,
       signal,
-      searchSimilarFeatures,
     });
 
-    expect(searchResponse).toEqual({
-      response: {
-        features: [],
-        count: 0,
-        error: 'semantic unavailable',
-      },
-    });
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Failed to search similar features: semantic unavailable'
-    );
-    expect(result.features).toEqual([]);
-  });
-
-  it('keeps semantic search optional for existing consumers', async () => {
-    let searchResponse: Awaited<ReturnType<ToolCallback>> | undefined;
-
-    executeAsReasoningAgentMock.mockImplementation(async (options) => {
-      const callbacks = (options as Parameters<typeof executeAsReasoningAgent>[0]).toolCallbacks;
-      searchResponse = await callTool(
-        callbacks.search_similar_features,
-        'search_similar_features',
-        {
-          candidate_id: 'candidate',
-          title: 'Candidate',
-          description: 'Candidate description',
-          type: 'technology',
-        }
-      );
-      return emptyReasoningResponse;
-    });
-
-    await identifyFeatures({
-      streamName: 'logs.test',
-      sampleDocuments: [],
-      inferenceClient,
-      systemPrompt: 'system prompt',
-      logger,
-      signal,
-    });
-
-    expect(searchResponse).toEqual({
-      response: {
-        features: [],
-        count: 0,
-        error: 'Semantic feature search is unavailable.',
-      },
-    });
+    expect(result.features).toHaveLength(MAX_IDENTIFIED_FEATURES_PER_ITERATION);
   });
 
   it('fails the iteration when the reasoning agent does not finalize', async () => {

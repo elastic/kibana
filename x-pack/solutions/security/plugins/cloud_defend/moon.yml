@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
   - '@kbn/core-security-common'
+  - '@kbn/core-spaces-common'
   - '@kbn/react-query'
   - '@kbn/licensing-types'
 tags:

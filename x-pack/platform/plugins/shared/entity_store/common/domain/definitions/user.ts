@@ -193,6 +193,15 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   },
 
   /**
+   * Restricts single-document creation to local users; other namespaces would mint a
+   * high-confidence entity without authoritative IdP evidence.
+   */
+  creatableFromSingleDocument: {
+    requires: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+    rejectionReason: 'user_not_local_namespace',
+  },
+
+  /**
    * Post-STATS: entity.name for local vs non-local; entity.confidence from namespace (local → medium,
    * else → high). Logs ESQL maps to `recent.*` after STATS.
    */
