@@ -27,6 +27,8 @@ import { createToolHandlerContextMock } from '../../test_utils/runner';
 const baseContext: BeforeAgentHookContext = {
   nextInput: { message: 'hello', attachments: [] },
   request: {} as BeforeAgentHookContext['request'],
+  spaceId: 'default',
+  agentConfiguration: { tools: [] },
 };
 
 const baseToolCallContext: BeforeToolCallHookContext = {

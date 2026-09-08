@@ -24,7 +24,9 @@ describe('apply_result', () => {
   describe('applyBeforeAgentResult', () => {
     const baseContext: BeforeAgentHookContext = {
       request: createMockRequest(),
+      spaceId: 'default',
       nextInput: { message: 'original', attachments: [] },
+      agentConfiguration: { tools: [] },
     };
 
     it('returns context unchanged when result is undefined', () => {

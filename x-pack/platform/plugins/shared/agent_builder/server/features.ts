@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { AGENT_MEMORY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   AGENTBUILDER_APP_ID,
   AGENTBUILDER_FEATURE_ID,
@@ -42,6 +43,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
+        aiIndex: { read: [AGENT_MEMORY_KI_TYPE] },
         ui: [uiPrivileges.show, uiPrivileges.write],
       },
       read: {
@@ -52,6 +54,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
+        aiIndex: { read: [AGENT_MEMORY_KI_TYPE] },
         ui: [uiPrivileges.show],
       },
     },

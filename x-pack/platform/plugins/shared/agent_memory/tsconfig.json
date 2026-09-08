@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["../../../../../typings/**/*", "common/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/es-errors",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/occ",
+    "@kbn/config-schema",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/i18n",
+    "@kbn/inference-tracing",
+    "@kbn/storage-adapter",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/zod",
+    "@kbn/core-http-server",
+    "@kbn/core-security-server"
+  ]
+}

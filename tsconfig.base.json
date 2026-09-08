@@ -69,6 +69,8 @@
       "@kbn/agent-builder-workflow-gen/*": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen/*"],
       "@kbn/agent-builder-workflows-plugin": ["./x-pack/platform/plugins/shared/agent_builder_workflows"],
       "@kbn/agent-builder-workflows-plugin/*": ["./x-pack/platform/plugins/shared/agent_builder_workflows/*"],
+      "@kbn/agent-memory-plugin": ["./x-pack/platform/plugins/shared/agent_memory"],
+      "@kbn/agent-memory-plugin/*": ["./x-pack/platform/plugins/shared/agent_memory/*"],
       "@kbn/ai-assistant": ["./x-pack/platform/packages/shared/kbn-ai-assistant"],
       "@kbn/ai-assistant/*": ["./x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["./x-pack/platform/packages/shared/ai-assistant/common"],
