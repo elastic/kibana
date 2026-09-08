@@ -11,8 +11,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { ESQL_ROW_LIMIT } from './esql';
 import {
-  ESQL_ROW_LIMIT,
   fetchBranchStats,
   fetchFailingFiles,
   fetchSampleFailures,
@@ -25,25 +25,14 @@ import {
 import {
   FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
-  TEST_FRAMEWORKS,
   type FlakyTestBranchStats,
   type FlakyTestEntry,
   type FlakyTestLatestRun,
   type FlakyTestReport,
+  type FlakyTestReportOptions,
   type FlakyTestReportThresholds,
   type TestFramework,
 } from './schema';
-
-export interface FlakyTestReportOptions {
-  lookbackDays: number;
-  pipelines: string[];
-  branches: string[];
-  frameworks: TestFramework[];
-  thresholds: FlakyTestReportThresholds;
-  samplesPerTest: number;
-  /** Upper bound of the window; defaults to the current time. */
-  now?: Date;
-}
 
 /** The newest of the per-branch latest runs, tagged with its branch. */
 export const latestRunAcrossBranches = (
@@ -56,19 +45,6 @@ export const latestRunAcrossBranches = (
     }
   }
   return latest;
-};
-
-export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
-  lookbackDays: 7,
-  pipelines: ['kibana-on-merge'],
-  branches: [],
-  frameworks: [...TEST_FRAMEWORKS],
-  thresholds: {
-    minBuilds: 10,
-    minFailedBuilds: 2,
-    maxTests: 200,
-  },
-  samplesPerTest: 3,
 };
 
 export type FlakyTestClassification = 'flaky' | 'consistently-failing';

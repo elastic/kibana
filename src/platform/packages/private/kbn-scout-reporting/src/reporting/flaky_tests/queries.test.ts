@@ -17,7 +17,6 @@ import {
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
-  quoteEsqlString,
   type FlakyTestQueryScope,
 } from './queries';
 
@@ -34,16 +33,6 @@ const mockEs = (records: unknown[]) => {
   const search = jest.fn();
   return { client: { helpers: { esql }, search } as any, esql, search };
 };
-
-describe('quoteEsqlString', () => {
-  it('wraps the value in double quotes', () => {
-    expect(quoteEsqlString('kibana-on-merge')).toBe('"kibana-on-merge"');
-  });
-
-  it('escapes backslashes and double quotes', () => {
-    expect(quoteEsqlString('say "hi" \\ bye')).toBe('"say \\"hi\\" \\\\ bye"');
-  });
-});
 
 describe('buildFailingFilesQuery', () => {
   it('scopes by window and pipelines and matches failures of every requested framework', () => {

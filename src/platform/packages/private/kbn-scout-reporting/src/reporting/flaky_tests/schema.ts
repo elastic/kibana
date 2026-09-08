@@ -105,6 +105,30 @@ export const FlakyTestReportThresholdsSchema = z.object({
 });
 export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholdsSchema>;
 
+export interface FlakyTestReportOptions {
+  lookbackDays: number;
+  pipelines: string[];
+  branches: string[];
+  frameworks: TestFramework[];
+  thresholds: FlakyTestReportThresholds;
+  samplesPerTest: number;
+  /** Upper bound of the window; defaults to the current time. */
+  now?: Date;
+}
+
+export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
+  lookbackDays: 7,
+  pipelines: ['kibana-on-merge'],
+  branches: [],
+  frameworks: [...TEST_FRAMEWORKS],
+  thresholds: {
+    minBuilds: 10,
+    minFailedBuilds: 2,
+    maxTests: 200,
+  },
+  samplesPerTest: 3,
+};
+
 export const FlakyTestReportSchema = z.object({
   schemaVersion: z.literal(FLAKY_TEST_REPORT_SCHEMA_VERSION),
   generatedAt: z.coerce.date(),

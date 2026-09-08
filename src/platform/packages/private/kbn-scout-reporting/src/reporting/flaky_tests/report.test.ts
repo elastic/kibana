@@ -11,14 +11,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  classifyTest,
-  DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
-  latestRunAcrossBranches,
-  rankTests,
-  ScoutFlakyTests,
-} from './report';
-import { FlakyTestReportSchema } from './schema';
+import { classifyTest, latestRunAcrossBranches, rankTests, ScoutFlakyTests } from './report';
+import { DEFAULT_FLAKY_TEST_REPORT_OPTIONS, FlakyTestReportSchema } from './schema';
 import * as queries from './queries';
 
 const thresholds = { minBuilds: 10, minFailedBuilds: 2 };
