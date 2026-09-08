@@ -76836,7 +76836,7 @@ paths:
                   description: Input data to resume the execution with.
                   type: object
                 stepExecutionId:
-                  description: Step execution id of the HITL wait to claim. When omitted, the server looks up the waiting step.
+                  description: Step execution ID of the HITL wait to claim. When omitted, the server looks up the waiting step.
                   maxLength: 1024
                   minLength: 1
                   type: string
