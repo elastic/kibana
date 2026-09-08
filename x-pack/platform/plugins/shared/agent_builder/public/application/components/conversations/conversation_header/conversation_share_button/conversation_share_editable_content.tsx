@@ -53,6 +53,16 @@ const currentMembersLabelStyle = ({ euiTheme }: UseEuiTheme) => css`
   row-gap: ${euiTheme.size.s};
 `;
 
+/**
+ * `EuiToolTip` positions itself against its anchor wrapper, which is inline and inherits the
+ * label's line height, leaving the tooltip floating above the icon. Sizing the wrapper to the
+ * icon box keeps the two together.
+ */
+const agentAccessHelpAnchorStyle = css`
+  display: inline-flex;
+  vertical-align: text-bottom;
+`;
+
 interface UserSearchOptionProps {
   profile: UserProfileWithAvatar;
 }
@@ -160,9 +170,11 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
             {agentName ? (
               <EuiIconTip
                 type="question"
+                size="s"
                 color="subdued"
                 aria-label={agentAccessHelpAriaLabel}
                 content={agentAccessHelpLabel(agentName)}
+                anchorProps={{ css: agentAccessHelpAnchorStyle }}
               />
             ) : null}
           </>
