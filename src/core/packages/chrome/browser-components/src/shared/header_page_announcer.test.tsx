@@ -306,20 +306,32 @@ describe('ChromeNextPageAnnouncer', () => {
     const { getByLabelText } = renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements').textContent).toBe('Inline');
+    expect(getByLabelText('Page change announcements').textContent).toBe('Inline - Elastic');
   });
 
-  it('does not append Elastic or a custom brand suffix', () => {
+  it('appends the default brand, and custom branding when set', () => {
     const { chrome, deps, renderAnnouncer } = createHarness();
     chrome.next.inlineAppHeader.register('SLOs');
-    act(() => {
-      deps.customBranding.customBranding$.next({ pageTitle: 'Kibana' });
-    });
 
     const { getByLabelText } = renderAnnouncer();
     flushAnnouncement();
+    const announcer = getByLabelText('Page change announcements');
+    expect(announcer.textContent).toBe('SLOs - Elastic');
 
-    expect(getByLabelText('Page change announcements').textContent).toBe('SLOs');
+    act(() => {
+      deps.customBranding.customBranding$.next({ pageTitle: 'Kibana' });
+    });
+    flushAnnouncement();
+
+    expect(announcer.textContent).toBe('SLOs - Kibana');
+  });
+
+  it('does not announce the brand when no page title is resolved', () => {
+    const { renderAnnouncer } = createHarness();
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements').textContent).toBe('');
   });
 
   it('does not expose a registered or fallback title while updating an inline title', () => {

@@ -107,8 +107,9 @@ Do not register `{ back: false }` separately from another app-header config on t
 
 ## Page announcements
 
-Chrome Next announces the `AppHeader` / `ChromeAppHeaderRegistration` title. Do not put
-breadcrumbs or a brand suffix in that title; `document.title` stays branded.
+Chrome Next announces the `AppHeader` / `ChromeAppHeaderRegistration` title, plus the same
+brand suffix as classic (`customBranding.pageTitle` or `Elastic`). Do not put breadcrumbs
+or that suffix in the header title itself; Chrome appends it.
 
 `AppHeaderLoading` owns the header slot without a title, so a registered chrome-owned title is
 not announced while it is mounted. Unmigrated routes fall back to the document title, then the

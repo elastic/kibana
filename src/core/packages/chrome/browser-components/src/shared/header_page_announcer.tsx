@@ -149,13 +149,15 @@ export const ChromeNextPageAnnouncer: FC = () => {
   const navigation = useObservable(navigation$, undefined);
   const docTitleParts = useObservable(chrome.componentDeps.docTitleParts$, []);
   const location = useObservable(application.currentLocation$, '');
+  const brand = useCustomBranding()?.pageTitle || DEFAULT_BRAND;
 
-  const announcement = resolveChromeNextAnnouncement({
+  const pageTitle = resolveChromeNextAnnouncement({
     inline,
     registeredTitle: registered?.title,
     docTitleParts,
     activeNodes: navigation?.activeNodes,
   });
+  const announcement = pageTitle ? `${pageTitle}${TITLE_SEPARATOR}${brand}` : '';
 
   const [routeTitle, setRouteTitle] = useState('');
   const [shouldHandleTab, setShouldHandleTab] = useState(false);
