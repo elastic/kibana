@@ -50,7 +50,6 @@ import type {
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  basePath?: string;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -104,40 +103,36 @@ const StandardProviders = ({
 export const AlertingV2RulesPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
 }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <RulesApp basePath={basePath} />
+    <RulesApp />
   </StandardProviders>
 );
 
 export const AlertingV2RuleLibraryPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
 }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <RuleLibraryApp basePath={basePath} />
+    <RuleLibraryApp />
   </StandardProviders>
 );
 
 export const AlertingV2ActionPoliciesPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
 }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <ActionPoliciesApp basePath={basePath} />
+    <ActionPoliciesApp />
   </StandardProviders>
 );
 
 export const AlertingV2ExecutionHistoryPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
 }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <ExecutionHistoryApp basePath={basePath} />
+    <ExecutionHistoryApp />
   </StandardProviders>
 );
 
@@ -147,7 +142,6 @@ export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
-  basePath = '',
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
   const locators = useMemo(() => resolveLocators(container), [container]);
@@ -178,7 +172,7 @@ export const AlertingV2EpisodesPage = ({
           <LocatorProvider locators={locators}>
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <I18nProvider>
-                <EpisodesApp basePath={basePath} />
+                <EpisodesApp />
               </I18nProvider>
             </BreadcrumbProvider>
           </LocatorProvider>

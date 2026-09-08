@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route } from 'react-router-dom';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
@@ -202,68 +202,61 @@ describe('composable pages', () => {
     });
   });
 
-  describe('basePath route matching', () => {
-    it('EpisodesPage renders list at basePath/', () => {
-      renderInRouter(<AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />, '/inbox');
+  describe('useRouteMatch route matching', () => {
+    const renderAtRoute = (
+      parentPath: string,
+      location: string,
+      ui: React.ReactElement
+    ) =>
+      render(
+        <MemoryRouter initialEntries={[location]}>
+          <Route path={parentPath}>{ui}</Route>
+        </MemoryRouter>
+      );
+
+    it('EpisodesPage renders list when parent route matches', () => {
+      renderAtRoute('/inbox', '/inbox', <AlertingV2EpisodesPage {...defaultProps()} />);
       expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
     });
 
-    it('EpisodesPage renders episode detail at basePath/:episodeId', () => {
-      renderInRouter(
-        <AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />,
-        '/inbox/ep-1'
-      );
+    it('EpisodesPage renders episode detail at parent/:episodeId', () => {
+      renderAtRoute('/inbox', '/inbox/ep-1', <AlertingV2EpisodesPage {...defaultProps()} />);
       expect(screen.getByTestId('episodeDetailsPage')).toBeInTheDocument();
     });
 
     it('EpisodesPage at /inbox does not match /:episodeId with "inbox" as the id', () => {
-      renderInRouter(<AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />, '/inbox');
+      renderAtRoute('/inbox', '/inbox', <AlertingV2EpisodesPage {...defaultProps()} />);
       expect(screen.queryByTestId('episodeDetailsPage')).not.toBeInTheDocument();
       expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
     });
 
-    it('RulesPage renders list at basePath/', () => {
-      renderInRouter(<AlertingV2RulesPage {...defaultProps()} basePath="/rules/v2" />, '/rules/v2');
+    it('RulesPage renders list when parent route matches', () => {
+      renderAtRoute('/rules/v2', '/rules/v2', <AlertingV2RulesPage {...defaultProps()} />);
       expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
     });
 
-    it('RulesPage renders rule detail at basePath/:ruleId', () => {
-      renderInRouter(
-        <AlertingV2RulesPage {...defaultProps()} basePath="/rules/v2" />,
-        '/rules/v2/some-rule'
-      );
+    it('RulesPage renders rule detail at parent/:ruleId', () => {
+      renderAtRoute('/rules/v2', '/rules/v2/some-rule', <AlertingV2RulesPage {...defaultProps()} />);
       expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
     });
 
-    it('ActionPoliciesPage renders list at basePath/', () => {
-      renderInRouter(
-        <AlertingV2ActionPoliciesPage {...defaultProps()} basePath="/action-policies" />,
-        '/action-policies'
-      );
+    it('ActionPoliciesPage renders list when parent route matches', () => {
+      renderAtRoute('/action-policies', '/action-policies', <AlertingV2ActionPoliciesPage {...defaultProps()} />);
       expect(screen.getByTestId('listActionPoliciesPage')).toBeInTheDocument();
     });
 
-    it('ActionPoliciesPage renders create at basePath/create', () => {
-      renderInRouter(
-        <AlertingV2ActionPoliciesPage {...defaultProps()} basePath="/action-policies" />,
-        '/action-policies/create'
-      );
+    it('ActionPoliciesPage renders create at parent/create', () => {
+      renderAtRoute('/action-policies', '/action-policies/create', <AlertingV2ActionPoliciesPage {...defaultProps()} />);
       expect(screen.getByTestId('actionPolicyFormPage')).toBeInTheDocument();
     });
 
-    it('RuleLibraryPage renders at basePath/', () => {
-      renderInRouter(
-        <AlertingV2RuleLibraryPage {...defaultProps()} basePath="/rule-library" />,
-        '/rule-library'
-      );
+    it('RuleLibraryPage renders when parent route matches', () => {
+      renderAtRoute('/rule-library', '/rule-library', <AlertingV2RuleLibraryPage {...defaultProps()} />);
       expect(screen.getByTestId('ruleLibraryPage')).toBeInTheDocument();
     });
 
-    it('ExecutionHistoryPage renders at basePath/', () => {
-      renderInRouter(
-        <AlertingV2ExecutionHistoryPage {...defaultProps()} basePath="/execution-history" />,
-        '/execution-history'
-      );
+    it('ExecutionHistoryPage renders when parent route matches', () => {
+      renderAtRoute('/execution-history', '/execution-history', <AlertingV2ExecutionHistoryPage {...defaultProps()} />);
       expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
     });
   });
