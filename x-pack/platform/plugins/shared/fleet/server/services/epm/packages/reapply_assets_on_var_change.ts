@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { KibanaSavedObjectType } from '../../../types';
 
 import * as Registry from '../registry';
+import { getEsPackage } from '../archive/storage';
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
 import { createFleetInternalRequest } from '../../security/fake_request';
 
@@ -46,10 +48,18 @@ export const reapplyPackageWorkflowAssetsOnVarChange = async ({
   pkgName,
   savedObjectsClient,
   logger,
+  request,
 }: {
   pkgName: string;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  /**
+   * The authenticated request that triggered the vars change, when there is one.
+   * Workflow asset installation clones an API key and therefore needs real
+   * credentials; the credential-less internal request only works for callers
+   * that run outside an HTTP context.
+   */
+  request?: KibanaRequest;
 }): Promise<void> => {
   const installationSO = await getInstallationObject({ savedObjectsClient, pkgName });
   if (!installationSO) {
@@ -69,28 +79,57 @@ export const reapplyPackageWorkflowAssetsOnVarChange = async ({
     return;
   }
 
-  const { packageInfo, paths, archiveIterator } = await Registry.getPackage(
-    pkgName,
-    installation.version,
-    { useStreaming: true }
-  );
-  const packageInstallContext = { packageInfo, paths, archiveIterator };
+  // Prefer the archive Fleet stored at install time. Packages installed from an
+  // upload or a bundled source are not resolvable from the remote registry, and
+  // a registry lookup for them fails with "<pkg>@<version> not found" — which
+  // would silently skip the re-apply for exactly the locally-installed packages
+  // this hook exists to serve. Fall back to the registry only when no stored
+  // assets are recorded.
+  let packageInstallContext;
+  const packageAssetRefs = installation.package_assets;
+
+  if (packageAssetRefs?.length) {
+    const esPackage = await getEsPackage(
+      pkgName,
+      installation.version,
+      packageAssetRefs,
+      savedObjectsClient
+    );
+    if (esPackage) {
+      // getEsPackage returns an assetsMap, not an archiveIterator; adapt it the
+      // same way the install-assets route does.
+      packageInstallContext = {
+        packageInfo: esPackage.packageInfo,
+        paths: esPackage.paths,
+        archiveIterator: createArchiveIteratorFromMap(esPackage.assetsMap),
+      };
+    }
+  }
+
+  if (!packageInstallContext) {
+    const { packageInfo, paths, archiveIterator } = await Registry.getPackage(
+      pkgName,
+      installation.version,
+      { useStreaming: true }
+    );
+    packageInstallContext = { packageInfo, paths, archiveIterator };
+  }
   const spaceId = installation.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
-  const request = createFleetInternalRequest();
+  const effectiveRequest = request ?? createFleetInternalRequest();
 
   await stepInstallWorkflowAssets({
     logger,
     savedObjectsClient,
     packageInstallContext,
     spaceId,
-    request,
+    request: effectiveRequest,
   });
   await stepInstallAgentAssets({
     logger,
     savedObjectsClient,
     packageInstallContext,
     spaceId,
-    request,
+    request: effectiveRequest,
   });
 
   logger.info(

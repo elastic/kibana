@@ -1647,7 +1647,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       asyncDeploy?: boolean;
     },
-    context?: RequestHandlerContext
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1923,6 +1924,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgName: oldPackagePolicy.package.name,
         savedObjectsClient: soClient,
         logger,
+        request,
       }).catch((error) => {
         logger.warn(
           `FLEET-004: failed to re-apply workflow/agent assets for ${oldPackagePolicy.package?.name} after package policy ${id} vars change: ${error?.message}`
