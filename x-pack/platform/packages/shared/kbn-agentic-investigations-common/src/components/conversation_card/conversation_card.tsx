@@ -19,8 +19,6 @@ import { type Investigation } from '../../types';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 
-const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
-
 interface ConversationCardProps {
   investigation: Investigation;
   hasBorder: boolean;
@@ -68,29 +66,6 @@ export const ConversationCard = memo<ConversationCardProps>(
           justifyContent="spaceBetween"
           direction="row"
         >
-          {investigation.priorityScore != null ? (
-            <EuiFlexItem grow={false} alignSelf="center" justifyContent="center">
-              <EuiText
-                size="s"
-                component="span"
-                color="danger"
-                css={{
-                  flexShrink: 0,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: euiTheme.colors.backgroundLightDanger,
-                  width: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
-                  height: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
-                  fontWeight: euiTheme.font.weight.semiBold,
-                  fontVariantNumeric: 'tabular-nums',
-                  borderRadius: euiTheme.size.s,
-                }}
-              >
-                {investigation.priorityScore}
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem grow={true}>
             <EuiFlexGroup gutterSize="xs" responsive direction="column">
               <EuiFlexItem grow={false}>

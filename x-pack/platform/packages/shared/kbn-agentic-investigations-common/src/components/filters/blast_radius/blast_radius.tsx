@@ -67,9 +67,24 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
           <EuiFlexItem key={surface} grow={false}>
             <EuiBadge
               style={{ padding: euiTheme.size.xs, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              color={surfaceFilter === surface ? 'primary' : 'hollow'}
               onClick={() => onSurfaceFilterChange(surfaceFilter === surface ? null : surface)}
               onClickAriaLabel={surface}
+              css={css({
+                background:
+                  surfaceFilter === surface
+                    ? euiTheme.colors.backgroundBaseHighlighted
+                    : euiTheme.colors.emptyShade,
+                border: `1px solid ${
+                  surfaceFilter === surface ? euiTheme.colors.darkShade : euiTheme.colors.lightShade
+                }`,
+                '&:hover': {
+                  border: `1px solid ${
+                    surfaceFilter === surface
+                      ? euiTheme.colors.darkShade
+                      : euiTheme.colors.borderInteractiveFormsHoverPlain
+                  }`,
+                },
+              })}
             >
               <EuiFlexGroup
                 gutterSize="none"
@@ -83,7 +98,7 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">
+                  <EuiBadge color="hollow">
                     {investigations.filter((i) => i.affectedSurface === surface).length}
                   </EuiBadge>
                 </EuiFlexItem>

@@ -23,7 +23,6 @@ export {
   ConversationDetailsFlyout,
   type ConversationDetailsFlyoutProps,
 } from './src/components/details/details_flyout';
-export { CriticalityBadge } from './src/components/details/criticality_badge';
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export { TimelineEventList } from './src/components/timeline/timeline_event_list';

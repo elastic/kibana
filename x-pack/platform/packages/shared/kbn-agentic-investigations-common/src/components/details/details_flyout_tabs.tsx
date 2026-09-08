@@ -19,7 +19,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
-import { CriticalityBadge } from './criticality_badge';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import type { FlyoutTab } from './details_flyout_tab_contents';
 
@@ -53,11 +52,6 @@ export const ConversationDetailsFlyoutTabs = memo<ConversationDetailsFlyoutHeade
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-              {priorityScore != null && (
-                <EuiFlexItem grow={false}>
-                  <CriticalityBadge priorityScore={priorityScore} />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   <span>{formatSince(createdAt)}</span>

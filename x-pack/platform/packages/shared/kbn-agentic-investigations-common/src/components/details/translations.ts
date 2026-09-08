@@ -37,11 +37,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Close',
       }),
     },
-    criticalityBadge: (priorityScore: number) =>
-      i18n.translate('xpack.alertzero.detailsFlyout.criticalityBadge.priorityScore', {
-        defaultMessage: 'Criticality · {priorityScore}',
-        values: { priorityScore },
-      }),
   },
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {

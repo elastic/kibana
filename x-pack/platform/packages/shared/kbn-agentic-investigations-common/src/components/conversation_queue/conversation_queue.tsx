@@ -8,12 +8,6 @@
 import React, { memo } from 'react';
 import styled from '@emotion/styled';
 import {
-  CONVERSATION_QUEUE_LABELS,
-  CONVERSATION_CATEGORY_COLORS,
-  type Investigation,
-  type RecommendedAction,
-} from '../../types';
-import {
   EuiAccordion,
   EuiBadge,
   EuiFlexGroup,
@@ -24,6 +18,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  CONVERSATION_QUEUE_LABELS,
+  type Investigation,
+  type RecommendedAction,
+} from '../../types';
 import { EMPTY_CONVERSATION_QUEUE } from './translations';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { type BaseActionsProps } from '../actions';
@@ -38,8 +37,6 @@ interface ConversationQueueProps {
   isFiltered?: boolean;
 }
 
-const CONVERSATION_QUEUE_HEADER_DOT_SIZE = 6;
-
 const StyledAccordion = styled(EuiAccordion)`
   &.euiAccordion-isOpen {
     .euiAccordion__triggerWrapper {
@@ -49,7 +46,7 @@ const StyledAccordion = styled(EuiAccordion)`
 
   .euiAccordion__triggerWrapper {
     padding: ${({ theme }) =>
-      `${theme.euiTheme.size.base} ${theme.euiTheme.size.l} ${theme.euiTheme.size.base} ${theme.euiTheme.size.base}`};
+      `${theme.euiTheme.size.m} ${theme.euiTheme.size.l} ${theme.euiTheme.size.m} ${theme.euiTheme.size.m}`};
     box-sizing: border-box;
   }
 `;
@@ -67,17 +64,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     const { euiTheme } = useEuiTheme();
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <span
-            style={{
-              display: 'inline-block',
-              background: euiTheme.colors[CONVERSATION_CATEGORY_COLORS[briefingType]],
-              width: `${CONVERSATION_QUEUE_HEADER_DOT_SIZE}px`,
-              height: `${CONVERSATION_QUEUE_HEADER_DOT_SIZE}px`,
-              borderRadius: '50%',
-            }}
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle
             size="xxs"

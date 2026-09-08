@@ -11,12 +11,10 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiBasicTable,
   EuiText,
   EuiTitle,
-  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
@@ -51,7 +49,7 @@ const SUMMARY_LIMIT = 120;
 
 export const OverviewTab = memo<{ investigation: Investigation }>(({ investigation }) => {
   const { euiTheme } = useEuiTheme();
-  const { summary, title, affectedSurface, severity } = investigation;
+  const { summary, affectedSurface, severity } = investigation;
   const [expanded, setExpanded] = useState(false);
 
   const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
@@ -89,41 +87,6 @@ export const OverviewTab = memo<{ investigation: Investigation }>(({ investigati
           </DetailsBlock>
         </EuiFlexItem>
       )}
-
-      <EuiFlexItem>
-        <EuiPanel hasBorder paddingSize="m" style={{ borderRadius: euiTheme.size.s }}>
-          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <span
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  borderRadius: euiTheme.size.s,
-                  width: euiTheme.size.xl,
-                  height: euiTheme.size.xl,
-                  justifyContent: 'center',
-                  background: euiTheme.colors.backgroundLightDanger,
-                }}
-              >
-                <EuiIcon
-                  type="warning"
-                  size="m"
-                  aria-hidden="true"
-                  color={euiTheme.colors.danger}
-                />
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <EuiTextTruncate text={title} />
-              </EuiText>
-              <EuiText size="xs" color="subdued">
-                <span>{DETAILS_FLYOUT_LABELS.overview.triggerAlert}</span>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
 
       {impactRows.length > 0 && (
         <EuiFlexItem>
