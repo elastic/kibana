@@ -139,8 +139,12 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
     // Opens the rapid-open race window deterministically, unlike the expensive query it
     // replaces, whose window tracked dataset size and CI load (#274834).
+    let holdSearches = true;
+
     await page.route(isEsqlSearchStart, async (route) => {
-      await delay(ESQL_RESPONSE_DELAY_MS);
+      if (holdSearches) {
+        await delay(ESQL_RESPONSE_DELAY_MS);
+      }
       await route.continue();
     });
 
@@ -159,8 +163,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       }
       await discover.waitUntilTabIsLoaded();
 
-      // Drop the delay for the walk below; `wait` lets sleeping handlers finish first.
-      await page.unrouteAll({ behavior: 'wait' });
+      holdSearches = false;
 
       // The initial tab plus every rapidly-opened tab should be present.
       await expect(unifiedTabs.getTabs()).toHaveCount(newTabCount + 1);
