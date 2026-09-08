@@ -148,7 +148,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'Omit `min`, `max`, and `goal` unless the user supplied them or the existing configuration already has them.',
         ],
         coloringRules: [
-          'When explicit bands are needed without existing or requested bands, or an edit explicitly requests the four-band default, use `range: "percentage"` with 4 bands: `0 <= value < 25`, `25 <= value < 50`, `50 <= value < 75`, `75 <= value <= 100`. A palette-only edit changes only step colors: preserve the existing number of steps, threshold boundaries, and `range`. Change existing bands only when the instruction requests it; explicit user thresholds take precedence over defaults.',
+          'When explicit bands are needed without existing or requested bands, or an edit explicitly requests the four-band default, use `range: "percentage"` with 4 bands: `0 <= value < 25`, `25 <= value < 50`, `50 <= value < 75`, `75 <= value <= 100`. A palette-only edit changes only step colors: preserve the existing number of steps, threshold boundaries, and `range`. Change existing bands only when the instruction requests it; explicit user thresholds take precedence over defaults. Choose the band count from these rules, not from the number of colors in a palette preview.',
         ],
         options: {
           coloring: {

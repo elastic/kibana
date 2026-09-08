@@ -36,7 +36,7 @@ const reviewDashboardSchema = z.object({
     ),
 });
 
-export interface ReviewDashboardToolDeps {
+interface ReviewDashboardToolDeps {
   getFilesStart: GetFilesStart;
 }
 
@@ -54,9 +54,7 @@ export const reviewDashboardTool = ({
 }: ReviewDashboardToolDeps): BuiltinSkillBoundedTool<typeof reviewDashboardSchema> => ({
   id: dashboardTools.reviewDashboard,
   type: ToolType.builtin,
-  description: `Review the presentation of a dashboard attachment and get concrete corrections. Read-only.
-
-Checks composition and section membership, panel sizing and packing, titles, number formats, colors and palettes, legends and axes, and other chart-specific defaults, while preserving explicit user choices and business thresholds. Returns the reviewed attachment id and version, dashboard-level findings with new sections and concrete grid changes, findings for the panels that need edits (panels without findings are listed as no_issues_panel_ids), panels that could not be assessed, and data questions to investigate separately. Apply the corrections with ${dashboardTools.generateDashboard}, then review the updated attachment again.`,
+  description: `Read-only presentation review of the latest version of a dashboard attachment: composition and sections, panel sizing and packing, titles, number formats, colors and palettes, legends, axes, and other chart-specific defaults. Returns concrete corrections for the dashboard and for each panel that needs edits; apply them with ${dashboardTools.generateDashboard}.`,
   schema: reviewDashboardSchema,
   handler: async (
     { dashboardAttachmentId, userRequest, screenshotAttachmentId },
@@ -89,10 +87,8 @@ Checks composition and section membership, panel sizing and packing, titles, num
         screenshotResult?.status === 'loaded' ? screenshotResult.screenshot : undefined;
 
       const { review, unreviewedPanelIds } = await runDashboardReview({
-        attachmentId: dashboardAttachmentId,
-        version: latestVersion.version,
         dashboardData: latestVersion.data,
-        context: { userRequest },
+        userRequest,
         screenshot,
         modelProvider,
         logger,
@@ -105,7 +101,6 @@ Checks composition and section membership, panel sizing and packing, titles, num
         ...(screenshotResult?.status === 'unavailable'
           ? { screenshot_note: screenshotResult.reason }
           : {}),
-        review_complete: unreviewedPanelIds.length === 0,
         unreviewed_panel_ids: unreviewedPanelIds,
         ...review,
       };

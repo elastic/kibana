@@ -8,7 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
-import { colorDesignPromptContent, getColorConfigPromptContent } from './color_palettes';
+import { getColorConfigPromptContent } from './color_palettes';
 import type { VisualizationConfig } from './types';
 
 const getEditRulesPromptContent = (appearanceOnly: boolean): string =>
@@ -66,7 +66,6 @@ ${getEditRulesPromptContent(appearanceOnly)}`
 3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be one produced by that query.
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,
     getChartTypeConfigPromptContent(chartType),
-    colorDesignPromptContent,
     getColorConfigPromptContent(chartType, parsedExistingConfig),
     `Your task is to generate a ${chartType} visualization configuration based on the following information:
 

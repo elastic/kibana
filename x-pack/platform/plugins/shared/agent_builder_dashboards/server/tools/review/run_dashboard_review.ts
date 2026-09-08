@@ -9,7 +9,7 @@ import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/logging';
-import { createDashboardReviewPrompt, type DashboardReviewContext } from './review_prompt';
+import { createDashboardReviewPrompt } from './review_prompt';
 import {
   dashboardReviewOutputSchema,
   type DashboardReview,
@@ -20,10 +20,9 @@ import type { LoadedScreenshot } from './screenshot';
 export const REVIEW_TOOL_NAME = 'report_dashboard_review';
 
 export interface RunDashboardReviewParams {
-  attachmentId: string;
-  version: number;
   dashboardData: DashboardAttachmentData;
-  context: DashboardReviewContext;
+  /** What the user asked for, in their words, including any constraints they stated. */
+  userRequest: string;
   screenshot?: LoadedScreenshot;
   modelProvider: ModelProvider;
   logger: Logger;
@@ -123,32 +122,20 @@ export const validateReview = (
  * validates the answer against the dashboard's real panel set.
  */
 export const runDashboardReview = async ({
-  attachmentId,
-  version,
   dashboardData,
-  context,
+  userRequest,
   screenshot,
   modelProvider,
   logger,
 }: RunDashboardReviewParams): Promise<ValidatedReview> => {
-  const prompt = createDashboardReviewPrompt({
-    attachmentId,
-    version,
-    dashboardData,
-    context,
-    screenshot,
-  });
+  const prompt = createDashboardReviewPrompt({ dashboardData, userRequest, screenshot });
 
   const { chatModel } = await modelProvider.getDefaultModel();
   const reviewer = chatModel.withStructuredOutput(dashboardReviewOutputSchema, {
     name: REVIEW_TOOL_NAME,
   });
 
-  logger.debug(
-    `Reviewing dashboard attachment "${attachmentId}" v${version} (${
-      listPanelIds(dashboardData).length
-    } panels, screenshot: ${screenshot ? 'yes' : 'no'})`
-  );
+  logger.debug(`Reviewing dashboard (screenshot: ${screenshot ? 'yes' : 'no'})`);
   const output = await reviewer.invoke(prompt);
 
   return validateReview(output, dashboardData, logger);

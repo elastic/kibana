@@ -6,5 +6,4 @@
  */
 
 export { generateDashboardTool } from './generate';
-export { reviewDashboardTool } from './review';
-export type { ReviewDashboardToolDeps, GetFilesStart, DashboardReviewResultData } from './review';
+export { reviewDashboardTool, type GetFilesStart } from './review';

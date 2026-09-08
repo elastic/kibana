@@ -42,9 +42,9 @@ export const getChartDesignPromptContent = (): string =>
 
 /**
  * Guidance for authoring one chart type's Lens config: the shared design
- * (general + chart-specific) followed by the author-only configuration rules
- * that carry it out. Color rules are compiled separately by
- * `getColorConfigPromptContent`.
+ * (general, chart-specific, and color) followed by the author-only
+ * configuration rules that carry it out. Color configuration rules are
+ * compiled separately by `getColorConfigPromptContent`.
  */
 export const getChartTypeConfigPromptContent = (chartType: SupportedChartType): string => {
   const { design = [], config } = chartTypeRegistry[chartType].prompt;
@@ -55,6 +55,8 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType): 
     'DESIGN GUIDANCE:',
     ...toBullets(generalChartGuidance.design),
     ...toBullets(design),
+    '',
+    colorDesignPromptContent,
     '',
     `CONFIGURATION RULES FOR ${upperChartType}:`,
     ...toBullets(generalChartGuidance.config),

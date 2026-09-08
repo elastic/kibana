@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { reviewDashboardTool, type ReviewDashboardToolDeps } from './review_dashboard_tool';
-export type { DashboardReviewResultData } from './review_result';
+export { reviewDashboardTool } from './review_dashboard_tool';
 export type { GetFilesStart } from './screenshot';

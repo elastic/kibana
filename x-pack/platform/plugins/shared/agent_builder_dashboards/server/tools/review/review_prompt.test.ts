@@ -79,21 +79,16 @@ describe('prepareDashboardForReview', () => {
 });
 
 describe('createDashboardReviewPrompt', () => {
-  const context = { userRequest: 'prettify, keep the gauge bands' };
+  const userRequest = 'prettify, keep the gauge bands';
 
   it('produces a system turn and one human turn without conversation history', () => {
-    const messages = createDashboardReviewPrompt({
-      attachmentId: 'dash',
-      version: 2,
-      dashboardData,
-      context,
-    });
+    const messages = createDashboardReviewPrompt({ dashboardData, userRequest });
 
     expect(messages).toHaveLength(2);
     expect(messages[0]).toEqual(['system', expect.any(String)]);
     const human = messages[1] as { content: string };
     expect(human.content).toContain('<user_request>prettify, keep the gauge bands</user_request>');
-    expect(human.content).toContain('<dashboard attachment_id="dash" version="2">');
+    expect(human.content).toContain('<dashboard>');
     expect(human.content).toContain('"id":"metric-1"');
     expect(human.content).toContain('"id":"section-1"');
     expect(human.content).not.toContain('<div>huge</div>');
@@ -102,10 +97,8 @@ describe('createDashboardReviewPrompt', () => {
 
   it('attaches the screenshot as image content when provided', () => {
     const messages = createDashboardReviewPrompt({
-      attachmentId: 'dash',
-      version: 2,
       dashboardData,
-      context,
+      userRequest,
       screenshot: { base64: 'QUJD', mimeType: 'image/jpeg' },
     });
 

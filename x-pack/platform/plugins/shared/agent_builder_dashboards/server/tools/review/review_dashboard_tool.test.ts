@@ -113,10 +113,8 @@ describe('reviewDashboardTool', () => {
 
     expect(mockRunReview).toHaveBeenCalledWith(
       expect.objectContaining({
-        attachmentId: 'dash',
-        version: 2,
         dashboardData,
-        context: { userRequest: 'prettify this dashboard, keep the red error series' },
+        userRequest: 'prettify this dashboard, keep the red error series',
         screenshot: undefined,
       })
     );
@@ -130,7 +128,6 @@ describe('reviewDashboardTool', () => {
     expect(review.attachment_id).toBe('dash');
     expect(review.version).toBe(2);
     expect(review.visual_assessment).toBe('configuration_only');
-    expect(review.review_complete).toBe(true);
     expect(review.unreviewed_panel_ids).toEqual([]);
     expect(review.no_issues_panel_ids).toEqual(['p1']);
     expect(review.panel_findings).toEqual([]);
@@ -180,7 +177,6 @@ describe('reviewDashboardTool', () => {
 
     const { result } = await runHandler({ dashboardAttachmentId: 'dash', userRequest: 'x' });
 
-    expect(result.results[0].data.review_complete).toBe(false);
     expect(result.results[0].data.unreviewed_panel_ids).toEqual(['p1']);
   });
 

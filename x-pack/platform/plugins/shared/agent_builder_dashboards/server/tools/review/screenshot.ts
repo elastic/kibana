@@ -6,10 +6,14 @@
  */
 
 import type { Readable } from 'stream';
-import { AttachmentType, imageAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  getLatestVersion,
+  imageAttachmentDataSchema,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { FilesStart } from '@kbn/files-plugin/server';
+import { getErrorMessage } from '../generate/core';
 
 export interface LoadedScreenshot {
   base64: string;
@@ -74,10 +78,11 @@ export const loadScreenshotAttachment = async ({
       screenshot: { base64: buffer.toString('base64'), mimeType: parsed.data.mime_type },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     return {
       status: 'unavailable',
-      reason: `Screenshot attachment "${attachmentId}" could not be loaded: ${message}`,
+      reason: `Screenshot attachment "${attachmentId}" could not be loaded: ${getErrorMessage(
+        error
+      )}`,
     };
   }
 };

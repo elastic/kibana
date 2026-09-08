@@ -17,7 +17,7 @@ export const generalChartGuidance = {
     'Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.',
   ],
   config: [
-    'Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the `title` field; every other chart needs a `title` string that is self-explanatory and exhaustive.',
+    'Titles: omit the `title` field when the design guidance calls for no panel title; every other chart needs a `title` string.',
     'Number formats — set `format` on the bound column: CPU / utilization percentages → { type: "percent", decimals: 1, compact: true }; bytes → { type: "bytes", decimals: 1 }; bits → { type: "bits", decimals: 1 }; durations → { type: "duration", from: "<source unit>", to: "" } where <source unit> matches the ES field unit (e.g. "ms", "s", "micros"). Do NOT apply a format to plain counts or ambiguous units.',
   ],
 } as const;

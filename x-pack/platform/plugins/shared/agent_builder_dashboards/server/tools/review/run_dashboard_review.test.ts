@@ -151,10 +151,8 @@ describe('runDashboardReview', () => {
     } as unknown as ModelProvider;
 
     const { review, unreviewedPanelIds } = await runDashboardReview({
-      attachmentId: 'dash-1',
-      version: 3,
       dashboardData: dashboard,
-      context: { userRequest: 'prettify this dashboard, keep the gauge goal' },
+      userRequest: 'prettify this dashboard, keep the gauge goal',
       screenshot: { base64: 'AAAA', mimeType: 'image/png' },
       modelProvider,
       logger: createLogger(),
@@ -170,7 +168,6 @@ describe('runDashboardReview', () => {
     expect(humanContent[0].text).toContain(
       '<user_request>prettify this dashboard, keep the gauge goal</user_request>'
     );
-    expect(humanContent[0].text).toContain('attachment_id="dash-1" version="3"');
     expect(humanContent[0].text).toContain('"id":"p3"');
     expect(humanContent[1].type).toBe('image_url');
 

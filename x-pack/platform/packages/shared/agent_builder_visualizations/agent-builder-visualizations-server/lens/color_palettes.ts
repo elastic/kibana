@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { get } from 'lodash';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getPalettes } from '@kbn/palettes';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './types';
@@ -87,6 +88,12 @@ export const getPaletteCatalogPromptContent = (): string =>
     ...getCategoricalPalettePreviews(),
   ].join('\n');
 
+/** Number of explicit color steps on an existing single-metric config, 0 when none. */
+const getExistingStepsCount = (existingConfig?: VisualizationConfig | null): number => {
+  const steps = get(existingConfig, ['metric', 'color', 'steps']);
+  return Array.isArray(steps) ? steps.length : 0;
+};
+
 /**
  * Returns color configuration guidance for the Lens config prompt: the default
  * policy, the chart type's `coloringRules` from the registry, and — when the
@@ -109,12 +116,7 @@ export const getColorConfigPromptContent = (
   }
 
   const stepsCount = dynamicColoringOptions?.recommendedStepCount ?? CATALOG_PREVIEW_STEPS;
-  const existingGaugeColor =
-    chartType === SupportedChartType.Gauge && existingConfig?.type === SupportedChartType.Gauge
-      ? existingConfig.metric.color
-      : undefined;
-  const existingStepsCount =
-    existingGaugeColor && 'steps' in existingGaugeColor ? existingGaugeColor.steps.length : 0;
+  const existingStepsCount = getExistingStepsCount(existingConfig);
   const previewStepCounts = [...new Set([stepsCount, existingStepsCount].filter(Boolean))];
   const lines: string[] = ['COLOR CONFIGURATION RULES:', ''];
 
@@ -153,10 +155,10 @@ export const getColorConfigPromptContent = (
     lines.push(
       'DYNAMIC STEPS — mechanics for when the rules above call for explicit `steps`:',
       '- Pick exactly ONE dynamic palette from the list below, following the color guidance on which palette fits which meaning.',
-      chartType === SupportedChartType.Gauge
-        ? '- Choose the band count according to the gauge rules above, not the number of colors in a preview. Use the selected palette preview matching the final band count; the default-count preview is available for explicitly requested normalization, and the existing-count preview for recoloring without changing bands.'
+      existingStepsCount && existingStepsCount !== stepsCount
+        ? `- Use ${stepsCount} steps for new bands. When only recoloring existing bands, keep their ${existingStepsCount} steps and thresholds.`
         : `- Use exactly ${stepsCount} step${stepsCount === 1 ? '' : 's'}.`,
-      '- Every `steps[*].color` hex MUST come from the selected palette preview line exactly as written.',
+      '- Every `steps[*].color` hex MUST come from the palette preview whose stop count matches your number of steps, exactly as written.',
       '- Step thresholds are data values, not display labels; keep them in the same unit and scale as the metric column. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values.',
       '- Keep palette order by default; to reverse, reverse the `steps` colors yourself. There is no `reverse` field.',
       ''
