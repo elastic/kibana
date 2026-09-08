@@ -22,33 +22,13 @@ import {
   type EvaluatorObservation,
   type EvaluatorFinding,
 } from '../src/matrix/evaluator_health';
+import { resolveEvaluatorRole } from '../src/matrix/evaluator_roles';
 
 /**
- * Evaluators that assert a required behaviour rather than grading quality.
- * These are expected to sit at the ceiling; see evaluator_health.ts.
- *
- * NOTE: matching on names is a stopgap. Role belongs in the evaluator
- * definition, because a name-based list can be widened until the audit passes
- * -- exactly the failure this tool exists to prevent. Anything listed here is
- * a claim that the evaluator is pass/fail, and is only as good as that claim:
- * `RequiredAlertIdsInResponse` and `DocVersionReleaseDate` return a constant
- * 1.000 across all 159 observations, and calling them gates means the audit
- * stops asking whether they were ever able to fail.
+ * Roles are declared in evaluator_roles.ts, not inferred here. An earlier
+ * version matched on evaluator names, which meant the list could be widened
+ * until the audit passed -- the exact failure the audit exists to catch.
  */
-const GATE_PATTERNS = [
-  /^Should/i,
-  /^Skill ?Invoked/i,
-  /^ExpectedSkillInvocation$/i,
-  /^ExpectedToolCalled$/i,
-  /^ForbiddenTools$/i,
-  /^FinalAnswerPresent$/i,
-  /^MinExpectedSteps$/i,
-  /^WorkflowEvidence$/i,
-  /^RequiredAlertIdsInResponse$/i,
-  /^DocVersionReleaseDate$/i,
-];
-
-const isGate = (name: string) => GATE_PATTERNS.some((p) => p.test(name));
 
 /** Cost/latency metrics are not 0-1 scores and must not be audited as such. */
 const NON_SCORE = /token|latency|cost per|duration|^Tool Calls$/i;
@@ -59,6 +39,7 @@ function main() {
 
   const models = JSON.parse(fs.readFileSync(path, 'utf8')) as any[];
   const bySuite = new Map<string, EvaluatorObservation[]>();
+  const undeclared = new Set<string>();
 
   for (const model of models) {
     for (const suite of model.suites ?? []) {
@@ -66,13 +47,16 @@ function main() {
         for (const evaluator of dataset.evaluators ?? []) {
           const name: string = evaluator.evaluatorName;
           if (NON_SCALE(evaluator) || NON_SCORE.test(name)) continue;
+          const role = resolveEvaluatorRole(name);
+          if (role === 'unknown') undeclared.add(name);
 
           const list = bySuite.get(suite.suiteId) ?? [];
           list.push({
             evaluatorName: name,
             modelId: model.modelId,
             score: evaluator.mean,
-            role: isGate(name) ? 'gate' : 'grader',
+            // `unknown` is reported, never guessed: see evaluator_roles.ts.
+            role: role === 'unknown' ? undefined : role,
           });
           bySuite.set(suite.suiteId, list);
         }
@@ -94,6 +78,14 @@ function main() {
     process.stdout.write(
       `  composite-safe (${report.compositeSafe.length}/${report.findings.length}): ` +
         `${report.compositeSafe.join(', ') || 'none'}\n`
+    );
+  }
+
+  if (undeclared.size > 0) {
+    process.stdout.write(
+      `\nUNDECLARED ROLE (${undeclared.size}): ${[...undeclared].join(', ')}\n` +
+        `Add each to EVALUATOR_ROLES with a rationale. Until then they are audited as graders'\n` +
+        `weaker cousin -- reported, but with no gate/grader expectation applied.\n`
     );
   }
 
