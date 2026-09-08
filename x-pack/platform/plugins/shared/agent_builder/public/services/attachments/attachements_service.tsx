@@ -125,11 +125,7 @@ export class AttachmentsService {
     return attachment;
   };
 
-  update: AttachmentBrowserClient['update'] = async ({
-    conversationId,
-    attachmentId,
-    ...body
-  }) => {
+  update: AttachmentBrowserClient['update'] = async ({ conversationId, attachmentId, ...body }) => {
     const { attachment } = await this.http.put<UpdateAttachmentResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
       { body: JSON.stringify(body) }
