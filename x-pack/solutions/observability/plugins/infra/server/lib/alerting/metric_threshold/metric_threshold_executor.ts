@@ -66,6 +66,7 @@ import { getEvaluationValues, getThresholds } from '../common/get_values';
 import type { EvaluatedRuleParams, Evaluation } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 import { isCustom } from './lib/metric_expression_params';
 
@@ -253,9 +254,10 @@ export const createMetricThresholdExecutor =
       }
     }
 
-    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      _alertOnGroupDisappear
+    );
 
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
