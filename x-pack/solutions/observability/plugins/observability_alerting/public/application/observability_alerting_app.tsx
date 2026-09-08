@@ -50,27 +50,47 @@ export const ObservabilityAlertingApp = ({
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
         <EuiPageSection paddingSize="m">
-          <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+          <EpisodesPage
+            basePath={OBSERVABILITY_ALERTING_INBOX_PATH}
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+          />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
         <EuiPageSection paddingSize="m">
-          <RulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+          <RulesPage
+            basePath={OBSERVABILITY_ALERTING_RULES_V2_PATH}
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+          />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
         <EuiPageSection paddingSize="m">
-          <RuleLibraryPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+          <RuleLibraryPage
+            basePath={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+          />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH}>
         <EuiPageSection paddingSize="m">
-          <ActionPoliciesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+          <ActionPoliciesPage
+            basePath={OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH}
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+          />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH}>
         <EuiPageSection paddingSize="m">
-          <ExecutionHistoryPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+          <ExecutionHistoryPage
+            basePath={OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH}
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+          />
         </EuiPageSection>
       </Route>
       <Route>

@@ -5,7 +5,8 @@
   },
   "include": [
     "public/**/*.ts",
-    "public/**/*.tsx"
+    "public/**/*.tsx",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -14,7 +15,9 @@
     "@kbn/alerting-v2-plugin",
     "@kbn/alerting-v2-constants",
     "@kbn/deeplinks-observability",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/scout-oblt",
+    "@kbn/app-header"
   ],
   "exclude": ["target/**/*"]
 }

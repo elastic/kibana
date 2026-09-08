@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/alerting-v2-constants'
   - '@kbn/deeplinks-observability'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/scout-oblt'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
@@ -34,6 +36,7 @@ fileGroups:
   src:
     - public/**/*.ts
     - public/**/*.tsx
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

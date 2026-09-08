@@ -67,13 +67,14 @@ plugins:
     - nightshift_investigations
     - notification_center
     - observability
+    - observability_alerting
     - observability_onboarding
     - osquery
     - painless_lab
     - profiling
-    - rollup
-    - remote_clusters
     - reindex_service
+    - remote_clusters
+    - rollup
     - saved_objects_management
     - saved_objects_tagging
     - searchExamples

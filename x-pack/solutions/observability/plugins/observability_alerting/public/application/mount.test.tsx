@@ -6,15 +6,13 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { createMemoryHistory } from 'history';
 import { mountObservabilityAlertingApp } from './mount';
 
 describe('mountObservabilityAlertingApp', () => {
   it('renders into the mount element and unmounts', () => {
     const coreStart = coreMock.createStart();
     const params = coreMock.createAppMountParameters();
-    const history = createMemoryHistory({ initialEntries: ['/inbox'] });
-    params.history = history as unknown as typeof params.history;
+    params.history.push('/inbox');
 
     const alertingVTwo = {
       RulesPage: () => null,
