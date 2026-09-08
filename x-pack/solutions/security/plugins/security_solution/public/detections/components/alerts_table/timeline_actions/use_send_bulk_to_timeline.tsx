@@ -30,10 +30,8 @@ const getNonEcsFieldValue = (data: TimelineNonEcsData[], field: string): string[
   data.find((d) => d.field === field)?.value ?? undefined;
 
 /**
- * The generic alerts table only populates `item.ecs` with `_id`/`_index` for bulk
- * selections; the real per-alert field values live in `item.data`. Overlay the fields
- * needed to detect EQL sequence alerts (kibana.alert.rule.type / kibana.alert.group.id)
- * so sendBulkEventsToTimelineAction can correctly expand correlated building-block events.
+ * Backfills kibana.alert.rule.type/kibana.alert.group.id from `item.data` onto `item.ecs`
+ * for bulk selections, since only `_id`/`_index` are populated there by default.
  */
 const enrichEcsForBulkSend = (item: TimelineItem): Ecs => {
   const ruleType = getNonEcsFieldValue(item.data, ALERT_RULE_TYPE);

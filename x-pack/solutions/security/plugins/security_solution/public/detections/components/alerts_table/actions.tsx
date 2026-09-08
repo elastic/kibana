@@ -286,11 +286,11 @@ const isSuppressedAlert = (ecsData: Ecs): boolean => {
 
 export const buildAlertsKqlFilter = (
   key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
-  alertIds: string[],
+  values: string[],
   label: string = 'Alert Ids'
 ): Filter[] => {
-  const singleId = alertIds.length === 1;
-  if (singleId) {
+  const singleValue = values.length === 1;
+  if (singleValue) {
     return [
       {
         meta: {
@@ -300,12 +300,12 @@ export const buildAlertsKqlFilter = (
           type: 'phrase',
           key,
           params: {
-            query: alertIds[0],
+            query: values[0],
           },
         },
         query: {
           match_phrase: {
-            [key]: alertIds[0],
+            [key]: values[0],
           },
         },
         $state: {
@@ -321,7 +321,7 @@ export const buildAlertsKqlFilter = (
         bool: {
           // The `ids` query only ever matches a document's own `_id`, so it can't be used
           // to filter on `kibana.alert.group.id`/`signal.group.id`; use `terms` for those.
-          filter: key === '_id' ? { ids: { values: alertIds } } : { terms: { [key]: alertIds } },
+          filter: key === '_id' ? { ids: { values } } : { terms: { [key]: values } },
         },
       },
       meta: {
@@ -330,8 +330,8 @@ export const buildAlertsKqlFilter = (
         disabled: false,
         type: 'phrases',
         key,
-        value: alertIds.join(),
-        params: alertIds,
+        value: values.join(),
+        params: values,
       },
       $state: {
         store: FilterStateStore.APP_STATE,
@@ -382,21 +382,19 @@ const buildEqlDataProviderOrFilter = (
   ecs: Ecs[] | Ecs
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
   if (!isEmpty(alertIds) && Array.isArray(ecs) && ecs.length > 1) {
+    const alertGroupIds = ecs.reduce<string[]>((acc, ecsData) => {
+      const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
+      const alertGroupId = Array.isArray(alertGroupIdField)
+        ? alertGroupIdField[0]
+        : alertGroupIdField;
+      if (!acc.includes(alertGroupId)) {
+        return [...acc, alertGroupId];
+      }
+      return acc;
+    }, []);
     return {
       dataProviders: [],
-      filters: buildAlertsKqlFilter(
-        ALERT_GROUP_ID,
-        ecs.reduce<string[]>((acc, ecsData) => {
-          const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
-          const alertGroupId = Array.isArray(alertGroupIdField)
-            ? alertGroupIdField[0]
-            : alertGroupIdField;
-          if (!acc.includes(alertGroupId)) {
-            return [...acc, alertGroupId];
-          }
-          return acc;
-        }, [])
-      ),
+      filters: buildAlertsKqlFilter(ALERT_GROUP_ID, alertGroupIds),
     };
   } else if (!Array.isArray(ecs) || ecs.length === 1) {
     const ecsData = Array.isArray(ecs) ? ecs[0] : ecs;

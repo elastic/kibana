@@ -139,10 +139,9 @@ describe('useSendBulkToTimeline', () => {
       );
     });
 
-    it('should overlay kibana.alert.rule.type and kibana.alert.group.id from `data` onto `ecs` when only `ecs._id`/`ecs._index` are populated', () => {
-      // The generic alerts table's bulk-selection mapper only populates `item.ecs`
-      // with `_id`/`_index`; the real field values live in `item.data`. Reproduces
-      // https://github.com/elastic/kibana/issues/288404.
+    it('enriches ecs with kibana.alert.rule.type and kibana.alert.group.id from data', () => {
+      // Bulk selections only populate `item.ecs` with `_id`/`_index`; the real
+      // field values live in `item.data`. See https://github.com/elastic/kibana/issues/288404.
       const eqlTimelineItems: TimelineItem[] = [
         {
           _id: 'eql-alert-a',
