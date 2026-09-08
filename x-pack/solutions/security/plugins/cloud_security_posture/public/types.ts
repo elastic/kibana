@@ -83,6 +83,7 @@ export interface CspClientPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
+
 /**
  * Methods exposed from the security solution to the cloud security posture application.
  */
