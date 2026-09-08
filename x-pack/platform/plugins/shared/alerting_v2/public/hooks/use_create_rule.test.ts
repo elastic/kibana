@@ -122,7 +122,7 @@ describe('useCreateRule', () => {
     const preventDefault = jest.fn();
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
-    expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalled();
+    expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
   });
 
   it('should disable the created rule before showing the success toast', async () => {
@@ -174,7 +174,7 @@ describe('useCreateRule', () => {
     const preventDefault = jest.fn();
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
-    expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalled();
+    expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
   });
 
   it('should surface the server error message in the modal and a friendly status in the toast', async () => {

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { useAlertingLocators } from '../../../application/locator_context';
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
@@ -122,21 +123,31 @@ describe('RuleSummaryFlyout', () => {
   describe('Take action menu', () => {
     const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-    it('opens the View details item with a basePath-prefixed rule details href', () => {
+    it('opens the View details item with a locator-built rule details href', () => {
+      const { rulesLocators } = useAlertingLocators();
       renderFlyout();
       openMenu();
 
-      expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute('href');
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
+        'href',
+        '/mock-locator-url'
+      );
     });
 
-    it('url-encodes the rule id when building the details href', () => {
+    it('forwards the raw rule id to the details locator', () => {
+      const { rulesLocators } = useAlertingLocators();
       renderFlyout({
         rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith({
+        ruleId: 'rule with spaces/and slash',
+      });
       expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
-        'href'
+        'href',
+        '/mock-locator-url'
       );
     });
 

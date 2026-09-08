@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
+import { useAlertingLocators } from '../../../../application/locator_context';
 
 const mockUseLinkedActionPolicies = jest.fn();
 
@@ -134,11 +135,16 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     renderSubsection();
 
+    const { actionPolicyLocators } = useAlertingLocators();
+    expect(actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
     expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('2');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(
       '1 is matching criteria and 1 is catch-all'
     );
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute('href');
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
+      'href',
+      '/mock-locator-url'
+    );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'target',
       '_blank'

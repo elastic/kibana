@@ -23,6 +23,7 @@ import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { TestProviders } from '../../test_utils/test_providers';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
+import { useAlertingLocators } from '../../application/locator_context';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
 
@@ -272,12 +273,17 @@ describe('EpisodeDetailsPage', () => {
   });
 
   it('renders the app header title, tabs, back link, and badges', () => {
+    const { episodesLocators } = useAlertingLocators();
     renderPage();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule A');
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata')).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href');
+    expect(episodesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/mock-locator-url'
+    );
     // Badge label/color mapping per status and severity is covered by get_episode_header_badges.test.ts;
     // this just proves the header is wired up to badges at all.
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(

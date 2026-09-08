@@ -11,6 +11,7 @@ import { QueryClient } from '@kbn/react-query';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
@@ -266,8 +267,10 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the manage rules link in the app header menu', async () => {
+    const { rulesLocators } = useAlertingLocators();
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
-    expect(manageRulesLink).toHaveAttribute('href');
+    expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(manageRulesLink).toHaveAttribute('href', '/mock-locator-url');
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {

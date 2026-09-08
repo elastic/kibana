@@ -287,7 +287,9 @@ describe('ActionPolicyFormPage', () => {
       );
       expect(mockCreateInlineWorkflows).toHaveBeenCalledWith([]);
       await waitFor(() =>
-        expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled()
+        expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({
+          page: 'list',
+        })
       );
     });
 
@@ -353,7 +355,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'list' });
     });
 
     it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
@@ -459,7 +461,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'list' });
     });
 
     describe('Agent Builder auto-attach', () => {

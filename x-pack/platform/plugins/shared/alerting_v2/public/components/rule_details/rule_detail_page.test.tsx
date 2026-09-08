@@ -17,6 +17,7 @@ import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { useAlertingLocators } from '../../application/locator_context';
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -224,9 +225,11 @@ describe('RuleDetailPage', () => {
   });
 
   it('renders a back link to the rules list', () => {
+    const { rulesLocators } = useAlertingLocators();
     renderPage(baseRule);
     const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
-    expect(backButton).toHaveAttribute('href');
+    expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(backButton).toHaveAttribute('href', '/mock-locator-url');
   });
 
   it('renders native kind, status, and tag badges in the app header', () => {

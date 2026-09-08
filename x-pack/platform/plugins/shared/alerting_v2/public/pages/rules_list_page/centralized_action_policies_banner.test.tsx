@@ -88,9 +88,10 @@ describe('CentralizedActionPoliciesBanner', () => {
     renderBanner();
 
     const createBtn = screen.getByTestId('centralizedActionPoliciesCreate');
-    expect(createBtn).toHaveAttribute('href');
+    expect(mockLocators.actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'create' });
+    expect(createBtn).toHaveAttribute('href', '/mock-locator-url');
     fireEvent.click(createBtn);
-    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
+    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
   });
 
   it('Learn more CTA has correct href and opens in a new tab', () => {
