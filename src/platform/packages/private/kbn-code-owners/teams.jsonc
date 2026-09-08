@@ -251,6 +251,21 @@
     ]
   },
   {
+    "id": "discover",
+    "name": "Discover",
+    "areas": [
+      "platform"
+    ],
+    "github": {
+      "team": "elastic/kibana-discover",
+      "label": "Team:Discover"
+    },
+    "responsibilities": [
+      "Discover",
+      "ES|QL editor"
+    ]
+  },
+  {
     "id": "discovery",
     "name": "Data Discovery",
     "areas": [
