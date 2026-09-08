@@ -36010,7 +36010,6 @@
     "xpack.monitoring.setupMode.disableInternalCollectionTitle": "Selbst-Monitoring deaktivieren",
     "xpack.monitoring.setupMode.enter": "Einrichtungsmodus aufrufen",
     "xpack.monitoring.setupMode.exit": "Setup-Modus beenden",
-    "xpack.monitoring.setupMode.flagIcon": "Flaggensymbol",
     "xpack.monitoring.setupMode.instance": "Instanz",
     "xpack.monitoring.setupMode.instances": "Instanzen",
     "xpack.monitoring.setupMode.metricbeatAllNodes": "Metricbeat überwacht alle {identifier}.",

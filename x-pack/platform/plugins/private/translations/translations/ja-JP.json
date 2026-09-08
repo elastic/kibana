@@ -36121,7 +36121,6 @@
     "xpack.monitoring.setupMode.disableInternalCollectionTitle": "自己監視を無効にする",
     "xpack.monitoring.setupMode.enter": "設定モードにする",
     "xpack.monitoring.setupMode.exit": "設定モードを終了",
-    "xpack.monitoring.setupMode.flagIcon": "フラグアイコン",
     "xpack.monitoring.setupMode.instance": "インスタンス",
     "xpack.monitoring.setupMode.instances": "インスタンス",
     "xpack.monitoring.setupMode.metricbeatAllNodes": "Metricbeat がすべての {identifier} を監視しています。",

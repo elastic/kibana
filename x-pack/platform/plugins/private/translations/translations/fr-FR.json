@@ -35923,7 +35923,6 @@
     "xpack.monitoring.setupMode.disableInternalCollectionTitle": "Désactiver l'auto-monitoring",
     "xpack.monitoring.setupMode.enter": "Entrer en mode configuration",
     "xpack.monitoring.setupMode.exit": "Quitter le mode configuration",
-    "xpack.monitoring.setupMode.flagIcon": "Icône de drapeau",
     "xpack.monitoring.setupMode.instance": "instance",
     "xpack.monitoring.setupMode.instances": "instances",
     "xpack.monitoring.setupMode.metricbeatAllNodes": "Metricbeat monitore tous les {identifier}.",

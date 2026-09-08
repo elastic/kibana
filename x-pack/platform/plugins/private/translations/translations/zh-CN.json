@@ -36129,7 +36129,6 @@
     "xpack.monitoring.setupMode.disableInternalCollectionTitle": "禁用自我监测",
     "xpack.monitoring.setupMode.enter": "进入设置模式",
     "xpack.monitoring.setupMode.exit": "退出设置模式",
-    "xpack.monitoring.setupMode.flagIcon": "旗帜图标",
     "xpack.monitoring.setupMode.instance": "实例",
     "xpack.monitoring.setupMode.instances": "实例",
     "xpack.monitoring.setupMode.metricbeatAllNodes": "Metricbeat 正在监测所有 {identifier}。",
