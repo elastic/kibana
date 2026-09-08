@@ -155,6 +155,9 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     globalRegion: schema.maybe(
       schema.string({ meta: { description: 'Global AWS region from the Service Settings step.' } })
     ),
+    dataFormat: schema.maybe(
+      schema.string({ meta: { description: 'Data format: ecs or otel.' } })
+    ),
   }),
 };
 
