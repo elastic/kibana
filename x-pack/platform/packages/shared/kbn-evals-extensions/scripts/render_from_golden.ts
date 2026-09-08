@@ -94,12 +94,17 @@ const provenance = {
                 2
               )}x -- an upper ` +
               `bound, since judges are correlated rather than independent.`,
-            `Under the ensemble, ${top.modelId} leads at ${top.ensemble.toFixed(
-              3
-            )}, and 8 of 15 model pairs ` +
+            // Derived from the artifact, never asserted: a hardcoded pair count
+            // silently survives a re-run that produced different separability,
+            // which is the same failure mode as a hardcoded judge id.
+            `Under the ensemble, ${top.modelId} leads at ${top.ensemble.toFixed(3)}, and ${
+              e.separablePairs
+            } of ${e.totalPairs} model pairs ` +
               `separate by a paired bootstrap over shared examples (95% CI excluding zero) -- against exactly ` +
               `1 judge-independent rank under any single judge. The ensemble buys real discrimination, but ` +
-              `7 of 15 pairs remain statistically tied and must not be read as ordered.`,
+              `${
+                e.totalPairs - e.separablePairs
+              } of ${e.totalPairs} pairs remain statistically tied and must not be read as ordered.`,
             `Per-model judge spread is published next to every ensemble score. ${widest.modelId} has the widest ` +
               `at ${widest.judgeSpread.toFixed(
                 3

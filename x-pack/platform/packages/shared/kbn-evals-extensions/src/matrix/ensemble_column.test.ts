@@ -83,4 +83,66 @@ describe('buildEnsembleColumn', () => {
     // A 0.5 that came from total disagreement must not read like consensus.
     expect(column.models[0].judgeSpread).toBeCloseTo(1, 6);
   });
+
+  it('reports separable pairs out of total, so the board can state how much of its ranking is real', () => {
+    // Cell difficulty swings hard (0.9 -> 0.1 by example) and the two strong
+    // models differ by a small CONSTANT offset. Unpaired resampling drowns that
+    // offset in difficulty variance; paired resampling cancels difficulty and
+    // keeps it. So this fixture only behaves if the bootstrap is truly paired.
+    const cells = [];
+    for (let i = 0; i < 30; i++) {
+      const difficulty = i % 2 === 0 ? 0.9 : 0.1;
+      for (const judgeId of ['j1', 'j2']) {
+        cells.push(cell(judgeId, 'strong', `e${i}`, difficulty));
+        cells.push(cell(judgeId, 'weak', `e${i}`, difficulty - 0.08));
+        cells.push(cell(judgeId, 'alsoStrong', `e${i}`, difficulty));
+      }
+    }
+
+    const out = buildEnsembleColumn(cells);
+
+    expect(out.totalPairs).toBe(3);
+    // strong-vs-weak and alsoStrong-vs-weak separate; strong-vs-alsoStrong cannot.
+    expect(out.separablePairs).toBe(2);
+  });
+
+  it('pairs on example identity even when models were graded in different orders', () => {
+    // 'a' beats 'b' by a small CONSTANT margin on every example, while example
+    // difficulty swings wildly. Paired on identity, the margin is consistent
+    // and the pair separates. Paired by array position -- 'b' is emitted in
+    // reverse order -- easy cells line up against hard ones, the difference is
+    // swamped by difficulty, and the true separation disappears.
+    const cells = [];
+    for (let i = 0; i < 30; i++) {
+      const difficulty = i % 2 === 0 ? 0.9 : 0.1;
+      for (const judgeId of ['j1', 'j2']) {
+        cells.push(cell(judgeId, 'a', `e${i}`, difficulty));
+      }
+    }
+    for (let i = 29; i >= 0; i--) {
+      const difficulty = i % 2 === 0 ? 0.9 : 0.1;
+      for (const judgeId of ['j1', 'j2']) {
+        cells.push(cell(judgeId, 'b', `e${i}`, difficulty - 0.05));
+      }
+    }
+
+    const out = buildEnsembleColumn(cells);
+
+    expect(out.totalPairs).toBe(1);
+    expect(out.separablePairs).toBe(1);
+  });
+
+  it('is deterministic across runs, so a published pair count does not drift', () => {
+    const cells = [];
+    for (let i = 0; i < 25; i++) {
+      for (const judgeId of ['j1', 'j2']) {
+        cells.push(cell(judgeId, 'a', `e${i}`, (i % 5) / 4));
+        cells.push(cell(judgeId, 'b', `e${i}`, ((i + 2) % 5) / 4));
+      }
+    }
+
+    expect(buildEnsembleColumn(cells).separablePairs).toBe(
+      buildEnsembleColumn(cells).separablePairs
+    );
+  });
 });
