@@ -159,13 +159,15 @@ export const ImportDashboardJsonFlyout = ({
 
         <EuiSpacer size="m" />
 
-        <EuiForm>
+        <EuiForm fullWidth>
           <EuiFormRow
+            fullWidth
             label={importDashboardJsonStrings.getFilePickerLabel()}
             isInvalid={Boolean(jsonParseError)}
             error={jsonParseError ?? undefined}
           >
             <EuiFilePicker
+              fullWidth
               accept=".json"
               onChange={onFileChange}
               isLoading={isValidating}
