@@ -496,7 +496,7 @@ Follow this format:
 
   The doctor recommends migrating this Cypress coverage to Scout, which this fixer does not implement. Use the [`security-cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/SKILL.md), [`scout-ui-testing`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-ui-testing/SKILL.md) and [`scout-api-testing`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-api-testing/SKILL.md) skills as needed. Do not patch the Cypress spec.
   ```
-  For a new API/unit test rather than Scout, swap the heading to `### 🔄 Move Cypress coverage to API/unit` and name that destination in the sentence.
+  For a new API or unit test rather than Scout, swap the heading to `### 🔄 Move Cypress coverage to API` or `### 🔄 Move Cypress coverage to unit` — pick the destination the doctor named — and name that destination in the sentence.
 - **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
   ```markdown
   ### 🕒 Pre-fix CI lag, not a regression
