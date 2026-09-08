@@ -15,6 +15,7 @@ import { RequireAlertingPrivilege } from '../components/require_alerting_privile
 
 export const EpisodesApp = () => {
   const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
     <RequireAlertingPrivilege
       features={['alerts']}
@@ -26,7 +27,7 @@ export const EpisodesApp = () => {
         <Route exact path={path}>
           <AlertEpisodesListPage />
         </Route>
-        <Route path={`${path}/:episodeId`}>
+        <Route path={`${base}/:episodeId`}>
           <EpisodeDetailsPage />
         </Route>
       </Routes>

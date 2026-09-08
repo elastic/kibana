@@ -27,19 +27,20 @@ const SequenceBuilderFallback = () => (
 
 export const RulesApp = () => {
   const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
     <RequireAlertingPrivilege
       features={['rules']}
       pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', { defaultMessage: 'Rules' })}
     >
       <Routes>
-        <Route exact path={`${path}/sequence/create`}>
+        <Route exact path={`${base}/sequence/create`}>
           <Suspense fallback={<SequenceBuilderFallback />}>
             <SequenceBuilderPage />
           </Suspense>
         </Route>
 
-        <Route exact path={`${path}/:ruleId`}>
+        <Route exact path={`${base}/:ruleId`}>
           <RuleDetailsRoute />
         </Route>
         <Route exact path={path}>

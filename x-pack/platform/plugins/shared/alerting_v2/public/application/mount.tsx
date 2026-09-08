@@ -36,7 +36,33 @@ import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
+import { LocatorProvider, type AlertingV2Locators } from './locator_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from '../locators';
+import {
+  ALERTING_V2_RULES_LOCATOR,
+  ALERTING_V2_RULE_LIBRARY_LOCATOR,
+  ALERTING_V2_EPISODES_LOCATOR,
+  ALERTING_V2_ACTION_POLICIES_LOCATOR,
+  ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
+} from '@kbn/alerting-v2-constants';
+
+const resolveLocators = (container: Container): AlertingV2Locators => {
+  const share = container.get(PluginStart('share')) as SharePluginStart;
+  return {
+    rules: share.url.locators.get<AlertingV2RulesLocatorParams>(ALERTING_V2_RULES_LOCATOR)!,
+    ruleLibrary: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(ALERTING_V2_RULE_LIBRARY_LOCATOR)!,
+    episodes: share.url.locators.get<AlertingV2EpisodesLocatorParams>(ALERTING_V2_EPISODES_LOCATOR)!,
+    actionPolicies: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(ALERTING_V2_ACTION_POLICIES_LOCATOR)!,
+    executionHistory: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(ALERTING_V2_EXECUTION_HISTORY_LOCATOR)!,
+  };
+};
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -56,18 +82,21 @@ export const mountAlertingV2App = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = resolveLocators(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <RulesApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <RulesApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),
@@ -89,18 +118,21 @@ export const mountRuleLibraryApp = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = resolveLocators(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <RuleLibraryApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <RuleLibraryApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),
@@ -124,6 +156,7 @@ export const mountEpisodesApp = async ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   const queryClient = new QueryClient();
+  const locators = resolveLocators(container);
 
   const data = container.get(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart;
@@ -157,15 +190,17 @@ export const mountEpisodesApp = async ({
       <KibanaContextProvider services={kibanaReactServices}>
         <Context.Provider value={container}>
           <QueryClientProvider client={queryClient}>
-            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-              <I18nProvider>
-                <Router history={history}>
-                  <RedirectAppLinks coreStart={coreStart}>
-                    <EpisodesApp />
-                  </RedirectAppLinks>
-                </Router>
-              </I18nProvider>
-            </BreadcrumbProvider>
+            <LocatorProvider locators={locators}>
+              <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+                <I18nProvider>
+                  <Router history={history}>
+                    <RedirectAppLinks coreStart={coreStart}>
+                      <EpisodesApp />
+                    </RedirectAppLinks>
+                  </Router>
+                </I18nProvider>
+              </BreadcrumbProvider>
+            </LocatorProvider>
           </QueryClientProvider>
         </Context.Provider>
       </KibanaContextProvider>
@@ -188,18 +223,21 @@ export const mountActionPoliciesApp = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = resolveLocators(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <ActionPoliciesApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <ActionPoliciesApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),
@@ -221,18 +259,21 @@ export const mountExecutionHistoryApp = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = resolveLocators(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <ExecutionHistoryApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <ExecutionHistoryApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),

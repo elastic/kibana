@@ -15,6 +15,7 @@ import { RequireAlertingPrivilege } from '../components/require_alerting_privile
 
 export const ActionPoliciesApp = () => {
   const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
     <RequireAlertingPrivilege
       features={['actionPolicies']}
@@ -23,7 +24,7 @@ export const ActionPoliciesApp = () => {
       })}
     >
       <Routes>
-        <Route exact path={`${path}/create`}>
+        <Route exact path={`${base}/create`}>
           <RequireAlertingPrivilege
             features={['actionPolicies']}
             capability="all"
@@ -34,7 +35,7 @@ export const ActionPoliciesApp = () => {
             <ActionPolicyFormPage />
           </RequireAlertingPrivilege>
         </Route>
-        <Route exact path={`${path}/edit/:id`}>
+        <Route exact path={`${base}/edit/:id`}>
           <RequireAlertingPrivilege
             features={['actionPolicies']}
             capability="all"
