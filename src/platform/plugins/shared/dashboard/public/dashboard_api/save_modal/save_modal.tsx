@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
@@ -212,7 +212,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   ]);
 
   return (
-    <SavedObjectSaveModalWithSaveResult
+    <SavedObjectSaveModal
       disableModal
       hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
