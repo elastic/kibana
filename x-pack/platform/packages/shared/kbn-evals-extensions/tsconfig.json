@@ -13,6 +13,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
     "@kbn/inference-common",
-    "@kbn/inference-prompt-utils"
+    "@kbn/inference-prompt-utils",
+    "@kbn/zod"
   ]
 }
