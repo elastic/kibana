@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 
@@ -38,31 +39,42 @@ export interface EndpointArtifactsApiService {
 
 export const getEndpointArtifactsApiService = ({
   kbnClient,
+  esClient,
   log,
   scoutSpace,
 }: {
   kbnClient: KbnClient;
+  esClient: EsClient;
   log: ScoutLogger;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): EndpointArtifactsApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace.id}` : '';
 
+  /**
+   * HTTP DELETE /exception_lists removes one saved object and does not
+   * refresh. Duplicate list_id copies (or a stale delete) make the next
+   * create 409. Match FTR: wipe every agnostic list/item for this list_id
+   * with ES deleteByQuery + refresh.
+   */
   const deleteList = async (listId: string) => {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `${basePath}${EXCEPTION_LIST_URL}`,
-      query: { list_id: listId, namespace_type: 'agnostic' },
-      headers: PUBLIC_API_HEADERS,
-      ignoreErrors: [404],
-      retries: 0,
+    await esClient.deleteByQuery({
+      index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+      conflicts: 'proceed',
+      refresh: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { 'exception-list-agnostic.list_id': listId } }],
+        },
+      },
     });
   };
 
   return {
     createList: async ({ listId, type, name }) => {
       await measurePerformanceAsync(log, 'security.endpointArtifacts.createList', async () => {
-        // Agnostic lists persist across spaces. A leftover list + items would
-        // make create look successful (409) and poison `toHaveCount(1)`.
+        // Wipe first. Agnostic lists persist across spaces; a leftover list
+        // 409s create and leftover items poison `toHaveCount(1)`.
         await deleteList(listId);
         await kbnClient.request({
           method: 'POST',
