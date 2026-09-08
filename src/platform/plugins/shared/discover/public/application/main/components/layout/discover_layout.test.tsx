@@ -114,8 +114,8 @@ describe('Discover component', () => {
       await setup({ dataView: dataViewWithTimefieldMock });
 
       const callout = screen.getByTestId('testConflictCallout');
-      const layout = screen.getByTestId('discoverLayout');
-      expect(callout.nextElementSibling).toBe(layout.parentElement);
+      const container = screen.getByTestId('dscPageBodySidebarContainer');
+      expect(callout.nextElementSibling).toBe(container);
     } finally {
       calloutSpy.mockRestore();
     }

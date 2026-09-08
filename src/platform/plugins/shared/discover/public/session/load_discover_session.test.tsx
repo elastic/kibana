@@ -130,7 +130,7 @@ describe('loadDiscoverSession', () => {
     expect(dialog).toHaveTextContent('some_future_property');
     expect(dialog).toHaveTextContent('tab-2');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close', exact: true }));
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(modal.close).toHaveBeenCalledTimes(1);
   });
 });

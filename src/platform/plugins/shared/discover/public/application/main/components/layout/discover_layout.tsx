@@ -407,7 +407,7 @@ export function DiscoverLayout() {
           spaces={spaces}
           history={history}
         />
-        <div css={styles.sidebarContainer}>
+        <div css={styles.sidebarContainer} data-test-subj="dscPageBodySidebarContainer">
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
