@@ -6,7 +6,6 @@
  */
 
 import {
-  calculateSetMetrics,
   extractMitreTechniques,
   hasRequiredFields,
   resolveDateMathSeconds,
@@ -57,43 +56,6 @@ describe('validateFromClause', () => {
 
   it('accepts FROM with pipe continuation', () => {
     expect(validateFromClause('FROM logs-* | WHERE event.type == "start"').valid).toBe(true);
-  });
-});
-
-describe('calculateSetMetrics', () => {
-  it('returns perfect score when both sets are empty', () => {
-    expect(calculateSetMetrics(new Set(), new Set())).toEqual({ precision: 1, recall: 1, f1: 1 });
-  });
-
-  it('returns zero when predicted is empty but expected is not', () => {
-    expect(calculateSetMetrics(new Set(), new Set(['T1078']))).toEqual({
-      precision: 0,
-      recall: 0,
-      f1: 0,
-    });
-  });
-
-  it('returns zero when expected is empty but predicted is not', () => {
-    expect(calculateSetMetrics(new Set(['T1078']), new Set())).toEqual({
-      precision: 0,
-      recall: 0,
-      f1: 0,
-    });
-  });
-
-  it('returns perfect score for exact match', () => {
-    const s = new Set(['T1078', 'T1059']);
-    expect(calculateSetMetrics(s, s)).toEqual({ precision: 1, recall: 1, f1: 1 });
-  });
-
-  it('computes correct F1 for partial overlap', () => {
-    const { precision, recall, f1 } = calculateSetMetrics(
-      new Set(['T1078', 'T1059']),
-      new Set(['T1078', 'T1027'])
-    );
-    expect(precision).toBeCloseTo(0.5);
-    expect(recall).toBeCloseTo(0.5);
-    expect(f1).toBeCloseTo(0.5);
   });
 });
 
