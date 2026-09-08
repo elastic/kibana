@@ -81,11 +81,9 @@ export function isValidateQueryAction(action: Action): action is ValidateQueryAc
  * Format an action into a couple of [ai, user] messages to be used in prompts.
  */
 export const formatAction = (action: Action, withoutToolCalls = true): BaseMessageLike[] => {
-  // Important notice: models are unreliable with tool configuration and will happily call tools
-  // that are not available, purely based on tool calls present in the conversation history.
-  // Switching the tool set between rounds is legal, but observed with both Claude and Gemini 3.5
-  // Flash Lite, so we can't represent the action history as a tool call list and simulate a
-  // conversation instead.
+  // Important notice: models will happily call tools that are not available, just based on
+  // previous tool calls, which means we can't represent the action history as a tool call list
+  // and are forced to simulate a conversation instead.
   // yes, this is sub-optimal, but this is how models behave.
 
   const toolCallId = generateFakeToolCallId();
@@ -198,22 +196,9 @@ Can you fix the query?`
       if (documentedKeywords.length === 0) {
         return [];
       }
-      // Simulated as a conversation like the other actions, rather than replayed as a tool call.
-      //
-      // The tool call form was intentional at first: the generation step still exposed
-      // `request_documentation`, so the model could legitimately call it again when it needed more
-      // doc, and keeping the original shape helped prompt caching. The tool was later dropped from
-      // the generation step for determinism, which left the replay referencing a tool that is no
-      // longer offered — so the tool call form is a leftover of that removal, not a deliberate
-      // choice, and the caching argument no longer holds either since changing the tool set
-      // between the two rounds already breaks the cached prefix.
-      //
-      // Keeping it caused two distinct failures: models complete the pattern the transcript
-      // establishes and call the absent tool (`validateToolCalls` then throws, aborting generation
-      // entirely rather than consuming a retry), and a tool call in the history combined with no
-      // tools in the request makes `ensureToolsWhenHistoryHasToolUse` inject its
-      // `doNotCallThisTool` placeholder, which models sometimes call instead. Together those were
-      // 22 of 32 failed calls in a Gemini 3.5 Flash Lite eval of this tool.
+      // Used to be replayed as a tool call, back when the generation step still exposed this tool.
+      // It no longer does, and a tool call for an unavailable tool makes models call it anyway and
+      // triggers `doNotCallThisTool` injection, so simulate a conversation like the other actions.
       const requestedKeywords =
         action.requestedKeywords.length > 0 ? action.requestedKeywords : documentedKeywords;
       return withoutToolCalls
