@@ -105,6 +105,24 @@ describe('ImportDashboardJsonFlyout', () => {
     await waitFor(() => expect(screen.getByText(/schema validation failed/)).toBeInTheDocument());
   });
 
+  it('includes http body message in error details when present', async () => {
+    const err = Object.assign(new Error('Bad Request'), {
+      body: { message: 'panels must be an array' },
+    });
+    mockSanitizeDashboard.mockRejectedValue(err);
+    renderFlyout();
+    await pickFile(VALID_FILE);
+    await waitFor(() =>
+      expect(screen.getByTestId('importDashboardJsonServerErrorDetails')).toBeInTheDocument()
+    );
+    await act(async () => {
+      await userEvent.click(screen.getByText('Show details'));
+    });
+    await waitFor(() =>
+      expect(screen.getByText(/Bad Request: panels must be an array/)).toBeInTheDocument()
+    );
+  });
+
   it('calls sanitize and enables Import after a valid file is chosen', async () => {
     renderFlyout();
     await pickFile(VALID_FILE);

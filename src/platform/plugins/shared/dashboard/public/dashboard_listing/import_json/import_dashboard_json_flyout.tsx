@@ -92,9 +92,11 @@ export const ImportDashboardJsonFlyout = ({
           setWarnings(sanitizeWarnings);
           setSanitizedState(data);
         } catch (e) {
+          const httpMessage = (e as { body?: { message?: string } })?.body?.message;
+          const baseMessage = e instanceof Error ? e.message : String(e);
           setServerError({
             friendly: importDashboardJsonStrings.getServerValidationError(),
-            details: e instanceof Error ? e.message : String(e),
+            details: httpMessage ? `${baseMessage}: ${httpMessage}` : baseMessage,
           });
         }
       } finally {
