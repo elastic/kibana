@@ -28,12 +28,7 @@ import { buildAgentBuilderTracesIndexName } from '../../../../common/constants';
 import type { Signal } from '../../../../common/http_api/signals';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
-import {
-  humanizeQueryKind,
-  humanizeTagType,
-  signalTitle,
-  SIGNAL_STATUS_ERROR,
-} from './signal_format';
+import { humanizeQueryKind, tagLabel, signalTitle, SIGNAL_STATUS_ERROR } from './signal_format';
 
 const traceContainerStyle = css`
   height: 360px;
@@ -189,7 +184,7 @@ export const SignalDetailFlyout = ({
           {signal.tags.map((tag) => (
             <EuiFlexItem grow={false} key={tag}>
               <EuiBadge color="hollow" data-test-subj="contextSignalDetailTag">
-                {humanizeTagType(tag)}
+                {tagLabel(tag)}
               </EuiBadge>
             </EuiFlexItem>
           ))}

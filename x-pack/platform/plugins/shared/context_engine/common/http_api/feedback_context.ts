@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { SignalTag } from './signals';
+
 /**
  * One recurring shape in an AI index's signals: a classifier tag seen repeatedly against the same
  * target index through the same tool.
  */
 export interface SignalPatternGroup {
-  /** The classifier tag that defines the group (`query_error` / `empty_retrieval` / `coverage_gap`). */
-  tag: string;
+  /** The classifier tag that defines the group. */
+  tag: SignalTag;
   /** The index expression the failing queries named. */
   target_index: string;
   /** The tool that ran them. */

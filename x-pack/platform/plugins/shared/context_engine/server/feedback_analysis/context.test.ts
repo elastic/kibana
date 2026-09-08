@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MAX_ANALYSIS_SIGNALS } from '../../common/constants';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
+import type { SignalTag } from '../../common/http_api/signals';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { buildFeedbackContext } from './context';
@@ -25,7 +26,7 @@ const getKisMock = getKis as jest.MockedFunction<typeof getKis>;
 
 const WINDOW = { from: '2026-08-25T12:00:00.000Z', to: '2026-09-01T12:00:00.000Z' };
 
-const buildPattern = (tag: string, count: number): SignalPatternCandidate => ({
+const buildPattern = (tag: SignalTag, count: number): SignalPatternCandidate => ({
   tag,
   target_index: 'ai-index-idx-orders',
   tool: 'execute_esql',

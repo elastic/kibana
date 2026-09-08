@@ -7,10 +7,11 @@
 
 import { MAX_ANALYSIS_SIGNAL_GROUPS } from '../../common/constants';
 import type { SignalPatternGroup } from '../../common/http_api/feedback_context';
+import type { SignalTag } from '../../common/http_api/signals';
 
 /** One (tag, target index, tool) combination found in the window, before ranking. */
 export interface SignalPatternCandidate {
-  tag: string;
+  tag: SignalTag;
   target_index: string;
   tool: string;
   count: number;
@@ -18,13 +19,12 @@ export interface SignalPatternCandidate {
   example?: SignalPatternGroup['example'];
 }
 
-const TAG_WEIGHT: Record<string, number> = {
+/** How strongly each tag indicates a fixable problem, scaling a group's count into its score. */
+const TAG_WEIGHT: Record<SignalTag, number> = {
   coverage_gap: 3,
   query_error: 2,
   empty_retrieval: 1.5,
 };
-
-const DEFAULT_TAG_WEIGHT = 1;
 
 /** Ranks the candidate patterns and keeps the ones worth a run's attention. */
 export const rankPatterns = (candidates: SignalPatternCandidate[]): SignalPatternGroup[] =>
@@ -35,7 +35,7 @@ export const rankPatterns = (candidates: SignalPatternCandidate[]): SignalPatter
       target_index: candidate.target_index,
       tool: candidate.tool,
       count: candidate.count,
-      score: candidate.count * (TAG_WEIGHT[candidate.tag] ?? DEFAULT_TAG_WEIGHT),
+      score: candidate.count * TAG_WEIGHT[candidate.tag],
       signal_ids: candidate.signal_ids,
       ...(candidate.example ? { example: candidate.example } : {}),
     }))

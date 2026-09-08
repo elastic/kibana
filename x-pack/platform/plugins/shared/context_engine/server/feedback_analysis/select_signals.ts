@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { MAX_GROUP_SIGNAL_IDS } from '../../common/constants';
 import type { AiIndexSignalTimeRange, AiIndexSource } from '../../common/http_api/ai_indices';
-import type { Signal } from '../../common/http_api/signals';
+import type { Signal, SignalTag } from '../../common/http_api/signals';
 import { SIGNAL_INDEX_PREFIX } from '../../common/http_api/signals';
 import { parseFromClause } from '../tasks/transform';
 import type { SignalPatternCandidate } from './group_signals';
@@ -67,7 +67,7 @@ interface PatternAggregations {
   spaces: { buckets: TermsBucket[] };
   patterns: {
     buckets: Array<
-      TermsBucket & {
+      { key: SignalTag; doc_count: number } & {
         targets: {
           buckets: Array<TermsBucket & { tools: { buckets: TermsBucket[] } }>;
         };
@@ -160,7 +160,7 @@ const TOOL_CALL_CLAUSE: QueryDslQueryContainer = { term: { signal_type: 'tool_ca
 
 /** Keys a pattern by the triple that defines it. */
 const PATTERN_KEY_SEPARATOR = '\u0000';
-const patternKey = (tag: string, targetIndex: string, tool: string): string =>
+const patternKey = (tag: SignalTag, targetIndex: string, tool: string): string =>
   [tag, targetIndex, tool].join(PATTERN_KEY_SEPARATOR);
 
 type PatternEvidence = Pick<SignalPatternCandidate, 'example' | 'signal_ids'>;

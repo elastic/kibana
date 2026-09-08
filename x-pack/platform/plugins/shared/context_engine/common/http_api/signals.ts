@@ -15,6 +15,11 @@ export const buildSignalsIndexName = (spaceId: string): string =>
 /** The set of signal types; `tool_call` is the first. */
 export type SignalType = 'tool_call';
 
+/** The classification labels a signal may carry, assigned by `classify`. */
+export const SIGNAL_TAGS = ['query_error', 'empty_retrieval', 'coverage_gap'] as const;
+
+export type SignalTag = (typeof SIGNAL_TAGS)[number];
+
 /** Common envelope shared by every signal. `signal_id` is the ES `_id`, so re-processing overwrites rather than duplicates. */
 export interface SignalEnvelope {
   signal_id: string;
@@ -22,7 +27,7 @@ export interface SignalEnvelope {
   trace_ids?: string[];
   signal_type: SignalType;
   /** Classification labels; empty for a clean signal. */
-  tags: string[];
+  tags: SignalTag[];
   /** Per-type observation; opaque at the envelope level. */
   data: Record<string, unknown>;
 }
@@ -56,8 +61,7 @@ export type Signal = EsqlToolCallSignal;
 
 /** A single row of the preaggregated grouped-by-tag Signals list. */
 export interface SignalGroup {
-  /** The tag/classification label (a plain keyword such as `query_error`). */
-  tag: string;
+  tag: SignalTag;
   /** Number of signals carrying this tag across the whole signals store. */
   count: number;
 }

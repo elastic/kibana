@@ -6,6 +6,7 @@
  */
 
 import { MAX_ANALYSIS_SIGNAL_GROUPS } from '../../common/constants';
+import { SIGNAL_TAGS } from '../../common/http_api/signals';
 import type { SignalPatternCandidate } from './group_signals';
 import { rankPatterns } from './group_signals';
 
@@ -20,17 +21,21 @@ const candidate = (overrides: Partial<SignalPatternCandidate> = {}): SignalPatte
 
 describe('rankPatterns', () => {
   it('scores a pattern by its count weighted by how actionable the tag is', () => {
-    const [gap, error, empty, unknown] = rankPatterns([
+    const [gap, error, empty] = rankPatterns([
       candidate({ tag: 'coverage_gap', count: 2, target_index: 'a' }),
       candidate({ tag: 'query_error', count: 2, target_index: 'b' }),
       candidate({ tag: 'empty_retrieval', count: 2, target_index: 'c' }),
-      candidate({ tag: 'something_new', count: 2, target_index: 'd' }),
     ]);
 
     expect(gap).toMatchObject({ tag: 'coverage_gap', score: 6 });
     expect(error).toMatchObject({ tag: 'query_error', score: 4 });
     expect(empty).toMatchObject({ tag: 'empty_retrieval', score: 3 });
-    expect(unknown).toMatchObject({ tag: 'something_new', score: 2 });
+  });
+
+  it('weights every tag, so none scores as zero', () => {
+    for (const tag of SIGNAL_TAGS) {
+      expect(rankPatterns([candidate({ tag, count: 1 })])[0].score).toBeGreaterThan(0);
+    }
   });
 
   it('ranks a coverage gap above an equally frequent empty retrieval', () => {
