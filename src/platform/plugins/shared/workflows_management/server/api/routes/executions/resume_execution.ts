@@ -49,7 +49,7 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
                   maxLength: 1024,
                   meta: {
                     description:
-                      'Step execution id of the HITL wait to claim. When omitted, the server looks up the waiting step.',
+                      'Step execution ID of the HITL wait to claim. When omitted, the server looks up the waiting step.',
                   },
                 })
               ),
