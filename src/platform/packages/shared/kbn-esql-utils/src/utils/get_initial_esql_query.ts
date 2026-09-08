@@ -24,13 +24,13 @@ const getFinalWhereClause = (
   return ` | WHERE ${parts.join(' AND ')}`;
 };
 
+const ALL_REMOTES_WILDCARD = '*:*';
+
 /**
  * Matches every index on every remote cluster. TSDB field metadata surfacing from such a broad
  * resolution is not a reliable signal that the user wants a time series query.
  */
-const ALL_REMOTES_WILDCARD = '*:*';
-
-const hasUnboundedRemotePattern = (indexPattern: string): boolean =>
+const hasAllClustersWildcard = (indexPattern: string): boolean =>
   indexPattern.split(',').some((entry) => entry.trim() === ALL_REMOTES_WILDCARD);
 
 /**
@@ -63,7 +63,7 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?:
   );
   const indexPattern = dataView.getIndexPattern();
   const sourceCommand =
-    dataView.isTSDBMode() && !hasUnboundedRemotePattern(indexPattern) ? 'TS' : 'FROM';
+    dataView.isTSDBMode() && !hasAllClustersWildcard(indexPattern) ? 'TS' : 'FROM';
   const sortClause = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
 
   return `${sourceCommand} ${indexPattern}${sortClause}${whereClause}`;
