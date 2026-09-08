@@ -28,8 +28,8 @@ export const MemoryUsageIndicator: React.FC = () => {
     const unsubscribe = monitor.subscribe(setMemoryInfo);
 
     return () => {
-      monitor.stopMonitoring();
       unsubscribe();
+      monitor.destroy();
     };
   }, []);
 

@@ -49,9 +49,11 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     typeof (performance as any).memory?.usedJSHeapSize === 'number';
 
   private history: number[] = [];
+  private sampleTimes: number[] = [];
   private callbacks = new Set<Callback>();
   private timer?: number;
   private startedAt = 0;
+  private isMonitoring = false;
 
   private readonly cfg: Required<Config>;
 
@@ -67,9 +69,6 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
       pauseWhenHidden: true,
       ...config,
     };
-    if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', this.onVisibility, false);
-    }
   }
 
   isSupported(): boolean {
@@ -80,12 +79,21 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     if (!this.isSupported()) return;
     this.stopMonitoring(); // ensure clean start
     this.history.length = 0; // reset
+    this.sampleTimes.length = 0;
     this.startedAt = performance.now();
+    this.isMonitoring = true;
+    if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', this.onVisibility, false);
+    }
     this.sampleOnce(); // immediate sample
     this.scheduleNext(); // kick loop
   }
 
   stopMonitoring(): void {
+    this.isMonitoring = false;
+    if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.onVisibility, false);
+    }
     if (this.timer != null) {
       clearTimeout(this.timer);
       this.timer = undefined;
@@ -96,9 +104,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     this.stopMonitoring();
     this.history.length = 0;
     this.callbacks.clear();
-    if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
-      document.removeEventListener('visibilitychange', this.onVisibility, false);
-    }
+    this.sampleTimes.length = 0;
   }
 
   subscribe(cb: Callback): () => void {
@@ -113,17 +119,19 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
 
   private scheduleNext() {
     this.timer = setTimeout(() => {
+      if (!this.isMonitoring) return;
       // Pause if hidden, but keep rescheduling to check for visibility flips
       if (this.cfg.pauseWhenHidden && typeof document !== 'undefined' && document.hidden) {
         this.scheduleNext();
         return;
       }
       this.sampleOnce();
-      this.scheduleNext();
+      if (this.isMonitoring) this.scheduleNext();
     }, this.cfg.intervalMs) as unknown as number;
   }
 
   private onVisibility = () => {
+    if (!this.isMonitoring) return;
     // On becoming visible, take a sample “now” to avoid big gaps
     if (!document.hidden) this.sampleOnce();
   };
@@ -141,14 +149,20 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
   }
 
   private sampleOnce() {
+    if (!this.isMonitoring) return;
     const mem = this.readPerfMemory();
     if (!mem) return;
 
     const usedMB = mem.usedJSHeapSize / (1024 * 1024);
     if (!Number.isFinite(usedMB)) return;
 
+    const sampleTime = performance.now();
     this.history.push(usedMB);
-    if (this.history.length > this.cfg.maxHistory) this.history.shift();
+    this.sampleTimes.push(sampleTime);
+    if (this.history.length > this.cfg.maxHistory) {
+      this.history.shift();
+      this.sampleTimes.shift();
+    }
 
     const info = this.buildInfo(usedMB, mem);
     // Notify subscribers
@@ -198,14 +212,11 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
 
     const recentShort = h.slice(-10); // last 10 samples
     const recentLong = h.slice(-20); // last 20 samples
+    const recentShortTimes = this.sampleTimes.slice(-10);
+    const recentLongTimes = this.sampleTimes.slice(-20);
 
-    // Trend in MB/min computed from linear regression slope per sample
-    const slopeShort = this.linearSlope(recentShort); // MB/sample
-    const slopeLong = this.linearSlope(recentLong); // MB/sample
-    const samplesPerMinute = 60_000 / this.cfg.intervalMs;
-
-    const shortTrendPerMin = slopeShort * samplesPerMinute;
-    const longTrendPerMin = slopeLong * samplesPerMinute;
+    const shortTrendPerMin = this.linearSlope(recentShort, recentShortTimes);
+    const longTrendPerMin = this.linearSlope(recentLong, recentLongTimes);
 
     const current = h[n - 1] ?? 0;
     const absoluteIncrease = current - baseline;
@@ -241,23 +252,27 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     return sustainedGrowth && significantIncrease && highMemoryPressure;
   }
 
-  // Least squares slope using index as x (uniform sampling)
-  private linearSlope(data: number[]): number {
+  // Least squares slope in MB/min using elapsed sample time as x.
+  private linearSlope(data: number[], timestamps: number[]): number {
     const n = data.length;
-    if (n < 2) return 0;
+    if (n < 2 || timestamps.length !== n) return 0;
 
-    // Optional: light smoothing
-    const smoothed = this.smooth3(data);
+    const firstTimestamp = timestamps[0];
+    const relativeMinutes = timestamps.map((timestamp) => (timestamp - firstTimestamp) / 60_000);
+    const smoothedData = this.smooth3(data);
+    const smoothedTimes = this.smooth3(relativeMinutes);
+    const meanX = smoothedTimes.reduce((sum, value) => sum + value, 0) / n;
+    const meanY = smoothedData.reduce((sum, value) => sum + value, 0) / n;
 
-    const sumX = ((n - 1) * n) / 2; // Σi
-    const sumXX = ((n - 1) * n * (2 * n - 1)) / 6; // Σi^2
-    const sumY = smoothed.reduce((s, v) => s + v, 0); // Σy
-    const sumXY = smoothed.reduce((s, v, i) => s + i * v, 0); // Σi*y
+    let covariance = 0;
+    let variance = 0;
+    for (let i = 0; i < n; i++) {
+      const centeredX = smoothedTimes[i] - meanX;
+      covariance += centeredX * (smoothedData[i] - meanY);
+      variance += centeredX * centeredX;
+    }
 
-    const denom = n * sumXX - sumX * sumX;
-    if (denom === 0) return 0;
-
-    return (n * sumXY - sumX * sumY) / denom; // MB per sample
+    return variance > 0 ? covariance / variance : 0;
   }
 
   private smooth3(data: number[]): number[] {

@@ -49,7 +49,7 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
     this.isMonitoring = true;
     this.setupVisibilityHandling();
 
-    this.initializeWithBaselineData();
+    this.initializeHistory();
     this.startLoop();
   }
 
@@ -82,18 +82,8 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
 
   // ---- internal ----
 
-  private initializeWithBaselineData() {
-    // Prefill history to avoid noisy first renders; use calibrated baseline.
-    this.frameHistory = new Array(this.maxHistorySize).fill(this.baselineFps);
-    this.emit({
-      fps: this.baselineFps,
-      jankPercentage: 0,
-      history: [...this.frameHistory],
-      maxFps: this.baselineFps,
-      minFps: this.baselineFps,
-    });
-
-    // Reset per-second bucket
+  private initializeHistory() {
+    this.frameHistory = [];
     const now = performance.now();
     this.bucketStart = now;
     this.bucketFrames = 0;
@@ -112,11 +102,10 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
         // Compute FPS for the elapsed window rather than assuming exactly 1000ms
         const fps = Math.round((this.bucketFrames * 1000) / elapsed);
 
-        // Clamp to a reasonable range to avoid noisy spikes
-        const clamped = Math.max(0, Math.min(fps, 60));
+        const measuredFps = Math.max(0, fps);
 
-        this.pushFps(clamped);
-        this.emitSnapshot(clamped);
+        this.pushFps(measuredFps);
+        this.emitSnapshot(measuredFps);
 
         // Prepare next bucket. Carry over any spillover time to reduce drift.
         // If more than 1s elapsed (extreme throttling), just reset cleanly.

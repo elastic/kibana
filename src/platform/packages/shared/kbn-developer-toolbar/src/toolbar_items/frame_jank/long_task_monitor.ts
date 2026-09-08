@@ -31,6 +31,8 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   private callbacks: Array<(info: LongTaskInfo) => void> = [];
   private observer?: PerformanceObserver;
   private supportedFlag: boolean;
+  private expiryTimer?: number;
+  private isMonitoring = false;
 
   private taskHistory: Array<{ duration: number; startTime: number }> = [];
   private lastTaskDuration = 0;
@@ -68,30 +70,14 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
       } catch {
         this.observer.observe({ entryTypes: ['longtask'] });
       }
+      this.isMonitoring = true;
+      this.publishCurrentStats();
     } catch (error) {
+      this.isMonitoring = false;
       // eslint-disable-next-line no-console
       console.warn('Failed to start long task monitoring:', error);
+      this.observer = undefined;
     }
-  }
-
-  private handleLongTask(entry: PerformanceLongTaskTiming) {
-    const { duration, startTime } = entry;
-    if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
-
-    // Record
-    this.pushTask({ duration, startTime });
-    this.lastTaskDuration = duration;
-
-    // Maintain window
-    this.cleanupHistory();
-
-    // Emit snapshot
-    const info: LongTaskInfo = {
-      duration: this.lastTaskDuration,
-      totalBlockingTime: this.calculateTotalBlockingTime(),
-      tasksInLast30Seconds: this.taskHistory.length,
-    };
-    for (const cb of this.callbacks) cb(info);
   }
 
   private pushTask(task: { duration: number; startTime: number }) {
@@ -108,8 +94,13 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     const cutoff = performance.now() - LongTaskMonitor.HISTORY_DURATION;
     // Entries arrive roughly in time order; filter is still safe if they don't.
     if (this.taskHistory.length) {
-      this.taskHistory = this.taskHistory.filter((t) => t.startTime >= cutoff);
+      this.taskHistory = this.taskHistory.filter((task) => task.startTime > cutoff);
     }
+    const latestTask = this.taskHistory.reduce<{ duration: number; startTime: number } | undefined>(
+      (latest, task) => (!latest || task.startTime > latest.startTime ? task : latest),
+      undefined
+    );
+    this.lastTaskDuration = latestTask?.duration ?? 0;
   }
 
   private calculateTotalBlockingTime(): number {
@@ -123,7 +114,47 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     return total;
   }
 
+  private publishCurrentStats() {
+    if (!this.isMonitoring) return;
+    this.cleanupHistory();
+    const info: LongTaskInfo = {
+      duration: this.lastTaskDuration,
+      totalBlockingTime: this.calculateTotalBlockingTime(),
+      tasksInLast30Seconds: this.taskHistory.length,
+    };
+    for (const cb of this.callbacks) cb(info);
+    this.scheduleExpiry();
+  }
+
+  private scheduleExpiry() {
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
+    if (!this.isMonitoring || this.taskHistory.length === 0) return;
+
+    const oldestStartTime = Math.min(...this.taskHistory.map(({ startTime }) => startTime));
+    const delay = Math.max(
+      1,
+      oldestStartTime + LongTaskMonitor.HISTORY_DURATION - performance.now()
+    );
+    this.expiryTimer = setTimeout(() => this.publishCurrentStats(), delay) as unknown as number;
+  }
+
+  private handleLongTask(entry: PerformanceLongTaskTiming) {
+    const { duration, startTime } = entry;
+    if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
+
+    this.pushTask({ duration, startTime });
+    this.publishCurrentStats();
+  }
+
   stopMonitoring() {
+    this.isMonitoring = false;
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
     if (this.observer) {
       try {
         this.observer.disconnect();
