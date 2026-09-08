@@ -115,20 +115,10 @@ export abstract class LayoutMixin extends SaveMixin {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // The editor renders a skeleton until index sources and existing data view names load, so
-    // a visible flyout does not mean the fields exist yet. Outside the retry below because the
-    // skeleton is one-way, and waiting per attempt put a 30s floor under each retry.
     await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
-    // Submitting can silently no-op: the title's async validation races a separately
-    // debounced index lookup and can latch invalid even once matches exist (#283967), so the
-    // whole fill -> validate -> submit sequence is retried, not just the click.
-    //
-    // Exits on the new data view being selected, not on the flyout closing, which is a
-    // transition a slow save can miss (#274530). `toPass` abandons an attempt that crosses
-    // its deadline, so this budget has to exceed one whole attempt (~75s of inner waits).
     await expect(async () => {
-      await titleInput.fill(''); // a real value change, so a latched validation runs again
+      await titleInput.fill('');
       await titleInput.fill(title);
       // wait for async title validation to settle before continuing.
       await form
@@ -140,9 +130,6 @@ export abstract class LayoutMixin extends SaveMixin {
       // "loading has not started". Submitting too early still passes validation, but creates
       // the data view with no time field, so no time filter is applied and hit counts include
       // documents outside the selected range.
-      //
-      // Stays inside the retry because clearing the title empties the matched indices, which
-      // resets any selection an earlier attempt made.
       await expect
         .poll(
           async () => {
@@ -160,8 +147,6 @@ export abstract class LayoutMixin extends SaveMixin {
         adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
       );
 
-      // Saving writes a saved object and refreshes the data view list. Keep this generous: a
-      // deadline short enough to expire on a slow save sends the retry to a closed flyout.
       await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
     }).toPass({ timeout: 90_000, intervals: [0] });
 

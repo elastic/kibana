@@ -17,17 +17,13 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 const ESQL_ASYNC_ENDPOINT = '/internal/search/esql_async';
-// Long enough that a tab's fetch is still in flight when the next tab opens, which keeps
-// the race window independent of dataset size and CI load.
+// Keeps a tab's fetch in flight while the next tab opens.
 const ESQL_RESPONSE_DELAY_MS = 1_000;
-// Only the request that starts a search. Polls and cancels target the same path with a
-// search id appended, and delaying those inflates `pollSearch`'s elapsed-time back-off.
+// Search start only; delaying the polls inflates `pollSearch`'s back-off.
 const isEsqlSearchStart = (url: URL) => url.pathname.endsWith(ESQL_ASYNC_ENDPOINT);
 
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
-  // Every test here drives several tabs through full data fetches, and creating a data view
-  // adds an index-sources lookup plus the editor's retry budget on top, so these do far more
-  // work than the default allowance covers on a loaded CI worker (#274869).
+  // Several tabs through full fetches plus data view creation exceeds the default (#274869).
   spaceTest.setTimeout(150_000);
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -141,18 +137,15 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
   spaceTest('should be able to complete all quickly opened tabs', async ({ page, pageObjects }) => {
     const { discover, unifiedTabs } = pageObjects;
 
-    // Each new tab clones the current one and refetches, so holding back the start of every
-    // search keeps a fetch in flight whenever the next tab opens. Delaying the response is
-    // what opens the race window; an expensive query used to do it, which tied the window
-    // and the runtime to dataset size and CI load (#274834).
+    // Opens the rapid-open race window deterministically, unlike the expensive query it
+    // replaces, whose window tracked dataset size and CI load (#274834).
     await page.route(isEsqlSearchStart, async (route) => {
       await delay(ESQL_RESPONSE_DELAY_MS);
       await route.continue();
     });
 
     await spaceTest.step('set up an ES|QL query', async () => {
-      // A single index pattern rather than `FROM *`: every tab's fetch resolves the pattern
-      // to a data view, and resolving all indices costs about a second each under CI load.
+      // A single pattern, not `FROM *`: resolving all indices costs ~1s per tab fetch.
       await discover.writeAndSubmitEsqlQuery('FROM logstash-*');
       await discover.waitUntilTabIsLoaded();
     });
@@ -166,9 +159,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       }
       await discover.waitUntilTabIsLoaded();
 
-      // The race window has been created, so drop the delay before the walk below. `wait`
-      // lets handlers that are still sleeping finish, instead of resolving the requests they
-      // hold and leaving their `route.continue()` to fail with `Route is already handled!`.
+      // Drop the delay for the walk below; `wait` lets sleeping handlers finish first.
       await page.unrouteAll({ behavior: 'wait' });
 
       // The initial tab plus every rapidly-opened tab should be present.
