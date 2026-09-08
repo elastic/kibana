@@ -2875,6 +2875,57 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a single attachment by ID for a conversation.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-conversations-conversation-id-attachments-attachment-id
+      parameters:
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAttachmentResponseExample:
+                  description: Example response containing a single attachment
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: My text file
+                      id: attachment-1
+                      type: text
+                      versions:
+                        - content_hash: abc123
+                          created_at: '2025-01-01T10:00:00.000Z'
+                          data: File content
+                          estimated_tokens: 2
+                          version: 1
+          description: Indicates a successful response
+      summary: Get conversation attachment
+      tags:
+        - agent builder
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     patch:
       description: |-
         **Spaces method and path for this operation:**
