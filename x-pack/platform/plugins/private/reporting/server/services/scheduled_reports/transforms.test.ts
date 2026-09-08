@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CreatedAtSearchResponse } from './scheduled_reports_service';
 import {
@@ -140,7 +141,7 @@ const nextRunResponse: BulkGetResult = [
       partition: 146,
       userScope: {
         apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKeyCreatedByUser: false,
       },
       apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
@@ -181,7 +182,7 @@ const nextRunResponse: BulkGetResult = [
       partition: 146,
       userScope: {
         apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKeyCreatedByUser: false,
       },
       apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',

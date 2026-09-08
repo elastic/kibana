@@ -12,8 +12,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiSkeletonText,
   EuiTitle,
   useEuiTheme,
@@ -23,13 +21,8 @@ import { useHistory } from 'react-router-dom';
 import { compareWatchesForDisplay, type Lifecycle, type Watch } from '@kbn/pnd-common';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 // Shared with the deep-link registry, which is page-load critical — see the note on their definition.
-import { SUBNAV_SKILLS, SUBNAV_WORKERS } from '../../../components/app_chrome/translations';
 import { useWatches } from '../../../hooks/use_watches_api';
 import * as i18n from '../translations';
-
-/** Nav ids for the sections that are not per-watch. */
-export const WATCHES_NAV_WORKERS_ID = 'workers' as const;
-export const WATCHES_NAV_SKILLS_ID = 'skills' as const;
 
 /**
  * Either a watch id or one of the global section ids above. Not a closed union: the watch list is
@@ -41,29 +34,6 @@ const LIFECYCLE_LABEL: Record<Exclude<Lifecycle, 'ga'>, string> = {
   beta: i18n.LIFECYCLE_BETA,
   pilot: i18n.LIFECYCLE_PILOT,
 };
-
-interface GlobalNavItem {
-  id: WatchesSectionId;
-  label: string;
-  path: string;
-  icon: string;
-}
-
-const GLOBAL_NAV_ITEMS: GlobalNavItem[] = [
-  {
-    id: WATCHES_NAV_WORKERS_ID,
-    label: SUBNAV_WORKERS,
-    path: '/watches/workers',
-    icon: 'gear',
-  },
-  {
-    id: WATCHES_NAV_SKILLS_ID,
-    label: SUBNAV_SKILLS,
-    path: '/watches/skills',
-    icon: 'nested',
-  },
-];
-
 interface PndWatchesNavProps {
   active: WatchesSectionId;
   onCollapse: () => void;
@@ -142,19 +112,6 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
             </EuiFlexItem>
           ))
         )}
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="s" />
-
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        {GLOBAL_NAV_ITEMS.map((item) => (
-          <EuiFlexItem key={item.id} grow={false}>
-            <NavButton id={item.id} path={item.path} isActive={item.id === active}>
-              <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-              <span>{item.label}</span>
-            </NavButton>
-          </EuiFlexItem>
-        ))}
       </EuiFlexGroup>
     </aside>
   );
