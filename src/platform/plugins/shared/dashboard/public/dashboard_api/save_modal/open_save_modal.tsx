@@ -128,7 +128,7 @@ export function openSaveModal({
           });
 
           onSave({ ...saveResult, savedState: dashboardStateToSave });
-          onClose();
+          closeModal();
         };
 
         return (
