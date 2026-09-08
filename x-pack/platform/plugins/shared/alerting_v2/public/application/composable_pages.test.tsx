@@ -204,10 +204,7 @@ describe('composable pages', () => {
 
   describe('basePath route matching', () => {
     it('EpisodesPage renders list at basePath/', () => {
-      renderInRouter(
-        <AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />,
-        '/inbox'
-      );
+      renderInRouter(<AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />, '/inbox');
       expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
     });
 
@@ -220,19 +217,13 @@ describe('composable pages', () => {
     });
 
     it('EpisodesPage at /inbox does not match /:episodeId with "inbox" as the id', () => {
-      renderInRouter(
-        <AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />,
-        '/inbox'
-      );
+      renderInRouter(<AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />, '/inbox');
       expect(screen.queryByTestId('episodeDetailsPage')).not.toBeInTheDocument();
       expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
     });
 
     it('RulesPage renders list at basePath/', () => {
-      renderInRouter(
-        <AlertingV2RulesPage {...defaultProps()} basePath="/rules/v2" />,
-        '/rules/v2'
-      );
+      renderInRouter(<AlertingV2RulesPage {...defaultProps()} basePath="/rules/v2" />, '/rules/v2');
       expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
     });
 

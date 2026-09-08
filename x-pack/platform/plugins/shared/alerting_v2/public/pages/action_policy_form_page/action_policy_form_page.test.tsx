@@ -285,9 +285,7 @@ describe('ActionPolicyFormPage', () => {
         })
       );
       expect(mockCreateInlineWorkflows).toHaveBeenCalledWith([]);
-      await waitFor(() =>
-        expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled()
-      );
+      await waitFor(() => expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled());
     });
 
     it('creates inline workflows and merges them into destinations on submit', async () => {

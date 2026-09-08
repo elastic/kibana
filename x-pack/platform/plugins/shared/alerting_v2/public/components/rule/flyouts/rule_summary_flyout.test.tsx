@@ -134,7 +134,9 @@ describe('RuleSummaryFlyout', () => {
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-      expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute('href');
+      expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
+        'href'
+      );
     });
 
     it('forwards write action callbacks with the rule', () => {

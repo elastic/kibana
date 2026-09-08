@@ -62,10 +62,18 @@ const resolveLocators = (container: Container): AlertingV2Locators => {
   const share = container.get(PluginStart('share')) as SharePluginStart;
   return {
     rules: share.url.locators.get<AlertingV2RulesLocatorParams>(ALERTING_V2_RULES_LOCATOR)!,
-    ruleLibrary: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(ALERTING_V2_RULE_LIBRARY_LOCATOR)!,
-    episodes: share.url.locators.get<AlertingV2EpisodesLocatorParams>(ALERTING_V2_EPISODES_LOCATOR)!,
-    actionPolicies: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(ALERTING_V2_ACTION_POLICIES_LOCATOR)!,
-    executionHistory: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(ALERTING_V2_EXECUTION_HISTORY_LOCATOR)!,
+    ruleLibrary: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(
+      ALERTING_V2_RULE_LIBRARY_LOCATOR
+    )!,
+    episodes: share.url.locators.get<AlertingV2EpisodesLocatorParams>(
+      ALERTING_V2_EPISODES_LOCATOR
+    )!,
+    actionPolicies: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(
+      ALERTING_V2_ACTION_POLICIES_LOCATOR
+    )!,
+    executionHistory: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(
+      ALERTING_V2_EXECUTION_HISTORY_LOCATOR
+    )!,
   };
 };
 

@@ -31,7 +31,7 @@ const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabi
   executionHistory: '/execution-history',
 });
 
-const createLocator = <D extends { new (deps: { getHostApp: () => AlertingV2HostApp }): any }>(
+const createLocator = <D extends new (deps: { getHostApp: () => AlertingV2HostApp }) => any>(
   Definition: D,
   hostApp: AlertingV2HostApp = MANAGEMENT_HOST
 ) => new Definition({ getHostApp: () => hostApp });
@@ -224,9 +224,7 @@ describe('AlertingV2ActionPoliciesLocatorDefinition', () => {
     });
 
     it('resolves edit', async () => {
-      expect(
-        await locator.getLocation({ page: 'edit', actionPolicyId: 'pol-1' })
-      ).toMatchObject({
+      expect(await locator.getLocation({ page: 'edit', actionPolicyId: 'pol-1' })).toMatchObject({
         path: '/alertingV2/action_policies/edit/pol-1',
       });
     });

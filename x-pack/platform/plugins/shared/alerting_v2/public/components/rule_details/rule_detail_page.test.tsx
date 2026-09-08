@@ -15,7 +15,6 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
-import { paths } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 

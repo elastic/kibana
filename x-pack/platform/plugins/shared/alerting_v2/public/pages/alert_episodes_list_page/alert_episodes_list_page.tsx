@@ -521,10 +521,7 @@ const AlertEpisodesListPageContent = () => {
     ]
   );
 
-  const episodesMenu = useMemo(
-    () => getEpisodesListMenu({ manageRulesHref }),
-    [manageRulesHref]
-  );
+  const episodesMenu = useMemo(() => getEpisodesListMenu({ manageRulesHref }), [manageRulesHref]);
 
   return (
     <div

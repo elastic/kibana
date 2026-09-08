@@ -33,11 +33,26 @@ export interface AlertingV2HostApp {
 const MANAGEMENT_APP_ID = 'management';
 
 export const MANAGEMENT_HOST: AlertingV2HostApp = {
-  rules: { app: MANAGEMENT_APP_ID, basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}` },
-  ruleLibrary: { app: MANAGEMENT_APP_ID, basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}` },
-  episodes: { app: MANAGEMENT_APP_ID, basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}` },
-  actionPolicies: { app: MANAGEMENT_APP_ID, basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}` },
-  executionHistory: { app: MANAGEMENT_APP_ID, basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}` },
+  rules: {
+    app: MANAGEMENT_APP_ID,
+    basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`,
+  },
+  ruleLibrary: {
+    app: MANAGEMENT_APP_ID,
+    basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`,
+  },
+  episodes: {
+    app: MANAGEMENT_APP_ID,
+    basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`,
+  },
+  actionPolicies: {
+    app: MANAGEMENT_APP_ID,
+    basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`,
+  },
+  executionHistory: {
+    app: MANAGEMENT_APP_ID,
+    basePath: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`,
+  },
 };
 
 interface LocatorDeps {
@@ -146,8 +161,7 @@ export class AlertingV2EpisodesLocatorDefinition
           groupHash: params.filters?.groupHash,
           status: params.filters?.status,
           groupingValues:
-            params.filters?.groupingValues &&
-            Object.keys(params.filters.groupingValues).length > 0
+            params.filters?.groupingValues && Object.keys(params.filters.groupingValues).length > 0
               ? params.filters.groupingValues
               : undefined,
           timeFrom: params.timeRange?.from,
@@ -201,7 +215,7 @@ export class AlertingV2ActionPoliciesLocatorDefinition
 
 // --- Execution history locator ---
 
-export interface AlertingV2ExecutionHistoryLocatorParams extends SerializableRecord {}
+export type AlertingV2ExecutionHistoryLocatorParams = SerializableRecord;
 
 export class AlertingV2ExecutionHistoryLocatorDefinition
   implements LocatorDefinition<AlertingV2ExecutionHistoryLocatorParams>
