@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   EuiModal,
-  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
@@ -38,6 +39,7 @@ export const EditEpisodeAssigneeModal = ({
   onApply,
 }: EditEpisodeAssigneeModalProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'alertingV2EditEpisodeAssigneeModalTitle' });
+  const { euiTheme } = useEuiTheme();
 
   const handleApply = useCallback(
     (uid: string | null) => {
@@ -55,18 +57,28 @@ export const EditEpisodeAssigneeModal = ({
       data-test-subj="alertingV2EditEpisodeAssigneeModal"
       maxWidth={EPISODE_ASSIGNEE_PANEL_WIDTH}
     >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId} size="s">
+      <EuiModalHeader
+        css={css`
+          padding: ${euiTheme.size.s};
+          /* Leaves room for the close button, which the modal positions over the top right corner. */
+          padding-inline-end: ${euiTheme.size.xxl};
+        `}
+      >
+        <EuiModalHeaderTitle id={titleId} size="xs">
           {i18n.ASSIGNEE_PANEL_TITLE}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>
-        <EpisodeAssigneePanel
-          assigneeUid={assigneeUid}
-          episodeCount={episodeCount}
-          onApply={handleApply}
-        />
-      </EuiModalBody>
+      {/*
+        Deliberately not wrapped in `EuiModalBody`: its padding sits on an inner
+        element we shouldn't reach into, and the picker brings its own spacing.
+        Rendering it directly keeps it flush with the modal edges, like the
+        popover, which uses `panelPaddingSize="none"`.
+      */}
+      <EpisodeAssigneePanel
+        assigneeUid={assigneeUid}
+        episodeCount={episodeCount}
+        onApply={handleApply}
+      />
     </EuiModal>
   );
 };
