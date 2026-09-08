@@ -35,16 +35,20 @@ const serviceAccountSchema = z.object({
   name: serviceAccountNameSchema,
   organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
   role_assignments: z.record(z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH), z.unknown()),
-  assumable_by: z
-    .array(
+  assumable_by: z.array(
+    z.discriminatedUnion('type', [
       z.object({
         type: z.literal('project-service-account'),
         organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
         project_type: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
         project_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-      })
-    )
-    .max(1),
+      }),
+      z.object({
+        type: z.literal('platform-service-account'),
+        service_account_id: serviceAccountIdSchema,
+      }),
+    ])
+  ),
 });
 
 export interface UiamServiceAccountsOptions {

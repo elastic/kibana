@@ -21,7 +21,9 @@ export const buildAssumableBy = ({
   organizationId,
   projectId,
   projectType,
-}: BuildAssumableByParams): ServiceAccountAssumableBy[] => [
+}: BuildAssumableByParams): Array<
+  Extract<ServiceAccountAssumableBy, { type: 'project-service-account' }>
+> => [
   {
     type: 'project-service-account',
     organization_id: organizationId,

@@ -199,14 +199,60 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
+    it.each<{ assumableBy: ServiceAccount['assumable_by'] }>([
+      { assumableBy: validResponse.assumable_by },
+      {
+        assumableBy: [{ type: 'platform-service-account', service_account_id: 'nightshift-relay' }],
+      },
+      {
+        assumableBy: [
+          ...validResponse.assumable_by,
+          { type: 'platform-service-account', service_account_id: 'nightshift-relay' },
+          { type: 'platform-service-account', service_account_id: 'another-platform-service' },
+        ],
+      },
+    ])(
+      'accepts supported principals in the UIAM response: $assumableBy',
+      async ({ assumableBy }) => {
+        const result = { ...validResponse, assumable_by: assumableBy };
+        mockUiam.createServiceAccount.mockResolvedValue(result);
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).resolves.toEqual(result);
+        expect(logger.error).not.toHaveBeenCalled();
+      }
+    );
+
     it.each([
       { id: 'service-account-id' } as ServiceAccount,
       { ...validResponse, assumable_by: [{ type: 'project-service-account' }] } as ServiceAccount,
       { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
       {
         ...validResponse,
-        assumable_by: [validResponse.assumable_by[0], validResponse.assumable_by[0]],
-      },
+        assumable_by: [{ type: 'platform-service-account' }],
+      } as ServiceAccount,
+      {
+        ...validResponse,
+        assumable_by: [{ type: 'platform-service-account', service_account_id: 123 }],
+      } as never,
+      {
+        ...validResponse,
+        assumable_by: [
+          {
+            type: 'platform-service-account',
+            service_account_id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1),
+          },
+        ],
+      } as ServiceAccount,
+      {
+        ...validResponse,
+        assumable_by: [{ type: 'unsupported-service-account', service_account_id: 'relay' }],
+      } as never,
+      {
+        ...validResponse,
+        assumable_by: [validResponse.assumable_by[0], { type: 'platform-service-account' }],
+      } as ServiceAccount,
     ])('logs validation failures and returns the original response', async (result) => {
       mockUiam.createServiceAccount.mockResolvedValue(result);
 

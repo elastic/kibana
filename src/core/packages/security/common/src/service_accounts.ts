@@ -13,12 +13,17 @@
  *
  * @public
  */
-export interface ServiceAccountAssumableBy {
-  type: 'project-service-account';
-  organization_id: string;
-  project_type: string;
-  project_id: string;
-}
+export type ServiceAccountAssumableBy =
+  | {
+      type: 'project-service-account';
+      organization_id: string;
+      project_type: string;
+      project_id: string;
+    }
+  | {
+      type: 'platform-service-account';
+      service_account_id: string;
+    };
 
 /**
  * Roles granted to a service account, as resolved by UIAM and reported on a
