@@ -71,7 +71,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   const projectRouting = useMemo(() => {
-    return cps?.cpsManager?.getDefaultProjectRouting();
+    return cps?.cpsManager?.getProjectRouting();
   }, [cps]);
 
   useMemo(() => {

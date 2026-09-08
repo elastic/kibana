@@ -1692,6 +1692,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const datafeedQuery = get(config, 'datafeedConfig.query', null);
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+    const projectRouting =
+      isMlCpsEnabled && config.datafeedConfig
+        ? getProjectRoutingFromDatafeed(config.datafeedConfig) ?? undefined
+        : undefined;
 
     try {
       return await getEventDistributionData(
@@ -1707,7 +1712,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         range.min,
         range.max,
         config.bucketSpanSeconds * 1000,
-        config.datafeedConfig.project_routing
+        projectRouting
       );
     } catch (e) {
       handleError(
