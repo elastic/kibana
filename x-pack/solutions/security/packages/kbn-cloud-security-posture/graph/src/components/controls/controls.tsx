@@ -39,6 +39,8 @@ export interface ControlsProps extends CommonProps {
   /** Array of node IDs the graph must center on */
   nodeIdsToCenterOn?: NodeViewModel['id'][];
   fitViewOptions?: FitViewOptions;
+  /** Override for the fitView function used by fit-view and center buttons */
+  fitViewFn?: (opts?: FitViewOptions) => void;
   /** Callback when zoom in button is clicked */
   onZoomIn?: () => void;
   /** Callback when zoom out button is clicked */
@@ -71,6 +73,7 @@ export const Controls = ({
   showFitView = true,
   nodeIdsToCenterOn = [],
   fitViewOptions,
+  fitViewFn,
   onZoomIn,
   onZoomOut,
   onCenter,
@@ -78,8 +81,10 @@ export const Controls = ({
   ...props
 }: ControlsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { zoomIn, zoomOut, fitView: reactFlowFitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
+  // Use the override if provided (allows the graph to suppress onMove re-layout during fit)
+  const fitView = fitViewFn ?? reactFlowFitView;
 
   // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
   // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
