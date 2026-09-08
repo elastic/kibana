@@ -697,7 +697,9 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       await user.click(screen.getByTestId('createActionPolicyCard'));
 
-      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({
+        page: 'create',
+      });
     });
 
     it('opens agent chat from the empty state create-with-agent card', async () => {
