@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import {
@@ -65,55 +65,46 @@ export const externalLinkSchema = z
     description: 'Link type. Set to externalLink for a URL outside Kibana.',
   });
 
-export const linksArraySchema = lazySchema(() =>
-  z
-    .array(z.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]))
-    .max(100)
-    .meta({ description: 'The list of links to display.' })
-);
+export const linksArraySchema = z
+  .array(z.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]))
+  .max(100)
+  .meta({ description: 'The list of links to display.' });
 
 // Shared schema for layout - used by both saved objects and embeddables
-export const layoutSchema = lazySchema(() =>
-  z.enum([LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT]).optional().meta({
+export const layoutSchema = z
+  .enum([LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT])
+  .optional()
+  .meta({
     description: 'Whether to display the links in a horizontal or vertical layout.',
+  });
+
+const linksStateSchema = z
+  .object({
+    links: linksArraySchema,
+    layout: layoutSchema,
   })
-);
+  .strict();
 
-const linksStateSchema = lazySchema(() =>
-  z
-    .object({
-      links: linksArraySchema,
-      layout: layoutSchema,
-    })
-    .strict()
-);
+export const linksByValueSchema = serializedTitlesSchema
+  .extend(linksStateSchema.shape)
+  .meta(BY_VALUE_SCHEMA_META);
 
-export const linksByValueSchema = lazySchema(() =>
-  serializedTitlesSchema.extend(linksStateSchema.shape).meta(BY_VALUE_SCHEMA_META)
-);
-
-export const linksByReferenceSchema = lazySchema(() =>
-  serializedTitlesSchema
-    .extend({
-      ref_id: z.string().meta({
-        title: 'Reference ID',
-        description: 'The unique identifier of the links library item.',
-      }),
-    })
-    .meta(BY_REF_SCHEMA_META)
-);
+export const linksByReferenceSchema = serializedTitlesSchema
+  .extend({
+    ref_id: z.string().meta({
+      title: 'Reference ID',
+      description: 'The unique identifier of the links library item.',
+    }),
+  })
+  .meta(BY_REF_SCHEMA_META);
 
 // Complete links embeddable schema (union of by-value and by-reference embeddables)
-export const linksEmbeddableSchema = lazySchema(() =>
-  z.union([linksByValueSchema, linksByReferenceSchema]).meta({
-    description: 'Links embeddable schema',
-  })
-);
+export const linksEmbeddableSchema = z.union([linksByValueSchema, linksByReferenceSchema]).meta({
+  description: 'Links embeddable schema',
+});
 
-export const linksApiStateSchema = lazySchema(() =>
-  linksStateSchema.extend({
-    title: z.string(), // title is required - all links library items must have a title
-    description: z.string().optional(), // description of links library item is optional
-    tags: getAsCodeTagsSchema().optional(),
-  })
-);
+export const linksApiStateSchema = linksStateSchema.extend({
+  title: z.string(), // title is required - all links library items must have a title
+  description: z.string().optional(), // description of links library item is optional
+  tags: getAsCodeTagsSchema().optional(),
+});

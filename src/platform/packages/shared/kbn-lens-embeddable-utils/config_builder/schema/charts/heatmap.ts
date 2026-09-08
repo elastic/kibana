@@ -87,14 +87,16 @@ const heatmapStylingSchema = lazySchema(() =>
     })
 );
 
+const heatmapLegendSchema = legendSchema.optional().meta({
+  id: 'heatmapLegend',
+  title: 'Legend',
+  description: 'Legend configuration',
+});
+
 const heatmapSharedConfigSchema = lazySchema(() =>
   z.object({
     type: z.literal('heatmap'),
-    legend: legendSchema.optional().meta({
-      id: 'heatmapLegend',
-      title: 'Legend',
-      description: 'Legend configuration',
-    }),
+    legend: heatmapLegendSchema,
     ...sharedPanelInfoSchema.shape,
     ...layerSettingsSchema.shape,
     axis: z
