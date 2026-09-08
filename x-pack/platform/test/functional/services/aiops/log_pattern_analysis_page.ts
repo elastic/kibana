@@ -277,10 +277,24 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     async completeSaveToDashboardForm(createNew?: boolean) {
       const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
       if (createNew) {
+        // Wait for the dashboard picker's initial search to settle so its panel stops
+        // re-rendering (and shifting layout) while we click the "New" radio.
+        await testSubjects.waitForEnabled('open-dashboard-picker');
+
         const label = await dashboardSelector.findByCssSelector(
           `label[for="new-dashboard-option"]`
         );
         await label.click();
+
+        await retry.waitForWithTimeout(
+          'the "New dashboard" option to be selected',
+          10 * 1000,
+          async () => {
+            const options = await testSubjects.find('add-to-dashboard-options');
+            const newDashboardRadio = await options.findByCssSelector('#new-dashboard-option');
+            return await newDashboardRadio.isSelected();
+          }
+        );
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');

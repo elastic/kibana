@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -249,34 +250,60 @@ export const getIDsAndIndicesAsArrays = (
 };
 
 /**
- * This functions extracts the ids and indices from an alert comment. It enforces that the alertId and index are either
- * both strings or string arrays that are the same length. If they are arrays they represent a 1-to-1 mapping of
- * id existing in an index at each position in the array. This is not ideal. Ideally an alert comment request would
- * accept an array of objects like this: Array<{id: string; index: string; ruleName: string ruleID: string}> instead.
- *
- * To reformat the alert comment request requires a migration and a breaking API change.
+ * Extracts id/index pairs for an alert/event comment: 1-to-1 arrays, or a scalar `metadata.index`
+ * broadcasting across every id. Pass `strict: true` to throw on an invalid pairing instead of dropping it.
  */
-const getAndValidateAlertInfoFromComment = (comment: AttachmentRequestV2): AlertInfo[] => {
-  if (!isAlertAttachmentType(comment.type)) {
+const getAndValidateIndexedAttachmentInfo = (
+  comment: AttachmentRequestV2,
+  isTargetType: (type: string) => boolean,
+  strict: boolean
+): AlertInfo[] => {
+  if (!isTargetType(comment.type)) {
     return [];
   }
 
   const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
-  if (ids.length !== indices.length) {
+  // Only a scalar metadata.index broadcasts; an array (even length 1) must match 1-to-1.
+  const rawMetadataIndex =
+    'attachmentId' in comment ? getIndexFromMetadata(comment.metadata) : undefined;
+  const isBroadcastIndex = typeof rawMetadataIndex === 'string';
+
+  if (!isBroadcastIndex && ids.length !== indices.length) {
+    if (strict) {
+      throw Boom.badRequest(
+        `Attachment of type "${comment.type}" is missing a valid index reference (id count=${ids.length}, index count=${indices.length}).`
+      );
+    }
+
     return [];
   }
 
-  return ids.map((id, index) => ({ id, index: indices[index] }));
+  return ids.map((id, index) => ({ id, index: isBroadcastIndex ? indices[0] : indices[index] }));
 };
 
 /**
- * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
+ * Builds AlertInfo for the alerts in `comments`. Pass `strict: true` only when validating a new
+ * write before it's persisted; reads of already-persisted attachments must stay lenient.
  */
-export const getAlertInfoFromComments = (comments: AttachmentRequestV2[] = []): AlertInfo[] =>
+export const getAlertInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
-    const alertInfo = getAndValidateAlertInfoFromComment(comment);
-    acc.push(...alertInfo);
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isAlertAttachmentType, strict));
+    return acc;
+  }, []);
+
+/**
+ * Same as {@link getAlertInfoFromComments}, but for events (legacy `event` + unified `security.event`).
+ */
+export const getEventInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isEventAttachmentType, strict));
     return acc;
   }, []);
 

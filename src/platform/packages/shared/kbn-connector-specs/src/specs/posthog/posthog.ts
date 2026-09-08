@@ -138,6 +138,7 @@ export const PostHog: ConnectorSpec = {
   actions: {
     listIssues: {
       isTool: true,
+      scope: 'read',
       description:
         'List PostHog error-tracking issues, filterable by status, assignee, and last-seen time window. The primary read path to find what needs triage.',
       input: PostHogListIssuesInputSchema,
@@ -173,6 +174,7 @@ export const PostHog: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single PostHog error-tracking issue by ID, including status, assignee, volume, first/last seen, and message, so a workflow can branch or enrich on it.',
       input: PostHogGetIssueInputSchema,
@@ -190,6 +192,7 @@ export const PostHog: ConnectorSpec = {
 
     updateIssueStatus: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a PostHog error-tracking issue to a new status (active, resolved, archived, suppressed, or pending_release). The core lifecycle action the connector exists to drive.',
       input: PostHogUpdateIssueStatusInputSchema,
@@ -208,6 +211,7 @@ export const PostHog: ConnectorSpec = {
 
     assignIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Assign or reassign a PostHog error-tracking issue to a user or role, so a workflow can route ownership as part of triage.',
       input: PostHogAssignIssueInputSchema,
@@ -229,6 +233,7 @@ export const PostHog: ConnectorSpec = {
 
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a HogQL (SQL-like) query against PostHog product data and return the result rows. The general-purpose data lever for a decision or enrichment inside a workflow.',
       input: PostHogRunQueryInputSchema,
@@ -247,6 +252,7 @@ export const PostHog: ConnectorSpec = {
 
     updateFeatureFlag: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Toggle a PostHog feature flag active/inactive or change its rollout percentage, giving a workflow a mitigation lever to disable or roll back a bad rollout during an incident. Changing rolloutPercentage preserves the flag\'s existing release-condition groups and their targeting properties (e.g. "internal users only"), applying the new percentage to each group rather than replacing them with a single ungated group.',
       input: PostHogUpdateFeatureFlagInputSchema,
@@ -282,6 +288,7 @@ export const PostHog: ConnectorSpec = {
 
     getFeatureFlag: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a PostHog feature flag's current active state and rollout configuration by ID, so a workflow can decide whether to change it before calling updateFeatureFlag.",
       input: PostHogGetFeatureFlagInputSchema,
@@ -299,6 +306,7 @@ export const PostHog: ConnectorSpec = {
 
     listFeatureFlags: {
       isTool: true,
+      scope: 'read',
       description:
         'List PostHog feature flags, optionally filtered by a name/key substring, so a workflow can find the flag to change during a response.',
       input: PostHogListFeatureFlagsInputSchema,
@@ -316,6 +324,7 @@ export const PostHog: ConnectorSpec = {
 
     createAnnotation: {
       isTool: true,
+      scope: 'write',
       description:
         'Mark a deploy, incident, or config change on PostHog charts by creating an annotation at a given date, so analytics line up with the event.',
       input: PostHogCreateAnnotationInputSchema,
@@ -335,6 +344,7 @@ export const PostHog: ConnectorSpec = {
 
     listSessionRecordings: {
       isTool: true,
+      scope: 'read',
       description:
         'List PostHog session recordings within a time window, optionally scoped to a person, to investigate what users hit around an error.',
       input: PostHogListSessionRecordingsInputSchema,
@@ -357,6 +367,7 @@ export const PostHog: ConnectorSpec = {
 
     createExternalReference: {
       isTool: true,
+      scope: 'write',
       description:
         'Link a PostHog error-tracking issue to an external ticket (e.g. a Jira or GitHub issue) via a configured integration, so the issue and the external ticket stay connected for cross-tool tracking.',
       input: PostHogCreateExternalReferenceInputSchema,

@@ -10,7 +10,14 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
+type SidebarSectionName =
+  | 'meta'
+  | 'empty'
+  | 'available'
+  | 'unmapped'
+  | 'popular'
+  | 'selected'
+  | 'recommended';
 
 export class UnifiedFieldList {
   constructor(private readonly page: ScoutPage) {}
@@ -271,6 +278,16 @@ export class UnifiedFieldList {
    */
   async clickFieldListItem(field: string): Promise<void> {
     await this.getAvailableField(field).click();
+  }
+
+  /**
+   * Opens the field popover and applies that field as the histogram breakdown.
+   */
+  async clickFieldListAddBreakdownField(field: string): Promise<void> {
+    await this.searchField(field);
+    await this.clickFieldListItem(field);
+    await this.waitUntilFieldPopoverIsLoaded();
+    await this.page.testSubj.click(`fieldPopoverHeader_addBreakdownField-${field}`);
   }
 
   getFieldDescription(field: string) {

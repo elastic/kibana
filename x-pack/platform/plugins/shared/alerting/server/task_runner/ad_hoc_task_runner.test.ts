@@ -588,7 +588,7 @@ describe('Ad Hoc Task Runner', () => {
       logAlert: 2,
     });
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
       {
@@ -601,7 +601,7 @@ describe('Ad Hoc Task Runner', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
@@ -773,7 +773,7 @@ describe('Ad Hoc Task Runner', () => {
         foo: true,
         consumer: 'siem',
         uuid: '123abc',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         apiKeyId: 'apiKeyId',
       })
     );
@@ -793,6 +793,7 @@ describe('Ad Hoc Task Runner', () => {
       attributes: {
         ...mockedAdHocRunSO.attributes,
         uiamApiKey,
+        uiamApiKeyId: 'uiamId',
         rule: {
           ...mockedAdHocRunSO.attributes.rule,
           id: '1',
@@ -838,16 +839,93 @@ describe('Ad Hoc Task Runner', () => {
     await taskRunner.run();
     await taskRunner.cleanup();
 
-    // The scheduled action must be enqueued with the decoded UIAM secret, not the ES API key.
+    // The scheduled action must be enqueued with the decoded UIAM secret, not the ES API key,
+    // and must carry the UIAM key id so the API key invalidation task's in-use guard can see
+    // that this pending connector execution still needs the key.
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
-      expect.objectContaining({ apiKey: 'essu_secret', apiKeyId: 'apiKeyId' }),
+      expect.objectContaining({
+        apiKey: 'essu_secret',
+        apiKeyId: 'apiKeyId',
+        uiamApiKeyId: 'uiamId',
+      }),
     ]);
     // No fallback warning should be logged because the UIAM key is present.
     expect(logger.warn).not.toHaveBeenCalledWith(
       'UIAM API key is not provided to create a fake request, falling back to regular API key.',
       expect.anything()
     );
+  });
+
+  test('should not enqueue the UIAM API key id when the run falls back to the ES API key', async () => {
+    const uiamContext = {
+      ...taskRunnerFactoryInitializerParams,
+      alertsService: mockAlertsService,
+      shouldGrantUiam: true,
+      apiKeyType: ApiKeyType.UIAM,
+    };
+
+    // The ad hoc run snapshotted a UIAM key id, but the key material itself is gone, so
+    // `getFakeKibanaRequest` falls back to the ES key.
+    const mockedAdHocRunSOWithActions = {
+      ...mockedAdHocRunSO,
+      attributes: {
+        ...mockedAdHocRunSO.attributes,
+        uiamApiKeyId: 'uiamId',
+        rule: {
+          ...mockedAdHocRunSO.attributes.rule,
+          id: '1',
+          actions: [
+            {
+              uuid: '123abc',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'action',
+              params: { foo: true },
+              frequency: {
+                notifyWhen: 'onActiveAlert' as const,
+                summary: true,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      },
+      references: [
+        { type: RULE_SAVED_OBJECT_TYPE, name: 'rule', id: '1' },
+        { id: '4', name: 'action_0', type: 'action' },
+      ],
+    };
+
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: { count: 1, data: [mockAAD] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    mockAlertsService.createAlertsClient.mockImplementation(() => alertsClient);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+      mockedAdHocRunSOWithActions
+    );
+
+    const taskRunner = new AdHocTaskRunner({
+      context: uiamContext,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      executionUuid: UUID,
+    });
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    // Recording the id here would claim a UIAM key the connector task never presents, keeping
+    // an unused key alive.
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    const [[[enqueuedAction]]] = actionsClient.bulkEnqueueExecution.mock.calls;
+    expect(enqueuedAction).toEqual(
+      expect.objectContaining({ apiKey: 'MTIzOmFiYw==', apiKeyId: 'apiKeyId' })
+    );
+    expect(enqueuedAction).not.toHaveProperty('uiamApiKeyId');
   });
 
   test('should run with the next pending schedule', async () => {
@@ -945,7 +1023,7 @@ describe('Ad Hoc Task Runner', () => {
       logAlert: 2,
     });
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       `Executing ad hoc run for rule test:rule-id for runAt ${schedule4.runAt}`,
       {
@@ -958,7 +1036,7 @@ describe('Ad Hoc Task Runner', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
@@ -1089,7 +1167,7 @@ describe('Ad Hoc Task Runner', () => {
       logAlert: 2,
     });
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`,
       {
@@ -1102,7 +1180,7 @@ describe('Ad Hoc Task Runner', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
@@ -1414,7 +1492,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule1.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
         {
@@ -1510,7 +1588,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule5.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`,
         {
@@ -1524,7 +1602,7 @@ describe('Ad Hoc Task Runner', () => {
         }
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).nthCalledWith(
+      expect(logger.error).toHaveBeenNthCalledWith(
         1,
         `Failed to cleanup ad_hoc_run_params object [id="abc"]: trouble deleting this`,
         { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskInstanceId: '' } }
@@ -1584,7 +1662,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule1.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
         {
@@ -1597,17 +1675,17 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
         { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskInstanceId: '' } }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`,
         { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskInstanceId: '' } }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
@@ -1617,7 +1695,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         5,
         `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
@@ -1630,7 +1708,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         6,
         `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
@@ -1705,7 +1783,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule2.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`,
         {
@@ -1718,7 +1796,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
         {
@@ -1730,7 +1808,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`,
         {
@@ -1742,7 +1820,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
@@ -1752,7 +1830,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         5,
         `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
@@ -1765,7 +1843,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         6,
         `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
@@ -1839,7 +1917,7 @@ describe('Ad Hoc Task Runner', () => {
         timeout: true,
       });
       expect(logger.debug).toHaveBeenCalledTimes(3);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
         {
@@ -1852,7 +1930,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
         {
@@ -1864,7 +1942,7 @@ describe('Ad Hoc Task Runner', () => {
           },
         }
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`,
         {

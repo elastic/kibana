@@ -95,18 +95,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
   const handleFlyoutApply =
     (instanceId: string) =>
-    (varsByInput: Record<string, Record<string, string>>, enabledInputs: string[]) => {
-      setServiceFieldsAndInputs(instanceId, varsByInput, enabledInputs);
+    (
+      varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
+      enabledDataStreams: string[]
+    ) => {
+      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
-    varsByInput: Record<string, Record<string, string>>,
-    enabledInputs: string[]
+    varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
+    enabledDataStreams: string[]
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, varsByInput, enabledInputs);
+    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -216,9 +219,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         }),
         render: (inst: ServiceInstance) => {
           const service = awsServicesMap?.get(inst.serviceId);
-          return service ? <SignalTypeBadge signalType={service.signalType} /> : null;
+          return service ? <SignalTypeBadge signalTypes={service.signalTypes} /> : null;
         },
-        sortable: (inst: ServiceInstance) => awsServicesMap?.get(inst.serviceId)?.signalType ?? '',
+        sortable: (inst: ServiceInstance) =>
+          awsServicesMap?.get(inst.serviceId)?.signalTypes.join(',') ?? '',
       },
       {
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.category', {
@@ -241,11 +245,17 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           const service = awsServicesMap?.get(inst.serviceId);
           if (!service) return null;
           const config = getServiceVars(inst.instanceId);
-          const activeInput = config.enabledInputs?.[0] ?? null;
-          const regionField = getRegionFieldName(service, activeInput);
-          const override = activeInput
-            ? config.varsByInput?.[activeInput]?.[regionField]?.trim()
-            : undefined;
+          // Find the first enabled input across all data streams for region display.
+          let override: string | undefined;
+          for (const dsId of service.dataStreams) {
+            const dsVars = config.varsByDataStream[dsId];
+            const inp = dsVars?.enabledInputs?.[0];
+            if (inp) {
+              const regionField = getRegionFieldName(service, inp);
+              override = dsVars.varsByInput?.[inp]?.[regionField]?.trim() || undefined;
+              break;
+            }
+          }
           if (override) return override;
           if (globalRegion) return globalRegion;
           return (
@@ -258,6 +268,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       {
         width: '40px',
         render: (inst: ServiceInstance) => {
+          const service = awsServicesMap?.get(inst.serviceId);
+          const isEcfOnly = service?.deploymentMethods.every((dm) => dm.method === 'ecf') ?? false;
+          if (isEcfOnly && !inst.isDuplicate) return null;
           const isOpen = openMenuInstanceId === inst.instanceId;
           const actionsLabel = i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.table.actionsAriaLabel',
@@ -288,20 +301,24 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             >
               <EuiContextMenuPanel
                 items={[
-                  <EuiContextMenuItem
-                    key="duplicate"
-                    icon="copy"
-                    onClick={() => {
-                      setOpenMenuInstanceId(null);
-                      setDuplicateSourceInstanceId(inst.instanceId);
-                    }}
-                    data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestHub.serviceSettingsStep.table.action.duplicate"
-                      defaultMessage="Duplicate service"
-                    />
-                  </EuiContextMenuItem>,
+                  ...(!isEcfOnly
+                    ? [
+                        <EuiContextMenuItem
+                          key="duplicate"
+                          icon="copy"
+                          onClick={() => {
+                            setOpenMenuInstanceId(null);
+                            setDuplicateSourceInstanceId(inst.instanceId);
+                          }}
+                          data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
+                        >
+                          <FormattedMessage
+                            id="xpack.ingestHub.serviceSettingsStep.table.action.duplicate"
+                            defaultMessage="Duplicate service"
+                          />
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
                   ...(inst.isDuplicate
                     ? [
                         <EuiContextMenuItem
@@ -338,7 +355,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   );
 
   return (
-    <div data-test-subj="onboardingStep-serviceSettings">
+    <div data-test-subj="onboardingStep-service-settings">
       <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">

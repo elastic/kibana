@@ -439,6 +439,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     listResources: {
       isTool: true,
+      scope: 'read',
       description:
         'List resources of a given type, optionally filtered by namespace and label/field selectors. ' +
         'Returns a compact summary (name, namespace, labels, creation time, status highlights) per item. ' +
@@ -466,6 +467,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     getResource: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full manifest of a single resource by name. Server-managed metadata ' +
         '(managedFields) is stripped to reduce noise.',
@@ -486,6 +488,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     listNamespaces: {
       isTool: true,
+      scope: 'read',
       description: 'List all namespaces in the cluster.',
       input: ListNamespacesInputSchema,
       handler: async (ctx, input: ListNamespacesInput) => {
@@ -502,6 +505,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     getPodLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve logs for a pod (optionally a specific container). Output is capped to the last ' +
         `${MAX_LOG_CHARS} characters to stay within context limits.`,
@@ -542,6 +546,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     listEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List recent cluster events, optionally scoped to a namespace and filtered by label/field ' +
         'selectors. Useful for diagnosing why a resource is failing to schedule, start, or become ready. ' +

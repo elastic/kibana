@@ -6,8 +6,11 @@
  */
 
 import type {
+  Conversation,
   ConversationRound,
   ConversationRoundAuthor,
+  ConversationRoundStep,
+  ExecutionStepEvent,
   ExecutionTerminatedEvent,
   RoundInput,
   TimelineEvent,
@@ -17,9 +20,17 @@ import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 
-const EXECUTION_ID_SUFFIX = '::execution';
+/** Rounds derived from events timeline with a fallback to rounds if no events are present. */
+export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
+  isEventsNativeVersion(conversation.schema_version) &&
+  conversation.events &&
+  conversation.events.length > 0
+    ? eventsToRounds(conversation.events)
+    : conversation.rounds;
 
 /**
  * Reconstructs rounds from a timeline.
@@ -58,16 +69,31 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
       continue;
     }
 
+    const stepEvents = group.filter(
+      (event): event is ExecutionStepEvent => event.type === TimelineEventType.executionStep
+    );
+    const steps = stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated.data.steps ?? [];
+
     rounds.push({
       id: roundIdFromExecutionId(executionId),
       input: toRoundInput(userMessage),
       started_at: userMessage.created_at,
       ...authorAndOrigin(userMessage),
-      ...terminatedRoundFields(terminated.data),
+      ...terminatedRoundFields(terminated.data, steps),
     });
   }
 
   return rounds;
+};
+
+const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] => {
+  const byId = new Map<string, ExecutionStepEvent>();
+  for (const event of events) {
+    byId.set(event.id, event);
+  }
+  return Array.from(byId.values())
+    .sort((a, b) => a.data.sequence - b.data.sequence)
+    .map((event) => event.data.step);
 };
 
 /**
@@ -75,8 +101,8 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
  * conversion round-trips, otherwise fall back to the execution id.
  */
 const roundIdFromExecutionId = (executionId: string): string =>
-  executionId.endsWith(EXECUTION_ID_SUFFIX)
-    ? executionId.slice(0, -EXECUTION_ID_SUFFIX.length)
+  executionId.endsWith(ROUND_DERIVED_EVENT_ID_SUFFIXES.execution)
+    ? executionId.slice(0, -ROUND_DERIVED_EVENT_ID_SUFFIXES.execution.length)
     : executionId;
 
 const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
@@ -97,9 +123,9 @@ const authorAndOrigin = (
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };
 
-/** Rebuild a round's terminal fields from an `execution_terminated` event's summary + outcome. */
 const terminatedRoundFields = (
-  data: ExecutionTerminatedEvent['data']
+  data: ExecutionTerminatedEvent['data'],
+  steps: ConversationRoundStep[]
 ): Pick<
   ConversationRound,
   | 'status'
@@ -115,7 +141,7 @@ const terminatedRoundFields = (
 > => {
   const { outcome } = data;
   const summary = {
-    steps: data.steps,
+    steps,
     model_usage: data.model_usage,
     time_to_first_token: data.time_to_first_token,
     time_to_last_token: data.time_to_last_token,

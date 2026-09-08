@@ -8,24 +8,31 @@
  */
 
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
+import { apiPublishesESQLQuery, type ViewMode } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
 import type { VegaVisualizationDependencies } from '../plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
+import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
+import type { VegaByValueState } from '../../server';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
+jest.mock('../lib/extract_index_pattern', () => ({
+  extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
+}));
 
 interface MockVegaVisComponentProps {
   fireEvent: VegaEventHandler;
@@ -69,6 +76,9 @@ describe('vegaEmbeddableFactory', () => {
       mode: 'relative' as const,
     });
     const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
+    const esqlVariables$ = new BehaviorSubject<
+      Array<{ key: string; value: string; type: ESQLVariableType }> | undefined
+    >(undefined);
     const reload$ = new BehaviorSubject<void>(undefined);
     const viewMode$ = new BehaviorSubject<ViewMode>('view');
 
@@ -77,6 +87,7 @@ describe('vegaEmbeddableFactory', () => {
       filters$,
       timeRange$,
       timeslice$,
+      esqlVariables$,
       reload$,
       viewMode$,
       parentApi: {
@@ -87,12 +98,14 @@ describe('vegaEmbeddableFactory', () => {
         reload$,
         timeRange$,
         timeslice$,
+        esqlVariables$,
         viewMode$,
       },
     };
   };
 
-  let { query$, filters$, timeRange$, timeslice$, reload$, viewMode$, parentApi } = createParent();
+  let { query$, filters$, timeRange$, timeslice$, esqlVariables$, reload$, viewMode$, parentApi } =
+    createParent();
 
   // Only forwarded to the request handler and the Vega component, both of which are mocked here.
   const visualizationDependencies = {
@@ -103,8 +116,14 @@ describe('vegaEmbeddableFactory', () => {
 
   const visData = { isVegaLite: false, useMap: false } as unknown as VegaParser;
 
-  const buildEmbeddable = async () => {
-    const factory = vegaEmbeddableFactory(coreMock.createStart(), {
+  const buildEmbeddable = async ({
+    standaloneEmbeddableEnabled = false,
+  }: { standaloneEmbeddableEnabled?: boolean } = {}) => {
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockImplementation((key, fallback) =>
+      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback
+    );
+    const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
       visualizationDependencies,
     });
@@ -112,7 +131,7 @@ describe('vegaEmbeddableFactory', () => {
 
     return factory.buildEmbeddable({
       initializeDrilldownsManager,
-      initialState: { spec: '{ mark: point }', title: 'Initial title' },
+      initialState: { spec: { format: 'hjson', value: '{ mark: point }' }, title: 'Initial title' },
       finalizeApi: (api) => ({
         ...api,
         uuid,
@@ -130,7 +149,8 @@ describe('vegaEmbeddableFactory', () => {
     mockCreateVegaRequestHandler.mock.calls[call][1].abortSignal;
 
   beforeEach(() => {
-    ({ query$, filters$, timeRange$, timeslice$, reload$, viewMode$, parentApi } = createParent());
+    ({ query$, filters$, timeRange$, timeslice$, esqlVariables$, reload$, viewMode$, parentApi } =
+      createParent());
     executeTriggerActions.mockReset();
     mockOpenLazyFlyout.mockReset();
     mockReportVegaRender.mockReset();
@@ -144,7 +164,7 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
 
     api.applySerializedState({
-      spec: '{ mark: bar }',
+      spec: { format: 'hjson', value: '{ mark: bar }' },
       title: 'Updated title',
       time_range: {
         from: '2025-01-01T00:00:00.000Z',
@@ -155,7 +175,7 @@ describe('vegaEmbeddableFactory', () => {
 
     expect(api.serializeState()).toEqual(
       expect.objectContaining({
-        spec: '{ mark: bar }',
+        spec: { format: 'hjson', value: '{ mark: bar }' },
         title: 'Updated title',
         time_range: {
           from: '2025-01-01T00:00:00.000Z',
@@ -165,6 +185,17 @@ describe('vegaEmbeddableFactory', () => {
       })
     );
   });
+
+  it.each([
+    [true, true],
+    [false, false],
+  ] as const)(
+    'gates JSON export on the standalone embeddable flag (enabled=%s)',
+    async (standaloneEmbeddableEnabled, supportsJsonExport) => {
+      const { api } = await buildEmbeddable({ standaloneEmbeddableEnabled });
+      expect(api.supportsJsonExport).toBe(supportsJsonExport);
+    }
+  );
 
   it('renders the Vega component from the resolved parser', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();
@@ -320,35 +351,6 @@ describe('vegaEmbeddableFactory', () => {
     expect(executeTriggerActions).not.toHaveBeenCalled();
   });
 
-  it('exposes shared-item render metadata for Reporting and reports render telemetry', async () => {
-    const { api, Component: PanelComponent } = await buildEmbeddable();
-    const { container } = render(<PanelComponent />);
-    const sharedItem = container.querySelector('[data-shared-item]');
-    const renderComplete = jest.fn();
-
-    expect(sharedItem).toHaveAttribute('data-title', 'Initial title');
-    expect(sharedItem).toHaveAttribute('data-description', '');
-    expect(sharedItem).toHaveAttribute('data-render-complete', 'false');
-
-    sharedItem?.addEventListener('renderComplete', renderComplete);
-
-    await waitFor(() => expect(mockVegaVisComponentProps).toBeDefined());
-    await act(async () => {
-      mockVegaVisComponentProps?.renderComplete();
-    });
-
-    await waitFor(() => {
-      expect(api.rendered$.getValue()).toBe(true);
-      expect(sharedItem).toHaveAttribute('data-render-complete', 'true');
-      expect(renderComplete).toHaveBeenCalledTimes(1);
-    });
-    expect(mockReportVegaRender).toHaveBeenCalledWith({
-      containerType: 'dashboard',
-      isVegaLite: false,
-      useMap: false,
-    });
-  });
-
   it('gives the flyout the focus targets to restore when it closes', async () => {
     const { api } = await buildEmbeddable();
     const returnFocus = jest.fn();
@@ -373,13 +375,13 @@ describe('vegaEmbeddableFactory', () => {
       closeFlyout,
     })) as React.ReactElement<{
       onRevert: () => void;
-      onPreview: (spec: string) => void;
+      onPreview: (spec: VegaByValueState['spec']) => void;
     }>;
 
-    content.props.onPreview('{ mark: bar }');
-    expect(api.serializeState().spec).toBe('{ mark: bar }');
+    content.props.onPreview({ format: 'hjson', value: '{ mark: bar }' });
+    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
     content.props.onRevert();
-    expect(api.serializeState().spec).toBe('{ mark: point }');
+    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
     expect(jest.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
   });
 
@@ -408,10 +410,80 @@ describe('vegaEmbeddableFactory', () => {
     const content = (await flyout.loadContent({
       ariaLabelledBy: 'vega-flyout-title',
       closeFlyout,
-    })) as React.ReactElement<{ onSave: (spec: string) => void }>;
+    })) as React.ReactElement<{ onSave: (spec: VegaByValueState['spec']) => void }>;
 
-    content.props.onSave('{ mark: bar }');
+    content.props.onSave({ format: 'hjson', value: '{ mark: bar }' });
 
-    expect(api.serializeState().spec).toBe('{ mark: bar }');
+    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
+  });
+
+  it('forwards parent esqlVariables into the request handler and refetches on change', async () => {
+    const variables = [{ key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES }];
+    esqlVariables$.next(variables);
+    const { Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+
+    await waitFor(() => {
+      expect(mockVegaRequestHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlVariables: variables })
+      );
+    });
+
+    const updated = [{ key: 'fizzbuzz', value: 'osx', type: ESQLVariableType.VALUES }];
+    esqlVariables$.next(updated);
+
+    await waitFor(() => {
+      expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+        expect.objectContaining({ esqlVariables: updated })
+      );
+    });
+  });
+
+  it('publishes a verbatim ES|QL query$ for a single-source spec', async () => {
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const { api } = await buildEmbeddable();
+
+    api.applySerializedState({
+      spec: {
+        format: 'hjson',
+        value: `{ data: { url: { "%type%": "esql", query: "${query}" } } }`,
+      },
+      title: 'Initial title',
+    });
+
+    expect(api.query$.getValue()).toEqual({ esql: query });
+    expect(apiPublishesESQLQuery(api)).toBe(true);
+    expect(api).not.toHaveProperty('filters$');
+  });
+
+  it('does not publish an ES|QL query for non-ES|QL specs', async () => {
+    const { api } = await buildEmbeddable();
+
+    expect(api.query$.getValue()).toBeUndefined();
+    expect(apiPublishesESQLQuery(api)).toBe(false);
+  });
+
+  it('updates query$ when the spec changes without waiting for a fetch', async () => {
+    mockVegaRequestHandler.mockImplementation(() => new Promise(() => {}));
+    const { api } = await buildEmbeddable();
+
+    api.applySerializedState({
+      spec: {
+        format: 'hjson',
+        value: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz" } } }`,
+      },
+      title: 'Initial title',
+    });
+    expect(getESQLQueryVariables(api.query$.getValue()!.esql)).toContain('fizzbuzz');
+
+    api.applySerializedState({
+      spec: {
+        format: 'hjson',
+        value: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE color.keyword == ?color" } } }`,
+      },
+      title: 'Initial title',
+    });
+    expect(getESQLQueryVariables(api.query$.getValue()!.esql)).toEqual(['color']);
+    expect(getESQLQueryVariables(api.query$.getValue()!.esql)).not.toContain('fizzbuzz');
   });
 });

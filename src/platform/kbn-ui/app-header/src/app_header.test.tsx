@@ -316,6 +316,40 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
   });
 
+  it('uses a larger no-back title offset in compact spacing', () => {
+    const { result } = renderHook(() => useEuiTheme());
+    const { rerender } = render(<AppHeaderView title="Dashboard" sticky={false} />);
+
+    const titleOffsetBox = () => screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title).closest('div');
+
+    expect(titleOffsetBox()).toHaveStyleRule(
+      'padding-inline-start',
+      result.current.euiTheme.size.xs
+    );
+
+    rerender(<AppHeaderView title="Dashboard" sticky={false} spacing="compact" />);
+    expect(titleOffsetBox()).toHaveStyleRule(
+      'padding-inline-start',
+      result.current.euiTheme.size.s
+    );
+  });
+
+  it('does not apply the no-back title offset when a back button is present', () => {
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        sticky={false}
+        spacing="compact"
+        back={{ href: '/app/dashboards', label: 'Dashboards' }}
+      />
+    );
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title).closest('div')).not.toHaveStyleRule(
+      'padding-inline-start',
+      expect.any(String)
+    );
+  });
+
   it('renders tab badge and test subject metadata', () => {
     render(
       <AppHeaderView
@@ -395,7 +429,7 @@ describe('AppHeaderView', () => {
   });
 
   it('uses back hrefs as final targets without rewriting them', () => {
-    render(<AppHeaderView back="/base-other/app" />);
+    render(<AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',

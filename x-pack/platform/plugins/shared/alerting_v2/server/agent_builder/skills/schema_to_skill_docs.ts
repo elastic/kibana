@@ -358,6 +358,15 @@ function formatVariantSchemas(jsonSchema: unknown): string {
   return sections.join('\n\n');
 }
 
+const toOperationJsonSchema = (schema: z.ZodType, title: string): JsonSchemaNode => {
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  throwIfMissingOperationDescribes(
+    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
+    title
+  );
+  return jsonSchema;
+};
+
 /**
  * Generates markdown for a create/update API Zod schema (top-level field table,
  * plus optional extra sections such as query format variants).
@@ -414,13 +423,25 @@ export const generateOperationsDoc = ({
   title: string;
   schema: z.ZodType;
 }): string => {
-  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
-  throwIfMissingOperationDescribes(
-    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
-    title
-  );
-
+  const jsonSchema = toOperationJsonSchema(schema, title);
   return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
+};
+
+/**
+ * Bullet list of each operation's top-level `.describe()`. Use this in a tool
+ * description so usage copy stays in sync with the Zod schema instead of a
+ * hand-written operations list.
+ */
+export const generateOperationsUsageList = ({
+  title,
+  schema,
+}: {
+  title: string;
+  schema: z.ZodType;
+}): string => {
+  const jsonSchema = toOperationJsonSchema(schema, title);
+  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[];
+  return variants.map((variant) => `- ${variant.description}`).join('\n');
 };
 
 /**
@@ -428,6 +449,13 @@ export const generateOperationsDoc = ({
  */
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
+    title: 'Rule Operations Schema Reference',
+    schema: ruleOperationSchema,
+  });
+
+/** Operation `.describe()` list for the `manage_rule` tool description. */
+export const generateRuleOperationsUsageList = (): string =>
+  generateOperationsUsageList({
     title: 'Rule Operations Schema Reference',
     schema: ruleOperationSchema,
   });
