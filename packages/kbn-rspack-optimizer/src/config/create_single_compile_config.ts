@@ -80,6 +80,10 @@ export interface SingleCompileConfigOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   /** ToolingLog instance for consistent logging with Kibana's dev mode */
   log?: ToolingLog;
@@ -117,6 +121,8 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -134,11 +140,13 @@ export async function createSingleCompileConfig(
   }
   const resolvedHmrPort = hmrPort as number;
 
-  // Discover all plugins
+  // Discover all plugins, including plugins explicitly passed via --plugin-path.
   const plugins = await discoverPlugins({
     repoRoot,
     examples,
     testPlugins,
+    paths: pluginPaths,
+    parentDirs: pluginScanDirs,
   });
 
   // Create a SINGLE unified entry that imports ALL plugins
