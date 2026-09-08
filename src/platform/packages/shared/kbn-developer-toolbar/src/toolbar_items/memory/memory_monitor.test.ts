@@ -210,7 +210,7 @@ describe('MemoryMonitor', () => {
     expect(lastMeasured(snapshots)?.history).toEqual([100, 200]);
   });
 
-  it('replays the actual measured ratio and leak snapshot to late subscribers', () => {
+  it('replays the actual measured ratio and growth snapshot to late subscribers', () => {
     limitMiB = 320;
     monitor.startMonitoring();
     for (let sample = 1; sample <= 10; sample++) {
@@ -218,12 +218,105 @@ describe('MemoryMonitor', () => {
       jest.advanceTimersByTime(20_000);
     }
     const measured = lastMeasured(snapshots);
-    expect(measured?.leak).toBe(true);
+    expect(measured?.growthDetected).toBe(true);
     expect(measured?.heapUsageRatio).toBeCloseTo(300 / 320);
 
     const replayed: Snapshot[] = [];
     monitor.subscribe((info) => replayed.push(info));
     expect(replayed).toEqual([measured]);
+  });
+
+  it('freezes a warmup median only after elapsed time and four samples', () => {
+    monitor.startMonitoring();
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(0);
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
+
+    hidden = true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    jest.advanceTimersByTime(60_000);
+    hidden = false;
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(lastMeasured(snapshots)?.history).toHaveLength(2);
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(0);
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
+
+    usedMiB = 140;
+    jest.advanceTimersByTime(20_000);
+    usedMiB = 160;
+    jest.advanceTimersByTime(20_000);
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(120);
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
+  });
+
+  it('detects growth without heap pressure against the frozen baseline', () => {
+    monitor.startMonitoring();
+    for (let sample = 1; sample <= 10; sample++) {
+      usedMiB = 100 + sample * 20;
+      jest.advanceTimersByTime(20_000);
+    }
+
+    const measured = lastMeasured(snapshots);
+    expect(measured?.details?.baseline).toBe(130);
+    expect(measured?.growthDetected).toBe(true);
+    expect(measured?.heapUsageRatio).toBeLessThan(0.85);
+  });
+
+  it('clears growth when heap holds and keeps the frozen baseline across rollover', () => {
+    monitor.destroy();
+    monitor = new MemoryMonitor({ maxHistory: 8 });
+    monitor.subscribe((info) => snapshots.push(info));
+    monitor.startMonitoring();
+    for (let sample = 1; sample <= 10; sample++) {
+      usedMiB = 100 + sample * 20;
+      jest.advanceTimersByTime(20_000);
+    }
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(true);
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(130);
+
+    usedMiB = 300;
+    for (let sample = 0; sample < 20; sample++) {
+      jest.advanceTimersByTime(20_000);
+    }
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(130);
+    expect(lastMeasured(snapshots)?.history).toHaveLength(8);
+  });
+
+  it('starts a new baseline window after restart', () => {
+    monitor.startMonitoring();
+    for (let sample = 1; sample <= 3; sample++) {
+      usedMiB = 100 + sample * 20;
+      jest.advanceTimersByTime(20_000);
+    }
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(130);
+
+    usedMiB = 400;
+    monitor.startMonitoring();
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(0);
+    expect(lastMeasured(snapshots)?.history).toEqual([400]);
+
+    for (let sample = 1; sample <= 3; sample++) {
+      usedMiB = 400 + sample * 10;
+      jest.advanceTimersByTime(20_000);
+    }
+    expect(lastMeasured(snapshots)?.details?.baseline).toBe(415);
+  });
+
+  it('does not mutate an earlier snapshot history after later samples roll', () => {
+    monitor.destroy();
+    monitor = new MemoryMonitor({ maxHistory: 4 });
+    monitor.subscribe((info) => snapshots.push(info));
+    monitor.startMonitoring();
+    const first = lastMeasured(snapshots);
+    expect(first?.history).toEqual([100]);
+
+    for (let sample = 1; sample <= 5; sample++) {
+      usedMiB = 100 + sample * 20;
+      jest.advanceTimersByTime(20_000);
+    }
+
+    expect(first?.history).toEqual([100]);
+    expect(lastMeasured(snapshots)?.history).toEqual([140, 160, 180, 200]);
   });
 
   it('replays null after a failed sample instead of a stale measurement', () => {

@@ -59,10 +59,11 @@ export const MemoryUsageIndicator: React.FC = () => {
     );
   }
 
-  const { heapUsageRatio } = memoryInfo;
+  const { heapUsageRatio, growthDetected } = memoryInfo;
   const isUnderHeapPressure = (heapUsageRatio ?? 0) > 0.85;
-  const isWarning = memoryInfo.leak || isUnderHeapPressure;
-  const badgeColor = memoryInfo.leak ? 'danger' : isUnderHeapPressure ? 'warning' : '#0B1628';
+  const isWarning = growthDetected || isUnderHeapPressure;
+  const badgeColor =
+    growthDetected && isUnderHeapPressure ? 'danger' : isWarning ? 'warning' : '#0B1628';
   const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
   const trend = memoryInfo.details?.shortTrendPerMin;
   const trendText =
@@ -83,7 +84,7 @@ export const MemoryUsageIndicator: React.FC = () => {
         {heapUtilizationPercentage !== null &&
           (isUnderHeapPressure ? (
             <div css={emphasisStyles}>
-              <EuiTextColor color={memoryInfo.leak ? 'danger' : 'warning'}>
+              <EuiTextColor color={growthDetected ? 'danger' : 'warning'}>
                 Heap limit used: {heapUtilizationPercentage}%
               </EuiTextColor>
             </div>
@@ -93,15 +94,16 @@ export const MemoryUsageIndicator: React.FC = () => {
       </div>
       <div>
         <div>{trendText}</div>
-        {memoryInfo.leak ? (
+        {growthDetected && (
           <div css={emphasisStyles}>
-            <EuiTextColor color="danger">
-              Sustained growth near the heap limit; possible leak.
+            <EuiTextColor color={isUnderHeapPressure ? 'danger' : 'warning'}>
+              Sustained heap growth; possible leak.
             </EuiTextColor>
           </div>
-        ) : isUnderHeapPressure ? (
+        )}
+        {isUnderHeapPressure && (
           <div>More than 85% of the browser-reported heap limit is in use.</div>
-        ) : null}
+        )}
       </div>
       <div>
         <div>

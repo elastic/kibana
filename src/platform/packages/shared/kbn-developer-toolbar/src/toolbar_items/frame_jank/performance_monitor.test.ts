@@ -98,6 +98,70 @@ describe('PerformanceMonitor', () => {
     expect(snapshots[0].baselineFps).toBe(60);
     expect(snapshots[0].jankPercentage).toBe(100);
     expect(snapshots[0].history).toEqual([snapshots[0].fps]);
+
+    advanceFrames(600, 1000 / 30);
+    expect(snapshots.at(-1)?.baselineFps).toBe(60);
+    expect(snapshots.at(-1)?.jankPercentage).toBe(100);
+    expect(snapshots.at(-1)?.history.length).toBeGreaterThan(3);
+  });
+
+  it('keeps a 120 Hz high-water so a visible 60 FPS downshift stays slow', () => {
+    monitor.startMonitoring();
+    advanceFrames(961, 1000 / 120);
+
+    const highWater = snapshots.at(-1)?.baselineFps ?? 0;
+    expect(highWater).toBeGreaterThan(60);
+
+    const afterCalibration = snapshots.length;
+    advanceFrames(20 * 60, 1000 / 60);
+    expect(snapshots.length).toBeGreaterThan(afterCalibration);
+    expect(snapshots.at(-1)?.baselineFps).toBeGreaterThanOrEqual(highWater);
+    expect(snapshots.at(-1)?.fps).toBeCloseTo(60, 0);
+    expect(snapshots.at(-1)?.jankPercentage).toBe(100);
+  });
+
+  it('clears 30 FPS jank through history roll-off without lowering the baseline', () => {
+    monitor.destroy();
+    monitor = new PerformanceMonitor(20);
+    monitor.subscribe((info) => snapshots.push(info));
+    monitor.startMonitoring();
+    advanceFrames(23 * 30, 1000 / 30);
+
+    expect(snapshots.at(-1)?.baselineFps).toBe(60);
+    expect(snapshots.at(-1)?.jankPercentage).toBe(100);
+
+    advanceFrames(22 * 60, 1000 / 60);
+    expect(snapshots.at(-1)?.baselineFps).toBe(60);
+    expect(snapshots.at(-1)?.jankPercentage).toBe(0);
+  });
+
+  it('resets a 120 Hz high-water after visibility restoration', () => {
+    const hidden = jest.spyOn(document, 'hidden', 'get');
+    hidden.mockReturnValue(false);
+    monitor.startMonitoring();
+    advanceFrames(961, 1000 / 120);
+    expect(snapshots.at(-1)?.baselineFps).toBeGreaterThan(60);
+
+    hidden.mockReturnValue(true);
+    document.dispatchEvent(new Event('visibilitychange'));
+    hidden.mockReturnValue(false);
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    expect(snapshots.at(-1)).toEqual({
+      fps: 0,
+      jankPercentage: 0,
+      baselineFps: 60,
+      history: [],
+      maxFps: 0,
+      minFps: 0,
+    });
+
+    const afterRestore = snapshots.length;
+    advanceFrames(121, 1000 / 30);
+    expect(snapshots.length).toBe(afterRestore + 1);
+    expect(snapshots.at(-1)?.baselineFps).toBe(60);
+    expect(snapshots.at(-1)?.history).toHaveLength(1);
+    expect(snapshots.at(-1)?.jankPercentage).toBe(100);
   });
 
   it('bounds history and waits for new real data after restart', () => {
@@ -111,10 +175,18 @@ describe('PerformanceMonitor', () => {
     monitor.stopMonitoring();
     const snapshotCount = snapshots.length;
     monitor.startMonitoring();
-    expect(snapshots).toHaveLength(snapshotCount);
+    expect(snapshots).toHaveLength(snapshotCount + 1);
+    expect(snapshots.at(-1)).toEqual({
+      fps: 0,
+      jankPercentage: 0,
+      baselineFps: 60,
+      history: [],
+      maxFps: 0,
+      minFps: 0,
+    });
 
     advanceFrames(481, 1000 / 120);
-    expect(snapshots).toHaveLength(snapshotCount + 1);
+    expect(snapshots).toHaveLength(snapshotCount + 2);
     expect(snapshots.at(-1)?.history).toHaveLength(1);
   });
 });

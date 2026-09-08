@@ -36,12 +36,12 @@ jest.mock('@elastic/eui', () => ({
 const memoryInfo = (
   memoryUsage: number,
   heapUsageRatio: number,
-  leak = false,
+  growthDetected = false,
   options: { historyLength?: number; shortTrendPerMin?: number } = {}
 ): MemoryInfo => ({
   memoryUsage,
   heapUsageRatio,
-  leak,
+  growthDetected,
   history: Array.from({ length: options.historyLength ?? 1 }, () => memoryUsage),
   details:
     options.shortTrendPerMin === undefined
@@ -84,18 +84,33 @@ describe('MemoryUsageIndicator', () => {
     expect(screen.getByRole('tooltip').textContent).toContain(
       'More than 85% of the browser-reported heap limit is in use.'
     );
+    expect(screen.getByRole('tooltip').textContent).not.toContain(
+      'Sustained heap growth; possible leak.'
+    );
+
+    act(() => publish(memoryInfo(200, 0.25, true)));
+    expect(screen.getByTestId('memoryBadge').getAttribute('data-color')).toBe('warning');
+    expect(screen.getByRole('tooltip').textContent).toContain(
+      'Sustained heap growth; possible leak.'
+    );
+    expect(screen.getByRole('tooltip').textContent).not.toContain(
+      'More than 85% of the browser-reported heap limit is in use.'
+    );
 
     act(() => publish(memoryInfo(900, 0.86, true)));
     expect(screen.getByTestId('memoryBadge').getAttribute('data-color')).toBe('danger');
     expect(screen.getByRole('tooltip').textContent).toContain(
-      'Sustained growth near the heap limit; possible leak.'
+      'Sustained heap growth; possible leak.'
+    );
+    expect(screen.getByRole('tooltip').textContent).toContain(
+      'More than 85% of the browser-reported heap limit is in use.'
     );
 
-    act(() => publish({ memoryUsage: 900, leak: true, history: [900] }));
-    expect(screen.getByTestId('memoryBadge').getAttribute('data-color')).toBe('danger');
+    act(() => publish({ memoryUsage: 900, growthDetected: true, history: [900] }));
+    expect(screen.getByTestId('memoryBadge').getAttribute('data-color')).toBe('warning');
     expect(screen.getByRole('tooltip').textContent).not.toContain('Heap limit used:');
     expect(screen.getByRole('tooltip').textContent).toContain(
-      'Sustained growth near the heap limit; possible leak.'
+      'Sustained heap growth; possible leak.'
     );
   });
 

@@ -107,6 +107,7 @@ describe('FrameJankIndicator warnings', () => {
     jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
     jest.spyOn(PerformanceMonitor.prototype, 'startMonitoring').mockImplementation();
     jest.spyOn(PerformanceMonitor.prototype, 'stopMonitoring').mockImplementation();
+    jest.spyOn(PerformanceMonitor.prototype, 'destroy').mockImplementation();
     jest.spyOn(LongTaskMonitor.prototype, 'startMonitoring').mockImplementation();
     jest.spyOn(LongTaskMonitor.prototype, 'destroy').mockImplementation();
     jest.spyOn(LongTaskMonitor.prototype, 'isSupported').mockReturnValue(true);

@@ -13,7 +13,9 @@ import { LongTaskMonitor, type LongTaskInfo } from './long_task_monitor';
 class TimingObserver implements PerformanceObserver {
   static supportedEntryTypes = ['longtask', 'event'];
   static instances: TimingObserver[] = [];
+  static rejectBufferedObserve = false;
   type?: string;
+  options?: PerformanceObserverInit;
   private connected = false;
 
   constructor(private readonly callback: PerformanceObserverCallback) {
@@ -21,6 +23,10 @@ class TimingObserver implements PerformanceObserver {
   }
 
   observe(options: PerformanceObserverInit = {}): void {
+    if (TimingObserver.rejectBufferedObserve && options.buffered) {
+      throw new Error('buffered observe unsupported');
+    }
+    this.options = options;
     this.type = options.type ?? options.entryTypes?.[0];
     this.connected = true;
   }
@@ -90,6 +96,7 @@ describe('LongTaskMonitor', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     TimingObserver.instances = [];
+    TimingObserver.rejectBufferedObserve = false;
     Object.defineProperty(globalThis, 'PerformanceObserver', {
       configurable: true,
       value: TimingObserver,
@@ -182,6 +189,48 @@ describe('LongTaskMonitor', () => {
     });
   });
 
+  it('rejects buffered pre-session tasks and accepts in-session tasks', () => {
+    expect(TimingObserver.instances.at(-1)?.options).toEqual({ type: 'longtask', buffered: true });
+
+    monitor.stopMonitoring();
+    jest.advanceTimersByTime(5_000);
+    monitor.startMonitoring();
+    expect(snapshots.at(-1)).toEqual({
+      duration: 0,
+      totalBlockingTime: 0,
+      tasksInLast30Seconds: 0,
+      worstTaskDuration: 0,
+      worstTaskStartTime: null,
+    });
+
+    deliver([timingEntry(400, 1_000)]);
+    expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(0);
+
+    deliver([timingEntry(250, performance.now())]);
+    expect(snapshots.at(-1)).toMatchObject({
+      duration: 250,
+      tasksInLast30Seconds: 1,
+      worstTaskDuration: 250,
+    });
+  });
+
+  it('still records tasks when buffered observe is unavailable', () => {
+    monitor.destroy();
+    TimingObserver.instances = [];
+    TimingObserver.rejectBufferedObserve = true;
+    snapshots = [];
+    monitor = new LongTaskMonitor();
+    monitor.subscribe((info) => snapshots.push(info));
+    monitor.startMonitoring();
+
+    expect(TimingObserver.instances.at(-1)?.options).toEqual({ entryTypes: ['longtask'] });
+    deliver([timingEntry(180, performance.now())]);
+    expect(snapshots.at(-1)).toMatchObject({
+      duration: 180,
+      tasksInLast30Seconds: 1,
+    });
+  });
+
   it('cancels expiry on destroy and after a subscriber stops publication', () => {
     deliver([timingEntry(300)]);
     const publicationsBeforeDestroy = snapshots.length;
@@ -209,6 +258,7 @@ describe('INPMonitor', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     TimingObserver.instances = [];
+    TimingObserver.rejectBufferedObserve = false;
     Object.defineProperty(globalThis, 'PerformanceObserver', {
       configurable: true,
       value: TimingObserver,
@@ -287,6 +337,33 @@ describe('INPMonitor', () => {
     deliverEvents([eventEntry(150, 3)]);
     expect(jest.getTimerCount()).toBe(0);
     stoppingMonitor.destroy();
+  });
+
+  it('rejects buffered pre-session interactions and accepts in-session interactions', () => {
+    expect(TimingObserver.instances.at(-1)?.options).toMatchObject({
+      type: 'event',
+      buffered: true,
+    });
+
+    monitor.stopMonitoring();
+    jest.advanceTimersByTime(5_000);
+    monitor.startMonitoring();
+    expect(snapshots.at(-1)).toEqual({
+      currentINP: 0,
+      slowInteractionsCount: 0,
+      worstInteractionDelay: 0,
+      lastInteractionDelay: 0,
+      worstInteractionStartTime: null,
+    });
+
+    deliverEvents([eventEntry(400, 1, 1_000)]);
+    expect(snapshots.at(-1)?.slowInteractionsCount).toBe(0);
+
+    deliverEvents([eventEntry(220, 2, performance.now())]);
+    expect(snapshots.at(-1)).toMatchObject({
+      slowInteractionsCount: 1,
+      worstInteractionDelay: 220,
+    });
   });
 
   it('deduplicates interaction maxima and derives last from retained start times', () => {

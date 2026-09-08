@@ -225,7 +225,7 @@ export const FrameJankIndicator: React.FC = () => {
     }
 
     return () => {
-      performanceMonitor.stopMonitoring();
+      performanceMonitor.destroy();
       longTaskMonitor.destroy();
       inpMonitor.destroy();
       perfUnsubscribe();
@@ -331,7 +331,10 @@ export const FrameJankIndicator: React.FC = () => {
               )}
             </div>
             <div>Samples: {perfInfo?.history.length ?? 0}</div>
-            <div>Jank counts slow one-second samples, not dropped frames.</div>
+            <div>
+              Jank counts slow one-second samples against this visible session’s high-water target
+              (at least 60 FPS), not dropped frames.
+            </div>
             <div>
               {perfInfo
                 ? 'Frame warnings use at least 3 measured samples.'

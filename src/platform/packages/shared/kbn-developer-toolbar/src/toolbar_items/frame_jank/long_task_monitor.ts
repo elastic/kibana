@@ -35,6 +35,7 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   private supportedFlag: boolean;
   private expiryTimer?: number;
   private isMonitoring = false;
+  private sessionStartedAt = 0;
 
   private taskHistory: Array<{ duration: number; startTime: number }> = [];
   private lastTaskDuration = 0;
@@ -62,6 +63,9 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     if (!this.supportedFlag) return;
     if (this.observer) return; // idempotent
 
+    this.resetSessionState();
+    this.sessionStartedAt = performance.now();
+
     try {
       this.observer = new PerformanceObserver((list) => {
         const entries = list.getEntries() as PerformanceLongTaskTiming[];
@@ -78,11 +82,21 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
       this.isMonitoring = true;
       this.publishCurrentStats();
     } catch (error) {
-      this.isMonitoring = false;
+      this.stopMonitoring();
       // eslint-disable-next-line no-console
       console.warn('Failed to start long task monitoring:', error);
-      this.observer = undefined;
     }
+  }
+
+  private resetSessionState() {
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
+    this.taskHistory = [];
+    this.lastTaskDuration = 0;
+    this.worstTaskDuration = 0;
+    this.worstTaskStartTime = null;
   }
 
   private pushTask(task: { duration: number; startTime: number }) {
@@ -159,6 +173,7 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   private handleLongTask(entry: PerformanceLongTaskTiming) {
     if (!this.isMonitoring) return;
     const { duration, startTime } = entry;
+    if (startTime < this.sessionStartedAt) return;
     if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
 
     this.pushTask({ duration, startTime });
@@ -184,11 +199,8 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
 
   destroy() {
     this.stopMonitoring();
+    this.resetSessionState();
     this.callbacks = [];
-    this.taskHistory = [];
-    this.lastTaskDuration = 0;
-    this.worstTaskDuration = 0;
-    this.worstTaskStartTime = null;
   }
 
   subscribe(callback: (info: LongTaskInfo) => void) {

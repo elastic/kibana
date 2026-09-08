@@ -11,7 +11,7 @@ import type { Monitor } from '../monitor';
 
 export interface MemoryInfo {
   memoryUsage: number; // MiB
-  leak: boolean;
+  growthDetected: boolean;
   history: number[]; // MiB samples
   heapUsageRatio?: number; // used / limit
   details?: {
@@ -31,17 +31,27 @@ type Callback = (info: MemoryInfo | null) => void;
 
 interface Config {
   intervalMs?: number; // sampling period
-  warmupMs?: number; // time to skip leak detection
+  warmupMs?: number; // minimum elapsed time before freezing the session baseline
   maxHistory?: number; // cap stored samples
-  // Leak thresholds (MiB/min, MiB absolute, ratio)
+  // Growth thresholds (MiB/min, MiB absolute)
   shortTrendMbPerMin?: number;
   longTrendMbPerMin?: number;
   absoluteIncreaseMb?: number;
-  highPressureRatio?: number; // used / limit
   pauseWhenHidden?: boolean; // don't sample on hidden tabs
 }
 
 export class MemoryMonitor implements Monitor<MemoryInfo | null> {
+  private static readonly MIN_BASELINE_SAMPLES = 4;
+
+  private static median(values: number[]): number {
+    const sorted = [...values].sort((a, b) => a - b);
+    const middle = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) {
+      return (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+    return sorted[middle];
+  }
+
   private static readPerfMemory(): PerformanceMemory | null {
     try {
       if (typeof performance === 'undefined') return null;
@@ -67,6 +77,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
 
   private history: number[] = [];
   private sampleTimes: number[] = [];
+  private frozenBaseline: number | undefined;
   private callbacks = new Set<Callback>();
   private timer?: ReturnType<typeof setTimeout>;
   private startedAt = 0;
@@ -82,7 +93,6 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
       shortTrendMbPerMin: 15,
       longTrendMbPerMin: 8,
       absoluteIncreaseMb: 100,
-      highPressureRatio: 0.85,
       pauseWhenHidden: true,
       ...config,
     };
@@ -94,8 +104,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
 
   startMonitoring(): void {
     this.stopMonitoring(); // ensure clean start
-    this.history.length = 0; // reset
-    this.sampleTimes.length = 0;
+    this.resetSessionState();
     this.lastInfo = undefined;
     this.startedAt = performance.now();
     this.isMonitoring = true;
@@ -119,9 +128,8 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
 
   destroy(): void {
     this.stopMonitoring();
-    this.history.length = 0;
+    this.resetSessionState();
     this.callbacks.clear();
-    this.sampleTimes.length = 0;
     this.lastInfo = undefined;
   }
 
@@ -132,6 +140,12 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
   }
 
   // ---------- internals ----------
+
+  private resetSessionState() {
+    this.history = [];
+    this.sampleTimes = [];
+    this.frozenBaseline = undefined;
+  }
 
   private scheduleNext() {
     this.timer = setTimeout(() => {
@@ -162,31 +176,42 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
     }
 
     const usedMB = mem.usedJSHeapSize / (1024 * 1024);
-    const sampleTime = performance.now();
     this.history.push(usedMB);
-    this.sampleTimes.push(sampleTime);
+    this.sampleTimes.push(performance.now());
     if (this.history.length > this.cfg.maxHistory) {
       this.history.shift();
       this.sampleTimes.shift();
     }
+    this.maybeFreezeBaseline();
 
     const info = this.buildInfo(usedMB, mem);
     this.lastInfo = info;
     this.callbacks.forEach((cb) => cb(info));
   }
 
+  private maybeFreezeBaseline() {
+    if (this.frozenBaseline !== undefined) return;
+    if (performance.now() - this.startedAt < this.cfg.warmupMs) return;
+    if (this.history.length < MemoryMonitor.MIN_BASELINE_SAMPLES) return;
+    this.frozenBaseline = MemoryMonitor.median(this.history);
+  }
+
   private buildInfo(current: number, mem: PerformanceMemory): MemoryInfo {
-    const leak = this.detectLeak(mem);
-    const heapUsageRatio = mem.usedJSHeapSize / mem.jsHeapSizeLimit;
+    const baseline = this.frozenBaseline ?? 0;
+    const shortTrendPerMin = this.linearSlope(this.history.slice(-10), this.sampleTimes.slice(-10));
+    const longTrendPerMin = this.linearSlope(this.history.slice(-20), this.sampleTimes.slice(-20));
+    const absoluteIncrease = this.frozenBaseline === undefined ? 0 : current - baseline;
+    const growthDetected =
+      this.frozenBaseline !== undefined &&
+      shortTrendPerMin > this.cfg.shortTrendMbPerMin &&
+      longTrendPerMin > this.cfg.longTrendMbPerMin &&
+      absoluteIncrease > this.cfg.absoluteIncreaseMb;
 
-    const { baseline, absoluteIncrease, shortTrendPerMin, longTrendPerMin } =
-      this.computeLeakMetrics();
-
-    const base: MemoryInfo = {
+    return {
       memoryUsage: current,
-      leak,
-      history: this.history,
-      heapUsageRatio,
+      growthDetected,
+      history: [...this.history],
+      heapUsageRatio: mem.usedJSHeapSize / mem.jsHeapSizeLimit,
       details: {
         baseline,
         absoluteIncrease,
@@ -194,64 +219,6 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
         longTrendPerMin,
       },
     };
-    return base;
-  }
-
-  private computeLeakMetrics() {
-    const h = this.history;
-    const n = h.length;
-
-    const elapsed = performance.now() - this.startedAt;
-    const warmedUp = elapsed >= this.cfg.warmupMs;
-
-    // Baseline = mean of earliest stable window after warm-up
-    // Choose a window near the first third of samples when available
-    const start = Math.max(0, Math.min(Math.floor(n / 3) - 5, n - 25));
-    const end = Math.max(start + 5, Math.min(start + 15, n - 20));
-    const baselineWindow = end > start ? h.slice(start, end) : [];
-    const baseline =
-      baselineWindow.length > 0
-        ? baselineWindow.reduce((s, v) => s + v, 0) / baselineWindow.length
-        : h[0] ?? 0;
-
-    const recentShort = h.slice(-10); // last 10 samples
-    const recentLong = h.slice(-20); // last 20 samples
-    const recentShortTimes = this.sampleTimes.slice(-10);
-    const recentLongTimes = this.sampleTimes.slice(-20);
-
-    const shortTrendPerMin = this.linearSlope(recentShort, recentShortTimes);
-    const longTrendPerMin = this.linearSlope(recentLong, recentLongTimes);
-
-    const current = h[n - 1] ?? 0;
-    const absoluteIncrease = current - baseline;
-
-    return {
-      warmedUp,
-      baseline,
-      absoluteIncrease,
-      shortTrendPerMin,
-      longTrendPerMin,
-    };
-  }
-
-  private detectLeak(mem: PerformanceMemory): boolean {
-    if (this.history.length < 10) return false;
-
-    const { warmedUp, absoluteIncrease, shortTrendPerMin, longTrendPerMin } =
-      this.computeLeakMetrics();
-
-    if (!warmedUp) return false;
-
-    const sustainedGrowth =
-      shortTrendPerMin > this.cfg.shortTrendMbPerMin &&
-      longTrendPerMin > this.cfg.longTrendMbPerMin;
-
-    const significantIncrease = absoluteIncrease > this.cfg.absoluteIncreaseMb;
-    const heapUsageRatio = mem.usedJSHeapSize / mem.jsHeapSizeLimit;
-
-    const highMemoryPressure = heapUsageRatio > this.cfg.highPressureRatio;
-
-    return sustainedGrowth && significantIncrease && highMemoryPressure;
   }
 
   // Least squares slope in MiB/min using elapsed sample time as x.

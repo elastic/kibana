@@ -4,8 +4,8 @@ A development toolbar for Kibana with real-time performance monitoring and custo
 
 ## Features
 
-- **Frame Jank Monitor**: Tracks FPS, frame drops, long tasks, and interaction delays
-- **Memory Usage**: Displays current memory consumption and detects potential leaks
+- **Frame Jank Monitor**: Tracks slow one-second frame samples against a 60+ FPS session target, long tasks, and slow-interaction p75 (not standard INP)
+- **Memory Usage**: Displays estimated JavaScript heap usage and possible heap growth, not proven leaks
 - **Console Errors**: Captures and displays console errors and warnings in real-time
 - **Environment Info**: Shows current environment and build information
 - **Custom Items**: Add your own toolbar items declaratively
