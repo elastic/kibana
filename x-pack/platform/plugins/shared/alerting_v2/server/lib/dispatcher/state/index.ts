@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export { DispatchOutcome } from './dispatch_outcome';
+export { DispatchPlan } from './dispatch_plan';
 export { EpisodeScan } from './episode_scan';
+export { EpisodeTriage, type SuppressedEpisode } from './episode_triage';
 export { PolicyCatalog } from './policy_catalog';
 export { RuleCatalog } from './rule_catalog';
+export { SuppressionIndex } from './suppression_index';

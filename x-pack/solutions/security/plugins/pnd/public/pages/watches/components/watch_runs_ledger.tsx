@@ -10,7 +10,7 @@ import { EuiBadge, EuiBasicTable, EuiText, type EuiBasicTableColumn } from '@ela
 import type { WatchLedgerEntry, WatchRunAction, WatchRunOutcome } from '@kbn/pnd-common';
 import * as i18n from '../settings_translations';
 import * as workerI18n from '../workers/translations';
-import * as skillI18n from '../skills/translations';
+import * as skillI18n from '../skills_table_translations';
 
 /** Draft and gated runs are awaiting a human, so they read as accented rather than neutral. */
 const ACTION_BADGE_COLOR: Record<WatchRunAction, string> = {

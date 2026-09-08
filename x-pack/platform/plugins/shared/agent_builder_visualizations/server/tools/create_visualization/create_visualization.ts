@@ -48,10 +48,7 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
 
 const createVisualizationSchema = z
   .object({
-    query: z
-      .string()
-      .max(2048)
-      .describe('A natural language query describing the desired visualization.'),
+    query: z.string().max(2048).describe('A natural language query describing the visualization.'),
     index: z
       .string()
       .max(1024)
@@ -70,7 +67,7 @@ const createVisualizationSchema = z
       .enum(['lens', 'vega'])
       .optional()
       .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Omit this field when updating an existing attachment; edits keep the existing renderer.'
+        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Omit this field when updating an existing attachment; edits keep the existing renderer.'
       ),
     chartType: z
       .nativeEnum(SupportedChartType)

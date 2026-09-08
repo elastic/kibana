@@ -27,7 +27,7 @@ import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
 
-interface ContextSwitcherComponentProps {
+export interface ContextSwitcherComponentProps {
   spacesManager: SpacesManager;
   core: CoreStart;
   cloud?: CloudStart;

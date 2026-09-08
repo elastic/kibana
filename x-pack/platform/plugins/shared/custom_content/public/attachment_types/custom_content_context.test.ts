@@ -68,7 +68,7 @@ describe('customContentContextAttachmentUiDefinition', () => {
     it('falls back to a generic label when the panel is untitled', () => {
       expect(
         customContentContextAttachmentUiDefinition.getLabel(makeAttachment({ panel_title: '' }))
-      ).toBe('Custom content panel');
+      ).toBe('Custom panel');
     });
   });
 

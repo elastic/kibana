@@ -40,7 +40,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
       framework.router.handleLegacyErrors(async (requestContext, request, response) => {
         try {
           const {
-            data: { indices, timestampField, startTime, endTime, runtimeMappings },
+            data: { indices, timestampField, startTime, endTime, runtimeMappings, projectRouting },
           } = request.body;
 
           // Deduplicate the user-provided indices to avoid redundant queries.
@@ -56,7 +56,8 @@ export const initValidateLogAnalysisDatasetsRoute = ({
                 indexName,
                 startTime,
                 endTime,
-                runtimeMappings as estypes.MappingRuntimeFields
+                runtimeMappings as estypes.MappingRuntimeFields,
+                projectRouting
               );
 
               return {

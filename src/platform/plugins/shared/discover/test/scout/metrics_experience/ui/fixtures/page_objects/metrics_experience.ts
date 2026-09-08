@@ -229,19 +229,31 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Reads the sort direction persisted in local tab storage, or `undefined` when no open tab
-   * carries one (the default 'asc' is stripped rather than written). Tab state is written on a
+   * Reads a metrics profile-state field persisted in local tab storage, or `undefined` when no
+   * open tab carries one (defaults are stripped rather than written). Tab state is written on a
    * 300ms trailing throttle, so poll this before reloading or navigating.
    */
-  public getPersistedSortDirection(): Promise<string | undefined> {
-    return this.page.evaluate((storageKey) => {
-      const raw = window.localStorage.getItem(storageKey);
-      if (!raw) return undefined;
-      const { openTabs } = JSON.parse(raw) as {
-        openTabs?: Array<{ profileState?: { metricsState?: { sortDirection?: string } } }>;
-      };
-      return openTabs?.find((tab) => tab.profileState?.metricsState?.sortDirection != null)
-        ?.profileState?.metricsState?.sortDirection;
-    }, DISCOVER_TABS_LOCAL_STORAGE_KEY);
+  public getPersistedMetricsStateField(
+    field:
+      | 'sortDirection'
+      | 'sortField'
+      | 'counterAggregation'
+      | 'gaugeAggregation'
+      | 'histogramPercentile'
+  ): Promise<string | undefined> {
+    return this.page.evaluate(
+      ([storageKey, fieldName]) => {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) return undefined;
+        const { openTabs } = JSON.parse(raw) as {
+          openTabs?: Array<{
+            profileState?: { metricsState?: Record<string, string> };
+          }>;
+        };
+        return openTabs?.find((tab) => tab.profileState?.metricsState?.[fieldName] != null)
+          ?.profileState?.metricsState?.[fieldName];
+      },
+      [DISCOVER_TABS_LOCAL_STORAGE_KEY, field] as const
+    );
   }
 }
