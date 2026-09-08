@@ -21,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useLocation } from 'react-router-dom';
+
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
@@ -58,7 +60,10 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
   } = useServicesStep({ onContinue });
 
   const { detectAndReviewStep } = useOnboardingFlow();
+  const location = useLocation();
+  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isFormatDisabled =
+    isEditMode ||
     Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
     Object.values(detectAndReviewStep.serviceStatuses).some(
       (s) => s !== 'error' && s !== 'timeout'
@@ -82,6 +87,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
             dataFormat={dataFormat}
             onChange={setDataFormat}
             disabled={isFormatDisabled}
+            disabledReason={isEditMode ? 'edit_mode' : 'deployed'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

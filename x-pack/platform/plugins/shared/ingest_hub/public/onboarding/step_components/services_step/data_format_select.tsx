@@ -69,16 +69,20 @@ interface DataFormatSelectProps {
   dataFormat: DataFormat;
   onChange: (format: DataFormat) => void;
   disabled: boolean;
+  disabledReason?: 'deployed' | 'edit_mode';
 }
 
-export function DataFormatSelect({ dataFormat, onChange, disabled }: DataFormatSelectProps) {
-  const disabledTooltip = i18n.translate(
-    'xpack.ingestHub.servicesStep.dataFormat.disabledTooltip',
-    {
-      defaultMessage:
-        'Data format cannot be changed after services have been deployed. Start a new session to choose a different format.',
-    }
-  );
+export function DataFormatSelect({ dataFormat, onChange, disabled, disabledReason }: DataFormatSelectProps) {
+  const disabledTooltip =
+    disabledReason === 'edit_mode'
+      ? i18n.translate('xpack.ingestHub.servicesStep.dataFormat.disabledTooltip.editMode', {
+          defaultMessage:
+            'Data format cannot be changed when resuming an existing deployment. Start a new session to choose a different format.',
+        })
+      : i18n.translate('xpack.ingestHub.servicesStep.dataFormat.disabledTooltip', {
+          defaultMessage:
+            'Data format cannot be changed after services have been deployed. Start a new session to choose a different format.',
+        });
 
   const prepend = i18n.translate('xpack.ingestHub.servicesStep.dataFormat.label', {
     defaultMessage: 'Data format',
