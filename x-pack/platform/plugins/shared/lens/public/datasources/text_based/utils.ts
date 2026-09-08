@@ -66,6 +66,19 @@ export const getAllColumns = (
   });
 };
 
+/**
+ * Rebinds existing layer columns (and their dimension mappings) to the columns
+ * returned by a changed layer query, so configured dimensions survive query edits.
+ *
+ * Tie-breaking order per query column, each existing column used at most once:
+ * 1. exact match — same `fieldName` as the query column id/name
+ * 2. positional match — existing column at the same index, if the meta type matches
+ * 3. first unused existing column with the same meta type (best-effort: with
+ *    multiple same-type dimensions this can rebind a semantically unrelated
+ *    field; preserving the dimension is preferred over dropping it)
+ *
+ * Query columns with no match produce fresh columns keyed by the query column id.
+ */
 export const reconcileQueryColumns = (
   existingColumns: TextBasedLayerColumn[],
   columnsFromQuery: DatatableColumn[]
