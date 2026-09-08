@@ -647,10 +647,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         return false;
       }
 
-      if (!type) {
-        return true;
-      }
-
       if (type === 'error') {
         return /_error_/.test(code);
       }
@@ -825,7 +821,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.654',
                           parent_entity_id: 'ksuqwn8364fnbks.234',
                           command: '654_command.exe',
-                          was_killed: false,
                           code: 'ra_kill-process_descendant_error_failure',
                         },
                       ],
