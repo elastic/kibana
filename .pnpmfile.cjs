@@ -15,7 +15,7 @@ const REWRITE_RULES = {
       name: 'replace redux peer dependency with redux 4',
       matchVersion: (version) => version.startsWith('2.'),
       rewrite: (pkg) => {
-        delete pkg.peerDependencies.redux;
+        delete pkg.peerDependencies?.redux;
         pkg.dependencies = { ...pkg.dependencies, redux: 'npm:redux@4.2.1' };
       },
     },
@@ -25,7 +25,7 @@ const REWRITE_RULES = {
       name: 'replace redux peer dependency with redux 4',
       matchVersion: ALL,
       rewrite: (pkg) => {
-        delete pkg.peerDependencies.redux;
+        delete pkg.peerDependencies?.redux;
         pkg.dependencies = { ...pkg.dependencies, redux: 'npm:redux@4.2.1' };
       },
     },
@@ -38,8 +38,12 @@ function readPackage(pkg) {
   if (rewrites) {
     for (const rewriteRule of rewrites) {
       if (rewriteRule.matchVersion(pkg.version)) {
-        logger.info(`rewrite rule: ${rewriteRule.name}`);
-        rewriteRule.rewrite(pkg, logger);
+        try {
+          logger.info(`rewrite rule: ${rewriteRule.name}`);
+          rewriteRule.rewrite(pkg, logger);
+        } catch (error) {
+          logger.warn(`error applying rewrite rule: ${rewriteRule.name}`, error);
+        }
       }
     }
   }
