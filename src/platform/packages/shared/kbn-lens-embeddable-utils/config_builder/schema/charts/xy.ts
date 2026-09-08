@@ -902,7 +902,7 @@ const annotationLayerESQLSchema = z
   })
   .strict()
   .meta({
-    id: 'xyAnnotationLayerESQL',
+    id: 'visXyAnnotationLayerESQL',
     title: 'Annotation Layer (ES|QL)',
     description:
       'Layer containing manual (point and range) annotations. Query-based annotations are not supported on ES|QL charts yet.',
@@ -927,7 +927,7 @@ const referenceLineLayerESQLStaticSchema = z
   })
   .strict()
   .meta({
-    id: 'xyReferenceLineLayerESQLStatic',
+    id: 'visXyReferenceLineLayerESQLStatic',
     title: 'Reference Line Layer (ES|QL, static values)',
     description:
       'Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.',
