@@ -112,15 +112,19 @@ export const putAiIndexFeedbackAnalysis = (
 
 interface DeleteAiIndexArgs {
   aiIndexId: string;
+  deleteKnowledgeIndicators?: boolean;
+  deleteAutomations?: boolean;
 }
 
-/**
- * Deletes an AI index. Only the entry is removed — backing indices are left untouched.
- */
+
 export const deleteAiIndex = (
   http: HttpStart,
-  { aiIndexId }: DeleteAiIndexArgs
+  { aiIndexId, deleteKnowledgeIndicators = false, deleteAutomations = false }: DeleteAiIndexArgs
 ): Promise<DeleteAiIndexResponse> =>
   http.delete<DeleteAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
+    query: {
+      delete_knowledge_indicators: deleteKnowledgeIndicators,
+      delete_automations: deleteAutomations,
+    },
   });

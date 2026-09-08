@@ -8,8 +8,16 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+} from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
@@ -68,6 +76,10 @@ import {
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import {
+  deleteAutomationResources,
+  deleteBackingStoreResource,
+} from '../ai_indices/delete_resources';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
@@ -293,18 +305,41 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   throw error;
 };
 
+const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRequest): string =>
+  spaces?.spacesService.getSpaceId(request) ?? 'default';
+
+const deleteAiIndexQuerySchema = schema.object({
+  delete_knowledge_indicators: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Defaults to false.',
+    },
+  }),
+  delete_automations: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description: 'When true, also delete the attached workflow automations. Defaults to false.',
+    },
+  }),
+});
+
 export const registerAiIndexRoutes = ({
   router,
   logger,
   getAiIndexService,
   getImprovementsService,
   getActions,
+  getWorkflowsManagementApi,
+  getSpaces,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
+  getWorkflowsManagementApi: () => WorkflowsManagementApi | undefined;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
   // Create an AI index
   router.versioned
@@ -602,7 +637,9 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Delete an AI index',
       description:
-        'Deletes an AI index by id. Only the AI index entry is deleted — backing indices are left untouched and must be removed with the Delete index API if desired.',
+        'Deletes an AI index by id. The backing data stream/index (and therefore its Knowledge ' +
+        'Indicators) and the attached workflow automations are left untouched unless the ' +
+        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -614,6 +651,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: deleteAiIndexQuerySchema,
           },
         },
       },
@@ -621,11 +659,42 @@ export const registerAiIndexRoutes = ({
         const core = await ctx.core;
         const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
+        const {
+          delete_knowledge_indicators: deleteKnowledgeIndicators,
+          delete_automations: deleteAutomations,
+        } = request.query;
         try {
+          const aiIndex = await getAiIndexService().get(aiIndexId);
           await getAiIndexService().delete(aiIndexId);
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+
+          // From here on, failures are best-effort: the AI index entry is already gone (the primary
+          // goal), so any failure is reported back to the caller as a partial-failure
+          const errors: string[] = [];
+
+          if (deleteKnowledgeIndicators) {
+            const err = await deleteBackingStoreResource({
+              esClient: core.elasticsearch.client.asCurrentUser,
+              dest: aiIndex.dest,
+              logger,
+              aiIndexId,
+            });
+            if (err) errors.push(err);
+          }
+
+          if (deleteAutomations) {
+            const automationErrors = await deleteAutomationResources({
+              automations: aiIndex.automations,
+              workflowsManagementApi: getWorkflowsManagementApi(),
+              spaceId: resolveSpaceId(await getSpaces(), request),
+              request,
+              logger,
+              aiIndexId,
+            });
+            errors.push(...automationErrors);
+          }
 
           // The improvements store is keyed by AI index id, so revisions left behind would
           // resurface if an AI index were later recreated under the same id. Best-effort: the store
@@ -642,7 +711,7 @@ export const registerAiIndexRoutes = ({
               );
             });
 
-          const body: DeleteAiIndexResponse = { acknowledged: true };
+          const body: DeleteAiIndexResponse = { acknowledged: true, errors };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

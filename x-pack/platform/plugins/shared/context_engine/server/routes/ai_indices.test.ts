@@ -33,6 +33,7 @@ import {
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 
 interface RegisteredRoute {
   config: {
@@ -95,6 +96,7 @@ describe('ai indices routes', () => {
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
+  let workflowsManagementApi: jest.Mocked<Pick<WorkflowsManagementApi, 'deleteWorkflows'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -102,6 +104,8 @@ describe('ai indices routes', () => {
   let auditLogger: { log: jest.Mock };
   let esSearch: jest.Mock;
   let esGet: jest.Mock;
+  let esDeleteDataStream: jest.Mock;
+  let esDeleteIndex: jest.Mock;
   let improvementsClients: unknown[];
   const logger = loggerMock.create();
 
@@ -117,6 +121,10 @@ describe('ai indices routes', () => {
             asCurrentUser: {
               search: esSearch,
               get: esGet,
+              indices: {
+                deleteDataStream: esDeleteDataStream,
+                delete: esDeleteIndex,
+              },
             },
           },
         },
@@ -141,15 +149,20 @@ describe('ai indices routes', () => {
     auditLogger = { log: jest.fn() };
     esSearch = jest.fn();
     esGet = jest.fn();
+    esDeleteDataStream = jest.fn().mockResolvedValue({ acknowledged: true });
+    esDeleteIndex = jest.fn().mockResolvedValue({ acknowledged: true });
     aiIndexService = {
       create: jest.fn(),
       put: jest.fn(),
-      get: jest.fn(),
+      get: jest.fn().mockResolvedValue(aiIndexItem),
       list: jest.fn(),
       delete: jest.fn(),
       setFeedbackAnalysis: jest.fn(),
     };
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
+    workflowsManagementApi = {
+      deleteWorkflows: jest.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
+    };
     improvementsClients = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
@@ -183,6 +196,8 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getActions: async () => actions,
+      getWorkflowsManagementApi: () => workflowsManagementApi as unknown as WorkflowsManagementApi,
+      getSpaces: async () => undefined,
     });
   });
 

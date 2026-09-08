@@ -132,6 +132,11 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getWorkflowsManagementApi: () => setupDeps.workflowsManagement?.management,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
     });
 
     registerStepDefinitions({
