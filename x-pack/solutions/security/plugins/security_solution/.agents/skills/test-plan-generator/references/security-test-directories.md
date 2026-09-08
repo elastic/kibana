@@ -193,6 +193,7 @@ These skills describe test file conventions, runner commands, authentication pat
 | Functional (FTR) | `test/security_solution_endpoint/` |
 | Cypress E2E | `test/defend_workflows_cypress/` |
 | API integration | `test/security_solution_api_integration/test_suites/edr_workflows/` |
+| Scout UI | `plugins/security_solution/test/scout/automated_response_actions/ui/` |
 
 ### Telemetry
 
