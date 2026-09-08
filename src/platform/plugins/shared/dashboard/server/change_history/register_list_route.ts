@@ -6,31 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import * as jsondiffpatch from 'jsondiffpatch';
+import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import type { ObjectChange } from '@kbn/change-history';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
-import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import type { SetupDeps, StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
 import { getChangeHistoryClient } from './change_history_service';
-import { registerChangeDetailsRoute } from './register_details_route';
-import { registerHistoryListRoute } from './register_list_route';
 
-export function registerChangeHistoryRoute(
+export const registerHistoryListRoute = (
   services: SetupDeps,
-  core: CoreSetup<StartDeps, DashboardPluginStart>,
+  coreSetup: CoreSetup<StartDeps, DashboardPluginStart>,
   router: IRouter<RequestHandlerContext>
-) {
-  registerAddToHistoryRoute(services, router);
-  registerHistoryListRoute(services, core, router);
-  registerChangeDetailsRoute(services, router);
-}
-
-const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestHandlerContext>) => {
-  router.post(
+) => {
+  router.get(
     {
       path: '/internal/dashboard/change_history/{id}',
       validate: {
@@ -46,7 +38,25 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
               per_page: z.coerce.number().optional(),
             })
             .strict(),
-          body: getDashboardStateSchema(true),
+        },
+        response: {
+          200: {
+            body: () =>
+              z.object({
+                items: z.array(
+                  z.object({
+                    id: z.string(),
+                    timestamp: z.string(),
+                    actor: z.object({ name: z.string(), id: z.string().optional() }),
+                    action: z.string(),
+                    changes: z.record(z.string(), z.any()).optional(),
+                    metadata: z.record(z.string(), z.any()).optional(),
+                  })
+                ),
+                total: z.number(),
+              }),
+            description: 'success',
+          },
         },
       },
       security: {
@@ -73,29 +83,48 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
         return res.forbidden();
       }
 
-      const user = core.security.authc.getCurrentUser();
-      if (!user) throw new Error('User not authenticated');
-
       let client;
       try {
         client = getChangeHistoryClient();
       } catch {
         return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
       }
-      console.log('!!!!!! TYPEOF', typeof req.body);
-      const change: ObjectChange = {
-        objectType: 'dashboard',
-        objectId: req.params.id,
-        snapshot: req.body, // post-change state
-      };
       const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
-      await client.log(change, {
-        action: 'dashboard_save',
-        username: user.username,
-        userProfileId: user.profile_uid,
-        spaceId,
+
+      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id);
+
+      const [coreStart] = await coreSetup.getStartServices();
+      const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
+
+      const profiles = await coreStart.userProfile.bulkGet({ uids });
+      const fullNameByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
+
+      return res.ok({
+        body: {
+          total,
+          items: items.map((item, index) => {
+            const user = item.user;
+            const profile = user.id ? fullNameByUid.get(user.id) : undefined;
+            const previous = index > 0 ? items[index - 1] : undefined;
+            const changes = previous
+              ? jsonpatchFormatter.format(
+                  jsondiffpatch.diff(previous.object.snapshot, item.object.snapshot)
+                )
+              : undefined;
+            console.log({ changes });
+            return {
+              id: item.event.id,
+              action: item.event.action,
+              timestamp: item['@timestamp'],
+              actor: {
+                name: profile?.user.full_name || user.name,
+                id: user.id,
+              },
+              ...(changes ? { changes: { count: changes.length } } : {}),
+            };
+          }),
+        },
       });
-      return res.ok();
     }
   );
 };

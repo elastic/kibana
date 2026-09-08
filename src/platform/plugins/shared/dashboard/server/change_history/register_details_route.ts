@@ -8,45 +8,37 @@
  */
 
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import type { ObjectChange } from '@kbn/change-history';
-import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import type { SetupDeps, StartDeps } from '../plugin';
-import type { DashboardPluginStart } from '../types';
+import type { SetupDeps } from '../plugin';
 import { getChangeHistoryClient } from './change_history_service';
-import { registerChangeDetailsRoute } from './register_details_route';
-import { registerHistoryListRoute } from './register_list_route';
 
-export function registerChangeHistoryRoute(
+export const registerChangeDetailsRoute = (
   services: SetupDeps,
-  core: CoreSetup<StartDeps, DashboardPluginStart>,
   router: IRouter<RequestHandlerContext>
-) {
-  registerAddToHistoryRoute(services, router);
-  registerHistoryListRoute(services, core, router);
-  registerChangeDetailsRoute(services, router);
-}
-
-const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestHandlerContext>) => {
-  router.post(
+) => {
+  router.get(
     {
-      path: '/internal/dashboard/change_history/{id}',
+      path: '/internal/dashboard/change_history/{id}/{changeId}',
       validate: {
         request: {
           params: z
             .object({
               id: asCodeIdSchema,
+              changeId: z.string(),
             })
             .strict(),
-          query: z
-            .object({
-              page: z.coerce.number().optional(),
-              per_page: z.coerce.number().optional(),
-            })
-            .strict(),
-          body: getDashboardStateSchema(true),
+        },
+        response: {
+          200: {
+            body: () =>
+              z.object({
+                snapshot: getDashboardStateSchema(true),
+              }),
+            description: 'success',
+          },
         },
       },
       security: {
@@ -73,29 +65,28 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
         return res.forbidden();
       }
 
-      const user = core.security.authc.getCurrentUser();
-      if (!user) throw new Error('User not authenticated');
-
       let client;
       try {
         client = getChangeHistoryClient();
       } catch {
         return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
       }
-      console.log('!!!!!! TYPEOF', typeof req.body);
-      const change: ObjectChange = {
-        objectType: 'dashboard',
-        objectId: req.params.id,
-        snapshot: req.body, // post-change state
-      };
       const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
-      await client.log(change, {
-        action: 'dashboard_save',
-        username: user.username,
-        userProfileId: user.profile_uid,
-        spaceId,
+
+      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
+        additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
+        size: 1,
       });
-      return res.ok();
+      console.log({
+        total,
+        changeId: req.params.changeId,
+        item: JSON.stringify(items[0]?.object.snapshot, null, 2),
+      });
+      return res.ok({
+        body: {
+          snapshot: items[0]?.object.snapshot,
+        },
+      });
     }
   );
 };

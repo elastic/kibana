@@ -81,7 +81,7 @@ export const getHistoryForWorkflow = async (
   });
 
   const userProfilesById = await resolveUserProfiles(deps.userProfileService, result.items);
-
+  console.log({ result });
   return {
     page,
     perPage,
