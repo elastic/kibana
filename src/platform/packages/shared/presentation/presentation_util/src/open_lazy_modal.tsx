@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
+import { EuiModal } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
@@ -32,7 +33,7 @@ interface OpenLazyModalParams {
  * - Closing the modal automatically if content resolves to `null` or `undefined`.
  *
  * @param params - Configuration object.
- * @param params.core - The `CoreStart` contract, used for overlays.
+ * @param params.core - The `CoreStart` contract, used for rendering context.
  * @param params.loadContent - Async function that loads the modal content. Must return a valid React element.
  *                             If it resolves to `null` or `undefined`, the modal will close automatically.
  * @param params.onClose - Optional callback invoked when the modal is closed.
@@ -43,13 +44,18 @@ export const openLazyModal = ({
   onClose: onCloseCallback,
 }: OpenLazyModalParams): void => {
   const closeModal = () => {
-    overlayRef?.close();
+    unmount?.();
     onCloseCallback?.();
   };
 
-  const overlayRef = core.overlays.openModal(
-    toMountPoint(<LazyModal loadContent={loadContent} closeModal={closeModal} />, core)
+  const mount = toMountPoint(
+    <EuiModal onClose={closeModal}>
+      <LazyModal loadContent={loadContent} closeModal={closeModal} />
+    </EuiModal>,
+    core
   );
+
+  const unmount = mount(document.createElement('div'));
 };
 
 function LazyModal({
