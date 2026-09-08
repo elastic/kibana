@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/workflows-ui'
   - '@kbn/scout-search'
+  - '@kbn/announcement-banner'
 tags:
   - plugin
   - prod

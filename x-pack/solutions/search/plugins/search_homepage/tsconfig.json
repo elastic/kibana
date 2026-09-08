@@ -48,6 +48,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/workflows-ui",
     "@kbn/scout-search",
+    "@kbn/announcement-banner",
   ],
   "exclude": [
     "target/**/*"
