@@ -77,6 +77,32 @@ describe('dataset_wizard_step_validation', () => {
     ]);
   });
 
+  it('validates schema mapping settings on the schema mappings step', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+    };
+
+    expect(getSchemaMappingsStepFields(values)).toEqual([
+      'settings.schema_sample_size',
+      'settings.schema_resolution',
+    ]);
+  });
+
+  it('validates schema mapping settings on the schema mappings step in flow 3 9.6', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+    };
+
+    expect(
+      getWizardStepFields(SCHEMA_MAPPINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).toEqual(['settings.schema_sample_size', 'settings.schema_resolution']);
+    expect(
+      getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).not.toEqual(expect.arrayContaining(['settings.schema_sample_size']));
+  });
+
   it('includes logistics and settings fields for review validation', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
@@ -163,7 +189,6 @@ describe('dataset_wizard_step_validation', () => {
       'name',
       'resource',
       'settings.partition_detection',
-      'settings.partition_path',
       'settings.format',
     ]);
     expect(

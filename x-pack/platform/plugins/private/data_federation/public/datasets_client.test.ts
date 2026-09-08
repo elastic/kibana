@@ -97,6 +97,35 @@ describe('DatasetsClient', () => {
       });
     });
 
+    it('omits parquet UI settings Elasticsearch does not accept', async () => {
+      const http = createHttpMock();
+      const client = new DatasetsClient(http as unknown as HttpStart);
+
+      const data: DataSetWithName = {
+        name: 'set1',
+        data_source: 'ds',
+        resource: 'r',
+        description: '',
+        settings: {
+          format: 'parquet',
+          optimized_reader: true,
+          late_materialization: true,
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(client.add(data)).resolves.toBeUndefined();
+      expect(http.put).toHaveBeenCalledWith(getDataSetByIdApiPath('set1'), {
+        body: JSON.stringify({
+          data_source: 'ds',
+          resource: 'r',
+          description: '',
+          settings: { format: 'parquet' },
+        }),
+      });
+    });
+
     it('omits settings entirely when undefined', async () => {
       const http = createHttpMock();
       const client = new DatasetsClient(http as unknown as HttpStart);

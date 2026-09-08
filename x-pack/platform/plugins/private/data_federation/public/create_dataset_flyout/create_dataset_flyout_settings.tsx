@@ -25,6 +25,8 @@ import {
   validateMaxErrorRatio,
   validateMaxErrors,
   validatePartitionPath,
+  SCHEMA_SAMPLE_SIZE_MAX,
+  SCHEMA_SAMPLE_SIZE_MIN,
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
@@ -425,7 +427,8 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         <EuiFieldNumber
           data-test-subj="createDatasetFlyoutSettingsSchemaSampleSize"
           fullWidth
-          min={1}
+          min={SCHEMA_SAMPLE_SIZE_MIN}
+          max={SCHEMA_SAMPLE_SIZE_MAX}
           step={1}
           isInvalid={Boolean(schemaSampleSizeState.error)}
           value={schemaSampleSizeField.value}
@@ -594,7 +597,8 @@ function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues>
         <EuiFieldNumber
           data-test-subj="createDatasetFlyoutSettingsSchemaSampleSize"
           fullWidth
-          min={1}
+          min={SCHEMA_SAMPLE_SIZE_MIN}
+          max={SCHEMA_SAMPLE_SIZE_MAX}
           step={1}
           isInvalid={Boolean(schemaSampleSizeState.error)}
           value={schemaSampleSizeField.value}

@@ -243,12 +243,12 @@ export const createDatasetFlyoutStrings = {
 
   settingsSchemaSampleSizeHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizeHelp', {
-      defaultMessage: 'Number of rows to sample when inferring schema.',
+      defaultMessage: 'Number of rows to sample when inferring schema, from 1 to 20,000.',
     }),
 
   settingsSchemaSampleSizeInvalid: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizeInvalid', {
-      defaultMessage: 'Must be a positive integer.',
+      defaultMessage: 'Must be an integer between 1 and 20,000.',
     }),
 
   settingsPartitionDetectionLabel: () =>

@@ -74,9 +74,32 @@ describe('settings_custom_json_utils', () => {
       });
       expect(merged?.escape).toBe('\\');
     });
+
+    it('drops parquet settings Elasticsearch does not accept', () => {
+      expect(
+        mergeCustomJsonIntoDatasetSettings(
+          { format: 'parquet' },
+          '{ "optimized_reader": true, "late_materialization": true }'
+        )
+      ).toEqual({ format: 'parquet' });
+    });
   });
 
   describe('applyCustomJsonToFormSettings', () => {
+    it('keeps parquet UI settings on the form when json includes them', () => {
+      const settings = applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet');
+
+      expect(
+        applyCustomJsonToFormSettings(
+          { ...settings, optimized_reader: 'false', late_materialization: 'false' },
+          '{ "optimized_reader": true, "late_materialization": true }'
+        )
+      ).toMatchObject({
+        optimized_reader: 'true',
+        late_materialization: 'true',
+      });
+    });
+
     it('overlays json partition detection onto form settings', () => {
       const settings = applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet');
 

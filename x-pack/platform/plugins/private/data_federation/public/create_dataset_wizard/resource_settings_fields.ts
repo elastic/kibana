@@ -7,7 +7,10 @@
 
 import { pick } from 'lodash';
 
-import type { CreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
+import type {
+  CreateDatasetSettingsFormValues,
+  DatasetPartitionDetectionFormValue,
+} from '../create_dataset_flyout/create_dataset_flyout_form_state';
 import type { DatasetSettingsFieldId } from '../create_dataset_flyout/dataset_settings_visibility';
 import {
   isDatasetWizardFlow396,
@@ -27,6 +30,18 @@ export const getResourceOwnedSettingsFieldIds = (
   flowVariant: DatasetWizardFlowVariant
 ): readonly DatasetSettingsFieldId[] =>
   isDatasetWizardFlow396(flowVariant) ? RESOURCE_OWNED_SETTINGS_FIELD_IDS : [];
+
+/**
+ * Flow 3 9.6 only asks for a path when detection is Template. Ownership stays
+ * both fields so a leftover path survives switching away from Template.
+ */
+export const getVisibleResourceOwnedSettingsFieldIds = (
+  flowVariant: DatasetWizardFlowVariant,
+  partitionDetection: DatasetPartitionDetectionFormValue
+): readonly DatasetSettingsFieldId[] =>
+  getResourceOwnedSettingsFieldIds(flowVariant).filter(
+    (fieldId) => fieldId !== 'partition_path' || partitionDetection === 'template'
+  );
 
 /**
  * Reapplies the values owned by the resource step, which the format settings would otherwise

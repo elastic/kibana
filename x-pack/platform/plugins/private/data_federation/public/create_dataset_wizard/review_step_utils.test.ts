@@ -51,8 +51,6 @@ describe('review_step_utils', () => {
         partition_detection: 'auto',
         schema_resolution: 'union_by_name',
         error_mode: 'fail_fast',
-        optimized_reader: true,
-        late_materialization: true,
       },
     });
   });
@@ -70,6 +68,24 @@ describe('review_step_utils', () => {
     expect(buildDatasetPayloadFromWizardValues(values).settings).toMatchObject({
       format: 'csv',
       quote: '|',
+    });
+  });
+
+  it('omits parquet UI settings Elasticsearch does not accept from the payload', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+      settings_custom_json: '{ "optimized_reader": true, "late_materialization": true }',
+    };
+
+    expect(buildDatasetPayloadFromWizardValues(values).settings).toEqual({
+      format: 'parquet',
+      partition_detection: 'auto',
+      schema_resolution: 'union_by_name',
+      error_mode: 'fail_fast',
     });
   });
 
@@ -250,11 +266,92 @@ describe('review_step_utils', () => {
     expect(logisticsRows).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ label: 'Partition detection', displayValue: 'Hive' }),
+      ])
+    );
+    expect(logisticsRows.map(({ label }) => label)).not.toContain('Partition path');
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition detection');
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition path');
+  });
+
+  it('summarizes a partition path with the resource only when detection is template', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: {
+        ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+        partition_detection: 'template' as const,
+        partition_path: 'year/month',
+      },
+    };
+
+    expect(
+      getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Partition detection', displayValue: 'Template' }),
         expect.objectContaining({ label: 'Partition path', displayValue: 'year/month' }),
       ])
     );
-    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition detection');
-    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition path');
+  });
+
+  it('hides an empty template partition path on the flow 3 9.6 review', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: {
+        ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+        partition_detection: 'template' as const,
+        partition_path: '',
+      },
+    };
+
+    expect(
+      getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3_9_6).map(
+        ({ label }) => label
+      )
+    ).not.toContain('Partition path');
+  });
+
+  it('sends the default partition path when template detection has none', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: {
+        ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+        partition_detection: 'template' as const,
+        partition_path: '',
+      },
+    };
+
+    expect(buildDatasetPayloadFromWizardValues(values).settings).toMatchObject({
+      partition_detection: 'template',
+      partition_path: '{year}/{month}/{day}',
+    });
+  });
+
+  it('keeps an explicit template partition path on the payload', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: {
+        ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+        partition_detection: 'template' as const,
+        partition_path: 'year={year}',
+      },
+    };
+
+    expect(buildDatasetPayloadFromWizardValues(values).settings).toMatchObject({
+      partition_detection: 'template',
+      partition_path: 'year={year}',
+    });
   });
 
   it('summarizes the partition settings with the format settings in flow 3', () => {
@@ -271,7 +368,9 @@ describe('review_step_utils', () => {
     ).not.toContain('Partition detection');
     expect(
       getReviewSettingsRows(settings, 's3://obs-logs-prod/**/*.parquet').map(({ label }) => label)
-    ).toContain('Partition detection');
+    ).toEqual(
+      expect.arrayContaining(['Partition detection', 'Optimized reader', 'Late materialization'])
+    );
   });
 
   it('marks format defaults and modified settings in summary rows', () => {

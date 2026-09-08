@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { SCHEMA_SAMPLE_SIZE_MAX, SCHEMA_SAMPLE_SIZE_MIN } from '../../../common';
+
 const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 
 /**
@@ -47,7 +49,9 @@ export const datasetSchema = schema.object({
       partition_path: optionalString,
       hive_partitioning: schema.maybe(schema.boolean()),
       // CSV/TSV + NDJSON
-      schema_sample_size: schema.maybe(schema.number({ min: 1 })),
+      schema_sample_size: schema.maybe(
+        schema.number({ min: SCHEMA_SAMPLE_SIZE_MIN, max: SCHEMA_SAMPLE_SIZE_MAX })
+      ),
       // CSV/TSV commonly changed
       delimiter: optionalString,
       mode: schema.maybe(
@@ -78,7 +82,8 @@ export const datasetSchema = schema.object({
       max_field_size: schema.maybe(schema.number({ min: 0 })),
       // NDJSON advanced
       segment_size: optionalString,
-      // Parquet advanced
+      // Parquet UI-only; accepted here so older clients do not fail Kibana
+      // validation, then stripped before the Elasticsearch PUT.
       optimized_reader: schema.maybe(schema.boolean()),
       late_materialization: schema.maybe(schema.boolean()),
       // API-only (not shown in the UI)

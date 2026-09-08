@@ -13,6 +13,7 @@ import type { DataSetWithName, Dataset } from '../common';
 import {
   DATA_SETS_LIST_ROUTE_PATH,
   getDataSetByIdApiPath,
+  omitDatasetFieldsNotSentToEs,
   validateIndexNameRules,
 } from '../common';
 
@@ -61,15 +62,17 @@ export class DatasetsClient {
     }
 
     const withoutName = omit(dataSet, 'name');
-    const body = omitBy(
-      {
-        ...withoutName,
-        settings: dataSet.settings
-          ? omitEmptySettingsFields(dataSet.settings as object)
-          : undefined,
-      },
-      isNil
-    ) as unknown as Dataset;
+    const body = omitDatasetFieldsNotSentToEs(
+      omitBy(
+        {
+          ...withoutName,
+          settings: dataSet.settings
+            ? omitEmptySettingsFields(dataSet.settings as object)
+            : undefined,
+        },
+        isNil
+      ) as unknown as Dataset
+    );
     await this.http.put(getDataSetByIdApiPath(nameTrimmed), {
       body: JSON.stringify(body),
     });

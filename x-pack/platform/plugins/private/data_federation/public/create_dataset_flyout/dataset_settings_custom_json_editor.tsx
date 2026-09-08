@@ -21,11 +21,9 @@ import type {
 import {
   DATASET_SETTINGS_CUSTOM_JSON_SCHEMA_URI,
   getDatasetSettingsCustomJsonSchema,
+  validateDatasetSettingsCustomJson,
 } from './settings_custom_json_schema';
-import {
-  EMPTY_SETTINGS_CUSTOM_JSON,
-  validateSettingsCustomJson,
-} from './settings_custom_json_utils';
+import { EMPTY_SETTINGS_CUSTOM_JSON } from './settings_custom_json_utils';
 
 const CUSTOM_JSON_EDITOR_MAX_LINES = 14;
 const CUSTOM_JSON_EDITOR_MIN_LINES = 3;
@@ -85,7 +83,8 @@ export const DatasetSettingsCustomJsonEditor: FunctionComponent<
     name: 'settings_custom_json',
     control,
     rules: {
-      validate: validateSettingsCustomJson,
+      validate: (value, formValues) =>
+        validateDatasetSettingsCustomJson(String(value ?? ''), formValues),
     },
   });
 

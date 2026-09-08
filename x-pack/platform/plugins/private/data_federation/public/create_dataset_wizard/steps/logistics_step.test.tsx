@@ -37,17 +37,23 @@ const TestHarness = ({
   flowVariant,
   format = '',
   resource = '',
+  partitionDetection = '',
 }: {
   flowVariant: DatasetWizardFlowVariant;
   format?: string;
   resource?: string;
+  partitionDetection?: string;
 }) => {
   const syncedResourceRef = useRef<string | null>(null);
   const { control, getValues, setValue } = useForm<DatasetWizardFormValues>({
     defaultValues: {
       ...emptyDatasetWizardFormValues(),
       resource,
-      settings: { ...emptyDatasetWizardFormValues().settings, format },
+      settings: {
+        ...emptyDatasetWizardFormValues().settings,
+        format,
+        partition_detection: partitionDetection,
+      },
     } as DatasetWizardFormValues,
   });
 
@@ -73,18 +79,30 @@ describe('LogisticsStep', () => {
     render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
     expect(screen.getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
+    expect(screen.queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
+  });
+
+  it('asks for a partition path only when detection is template in flow 3 9.6', () => {
+    render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+    );
+
     expect(screen.getByTestId('datasetWizardSettingsPartitionPath')).toBeInTheDocument();
   });
 
   it('marks the partition settings as optional', () => {
-    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+    render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+    );
 
     expect(screen.getByText('Partition detection (optional)')).toBeInTheDocument();
     expect(screen.getByText('Partition path (optional)')).toBeInTheDocument();
   });
 
   it('renders the partition settings on one row in flow 3 9.6', () => {
-    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+    render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+    );
 
     const partitionDetection = screen.getByTestId('datasetWizardSettingsPartitionDetection');
     const partitionPath = screen.getByTestId('datasetWizardSettingsPartitionPath');
@@ -95,7 +113,9 @@ describe('LogisticsStep', () => {
   });
 
   it('sizes the partition settings like the fields around them', () => {
-    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+    render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+    );
 
     ['datasetWizardSettingsPartitionDetection', 'datasetWizardSettingsPartitionPath'].forEach(
       (testSubj) => {
@@ -136,7 +156,7 @@ describe('LogisticsStep', () => {
       render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} format={format} />);
 
       expect(screen.getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
-      expect(screen.getByTestId('datasetWizardSettingsPartitionPath')).toBeInTheDocument();
+      expect(screen.queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
     }
   );
 

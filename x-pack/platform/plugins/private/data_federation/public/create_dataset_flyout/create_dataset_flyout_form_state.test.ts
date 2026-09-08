@@ -8,7 +8,9 @@
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
+  omitDatasetSettingsNotSentToEs,
   validatePartitionPath,
+  validateSchemaSampleSize,
 } from './create_dataset_flyout_form_state';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
@@ -223,6 +225,17 @@ describe('create_dataset_flyout_form_state', () => {
       });
     });
 
+    it('omits parquet UI settings Elasticsearch does not accept', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'parquet',
+          optimized_reader: 'true',
+          late_materialization: 'true',
+        })
+      ).toEqual({ format: 'parquet' });
+    });
+
     it('excludes CSV-only fields when format is parquet', () => {
       const result = buildDatasetSettingsFromFormValues({
         ...empty(),
@@ -248,6 +261,18 @@ describe('create_dataset_flyout_form_state', () => {
     });
   });
 
+  describe('omitDatasetSettingsNotSentToEs', () => {
+    it('drops optimized_reader and late_materialization', () => {
+      expect(
+        omitDatasetSettingsNotSentToEs({
+          format: 'parquet',
+          optimized_reader: true,
+          late_materialization: true,
+        })
+      ).toEqual({ format: 'parquet' });
+    });
+  });
+
   describe('validatePartitionPath', () => {
     it('requires a path when partition detection is template', () => {
       expect(validatePartitionPath('', 'template')).toEqual(expect.any(String));
@@ -266,6 +291,28 @@ describe('create_dataset_flyout_form_state', () => {
       expect(validatePartitionPath('', 'auto')).toBe(true);
       expect(validatePartitionPath('', 'hive')).toBe(true);
       expect(validatePartitionPath('', 'none')).toBe(true);
+    });
+  });
+
+  describe('validateSchemaSampleSize', () => {
+    it('accepts an empty value', () => {
+      expect(validateSchemaSampleSize('')).toBe(true);
+      expect(validateSchemaSampleSize('  ')).toBe(true);
+    });
+
+    it('accepts integers in the Elasticsearch range', () => {
+      expect(validateSchemaSampleSize('1')).toBe(true);
+      expect(validateSchemaSampleSize('20000')).toBe(true);
+    });
+
+    it('rejects values above 20000', () => {
+      expect(validateSchemaSampleSize('20001')).toEqual(expect.any(String));
+      expect(validateSchemaSampleSize('100000')).toEqual(expect.any(String));
+    });
+
+    it('rejects non-integers and values below 1', () => {
+      expect(validateSchemaSampleSize('0')).toEqual(expect.any(String));
+      expect(validateSchemaSampleSize('1.5')).toEqual(expect.any(String));
     });
   });
 });

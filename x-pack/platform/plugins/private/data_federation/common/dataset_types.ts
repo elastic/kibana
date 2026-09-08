@@ -20,6 +20,10 @@ export type DataSetWithName = Dataset & { name: string };
 
 export type DatasetSettings = DatasetSettingsFile;
 
+/** Elasticsearch accepts schema_sample_size only in this inclusive range. */
+export const SCHEMA_SAMPLE_SIZE_MIN = 1;
+export const SCHEMA_SAMPLE_SIZE_MAX = 20000;
+
 export interface DatasetSettingsFile {
   format?: 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 

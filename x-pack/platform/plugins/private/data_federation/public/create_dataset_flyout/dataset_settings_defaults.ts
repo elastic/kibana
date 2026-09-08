@@ -35,8 +35,8 @@ const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
 /**
  * Mirrors the defaults documented for the dataset settings API, so a field left
  * untouched can be omitted from the request without changing how the file reads.
- * schema_sample_size, optimized_reader, and late_materialization are undocumented
- * and remain our own choices.
+ * schema_sample_size is our own default. optimized_reader and late_materialization
+ * are UI-only; Elasticsearch rejects them, so they are omitted from requests.
  */
 const FORMAT_DEFAULTS: Partial<
   Record<Exclude<DatasetFormatFormValue, ''>, Partial<CreateDatasetSettingsFormValues>>

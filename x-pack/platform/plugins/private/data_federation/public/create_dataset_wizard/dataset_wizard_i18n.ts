@@ -443,6 +443,60 @@ export const datasetWizardStrings = {
       defaultMessage: 'Custom settings must be a JSON object.',
     }),
 
+  settingsCustomJsonUnknownPropertyErrorMessage: (key: string) =>
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.settingsCustomJsonUnknownPropertyErrorMessage',
+      {
+        defaultMessage: '{key} is not a recognized dataset setting.',
+        values: { key },
+      }
+    ),
+
+  settingsCustomJsonUnsupportedForFormatErrorMessage: (key: string) =>
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.settingsCustomJsonUnsupportedForFormatErrorMessage',
+      {
+        defaultMessage: '{key} is not valid for this file format.',
+        values: { key },
+      }
+    ),
+
+  settingsCustomJsonInvalidTypeErrorMessage: (key: string, type: string) =>
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidTypeErrorMessage',
+      {
+        defaultMessage: '{key} must be a {type}.',
+        values: { key, type },
+      }
+    ),
+
+  settingsCustomJsonInvalidEnumErrorMessage: (key: string, allowed: string) =>
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidEnumErrorMessage',
+      {
+        defaultMessage: '{key} must be one of {allowed}.',
+        values: { key, allowed },
+      }
+    ),
+
+  settingsCustomJsonInvalidMinimumErrorMessage: (key: string, min: number) =>
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidMinimumErrorMessage',
+      {
+        defaultMessage: '{key} must be at least {min}.',
+        values: { key, min },
+      }
+    ),
+
+  settingsCustomJsonInvalidMaximumErrorMessage: (key: string, max: number) =>
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidMaximumErrorMessage',
+      {
+        defaultMessage: '{key} must be at most {max}.',
+        values: { key, max },
+      }
+    ),
+
   delimiterOptionComma: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.delimiterOptionComma', {
       defaultMessage: 'Comma (,)',

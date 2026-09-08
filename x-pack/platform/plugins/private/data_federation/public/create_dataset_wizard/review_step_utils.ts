@@ -39,7 +39,7 @@ import {
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
 import { inferFormatFromResource } from './infer_format_from_resource';
-import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
+import { getVisibleResourceOwnedSettingsFieldIds } from './resource_settings_fields';
 
 export type ReviewSettingBadge = 'default' | 'modified';
 
@@ -60,13 +60,27 @@ const omitEmptySettingsFields = (settings: object): Record<string, unknown> =>
     return false;
   });
 
+const DEFAULT_TEMPLATE_PARTITION_PATH = '{year}/{month}/{day}';
+
+const withTemplatePartitionPathDefault = (
+  settings: ReturnType<typeof mergeCustomJsonIntoDatasetSettings>
+): ReturnType<typeof mergeCustomJsonIntoDatasetSettings> => {
+  if (!settings || settings.partition_detection !== 'template' || settings.partition_path) {
+    return settings;
+  }
+
+  return { ...settings, partition_path: DEFAULT_TEMPLATE_PARTITION_PATH };
+};
+
 export const buildDatasetPayloadFromWizardValues = (
   values: DatasetWizardFormValues
 ): DataSetWithName => {
   const desc = values.description?.trim();
-  const settings = mergeCustomJsonIntoDatasetSettings(
-    buildDatasetSettingsFromFormValues(values.settings),
-    values.settings_custom_json
+  const settings = withTemplatePartitionPathDefault(
+    mergeCustomJsonIntoDatasetSettings(
+      buildDatasetSettingsFromFormValues(values.settings),
+      values.settings_custom_json
+    )
   );
 
   return {
@@ -177,7 +191,10 @@ export const getReviewLogisticsRows = (
 
   // Settings asked for beside the resource are summarized with it rather than with the format
   // settings, so the summary follows the steps.
-  for (const fieldId of getResourceOwnedSettingsFieldIds(flowVariant)) {
+  for (const fieldId of getVisibleResourceOwnedSettingsFieldIds(
+    flowVariant,
+    values.settings.partition_detection
+  )) {
     const value = values.settings[fieldId];
     if (!value || value.trim() === '') {
       continue;

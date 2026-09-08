@@ -6,6 +6,7 @@
  */
 
 import type { DatasetSettings } from '../../common/dataset_types';
+import { omitDatasetSettingsNotSentToEs } from '../../common';
 import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
 import type { CreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
 
@@ -149,15 +150,15 @@ export const mergeCustomJsonIntoDatasetSettings = (
   const parsed = parseSettingsCustomJson(customJson);
 
   if (!parsed) {
-    return base;
+    return omitDatasetSettingsNotSentToEs(base);
   }
 
   if (!base) {
-    return parsed as DatasetSettings;
+    return omitDatasetSettingsNotSentToEs(parsed as DatasetSettings);
   }
 
-  return {
+  return omitDatasetSettingsNotSentToEs({
     ...base,
     ...parsed,
-  };
+  });
 };

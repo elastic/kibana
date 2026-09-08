@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { DataSetWithName, Dataset } from '../common';
+import { omitDatasetFieldsNotSentToEs, type DataSetWithName, type Dataset } from '../common';
 
 const path = '/_query/dataset';
 /**
@@ -46,7 +46,7 @@ export class DataSetsClient {
     return this.esClient.transport.request({
       method: 'PUT',
       path: `${path}/${encoded}`,
-      body,
+      body: omitDatasetFieldsNotSentToEs(body),
     });
   }
 

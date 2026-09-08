@@ -61,7 +61,12 @@ export function getDataSetByIdApiPath(id: string): string {
   return DATA_SET_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
 }
 
-export type { Dataset, DataSetWithName, DatasetSettings } from './dataset_types';
+export type { Dataset, DataSetWithName, DatasetSettings, DatasetSettingsFile } from './dataset_types';
+export { SCHEMA_SAMPLE_SIZE_MAX, SCHEMA_SAMPLE_SIZE_MIN } from './dataset_types';
+export {
+  omitDatasetFieldsNotSentToEs,
+  omitDatasetSettingsNotSentToEs,
+} from './omit_dataset_settings_not_sent_to_es';
 
 export const PLUGIN_NAME = i18n.translate('xpack.dataFederation.pluginName', {
   defaultMessage: 'ES|QL Data Federation',

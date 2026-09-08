@@ -15,12 +15,19 @@ import type {
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
+  SCHEMA_SAMPLE_SIZE_MAX,
+  SCHEMA_SAMPLE_SIZE_MIN,
+  validatePartitionPath,
 } from './create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
 import { getDefaultSettingsForFormat } from './dataset_settings_defaults';
 import type { DatasetSettings } from '../../common/dataset_types';
 import {
   DATASET_SETTINGS_CUSTOM_JSON_API_KEYS,
+  mergeCustomJsonIntoDatasetSettings,
+  stripJsonComments,
+  validateSettingsCustomJson,
   type DatasetSettingsCustomJsonApiKey,
 } from './settings_custom_json_utils';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
@@ -101,7 +108,8 @@ const CUSTOM_JSON_PROPERTY_SCHEMAS: Record<DatasetSettingsCustomJsonApiKey, JSON
     },
     schema_sample_size: {
       type: 'integer',
-      minimum: 1,
+      minimum: SCHEMA_SAMPLE_SIZE_MIN,
+      maximum: SCHEMA_SAMPLE_SIZE_MAX,
     },
     delimiter: {
       type: 'string',
@@ -204,6 +212,152 @@ export const getDatasetSettingsCustomJsonSchema = (
     additionalProperties: false,
     properties,
   };
+};
+
+const isJsonSchemaObject = (
+  definition: JSONSchema7Definition | undefined
+): definition is JSONSchema7 => typeof definition === 'object' && definition !== null;
+
+const validateCustomJsonPropertyValue = (
+  key: string,
+  value: unknown,
+  definition: JSONSchema7
+): true | string => {
+  if (definition.type === 'string') {
+    if (typeof value !== 'string') {
+      return datasetWizardStrings.settingsCustomJsonInvalidTypeErrorMessage(key, 'string');
+    }
+
+    if (definition.enum && !definition.enum.includes(value)) {
+      return datasetWizardStrings.settingsCustomJsonInvalidEnumErrorMessage(
+        key,
+        definition.enum.map(String).join(', ')
+      );
+    }
+
+    return true;
+  }
+
+  if (definition.type === 'boolean') {
+    return typeof value === 'boolean'
+      ? true
+      : datasetWizardStrings.settingsCustomJsonInvalidTypeErrorMessage(key, 'boolean');
+  }
+
+  if (definition.type === 'integer' || definition.type === 'number') {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+      return datasetWizardStrings.settingsCustomJsonInvalidTypeErrorMessage(
+        key,
+        definition.type === 'integer' ? 'integer' : 'number'
+      );
+    }
+
+    if (definition.type === 'integer' && !Number.isInteger(value)) {
+      return datasetWizardStrings.settingsCustomJsonInvalidTypeErrorMessage(key, 'integer');
+    }
+
+    if (definition.minimum !== undefined && value < definition.minimum) {
+      return datasetWizardStrings.settingsCustomJsonInvalidMinimumErrorMessage(
+        key,
+        definition.minimum
+      );
+    }
+
+    if (definition.maximum !== undefined && value > definition.maximum) {
+      return datasetWizardStrings.settingsCustomJsonInvalidMaximumErrorMessage(
+        key,
+        definition.maximum
+      );
+    }
+
+    return true;
+  }
+
+  return true;
+};
+
+const validateCustomJsonObject = (
+  parsed: Record<string, unknown>,
+  format: DatasetFormatFormValue,
+  errorMode: DatasetErrorModeFormValue
+): true | string => {
+  const knownKeys = new Set<string>(DATASET_SETTINGS_CUSTOM_JSON_API_KEYS);
+  const visibleKeys =
+    format === '' ? knownKeys : new Set(getVisibleCustomJsonApiKeys(format, errorMode));
+  const propertySchemas =
+    format === ''
+      ? CUSTOM_JSON_PROPERTY_SCHEMAS
+      : getDatasetSettingsCustomJsonSchema(format, errorMode).properties ?? {};
+
+  for (const [key, value] of Object.entries(parsed)) {
+    if (!knownKeys.has(key)) {
+      return datasetWizardStrings.settingsCustomJsonUnknownPropertyErrorMessage(key);
+    }
+
+    if (!visibleKeys.has(key)) {
+      return datasetWizardStrings.settingsCustomJsonUnsupportedForFormatErrorMessage(key);
+    }
+
+    const definition = isJsonSchemaObject(propertySchemas[key])
+      ? propertySchemas[key]
+      : CUSTOM_JSON_PROPERTY_SCHEMAS[key as DatasetSettingsCustomJsonApiKey];
+
+    if (!isJsonSchemaObject(definition)) {
+      continue;
+    }
+
+    const propertyResult = validateCustomJsonPropertyValue(key, value, definition);
+    if (propertyResult !== true) {
+      return propertyResult;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Syntax, types, and partition-path pairing for custom settings JSON, so Next
+ * cannot send a payload Elasticsearch or the Kibana schema would reject.
+ */
+export const validateDatasetSettingsCustomJson = (
+  value: string,
+  formValues?: { settings: CreateDatasetSettingsFormValues }
+): true | string => {
+  const syntaxResult = validateSettingsCustomJson(value);
+  if (syntaxResult !== true) {
+    return syntaxResult;
+  }
+
+  const stripped = stripJsonComments(value?.trim() ?? '');
+  if (!stripped || stripped === '{}') {
+    return true;
+  }
+
+  const parsed = JSON.parse(stripped) as Record<string, unknown>;
+  const format = formValues?.settings.format ?? '';
+  const errorMode = formValues?.settings.error_mode ?? '';
+  const objectResult = validateCustomJsonObject(parsed, format, errorMode);
+  if (objectResult !== true) {
+    return objectResult;
+  }
+
+  if (!formValues) {
+    return true;
+  }
+
+  const merged = mergeCustomJsonIntoDatasetSettings(
+    buildDatasetSettingsFromFormValues(formValues.settings),
+    value
+  );
+  const partitionPath = merged?.partition_path ?? '';
+
+  // Template with an empty path is filled at submit; only a leftover path
+  // under another detection mode is rejected here.
+  if (!partitionPath.trim()) {
+    return true;
+  }
+
+  return validatePartitionPath(partitionPath, merged?.partition_detection ?? '');
 };
 
 const CUSTOM_JSON_FALLBACK_DEFAULTS: Partial<Record<DatasetSettingsCustomJsonApiKey, unknown>> = {

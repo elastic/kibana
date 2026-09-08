@@ -33,6 +33,7 @@ import {
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
 import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
+import { getSchemaMappingSettingsFieldIds } from './schema_mapping_settings_fields';
 import {
   getWizardStepPosition,
   getWizardSteps,
@@ -64,7 +65,11 @@ const getLogisticsStepFields = (
   ...(isDatasetWizardFlow3(flowVariant) || !hasDatasetWizardRegionField(flowVariant)
     ? LOGISTICS_STEP_FIELDS_WITHOUT_REGION
     : LOGISTICS_STEP_FIELDS),
-  ...toSettingsFieldPaths(getResourceOwnedSettingsFieldIds(flowVariant)),
+  ...toSettingsFieldPaths(
+    getResourceOwnedSettingsFieldIds(flowVariant).filter(
+      (fieldId) => !(isDatasetWizardFlow396(flowVariant) && fieldId === 'partition_path')
+    )
+  ),
   ...(isDatasetWizardFlow396(flowVariant) ? (['settings.format'] as const) : []),
 ];
 
@@ -93,10 +98,14 @@ export const getAdditionalSettingsStepFields = (
   }
 
   const resourceOwnedFieldIds = getResourceOwnedSettingsFieldIds(flowVariant);
+  const schemaMappingFieldIds = isDatasetWizardFlow396(flowVariant)
+    ? new Set(getSchemaMappingSettingsFieldIds(format, errorMode, { showForAllFormats: true }))
+    : new Set<DatasetSettingsFieldId>();
   const fields = toSettingsFieldPaths(
     DATASET_SETTINGS_FIELD_IDS.filter(
       (fieldId) =>
         !resourceOwnedFieldIds.includes(fieldId) &&
+        !schemaMappingFieldIds.has(fieldId) &&
         isFieldVisibleForFormat(fieldId, format) &&
         isFieldVisibleForErrorMode(fieldId, errorMode)
     )
@@ -112,13 +121,25 @@ export const getAdditionalSettingsStepFields = (
 };
 
 export const getSchemaMappingsStepFields = (
-  values: DatasetWizardFormValues
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): Array<FieldPath<DatasetWizardFormValues>> => {
-  if (values.schema_mapping_mode !== 'aws_glue_table') {
-    return [];
+  const glueFields: Array<FieldPath<DatasetWizardFormValues>> =
+    values.schema_mapping_mode === 'aws_glue_table' ? GLUE_STEP_FIELDS : [];
+  const { format, error_mode: errorMode } = values.settings;
+
+  if (!isKnownFormat(format)) {
+    return glueFields;
   }
 
-  return GLUE_STEP_FIELDS;
+  return [
+    ...glueFields,
+    ...toSettingsFieldPaths(
+      getSchemaMappingSettingsFieldIds(format, errorMode, {
+        showForAllFormats: isDatasetWizardFlow396(flowVariant),
+      })
+    ),
+  ];
 };
 
 export const getWizardStepFields = (
@@ -138,20 +159,20 @@ export const getWizardStepFields = (
     case ADDITIONAL_SETTINGS_STEP:
       return getAdditionalSettingsStepFields(values, flowVariant);
     case SCHEMA_MAPPINGS_STEP:
-      return getSchemaMappingsStepFields(values);
+      return getSchemaMappingsStepFields(values, flowVariant);
     case PREVIEW_RESULTS_STEP:
       return hasDatasetWizardPreviewResultsStep(flowVariant)
         ? []
         : [
             ...getLogisticsStepFields(flowVariant),
             ...getAdditionalSettingsStepFields(values, flowVariant),
-            ...getSchemaMappingsStepFields(values),
+            ...getSchemaMappingsStepFields(values, flowVariant),
           ];
     case FLOW_3_REVIEW_STEP:
       return [
         ...getLogisticsStepFields(flowVariant),
         ...getAdditionalSettingsStepFields(values, flowVariant),
-        ...getSchemaMappingsStepFields(values),
+        ...getSchemaMappingsStepFields(values, flowVariant),
       ];
   }
 };

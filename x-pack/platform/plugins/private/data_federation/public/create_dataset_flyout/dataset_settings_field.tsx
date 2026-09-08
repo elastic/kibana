@@ -35,6 +35,8 @@ import {
   validateMaxErrorRatio,
   validateMaxErrors,
   validatePartitionPath,
+  SCHEMA_SAMPLE_SIZE_MAX,
+  SCHEMA_SAMPLE_SIZE_MIN,
   validateSchemaSampleSize,
 } from './create_dataset_flyout_form_state';
 import { MaxFieldSizeField } from './max_field_size_field';
@@ -90,17 +92,24 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
               ? createDatasetFlyoutStrings.settingsPartitionPathOptionalLabel()
               : createDatasetFlyoutStrings.settingsPartitionPathLabel()
           }
-          // A step pairs this with partition detection, which already names the
-          // Template constraint, and validation reports it when it is broken.
+          // Flow 3 9.6 only mounts this beside Template detection and does not
+          // require a path before Next; submit fills the default when empty.
           helpText={
             isStepField ? undefined : createDatasetFlyoutStrings.settingsPartitionPathHelp()
           }
           placeholder={createDatasetFlyoutStrings.settingsPartitionPathPlaceholder()}
           presets={PARTITION_PATH_PRESETS()}
-          rules={{
-            validate: (value, formValues) =>
-              validatePartitionPath(String(value ?? ''), formValues.settings.partition_detection),
-          }}
+          rules={
+            isStepField
+              ? undefined
+              : {
+                  validate: (value, formValues) =>
+                    validatePartitionPath(
+                      String(value ?? ''),
+                      formValues.settings.partition_detection
+                    ),
+                }
+          }
           data-test-subj={`${testSubjPrefix}SettingsPartitionPath`}
           isCompressed={isCompressed}
         />
@@ -397,7 +406,8 @@ const SchemaSampleSizeField: FunctionComponent<{
         data-test-subj={`${testSubjPrefix}SettingsSchemaSampleSize`}
         fullWidth
         compressed={isCompressed}
-        min={1}
+        min={SCHEMA_SAMPLE_SIZE_MIN}
+        max={SCHEMA_SAMPLE_SIZE_MAX}
         step={1}
         placeholder={fieldText.placeholder}
         isInvalid={Boolean(fieldState.error)}

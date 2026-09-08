@@ -29,7 +29,10 @@ import {
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
-import { getResourceOwnedSettingsFieldIds } from '../resource_settings_fields';
+import {
+  getResourceOwnedSettingsFieldIds,
+  getVisibleResourceOwnedSettingsFieldIds,
+} from '../resource_settings_fields';
 import { useDatasetFormatSelection } from '../use_dataset_format_selection';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
 import { WizardRegionField } from '../wizard_region_field';
@@ -115,6 +118,12 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
     () => getResourceOwnedSettingsFieldIds(flowVariant),
     [flowVariant]
   );
+  const partitionDetection =
+    useWatch({ control, name: 'settings.partition_detection' }) ?? '';
+  const visibleResourceSettingsFieldIds = useMemo(
+    () => getVisibleResourceOwnedSettingsFieldIds(flowVariant, partitionDetection),
+    [flowVariant, partitionDetection]
+  );
   const resource = useWatch({ control, name: 'resource' }) ?? '';
   const watchedFormat = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
   const {
@@ -140,12 +149,12 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
   });
   const formatForHints = showFormatField ? format : watchedFormat;
   const resourceSettingsFields =
-    resourceSettingsFieldIds.length > 0 ? (
+    visibleResourceSettingsFieldIds.length > 0 ? (
       <DatasetSettingsFieldsLayout
         control={control}
-        fields={resourceSettingsFieldIds}
+        fields={visibleResourceSettingsFieldIds}
         testSubjPrefix="datasetWizard"
-        columns={Math.min(resourceSettingsFieldIds.length, 2)}
+        columns={Math.min(visibleResourceSettingsFieldIds.length, 2)}
         constrainWidth={false}
         variant="step"
       />

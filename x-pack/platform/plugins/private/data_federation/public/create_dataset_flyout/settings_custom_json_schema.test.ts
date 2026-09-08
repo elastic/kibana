@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { emptyCreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
+import { applySettingsForFormat } from './dataset_settings_defaults';
 import {
   buildDefaultSettingsCustomJson,
   getDatasetSettingsCustomJsonSchema,
   getVisibleCustomJsonApiKeys,
+  validateDatasetSettingsCustomJson,
 } from './settings_custom_json_schema';
 
 describe('settings_custom_json_schema', () => {
@@ -107,6 +110,91 @@ describe('settings_custom_json_schema', () => {
       expect(parsed.optimized_reader).toBe(true);
       expect(parsed.late_materialization).toBe(true);
       expect(parsed.delimiter).toBeUndefined();
+    });
+  });
+
+  describe('validateDatasetSettingsCustomJson', () => {
+    const parquetSettings = {
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+    };
+
+    it('accepts empty and comment-only content', () => {
+      expect(validateDatasetSettingsCustomJson('{\n\n}', parquetSettings)).toBe(true);
+      expect(validateDatasetSettingsCustomJson('{\n  // "quote": "\\""\n}', parquetSettings)).toBe(
+        true
+      );
+    });
+
+    it('rejects an unknown setting', () => {
+      expect(validateDatasetSettingsCustomJson('{ "not_a_setting": true }', parquetSettings)).toEqual(
+        expect.any(String)
+      );
+    });
+
+    it('rejects a setting that does not apply to the format', () => {
+      expect(validateDatasetSettingsCustomJson('{ "delimiter": "," }', parquetSettings)).toEqual(
+        expect.any(String)
+      );
+    });
+
+    it('rejects an invalid enum value', () => {
+      expect(
+        validateDatasetSettingsCustomJson('{ "partition_detection": "foo" }', parquetSettings)
+      ).toEqual(expect.any(String));
+    });
+
+    it('rejects a schema sample size above 20000', () => {
+      expect(
+        validateDatasetSettingsCustomJson('{ "schema_sample_size": 100000 }', {
+          settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+        })
+      ).toEqual(expect.any(String));
+    });
+
+    it('rejects a mistyped number', () => {
+      expect(
+        validateDatasetSettingsCustomJson(
+          '{ "max_errors": "ten" }',
+          {
+            settings: {
+              ...parquetSettings.settings,
+              error_mode: 'skip_row',
+            },
+          }
+        )
+      ).toEqual(expect.any(String));
+    });
+
+    it('rejects a partition path when detection is not template', () => {
+      expect(
+        validateDatasetSettingsCustomJson('{ "partition_path": "year/month" }', parquetSettings)
+      ).toEqual(expect.any(String));
+    });
+
+    it('rejects json that sets a path and a non-template detection together', () => {
+      expect(
+        validateDatasetSettingsCustomJson(
+          '{ "partition_detection": "hive", "partition_path": "year/month" }',
+          parquetSettings
+        )
+      ).toEqual(expect.any(String));
+    });
+
+    it('accepts a template path override', () => {
+      expect(
+        validateDatasetSettingsCustomJson('{ "partition_path": "year={year}" }', {
+          settings: {
+            ...parquetSettings.settings,
+            partition_detection: 'template',
+          },
+        })
+      ).toBe(true);
+    });
+
+    it('accepts template detection without a path', () => {
+      expect(
+        validateDatasetSettingsCustomJson('{ "partition_detection": "template" }', parquetSettings)
+      ).toBe(true);
     });
   });
 });

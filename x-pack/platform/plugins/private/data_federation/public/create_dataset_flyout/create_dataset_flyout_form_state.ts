@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
-
+import {
+  omitDatasetSettingsNotSentToEs,
+  SCHEMA_SAMPLE_SIZE_MAX,
+  SCHEMA_SAMPLE_SIZE_MIN,
+  type DatasetSettings,
+  type DatasetSettingsFile,
+} from '../../common';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import { mapNullValueToApi } from './dataset_settings_options';
+
+export { SCHEMA_SAMPLE_SIZE_MAX, SCHEMA_SAMPLE_SIZE_MIN, omitDatasetSettingsNotSentToEs };
 
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
@@ -115,10 +122,15 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
 };
 
 export const validateSchemaSampleSize = (value: string): true | string => {
+  if (!value?.trim()) {
+    return true;
+  }
+
   const parsed = parseOptionalPositiveInteger(value);
-  if (value?.trim() && parsed === undefined) {
+  if (parsed === undefined || parsed > SCHEMA_SAMPLE_SIZE_MAX) {
     return createDatasetFlyoutStrings.settingsSchemaSampleSizeInvalid();
   }
+
   return true;
 };
 
@@ -240,13 +252,7 @@ export const buildDatasetSettingsFromFormValues = (
     applyErrorHandlingSettings();
   }
 
-  if (format === 'parquet') {
-    const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
-    if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
-
-    const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
-    if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
-  }
-
-  return Object.keys(applied).length > 0 ? applied : undefined;
+  return omitDatasetSettingsNotSentToEs(
+    Object.keys(applied).length > 0 ? applied : undefined
+  );
 };
