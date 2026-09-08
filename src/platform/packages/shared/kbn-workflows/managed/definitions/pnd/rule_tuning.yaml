@@ -126,9 +126,6 @@ steps:
               low-priority noise. Populate proposed_risk_score (0–100) and
               proposed_severity (low / medium / high / critical).
 
-            disable  — Last resort. The rule has no detection value or is fully
-              redundant with another active rule.
-
             manual  — None of the above is safe to apply automatically. Use summary
               to describe the recommended manual change.
           schema:
@@ -136,7 +133,7 @@ steps:
             properties:
               change_type:
                 type: string
-                enum: [exception, query, risk_score, disable, manual]
+                enum: [exception, query, risk_score, manual]
               summary:
                 type: string
               exception_entries:
@@ -264,11 +261,6 @@ steps:
             Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
             Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
             {% endif %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "disable" %}
-            This proposal disables the rule entirely. This is a last resort — only approve
-            if you are confident the rule provides no detection value or is fully redundant.
-            Approving disables the rule. It can be re-enabled in the Detection Rules UI.
-            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
             No automated change can be applied safely. Approving records the handoff;
             apply the recommended change manually in the Detection Rules UI.
@@ -296,8 +288,6 @@ steps:
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
               and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
               and steps.diagnose_rule.output.structured_output.proposed_severity != null }}
-          can_apply_disable: >-
-            ${{ steps.diagnose_rule.output.structured_output.change_type == 'disable' }}
 
       - name: apply_query_tuning
         type: security.patchRule
@@ -346,15 +336,6 @@ steps:
             risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
             severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
 
-      - name: apply_disable_tuning
-        type: security.disableRule
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply_disable == true }}
-        on-failure:
-          continue: true
-        with:
-          ids: ["{{ foreach.item.0 }}"]
 
       - name: record_manual_tuning
         type: data.set
@@ -362,8 +343,7 @@ steps:
           ${{ steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_query == false
             and steps.classify_proposal.output.can_apply_exception == false
-            and steps.classify_proposal.output.can_apply_risk_score == false
-            and steps.classify_proposal.output.can_apply_disable == false }}
+            and steps.classify_proposal.output.can_apply_risk_score == false }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.
@@ -386,10 +366,6 @@ steps:
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_risk_score == true
               and steps.apply_risk_score_tuning.error != null }}
-          disable_failed: >-
-            ${{ steps.review_tuning.output.response.approved == true
-              and steps.classify_proposal.output.can_apply_disable == true
-              and steps.apply_disable_tuning.error != null }}
 
       # An approved proposal whose apply step errored must not vanish silently.
       - name: record_failed_apply
@@ -397,8 +373,7 @@ steps:
         if: >-
           ${{ steps.classify_apply_failures.output.query_failed == true
             or steps.classify_apply_failures.output.exception_failed == true
-            or steps.classify_apply_failures.output.risk_score_failed == true
-            or steps.classify_apply_failures.output.disable_failed == true }}
+            or steps.classify_apply_failures.output.risk_score_failed == true }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: >-
@@ -425,8 +400,7 @@ steps:
           ${{ steps.review_tuning.output.response.approved == true
             and steps.classify_apply_failures.output.query_failed != true
             and steps.classify_apply_failures.output.exception_failed != true
-            and steps.classify_apply_failures.output.risk_score_failed != true
-            and steps.classify_apply_failures.output.disable_failed != true }}
+            and steps.classify_apply_failures.output.risk_score_failed != true }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.applied_tags }}"
