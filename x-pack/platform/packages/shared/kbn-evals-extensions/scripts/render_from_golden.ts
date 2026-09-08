@@ -24,6 +24,7 @@ import type { MatrixTraceData } from '../src/matrix/trace_types';
 import type { AggregatedModelScores } from '../src/matrix/query_matrix_scores';
 import { loadMatrixConfig } from '../src/matrix/load_matrix_config';
 import { deriveJudgeProvenance } from '../src/matrix/judge_provenance';
+import type { SaturationReport } from '../src/matrix/saturation';
 
 const readJson = <T>(file: string): T => JSON.parse(fs.readFileSync(file, 'utf8')) as T;
 
@@ -39,6 +40,10 @@ const JUDGED_STATS_PATH = process.env.JUDGED_STATS_JSON ?? process.env.JUDGED_ST
 // supplied it is reported UNCONDITIONALLY, next to the single-judge figures,
 // because the whole point is that one judge's column is not the last word.
 const ENSEMBLE_PATH = process.env.ENSEMBLE_JSON;
+// Saturation report for a column whose scores pile up at the rubric ceiling.
+// Published for the same reason as the ensemble: a column that cannot rank must
+// say why it cannot, or a reader will assume the ordering means something.
+const SATURATION_PATH = process.env.SATURATION_JSON;
 
 const aggregated = readJson<AggregatedModelScores[]>(aggregatedPath);
 // Use the real loader so schema defaults (DEFAULT_EXCLUDED_EVALUATORS, scale,
@@ -116,6 +121,25 @@ const provenance = {
                 3
               )}, meaning its consensus score averages over substantial judge ` +
               `disagreement; a mean that hides that spread would overstate what the judges actually agreed on.`,
+          ];
+        })()
+      : []),
+    ...(SATURATION_PATH
+      ? (() => {
+          const s: SaturationReport = JSON.parse(fs.readFileSync(SATURATION_PATH!, 'utf8'));
+          return [
+            `The attack-discovery column cannot be ranked, and the limiting factor is ${s.limitingFactor}: ` +
+              `${(s.ceilingShare * 100).toFixed(1)}% of its ${
+                s.cellCount
+              } scored cells sit at the rubric ` +
+              `ceiling and ${s.saturatedModels} of ${s.modelCount} models are indistinguishable from it.`,
+            `${
+              s.judgeCount
+            } judges regraded those cells and disagreed by only ${s.judgeSpread.toFixed(
+              3
+            )} per cell, against a model-to-model spread of ${s.modelSpread.toFixed(3)}. ` +
+              `Judge noise is not what hides the ordering, so adding judges cannot recover it -- ` +
+              `only fixtures the models actually fail can. ${s.verdict}`,
           ];
         })()
       : []),
