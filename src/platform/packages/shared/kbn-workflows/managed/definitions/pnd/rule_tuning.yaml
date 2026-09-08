@@ -92,6 +92,17 @@ steps:
         on-failure:
           continue: true
 
+      # Surfaces fetch failures in the execution trace so they don't disappear
+      # silently. Alerts stay untagged, so the rule re-appears on the next sweep.
+      - name: record_fetch_failed
+        type: data.set
+        if: "${{ steps.fetch_rule.error != null }}"
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          rule_name: "{{ foreach.item.1 }}"
+          note: >-
+            Could not fetch rule details. Alerts will be re-harvested on the next sweep.
+
       - name: diagnose_rule
         type: ai.agent
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
@@ -220,7 +231,10 @@ steps:
 
       - name: review_tuning
         type: waitForApproval
-        if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
+        if: >-
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.diagnose_rule.output.structured_output.summary != null }}
         timeout: "72h"
         with:
           approveLabel: Apply tuning
@@ -271,8 +285,11 @@ steps:
             {% endif %}
 
       # Decided once so the apply and hand-off branches stay exact complements.
+      # Gated on fetch_rule so a skipped diagnose_rule cannot carry a prior
+      # iteration's stale proposal into the apply steps.
       - name: classify_proposal
         type: data.set
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
         with:
           can_apply_query: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
