@@ -8,7 +8,7 @@
  */
 
 import { Parser, isOptionNode } from '@elastic/esql';
-import type { ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 
 /** Finds the STATS command in a list of AST commands. */
 export const findStatsCommand = (commands: ESQLCommand[]): ESQLCommand => {
@@ -27,7 +27,7 @@ export const findByOption = (statsCmd: ESQLCommand): ESQLCommandOption => {
 /**
  * Parses a BUCKET expression into an AST node by extracting it from a helper query.
  */
-export const parseBucketNode = (bucketExpr: string) => {
+export const parseBucketNode = (bucketExpr: string): ESQLAstItem => {
   const { root } = Parser.parse(`FROM _x | STATS _x BY ${bucketExpr}`);
   const statsCmd = findStatsCommand(root.commands);
   const byOption = findByOption(statsCmd);
