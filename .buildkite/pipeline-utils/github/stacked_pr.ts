@@ -86,7 +86,9 @@ export async function getEffectiveTargetBranch(
     return stackBase;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.warn(`Failed to resolve stacked PR base, falling back to "${targetBranch}": ${message}`);
+    console.warn(
+      `Failed to resolve stacked PR base, falling back to "${targetBranch}": ${message}`
+    );
     return targetBranch;
   }
 }

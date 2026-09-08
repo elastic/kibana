@@ -51,9 +51,9 @@ describe('getEffectiveTargetBranch', () => {
   it('keeps the direct target branch when the PR is not stacked', async () => {
     mockGraphql.mockResolvedValue({ repository: { pullRequest: { stack: null } } });
 
-    await expect(
-      getEffectiveTargetBranch('elastic', 'kibana', 289661, 'main')
-    ).resolves.toEqual('main');
+    await expect(getEffectiveTargetBranch('elastic', 'kibana', 289661, 'main')).resolves.toEqual(
+      'main'
+    );
   });
 
   it('does not promote a stacked PR whose stack targets a release branch', async () => {
@@ -83,9 +83,9 @@ describe('getEffectiveTargetBranch', () => {
   });
 
   it('does not call the API when PR context is missing', async () => {
-    await expect(
-      getEffectiveTargetBranch(undefined, 'kibana', 289662, 'main')
-    ).resolves.toEqual('main');
+    await expect(getEffectiveTargetBranch(undefined, 'kibana', 289662, 'main')).resolves.toEqual(
+      'main'
+    );
     expect(mockGraphql).not.toHaveBeenCalled();
   });
 
