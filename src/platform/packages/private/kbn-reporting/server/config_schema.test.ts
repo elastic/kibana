@@ -48,7 +48,7 @@ describe('Reporting Config Schema', () => {
         ConfigSchema.validate({
           kibanaServer: { hostname: address },
         })
-      ).toThrowError(`[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`);
+      ).toThrow(`[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`);
     }
   );
 
@@ -59,7 +59,7 @@ describe('Reporting Config Schema', () => {
         ConfigSchema.validate({
           kibanaServer: { hostname: address },
         })
-      ).toThrowError(
+      ).toThrow(
         `[kibanaServer.hostname]: cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`
       );
     }
@@ -128,6 +128,6 @@ describe('Reporting Config Schema', () => {
       ConfigSchema.validate({
         csv: { maxRows: 0 },
       })
-    ).toThrowError('[csv.maxRows]: Value must be equal to or greater than [1].');
+    ).toThrow('[csv.maxRows]: Value must be equal to or greater than [1].');
   });
 });

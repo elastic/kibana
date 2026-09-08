@@ -193,7 +193,42 @@ await managed.install(MY_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
 
 ### No default
 
-`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use `GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
+`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use
+`GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
+
+### Scoping raw request paths at runtime
+
+The `spaceId` above is about where the **workflow definition** lives and which space an
+*execution* is stamped with. It has no effect on the HTTP requests a workflow makes while it
+runs — that is a separate, step-level concern.
+
+A `kibana.request` step, and any `kibana.*` connector step using `with.request` or
+`with.form_data`, is not space-scoped by the engine. `kibana_action_step.ts` checks
+`cleanParams.request`, then `cleanParams.form_data`, and only its final `else` branch reaches
+`buildKibanaRequest`, whose connector lookup is what applies `applySpacePrefix`. All three shapes
+send their `path` verbatim:
+
+| Shape | Applies to |
+| --- | --- |
+| top-level `path` | `type: kibana.request` |
+| `with.request` object | any `kibana.*` type, including generated connectors |
+| `with.form_data` with a top-level `path` | any `kibana.*` type |
+
+An unprefixed path in any of these always hits the **default space**, no matter which space the
+execution belongs to — including a global (`'*'`) workflow executing on behalf of a named space.
+Because `/api/x` and `/s/default/api/x` behave identically, this fails silently in the default
+space and only reproduces when verified in a named non-default space.
+
+Prefix the path with the executing space, e.g. `/s/{{ workflow.spaceId }}/...`. `workflow.spaceId`
+is correct for most workflows, but it is not the only valid expression: a workflow that takes its
+target space as an input or a variable (`{{ inputs.space_id }}`, `{{ variables.spaceId }}`) should
+prefix with that instead — the requirement is that the segment resolves to the executing space,
+not that it is literally `workflow.spaceId`. Cluster-level routes that are not space-scoped (e.g.
+`/api/status`) are the deliberate exception.
+
+This bit the Security Alert Analysis workflow (elastic/kibana#287438): its note-writing steps used
+a bare `/api/note`, so every note was written to the default space regardless of which space the
+alert was in, and the workflow still reported success.
 
 ## 5) Workflow identity
 
@@ -663,3 +698,4 @@ Because there is a **single persisted document** for a global workflow, any edit
 13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade).
 14. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
 15. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+16. Prefix every raw request path (`kibana.request`, `with.request`, `with.form_data`) with the executing space — see [Scoping raw request paths at runtime](#scoping-raw-request-paths-at-runtime). A cluster-level route is the deliberate exception.

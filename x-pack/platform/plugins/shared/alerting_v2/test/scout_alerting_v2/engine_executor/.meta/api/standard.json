@@ -1,5 +1,5 @@
 {
-  "sha1": "d86dd3200962d311b5c0285ebc3ecf402848380e",
+  "sha1": "36b1cb490458f32e79cba5a9b05f3e5f4c3ff26a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,8 +33,8 @@
       }
     },
     {
-      "id": "3de060ac7c61a49-f483edb81189e44",
-      "title": "Rule executor (json ES|QL response format) populates rule, source, and scheduling fields on every breach event",
+      "id": "3de060ac7c61a49-cd62e054970ced8",
+      "title": "Rule executor (json ES|QL response format) persists ES|QL date columns as epoch millis in the data field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -47,6 +47,20 @@
       }
     },
     {
+      "id": "3de060ac7c61a49-f483edb81189e44",
+      "title": "Rule executor (json ES|QL response format) populates rule, source, and scheduling fields on every breach event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
+        "line": 209,
+        "column": 34
+      }
+    },
+    {
       "id": "3de060ac7c61a49-0ab647a513e7b9a",
       "title": "Rule executor (json ES|QL response format) writes one event per group when grouping.fields is set",
       "expectedStatus": "passed",
@@ -56,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 219,
+        "line": 266,
         "column": 23
       }
     },
@@ -70,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 269,
+        "line": 316,
         "column": 10
       }
     },
@@ -84,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 343,
+        "line": 390,
         "column": 32
       }
     },
@@ -98,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 402,
+        "line": 449,
         "column": 13
       }
     },
@@ -112,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 464,
+        "line": 511,
         "column": 13
       }
     },
@@ -126,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 552,
+        "line": 599,
         "column": 18
       }
     },
@@ -140,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 597,
+        "line": 644,
         "column": 13
       }
     },
@@ -154,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 633,
+        "line": 680,
         "column": 26
       }
     },
@@ -168,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 675,
+        "line": 722,
         "column": 28
       }
     },
@@ -182,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 738,
+        "line": 785,
         "column": 13
       }
     },
@@ -196,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 784,
+        "line": 831,
         "column": 18
       }
     },
@@ -210,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 838,
+        "line": 885,
         "column": 35
       }
     },
@@ -224,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 891,
+        "line": 938,
         "column": 13
       }
     },
@@ -238,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 942,
+        "line": 989,
         "column": 13
       }
     },
@@ -252,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1025,
+        "line": 1072,
         "column": 16
       }
     },
@@ -266,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1136,
+        "line": 1183,
         "column": 35
       }
     },
@@ -280,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1214,
+        "line": 1261,
         "column": 13
       }
     },
@@ -294,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1282,
+        "line": 1329,
         "column": 13
       }
     },
@@ -308,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1381,
+        "line": 1428,
         "column": 15
       }
     },
@@ -322,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1490,
+        "line": 1537,
         "column": 33
       }
     },
@@ -336,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1559,
+        "line": 1606,
         "column": 33
       }
     },
@@ -350,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1627,
+        "line": 1674,
         "column": 33
       }
     },
@@ -364,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1748,
+        "line": 1795,
         "column": 25
       }
     },
@@ -378,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1844,
+        "line": 1891,
         "column": 25
       }
     },
@@ -392,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1894,
+        "line": 1941,
         "column": 35
       }
     },
@@ -406,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1964,
+        "line": 2011,
         "column": 15
       }
     },
@@ -420,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2013,
+        "line": 2060,
         "column": 15
       }
     },
@@ -434,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2032,
+        "line": 2079,
         "column": 32
       }
     },
@@ -448,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2096,
+        "line": 2143,
         "column": 12
       }
     },
@@ -462,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2180,
+        "line": 2227,
         "column": 34
       }
     },
@@ -476,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2238,
+        "line": 2285,
         "column": 13
       }
     },
@@ -490,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2303,
+        "line": 2350,
         "column": 10
       }
     },
@@ -504,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2348,
+        "line": 2395,
         "column": 99
       }
     },
@@ -518,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2409,
+        "line": 2456,
         "column": 31
       }
     },
@@ -549,8 +563,8 @@
       }
     },
     {
-      "id": "3de060ac7c61a49-ef6024e854f8ad6",
-      "title": "Rule executor (arrow ES|QL response format) populates rule, source, and scheduling fields on every breach event",
+      "id": "3de060ac7c61a49-59d1d4281088eeb",
+      "title": "Rule executor (arrow ES|QL response format) persists ES|QL date columns as epoch millis in the data field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -562,6 +576,19 @@
       }
     },
     {
+      "id": "3de060ac7c61a49-ef6024e854f8ad6",
+      "title": "Rule executor (arrow ES|QL response format) populates rule, source, and scheduling fields on every breach event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
+        "line": 209,
+        "column": 34
+      }
+    },
+    {
       "id": "3de060ac7c61a49-e358012a156b98d",
       "title": "Rule executor (arrow ES|QL response format) writes one event per group when grouping.fields is set",
       "expectedStatus": "passed",
@@ -570,7 +597,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 219,
+        "line": 266,
         "column": 23
       }
     },
@@ -583,7 +610,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 269,
+        "line": 316,
         "column": 10
       }
     },
@@ -596,7 +623,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 343,
+        "line": 390,
         "column": 32
       }
     },
@@ -609,7 +636,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 402,
+        "line": 449,
         "column": 13
       }
     },
@@ -622,7 +649,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 464,
+        "line": 511,
         "column": 13
       }
     },
@@ -635,7 +662,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 552,
+        "line": 599,
         "column": 18
       }
     },
@@ -648,7 +675,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 597,
+        "line": 644,
         "column": 13
       }
     },
@@ -661,7 +688,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 633,
+        "line": 680,
         "column": 26
       }
     },
@@ -674,7 +701,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 675,
+        "line": 722,
         "column": 28
       }
     },
@@ -687,7 +714,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 738,
+        "line": 785,
         "column": 13
       }
     },
@@ -700,7 +727,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 784,
+        "line": 831,
         "column": 18
       }
     },
@@ -713,7 +740,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 838,
+        "line": 885,
         "column": 35
       }
     },
@@ -726,7 +753,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 891,
+        "line": 938,
         "column": 13
       }
     },
@@ -739,7 +766,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 942,
+        "line": 989,
         "column": 13
       }
     },
@@ -752,7 +779,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1025,
+        "line": 1072,
         "column": 16
       }
     },
@@ -765,7 +792,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1136,
+        "line": 1183,
         "column": 35
       }
     },
@@ -778,7 +805,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1214,
+        "line": 1261,
         "column": 13
       }
     },
@@ -791,7 +818,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1282,
+        "line": 1329,
         "column": 13
       }
     },
@@ -804,7 +831,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1381,
+        "line": 1428,
         "column": 15
       }
     },
@@ -817,7 +844,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1490,
+        "line": 1537,
         "column": 33
       }
     },
@@ -830,7 +857,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1559,
+        "line": 1606,
         "column": 33
       }
     },
@@ -843,7 +870,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1627,
+        "line": 1674,
         "column": 33
       }
     },
@@ -856,7 +883,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1748,
+        "line": 1795,
         "column": 25
       }
     },
@@ -869,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1844,
+        "line": 1891,
         "column": 25
       }
     },
@@ -882,7 +909,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1894,
+        "line": 1941,
         "column": 35
       }
     },
@@ -895,7 +922,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1964,
+        "line": 2011,
         "column": 15
       }
     },
@@ -908,7 +935,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2013,
+        "line": 2060,
         "column": 15
       }
     },
@@ -921,7 +948,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2032,
+        "line": 2079,
         "column": 32
       }
     },
@@ -934,7 +961,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2096,
+        "line": 2143,
         "column": 12
       }
     },
@@ -947,7 +974,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2180,
+        "line": 2227,
         "column": 34
       }
     },
@@ -960,7 +987,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2238,
+        "line": 2285,
         "column": 13
       }
     },
@@ -973,7 +1000,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2303,
+        "line": 2350,
         "column": 10
       }
     },
@@ -986,7 +1013,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2348,
+        "line": 2395,
         "column": 99
       }
     },
@@ -999,7 +1026,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2409,
+        "line": 2456,
         "column": 31
       }
     }

@@ -407,10 +407,11 @@ export class WorkflowsService {
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { nameFallback?: string }
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
-    return this.crudService.createWorkflow(workflow, spaceId, request);
+    return this.crudService.createWorkflow(workflow, spaceId, request, options);
   }
 
   public async bulkCreateWorkflows(
@@ -573,7 +574,7 @@ export class WorkflowsService {
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,
-    channel: string,
+    channel: string | undefined,
     spaceId: string
   ): Promise<boolean> {
     await this.ensureInitialized();

@@ -50,6 +50,11 @@ export const ALERTING_ERROR_CODES = {
    * operation into multiple requests.
    */
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
+  /**
+   * A builder rule's query was changed without explicitly clearing
+   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   */
+  BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */
@@ -431,6 +436,12 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
+  RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
+  /**
+   * The active-group fetch hit its `alerts.max` bound, so the active set may be truncated.
+   */
+  RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED: 'RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**

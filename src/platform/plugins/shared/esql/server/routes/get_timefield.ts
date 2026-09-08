@@ -8,10 +8,13 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlQueryResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+  parseTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
@@ -46,18 +49,19 @@ const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
 const getEsqlColumnsForSource = async ({
   client,
   sourceName,
+  projectRouting,
 }: {
   client: ElasticsearchClient;
   sourceName: string;
-}): Promise<ESQLSearchResponse | undefined> => {
+  projectRouting: string | undefined;
+}): Promise<EsqlQueryResponse | undefined> => {
   // Limit 0 is used to get the schema, more performant
   const query = `FROM ${sourceName} | LIMIT 0`;
 
   try {
-    return await client.transport.request<ESQLSearchResponse>({
-      method: 'POST',
-      path: '/_query',
-      body: { query },
+    return await client.esql.query({
+      query,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     });
   } catch {
     // ignore
@@ -67,12 +71,14 @@ const getEsqlColumnsForSource = async ({
 const checkViewLikeSourceForTimestamp = async ({
   client,
   sourceName,
+  projectRouting,
 }: {
   client: ElasticsearchClient;
   sourceName: string;
+  projectRouting: string | undefined;
 }): Promise<boolean> => {
   // ES|QL views are resolved by ES|QL itself, and their schema is the output schema.
-  const esqlResp = await getEsqlColumnsForSource({ client, sourceName });
+  const esqlResp = await getEsqlColumnsForSource({ client, sourceName, projectRouting });
   return Boolean(esqlResp?.columns?.some((col) => col.name === ES_TIMESTAMP_FIELD_NAME));
 };
 
@@ -92,8 +98,10 @@ const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
   logger: Logger,
-  datasetFilteringEnabled: boolean
+  datasetFilteringEnabled: boolean,
+  projectRouting: string | undefined
 ): Promise<{ timeField: string | undefined }> => {
+  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
   // Query is of the form "from index | where timefield >= ?_tstart".
   // At this point we just want to extract the timefield if present in the query
   const timeField = parseTimeFieldFromESQLQuery(query);
@@ -134,7 +142,13 @@ const resolveTimeField = async (
     const datasetSources = splitSources.filter((name) => datasetNames.has(name));
     if (datasetSources.length > 0) {
       const datasetChecks = await Promise.all(
-        datasetSources.map((sourceName) => checkViewLikeSourceForTimestamp({ client, sourceName }))
+        datasetSources.map((sourceName) =>
+          checkViewLikeSourceForTimestamp({
+            client,
+            sourceName,
+            projectRouting: effectiveProjectRouting,
+          })
+        )
       );
       if (datasetChecks.every(Boolean)) {
         return { timeField: ES_TIMESTAMP_FIELD_NAME };
@@ -159,6 +173,7 @@ const resolveTimeField = async (
             index,
             fields: '@timestamp',
             include_unmapped: false,
+            ...(effectiveProjectRouting ? { project_routing: effectiveProjectRouting } : {}),
           });
           return hasTimestampInFieldCapsResponse(fieldCapsResp);
         } catch (fieldCapsError) {
@@ -190,7 +205,11 @@ const resolveTimeField = async (
     if (viewSources.length) {
       const viewChecks = await Promise.all(
         viewSources.map((viewName) =>
-          checkViewLikeSourceForTimestamp({ client, sourceName: viewName })
+          checkViewLikeSourceForTimestamp({
+            client,
+            sourceName: viewName,
+            projectRouting: effectiveProjectRouting,
+          })
         )
       );
       if (viewChecks.every(Boolean)) {
@@ -225,11 +244,12 @@ export const registerGetTimeFieldRoute = (
       validate: {
         body: schema.object({
           query: schema.string({ maxLength: 1000000 }),
+          projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query } = request.body;
+      const { query, projectRouting } = request.body;
 
       if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
         return response.badRequest({
@@ -246,7 +266,13 @@ export const registerGetTimeFieldRoute = (
       );
 
       try {
-        const body = await resolveTimeField(client, query, logger.get(), datasetFilteringEnabled);
+        const body = await resolveTimeField(
+          client,
+          query,
+          logger.get(),
+          datasetFilteringEnabled,
+          projectRouting
+        );
         esqlRouteRequestCounter.add(1, {
           route: 'timefield',
           outcome: 'success',

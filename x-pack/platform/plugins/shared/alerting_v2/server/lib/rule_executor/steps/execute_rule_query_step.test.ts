@@ -44,7 +44,11 @@ const createPluginConfigAccessor = ({
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: maxAlertsPerRun }, query: { maxResponseSize: 50 * 1024 * 1024 } },
+      run: {
+        alerts: { max: maxAlertsPerRun },
+        query: { maxResponseSize: 50 * 1024 * 1024 },
+        maxGroupsPerExecution: 10000,
+      },
     },
     esql: { responseFormat },
   };

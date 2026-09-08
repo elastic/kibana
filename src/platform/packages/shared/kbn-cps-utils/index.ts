@@ -20,6 +20,7 @@ export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,
   ProjectTagsResponse,
+  CpsLinkedProject,
   ICPSManager,
   ProjectsData,
   CPSAppAccessResolver,
@@ -45,3 +46,4 @@ export type {
 export { projectRoutingCodec } from './components/project_picker_update/utils/project_routing_codec';
 export { PROJECT_ROUTING } from '@kbn/cps-common';
 export { ProjectRoutingAccess } from './types';
+export { getCSPLabel, getSolutionIcon, getProjectTags } from './components/utils';

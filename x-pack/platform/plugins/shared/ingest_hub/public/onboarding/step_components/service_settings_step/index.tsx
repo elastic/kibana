@@ -268,6 +268,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       {
         width: '40px',
         render: (inst: ServiceInstance) => {
+          const service = awsServicesMap?.get(inst.serviceId);
+          const isEcfOnly = service?.deploymentMethods.every((dm) => dm.method === 'ecf') ?? false;
+          if (isEcfOnly && !inst.isDuplicate) return null;
           const isOpen = openMenuInstanceId === inst.instanceId;
           const actionsLabel = i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.table.actionsAriaLabel',
@@ -298,20 +301,24 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             >
               <EuiContextMenuPanel
                 items={[
-                  <EuiContextMenuItem
-                    key="duplicate"
-                    icon="copy"
-                    onClick={() => {
-                      setOpenMenuInstanceId(null);
-                      setDuplicateSourceInstanceId(inst.instanceId);
-                    }}
-                    data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestHub.serviceSettingsStep.table.action.duplicate"
-                      defaultMessage="Duplicate service"
-                    />
-                  </EuiContextMenuItem>,
+                  ...(!isEcfOnly
+                    ? [
+                        <EuiContextMenuItem
+                          key="duplicate"
+                          icon="copy"
+                          onClick={() => {
+                            setOpenMenuInstanceId(null);
+                            setDuplicateSourceInstanceId(inst.instanceId);
+                          }}
+                          data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
+                        >
+                          <FormattedMessage
+                            id="xpack.ingestHub.serviceSettingsStep.table.action.duplicate"
+                            defaultMessage="Duplicate service"
+                          />
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
                   ...(inst.isDuplicate
                     ? [
                         <EuiContextMenuItem
@@ -348,7 +355,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   );
 
   return (
-    <div data-test-subj="onboardingStep-serviceSettings">
+    <div data-test-subj="onboardingStep-service-settings">
       <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">
