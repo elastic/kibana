@@ -56,7 +56,7 @@ export const registerInvestigationReconciliationTask = ({
         run: async () => {
           const workflowsManagement = getWorkflowsManagement();
           if (!workflowsManagement) {
-            logger.warn(
+            logger.debug(
               'Skipping investigation reconciliation: workflowsManagement is not available'
             );
             return { state: {} };

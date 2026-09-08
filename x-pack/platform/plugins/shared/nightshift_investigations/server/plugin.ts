@@ -161,9 +161,11 @@ export class NightshiftInvestigationsPlugin
       });
     }
 
-    scheduleInvestigationReconciliationTask({ taskManager: plugins.taskManager }).catch((err) => {
-      this.logger.error(`Failed to schedule investigation reconciliation task: ${err.message}`);
-    });
+    if (this.workflowsManagement) {
+      scheduleInvestigationReconciliationTask({ taskManager: plugins.taskManager }).catch((err) => {
+        this.logger.error(`Failed to schedule investigation reconciliation task: ${err.message}`);
+      });
+    }
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
