@@ -7,7 +7,7 @@
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { LensDocument } from './persistence';
+import type { LensDocument } from '@kbn/lens-common';
 import {
   getActiveDatasourceIdFromDoc,
   getUniqueLabelGenerator,
