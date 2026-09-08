@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/core-security-server'
   - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/logging-mocks'
