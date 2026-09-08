@@ -229,14 +229,7 @@ export const kevAdapter: FetchAdapter = {
       const vuln = parseKevVulnerability(rawEntry);
       if (vuln && isCompleteKevEntry(vuln)) {
         reports.push(
-          buildKevReport(
-            vuln,
-            provenanceUrl,
-            ingestedAt,
-            spaceId,
-            source._id,
-            source._source.name
-          )
+          buildKevReport(vuln, provenanceUrl, ingestedAt, spaceId, source._id, source._source.name)
         );
       } else {
         log.warn(

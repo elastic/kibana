@@ -11,7 +11,13 @@ import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
 import { buildReportContent } from '../../services/report_content';
 import { normalizeProvenanceUrl } from '../../services/provenance_url';
-import type { AdapterRunContext, FetchAdapter, IocEntry, NormalizedReport, SourceHit } from '../types';
+import type {
+  AdapterRunContext,
+  FetchAdapter,
+  IocEntry,
+  NormalizedReport,
+  SourceHit,
+} from '../types';
 import { parseIndicatorList } from './parse_indicator_list';
 import type { IndicatorBlock } from './parse_indicator_list';
 
