@@ -191,7 +191,6 @@ export const DiscoverSessionSaveModalContainer = ({
         }),
         text: error.message,
       });
-      onClose();
     }
   };
 

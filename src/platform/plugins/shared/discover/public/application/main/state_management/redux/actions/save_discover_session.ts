@@ -9,7 +9,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
+import type {
+  SaveDiscoverSessionOptions,
+  SaveDiscoverSessionParams,
+} from '@kbn/saved-search-plugin/public';
 import { updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -190,16 +193,19 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       }
     }
 
-    const saveState: SaveDiscoverSessionParams = {
+    const saveParams: SaveDiscoverSessionParams = {
       id: state.persistedDiscoverSession?.id,
       title: newTitle,
       description: newDescription,
       tabs: updatedTabs,
       tags: services.savedObjectsTagging ? newTags : state.persistedDiscoverSession?.tags,
     };
-    const discoverSession = await services.discoverSessionPersistence.save(saveState, {
+
+    const saveOptions: SaveDiscoverSessionOptions = {
       copyOnSave: newCopyOnSave,
-    });
+    };
+
+    const discoverSession = await services.discoverSessionPersistence.save(saveParams, saveOptions);
 
     if (discoverSession) {
       await dispatch(

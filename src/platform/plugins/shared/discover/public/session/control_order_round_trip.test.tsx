@@ -32,7 +32,7 @@ import {
 } from '../application/main/state_management/redux';
 import type { DiscoverSessionClient } from './api_client';
 import { createDiscoverSessionPersistence } from './persistence';
-import { fromDiscoverSessionApiResponse } from './state_adapter';
+import { prepareDiscoverSession } from './prepare_session';
 
 describe('control order after saving a Discover session', () => {
   beforeAll(() => {
@@ -81,7 +81,7 @@ describe('control order after saving a Discover session', () => {
         ],
       },
     };
-    const initialSession = fromDiscoverSessionApiResponse(savedResponse);
+    const initialSession = prepareDiscoverSession(savedResponse);
     initialSession.tabs[0].controlGroupJson = JSON.stringify(controls);
     await toolkit.initializeTabs({ persistedDiscoverSession: initialSession });
     await toolkit.initializeSingleTab({ tabId: 'tab-id' });

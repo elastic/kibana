@@ -17,6 +17,7 @@ import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import { internalStateActions, selectHasUnsavedChanges } from '..';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { map } from 'rxjs';
 import {
   createDiscoverSessionPersistence,
@@ -328,6 +329,70 @@ describe('saveDiscoverSession', () => {
     expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
     expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
   });
+
+  it.each([
+    { action: 'Save', copyOnSave: false, method: 'upsert' as const },
+    { action: 'Save As', copyOnSave: true, method: 'create' as const },
+  ])(
+    'should keep the previous saved session and pending changes when HTTP $action fails',
+    async ({ copyOnSave, method }) => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+      const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
+      const tabId = toolkit.getCurrentTab().id;
+      const resetOnSavedSearchChangeSpy = jest.spyOn(
+        internalStateSlice.actions,
+        'resetOnSavedSearchChange'
+      );
+      const apiClient: jest.Mocked<DiscoverSessionClient> = {
+        get: jest.fn(),
+        create: jest.fn(),
+        upsert: jest.fn(),
+      };
+      apiClient[method].mockRejectedValue(
+        createHttpFetchError(
+          'Bad Request',
+          'BadRequest',
+          new Request('http://localhost/api/discover_sessions'),
+          new Response(undefined, { status: 400 })
+        )
+      );
+      const persistence = createDiscoverSessionPersistence({
+        apiClient,
+        legacyClient: services.savedSearch,
+        useHttpApi: true,
+      });
+      saveDiscoverSessionSpy.mockImplementation(persistence.save);
+
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { columns: ['message'] } })
+      );
+      const expectedChanges = { hasUnsavedChanges: true, unsavedTabIds: [tabId] };
+      const comparisonContext = { runtimeStateManager: toolkit.runtimeStateManager, services };
+      expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual(
+        expectedChanges
+      );
+
+      await expect(
+        toolkit.internalState
+          .dispatch(
+            internalStateActions.saveDiscoverSession(
+              getSaveDiscoverSessionParams({ newCopyOnSave: copyOnSave })
+            )
+          )
+          .unwrap()
+      ).rejects.toMatchObject({ message: 'Bad Request' });
+
+      expect(apiClient[method]).toHaveBeenCalledTimes(1);
+      expect(apiClient.get).not.toHaveBeenCalled();
+      expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
+      expect(toolkit.getCurrentTab().id).toBe(tabId);
+      expect(toolkit.getCurrentTab().appState.columns).toEqual(['message']);
+      expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
+      expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual(
+        expectedChanges
+      );
+    }
+  );
 
   it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
     const resetOnSavedSearchChangeSpy = jest.spyOn(

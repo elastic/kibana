@@ -19,10 +19,9 @@ type RuntimeControlPanel = ControlPanelsState<OptionsListESQLControlState>[strin
 
 // TODO: Move this mapping to a shared Discover module when the client and server use common
 // session types. Keep both implementations aligned until then.
-/** Converts API controls to runtime JSON, using supplied order numbers or array positions. */
+/** Converts API controls to Discover's JSON format, using array positions as order numbers. */
 export const toControlGroupJson = (
-  controlPanels: ApiControlPanels | undefined,
-  runtimeOrders?: number[]
+  controlPanels: ApiControlPanels | undefined
 ): string | undefined => {
   if (!controlPanels?.length) {
     return undefined;
@@ -32,9 +31,7 @@ export const toControlGroupJson = (
 
   for (const [index, apiPanel] of controlPanels.entries()) {
     const { id, type, width, grow, config } = apiPanel;
-    const order = runtimeOrders?.[index] ?? index;
-
-    runtimePanels[id] = { order, type, width, grow, ...config };
+    runtimePanels[id] = { order: index, type, width, grow, ...config };
   }
 
   return JSON.stringify(runtimePanels);
@@ -71,7 +68,7 @@ export const toApiControlPanels = (
 };
 
 /** Reads runtime controls, checks their order and type, and sorts them by display order. */
-export const parseOrderedControlPanels = (
+const parseOrderedControlPanels = (
   controlGroupJson: string | undefined
 ): Array<{ id: string; panel: RuntimeControlPanel }> => {
   if (!controlGroupJson) {

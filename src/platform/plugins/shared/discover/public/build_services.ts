@@ -212,8 +212,9 @@ export const buildServices = ({
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
 
-  // Build both persistence paths here; the switch below selects the one used by Discover.
   const discoverSessionClient = createDiscoverSessionClient(core.http);
+  // Keep loading and saving behind one service, including state conversion.
+  // The flag and legacy branch can be removed once Discover uses only HTTP.
   const discoverSessionPersistence = createDiscoverSessionPersistence({
     apiClient: discoverSessionClient,
     legacyClient: plugins.savedSearch,

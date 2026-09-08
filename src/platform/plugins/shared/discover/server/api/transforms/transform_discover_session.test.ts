@@ -18,8 +18,10 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiData,
+  DiscoverSessionApiDataInput,
   DiscoverSessionApiEsqlTab,
 } from '../schema';
+import { discoverSessionApiDataSchema } from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -650,11 +652,80 @@ describe('discover session API transforms', () => {
   });
 
   describe('round-trip', () => {
-    it('round-trips fixture API data through persistence', () => {
-      const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
+    it('round-trips validated fixture API data through persistence without warnings', () => {
+      // Include request validation and defaults, as POST and PUT do before calling the service.
+      const request = discoverSessionApiDataSchema.parse(discoverSessionApiData);
+      const { attributes, references } = transformDiscoverSessionIn(request);
+      const { sessionState, warnings } = transformDiscoverSessionOut(attributes, references);
+      const roundTripped = discoverSessionApiDataSchema.parse(sessionState);
 
-      expect(roundTripped).toEqual(discoverSessionApiData);
+      expect(sessionState).toEqual(discoverSessionApiData);
+      expect(roundTripped).toStrictEqual(request);
+      expect(warnings).toEqual([]);
+    });
+
+    it('applies request defaults without changing authored values during persistence', () => {
+      const input = {
+        title: 'Session with omitted defaults',
+        tags: [],
+        tabs: [
+          {
+            id: 'classic',
+            label: 'Classic',
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-data-view' },
+            column_order: ['message'],
+            row_height: 'auto',
+            sample_size: 250,
+            hide_chart: true,
+          },
+          {
+            id: 'esql',
+            label: 'ES|QL',
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: [],
+            control_panels: [
+              {
+                id: 'service',
+                type: ESQL_CONTROL,
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: 'service',
+                  variable_type: 'values',
+                  available_options: ['api', 'web'],
+                  selected_options: ['web'],
+                  single_select: true,
+                },
+              },
+            ],
+          },
+        ],
+      } satisfies DiscoverSessionApiDataInput;
+      const request = discoverSessionApiDataSchema.parse(input);
+      const { attributes, references } = transformDiscoverSessionIn(request);
+      const { sessionState, warnings } = transformDiscoverSessionOut(attributes, references);
+
+      expect(request).toMatchObject({
+        description: '',
+        tabs: [
+          {
+            filters: [],
+            sort: [],
+            view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            hide_chart: true,
+            hide_table: false,
+          },
+          {
+            sort: [],
+            hide_chart: false,
+            hide_table: false,
+            control_panels: [{ width: 'medium', grow: false }],
+          },
+        ],
+      });
+      expect(sessionState).toStrictEqual(request);
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toStrictEqual(request);
+      expect(attributes.tabs[0].attributes.rowHeight).toBe(-1);
+      expect(warnings).toEqual([]);
     });
 
     it('round-trips fixture saved object attributes through API', () => {

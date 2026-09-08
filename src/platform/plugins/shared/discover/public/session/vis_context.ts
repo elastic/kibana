@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { get, isPlainObject } from 'lodash';
 import type { DiscoverSessionClient } from './api_client';
 
@@ -28,19 +28,19 @@ interface EsqlVisContextFingerprint {
 
 // TODO: Move this mapping to a shared Discover module when the client and server use common
 // session types. Keep both implementations aligned until then.
-/** Restores a chart and keeps runtime-only values across an immediate save response. */
-export const toRuntimeVisContext = (
-  apiTab: ApiTab,
-  previousTab: DiscoverSessionTab | undefined
+/** Converts an API chart and rebuilds its ES|QL compatibility fingerprint. */
+export const fromApiVisContext = (
+  visContext: ApiTab['vis_context'],
+  breakdownField: ApiTab['breakdown_field']
 ): DiscoverSessionTab['visContext'] => {
-  if (!apiTab.vis_context) {
+  if (!visContext) {
     return undefined;
   }
 
   return {
-    suggestionType: apiTab.vis_context.suggestion_type,
-    attributes: apiTab.vis_context.attributes,
-    requestData: getRuntimeRequestData(apiTab, previousTab),
+    suggestionType: visContext.suggestion_type,
+    attributes: visContext.attributes,
+    requestData: getVisContextRequestData(visContext.attributes, breakdownField),
   };
 };
 
@@ -63,25 +63,21 @@ export const toApiVisContext = (
   };
 };
 
-/** Restores the ES|QL chart fingerprint or reuses the current value after a save. */
-const getRuntimeRequestData = (apiTab: ApiTab, previousTab: DiscoverSessionTab | undefined) => {
-  if (previousTab?.visContext && 'requestData' in previousTab.visContext) {
-    return previousTab.visContext.requestData;
-  }
-
-  if (apiTab.data_source.type !== AS_CODE_ESQL_DATA_SOURCE_TYPE || !apiTab.vis_context) {
-    return {};
-  }
-
-  const fingerprint = extractEsqlFingerprint(apiTab.vis_context.attributes);
+/** Rebuilds an ES|QL chart fingerprint from its saved attributes. */
+const getVisContextRequestData = (
+  attributes: Record<string, unknown>,
+  breakdownField: ApiTab['breakdown_field']
+): UnifiedHistogramVisContext['requestData'] => {
+  // A session saved in classic may still hold an ES|QL chart. Restore its fingerprint so
+  // switching back to ES|QL can check whether the chart is still compatible.
+  const fingerprint = extractEsqlFingerprint(attributes);
   if (!fingerprint) {
     return {};
   }
 
   return {
     ...fingerprint,
-    ...(apiTab.breakdown_field !== undefined &&
-      apiTab.breakdown_field !== '' && { breakdownField: apiTab.breakdown_field }),
+    ...(breakdownField !== undefined && breakdownField !== '' && { breakdownField }),
   };
 };
 

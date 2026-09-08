@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_DATA_VIEW_SPEC_TYPE, type AsCodeDataView } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import {
@@ -16,37 +15,26 @@ import {
   parseSearchSourceJSON,
   type SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { isFilterPinned } from '@kbn/es-query';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { stableStringify } from '@kbn/std';
-import { cloneDeep } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import { fromStoredTab, toStoredSort, toStoredTab } from '../../common/embeddable/transform_utils';
 import type { DiscoverSessionClient } from './api_client';
-import {
-  parseOrderedControlPanels,
-  toApiControlPanels,
-  toControlGroupJson,
-} from './control_panels';
-import { toApiVisContext, toRuntimeVisContext } from './vis_context';
+import { toApiControlPanels, toControlGroupJson } from './control_panels';
+import { fromApiVisContext, toApiVisContext } from './vis_context';
+
+// The HTTP path uses this adapter because Discover still works with saved-search-shaped state.
+// Removing the legacy persistence path does not remove the need for these conversions.
 
 type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['create']>>;
 type ApiResolve = Awaited<ReturnType<DiscoverSessionClient['get']>>['resolve'];
 type ApiData = ApiResponse['data'];
 type ApiTab = ApiResponse['data']['tabs'][number];
 
-/** Converts an API response into the state used while Discover is running. */
+/** Converts API fields and charts; session preparation adds inline IDs and filter defaults. */
 export const fromDiscoverSessionApiResponse = (
   response: ApiResponse,
-  resolve?: ApiResolve,
-  previousTabs: DiscoverSessionTab[] = []
+  resolve?: ApiResolve
 ): DiscoverSession => {
-  const previousTabsById = new Map(previousTabs.map((tab) => [tab.id, tab]));
-  const inlineRuntimeIdsBySpec = new Map<string, string>();
-  const materializedTabs = response.data.tabs.map((tab) =>
-    fromApiTab(tab, previousTabsById.get(tab.id), inlineRuntimeIdsBySpec)
-  );
+  const tabsWithReferences = response.data.tabs.map(fromApiTab);
   const { references: tagReferences } = toStoredTags({ tags: response.data.tags });
 
   return {
@@ -54,14 +42,14 @@ export const fromDiscoverSessionApiResponse = (
     title: response.data.title,
     description: response.data.description,
     tags: response.data.tags,
-    tabs: materializedTabs.map(({ tab }) => tab),
+    tabs: tabsWithReferences.map(({ tab }) => tab),
     managed: response.meta.managed ?? false,
-    references: [...tagReferences, ...materializedTabs.flatMap(({ references }) => references)],
+    references: [...tagReferences, ...tabsWithReferences.flatMap(({ references }) => references)],
     ...(resolve?.outcome !== undefined && { sharingSavedObjectProps: resolve }),
   };
 };
 
-/** Converts Discover's runtime state into a create or upsert request body. */
+/** Converts a Discover session into a create or upsert request body. */
 export const toDiscoverSessionApiData = (
   session: Pick<DiscoverSession, 'title' | 'description' | 'tabs' | 'tags'>
 ): ApiData => ({
@@ -71,61 +59,57 @@ export const toDiscoverSessionApiData = (
   tabs: session.tabs.map(toApiTab),
 });
 
-/** Converts one API tab into Discover runtime state. */
+/** Rebuilds saved-object references from the API document without rebuilding Discover tabs. */
+export const getDiscoverSessionReferences = (data: ApiData): SavedObjectReference[] => {
+  const { references: tagReferences } = toStoredTags({ tags: data.tags });
+  const tabReferences = data.tabs.flatMap((tab) => {
+    const { references } = toStoredTab(tab, { refNamePrefix: `tab_${tab.id}` });
+    return references;
+  });
+
+  return [...tagReferences, ...tabReferences];
+};
+
 const fromApiTab = (
-  apiTab: ApiTab,
-  previousTab: DiscoverSessionTab | undefined,
-  inlineRuntimeIdsBySpec: Map<string, string>
+  apiTab: ApiTab
 ): { tab: DiscoverSessionTab; references: SavedObjectReference[] } => {
-  const { state, references } = toStoredTab(apiTab, { refNamePrefix: `tab_${apiTab.id}` });
-  const storedSearchSource = injectReferences(
-    parseSearchSourceJSON(state.kibanaSavedObjectMeta.searchSourceJSON),
+  // Reuse the stored-format conversion to rebuild search source fields and references in memory.
+  const { state: storedTab, references } = toStoredTab(apiTab, {
+    refNamePrefix: `tab_${apiTab.id}`,
+  });
+  const serializedSearchSource = injectReferences(
+    parseSearchSourceJSON(storedTab.kibanaSavedObjectMeta.searchSourceJSON),
     references
-  );
-  const runtimeSearchSource = toRuntimeSearchSource(
-    apiTab,
-    storedSearchSource,
-    previousTab,
-    inlineRuntimeIdsBySpec
-  );
-  const searchSourceWithGlobalFilters = restoreGlobalFiltersFromPreviousTab(
-    runtimeSearchSource,
-    previousTab
-  );
-  const serializedSearchSource = normalizeRuntimeFilters(searchSourceWithGlobalFilters);
-  const controlOrders = getReusableControlOrders(
-    apiTab.control_panels,
-    previousTab?.controlGroupJson
   );
 
   const tab: DiscoverSessionTab = {
     id: apiTab.id,
     label: apiTab.label,
     sort: toStoredSort(apiTab.sort),
-    columns: state.columns,
-    grid: state.grid,
-    hideChart: apiTab.hide_chart,
-    hideTable: apiTab.hide_table,
-    isTextBasedQuery: state.isTextBasedQuery,
+    columns: storedTab.columns,
+    grid: storedTab.grid,
+    viewMode: storedTab.viewMode,
+    rowHeight: storedTab.rowHeight,
+    headerRowHeight: storedTab.headerRowHeight,
+    rowsPerPage: storedTab.rowsPerPage,
+    sampleSize: storedTab.sampleSize,
+    density: storedTab.density,
+    documentsDisplayMode: storedTab.documentsDisplayMode,
+    jsonModeSettings: storedTab.jsonModeSettings,
+    isTextBasedQuery: storedTab.isTextBasedQuery,
     usesAdHocDataView: apiTab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
     serializedSearchSource,
-    viewMode: state.viewMode,
+    hideChart: apiTab.hide_chart,
+    hideTable: apiTab.hide_table,
     hideAggregatedPreview: apiTab.hide_aggregated_preview,
-    rowHeight: state.rowHeight,
-    headerRowHeight: state.headerRowHeight,
     esqlApproximation: 'esql_approximation' in apiTab ? apiTab.esql_approximation : undefined,
     timeRestore: apiTab.time_range !== undefined,
     timeRange: apiTab.time_range,
     refreshInterval: apiTab.refresh_interval,
-    rowsPerPage: state.rowsPerPage,
-    sampleSize: state.sampleSize,
     breakdownField: apiTab.breakdown_field,
     chartInterval: apiTab.chart_interval,
-    density: state.density,
-    documentsDisplayMode: state.documentsDisplayMode,
-    jsonModeSettings: state.jsonModeSettings,
-    visContext: toRuntimeVisContext(apiTab, previousTab),
-    controlGroupJson: toControlGroupJson(apiTab.control_panels, controlOrders),
+    visContext: fromApiVisContext(apiTab.vis_context, apiTab.breakdown_field),
+    controlGroupJson: toControlGroupJson(apiTab.control_panels),
   };
 
   return {
@@ -134,43 +118,20 @@ const fromApiTab = (
   };
 };
 
-/** Converts one runtime tab into its public API representation. */
 const toApiTab = (tab: DiscoverSessionTab): ApiTab => {
-  const serializedSearchSource = toApiSearchSource(tab);
-  const attributes: Parameters<typeof fromStoredTab>[0] = {
-    sort: tab.sort,
-    columns: tab.columns,
-    grid: tab.grid,
-    hideChart: tab.hideChart,
-    hideTable: tab.hideTable,
-    isTextBasedQuery: tab.isTextBasedQuery,
-    usesAdHocDataView: tab.usesAdHocDataView,
-    kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(serializedSearchSource) },
-    viewMode: tab.viewMode,
-    hideAggregatedPreview: tab.hideAggregatedPreview,
-    rowHeight: tab.rowHeight,
-    headerRowHeight: tab.headerRowHeight,
-    esqlApproximation: tab.esqlApproximation,
-    timeRestore: tab.timeRestore,
-    timeRange: tab.timeRange,
-    refreshInterval: tab.refreshInterval,
-    rowsPerPage: tab.rowsPerPage,
-    sampleSize: tab.sampleSize,
-    breakdownField: tab.breakdownField,
-    chartInterval: tab.chartInterval,
-    density: tab.density,
-    documentsDisplayMode: tab.documentsDisplayMode,
-    jsonModeSettings: tab.jsonModeSettings,
-    visContext: tab.visContext,
-    controlGroupJson: tab.controlGroupJson,
+  const { id, label, serializedSearchSource: _searchSource, ...tabAttributes } = tab;
+  // Only the search source needs a different shape here. The transformer selects the API fields.
+  const storedTab: Parameters<typeof fromStoredTab>[0] = {
+    ...tabAttributes,
+    kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(toApiSearchSource(tab)) },
   };
-  const apiTab = fromStoredTab(attributes);
+  const apiTab = fromStoredTab(storedTab);
   const visContext = toApiVisContext(tab.visContext);
   const controlPanels = toApiControlPanels(tab.controlGroupJson);
 
   return {
-    id: tab.id,
-    label: tab.label,
+    id,
+    label,
     ...apiTab,
     hide_chart: tab.hideChart,
     hide_table: tab.hideTable,
@@ -190,110 +151,7 @@ const toApiTab = (tab: DiscoverSessionTab): ApiTab => {
   };
 };
 
-/**
- * The API does not store IDs for inline Data Views. Keep the ID of an unchanged tab; otherwise
- * reuse the ID already assigned to the same spec, or create a new one.
- */
-const toRuntimeSearchSource = (
-  apiTab: ApiTab,
-  searchSource: SerializedSearchSourceFields,
-  previousTab: DiscoverSessionTab | undefined,
-  inlineRuntimeIdsBySpec: Map<string, string>
-): SerializedSearchSourceFields => {
-  const { index } = searchSource;
-  if (
-    apiTab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE ||
-    !index ||
-    typeof index === 'string'
-  ) {
-    return searchSource;
-  }
-
-  const specKey = getInlineDataViewSpecKey(apiTab.data_source);
-  const previousRuntimeId = getReusablePreviousInlineDataViewId(previousTab, specKey);
-  const runtimeId = previousRuntimeId ?? inlineRuntimeIdsBySpec.get(specKey) ?? uuidv4();
-  inlineRuntimeIdsBySpec.set(specKey, runtimeId);
-
-  return {
-    ...searchSource,
-    index: {
-      ...index,
-      id: runtimeId,
-    },
-    ...(Array.isArray(searchSource.filter) && {
-      filter: searchSource.filter.map((filter) => {
-        if (filter.meta.index !== undefined) {
-          return filter;
-        }
-
-        return {
-          ...filter,
-          meta: { ...filter.meta, index: runtimeId },
-        };
-      }),
-    }),
-  };
-};
-
-/** Restores global filters omitted by the API when applying a save response. */
-const restoreGlobalFiltersFromPreviousTab = (
-  searchSource: SerializedSearchSourceFields,
-  previousTab: DiscoverSessionTab | undefined
-): SerializedSearchSourceFields => {
-  const globalFilters = previousTab?.serializedSearchSource.filter?.filter(isFilterPinned);
-  if (!globalFilters?.length) {
-    return searchSource;
-  }
-
-  // The save response replaces the session used to rebuild the UI and compare unsaved changes.
-  // Keep pinned filters in this in-memory copy so they remain applied after Save and Save As.
-  // The tab mapper puts them in global state; the API write transform excludes them from storage.
-  return {
-    ...searchSource,
-    filter: [...globalFilters, ...(searchSource.filter ?? [])],
-  };
-};
-
-const normalizeRuntimeFilters = (
-  searchSource: SerializedSearchSourceFields
-): SerializedSearchSourceFields => {
-  const { filter } = searchSource;
-  if (!filter) {
-    return searchSource;
-  }
-
-  // Use the same filter defaults as FilterManager so loading a session does not mark it as changed.
-  // Normalize a copy because pinned filters can still belong to the previous tab's state.
-  return {
-    ...searchSource,
-    filter: mapAndFlattenFilters(cloneDeep(filter)),
-  };
-};
-
-/** Returns the previous order numbers only when the save response preserves the control sequence. */
-const getReusableControlOrders = (
-  controlPanels: ApiTab['control_panels'],
-  previousControlGroupJson: string | undefined
-): number[] | undefined => {
-  if (!controlPanels?.length || !previousControlGroupJson) {
-    return undefined;
-  }
-
-  const previousPanels = parseOrderedControlPanels(previousControlGroupJson);
-  const hasSameSequence =
-    controlPanels.length === previousPanels.length &&
-    controlPanels.every(({ id }, index) => id === previousPanels[index].id);
-
-  if (!hasSameSequence) {
-    return undefined;
-  }
-
-  // The API preserves the sequence, but not gaps such as 0, 2 after deleting a control.
-  // Keep those runtime numbers after saving so the mounted renderer and saved state agree.
-  return previousPanels.map(({ panel }) => panel.order);
-};
-
-/** Removes the runtime ID only from filters targeting the tab's inline Data View. */
+/** Removes the ID only from filters targeting the tab's inline Data View. */
 const toApiSearchSource = (tab: DiscoverSessionTab): SerializedSearchSourceFields => {
   const searchSource = tab.serializedSearchSource;
   const inlineDataViewId = getInlineDataViewId(searchSource);
@@ -318,35 +176,7 @@ const toApiSearchSource = (tab: DiscoverSessionTab): SerializedSearchSourceField
   return { ...searchSource, filter };
 };
 
-/** Keeps a tab's runtime ID only while its inline data view spec is unchanged. */
-const getReusablePreviousInlineDataViewId = (
-  tab: DiscoverSessionTab | undefined,
-  currentSpecKey: string
-): string | undefined => {
-  if (!tab || tab.isTextBasedQuery || !tab.usesAdHocDataView) {
-    return undefined;
-  }
-
-  const { index } = tab.serializedSearchSource;
-  if (!index || typeof index === 'string' || index.id === undefined) {
-    return undefined;
-  }
-
-  const previousDataView = fromStoredDataView(index);
-  if (getInlineDataViewSpecKey(previousDataView) !== currentSpecKey) {
-    return undefined;
-  }
-
-  return index.id;
-};
-
-/**
- * Builds the key used to share a runtime ID. Previous runtime Data Views are converted back to the
- * API shape first, so extra runtime fields do not make an unchanged Data View look different.
- */
-const getInlineDataViewSpecKey = (dataView: AsCodeDataView): string => stableStringify(dataView);
-
-/** Returns the ID of a runtime inline data view. */
+/** Returns the tab's inline Data View ID. */
 const getInlineDataViewId = (searchSource: SerializedSearchSourceFields): string | undefined => {
   const { index } = searchSource;
   return index && typeof index !== 'string' ? index.id : undefined;

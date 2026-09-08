@@ -14,6 +14,7 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { cloneDeep } from 'lodash';
 import type { DiscoverSessionClient } from './api_client';
 import { createDiscoverSessionPersistence } from './persistence';
 
@@ -135,6 +136,66 @@ describe('Discover session persistence', () => {
         tabs: [expect.objectContaining({ id: 'logs-tab' })],
       })
     );
+  });
+
+  it.each([
+    { action: 'Save', copyOnSave: false, savedId: 'resolved-session-id' },
+    { action: 'Save As', copyOnSave: true, savedId: 'copied-session-id' },
+  ])(
+    'keeps the submitted tabs after $action and uses the returned identity and metadata',
+    async ({ copyOnSave, savedId }) => {
+      const submittedSession = cloneDeep(session);
+      const apiClient = createApiClient();
+      // The response includes defaults, but saving must not reload the already open tabs.
+      const saveResponse: ApiResponse = {
+        ...apiResponse,
+        id: savedId,
+        meta: { managed: true },
+      };
+      apiClient.create.mockResolvedValue(saveResponse);
+      apiClient.upsert.mockResolvedValue(saveResponse);
+      const persistence = createDiscoverSessionPersistence({
+        apiClient,
+        legacyClient: savedSearchPluginMock.createStartContract(),
+        useHttpApi: true,
+      });
+
+      const savedSession = await persistence.save(submittedSession, { copyOnSave });
+
+      expect(savedSession).toStrictEqual({
+        ...submittedSession,
+        id: savedId,
+        managed: true,
+        references: [
+          {
+            id: 'logs-data-view',
+            type: 'index-pattern',
+            name: 'tab_logs-tab.kibanaSavedObjectMeta.searchSourceJSON.index',
+          },
+        ],
+      });
+      expect(submittedSession).toStrictEqual(session);
+      expect(apiClient.get).not.toHaveBeenCalled();
+    }
+  );
+
+  it('creates a new session without an ID and keeps the submitted tabs', async () => {
+    const { id: _id, ...newSession } = session;
+    const apiClient = createApiClient();
+    const persistence = createDiscoverSessionPersistence({
+      apiClient,
+      legacyClient: savedSearchPluginMock.createStartContract(),
+      useHttpApi: true,
+    });
+
+    const savedSession = await persistence.save(newSession, {});
+
+    expect(apiClient.create).toHaveBeenCalledWith(apiData);
+    expect(apiClient.upsert).not.toHaveBeenCalled();
+    expect(apiClient.get).not.toHaveBeenCalled();
+    expect(savedSession?.id).toBe(apiResponse.id);
+    expect(savedSession?.tabs).toStrictEqual(newSession.tabs);
+    expect(newSession).not.toHaveProperty('id');
   });
 
   it('uses the legacy client when the local switch is disabled', async () => {

@@ -14,7 +14,8 @@ import type {
   SavedSearchPublicPluginStart,
 } from '@kbn/saved-search-plugin/public';
 import type { DiscoverSessionClient } from './api_client';
-import { fromDiscoverSessionApiResponse, toDiscoverSessionApiData } from './state_adapter';
+import { prepareDiscoverSession } from './prepare_session';
+import { getDiscoverSessionReferences, toDiscoverSessionApiData } from './state_adapter';
 
 type LegacyDiscoverSessionClient = Pick<
   SavedSearchPublicPluginStart,
@@ -30,8 +31,8 @@ interface DiscoverSessionLoadResult {
   warnings: DiscoverSessionLoadWarning[];
 }
 
-// This temporary contract keeps the legacy save types while Discover switches persistence paths.
-// Replace those types when the legacy path is removed.
+// Keep the legacy save types while callers use the existing save flow.
+// Revisit those types when the legacy path is removed; the persistence service can remain.
 export interface DiscoverSessionPersistence {
   get: (id: string) => Promise<DiscoverSessionLoadResult>;
   save: (
@@ -51,32 +52,46 @@ export const createDiscoverSessionPersistence = ({
   useHttpApi: boolean;
 }): DiscoverSessionPersistence => {
   if (!useHttpApi) {
-    return {
-      get: async (id) => ({
-        session: await legacyClient.getDiscoverSession(id),
-        warnings: [],
-      }),
-      save: (session, options) => legacyClient.saveDiscoverSession(session, options),
-    };
+    return createLegacyPersistence(legacyClient);
   }
 
   return {
     get: async (id) => {
       const response = await apiClient.get(id);
       return {
-        session: fromDiscoverSessionApiResponse(response, response.resolve),
+        session: prepareDiscoverSession(response, response.resolve),
         warnings: response.warnings ?? [],
       };
     },
     save: async (session, options) => {
       const data = toDiscoverSessionApiData(session);
+      let response: Awaited<ReturnType<DiscoverSessionClient['create']>>;
+
       if (options.copyOnSave || session.id === undefined) {
-        const response = await apiClient.create(data);
-        return fromDiscoverSessionApiResponse(response, undefined, session.tabs);
+        response = await apiClient.create(data);
+      } else {
+        response = await apiClient.upsert(session.id, data);
       }
 
-      const response = await apiClient.upsert(session.id, data);
-      return fromDiscoverSessionApiResponse(response, undefined, session.tabs);
+      // Saving confirms the submitted tabs; it does not reload them. The API document omits
+      // local values such as pinned filters, inline IDs, and the live chart fingerprint.
+      return {
+        ...session,
+        id: response.id,
+        managed: response.meta.managed ?? false,
+        references: getDiscoverSessionReferences(response.data),
+      };
     },
   };
 };
+
+// Remove this fallback and the flag once Discover uses only HTTP.
+const createLegacyPersistence = (
+  legacyClient: LegacyDiscoverSessionClient
+): DiscoverSessionPersistence => ({
+  get: async (id) => ({
+    session: await legacyClient.getDiscoverSession(id),
+    warnings: [],
+  }),
+  save: (session, options) => legacyClient.saveDiscoverSession(session, options),
+});

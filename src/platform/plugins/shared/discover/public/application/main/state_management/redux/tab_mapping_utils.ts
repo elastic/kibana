@@ -31,6 +31,7 @@ export const fromSavedObjectTabToAppState = ({
   return omitBy<DiscoverAppState>(
     {
       columns: tab.columns,
+      // Pinned filters already go in global state. Don't add them here too.
       filters: tab.serializedSearchSource.filter?.filter((filter) => !isFilterPinned(filter)),
       grid: tab.grid,
       hideChart: tab.hideChart,
@@ -70,23 +71,24 @@ export const fromSavedObjectTabToTabState = ({
   profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
   const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
-  const serializedGlobalFilters = tab.serializedSearchSource.filter?.filter(isFilterPinned);
 
-  const globalState: TabState['globalState'] = {
+  // Global filters are pinned filters. They can arrive mixed with unpinned filters, so separate them.
+  // See FilterManager.partitionFilters in data/public/query/filter_manager/filter_manager.ts:80.
+  const incomingPinnedFilters = tab.serializedSearchSource.filter?.filter(isFilterPinned);
+
+  // Keep the current list, even if it's empty. Don't bring back filters the user removed.
+  let pinnedFilters = existingTab?.globalState.filters;
+  if (pinnedFilters === undefined && incomingPinnedFilters?.length) {
+    pinnedFilters = incomingPinnedFilters;
+  }
+
+  const globalState = {
     timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
     refreshInterval: tab.timeRestore
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
+    ...(pinnedFilters !== undefined && { filters: pinnedFilters }),
   };
-
-  const storedGlobalFilters = serializedGlobalFilters?.length ? serializedGlobalFilters : undefined;
-
-  // Keep the current global filters, even an empty list, so old pinned filters do not reappear.
-  const globalFilters = existingTab?.globalState.filters ?? storedGlobalFilters;
-
-  if (globalFilters !== undefined) {
-    globalState.filters = globalFilters;
-  }
 
   return {
     ...DEFAULT_TAB_STATE,

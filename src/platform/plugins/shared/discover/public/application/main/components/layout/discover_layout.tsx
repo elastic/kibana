@@ -506,7 +506,7 @@ const componentStyles = {
   }),
   sidebarContainer: css({
     width: '100%',
-    minHeight: 0,
+    height: '100%',
     display: 'flex',
     flex: '1 1 auto',
   }),
