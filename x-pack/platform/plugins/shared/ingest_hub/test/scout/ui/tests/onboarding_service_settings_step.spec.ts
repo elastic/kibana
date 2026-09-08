@@ -272,6 +272,50 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(cloudtrailRow.getByText('eu-west-1')).toBeVisible();
   });
 
+  // ── Region lock after deploy ────────────────────────────────────────────
+
+  test('global region field is disabled when policyIdsByInstance is non-empty', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      detectAndReviewStep: { policyIdsByInstance: { cloudtrail: 'policy-id-1' } },
+    });
+
+    const comboBox = page.testSubj.locator('serviceSettingsStep-globalRegion');
+    await expect(comboBox).toBeDisabled();
+  });
+
+  test('global region field is disabled when a service status is not error or timeout', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      detectAndReviewStep: { serviceStatuses: { cloudtrail: 'success' } },
+    });
+
+    const comboBox = page.testSubj.locator('serviceSettingsStep-globalRegion');
+    await expect(comboBox).toBeDisabled();
+  });
+
+  test('global region field is enabled when all service statuses are error or timeout', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      detectAndReviewStep: {
+        policyIdsByInstance: {},
+        serviceStatuses: { cloudtrail: 'error', waf: 'timeout' },
+      },
+    });
+
+    const comboBox = page.testSubj.locator('serviceSettingsStep-globalRegion');
+    await expect(comboBox).not.toBeDisabled();
+  });
+
   test('Continue is disabled without global region', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['cloudtrail'],
