@@ -213,6 +213,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
 
   return (
     <SavedObjectSaveModalWithSaveResult
+      disableModal
       hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
       onClose={onClose}

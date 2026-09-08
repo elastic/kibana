@@ -11,14 +11,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-} from '@elastic/eui';
+import { LoadingModal } from './loading_modal';
+
 interface LoadContentArgs {
   closeModal: () => void;
 }
@@ -34,35 +28,17 @@ export const openLazyModal = ({
   loadContent,
   onClose: onCloseCallback,
 }: OpenLazyModalParams): void => {
-  let unmount: ReturnType<ReturnType<typeof toMountPoint>> | undefined;
+  let overlayRef: ReturnType<typeof core.overlays.openModal> | undefined;
 
   const closeModal = () => {
-    unmount?.();
-    unmount = undefined;
+    overlayRef?.close();
     onCloseCallback?.();
   };
 
-  const mount = toMountPoint(
-    <LazyModal loadContent={loadContent} closeModal={closeModal} />,
-    core
+  overlayRef = core.overlays.openModal(
+    toMountPoint(<LazyModal loadContent={loadContent} closeModal={closeModal} />, core)
   );
-  unmount = mount(document.createElement('div'));
 };
-
-function LoadingModal({ onClose }: { onClose: () => void }) {
-  return (
-    <EuiModal onClose={onClose}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiSkeletonTitle size="xs" />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiSkeletonText />
-      </EuiModalBody>
-    </EuiModal>
-  );
-}
 
 function LazyModal({
   loadContent,

@@ -75,6 +75,8 @@ interface Props<T = void> {
   isValid?: boolean;
   customModalTitle?: string | React.ReactNode;
   theme: WithEuiThemeProps['theme'];
+  /** When true, renders content without wrapping in EuiModal */
+  disableModal?: boolean;
 }
 
 export interface SaveModalState {
@@ -168,13 +170,8 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
         : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
     });
 
-    return (
-      <EuiModal
-        data-test-subj="savedObjectSaveModal"
-        onClose={this.props.onClose}
-        css={styles}
-        aria-labelledby={modalTitleId}
-      >
+    const content = (
+      <>
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
@@ -216,6 +213,21 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
             <EuiFlexItem grow={false}>{this.renderConfirmButton()}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalFooter>
+      </>
+    );
+
+    return this.props.disableModal ? (
+      <div data-test-subj="savedObjectSaveModal" css={styles}>
+        {content}
+      </div>
+    ) : (
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
+      >
+        {content}
       </EuiModal>
     );
   }
