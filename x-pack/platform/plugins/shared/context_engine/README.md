@@ -267,6 +267,11 @@ turned analysis on. The conversation it creates is private to that user, Agent
 Builder's default: a run reads the index's data under the owner's privileges,
 and its rounds quote what it read.
 
+A managed workflow instance is keyed by `(workflowId, spaceId)`, but an AI index
+is global and writable from any space, so the instance is installed in the
+default space rather than the caller's. Enable, disable and delete therefore
+address the same instance whichever space the write came from.
+
 The workflow carries a `concurrency` guard keyed on the AI index with
 `strategy: drop`, so two runs for one index never overlap.
 

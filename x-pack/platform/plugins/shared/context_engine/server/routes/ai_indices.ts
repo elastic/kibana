@@ -8,13 +8,7 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type {
-  ElasticsearchClient,
-  IRouter,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
@@ -306,7 +300,6 @@ export const registerAiIndexRoutes = ({
   getAiIndexService,
   getImprovementsService,
   getScheduleService,
-  getSpaceId,
   getActions,
 }: {
   router: IRouter;
@@ -314,16 +307,14 @@ export const registerAiIndexRoutes = ({
   getAiIndexService: () => AiIndexService;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
-  getSpaceId: (request: KibanaRequest) => string;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+  const reconcileSchedule = async (aiIndexId: string) => {
     try {
       const aiIndex = await getAiIndexService().get(aiIndexId);
       await getScheduleService().reconcile({
         aiIndexId,
         ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
-        spaceId: getSpaceId(request),
       });
     } catch (error) {
       logger.warn(
@@ -367,7 +358,7 @@ export const registerAiIndexRoutes = ({
           });
           await getAiIndexService().create(id, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id, request);
+          await reconcileSchedule(id);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -414,7 +405,7 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -612,7 +603,7 @@ export const registerAiIndexRoutes = ({
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
@@ -658,7 +649,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
           await getScheduleService()
-            .remove({ aiIndexId, spaceId: getSpaceId(request) })
+            .remove({ aiIndexId })
             .catch((error) => {
               logger.warn(
                 `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${

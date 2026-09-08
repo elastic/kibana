@@ -189,7 +189,6 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
-      getSpaceId: () => 'default',
       getActions: async () => actions,
     });
   });
@@ -853,7 +852,6 @@ describe('ai indices routes', () => {
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
         feedbackAnalysis,
-        spaceId: 'default',
       });
     });
 
@@ -883,7 +881,6 @@ describe('ai indices routes', () => {
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
         feedbackAnalysis,
-        spaceId: 'default',
       });
     });
 
@@ -898,7 +895,6 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
-        spaceId: 'default',
       });
     });
 
@@ -921,7 +917,6 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.remove).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
-        spaceId: 'default',
       });
     });
 

@@ -13,7 +13,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -62,7 +61,6 @@ export class ContextEnginePlugin
   private createImprovementsService?: (esClient: ElasticsearchClient) => ImprovementsService;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
-  private spaces?: SpacesPluginStart;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
@@ -146,9 +144,6 @@ export class ContextEnginePlugin
       return this.scheduleService;
     };
 
-    const getSpaceId = (request: KibanaRequest) =>
-      this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
@@ -156,7 +151,6 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       getScheduleService,
-      getSpaceId,
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
@@ -255,8 +249,6 @@ export class ContextEnginePlugin
         }`
       );
     });
-
-    this.spaces = startDeps.spaces;
 
     this.scheduleService = createFeedbackAnalysisScheduleService({
       logger: this.logger,

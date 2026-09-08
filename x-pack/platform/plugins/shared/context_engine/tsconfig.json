@@ -16,6 +16,7 @@
     "@kbn/actions-plugin",
     "@kbn/data-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/llm-trace-waterfall",
     "@kbn/core",
     "@kbn/core-http-browser",

@@ -29,11 +29,10 @@ describe('createFeedbackAnalysisScheduleService', () => {
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: true, schedule: { interval: '6h' } },
-      spaceId: 'marketing',
     });
 
     expect(client.install).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'marketing',
+      spaceId: 'default',
       workflowIdSuffix: 'orders',
       values: { aiIndexId: 'orders', intervalMinutes: 360 },
     });
@@ -44,7 +43,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: true },
-      spaceId: 'default',
     });
 
     expect(client.install).toHaveBeenCalledWith(
@@ -57,7 +55,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: false, schedule: { interval: '1d' } },
-      spaceId: 'default',
     });
 
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
@@ -68,7 +65,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
   });
 
   it('treats a removed analysis block as disabled', async () => {
-    await service.reconcile({ aiIndexId: 'orders', spaceId: 'default' });
+    await service.reconcile({ aiIndexId: 'orders' });
 
     expect(client.uninstall).toHaveBeenCalled();
     expect(client.install).not.toHaveBeenCalled();
@@ -78,12 +75,10 @@ describe('createFeedbackAnalysisScheduleService', () => {
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: true, schedule: { interval: '1d' } },
-      spaceId: 'default',
     });
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: true, schedule: { interval: '30m' } },
-      spaceId: 'default',
     });
 
     expect(client.install).toHaveBeenLastCalledWith(
@@ -96,7 +91,6 @@ describe('createFeedbackAnalysisScheduleService', () => {
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: true, schedule: { interval: 'whenever' } },
-      spaceId: 'default',
     });
 
     expect(client.install).toHaveBeenCalledWith(
@@ -106,24 +100,33 @@ describe('createFeedbackAnalysisScheduleService', () => {
   });
 
   it('tears the schedule down when the AI index is deleted', async () => {
-    await service.remove({ aiIndexId: 'orders', spaceId: 'marketing' });
+    await service.remove({ aiIndexId: 'orders' });
 
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'marketing',
+      spaceId: 'default',
       workflowIdSuffix: 'orders',
     });
+  });
+
+  it('installs and uninstalls in the same space whichever space the write came from, since an AI index is global', async () => {
+    await service.reconcile({ aiIndexId: 'orders', feedbackAnalysis: { enabled: true } });
+    await service.reconcile({ aiIndexId: 'orders', feedbackAnalysis: { enabled: false } });
+
+    const [, installOptions] = client.install.mock.calls[0];
+    const [, uninstallOptions] = client.uninstall.mock.calls[0];
+
+    expect((installOptions as { spaceId: string }).spaceId).toBe('default');
+    expect((uninstallOptions as { spaceId: string }).spaceId).toBe('default');
   });
 
   it('gives each AI index its own schedule', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
       feedbackAnalysis: { enabled: true },
-      spaceId: 'default',
     });
     await service.reconcile({
       aiIndexId: 'customers',
       feedbackAnalysis: { enabled: true },
-      spaceId: 'default',
     });
 
     expect(
