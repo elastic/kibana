@@ -811,6 +811,7 @@ export class Authenticator {
     const isMinimalAuthentication = request.route.options.security?.authc?.enabled === 'minimal';
 
     // Minimal authentication can persist provider state only for a session that provider already owns.
+    // A different username from the same provider still triggers normal session replacement below.
     if (isMinimalAuthentication && !(ownsSession && authenticationResult.shouldUpdateState())) {
       this.logger.debug(
         'Session should not be changed for requests that require minimal authentication, skipping session update.'

@@ -11,6 +11,7 @@ jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
 import { errors } from '@elastic/elasticsearch';
+import type { DetailedPeerCertificate } from 'tls';
 
 import {
   elasticsearchServiceMock,
@@ -2135,6 +2136,108 @@ describe('Authenticator', () => {
       }
     );
 
+    it.each([
+      ['full', true],
+      ['minimal', 'minimal'],
+    ] as const)(
+      'replaces the PKI session when a new certificate authenticates a different user on a %s-auth API request',
+      async (_, enabled) => {
+        const provider = { name: 'pki1', type: 'pki' };
+        mockOptions = getMockOptions({
+          providers: { pki: { pki1: { order: 0 } } },
+          http: { enabled: false },
+        });
+        authenticator = new Authenticator(mockOptions);
+
+        const previousSession = sessionMock.createValue({
+          provider,
+          username: 'old-user',
+          state: { accessToken: 'old-token', peerCertificateFingerprint256: 'old-fingerprint' },
+        });
+        mockOptions.session.get.mockResolvedValue({ error: null, value: previousSession });
+        mockOptions.session.create.mockImplementation(async (request, value) =>
+          sessionMock.createValue({ ...value, sid: 'new-session-id' })
+        );
+
+        const request = httpServerMock.createKibanaRequest({
+          path: '/internal/search/es',
+          headers: { 'kbn-xsrf': 'true' },
+          kibanaRouteOptions: {
+            xsrfRequired: true,
+            access: 'internal',
+            security: {
+              authc: { enabled, reason: 'test' },
+              authz: { enabled: false, reason: 'test' },
+            },
+          },
+        });
+        const certificate = {
+          fingerprint256: 'new-fingerprint',
+          raw: Buffer.from('new-certificate'),
+        } as DetailedPeerCertificate;
+        certificate.issuerCertificate = certificate;
+        Object.defineProperty(request.socket, 'authorized', { value: true });
+        jest.spyOn(request.socket, 'getPeerCertificate').mockReturnValue(certificate);
+
+        const user = mockAuthenticatedUser({
+          username: 'new-user',
+          authentication_provider: provider,
+        });
+        mockOptions.clusterClient.asInternalUser.security.invalidateToken.mockResponse({
+          invalidated_tokens: 1,
+          previously_invalidated_tokens: 0,
+          error_count: 0,
+        });
+        mockOptions.clusterClient.asInternalUser.transport.request.mockResolvedValue({
+          access_token: 'new-token',
+          authentication: user,
+        });
+        const userProfileGrant = { type: 'accessToken', accessToken: 'new-token' } as const;
+        mockOptions.userProfileService.activate.mockResolvedValue(
+          userProfileMock.createWithSecurity({ uid: 'new-profile-id' })
+        );
+        const state = {
+          accessToken: 'new-token',
+          peerCertificateFingerprint256: certificate.fingerprint256,
+        };
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(
+            { ...user, profile_uid: 'new-profile-id' },
+            { authHeaders: { authorization: 'Bearer new-token' }, userProfileGrant, state }
+          )
+        );
+
+        expect(
+          mockOptions.clusterClient.asInternalUser.security.invalidateToken
+        ).toHaveBeenCalledWith({ token: 'old-token' });
+        expect(mockOptions.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/delegate_pki',
+          body: { x509_certificate_chain: [certificate.raw.toString('base64')] },
+        });
+        expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
+        expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          { username: user.username, userProfileId: 'new-profile-id', provider, state },
+          undefined
+        );
+        expect(mockOptions.session.update).not.toHaveBeenCalled();
+        expect(mockOptions.session.extend).not.toHaveBeenCalled();
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+        expectAuditEvents(
+          { action: 'user_logout', outcome: 'unknown' },
+          {
+            action: 'user_login',
+            outcome: 'success',
+            kibana: expect.objectContaining({ session_id: 'new-session-id' }),
+          }
+        );
+      }
+    );
+
     it('creates session whenever authentication provider returns state for system API requests', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({
@@ -3169,7 +3272,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
-    it('replaces existing session for a minimally authenticated request if provider returns new state', async () => {
+    it('updates existing session for a minimally authenticated request if provider returns new state', async () => {
       const user = mockAuthenticatedUser();
       const newState = { authorization: 'Basic yyy' };
       const request = httpServerMock.createKibanaRequest({
