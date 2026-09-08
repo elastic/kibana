@@ -214,7 +214,6 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
         <EuiButtonGroup
           isFullWidth
           buttonSize="m"
-          color="primary"
           legend=""
           options={[
             {
