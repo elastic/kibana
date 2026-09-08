@@ -114,10 +114,7 @@ function useColumnSelectorState({
 } {
   const itemsKey = selectorItemsKey(columns);
   const stableColumns = useMemo(() => parseSelectorItems(itemsKey), [itemsKey]);
-  const selectableIds = useMemo(
-    () => new Set(stableColumns.map((col) => col.id)),
-    [stableColumns]
-  );
+  const selectableIds = useMemo(() => new Set(stableColumns.map((col) => col.id)), [stableColumns]);
 
   const { visibleColumnIds, setVisibleColumnIds } = usePersistedColumnIds(
     storageKeyPrefix,
