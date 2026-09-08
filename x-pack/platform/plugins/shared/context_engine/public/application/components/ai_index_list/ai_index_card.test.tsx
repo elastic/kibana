@@ -149,4 +149,13 @@ describe('AiIndexCard', () => {
     fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
     expect(onDeleteClick).not.toHaveBeenCalled();
   });
+
+  it('shows a tooltip explaining why the delete action is disabled for managed indices', async () => {
+    renderAiIndexCard(buildAiIndex({ managed: true }));
+
+    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
+    fireEvent.mouseOver(screen.getByTestId('contextAiIndexCardDeleteAction'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('managed');
+  });
 });

@@ -119,7 +119,16 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                   <EuiContextMenuItem
                     key="delete"
                     icon="trash"
+                    hasAriaDisabled={aiIndex.managed}
                     disabled={aiIndex.managed}
+                    toolTipContent={
+                      aiIndex.managed
+                        ? i18n.translate(
+                            'xpack.contextEngine.landing.card.deleteActionManagedTooltip',
+                            { defaultMessage: 'This AI index is managed and cannot be deleted.' }
+                          )
+                        : undefined
+                    }
                     data-test-subj="contextAiIndexCardDeleteAction"
                     onClick={(event) => {
                       event.preventDefault();
@@ -130,7 +139,7 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                   >
                     <FormattedMessage
                       id="xpack.contextEngine.landing.card.deleteAction"
-                      defaultMessage="Delete"
+                      defaultMessage="Delete AI index"
                     />
                   </EuiContextMenuItem>,
                 ]}

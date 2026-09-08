@@ -36,7 +36,6 @@ export const AiIndexDeleteConfirmModal = ({
     services: { notifications },
   } = useKibana();
   const { deleteAiIndex, isDeleting } = useDeleteAiIndex();
-  const { summary, isLoading: isLoadingKiCount } = useKiList({ aiIndexId: aiIndex.id, size: 0 });
   const automationsCount = aiIndex.automations.length;
   const [deleteKnowledgeIndicators, setDeleteKnowledgeIndicators] = useState(true);
   const [deleteAutomations, setDeleteAutomations] = useState(true);
@@ -80,7 +79,7 @@ export const AiIndexDeleteConfirmModal = ({
     }
   };
 
-  const kiCount = summary.total;
+
 
   return (
     <EuiConfirmModal
@@ -119,11 +118,9 @@ export const AiIndexDeleteConfirmModal = ({
         label={
           <FormattedMessage
             id="xpack.contextEngine.landing.deleteModal.kiCheckbox"
-            defaultMessage="Also delete the backing index {index} {isLoading, select, true {} other {and its {count, plural, one {# Knowledge Indicator} other {# Knowledge Indicators}}}}"
+            defaultMessage="Also delete the backing index {index} and its Knowledge Indicators"
             values={{
               index: <EuiCode>{aiIndex.dest.value}</EuiCode>,
-              isLoading: isLoadingKiCount,
-              count: kiCount,
             }}
           />
         }
