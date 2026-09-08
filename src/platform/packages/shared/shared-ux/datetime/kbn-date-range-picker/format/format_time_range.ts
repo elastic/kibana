@@ -13,6 +13,7 @@ import moment from 'moment';
 import {
   ENGLISH_GRAMMAR,
   getActiveGrammar,
+  matchPreset,
   resolveNamedRangeAlias,
   type LocaleGrammar,
 } from '../parse';
@@ -26,7 +27,7 @@ import {
   DATE_TYPE_NOW,
   DATE_TYPE_RELATIVE,
 } from '../constants';
-import type { TimePrecision, TimeRange, TimeRangeTransformOptions, TimeUnit } from '../types';
+import type { TimePrecision, TimeRange, TimeRangeFormatOptions, TimeUnit } from '../types';
 
 /**
  * Trims a moment format string to the requested sub-minute precision.
@@ -43,16 +44,17 @@ export function applyTimePrecision(format: string, precision: TimePrecision = 's
 
 /**
  * Converts a parsed TimeRange into a human-readable display string.
+ * Absolute dates always use the picker's own format, never a consumer's input format.
  */
 export function timeRangeToDisplayText(
   timeRange: TimeRange,
-  options?: TimeRangeTransformOptions
+  options?: TimeRangeFormatOptions
 ): string {
   const {
     delimiter = DATE_RANGE_DISPLAY_DELIMITER,
-    dateFormat = DEFAULT_DATE_FORMAT,
     timePrecision = 's',
     locale,
+    presets = [],
   } = options ?? {};
   const grammar = getActiveGrammar(locale ?? i18n.getLocale());
 
@@ -60,6 +62,10 @@ export function timeRangeToDisplayText(
     return timeRange.value;
   }
   if (timeRange.isNaturalLanguage) {
+    // Text that matched a preset label shows the label as configured, not as typed
+    const preset = matchPreset(timeRange.value, presets);
+    if (preset?.label) return preset.label;
+
     // Resolve aliases (e.g. "yd" → "yesterday") before capitalizing
     const resolved = resolveNamedRangeAlias(timeRange.value);
     return resolved.charAt(0).toUpperCase() + resolved.slice(1);
@@ -80,11 +86,11 @@ export function timeRangeToDisplayText(
     }
   }
 
-  let startDateFormat = dateFormat;
-  let endDateFormat = dateFormat;
+  let startDateFormat: string = DEFAULT_DATE_FORMAT;
+  let endDateFormat: string = DEFAULT_DATE_FORMAT;
 
-  // Abbreviate absolute dates a little when using default format
-  if (timeRange.type.includes(DATE_TYPE_ABSOLUTE) && dateFormat === DEFAULT_DATE_FORMAT) {
+  // Abbreviate absolute dates a little
+  if (timeRange.type.includes(DATE_TYPE_ABSOLUTE)) {
     const currentYear = new Date().getFullYear();
     const startYear = timeRange.startDate?.getFullYear();
     const endYear = timeRange.endDate?.getFullYear();
@@ -131,19 +137,15 @@ export function timeRangeToDisplayText(
  */
 export function timeRangeToFullFormattedText(
   timeRange: TimeRange,
-  options?: TimeRangeTransformOptions
+  options?: TimeRangeFormatOptions
 ): string {
-  const {
-    delimiter = DATE_RANGE_DISPLAY_DELIMITER,
-    dateFormat = DEFAULT_DATE_FORMAT,
-    timePrecision = 'ms',
-  } = options ?? {};
+  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, timePrecision = 'ms' } = options ?? {};
 
   if (timeRange.isInvalid) {
     return timeRange.value;
   }
 
-  const format = applyTimePrecision(dateFormat, timePrecision);
+  const format = applyTimePrecision(DEFAULT_DATE_FORMAT, timePrecision);
   const formattedStart = timeRange.startDate
     ? formatAbsoluteInstant(timeRange.startDate, format)
     : timeRange.start;
@@ -290,6 +292,6 @@ function formatCompactRelativeTime(
 /**
  * Formats an absolute date for display using a moment format string.
  */
-function formatAbsoluteInstant(date: Date, dateFormat: string = DEFAULT_DATE_FORMAT): string {
+function formatAbsoluteInstant(date: Date, dateFormat: string): string {
   return moment(date).format(dateFormat);
 }
