@@ -62,6 +62,14 @@ const getConvertibleLayerName = (layerId: string): string =>
 /**
  * Detects query-based annotations in a visualization state. These rely on data views
  * and are not yet supported on ES|QL charts, so they block conversion.
+ *
+ * The state is intentionally probed structurally instead of via `XYVisualizationState`
+ * and `isAnnotationsLayer`: this hook is visualization-agnostic (`visualization.state`
+ * is `unknown` in the store and may belong to any vis type), mirroring the
+ * `getTrendlineLayerId` probe for metric state below. Trade-off: if the annotation
+ * layer shape ever changes (`layerType` / `annotations`), this returns `false` and
+ * the conversion guard silently disappears — keep it in sync with
+ * `XYAnnotationLayerConfig` (`@kbn/lens-common`).
  */
 export const hasQueryBasedAnnotations = (visualizationState: unknown): boolean => {
   const layers = (visualizationState as { layers?: unknown })?.layers;
