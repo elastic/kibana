@@ -228,9 +228,7 @@ describe('AppHeader adapter', () => {
   it('registers its initial title, updates it once, and unregisters', () => {
     const chrome = chromeServiceMock.createStartContract();
     const emissions: Array<{ title?: unknown } | undefined> = [];
-    const subscription = chrome.inlineAppHeader
-      .get$()
-      .subscribe((value) => emissions.push(value));
+    const subscription = chrome.inlineAppHeader.get$().subscribe((value) => emissions.push(value));
 
     const { rerender, unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
 
