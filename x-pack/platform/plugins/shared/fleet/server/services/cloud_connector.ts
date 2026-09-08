@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { isCloudConnectorSecretReference } from '../../common/types/models/cloud_connector';
 import type {
   CloudConnector,
+  CloudConnectorIacState,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
   AwsCloudConnectorVars,
@@ -48,6 +49,65 @@ import {
 } from '../errors';
 
 import { appContextService } from './app_context';
+
+const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
+  'templateSha',
+  'blueprintId',
+  'blueprintVersion',
+  'stackId',
+  'region',
+  'staticTemplate',
+  'cftUpgradeStatus',
+  'cftUpgradeCheckedAt',
+];
+
+export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
+  Boolean(iac && IAC_CONFIRM_KEYS.some((key) => iac[key] !== undefined));
+
+/**
+ * Maps a confirm-time IaC payload onto connector SO attributes.
+ * A static-template fallback stores the flag and clears templateSha.
+ */
+export const iacAttributesFromConfirm = (
+  iac: CloudConnectorIacState | undefined
+): Partial<CloudConnectorSOAttributes> => {
+  if (!iac || !hasIacConfirm(iac)) {
+    return {};
+  }
+
+  const attrs: Partial<CloudConnectorSOAttributes> = {};
+
+  if (iac.staticTemplate) {
+    attrs.staticTemplate = true;
+    attrs.templateSha = null;
+  } else if (iac.templateSha) {
+    attrs.staticTemplate = false;
+    attrs.templateSha = iac.templateSha;
+  } else if (iac.templateSha === null) {
+    attrs.templateSha = null;
+  }
+
+  if (iac.blueprintId !== undefined) {
+    attrs.blueprintId = iac.blueprintId;
+  }
+  if (iac.blueprintVersion !== undefined) {
+    attrs.blueprintVersion = iac.blueprintVersion;
+  }
+  if (iac.stackId !== undefined) {
+    attrs.stackId = iac.stackId;
+  }
+  if (iac.region !== undefined) {
+    attrs.region = iac.region;
+  }
+  if (iac.cftUpgradeStatus !== undefined) {
+    attrs.cftUpgradeStatus = iac.cftUpgradeStatus;
+  }
+  if (iac.cftUpgradeCheckedAt !== undefined) {
+    attrs.cftUpgradeCheckedAt = iac.cftUpgradeCheckedAt;
+  }
+
+  return attrs;
+};
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
@@ -256,6 +316,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         verification_status: 'pending',
+        ...iacAttributesFromConfirm(cloudConnector),
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -421,6 +482,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (cloudConnectorUpdate.vars) {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
+
+      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
       // Update the saved object
       const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(

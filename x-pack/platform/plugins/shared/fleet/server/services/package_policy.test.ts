@@ -1016,6 +1016,80 @@ describe('Package policy service', () => {
       }
     });
 
+    it('passes confirm-time IaC provenance when creating a cloud connector', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        cloud_connector_iac: {
+          templateSha: 'sha256:661cb7def1c7101f',
+          blueprintId: 'federated-identity',
+          blueprintVersion: '1.0.0',
+          staticTemplate: false,
+        },
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue({ id: 'cloud-connector-123' });
+
+      try {
+        await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(
+          soClient,
+          expect.objectContaining({
+            templateSha: 'sha256:661cb7def1c7101f',
+            blueprintId: 'federated-identity',
+            blueprintVersion: '1.0.0',
+            staticTemplate: false,
+          })
+        );
+      } finally {
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
     it('should return undefined when cloud connector setup is not required', async () => {
       const soClient = createSavedObjectClientMock();
       const enrichedPackagePolicy = {

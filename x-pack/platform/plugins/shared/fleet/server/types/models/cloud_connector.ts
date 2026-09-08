@@ -37,3 +37,16 @@ export const CloudConnectorSchemaV4 = CloudConnectorSchemaV3.extends({
   verification_started_at: schema.maybe(schema.string()),
   verification_failed_at: schema.maybe(schema.string()),
 });
+
+const CloudConnectorIacFields = {
+  templateSha: schema.maybe(schema.nullable(schema.string())),
+  blueprintId: schema.maybe(schema.nullable(schema.string())),
+  blueprintVersion: schema.maybe(schema.nullable(schema.string())),
+  stackId: schema.maybe(schema.string()),
+  region: schema.maybe(schema.string()),
+  staticTemplate: schema.maybe(schema.boolean()),
+  cftUpgradeStatus: schema.maybe(schema.string()),
+  cftUpgradeCheckedAt: schema.maybe(schema.string()),
+};
+
+export const CloudConnectorSchemaV5 = CloudConnectorSchemaV4.extends(CloudConnectorIacFields);

@@ -260,6 +260,34 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  cloud_connector_iac: schema.maybe(
+    schema.nullable(
+      schema.object(
+        {
+          templateSha: schema.maybe(
+            schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))
+          ),
+          blueprintId: schema.maybe(
+            schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))
+          ),
+          blueprintVersion: schema.maybe(
+            schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))
+          ),
+          stackId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
+          region: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+          staticTemplate: schema.maybe(schema.boolean()),
+          cftUpgradeStatus: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+          cftUpgradeCheckedAt: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+        },
+        {
+          meta: {
+            description:
+              'Transient IaC provenance copied onto the cloud connector when the package policy is saved.',
+          },
+        }
+      )
+    )
+  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),

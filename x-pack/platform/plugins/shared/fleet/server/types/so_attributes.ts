@@ -369,6 +369,14 @@ export interface CloudConnectorSOAttributes {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+  templateSha?: string | null;
+  blueprintId?: string | null;
+  blueprintVersion?: string | null;
+  stackId?: string;
+  region?: string;
+  staticTemplate?: boolean;
+  cftUpgradeStatus?: string;
+  cftUpgradeCheckedAt?: string;
 }
 
 export interface CloudOnboardingDeploymentSOAttributes {

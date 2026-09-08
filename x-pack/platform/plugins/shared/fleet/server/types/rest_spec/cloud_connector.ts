@@ -9,6 +9,17 @@ import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 
+const IacFieldsSchema = {
+  templateSha: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))),
+  blueprintId: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))),
+  blueprintVersion: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))),
+  stackId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
+  region: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+  staticTemplate: schema.maybe(schema.boolean()),
+  cftUpgradeStatus: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+  cftUpgradeCheckedAt: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+};
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -49,6 +60,7 @@ export const CreateCloudConnectorRequestSchema = {
         }),
       ])
     ),
+    ...IacFieldsSchema,
   }),
 };
 
@@ -74,6 +86,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacFieldsSchema,
   }),
 });
 
@@ -110,6 +123,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       created_at: schema.string(),
       updated_at: schema.string(),
       ...VerificationFieldsSchema,
+      ...IacFieldsSchema,
     }),
     { maxSize: 10000 }
   ),
@@ -135,6 +149,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacFieldsSchema,
   }),
 });
 
@@ -200,6 +215,7 @@ export const UpdateCloudConnectorRequestSchema = {
         ])
       )
     ),
+    ...IacFieldsSchema,
   }),
 };
 
@@ -215,6 +231,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacFieldsSchema,
   }),
 });
 

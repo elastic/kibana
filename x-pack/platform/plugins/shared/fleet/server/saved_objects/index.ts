@@ -56,6 +56,7 @@ import {
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
+  CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
@@ -1917,6 +1918,14 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_started_at: { type: 'date' },
           verification_failed_at: { type: 'date' },
+          templateSha: { type: 'keyword' },
+          blueprintId: { type: 'keyword' },
+          blueprintVersion: { type: 'keyword' },
+          stackId: { type: 'keyword' },
+          region: { type: 'keyword' },
+          staticTemplate: { type: 'boolean' },
+          cftUpgradeStatus: { type: 'keyword' },
+          cftUpgradeCheckedAt: { type: 'date' },
         },
       },
       modelVersions: {
@@ -2030,6 +2039,27 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
             create: CloudConnectorSchemaV4,
+          },
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                templateSha: { type: 'keyword' },
+                blueprintId: { type: 'keyword' },
+                blueprintVersion: { type: 'keyword' },
+                stackId: { type: 'keyword' },
+                region: { type: 'keyword' },
+                staticTemplate: { type: 'boolean' },
+                cftUpgradeStatus: { type: 'keyword' },
+                cftUpgradeCheckedAt: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV5,
           },
         },
       },
