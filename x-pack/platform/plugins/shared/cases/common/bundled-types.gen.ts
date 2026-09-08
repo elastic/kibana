@@ -2488,17 +2488,18 @@ export const PayloadWorkflow = lazySchema(() =>
         /**
          * The workflow ID.
          */
-        id: z.string(),
+        id: z.string().describe('The workflow ID.'),
         /**
          * The workflow name at the time the run was triggered.
          */
-        name: z.string(),
+        name: z.string().describe('The workflow name at the time the run was triggered.'),
         /**
          * The execution ID returned by the Workflows engine.
          */
-        executionId: z.string(),
+        executionId: z.string().describe('The execution ID returned by the Workflows engine.'),
       })
-      .optional(),
+      .optional()
+      .describe('Identifies the workflow that was run.'),
     /**
      * The context from which the workflow was triggered.
      */
@@ -2507,25 +2508,35 @@ export const PayloadWorkflow = lazySchema(() =>
         /**
          * The origin type.
          */
-        type: z.enum(['cases.case', 'cases.observable', 'cases.alert', 'cases.alerts']),
+        type: z
+          .enum(['cases.case', 'cases.observable', 'cases.alert', 'cases.alerts'])
+          .describe('The origin type.'),
         /**
          * The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
          */
-        id: z.string(),
+        id: z
+          .string()
+          .describe(
+            'The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).'
+          ),
         /**
          * For alert origins, the Elasticsearch index the alert lives in.
          */
-        index: z.string().optional(),
+        index: z
+          .string()
+          .optional()
+          .describe('For alert origins, the Elasticsearch index the alert lives in.'),
         /**
          * For observable origins, the observable type key.
          */
-        typeKey: z.string().optional(),
+        typeKey: z.string().optional().describe('For observable origins, the observable type key.'),
         /**
          * For observable origins, the observable value.
          */
-        value: z.string().optional(),
+        value: z.string().optional().describe('For observable origins, the observable value.'),
       })
-      .optional(),
+      .optional()
+      .describe('The context from which the workflow was triggered.'),
   })
 );
 export type PayloadWorkflow = z.infer<typeof PayloadWorkflow>;
