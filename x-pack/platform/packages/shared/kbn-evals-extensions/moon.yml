@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/core'
   - '@kbn/inference-plugin'
+  - '@kbn/inference-common'
 tags:
   - test-helper
   - package
