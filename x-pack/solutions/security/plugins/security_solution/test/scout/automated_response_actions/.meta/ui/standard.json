@@ -1,0 +1,23 @@
+{
+  "sha1": "5b9924af0cff5e4f35f80e6362ca2866f3ded42c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "0ddfd1731a3f092-23f354045137134",
+      "title": "Automated response actions on an alert shows isolate, kill-process, and the missing-field error for the seeded alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/automated_response_actions/ui/tests/automated_response_actions.spec.ts",
+        "line": 50,
+        "column": 3
+      }
+    }
+  ]
+}
