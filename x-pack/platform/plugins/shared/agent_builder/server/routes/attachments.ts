@@ -11,7 +11,7 @@ import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { isAgentBuilderError } from '@kbn/agent-builder-common';
+import { CONVERSATION_ID_MAX_LENGTH, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -28,6 +28,12 @@ import { createAttachmentPublicClient } from '../services/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from './route_security';
+
+// Defensive caps on client-supplied attachment fields to avoid unbounded request payloads.
+const ATTACHMENT_ID_MAX_LENGTH = 256;
+const ATTACHMENT_TYPE_MAX_LENGTH = 256;
+const ATTACHMENT_ORIGIN_MAX_LENGTH = 2048;
+const ATTACHMENT_DESCRIPTION_MAX_LENGTH = 2048;
 
 export function registerAttachmentRoutes({
   router,
@@ -63,6 +69,7 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
             }),
@@ -122,9 +129,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment.' },
               }),
             }),
@@ -187,6 +196,7 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
             }),
@@ -263,16 +273,19 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
             }),
             body: schema.object({
               id: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_ID_MAX_LENGTH,
                   meta: { description: 'Optional custom ID for the attachment.' },
                 })
               ),
               type: schema.string({
+                maxLength: ATTACHMENT_TYPE_MAX_LENGTH,
                 meta: {
                   description: 'The type of the attachment (e.g., text, esql, visualization).',
                 },
@@ -286,6 +299,7 @@ export function registerAttachmentRoutes({
               ),
               origin: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_ORIGIN_MAX_LENGTH,
                   meta: {
                     description:
                       'Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.',
@@ -294,6 +308,7 @@ export function registerAttachmentRoutes({
               ),
               description: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_DESCRIPTION_MAX_LENGTH,
                   meta: { description: 'Human-readable description of the attachment.' },
                 })
               ),
@@ -363,9 +378,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to update.' },
               }),
             }),
@@ -375,6 +392,7 @@ export function registerAttachmentRoutes({
               }),
               description: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_DESCRIPTION_MAX_LENGTH,
                   meta: { description: 'Optional new description for the attachment.' },
                 })
               ),
@@ -446,9 +464,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to delete.' },
               }),
             }),
@@ -525,9 +545,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to restore.' },
               }),
             }),
@@ -612,14 +634,17 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to rename.' },
               }),
             }),
             body: schema.object({
               description: schema.string({
+                maxLength: ATTACHMENT_DESCRIPTION_MAX_LENGTH,
                 meta: { description: 'The new description/name for the attachment.' },
               }),
             }),
@@ -700,14 +725,17 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to update.' },
               }),
             }),
             body: schema.object({
               origin: schema.string({
+                maxLength: ATTACHMENT_ORIGIN_MAX_LENGTH,
                 meta: {
                   description:
                     'The origin string (e.g., saved object ID for visualizations and dashboards).',
