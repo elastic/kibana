@@ -401,15 +401,24 @@ const resolveAuthorizedUniverse = async ({
  * Mirrors the Elasticsearch-side implicit DLS query: a document is visible when it carries no
  * privilege elements at all (public), OR when at least one element scoped to this requested space
  * (or to the global wildcard) matches. What "matches" means depends on `authz`:
- * - with `authz` (security plugin present), the element must additionally have ALL of its actions
- *   covered by what the caller holds (the `terms_set` clause);
+ * - with `authz` (security plugin present), the element must additionally either require no
+ *   actions at all (`count: 0` and no action names — see below) or have ALL of its actions covered
+ *   by what the caller holds (the `terms_set` clause);
  * - without `authz` (security plugin absent — dev / test), space scoping alone applies:
  *   privilege enforcement is skipped, matching the open-access semantics of every other
  *   Kibana surface in that configuration.
  *
+ * The `count: 0` escape is what makes a type that omits `getPermissions` public *within its
+ * spaces*, which is the contract {@link SmlTypeDefinition.getPermissions} advertises. Such a type
+ * still gets one element per space stamped, just with an empty action list. That branch also
+ * requires the element to carry no action names, so it is deliberately stricter than the
+ * Elasticsearch-side DLS query: the indexer derives `count` from the action list, so an element
+ * with `count: 0` *and* names is malformed and must fail CLOSED instead of reading as public.
+ *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
- * would turn the whole filter into a no-op.
+ * would turn the whole filter into a no-op. The `must_not exists` inside the `count: 0` branch is
+ * a different case — it sits *within* the `nested` query, where it is evaluated per child document.
  *
  * This is passed to the ES|QL `_query` API's `filter` parameter rather than expressed as a WHERE
  * clause, because ES|QL's index resolution excludes `nested` fields — they cannot be referenced as
@@ -448,11 +457,30 @@ const buildVisibilityFilter = ({
                 ...(authz
                   ? [
                       {
-                        terms_set: {
-                          [PERM_NAME_FIELD]: {
-                            terms: authz.authorizedActions,
-                            minimum_should_match_field: PERM_COUNT_FIELD,
-                          },
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            // `terms_set` cannot express minimum_should_match_field: 0.
+                            // The absent-name half is to be extra defensive: the indexer always writes
+                            // `count: actions.length`, so a `count: 0` element carrying action
+                            // names is malformed and must not be read.
+                            {
+                              bool: {
+                                filter: [
+                                  { term: { [PERM_COUNT_FIELD]: 0 } },
+                                  { bool: { must_not: [{ exists: { field: PERM_NAME_FIELD } }] } },
+                                ],
+                              },
+                            },
+                            {
+                              terms_set: {
+                                [PERM_NAME_FIELD]: {
+                                  terms: authz.authorizedActions,
+                                  minimum_should_match_field: PERM_COUNT_FIELD,
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ]

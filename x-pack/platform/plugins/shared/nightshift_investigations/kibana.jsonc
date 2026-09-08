@@ -13,10 +13,11 @@
     "requiredPlugins": [],
     "optionalPlugins": [
       "agentBuilder",
+      "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
-      "workflowsManagement"
+      "workflowsManagement",
     ],
-    "requiredBundles": []
-  }
+    "requiredBundles": [],
+  },
 }

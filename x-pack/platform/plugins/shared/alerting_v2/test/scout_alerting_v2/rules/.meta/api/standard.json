@@ -1,5 +1,5 @@
 {
-  "sha1": "9f4ae06174898bc23b4ea01dbb8ad4ad53f60190",
+  "sha1": "9a1898a97bf206dd27ea0e56ff406baaa348b136",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3602,6 +3602,32 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
         "line": 586,
         "column": 19
+      }
+    },
+    {
+      "id": "df929c73b65283e-0aca3362c154876",
+      "title": "Update rule API builder_type: should reject query change on a builder rule without explicit builder_type clear",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 606,
+        "column": 23
+      }
+    },
+    {
+      "id": "df929c73b65283e-f77a16dfe0afde9",
+      "title": "Update rule API builder_type: should allow query change on a builder rule when builder_type is explicitly cleared",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 623,
+        "column": 69
       }
     },
     {

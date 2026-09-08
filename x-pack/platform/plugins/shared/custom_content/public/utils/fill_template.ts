@@ -58,5 +58,9 @@ export async function fillTemplate(
     return obj;
   });
 
-  return liquid.parseAndRender(template.trim(), { rows: rowObjects, max: maxValues });
+  // Sync is ~1.4x faster for identical output: the async path awaits at every AST node, which only
+  // pays off with async filters or file-backed includes, and there are none. Registering either
+  // means going back to `parseAndRender` — a sync render does not reject on an async filter, it
+  // prints `[object Promise]` into the panel.
+  return liquid.parseAndRenderSync(template.trim(), { rows: rowObjects, max: maxValues });
 }

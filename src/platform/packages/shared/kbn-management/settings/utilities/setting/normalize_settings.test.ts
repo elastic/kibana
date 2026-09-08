@@ -91,7 +91,7 @@ describe('normalizeSettings', () => {
     const setting = { name: 'foo', value: { bar: 'baz' } };
     const settings = { foo: setting };
 
-    expect(() => normalizeSettings(settings)).toThrowError(
+    expect(() => normalizeSettings(settings)).toThrow(
       `incompatible SettingType: 'foo' type object | {"name":"foo","value":{"bar":"baz"}}`
     );
   });

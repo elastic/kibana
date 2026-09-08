@@ -184,9 +184,6 @@ export function createChromeApi({
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
     next: {
-      get isEnabled() {
-        return true;
-      },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
         register: (button: GlobalHeaderAiButton) => {

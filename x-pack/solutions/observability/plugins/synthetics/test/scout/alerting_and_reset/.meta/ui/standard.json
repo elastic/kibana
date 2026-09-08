@@ -1,5 +1,5 @@
 {
-  "sha1": "62c94183c87efdf02428489412a1615ee0ab101d",
+  "sha1": "e0e5fc69c60542b84cfcb157aaf594ff41c48581",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -84,7 +84,7 @@
     {
       "id": "8e3b6ee237d0715-74afbfcf9ca5efd",
       "title": "Creates a custom TLS alert rule can filter monitors by KQL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -93,14 +93,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 9
       }
     },
     {
       "id": "8e3b6ee237d0715-41c3eabe24bb637",
       "title": "Creates a custom TLS alert rule can filter monitors by type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -109,14 +109,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 10
       }
     },
     {
       "id": "8e3b6ee237d0715-761cf21fcc31efc",
       "title": "Creates a custom TLS alert rule can create rule and fire alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -125,7 +125,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 74
       }
     },

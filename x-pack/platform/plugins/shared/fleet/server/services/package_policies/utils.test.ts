@@ -97,7 +97,7 @@ describe('Package Policy Utils', () => {
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Reusable integration policies are only available with an Enterprise license'
       );
     });
@@ -107,7 +107,7 @@ describe('Package Policy Utils', () => {
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Reusable integration policies are only available with an Enterprise license'
       );
     });
@@ -131,7 +131,7 @@ describe('Package Policy Utils', () => {
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, output_id: 'some-output' })
-      ).rejects.toThrowError('Output per integration is only available with an enterprise license');
+      ).rejects.toThrow('Output per integration is only available with an enterprise license');
     });
 
     it('should throw if valid license and an incompatible output_id for the package is given', async () => {
@@ -146,7 +146,7 @@ describe('Package Policy Utils', () => {
           output_id: 'non-es-output',
           package: { name: 'apm', version: '1.0.0', title: 'APM' },
         })
-      ).rejects.toThrowError('Output type "kafka" is not usable with package "apm"');
+      ).rejects.toThrow('Output type "kafka" is not usable with package "apm"');
     });
 
     it('should throw if content package is being used', async () => {
@@ -165,7 +165,7 @@ describe('Package Policy Utils', () => {
             type: 'content',
           } as any
         )
-      ).rejects.toThrowError('Cannot create policy for content only packages');
+      ).rejects.toThrow('Cannot create policy for content only packages');
     });
 
     it('should not throw if valid license and valid output_id is provided and is not content package', async () => {
@@ -209,9 +209,7 @@ describe('Package Policy Utils', () => {
             policy_templates: [],
           } as any
         )
-      ).rejects.toThrowError(
-        '[data_stream.type]: required for stream in package "non-dynamic-pkg"'
-      );
+      ).rejects.toThrow('[data_stream.type]: required for stream in package "non-dynamic-pkg"');
     });
 
     it('should not throw if dynamic_signal_types package has a stream with undefined data_stream.type', async () => {
@@ -337,7 +335,7 @@ describe('Package Policy Utils', () => {
             ],
           } as any
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         '[data_stream.type]: required for stream in package "composable-integration"'
       );
     });

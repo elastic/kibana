@@ -1,5 +1,5 @@
 {
-  "sha1": "ecc8c9f7a82201dd1aa3167829e2c77f47ef3bfa",
+  "sha1": "7351580baceb983ab3a2840fe2ef683776bcd240",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -11,8 +11,21 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
-        "line": 7,
-        "column": 1
+        "line": 15,
+        "column": 17
+      }
+    },
+    {
+      "id": "002955b6e2ba042-c8a8f0b18e1608d",
+      "title": "Setup legacy log stream embeddable data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
+        "line": 19,
+        "column": 72
       }
     },
     {
@@ -94,6 +107,149 @@
       }
     },
     {
+      "id": "836a42ce7447919-7a2c0989fcda14e",
+      "title": "Add a new Discover panel from Dashboard can add a new Discover session panel to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_panel_from_dashboard.spec.ts",
+        "line": 24,
+        "column": 48
+      }
+    },
+    {
+      "id": "836a42ce7447919-4a32015dac42df1",
+      "title": "Add a new Discover panel from Dashboard can save a new session from an existing by-value panel without overriding it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_panel_from_dashboard.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "836a42ce7447919-d5952e81baed3bb",
+      "title": "Add a new Discover panel from Dashboard can cancel adding a new Discover session panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_panel_from_dashboard.spec.ts",
+        "line": 64,
+        "column": 33
+      }
+    },
+    {
+      "id": "eb20cd4d217f813-1449b73ab0a1f88",
+      "title": "Discover session with multiple data views does not ignore a filter from another data view by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_session_multiple_data_views.spec.ts",
+        "line": 48,
+        "column": 65
+      }
+    },
+    {
+      "id": "eb20cd4d217f813-42c07a70d921f19",
+      "title": "Discover session with multiple data views ignores a filter from another data view when configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_session_multiple_data_views.spec.ts",
+        "line": 53,
+        "column": 15
+      }
+    },
+    {
+      "id": "1bd2e09d1c05fc9-21368a78073c012",
+      "title": "Dashboard with legacy log stream embeddable loads the old log stream as a saved search embeddable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/legacy_log_stream_embeddable.spec.ts",
+        "line": 27,
+        "column": 35
+      }
+    },
+    {
+      "id": "6b2a5d21c804b3b-3eb2c6c843c1a81",
+      "title": "Save a Discover session from the embedded editor can save a new session and return to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/save_session_to_dashboard_embedded.spec.ts",
+        "line": 23,
+        "column": 48
+      }
+    },
+    {
+      "id": "6b2a5d21c804b3b-8b0a1e380ed6945",
+      "title": "Save a Discover session from the embedded editor can edit an existing session and save a copy without changing the original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/save_session_to_dashboard_embedded.spec.ts",
+        "line": 34,
+        "column": 22
+      }
+    },
+    {
+      "id": "20c54675a63e291-4c5b226d890e9e5",
+      "title": "Save a standalone Discover session to Dashboard can save a new session only to the library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/save_session_to_dashboard_standalone.spec.ts",
+        "line": 29,
+        "column": 25
+      }
+    },
+    {
+      "id": "20c54675a63e291-d21fc7349eddedb",
+      "title": "Save a standalone Discover session to Dashboard can save a new session to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/save_session_to_dashboard_standalone.spec.ts",
+        "line": 37,
+        "column": 76
+      }
+    },
+    {
+      "id": "20c54675a63e291-73fa71fa3ae6402",
+      "title": "Save a standalone Discover session to Dashboard can save a new session from an existing one without overriding the original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/save_session_to_dashboard_standalone.spec.ts",
+        "line": 48,
+        "column": 20
+      }
+    },
+    {
       "id": "3fe9adfc7cac7c0-81b70185dedb8c7",
       "title": "Discover shared links - doc viewer syncs and restores a shared classic document",
       "expectedStatus": "passed",
@@ -120,14 +276,16 @@
       }
     },
     {
-      "id": "44016f4041590ae-398c8c02ed1a873",
-      "title": "Teardown Discover core tests data",
+      "id": "44016f4041590ae-b01c783e48c58fb",
+      "title": "Teardown legacy log stream embeddable data",
       "expectedStatus": "passed",
-      "tags": [],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
+        "line": 14,
+        "column": 19
       }
     }
   ]

@@ -129,6 +129,41 @@ describe('Metric', () => {
         background_chart: { type: 'trend' },
       });
     });
+
+    it('uses an aliased TBUCKET result column for a TS metric trendline', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'TS metrics-* | STATS avg_cpu = AVG(AVG_OVER_TIME(cpu)) BY custom_time_bucket = TBUCKET(100)';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'TS metric with aliased TBUCKET trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'avg_cpu',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(query);
+      expect(trendlineLayer?.query?.esql).not.toContain('BUCKET(@timestamp');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('custom_time_bucket');
+    });
   });
 
   describe('form-based trendline breakdown ordering', () => {
@@ -269,6 +304,113 @@ describe('Metric', () => {
 
       expect(visualization.density).toBe('default');
       expect(apiOutput.styling?.density).toBe('default');
+    });
+  });
+
+  describe('secondary metric name visibility', () => {
+    const getConfigWithSecondaryLabel = (
+      label?: NonNullable<NonNullable<MetricConfig['styling']>['secondary']>['label']
+    ) =>
+      ({
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        ...(label ? { styling: { secondary: { label } } } : {}),
+      } satisfies MetricConfig);
+
+    const convert = (config: MetricConfig) => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      return {
+        visualization: lensState.state.visualization as MetricVisualizationState,
+        apiOutput: builder.toAPIFormat(lensState) as MetricConfig,
+      };
+    };
+
+    it('should hide the name when no label visibility is specified', () => {
+      const { visualization, apiOutput } = convert(getConfigWithSecondaryLabel());
+
+      expect(visualization.secondaryNameVisibility).toBe('hidden');
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+    });
+
+    it('should hide the name when the label is explicitly not visible', () => {
+      const { visualization, apiOutput } = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+
+      expect(visualization.secondaryNameVisibility).toBe('hidden');
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+    });
+
+    it.each(['before', 'after'] as const)(
+      'should place a visible name %s the value',
+      (placement) => {
+        const { visualization, apiOutput } = convert(
+          getConfigWithSecondaryLabel({ visible: true, placement })
+        );
+
+        expect(visualization.secondaryNameVisibility).toBe(placement);
+        expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement });
+      }
+    );
+
+    it('should default a visible name to before the value', () => {
+      const { visualization } = convert(getConfigWithSecondaryLabel({ visible: true }));
+
+      expect(visualization.secondaryNameVisibility).toBe('before');
+    });
+  });
+
+  describe('legacy secondaryLabel on API round-trip', () => {
+    const LEGACY_LABEL = 'Custom Name (label)';
+
+    const getLegacyAttributes = () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      const visualization = attributes.state.visualization as MetricVisualizationState;
+      visualization.secondaryLabel = LEGACY_LABEL;
+      const layer = attributes.state.datasourceStates.formBased!.layers[visualization.layerId];
+      const column = layer.columns[visualization.secondaryMetricAccessor!];
+      column.label = 'Custom Name';
+      column.customLabel = true;
+      return attributes;
+    };
+
+    it('emits leftover vis secondaryLabel as the secondary metric label', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const api = builder.toAPIFormat(getLegacyAttributes()) as MetricConfig;
+      const secondary = api.metrics.find((metric) => metric.type === 'secondary');
+
+      expect(secondary?.label).toBe(LEGACY_LABEL);
+    });
+
+    it('writes leftover vis secondaryLabel onto the column and drops it from visualization', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const so = builder.fromAPIFormat(builder.toAPIFormat(getLegacyAttributes()));
+      const visualization = so.state.visualization as MetricVisualizationState;
+      const column =
+        so.state.datasourceStates.formBased!.layers[DEFAULT_LAYER_ID].columns
+          .metric_accessor_secondary;
+
+      expect(visualization).not.toHaveProperty('secondaryLabel');
+      expect(column.label).toBe(LEGACY_LABEL);
+      expect(column.customLabel).toBe(true);
+    });
+
+    it('does not overlay an empty leftover secondaryLabel', () => {
+      const attributes = getLegacyAttributes();
+      (attributes.state.visualization as MetricVisualizationState).secondaryLabel = '';
+      const builder = new LensConfigBuilder(undefined, true);
+      const api = builder.toAPIFormat(attributes) as MetricConfig;
+      const secondary = api.metrics.find((metric) => metric.type === 'secondary');
+
+      expect(secondary?.label).toBe('Custom Name');
     });
   });
 

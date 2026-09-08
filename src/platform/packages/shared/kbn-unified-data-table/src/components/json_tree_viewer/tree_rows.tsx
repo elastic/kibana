@@ -33,14 +33,20 @@ import {
   type CollectionNode,
   type CollectionType,
   type FormatValue,
+  type GetLeafActions,
   type JsonPrimitive,
+  type JsonTreeRowAction,
   type NodeRow,
   type PagerRow,
   type PrimitiveType,
 } from './tree_model';
 
 const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const LEAF_LABEL_CLASS = 'jsonTreeViewerLeafLabel';
 const VALUE_CLASS = 'jsonTreeViewerValue';
+
+// After this many lines, the value will be truncated.
+const MAX_WRAP_VALUE_LINES = 100;
 
 // ---- Row view components (one per render-row kind) ----
 
@@ -54,8 +60,9 @@ interface FocusableRowProps {
 
 interface NodeRowViewProps extends FocusableRowProps {
   row: NodeRow;
-  onActivate: () => void;
+  onActivate: (event: React.MouseEvent) => void;
   formatValue?: FormatValue;
+  getLeafActions?: GetLeafActions;
 }
 export const NodeRowView = memo(function NodeRowView({
   row,
@@ -65,6 +72,7 @@ export const NodeRowView = memo(function NodeRowView({
   onFocus,
   onKeyDown,
   formatValue,
+  getLeafActions,
 }: NodeRowViewProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
@@ -97,7 +105,7 @@ export const NodeRowView = memo(function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} formatValue={formatValue} />
+      <NodeLabel row={row} formatValue={formatValue} getLeafActions={getLeafActions} />
     </div>
   );
 });
@@ -122,7 +130,11 @@ export const PagerRowView = memo(function PagerRowView({
 
   // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
   const primaryLabel = showMore
-    ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
+    ? showMoreLabel(
+        row.collectionType,
+        Math.min(CHILDREN_INCREMENT, row.hiddenCount),
+        row.totalCount
+      )
     : showFewerLabel(row.collectionType);
 
   // "Show fewer" unmounts the focused button — move focus to the pager row first so it isn't lost.
@@ -216,12 +228,12 @@ const KeyPrefix = memo(function KeyPrefix({
   const styles = useEuiMemoizedStyles(treeStyles);
   if (isArrayItem) return null;
   return (
-    <>
+    <span css={styles.keyPrefix}>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.key}>{name}</span>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.punctuation}>:</span>{' '}
-    </>
+    </span>
   );
 });
 
@@ -264,6 +276,30 @@ const Comma = memo(function Comma() {
 });
 
 const COPIED_FEEDBACK_DURATION = 1200;
+
+const copiedLabel = () =>
+  i18n.translate('unifiedDataTable.jsonTreeViewer.copied', { defaultMessage: 'Copied' });
+
+const useCopyWithFeedback = (getText: () => string, label: string) => {
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
+
+  const copy = () => {
+    copyToClipboard(getText());
+    setCopied(true);
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+  };
+
+  return {
+    copy,
+    iconType: copied ? 'check' : 'copy',
+    color: copied ? 'success' : 'text',
+    displayedLabel: copied ? copiedLabel() : label,
+  } as const;
+};
+
 const CopyButton = function CopyButton({
   getText,
   label,
@@ -274,34 +310,23 @@ const CopyButton = function CopyButton({
   nodeId: string;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
-  const [copied, setCopied] = useState(false);
-  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => clearTimeout(resetTimer.current), []);
-
-  const copiedLabel = i18n.translate('unifiedDataTable.jsonTreeViewer.copied', {
-    defaultMessage: 'Copied',
-  });
-
-  const displayedLabel = copied ? copiedLabel : label;
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(getText, label);
 
   return (
     <EuiToolTip content={displayedLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={displayedLabel}
-        className="jsonTreeViewerCopyButton"
-        color={copied ? 'success' : 'text'}
-        css={styles.copyButton}
+        className="jsonTreeViewerCopyButton jsonTreeViewerRowAction"
+        color={color}
+        css={styles.rowActionButton}
         data-test-subj={`jsonTreeViewerCopy-${nodeId}`}
         iconSize="s"
-        iconType={copied ? 'check' : 'copy'}
+        iconType={iconType}
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
-          copyToClipboard(getText());
-          setCopied(true);
-          clearTimeout(resetTimer.current);
-          resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+          copy();
         }}
-        onKeyDown={nestedControlKeyDown}
+        onKeyDown={rowActionKeyDown}
         size="xs"
       />
     </EuiToolTip>
@@ -341,21 +366,82 @@ const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: Coll
   return <CopyButton getText={() => nodeToJsonString(node)} label={label} nodeId={node.id} />;
 });
 
+// Copies the whole document as pretty-printed JSON.
+export const CopyAllButton = memo(function CopyAllButton({
+  getText,
+  onKeyDown,
+  buttonRef,
+}: {
+  getText: () => string;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  buttonRef?: React.Ref<HTMLButtonElement>;
+}) {
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(
+    getText,
+    i18n.translate('unifiedDataTable.jsonTreeViewer.copyAll', { defaultMessage: 'Copy all' })
+  );
+
+  return (
+    <EuiButtonEmpty
+      buttonRef={buttonRef}
+      className="jsonTreeViewerHeaderControl"
+      color={color}
+      data-test-subj="jsonTreeViewerCopyAll"
+      flush="left"
+      iconSize="s"
+      iconType={iconType}
+      onClick={() => copy()}
+      onKeyDown={onKeyDown}
+      size="xs"
+    >
+      {displayedLabel}
+    </EuiButtonEmpty>
+  );
+});
+
+// A host-defined trailing action on a leaf row.
+const RowActionButton = memo(function RowActionButton({ action }: { action: JsonTreeRowAction }) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  return (
+    <EuiToolTip content={action.label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={action.label}
+        className="jsonTreeViewerRowAction"
+        color="text"
+        css={styles.rowActionButton}
+        data-test-subj={action['data-test-subj']}
+        iconSize="s"
+        iconType={action.iconType}
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          action.onClick();
+        }}
+        onKeyDown={rowActionKeyDown}
+        size="xs"
+      />
+    </EuiToolTip>
+  );
+});
+
 // The body of a node row: key prefix + value/brackets + comma.
 const NodeLabel = memo(function NodeLabel({
   row,
   formatValue,
+  getLeafActions,
 }: {
   row: NodeRow;
   formatValue?: FormatValue;
+  getLeafActions?: GetLeafActions;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
+    const leafActions =
+      getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem }) ?? [];
     return (
       <span css={styles.label}>
-        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+        <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
@@ -364,7 +450,12 @@ const NodeLabel = memo(function NodeLabel({
           />
           {trailingComma && <Comma />}
         </span>
-        <ValueCopyButton nodeId={node.id} value={node.value} />
+        <span className="jsonTreeViewerRowActions" css={styles.actions}>
+          <ValueCopyButton nodeId={node.id} value={node.value} />
+          {leafActions.map((action) => (
+            <RowActionButton key={action.id} action={action} />
+          ))}
+        </span>
       </span>
     );
   }
@@ -453,6 +544,25 @@ const nestedControlKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
   }
 };
 
+// Accessibility handling for leaf node actions.
+const rowActionKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    const container = event.currentTarget.closest<HTMLElement>('.jsonTreeViewerRowActions');
+    const buttons = container
+      ? Array.from(container.querySelectorAll<HTMLElement>('.jsonTreeViewerRowAction'))
+      : [];
+    const index = buttons.indexOf(event.currentTarget);
+    const next = event.key === 'ArrowRight' ? buttons[index + 1] : buttons[index - 1];
+    if (next) {
+      event.preventDefault();
+      event.stopPropagation();
+      next.focus();
+      return;
+    }
+  }
+  nestedControlKeyDown(event);
+};
+
 // Accesibility handling for the pager buttons.
 const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -482,15 +592,15 @@ const collectionCountLabel = (collectionType: CollectionType, count: number) =>
         values: { count },
       });
 
-const showMoreLabel = (collectionType: CollectionType, count: number) =>
+const showMoreLabel = (collectionType: CollectionType, count: number, total: number) =>
   collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreItems', {
-        defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {item} other {items}}',
+        values: { count, total },
       })
     : i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreFields', {
-        defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {field} other {fields}}',
+        values: { count, total },
       });
 
 const showFewerLabel = (collectionType: CollectionType) =>
@@ -525,7 +635,7 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
       outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
       outlineOffset: `-${euiTheme.focus.width}`,
     },
-    '&:hover .jsonTreeViewerCopyButton, &:focus-within .jsonTreeViewerCopyButton': {
+    '&:hover .jsonTreeViewerRowAction, &:focus-within .jsonTreeViewerRowAction': {
       opacity: 1,
     },
   }),
@@ -551,11 +661,13 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
   }),
   label: css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
   labelText: css({ minWidth: 0 }),
+  keyPrefix: css({ flexShrink: 0 }),
   key: css({ color: euiTheme.colors.textPrimary }),
   punctuation: css({ color: euiTheme.colors.textSubdued }),
   bracket: css({ color: euiTheme.colors.textParagraph }),
   count: css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
-  copyButton: css({
+  actions: css({ display: 'flex', alignItems: 'center', flexShrink: 0 }),
+  rowActionButton: css({
     blockSize: euiTheme.size.base,
     inlineSize: euiTheme.size.base,
     flexShrink: 0,
@@ -564,6 +676,21 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     '&:focus-visible': { opacity: 1 },
   }),
   value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  wrap: css({
+    [`& .${LEAF_LABEL_CLASS}`]: {
+      display: 'flex',
+      minWidth: 0,
+      alignItems: 'flex-start',
+    },
+    [`& .${VALUE_CLASS}`]: css`
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: ${MAX_WRAP_VALUE_LINES};
+      overflow: hidden;
+      min-width: 0;
+      flex: 0 1 auto;
+    `,
+  }),
   noWrap: css({
     [`& .${LABEL_TEXT_CLASS}`]: {
       display: 'block',

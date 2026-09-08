@@ -774,7 +774,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState, []);
 
-    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    // ES|QL data-source queries are never mirrored into the top-level slot
+    expect(result.query).toBeUndefined();
     expect(result.filters).toHaveLength(2);
     expect(result.references).toHaveLength(1);
     expect(result.filters).toMatchObject([
@@ -816,7 +817,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState, []);
 
-    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    // ES|QL data-source queries are never mirrored into the top-level slot
+    expect(result.query).toBeUndefined();
     expect(result.filters).toEqual([]);
     expect(result.references).toEqual([]);
   });
@@ -949,7 +951,7 @@ describe('filtersAndQueryToApiFormat', () => {
   test('should not include filters if empty and query if ES|QL', () => {
     const lensState = {
       state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
-    } as LensAttributes;
+    } as unknown as LensAttributes;
 
     const result = filtersAndQueryToApiFormat(lensState);
 

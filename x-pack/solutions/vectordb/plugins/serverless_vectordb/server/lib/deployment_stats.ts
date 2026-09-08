@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  IndicesStatsIndicesStats,
+  IndicesStatsShardStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
 interface ApiKeysStats {
@@ -22,15 +26,6 @@ interface MeteringStatsResponse {
   indices: MeteringIndexStat[];
 }
 
-interface VectorStats {
-  value_count?: number;
-}
-
-interface IndexStatsWithVectors {
-  dense_vector?: VectorStats;
-  sparse_vector?: VectorStats;
-}
-
 interface IndexStats {
   indicesCount: number | null;
   storeSizeBytes: number | null;
@@ -38,7 +33,7 @@ interface IndexStats {
   documentsCount: number | null;
 }
 
-export const INDEX_STATS_UNAVAILABLE: IndexStats = {
+const INDEX_STATS_UNAVAILABLE: IndexStats = {
   indicesCount: null,
   storeSizeBytes: null,
   vectorCount: null,
@@ -48,18 +43,20 @@ export const INDEX_STATS_UNAVAILABLE: IndexStats = {
 const USER_INDICES_PATTERN = ['*', '-.*'];
 
 /**
- * Whether the caller may see cluster-wide totals. Every source behind `fetchIndexStats` runs with
- * elevated privileges, so Elasticsearch will not reject an unprivileged caller on its own and the
- * route has to ask on their behalf. Errors deny access rather than granting it.
+ * Whether the caller may see the cluster-wide vector count. `countVectors` reads `indices.stats`
+ * as the internal user, so Elasticsearch will not scope it to the caller and the route has to ask
+ * on their behalf. `monitor` is the privilege that governs index stats, and requiring it over `*`
+ * keeps a partially privileged caller from being shown totals that span indices they cannot see.
+ * Errors deny access rather than granting it.
  */
-export const hasIndexManagePrivilege = async (
+export const hasIndexMonitorPrivilege = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<boolean> => {
   try {
     const { has_all_requested: hasAllRequested } =
       await client.asCurrentUser.security.hasPrivileges({
-        index: [{ names: ['*'], privileges: ['manage'] }],
+        index: [{ names: ['*'], privileges: ['monitor'] }],
       });
 
     return hasAllRequested;
@@ -71,22 +68,56 @@ export const hasIndexManagePrivilege = async (
   }
 };
 
+const shardVectorCount = (shard: IndicesStatsShardStats): number =>
+  (shard.dense_vector?.value_count ?? 0) + (shard.sparse_vector?.value_count ?? 0);
+
 /**
- * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), aggregated at
- * the cluster level. Excluding dot indices keeps the total scoped to the same indices as the
- * metering-derived index and size counts. `open` is already the default for `expand_wildcards`, but
- * is pinned so hidden indices can't be pulled in by a later edit.
+ * Sums vector counts across indices, counting each logical shard exactly once. Neither of the
+ * `_all` rollups is usable in stateless: `primaries` reports nothing for an index whose indexing
+ * shard has been released as idle, and `total` counts every shard copy of an active index. The max
+ * across a shard's copies tolerates refresh lag between them.
  */
-const countVectors = async (client: IScopedClusterClient): Promise<number> => {
-  const stats = await client.asInternalUser.indices.stats({
+const sumVectorCounts = (indices: Record<string, IndicesStatsIndicesStats> | undefined): number => {
+  let count = 0;
+  for (const index of Object.values(indices ?? {})) {
+    for (const copies of Object.values(index.shards ?? {})) {
+      if (copies.length > 0) {
+        count += Math.max(...copies.map(shardVectorCount));
+      }
+    }
+  }
+  return count;
+};
+
+/**
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
+ * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
+ * Returns null when not all shards responded.
+ */
+const countVectors = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<number | null> => {
+  const { _shards: shards, indices } = await client.asInternalUser.indices.stats({
     index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
-    level: 'cluster',
+    level: 'shards',
     metric: ['dense_vector', 'sparse_vector'],
+    filter_path: [
+      '_shards',
+      'indices.*.shards.*.dense_vector.value_count',
+      'indices.*.shards.*.sparse_vector.value_count',
+    ],
   });
 
-  const primaries = stats._all?.primaries as IndexStatsWithVectors | undefined;
-  return (primaries?.dense_vector?.value_count ?? 0) + (primaries?.sparse_vector?.value_count ?? 0);
+  if (!shards || shards.successful !== shards.total) {
+    logger.warn(
+      `Vector count covered only ${shards?.successful ?? 0} of ${shards?.total ?? 0} shards.`
+    );
+    return null;
+  }
+
+  return sumVectorCounts(indices);
 };
 
 /**
@@ -120,12 +151,15 @@ const countDocuments = async (
 
 /**
  * Fetches index-level stats: user index count, aggregate store size, indexed dense/sparse vector
- * count, and top-level document count. Failures are logged and surfaced as `null` so callers can
- * distinguish "unavailable" from a genuine `0`.
+ * count, and top-level document count. The index, size, and document counts are scoped to the
+ * caller by Elasticsearch itself. The vector count is not scoped, so it is only read when the
+ * caller has the `monitor` all indices privilege. Failures are logged and surfaced as `null`
+ * so callers can distinguish "unavailable" from a genuine `0`.
  */
 export const fetchIndexStats = async (
   client: IScopedClusterClient,
-  logger: Logger
+  logger: Logger,
+  { canMonitorAllIndices }: { canMonitorAllIndices: boolean }
 ): Promise<IndexStats> => {
   try {
     const meteringStats = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>(
@@ -142,17 +176,19 @@ export const fetchIndexStats = async (
     const indicesCount = userIndices.length;
     const storeSizeBytes = userIndices.reduce((sum, index) => sum + (index.size_in_bytes ?? 0), 0);
 
-    let vectorCount: number | null = 0;
+    let vectorCount: number | null = canMonitorAllIndices ? 0 : null;
     let documentsCount: number | null = 0;
 
     if (indicesCount > 0) {
       [vectorCount, documentsCount] = await Promise.all([
-        countVectors(client).catch((error) => {
-          logger.warn(
-            `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
-          );
-          return null;
-        }),
+        canMonitorAllIndices
+          ? countVectors(client, logger).catch((error) => {
+              logger.warn(
+                `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
+              );
+              return null;
+            })
+          : Promise.resolve(null),
         countDocuments(client, logger).catch((error) => {
           logger.warn(
             `Failed to compute document count for vectordb deployment stats. Returning partial stats: ${error.message}`

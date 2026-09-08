@@ -21,10 +21,7 @@ export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj
-      .locator('chromeNextGlobalHeader')
-      .or(this.page.testSubj.locator('kibanaProjectHeader'))
-      .isVisible();
+    return await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible();
   }
 
   async navigateToHome() {
@@ -78,7 +75,16 @@ export class SpacesPage {
   }
 
   async getCurrentSpaceTitle() {
-    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
+    const contextTrigger = this.page.testSubj.locator('contextSwitcherTriggerButton');
+    const classicTrigger = this.page.testSubj.locator('spacesNavSelector');
+    await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
+
+    if (await contextTrigger.isVisible()) {
+      return (await contextTrigger.getAttribute('data-space-name'))?.trim() ?? null;
+    }
+
+    // Classic nav exposes the space name only via `title`.
+    return (await classicTrigger.getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {

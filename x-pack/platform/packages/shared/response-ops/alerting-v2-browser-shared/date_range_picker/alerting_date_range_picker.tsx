@@ -67,6 +67,8 @@ export interface AlertingDateRangePickerProps {
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
   compressed?: boolean;
+  /** Hide the date range label and show only the duration badge. @default false */
+  collapsed?: boolean;
   persistPresets?: boolean;
   'data-test-subj'?: string;
 }
@@ -81,6 +83,7 @@ export const AlertingDateRangePicker = ({
   showTimeWindowButtons = false,
   width = 'auto',
   compressed = true,
+  collapsed = false,
   persistPresets = true,
   'data-test-subj': dataTestSubj,
 }: AlertingDateRangePickerProps) => {
@@ -192,6 +195,7 @@ export const AlertingDateRangePicker = ({
       onRefresh={onRefresh}
       width={width}
       compressed={compressed}
+      collapsed={collapsed}
       dateFormat={dateFormat}
       timeZone={timeZone}
       prependBasePath={http.basePath.prepend}

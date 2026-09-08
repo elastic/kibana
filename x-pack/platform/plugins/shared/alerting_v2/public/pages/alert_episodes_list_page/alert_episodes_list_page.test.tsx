@@ -81,6 +81,36 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () =
   AlertEpisodeDetailsFlyout: jest.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
 }));
 
+jest.mock('../../hooks/use_compose_discover_flyout', () => ({
+  useComposeDiscoverFlyout: () => ({
+    flyout: null,
+    confirmationModal: null,
+    openCreateFlyout: jest.fn(),
+    openEditFlyout: jest.fn(),
+    openCloneFlyout: jest.fn(),
+  }),
+}));
+
+// The stub echoes the props the page passes so tests can assert on them from the DOM, which keeps
+// the mock factory free of module scope references it cannot reach while jest hoists it.
+jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
+  RuleSummaryFlyoutContainer: ({
+    ruleId,
+    type,
+    onClose,
+  }: {
+    ruleId: string;
+    type?: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`} data-flyout-type={type}>
+      <button data-test-subj="mockRuleSummaryFlyoutClose" onClick={onClose} type="button">
+        close
+      </button>
+    </div>
+  ),
+}));
+
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
 jest.mock('./components/episodes_kpis', () => ({
@@ -287,10 +317,26 @@ describe('AlertEpisodesListPage', () => {
       'rule.id',
       'duration',
       'tags',
+      'rule_tags',
       'assignees',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
+  });
+
+  it.each([
+    ['tags', 'Alert tags'],
+    ['rule_tags', 'Rule tags'],
+  ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    expect(customize!({ column: { id: columnId, isSortable: true }, headerRowHeight: 1 })).toEqual({
+      id: columnId,
+      displayAsText: label,
+      isSortable: false,
+    });
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
@@ -527,5 +573,83 @@ describe('privilege gating', () => {
     expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     ]);
+  });
+});
+
+describe('rule summary flyout', () => {
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
+    mockCreateEpisodeActions.mockReturnValue([]);
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    mockHttp.post.mockResolvedValue({ rules: [] });
+    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
+    renderPage();
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBeGreaterThan(0);
+    });
+  });
+
+  /**
+   * The table is stubbed, so the rule cell is never rendered. Build the element the page would
+   * hand to the grid for the rule column and read the props off it instead.
+   */
+  const getRuleCellProps = () => {
+    const renderer = mockUnifiedDataTable.mock.calls.at(-1)![0].externalCustomRenderers!['rule.id'];
+    const element = renderer({ columnId: 'rule.id' } as any) as React.ReactElement;
+    return element.props as { onRuleNameClick: (ruleId: string) => void };
+  };
+
+  const openRuleFlyout = async () => {
+    const { onRuleNameClick } = getRuleCellProps();
+    await act(async () => {
+      onRuleNameClick('rule1');
+    });
+  };
+
+  const getExpandedDoc = () => mockUnifiedDataTable.mock.calls.at(-1)![0].expandedDoc;
+
+  const expandEpisode = async () => {
+    const { setExpandedDoc } = mockUnifiedDataTable.mock.calls.at(-1)![0];
+    await act(async () => {
+      setExpandedDoc!({ id: 'ep1', raw: {}, flattened: { 'episode.id': 'ep1' } });
+    });
+  };
+
+  it('opens an overlay flyout for the clicked rule', async () => {
+    await openRuleFlyout();
+
+    const flyout = screen.getByTestId('mockRuleSummaryFlyout-rule1');
+    expect(flyout).toHaveAttribute('data-flyout-type', 'overlay');
+  });
+
+  it('closes the flyout without touching the table state', async () => {
+    await openRuleFlyout();
+
+    await userEvent.click(screen.getByTestId('mockRuleSummaryFlyoutClose'));
+
+    expect(screen.queryByTestId('mockRuleSummaryFlyout-rule1')).not.toBeInTheDocument();
+    expect(mockUnifiedDataTable.mock.calls.at(-1)![0].rows?.length).toBeGreaterThan(0);
+  });
+
+  it('collapses an expanded episode when the rule flyout opens', async () => {
+    await expandEpisode();
+    expect(getExpandedDoc()).toBeDefined();
+
+    await openRuleFlyout();
+
+    expect(getExpandedDoc()).toBeUndefined();
+    expect(screen.getByTestId('mockRuleSummaryFlyout-rule1')).toBeInTheDocument();
+  });
+
+  it('closes the rule flyout when an episode is expanded', async () => {
+    await openRuleFlyout();
+
+    await expandEpisode();
+
+    expect(screen.queryByTestId('mockRuleSummaryFlyout-rule1')).not.toBeInTheDocument();
+    expect(getExpandedDoc()).toBeDefined();
   });
 });

@@ -197,7 +197,6 @@ export const RangeSliderControl: FC<Props> = ({
   return (
     <ConditionalLabelWrapper label={label} isPinned={isPinned}>
       <span
-        data-shared-item={isPinned ? undefined : true}
         css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
         className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
         data-test-subj={`range-slider-control-${uuid}`}

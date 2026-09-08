@@ -65,7 +65,12 @@ beforeEach(() => {
 const buildServices = ({
   isServerless = false,
   featureFlagValues = {},
-}: { isServerless?: boolean; featureFlagValues?: Record<string, boolean> } = {}) => {
+  metricsOnboardingEnabled = true,
+}: {
+  isServerless?: boolean;
+  featureFlagValues?: Record<string, boolean>;
+  metricsOnboardingEnabled?: boolean;
+} = {}) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
     (app: string, options?: { path?: string }) => `/app/${app}${options?.path ?? ''}`
@@ -77,18 +82,12 @@ const buildServices = ({
         (key: string, fallback: boolean) => featureFlagValues[key] ?? fallback
       ),
     },
+    pricing: {
+      isFeatureAvailable: jest.fn(() => metricsOnboardingEnabled),
+    },
     observability: { config: { managedOtlpServiceUrl: '' } },
     cloud: undefined,
     context: { isServerless, isCloud: false, isDev: false },
-    share: {
-      url: {
-        locators: {
-          get: jest.fn(() => ({
-            getRedirectUrl: jest.fn(() => '/app/synthetics/add-monitor'),
-          })),
-        },
-      },
-    },
   };
 };
 
@@ -132,6 +131,16 @@ describe('useObservabilityCuratedCategories', () => {
       'host',
       'applications',
     ]);
+  });
+
+  it('hides the Applications category when metrics onboarding is unavailable', () => {
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
+      }
+    );
+    expect(result.current.map((category) => category.id)).toEqual(['cloud', 'containers', 'host']);
   });
 
   it('wires internal routes for quickstart tiles', () => {
@@ -227,9 +236,15 @@ describe('useObservabilityCuratedCategories', () => {
     );
     const tiles = result.current.flatMap((category) => category.tiles);
     const hrefById = Object.fromEntries(tiles.map((tile) => [tile.id, tile.href]));
-    expect(hrefById.opentelemetry).toBe('/app/apm/tutorial');
-    expect(hrefById.apm).toBe('/app/apm/tutorial');
-    expect(hrefById.synthetic_monitor).toBe('/app/synthetics/add-monitor');
+    expect(hrefById.opentelemetry).toBe(
+      '/app/apm/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
+    expect(hrefById.apm).toBe(
+      '/app/apm/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
+    expect(hrefById.synthetic_monitor).toBe(
+      '/app/synthetics/add-monitor?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
   });
 
   it('prefers the OTel quickstart and APM onboarding on serverless', () => {
@@ -269,6 +284,21 @@ describe('useObservabilityMiniTiles', () => {
     expect(result.current[0].onClick).toBeUndefined();
   });
 
+  it('swaps the metrics-only tiles for OpenTelemetry when metrics onboarding is unavailable', () => {
+    const { result } = renderHook(
+      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
+      }
+    );
+    expect(result.current.map((tile) => tile.id)).toEqual([
+      'opentelemetry',
+      'auto_import',
+      'upload_file',
+      'custom_logs',
+    ]);
+  });
+
   it('wires EPR-backed mini tiles to the integrations detail page', () => {
     const { result } = renderHook(
       () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
@@ -283,6 +313,20 @@ describe('useObservabilityMiniTiles', () => {
     expect(hrefById.supabase).toBe(
       '/app/integrations/detail/supabase/overview?returnAppId=observabilityOnboarding&returnPath=%3F'
     );
+  });
+
+  it('sends the OpenTelemetry mini tile to the OTel quickstart on serverless Logs Essentials', () => {
+    const { result } = renderHook(
+      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(
+          buildServices({ isServerless: true, metricsOnboardingEnabled: false })
+        ),
+      }
+    );
+    const opentelemetry = result.current.find((tile) => tile.id === 'opentelemetry');
+    expect(opentelemetry?.href).toBe('/otel-apm');
+    expect(opentelemetry?.onClick).toBeDefined();
   });
 
   it('wires the custom logs mini tile to the OTel logs flow route', () => {
@@ -305,8 +349,12 @@ describe('useObservabilityMiniTiles', () => {
       }
     );
     const hrefById = Object.fromEntries(result.current.map((tile) => [tile.id, tile.href]));
-    expect(hrefById.auto_import).toBe('/app/integrations/create');
-    expect(hrefById.upload_file).toBe('/app/home#/tutorial_directory/fileDataViz');
+    expect(hrefById.auto_import).toBe(
+      '/app/integrations/create?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
+    expect(hrefById.upload_file).toBe(
+      '/app/home#/tutorial_directory/fileDataViz?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
   });
 
   it('leaves no mini tile without a destination', () => {

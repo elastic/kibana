@@ -19,7 +19,7 @@ import type {
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fileds';
+import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fields';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,

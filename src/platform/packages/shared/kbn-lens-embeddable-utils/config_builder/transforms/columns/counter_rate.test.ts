@@ -31,7 +31,6 @@ describe('Counter Rate Transforms', () => {
         label: '',
         isBucketed: false,
         dataType: 'number',
-        params: {},
         references: [],
       };
 

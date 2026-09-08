@@ -18,11 +18,55 @@ import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 
+/**
+ * Task claim ordering tier, named after what the task is for. Tasks are sorted by
+ * priority descending before claiming, so a higher value is claimed first.
+ *
+ * The numeric values of the pre-existing tiers are unchanged; only the names describe
+ * intent now. Pick the tier from the name — see the task-registration guidance in the
+ * Task Manager README for when each one applies.
+ */
 export enum TaskPriority {
+  /**
+   * Background bookkeeping and housekeeping that may be deferred under load —
+   * cleanup, telemetry rollups, backfills.
+   */
+  Maintenance = 1,
+  /**
+   * Long-running work that should yield to `Standard` tasks rather than hold the
+   * regular pool while it grinds through a large workload.
+   */
+  Deferrable = 40,
+  /**
+   * The default tier, applied when a task type or instance does not set a priority.
+   * Correct for almost every task.
+   */
+  Standard = 50,
+  /**
+   * Work a user is directly waiting on, or work with a tight latency budget. Claimed
+   * ahead of every other tier, so reserve it for tasks where the delay is user-visible.
+   */
+  UserInteractive = 100,
+
+  /** @deprecated Use {@link TaskPriority.Maintenance} instead. */
   Low = 1,
+  /** @deprecated Use {@link TaskPriority.Deferrable} instead. */
   NormalLongRunning = 40,
+  /** @deprecated Use {@link TaskPriority.Standard} instead. */
   Normal = 50,
 }
+
+/**
+ * The non-deprecated `TaskPriority` members, ascending. Kept explicit because the
+ * deprecated aliases share numeric values with their replacements, so the enum's
+ * reverse mapping cannot distinguish them.
+ */
+const CANONICAL_TASK_PRIORITY_NAMES: ReadonlyArray<keyof typeof TaskPriority> = [
+  'Maintenance',
+  'Deferrable',
+  'Standard',
+  'UserInteractive',
+];
 
 export enum TaskTypeGroup {
   Alerting = 'alerting',
@@ -278,9 +322,9 @@ export const taskDefinitionSchema = schema.object(
       }
 
       if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
-        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
-          .filter((key) => isNaN(Number(key)))
-          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
+        return `Invalid priority "${priority}". Priority must be one of ${CANONICAL_TASK_PRIORITY_NAMES.map(
+          (key) => `${key} => ${TaskPriority[key]}`
+        )}`;
       }
 
       if (cost && (!isNumber(cost) || !(cost in TaskCost))) {
@@ -338,6 +382,14 @@ export interface TaskUserScope {
   apiKeyId: string;
   uiamApiKeyId?: string;
   spaceId?: string;
+  /**
+   * True when the credentials were supplied by the caller (a scheduling request already
+   * authenticated with an ES or UIAM API key — not necessarily a human, e.g. a service account)
+   * rather than minted by Task Manager. Task Manager does not own such keys and must never revoke
+   * them: this single flag gates invalidation of BOTH the ES and UIAM credentials at every
+   * grant/invalidate call site. Persisted on the task saved object, so renaming it requires a
+   * model version migration.
+   */
   apiKeyCreatedByUser: boolean;
   /**
    * UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key,

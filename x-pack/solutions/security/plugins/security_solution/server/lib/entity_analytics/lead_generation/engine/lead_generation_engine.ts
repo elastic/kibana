@@ -14,20 +14,17 @@ import type {
   LeadGenerationEngineConfig,
   Observation,
   ObservationModule,
+  ScoredEntity,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
-import { llmSynthesizeBatch, type CohortContext, type ScoredEntityInput } from './llm_synthesize';
+import { llmSynthesizeBatch, type CohortContext } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
   readonly logger: Logger;
   readonly config?: Partial<LeadGenerationEngineConfig>;
 }
 
-/** Scored entity group ready for persist classification / optional LLM synthesis. */
-export interface LeadCandidate {
-  readonly entity: LeadEntity;
-  readonly priority: number;
-  readonly observations: Observation[];
+export interface LeadCandidate extends ScoredEntity {
   readonly leadId: string;
 }
 
@@ -85,13 +82,17 @@ export const createLeadGenerationEngine = ({
       return [];
     }
 
-    // 4. Format lead candidates
+    // 4. Format lead candidates. Relationships aren't resolved here — the
+    // pipeline fills topRelatedEntities/relatedEntityCounts in afterwards via
+    // `attachRelatedEntities`.
     const candidates = qualifyingEntities.map((scored) => {
       return {
         entity: scored.entity,
         priority: scored.priority,
         observations: scored.observations,
         leadId: hashEuid(scored.entity.id),
+        topRelatedEntities: [],
+        relatedEntityCounts: {},
       };
     });
 
@@ -171,13 +172,6 @@ const collectAllObservations = async (
  * Normalization:
  *   priority = round(rawScore / normalizationCeiling × 9 + 1), clamped to [1, 10]
  */
-
-interface ScoredEntity {
-  readonly entity: LeadEntity;
-  readonly priority: number;
-  readonly observations: Observation[];
-}
-
 const groupObservationsByEntity = (
   observations: readonly Observation[]
 ): ReadonlyMap<string, Observation[]> =>
@@ -192,7 +186,7 @@ const scoreEntities = (
   allEntities: LeadEntity[],
   config: LeadGenerationEngineConfig,
   moduleWeights: ReadonlyMap<string, number>
-): ScoredEntity[] => {
+): Omit<ScoredEntity, 'topRelatedEntities' | 'relatedEntityCounts'>[] => {
   const entityByKey = new Map(allEntities.map((e) => [e.id, e]));
   const observationsByEntity = groupObservationsByEntity(observations);
 
@@ -264,7 +258,7 @@ const calculateWeightedPriority = (
 };
 
 const groupIntoLeads = async (
-  candidates: ReadonlyArray<ScoredEntityInput>,
+  candidates: ReadonlyArray<ScoredEntity>,
   logger: Logger,
   chatModel: InferenceChatModel
 ): Promise<Lead[]> => {
@@ -280,7 +274,7 @@ const groupIntoLeads = async (
   );
 
   return candidates.map((candidate, i) => {
-    const { entity, priority, observations } = candidate;
+    const { entity, priority, observations, topRelatedEntities, relatedEntityCounts } = candidate;
     const llm = llmResults[i];
 
     return {
@@ -295,6 +289,8 @@ const groupIntoLeads = async (
       timestamp: now.toISOString(),
       staleness: computeStaleness(now, now),
       observations,
+      topRelatedEntities,
+      relatedEntityCounts,
     };
   });
 };
@@ -304,9 +300,7 @@ const groupIntoLeads = async (
  * narrative can convey scope — e.g. how many other candidate entities exhibit
  * the same observation type. Each entity is counted once per observation type.
  */
-export const computeCohortContext = (
-  candidates: ReadonlyArray<ScoredEntityInput>
-): CohortContext => {
+export const computeCohortContext = (candidates: ReadonlyArray<ScoredEntity>): CohortContext => {
   const entityCountByObservationType: Record<string, number> = {};
 
   for (const candidate of candidates) {
@@ -319,7 +313,7 @@ export const computeCohortContext = (
   return { totalCandidates: candidates.length, entityCountByObservationType };
 };
 
-const buildByline = (candidate: ScoredEntityInput): string => {
+const buildByline = (candidate: ScoredEntity): string => {
   const { entity, observations } = candidate;
 
   const totalAlerts = extractNumber(observations, 'total_alerts');

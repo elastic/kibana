@@ -146,6 +146,16 @@ describe('useDeploymentStats', () => {
     );
   });
 
+  it('reports the vector count as unavailable when the response withholds it', async () => {
+    const { vectorCount, ...withheldVectorCount } = esStats;
+    mockResponses({ deploymentStats: withheldVectorCount });
+
+    const result = await renderStats();
+
+    expect(result.current.stats.vectorCount).toBeNull();
+    expect(result.current.stats.indicesCount).toBe(3);
+  });
+
   it('keeps the other stats when the workflows request fails', async () => {
     mockResponses({ workflows: null });
 

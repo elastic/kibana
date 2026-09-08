@@ -147,7 +147,6 @@ const createStartContractMock = () => {
       registerCustomizeNavigationHandler: jest.fn(),
     }),
     next: lazyObject({
-      isEnabled: false,
       aiButton: lazyObject({
         get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
         register: jest.fn().mockReturnValue(() => {}),

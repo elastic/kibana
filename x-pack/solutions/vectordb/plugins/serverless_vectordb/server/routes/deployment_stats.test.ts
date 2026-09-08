@@ -17,7 +17,7 @@ import { fetchDashboardsCount } from '../lib/dashboards';
 import {
   fetchApiKeysStats,
   fetchIndexStats,
-  hasIndexManagePrivilege,
+  hasIndexMonitorPrivilege,
 } from '../lib/deployment_stats';
 import { registerDeploymentStatsRoute } from './deployment_stats';
 
@@ -29,8 +29,8 @@ const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
   typeof fetchDashboardsCount
 >;
 const mockFetchApiKeysStats = fetchApiKeysStats as jest.MockedFunction<typeof fetchApiKeysStats>;
-const mockHasIndexManagePrivilege = hasIndexManagePrivilege as jest.MockedFunction<
-  typeof hasIndexManagePrivilege
+const mockHasIndexMonitorPrivilege = hasIndexMonitorPrivilege as jest.MockedFunction<
+  typeof hasIndexMonitorPrivilege
 >;
 
 describe('registerDeploymentStatsRoute', () => {
@@ -45,7 +45,7 @@ describe('registerDeploymentStatsRoute', () => {
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     soClient = savedObjectsClientMock.create();
-    mockHasIndexManagePrivilege.mockResolvedValue(true);
+    mockHasIndexMonitorPrivilege.mockResolvedValue(true);
     mockFetchApiKeysStats.mockResolvedValue({ total: null, expiring: null });
 
     registerDeploymentStatsRoute(router, logger);
@@ -119,8 +119,14 @@ describe('registerDeploymentStatsRoute', () => {
     expect(response.customError).not.toHaveBeenCalled();
   });
 
-  it('withholds index stats but still returns the dashboard count without the `manage` privilege', async () => {
-    mockHasIndexManagePrivilege.mockResolvedValue(false);
+  it('withholds only the vector count from a caller without the `monitor` privilege', async () => {
+    mockHasIndexMonitorPrivilege.mockResolvedValue(false);
+    mockFetchIndexStats.mockResolvedValue({
+      indicesCount: 3,
+      storeSizeBytes: 1024,
+      vectorCount: null,
+      documentsCount: 4,
+    });
     mockFetchDashboardsCount.mockResolvedValue(2);
 
     const request = httpServerMock.createKibanaRequest();
@@ -128,14 +134,15 @@ describe('registerDeploymentStatsRoute', () => {
 
     await getHandler()(createContext(), request, response);
 
-    expect(mockFetchIndexStats).not.toHaveBeenCalled();
+    expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger, {
+      canMonitorAllIndices: false,
+    });
     expect(response.forbidden).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        indicesCount: null,
-        storeSizeBytes: null,
-        vectorCount: null,
-        documentsCount: null,
+        indicesCount: 3,
+        storeSizeBytes: 1024,
+        documentsCount: 4,
         dashboardsCount: 2,
         apiKeysCount: null,
         expiringApiKeysCount: null,

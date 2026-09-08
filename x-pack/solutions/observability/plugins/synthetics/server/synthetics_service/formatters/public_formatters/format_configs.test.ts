@@ -314,6 +314,43 @@ describe('browser fields', () => {
 
     expect(formattedConfig).toEqual(expected);
   });
+
+  it('includes certificate_error_spki_allowlist when non-empty', () => {
+    const pem = '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----';
+    const formattedConfig = formatMonitorConfigFields(
+      [
+        ...(Object.keys(testBrowserConfig) as ConfigKey[]),
+        ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+      ],
+      {
+        ...testBrowserConfig,
+        [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [pem],
+      },
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(formattedConfig.certificate_error_spki_allowlist).toEqual([pem]);
+  });
+
+  it('omits certificate_error_spki_allowlist when empty', () => {
+    const formattedConfig = formatMonitorConfigFields(
+      [
+        ...(Object.keys(testBrowserConfig) as ConfigKey[]),
+        ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+      ],
+      {
+        ...testBrowserConfig,
+        [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
+      },
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(formattedConfig.certificate_error_spki_allowlist).toBeUndefined();
+  });
 });
 
 describe('formatHeartbeatRequest', () => {

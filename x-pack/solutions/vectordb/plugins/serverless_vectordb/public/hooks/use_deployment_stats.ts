@@ -27,7 +27,7 @@ interface StarredDashboardsCountResponse {
 
 interface DeploymentStatsResponse {
   indicesCount: number | null;
-  vectorCount: number | null;
+  vectorCount?: number | null;
   storeSizeBytes: number | null;
   dashboardsCount: number | null;
   documentsCount: number | null;
@@ -36,6 +36,7 @@ interface DeploymentStatsResponse {
 }
 
 export interface DeploymentStats extends DeploymentStatsResponse {
+  vectorCount: number | null;
   workflowsCount: number | null;
   workflowsRunningCount: number | null;
   starredDashboardsCount: number | null;

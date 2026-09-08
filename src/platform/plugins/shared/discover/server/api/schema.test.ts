@@ -37,7 +37,6 @@ const classicTab = {
   view_mode: 'documents',
   hide_chart: false,
   hide_table: false,
-  time_restore: false,
 };
 
 const esqlTab = {
@@ -50,7 +49,6 @@ const esqlTab = {
   sort: [],
   hide_chart: false,
   hide_table: false,
-  time_restore: false,
 };
 
 const multiTabSessionData = {
@@ -120,7 +118,6 @@ describe('discoverSessionApiDataSchema', () => {
 
     expect(tab.hide_chart).toBe(false);
     expect(tab.hide_table).toBe(false);
-    expect(tab.time_restore).toBe(false);
     expect(tab.sort).toEqual([]);
     expect(tab.filters).toEqual([]);
     expect(tab.view_mode).toBe('documents');
@@ -128,6 +125,15 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.density).toBeUndefined();
     expect(tab.header_row_height).toBeUndefined();
     expect(tab.control_panels).toBeUndefined();
+  });
+
+  it('rejects the removed time_restore API field', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'Legacy time restore',
+        tabs: [{ ...classicTab, time_restore: false }],
+      })
+    ).toThrow();
   });
 
   it('validates vis_context with opaque Lens attributes', () => {

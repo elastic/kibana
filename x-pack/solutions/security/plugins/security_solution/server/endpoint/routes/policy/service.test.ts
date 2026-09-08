@@ -28,7 +28,7 @@ describe('Policy Response Services', () => {
         })
       ).toBeTruthy();
 
-      expect(() => GetPolicyResponseSchema.query.validate({})).toThrowError();
+      expect(() => GetPolicyResponseSchema.query.validate({})).toThrow();
     });
   });
 

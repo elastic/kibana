@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldText,
@@ -21,7 +21,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import type { InputFieldProps } from '@kbn/fleet-plugin/public';
+import {
+  DataStreamTypeSelector,
+  LazyPackagePolicyInputVarField,
+  useGetDataStreams,
+} from '@kbn/fleet-plugin/public';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
@@ -29,7 +35,6 @@ import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
   getRegionFieldName,
-  getRequiredBooleanFields,
   getRequiredTextFields,
   isAdvancedVar,
   resolveFieldMeta,
@@ -78,6 +83,7 @@ function VarField({
   draft,
   onFieldChange,
   forceShowErrors,
+  datastreams,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
@@ -85,10 +91,32 @@ function VarField({
   draft: Record<string, Record<string, string>>;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
+  datastreams?: InputFieldProps['datastreams'];
 }) {
+  const { colorMode } = useEuiTheme();
   const meta = resolveFieldMeta(service, activeInput, fieldName);
   if (!meta) return null;
   const value = toTyped(draft[activeInput]?.[fieldName], meta);
+
+  if (fieldName === 'data_stream.type') {
+    const selected = typeof value === 'string' ? value : (meta.def.default as string) ?? 'logs';
+    return (
+      <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
+        <DataStreamTypeSelector
+          value={selected}
+          onChange={(id) => onFieldChange(activeInput, fieldName, id)}
+          helpText={i18n.translate(
+            'xpack.ingestHub.serviceSettingsStep.flyout.dataStreamType.help',
+            {
+              defaultMessage:
+                "Select a data stream type for this policy. This setting changes the name of the integration's data stream.",
+            }
+          )}
+        />
+      </div>
+    );
+  }
+
   const isRequired = !meta.isBool && (service.requiredConfig ?? []).includes(fieldName);
   const isEmpty = Array.isArray(value)
     ? value.length === 0
@@ -104,18 +132,23 @@ function VarField({
   const varDef = ECF_TRIGGER_VARS.has(fieldName)
     ? { ...meta.def, description: undefined, multi: true, required: true }
     : meta.def;
+  // KibanaStyledComponentsThemeProvider supplies the legacy styled-components EUI theme that
+  // Fleet's var field accesses via props.theme.eui (e.g. FixedHeightDiv for yaml fields).
   return (
     <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <LazyPackagePolicyInputVarField
-          varDef={varDef}
-          value={value}
-          onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
-          errors={errors}
-          forceShowErrors={forceShowErrors}
-          packageName={service.packageName}
-        />
-      </Suspense>
+      <KibanaStyledComponentsThemeProvider darkMode={colorMode === 'DARK'}>
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <LazyPackagePolicyInputVarField
+            varDef={varDef}
+            value={value}
+            onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
+            errors={errors}
+            forceShowErrors={forceShowErrors}
+            packageName={service.packageName}
+            datastreams={datastreams}
+          />
+        </Suspense>
+      </KibanaStyledComponentsThemeProvider>
     </div>
   );
 }
@@ -136,6 +169,22 @@ function InputVarFields({
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
   const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  // data_stream.dataset is only present on OTel input-package services. useGetDataStreams cannot
+  // be called conditionally (Rules of Hooks), so the fetch always fires — only the derived
+  // value is guarded to avoid building a sorted list for every ECS-format flyout.
+  const needsDatastreams = allConfigFields.includes('data_stream.dataset');
+  const { data: dataStreamsData } = useGetDataStreams();
+  const datastreams = useMemo(() => {
+    if (!needsDatastreams) return undefined;
+    const all = dataStreamsData?.data_streams ?? [];
+    // Mirror Fleet's sortDatastreamsByDataset: package's own streams first, then alphabetical.
+    return [...all].sort((a, b) => {
+      const aOwn = a.dataset.startsWith(service.packageName ?? '') ? 0 : 1;
+      const bOwn = b.dataset.startsWith(service.packageName ?? '') ? 0 : 1;
+      if (aOwn !== bOwn) return aOwn - bOwn;
+      return a.dataset.localeCompare(b.dataset);
+    });
+  }, [dataStreamsData, service.packageName, needsDatastreams]);
   const regionFieldName = getRegionFieldName(service, activeInput);
   const regionMeta = allConfigFields.includes(regionFieldName)
     ? resolveFieldMeta(service, activeInput, regionFieldName)
@@ -147,15 +196,20 @@ function InputVarFields({
   const otherFlyoutFields = flyoutFields.filter(
     (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
   );
-  const requiredBoolFields = getRequiredBooleanFields(service, activeInput);
-
   const isAdvanced = (fieldName: string) => {
     const meta = resolveFieldMeta(service, activeInput, fieldName);
     return meta ? isAdvancedVar(meta.def) : false;
   };
 
-  const primaryBoolFields = requiredBoolFields.filter((f) => !isAdvanced(f));
-  const advancedBoolFields = requiredBoolFields.filter(isAdvanced);
+  // Collect ALL bool fields from both required and optional config — getRequiredBooleanFields
+  // only covers show_user:true bools from requiredConfig, missing optional bools like
+  // "Enable request tracing" (show_user:false in optionalConfig).
+  const allBoolFields = allConfigFields.filter((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
+    return meta?.isBool ?? false;
+  });
+  const primaryBoolFields = allBoolFields.filter((f) => !isAdvanced(f));
+  const advancedBoolFields = allBoolFields.filter(isAdvanced);
   const primaryOtherFields = otherFlyoutFields.filter((f) => !isAdvanced(f));
   const advancedOtherFields = otherFlyoutFields.filter(isAdvanced);
 
@@ -215,6 +269,7 @@ function InputVarFields({
                 draft={varsByInput}
                 onFieldChange={onFieldChange}
                 forceShowErrors={anyRequiredEmpty}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -233,6 +288,7 @@ function InputVarFields({
                 fieldName={fieldName}
                 draft={varsByInput}
                 onFieldChange={onFieldChange}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -251,6 +307,7 @@ function InputVarFields({
                 fieldName={fieldName}
                 draft={varsByInput}
                 onFieldChange={onFieldChange}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -278,6 +335,7 @@ function InputVarFields({
           </EuiFlexGroup>
           {isShowingAdvanced && (
             <>
+              <EuiSpacer size="s" />
               {advancedBoolFields.map((fieldName, i) => (
                 <React.Fragment key={fieldName}>
                   {i > 0 && <EuiSpacer size="m" />}
@@ -333,7 +391,12 @@ export function ServiceFieldsForm({
     return (
       <>
         {dsInputs.map((input, idx) => {
-          const isEnabled = dsVars ? dsVars.enabledInputs.includes(input) : true;
+          const isEnabled = dsVars
+            ? dsVars.enabledInputs.includes(input)
+            : (dsView.defaultEnabledInputs?.length
+                ? dsView.defaultEnabledInputs
+                : dsInputs
+              ).includes(input);
           return (
             <React.Fragment key={input}>
               {idx > 0 && <EuiHorizontalRule margin="m" />}
