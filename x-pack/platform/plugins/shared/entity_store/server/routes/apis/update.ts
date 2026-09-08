@@ -14,12 +14,26 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
-import { enforceEntityStorePrivileges } from './utils/check_entity_store_privileges';
+import {
+  LogExtractionByTypeSchema,
+  LogExtractionUpdadeSchema,
+} from './utils/log_extraction_validator';
+import {
+  collectAdditionalIndexPatterns,
+  enforceEntityStorePrivileges,
+} from './utils/check_entity_store_privileges';
+import { EntityTypeNotInstalledError } from '../../domain/errors';
 
-const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
-});
+const bodySchema = z
+  .object({
+    logExtraction: LogExtractionUpdadeSchema.optional(),
+    logExtractionByType: LogExtractionByTypeSchema,
+  })
+  .refine(
+    ({ logExtraction, logExtractionByType }) =>
+      logExtraction !== undefined || logExtractionByType !== undefined,
+    { message: 'at least one of logExtraction or logExtractionByType is required' }
+  );
 
 export function registerUpdate(router: EntityStorePluginRouter) {
   router.versioned
@@ -56,17 +70,22 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         } = await ctx.entityStore;
         logger.debug('Update api called');
 
+        const { logExtraction, logExtractionByType } = req.body;
+
         const forbidden = await enforceEntityStorePrivileges(
           assetManager,
           req,
           res,
-          req.body.logExtraction?.additionalIndexPatterns
+          collectAdditionalIndexPatterns(logExtraction, logExtractionByType)
         );
         if (forbidden) return forbidden;
 
         try {
-          await logsExtractionClient.updateConfig(req.body.logExtraction);
+          await logsExtractionClient.updateConfig(logExtraction, logExtractionByType);
         } catch (error) {
+          if (error instanceof EntityTypeNotInstalledError) {
+            return res.badRequest({ body: { message: error.message } });
+          }
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });
           }

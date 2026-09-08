@@ -13,7 +13,10 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
-import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
+import {
+  collectAdditionalIndexPatterns,
+  enforceEntityStorePrivileges,
+} from '../utils/check_entity_store_privileges';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
@@ -53,14 +56,14 @@ export function registerInstall(router: EntityStorePluginRouter) {
           assetManagerClient: assetManager,
           entityMaintainersClient,
         } = entityStoreCtx;
-        const { entityTypes, logExtraction, historySnapshot } = req.body;
+        const { entityTypes, logExtraction, logExtractionByType, historySnapshot } = req.body;
         logger.debug('Install api called');
 
         const forbidden = await enforceEntityStorePrivileges(
           assetManager,
           req,
           res,
-          logExtraction?.additionalIndexPatterns
+          collectAdditionalIndexPatterns(logExtraction, logExtractionByType)
         );
         if (forbidden) return forbidden;
         const { engines } = await assetManager.getStatus();
@@ -71,7 +74,13 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await assetManager.init(req, toInstall, logExtraction, historySnapshot);
+        await assetManager.init(
+          req,
+          toInstall,
+          logExtraction,
+          historySnapshot,
+          logExtractionByType
+        );
         await entityMaintainersClient.init(req);
 
         return res.created({ body: { ok: true } });
