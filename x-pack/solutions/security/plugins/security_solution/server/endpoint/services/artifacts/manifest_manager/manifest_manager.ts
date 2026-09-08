@@ -40,6 +40,7 @@ import {
   type ArtifactListId,
   buildArtifact,
   convertExceptionsToEndpointFormat,
+  convertYaraRulesToEndpointFormat,
   getAllItemsFromEndpointExceptionList,
   getArtifactId,
   Manifest,
@@ -53,6 +54,7 @@ import {
   type InternalArtifactCompleteSchema,
   type InternalManifestSchema,
   type WrappedTranslatedExceptionList,
+  type WrappedTranslatedYaraRulesList,
 } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
@@ -204,7 +206,7 @@ export class ManifestManager {
     schemaVersion: string;
     exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
     isEndpointExceptionsPerPolicyEnabled?: boolean;
-  }): Promise<WrappedTranslatedExceptionList> {
+  }): Promise<WrappedTranslatedExceptionList | WrappedTranslatedYaraRulesList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
       // If there are host isolation exceptions in place but there is a downgrade scenario (serverless), those shouldn't be taken into account when generating artifacts.
@@ -243,6 +245,10 @@ export class ManifestManager {
         listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
           ? allExceptionsByListId
           : allExceptionsByListId.filter(filter);
+    }
+
+    if (listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id) {
+      return convertYaraRulesToEndpointFormat(exceptions, schemaVersion);
     }
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
@@ -509,6 +515,33 @@ export class ManifestManager {
   }
 
   /**
+   * Builds an array of Custom YARA Signature artifacts (one per supported OS) based on the current
+   * state of the Custom YARA Signatures list
+   */
+  protected async buildCustomYaraSignaturesArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      name: ArtifactConstants.GLOBAL_CUSTOM_YARA_SIGNATURES_NAME,
+    };
+
+    for (const os of ArtifactConstants.SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    }
+
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
    * Writes new artifact to Fleet
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
@@ -731,6 +764,9 @@ export class ManifestManager {
       this.buildBlocklistArtifacts(allPolicyIds),
       ...(this.experimentalFeatures.trustedDevices
         ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
+      ...(this.experimentalFeatures.customYaraSignaturesEnabled
+        ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds)]
         : []),
     ]);
 
