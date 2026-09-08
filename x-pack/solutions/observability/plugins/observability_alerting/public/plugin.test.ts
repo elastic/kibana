@@ -9,20 +9,20 @@ import type { App, AppUpdater, AppUpdatableFields } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ObservabilityAlertingPlugin } from './plugin';
 import {
-  OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_INBOX_PATH,
 } from './constants';
 
-const APP_STUB = {
+const APP_STUB: App = {
   id: OBSERVABILITY_ALERTING_APP_ID,
   title: 'Alerting',
   mount: jest.fn(),
-} as unknown as App;
+};
 
 const readLatestUpdate = async (
   updater$: App['updater$'],

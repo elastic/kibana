@@ -9,7 +9,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
+  OBSERVABILITY_ALERTING_APP_ROUTE,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
@@ -32,8 +32,6 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
   },
 ] as const;
 
-const APP_ROUTE = OBSERVABILITY_ALERTING_BASE_PATH.replace(/^\/app\//, '');
-
 /**
  * Drives the Observability Alerting mounts (`/app/observability/alerting`).
  * Does not wait for page chrome so the same `goto` works for the flag-off
@@ -49,6 +47,6 @@ export class ObservabilityAlertingPage {
   }
 
   async goto(path: string): Promise<void> {
-    await this.page.gotoApp(`${APP_ROUTE}${path}`);
+    await this.page.gotoApp(`${OBSERVABILITY_ALERTING_APP_ROUTE}${path}`);
   }
 }
