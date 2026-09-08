@@ -56,7 +56,7 @@ describe('runWorkflowSync', () => {
       workflowLogger: {},
       workflowTaskManager: {},
       nodesFactory: {},
-      workflowExecutionPersistence: {},
+      activeExecutionPersistence: {},
       workflowExecutionRepository: undefined,
       esClient: {},
     };
@@ -102,7 +102,7 @@ describe('runWorkflowSync', () => {
         executionMode: 'sync',
         signal: abortController.signal,
         fakeRequest: request,
-        workflowExecutionRepository: setup.workflowExecutionPersistence,
+        workflowExecutionRepository: setup.activeExecutionPersistence,
       })
     );
   });
