@@ -306,12 +306,12 @@ export class WorkflowsApiService {
   async rawResume(
     workflowExecutionId: string,
     input: Record<string, unknown>,
-    options?: Partial<ReqOptions>
+    options?: Partial<ReqOptions> & { stepExecutionId?: string }
   ): Promise<{
     data: { success: boolean; executionId: string; message: string };
     status: number;
   }> {
-    const { headers, retries, ...rest } = options ?? {};
+    const { headers, retries, stepExecutionId, ...rest } = options ?? {};
     const response = await this.kbnClient.request<{
       success: boolean;
       executionId: string;
@@ -322,7 +322,10 @@ export class WorkflowsApiService {
       retries: retries ?? 0,
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}/resume`,
-      body: { input },
+      body: {
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      },
       headers: { 'elastic-api-version': '2023-10-31', ...headers },
     });
     return response;

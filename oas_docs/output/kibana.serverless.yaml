@@ -77722,6 +77722,7 @@ paths:
                   input:
                     approved: true
                     comment: Approved by analyst
+                  stepExecutionId: step-exec-a1b2c3d4
             schema:
               additionalProperties: false
               type: object
@@ -77731,6 +77732,11 @@ paths:
                     nullable: true
                   description: Input data to resume the execution with.
                   type: object
+                stepExecutionId:
+                  description: Step execution ID of the HITL wait to claim. When omitted, the server looks up the waiting step.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
               required:
                 - input
       responses:
@@ -77760,7 +77766,8 @@ paths:
                 "input": {
                   "approved": true,
                   "comment": "Approved by analyst"
-                }
+                },
+                "stepExecutionId": "step-exec-a1b2c3d4"
               }'
         - lang: Console
           source: |
@@ -77769,7 +77776,8 @@ paths:
               "input": {
                 "approved": true,
                 "comment": "Approved by analyst"
-              }
+              },
+              "stepExecutionId": "step-exec-a1b2c3d4"
             }
       x-state: Generally available
       x-metaTags:
