@@ -299,6 +299,10 @@ describe('displaySummary', () => {
     expect(output).toContain('Pipelines  : kibana-on-merge');
     expect(output).toContain('Branches   : any');
     expect(output).toContain('Frameworks : jest, playwright');
+    expect(output).toContain('Min builds        : 10');
+    expect(output).toContain('Min failed builds : 2');
+    expect(output).toContain('Max tests         : 200 per list');
+    expect(output).toContain('Consistently failing = qualifying test that never passed');
     expect(output).toContain('Flaky                : 2 (jest: 2)');
     expect(output).toContain('Consistently failing : 1');
     expect(output).toContain('Top 1 failing tests by failed builds');

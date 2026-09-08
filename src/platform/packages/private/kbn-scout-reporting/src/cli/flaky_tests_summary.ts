@@ -187,7 +187,7 @@ export const buildTopFailingTable = (
 
 /** Writes a panel with the report window, scope, totals and the top failing tests to the log. */
 export const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog): void => {
-  const { window, scope, summary } = report;
+  const { window, scope, thresholds, summary } = report;
   const flakyByFramework = Object.entries(summary.flakyByFramework)
     .map(([framework, count]) => `${framework}: ${count}`)
     .join(', ');
@@ -213,6 +213,16 @@ export const displaySummary = (report: FlakyTestReport, limit: number, log: Tool
     ],
     [
       dedent(`\
+        Thresholds
+          Min builds        : ${thresholds.minBuilds} (tests seen in fewer builds are ignored)
+          Min failed builds : ${thresholds.minFailedBuilds} (tests that failed in fewer builds are ignored)
+          Max tests         : ${thresholds.maxTests} per list
+          Flaky                = qualifying test with at least one pass or in-run retry recovery
+          Consistently failing = qualifying test that never passed in the window
+        `),
+    ],
+    [
+      dedent(`\
         Results
           Flaky                : ${summary.totalFlaky}${
         flakyByFramework ? ` (${flakyByFramework})` : ''
@@ -223,8 +233,8 @@ export const displaySummary = (report: FlakyTestReport, limit: number, log: Tool
   );
 
   const all = classifiedEntries(report);
-  if (all.length > 0) {
-    const top = all.slice(0, limit);
+  const top = all.slice(0, limit);
+  if (top.length > 0) {
     const legend = `${chalk.yellow('flaky')}, ${chalk.red('consistently failing')}`;
     panel.push([
       `Top ${top.length} failing tests by failed builds (${legend})\n${buildTopFailingTable(
