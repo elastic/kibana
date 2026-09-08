@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { calculateSetMetrics } from '@kbn/evals';
 import {
   validateEsqlSyntax,
   hasRequiredFields,
-  calculateSetMetrics,
   extractMitreTechniques,
 } from './helpers';
 
