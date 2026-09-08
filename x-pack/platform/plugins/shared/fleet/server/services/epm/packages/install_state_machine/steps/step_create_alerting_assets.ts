@@ -12,7 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import pMap from 'p-map';
 
-import { FLEET_ELASTIC_AGENT_PACKAGE, FleetError } from '../../../../../../common';
+import { FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
 import type { InstallablePackage } from '../../../../../../common/types';
 import { appContextService } from '../../../../app_context';
@@ -337,12 +337,12 @@ export async function stepCreateAlertingAssets(
     }
   }
 
-  // Create alerting rules templates from archive assets
-  if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
-    return;
-  }
+  // Create alerting rules from the package's shipped alerting_rule_template archive
+  // assets. Any integration package (not just elastic_agent) can ship these templates;
+  // they are materialized into real, disabled, action-less rules on install so admins can
+  // one-click enable them (FLEET-002).
 
-  await withPackageSpan('Install elastic agent rules', async () => {
+  await withPackageSpan('Install package alerting rules', async () => {
     const rulesClient = context.request
       ? await appContextService
           .getAlertingStart()
@@ -362,6 +362,9 @@ export async function stepCreateAlertingAssets(
       (path) => path.match(/\/alerting_rule_template\//) !== null
     );
 
+    if (alertTemplateAssets.length === 0) {
+      return;
+    }
     const assetRefs: KibanaAssetReference[] = [];
     await pMap(
       alertTemplateAssets,

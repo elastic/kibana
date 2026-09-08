@@ -20,7 +20,7 @@
       "timeField": "@timestamp",
       "aggType": "count",
       "groupBy": "all",
-      "termSize": 0,
+      "termSize": 1,
       "thresholdComparator": ">",
       "threshold": [
         0

@@ -590,11 +590,11 @@ describe('stepCreateAlertingAssets', () => {
   beforeEach(() => {
     jest.mocked(saveKibanaAssetsRefs).mockReset();
   });
-  it('does nothing for non elastic_agent package', async () => {
+  it('does nothing for package with no alerting rule templates', async () => {
     const context = {
       packageInstallContext: {
         packageInfo: { name: 'not-elastic-agent' },
-        archivePackage: { assets: [] },
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         savedObjectsClient: {} as any,
         esClient: {} as any,
         rulesClient: {} as any,
@@ -608,6 +608,60 @@ describe('stepCreateAlertingAssets', () => {
     expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 
+  it('installs rules for a non elastic_agent package that ships alerting rule templates', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: 'template-id',
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+    jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
+      .mockResolvedValue(rulesClient);
+    const context = {
+      savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
+      packageInstallContext: {
+        packageInfo: { name: 'sdlc_intel' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'sdlc_intel-0.1.0/kibana/alerting_rule_template/sdlc-stalled-items.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+    await stepCreateAlertingAssets(context as any);
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      expect.anything(),
+      'sdlc_intel',
+      [
+        {
+          id: 'fleet-default-sdlc_intel-template-id',
+          type: 'alert',
+          deferred: false,
+        },
+      ],
+      DEFAULT_SPACE_ID,
+      false,
+      true,
+      ['alert']
+    );
+  });
   it('install elastic_agent rules', async () => {
     const rulesClient = {
       getTemplate: jest.fn().mockResolvedValue({

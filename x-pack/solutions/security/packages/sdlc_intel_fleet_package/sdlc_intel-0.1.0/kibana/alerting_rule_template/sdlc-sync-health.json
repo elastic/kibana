@@ -20,14 +20,14 @@
       "timeField": "createdAt",
       "aggType": "count",
       "groupBy": "all",
-      "termSize": 0,
+      "termSize": 1,
       "thresholdComparator": ">",
       "threshold": [
         0
       ],
       "timeWindowSize": 4,
       "timeWindowUnit": "h",
-      "filterKuery": "workflowId\\:*sdlc* and status\\:(\"failed\" or \"timed_out\")"
+      "filterKuery": "workflowId:*sdlc* and status:(\"failed\" or \"timed_out\")"
     },
     "alertDelay": {
       "active": 1
