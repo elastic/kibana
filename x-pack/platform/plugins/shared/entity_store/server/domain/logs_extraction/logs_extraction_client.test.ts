@@ -74,6 +74,7 @@ import {
   type EngineDescriptorClient,
   type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
+  type EntityStoreGlobalStateOverrides,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
@@ -139,7 +140,13 @@ function createMockGlobalStateClient(
   return {
     find: jest.fn().mockResolvedValue(state),
     findOrThrow: jest.fn().mockResolvedValue(state),
-    update: jest.fn().mockResolvedValue({}),
+    update: jest.fn().mockImplementation(async (partial: EntityStoreGlobalStateOverrides) => ({
+      ...state,
+      logsExtraction: LogExtractionConfig.parse({
+        ...logsExtraction,
+        ...partial.logsExtraction,
+      }),
+    })),
   };
 }
 
@@ -1549,7 +1556,6 @@ describe('LogsExtractionClient', () => {
     it('should merge provided params over current config and persist via globalStateClient', async () => {
       await client.updateConfig({ delay: '5m' });
 
-      expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         logsExtraction: expect.objectContaining({ delay: '5m' }),
       });
@@ -1599,12 +1605,11 @@ describe('LogsExtractionClient', () => {
 
     it('should throw when global state is not found', async () => {
       const notFoundError = new Error('No global state found for this namespace');
-      mockGlobalStateClient.findOrThrow.mockRejectedValue(notFoundError);
+      mockGlobalStateClient.update.mockRejectedValue(notFoundError);
 
       await expect(client.updateConfig({ delay: '5m' })).rejects.toThrow(
         'No global state found for this namespace'
       );
-      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
   });
 });

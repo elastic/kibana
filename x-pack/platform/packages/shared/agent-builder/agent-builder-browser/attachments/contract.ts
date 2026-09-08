@@ -35,6 +35,14 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   openSidebarConversation?: () => void;
 }
 
+/** Props passed to attachment renderers in the conversation details flyout. */
+export interface ConversationDetailsRenderProps<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** The attachment to render, with version data selected by the consumer. */
+  attachment: TAttachment;
+}
+
 /**
  * Callbacks available to canvas content renderers.
  */
@@ -204,6 +212,10 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   renderInlineContent?: (
     props: AttachmentRenderProps<TAttachment>,
     callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /** Render attachment content in the conversation details flyout. */
+  renderConversationDetailsContent?: (
+    props: ConversationDetailsRenderProps<TAttachment>
   ) => ReactNode;
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
