@@ -8,7 +8,7 @@ pageLoadAssetSize:
   agentBuilderWorkflows: 13383
   agentContextLayer: 324
   aiAssistantManagementSelection: 355
-  aiops: 317
+  aiops: 586
   alerting: 8789
   alertingVTwo: 10685
   apm: 33124
@@ -34,6 +34,7 @@ pageLoadAssetSize:
   core: 320
   cps: 5080
   crossClusterReplication: 7691
+
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4405
@@ -50,7 +51,7 @@ pageLoadAssetSize:
   developerToolbar: 1947
   devTools: 4281
   discover: 18086
-  discoverEnhanced: 1091
+  discoverEnhanced: 1359
   discoveries: 31528
   discoverShared: 1070
   elasticAssistant: 137336
@@ -109,8 +110,8 @@ pageLoadAssetSize:
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
-  kubernetesSecurity: 247
-  lens: 316
+  kubernetesSecurity: 515
+  lens: 585
   licenseManagement: 3292
   licensing: 8329
   links: 3586
@@ -120,7 +121,7 @@ pageLoadAssetSize:
   logstash: 11772
   maintenanceWindows: 3754
   management: 10296
-  maps: 932
+  maps: 1201
   mapsEms: 3256
   metricsDataAccess: 1557
   ml: 663
@@ -144,13 +145,13 @@ pageLoadAssetSize:
   productDocBase: 3614
   productIntercept: 4738
   profiling: 12944
-  queryActivity: 881
-  reindexService: 1696
+  queryActivity: 1149
+  reindexService: 1964
   remoteClusters: 5794
   reporting: 27953
   rollup: 8005
-  runtimeFields: 301
-  sampleDataIngest: 1084
+  runtimeFields: 569
+  sampleDataIngest: 1353
   savedObjects: 365
   savedObjectsFinder: 256
   savedObjectsManagement: 18227
@@ -196,18 +197,18 @@ pageLoadAssetSize:
   synthetics: 18443
   telemetry: 20586
   telemetryManagementSection: 1738
-  timelines: 1140
+  timelines: 1409
   transform: 8828
-  triggersActionsUi: 3033
+  triggersActionsUi: 3396
   uiActions: 454
   unifiedDocViewer: 627
   unifiedSearch: 511
-  upgradeAssistant: 1822
+  upgradeAssistant: 2091
   uptime: 37816
-  urlDrilldown: 1267
+  urlDrilldown: 1535
   urlForwarding: 1412
   usageCollection: 223
-  ux: 2418
+  ux: 2687
   vendors: 4591364
   vendors-heavy: 1388239
   visDefaultEditor: 738

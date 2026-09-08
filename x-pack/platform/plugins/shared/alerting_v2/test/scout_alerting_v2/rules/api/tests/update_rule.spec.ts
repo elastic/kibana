@@ -300,6 +300,64 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'update: should clear all tags when metadata.tags is set to null',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-with-tags', tags: ['prod', 'infra'] },
+        })
+      );
+      expect(created.metadata.tags).toStrictEqual(['prod', 'infra']);
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.tags).toBeUndefined();
+
+      // The cleared tags must survive a re-read (the original bug: they came back).
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.tags).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'update: should replace tags when metadata.tags is a non-empty array',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-retag', tags: ['old'] } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: ['prod', 'infra'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.tags).toStrictEqual(['prod', 'infra']);
+    }
+  );
+
+  apiTest(
+    'validation: should reject metadata.tags as an empty array (null clears tags)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-empty-tags', tags: ['keep'] } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: [] } },
+      });
+      expect(response).toHaveStatusCode(400);
+      // The rejected update must not have persisted.
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.tags).toStrictEqual(['keep']);
+    }
+  );
+
   apiTest('status: should return 404 when the rule does not exist', async ({ apiClient }) => {
     const response = await apiClient.patch(getRuleUrl('does-not-exist'), {
       headers: writerHeaders,
