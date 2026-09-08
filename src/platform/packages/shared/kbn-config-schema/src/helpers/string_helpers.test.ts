@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as helpers from '../..';
-import { schema, metaFields } from '../..';
+import {
+  schema,
+  metaFields,
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  unboundedString,
+} from '../..';
 import { reportStringLengthViolation } from '@kbn/schema-string-helpers';
 
 jest.mock('@kbn/schema-string-helpers', () => ({
@@ -19,18 +31,16 @@ jest.mock('@kbn/schema-string-helpers', () => ({
 beforeEach(() => jest.clearAllMocks());
 
 describe.each([
-  ['savedObjectId', 1, 512],
-  ['savedObjectType', 0, 256],
-  ['savedObjectVersion', 0, 256],
-  ['spaceId', 1, 512],
-  ['displayName', 1, 1024],
-  ['description', 0, 10000],
-  ['searchFilter', 0, 10000],
-  ['aggregation', 0, 100000],
-  ['querySortField', 0, 256],
-] as const)('%s', (name, minLength, maxLength) => {
-  const helper = helpers[name];
-
+  ['savedObjectId', savedObjectId, 1, 512],
+  ['savedObjectType', savedObjectType, 0, 256],
+  ['savedObjectVersion', savedObjectVersion, 0, 256],
+  ['spaceId', spaceId, 1, 512],
+  ['displayName', displayName, 1, 1024],
+  ['description', description, 0, 10000],
+  ['searchFilter', searchFilter, 0, 10000],
+  ['aggregation', aggregation, 0, 100000],
+  ['querySortField', querySortField, 0, 256],
+] as const)('%s', (name, helper, minLength, maxLength) => {
   test('enforces the default boundaries and string type', () => {
     const strict = helper();
     expect(strict.validate('x'.repeat(maxLength))).toHaveLength(maxLength);
@@ -85,11 +95,11 @@ describe.each([
 
 describe('unboundedString', () => {
   test.each(['', '  ', '\n\t'])('rejects an empty reason %j at definition time', (reason) => {
-    expect(() => helpers.unboundedString({ reason })).toThrow('requires a non-empty reason');
+    expect(() => unboundedString({ reason })).toThrow('requires a non-empty reason');
   });
 
   test('accepts large strings, preserves minimum length and validates the input type', () => {
-    const unbounded = helpers.unboundedString({
+    const unbounded = unboundedString({
       reason: 'Size is enforced upstream',
       minLength: 1,
     });
