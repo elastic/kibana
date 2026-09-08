@@ -21,10 +21,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { unstableAutoGridCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { unstableAutoGridCss, unstableRowOrStackCss } from '@kbn/css-utils/public/unstable_layout_css';
 import { docLinks } from '../../../common/doc_links';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
+
+/** Width a card needs to keep its icon beside its text, and the grid's ideal track width. */
+const CARD_MIN_WIDTH = '30rem';
 
 interface ResourceCardProps {
   title: string;
@@ -49,9 +52,9 @@ const ResourceCard = ({
   return (
     <EuiSplitPanel.Outer
       direction="row"
-      responsive={['xs', 's', 'm']}
+      responsive={false}
       data-test-subj={dataTestSubj}
-      css={css({ height: '100%' })}
+      css={[unstableRowOrStackCss({ threshold: CARD_MIN_WIDTH }), css({ height: '100%' })]}
     >
       <EuiSplitPanel.Inner paddingSize="none" color="subdued">
         <EuiFlexGroup
@@ -191,7 +194,7 @@ export const CloudResources = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <div css={unstableAutoGridCss({ minItemWidth: '30rem', gap: euiTheme.size.l })}>
+        <div css={unstableAutoGridCss({ minItemWidth: CARD_MIN_WIDTH, gap: euiTheme.size.l })}>
           {cards.map((card, index) => (
             <ResourceCard
               key={`resource-${index}`}
