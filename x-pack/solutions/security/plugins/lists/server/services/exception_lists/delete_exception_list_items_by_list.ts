@@ -6,6 +6,7 @@
  */
 
 import type {
+  ExceptionListItemSchema,
   FoundExceptionListItemSchema,
   ListId,
   NamespaceType,
@@ -35,11 +36,19 @@ export const getExceptionListItemIds = async ({
   savedObjectsClient,
   namespaceType,
 }: DeleteExceptionListItemByListOptions): Promise<string[]> => {
+  const items = await getExceptionListItems({ listId, namespaceType, savedObjectsClient });
+  return items.map(({ id }) => id);
+};
+
+export const getExceptionListItems = async ({
+  listId,
+  savedObjectsClient,
+  namespaceType,
+}: DeleteExceptionListItemByListOptions): Promise<ExceptionListItemSchema[]> => {
   // Stream the results from the Point In Time (PIT) finder into this array
-  let ids: string[] = [];
+  let items: ExceptionListItemSchema[] = [];
   const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
-    const responseIds = response.data.map((exceptionListItem) => exceptionListItem.id);
-    ids = [...ids, ...responseIds];
+    items = [...items, ...response.data];
   };
 
   await findExceptionListItemPointInTimeFinder({
@@ -53,5 +62,5 @@ export const getExceptionListItemIds = async ({
     sortField: 'tie_breaker_id',
     sortOrder: 'desc',
   });
-  return ids;
+  return items;
 };
