@@ -1,8 +1,7 @@
 {
-  "sha1": "",
+  "sha1": "c77afa2a886abef1ef351462ce1f07edeaad8d3b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 100,
+        "line": 103,
         "column": 25
       }
     },
@@ -33,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 119,
+        "line": 122,
         "column": 51
       }
     },
@@ -49,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 143,
+        "line": 146,
         "column": 48
       }
     },
@@ -65,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 164,
+        "line": 167,
         "column": 47
       }
     },
@@ -81,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 197,
+        "line": 200,
         "column": 37
       }
     },
@@ -97,13 +96,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 225,
+        "line": 228,
         "column": 48
       }
     },
     {
-      "id": "b56ee1f41d6fee2-8b73b3f08953a20",
-      "title": "Audit log — saved object diffs (ECS file appender) does not emit a diff for saved object types in typesToExclude",
+      "id": "b56ee1f41d6fee2-c6f9835385da3e7",
+      "title": "Audit log — saved object diffs (ECS file appender) does not emit a diff for saved object types outside typesToInclude",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -113,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 259,
+        "line": 262,
         "column": 20
       }
     },
@@ -129,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 282,
+        "line": 285,
         "column": 60
       }
     }

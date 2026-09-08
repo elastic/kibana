@@ -1,8 +1,7 @@
 {
-  "sha1": "4c98de547e10883caef0526e908b05e25ba750ca",
+  "sha1": "399f2bde519fb55cd4ecd4d32dc16c0dab5a18aa",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 53,
+        "column": 13
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 88,
+        "column": 18
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 107,
+        "column": 32
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 166,
+        "column": 24
       }
     },
     {
@@ -71,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 210,
-        "column": 12
+        "line": 208,
+        "column": 25
       }
     },
     {
@@ -85,8 +84,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 270,
-        "column": 12
+        "line": 265,
+        "column": 9
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-c5cc2a5acb76dbd",
+      "title": "Audit log — OTel field shape (Serverless) saved_object_create: kibana.diff is a JSON string (ops not dropped by the OTel SDK)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 311,
+        "column": 9
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-31ad923a7454834",
+      "title": "Audit log — OTel field shape (Serverless) saved_object_update: kibana.diff stringify preserves replace ops with oldValue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 347,
+        "column": 9
       }
     },
     {
@@ -99,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 325,
-        "column": 12
+        "line": 386,
+        "column": 18
       }
     }
   ]

@@ -126,6 +126,88 @@ describe('AgentPolicySummaryLine', () => {
     expect(results.container.textContent).not.toContain('warnings');
   });
 
+  describe('isVersionSpecific', () => {
+    const basePolicy = {
+      name: 'test',
+      revision: 2,
+      min_agent_version: '9.3.0',
+      package_agent_version_conditions: [
+        { name: 'auditd', title: 'Auditd Manager', version_condition: '>=9.3.0' },
+      ],
+    } as AgentPolicy;
+
+    test('it should NOT show version-specific icon when agent meets all integration conditions', () => {
+      // Reporter's exact case: latest-version agent assigned to policy#9.4 by the sweep task.
+      const agent = {
+        policy_id: 'abc#9.4',
+        policy_revision: 2,
+        local_metadata: { elastic: { agent: { version: '9.4.4' } } },
+      } as unknown as Agent;
+
+      const results = testRenderer.render(
+        <AgentPolicySummaryLine policy={basePolicy} agent={agent} isVersionSpecific={true} />
+      );
+      expect(results.queryByTestId('agentPolicyVersionSpecificTooltip')).toBeNull();
+    });
+
+    test('it should show version-specific icon when agent does NOT meet integration conditions', () => {
+      const agent = {
+        policy_id: 'abc#8.18',
+        policy_revision: 2,
+        local_metadata: { elastic: { agent: { version: '8.18.0' } } },
+      } as unknown as Agent;
+
+      const results = testRenderer.render(
+        <AgentPolicySummaryLine policy={basePolicy} agent={agent} isVersionSpecific={true} />
+      );
+      expect(results.queryByTestId('agentPolicyVersionSpecificTooltip')).not.toBeNull();
+    });
+
+    test('it should NOT show version-specific icon when package_agent_version_conditions is undefined (template-condition-only policy)', () => {
+      const policy = { name: 'test', revision: 2 } as AgentPolicy;
+      const agent = {
+        policy_id: 'abc#9.4',
+        policy_revision: 2,
+        local_metadata: { elastic: { agent: { version: '9.4.4' } } },
+      } as unknown as Agent;
+
+      const results = testRenderer.render(
+        <AgentPolicySummaryLine policy={policy} agent={agent} isVersionSpecific={true} />
+      );
+      expect(results.queryByTestId('agentPolicyVersionSpecificTooltip')).toBeNull();
+    });
+
+    test('it should NOT show version-specific icon when agent version is unknown', () => {
+      const agent = {
+        policy_id: 'abc#9.4',
+        policy_revision: 2,
+        local_metadata: {},
+      } as unknown as Agent;
+
+      const results = testRenderer.render(
+        <AgentPolicySummaryLine policy={basePolicy} agent={agent} isVersionSpecific={true} />
+      );
+      expect(results.queryByTestId('agentPolicyVersionSpecificTooltip')).toBeNull();
+    });
+
+    test('it should NOT render wrapper flex item when isVersionSpecific is true but agent is compatible and policy is not managed', () => {
+      // Guards the line-121 change: no empty flex wrapper causing a blank column gap.
+      const agent = {
+        policy_id: 'abc#9.4',
+        policy_revision: 2,
+        local_metadata: { elastic: { agent: { version: '9.4.4' } } },
+      } as unknown as Agent;
+      const policy = { ...basePolicy, is_managed: false } as AgentPolicy;
+
+      const results = testRenderer.render(
+        <AgentPolicySummaryLine policy={policy} agent={agent} isVersionSpecific={true} />
+      );
+      expect(results.queryByTestId('agentPolicyVersionSpecificTooltip')).toBeNull();
+      // No icon tip present at all
+      expect(results.container.querySelector('.euiIconTip')).toBeNull();
+    });
+  });
+
   describe('showPolicyId', () => {
     const renderWithPolicyId = (showPolicyId: boolean) =>
       testRenderer.render(

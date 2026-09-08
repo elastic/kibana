@@ -219,7 +219,7 @@ describe('#authorize (unpublished by interface)', () => {
         // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types: new Set(), spaces, actions })
-      ).rejects.toThrowError('No types specified for authorization');
+      ).rejects.toThrow('No types specified for authorization');
       expect(checkAuthorizationSpy).not.toHaveBeenCalled();
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -231,7 +231,7 @@ describe('#authorize (unpublished by interface)', () => {
         // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types, spaces: new Set(), actions })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrow('No spaces specified for authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -242,7 +242,7 @@ describe('#authorize (unpublished by interface)', () => {
         // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types, spaces, actions: new Set() })
-      ).rejects.toThrowError('No actions specified for authorization');
+      ).rejects.toThrow('No actions specified for authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -254,7 +254,7 @@ describe('#authorize (unpublished by interface)', () => {
         // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types, spaces, actions })
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrow('Oh no!');
     });
 
     test('fully authorized', async () => {
@@ -823,7 +823,7 @@ describe('#authorize (unpublished by interface)', () => {
               ['c', new Set(['x', 'y'])],
             ]),
           })
-        ).rejects.toThrowError('Unable to bulk_update b,c');
+        ).rejects.toThrow('Unable to bulk_update b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
@@ -873,7 +873,7 @@ describe('#authorize (unpublished by interface)', () => {
             enforceMap,
             auditOptions: { objects: auditObjects },
           })
-        ).rejects.toThrowError('Unable to bulk_update b,c');
+        ).rejects.toThrow('Unable to bulk_update b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
         for (const obj of auditObjects) {
@@ -927,7 +927,7 @@ describe('#authorize (unpublished by interface)', () => {
             ]),
             auditOptions: { objects: auditObjects, bypass: 'on_failure' },
           })
-        ).rejects.toThrowError('Unable to bulk_update b,c');
+        ).rejects.toThrow('Unable to bulk_update b,c');
 
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -950,7 +950,7 @@ describe('#authorize (unpublished by interface)', () => {
             ]),
             auditOptions: { bypass: 'on_success' },
           })
-        ).rejects.toThrowError('Unable to bulk_update b,c');
+        ).rejects.toThrow('Unable to bulk_update b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
@@ -995,7 +995,7 @@ describe('#authorize (unpublished by interface)', () => {
             spaces,
             enforceMap,
           })
-        ).rejects.toThrowError('Unable to bulk_update a,b,c');
+        ).rejects.toThrow('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
@@ -1046,7 +1046,7 @@ describe('#authorize (unpublished by interface)', () => {
             enforceMap,
             auditOptions: { objects: auditObjects },
           })
-        ).rejects.toThrowError('Unable to bulk_update a,b,c');
+        ).rejects.toThrow('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
         let i = 1;
@@ -1101,7 +1101,7 @@ describe('#authorize (unpublished by interface)', () => {
             ]),
             auditOptions: { objects: auditObjects, bypass: 'on_failure' },
           })
-        ).rejects.toThrowError('Unable to bulk_update a,b,c');
+        ).rejects.toThrow('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1124,7 +1124,7 @@ describe('#authorize (unpublished by interface)', () => {
             ]),
             auditOptions: { bypass: 'on_success' },
           })
-        ).rejects.toThrowError('Unable to bulk_update a,b,c');
+        ).rejects.toThrow('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
@@ -1167,9 +1167,7 @@ describe('#authorize (unpublished by interface)', () => {
           spaces,
           actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
         })
-      ).rejects.toThrowError(
-        'No actions or access control types specified for authorization check'
-      );
+      ).rejects.toThrow('No actions or access control types specified for authorization check');
     });
   });
 
@@ -1273,7 +1271,7 @@ describe('#authorize (unpublished by interface)', () => {
             objects: auditObjects,
           },
         })
-      ).rejects.toThrowError('Unable to bulk_create b,c');
+      ).rejects.toThrow('Unable to bulk_create b,c');
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
@@ -1304,7 +1302,7 @@ describe('#authorize (unpublished by interface)', () => {
             objects: auditObjects,
           },
         })
-      ).rejects.toThrowError('Unable to bulk_create a,b,c');
+      ).rejects.toThrow('Unable to bulk_create a,b,c');
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
@@ -1383,7 +1381,7 @@ describe('#create', () => {
           namespace: '',
           object: obj1,
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -1391,9 +1389,9 @@ describe('#create', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeCreate({ namespace, object: obj1 })
-      ).rejects.toThrowError('Oh no!');
+      await expect(securityExtension.authorizeCreate({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -1646,7 +1644,7 @@ describe('#create', () => {
           namespace,
           objects: emptyObjects,
         })
-      ).rejects.toThrowError('No objects specified for bulk_create authorization');
+      ).rejects.toThrow('No objects specified for bulk_create authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -1659,7 +1657,7 @@ describe('#create', () => {
           namespace: '',
           objects: [obj1, obj2],
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -1669,7 +1667,7 @@ describe('#create', () => {
 
       await expect(
         securityExtension.authorizeBulkCreate({ namespace, objects: [obj1] })
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrow('Oh no!');
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -1910,7 +1908,7 @@ describe('update', () => {
           namespace: '',
           object: obj2,
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -1918,9 +1916,9 @@ describe('update', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeUpdate({ namespace, object: obj1 })
-      ).rejects.toThrowError('Oh no!');
+      await expect(securityExtension.authorizeUpdate({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2171,7 +2169,7 @@ describe('update', () => {
           namespace,
           objects: emptyObjects,
         })
-      ).rejects.toThrowError('No objects specified for bulk_update authorization');
+      ).rejects.toThrow('No objects specified for bulk_update authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2184,7 +2182,7 @@ describe('update', () => {
           namespace: '',
           objects: [obj1, obj2],
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2194,7 +2192,7 @@ describe('update', () => {
 
       await expect(
         securityExtension.authorizeBulkUpdate({ namespace, objects: [obj1] })
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrow('Oh no!');
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2427,7 +2425,7 @@ describe('delete', () => {
           namespace: '',
           object: obj1,
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2435,9 +2433,9 @@ describe('delete', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeDelete({ namespace, object: obj1 })
-      ).rejects.toThrowError('Oh no!');
+      await expect(securityExtension.authorizeDelete({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2655,7 +2653,7 @@ describe('delete', () => {
           namespace,
           objects: emptyObjects,
         })
-      ).rejects.toThrowError('No objects specified for bulk_delete authorization');
+      ).rejects.toThrow('No objects specified for bulk_delete authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2668,7 +2666,7 @@ describe('delete', () => {
           namespace: '',
           objects,
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2676,9 +2674,9 @@ describe('delete', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeBulkDelete({ namespace, objects })
-      ).rejects.toThrowError('Oh no!');
+      await expect(securityExtension.authorizeBulkDelete({ namespace, objects })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2909,7 +2907,7 @@ describe('get', () => {
           namespace: '',
           object: obj1,
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2917,9 +2915,9 @@ describe('get', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeGet({ namespace, object: obj1 })
-      ).rejects.toThrowError('Oh no!');
+      await expect(securityExtension.authorizeGet({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -3243,7 +3241,7 @@ describe('get', () => {
           namespace,
           objects: emptyObjects,
         })
-      ).rejects.toThrowError('No objects specified for bulk_get authorization');
+      ).rejects.toThrow('No objects specified for bulk_get authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -3256,7 +3254,7 @@ describe('get', () => {
           namespace: '',
           objects,
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -3264,7 +3262,7 @@ describe('get', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(securityExtension.authorizeBulkGet({ namespace, objects })).rejects.toThrowError(
+      await expect(securityExtension.authorizeBulkGet({ namespace, objects })).rejects.toThrow(
         'Oh no!'
       );
     });
@@ -3560,7 +3558,7 @@ describe(`#authorizeCheckConflicts`, () => {
         namespace,
         objects: emptyObjects,
       })
-    ).rejects.toThrowError('No objects specified for bulk_create authorization');
+    ).rejects.toThrow('No objects specified for bulk_create authorization');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -3573,7 +3571,7 @@ describe(`#authorizeCheckConflicts`, () => {
         namespace: '',
         objects,
       })
-    ).rejects.toThrowError('namespace cannot be an empty string');
+    ).rejects.toThrow('namespace cannot be an empty string');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -3581,9 +3579,9 @@ describe(`#authorizeCheckConflicts`, () => {
     const { securityExtension, checkPrivileges } = setup();
     checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-    await expect(
-      securityExtension.authorizeCheckConflicts({ namespace, objects })
-    ).rejects.toThrowError('Oh no!');
+    await expect(securityExtension.authorizeCheckConflicts({ namespace, objects })).rejects.toThrow(
+      'Oh no!'
+    );
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -3785,7 +3783,7 @@ describe(`#authorizeRemoveReferences`, () => {
         namespace: '',
         object: obj1,
       })
-    ).rejects.toThrowError('namespace cannot be an empty string');
+    ).rejects.toThrow('namespace cannot be an empty string');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -3795,7 +3793,7 @@ describe(`#authorizeRemoveReferences`, () => {
 
     await expect(
       securityExtension.authorizeRemoveReferences({ namespace, object: obj1 })
-    ).rejects.toThrowError('Oh no!');
+    ).rejects.toThrow('Oh no!');
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -4012,7 +4010,7 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: new Set(),
         types: expectedTypes,
       })
-    ).rejects.toThrowError('No spaces specified for authorization');
+    ).rejects.toThrow('No spaces specified for authorization');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -4025,7 +4023,7 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: expectedSpaces,
         types: new Set(),
       })
-    ).rejects.toThrowError('No types specified for authorization');
+    ).rejects.toThrow('No types specified for authorization');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -4038,7 +4036,7 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: expectedSpaces,
         types: expectedTypes,
       })
-    ).rejects.toThrowError('Oh no!');
+    ).rejects.toThrow('Oh no!');
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
@@ -4460,7 +4458,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           namespace: '',
           objects: [refObj1, refObj2],
         })
-      ).rejects.toThrowError('namespace cannot be an empty string');
+      ).rejects.toThrow('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -4473,7 +4471,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           namespace,
           objects,
         })
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrow('Oh no!');
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -4952,7 +4950,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
         namespace,
         objects,
       })
-    ).rejects.toThrowError('Oh no!');
+    ).rejects.toThrow('Oh no!');
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -5266,7 +5264,7 @@ describe('#authorizeUpdateSpaces', () => {
         spacesToRemove,
         objects: emptyObjects,
       })
-    ).rejects.toThrowError('No objects specified for share_to_space authorization');
+    ).rejects.toThrow('No objects specified for share_to_space authorization');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -5281,7 +5279,7 @@ describe('#authorizeUpdateSpaces', () => {
         spacesToRemove,
         objects,
       })
-    ).rejects.toThrowError('namespace cannot be an empty string');
+    ).rejects.toThrow('namespace cannot be an empty string');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -5291,7 +5289,7 @@ describe('#authorizeUpdateSpaces', () => {
 
     await expect(
       securityExtension.authorizeUpdateSpaces({ namespace, spacesToAdd, spacesToRemove, objects })
-    ).rejects.toThrowError('Oh no!');
+    ).rejects.toThrow('Oh no!');
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -5725,7 +5723,7 @@ describe('find', () => {
           namespaces: new Set(),
           types: expectedTypes,
         })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrow('No spaces specified for authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -5738,7 +5736,7 @@ describe('find', () => {
           namespaces: expectedSpaces,
           types: new Set(),
         })
-      ).rejects.toThrowError('No types specified for authorization');
+      ).rejects.toThrow('No types specified for authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -5748,7 +5746,7 @@ describe('find', () => {
 
       await expect(
         securityExtension.authorizeFind({ namespaces: expectedSpaces, types: expectedTypes })
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrow('Oh no!');
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
@@ -5919,7 +5917,7 @@ describe('find', () => {
           previouslyCheckedNamespaces: expectedSpaces,
           objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
         })
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrow('Oh no!');
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
@@ -6167,7 +6165,7 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
 
   test('throws an error when `aliases` is empty', async () => {
     const { securityExtension, checkPrivileges } = setup();
-    await expect(securityExtension.authorizeDisableLegacyUrlAliases([])).rejects.toThrowError(
+    await expect(securityExtension.authorizeDisableLegacyUrlAliases([])).rejects.toThrow(
       'No aliases specified for authorization'
     );
     expect(checkPrivileges).not.toHaveBeenCalled();
@@ -6179,7 +6177,7 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
 
     await expect(
       securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases)
-    ).rejects.toThrowError('Oh no!');
+    ).rejects.toThrow('Oh no!');
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -6488,7 +6486,7 @@ describe('#authorizeChangeAccessControl', () => {
         },
         'changeOwnership'
       )
-    ).rejects.toThrowError('namespace cannot be an empty string');
+    ).rejects.toThrow('namespace cannot be an empty string');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
@@ -6502,7 +6500,7 @@ describe('#authorizeChangeAccessControl', () => {
         },
         'changeOwnership'
       )
-    ).rejects.toThrowError('No objects specified for manage_access_control authorization');
+    ).rejects.toThrow('No objects specified for manage_access_control authorization');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 

@@ -74,6 +74,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                       id="generated-id_euiToolTipAnchor"
                     >
                       <button
+                        aria-expanded="true"
                         aria-label="Open"
                         class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                         data-test-subj="query-toggle-header"

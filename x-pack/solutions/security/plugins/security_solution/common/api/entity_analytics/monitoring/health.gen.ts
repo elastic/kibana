@@ -34,13 +34,20 @@ export const PrivMonHealthResponse = lazySchema(() =>
         /**
          * Current number of privileged users being monitored
          */
-        current_count: z.number().int(),
+        current_count: z
+          .number()
+          .int()
+          .describe('Current number of privileged users being monitored'),
         /**
          * Maximum number of privileged users allowed to be monitored
          */
-        max_allowed: z.number().int(),
+        max_allowed: z
+          .number()
+          .int()
+          .describe('Maximum number of privileged users allowed to be monitored'),
       })
-      .optional(),
+      .optional()
+      .describe('User statistics for privilege monitoring'),
   })
 );
 export type PrivMonHealthResponse = z.infer<typeof PrivMonHealthResponse>;

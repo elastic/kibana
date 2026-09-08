@@ -8,7 +8,6 @@
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDescriptionList,
@@ -33,10 +32,10 @@ import React, { useMemo } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
-import { ActionPolicySnoozeButton } from '../action_policy_snooze_button';
 import { ActionPolicyStateBadge } from '../action_policy_state_badge';
 import { isSnoozed } from '../is_snoozed';
 import { ActionPolicyDefinitionList } from './action_policy_definition_list';
+import { TakeActionButton } from './take_action_button';
 
 const FLYOUT_TITLE_ID = 'actionPolicyDetailsFlyoutTitle';
 const EMPTY_VALUE = '-';
@@ -83,58 +82,39 @@ export const ActionPolicyDetailsFlyout = ({
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
   const metadataUids = useMemo(
-    () => [policy.createdBy, policy.updatedBy].filter((uid): uid is string => Boolean(uid)),
-    [policy.createdBy, policy.updatedBy]
+    () => [policy.created_by, policy.updated_by].filter((uid): uid is string => Boolean(uid)),
+    [policy.created_by, policy.updated_by]
   );
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
-  const { snoozedUntil } = policy;
+  const { snoozed_until: snoozedUntil } = policy;
   const snoozedActive = isSnoozed(snoozedUntil);
-  // Writers get the interactive snooze bell instead, which already shows the state.
-  const canSnooze = canWrite && policy.enabled;
-
-  const handleEdit = () => {
-    onClose();
-    onEdit(policy.id);
-  };
-
-  const handleClone = (p: ActionPolicyResponse) => {
-    onClone(p);
-  };
-
-  const handleDelete = (p: ActionPolicyResponse) => {
-    onDelete(p);
-  };
-
-  const handleUpdateApiKey = (id: string) => {
-    onUpdateApiKey(id);
-  };
 
   const metadataItems: EuiDescriptionListProps['listItems'] = [
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: resolveDisplayName(policy.createdBy, profileByUid, EMPTY_VALUE),
+      description: resolveDisplayName(policy.created_by, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdAt', {
         defaultMessage: 'Created at',
       }),
-      description: formatDate(policy.createdAt),
+      description: formatDate(policy.created_at),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: resolveDisplayName(policy.updatedBy, profileByUid, EMPTY_VALUE),
+      description: resolveDisplayName(policy.updated_by, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedAt', {
         defaultMessage: 'Updated at',
       }),
-      description: formatDate(policy.updatedAt),
+      description: formatDate(policy.updated_at),
     },
   ];
 
@@ -164,30 +144,6 @@ export const ActionPolicyDetailsFlyout = ({
           responsive={false}
           alignItems="center"
         >
-          {canSnooze && (
-            <EuiFlexItem grow={false}>
-              <ActionPolicySnoozeButton
-                policy={policy}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
-                isLoading={isSnoozeLoading}
-              />
-            </EuiFlexItem>
-          )}
-          {canWrite && (
-            <EuiFlexItem grow={false}>
-              <ActionPolicyActionsMenu
-                policy={policy}
-                onClone={handleClone}
-                onDelete={handleDelete}
-                onEnable={onEnable}
-                onDisable={onDisable}
-                onUpdateApiKey={handleUpdateApiKey}
-                isStateLoading={isStateLoading}
-                data-test-subj="detailsFlyoutActionsMenuButton"
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
@@ -228,7 +184,7 @@ export const ActionPolicyDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <ActionPolicyStateBadge policy={policy} isLoading={false} />
             </EuiFlexItem>
-            {snoozedActive && !canSnooze && (
+            {snoozedActive && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="accent" iconType="bellSlash">
                   <FormattedMessage
@@ -295,21 +251,24 @@ export const ActionPolicyDetailsFlyout = ({
             </EuiFlexItem>
             {canWrite && (
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  iconType="pencil"
-                  onClick={handleEdit}
-                  data-test-subj="detailsFlyoutEditButton"
-                  aria-label={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.detailsFlyout.edit.ariaLabel',
-                    { defaultMessage: 'Edit this action policy' }
-                  )}
-                >
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.edit"
-                    defaultMessage="Edit"
-                  />
-                </EuiButton>
+                <ActionPolicyActionsMenu
+                  policy={policy}
+                  onEdit={(id) => {
+                    onClose();
+                    onEdit(id);
+                  }}
+                  onClone={onClone}
+                  onDelete={onDelete}
+                  onEnable={onEnable}
+                  onDisable={onDisable}
+                  onSnooze={onSnooze}
+                  onCancelSnooze={onCancelSnooze}
+                  onUpdateApiKey={onUpdateApiKey}
+                  isStateLoading={isStateLoading}
+                  isSnoozeLoading={isSnoozeLoading}
+                  anchorPosition="upRight"
+                  renderButton={({ toggle }) => <TakeActionButton onClick={toggle} />}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

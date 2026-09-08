@@ -41,6 +41,19 @@ export function createMarkersAndDecorations(
         markers.push(marker);
       }
     };
+    // Monaco renders the marker message in the hover already, so a decoration repeating it
+    // shows the same sentence twice.
+    const decorationHoverMessage = (): monaco.IMarkdownString | null => {
+      const { hoverMessage } = validationResult;
+      if (!hoverMessage) {
+        return null;
+      }
+      const message = 'message' in validationResult ? validationResult.message : null;
+      if (hoverMessage === message && shouldCreateMarker(validationResult.owner)) {
+        return null;
+      }
+      return createMarkdownContent(hoverMessage);
+    };
     const marker = {
       startLineNumber: validationResult.startLineNumber,
       startColumn: validationResult.startColumn,
@@ -48,7 +61,7 @@ export function createMarkersAndDecorations(
       endColumn: validationResult.endColumn,
     };
     if (validationResult.owner === 'variable-validation') {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
@@ -60,9 +73,7 @@ export function createMarkersAndDecorations(
         range: createRange(validationResult),
         options: {
           inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
+          hoverMessage: decorationHoverMessage(),
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
         },
       });
@@ -87,9 +98,7 @@ export function createMarkersAndDecorations(
         options: {
           inlineClassName: `liquid-template-${validationResult.severity ?? 'valid'}`,
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
+          hoverMessage: decorationHoverMessage(),
         },
       });
     } else if (validationResult.owner === 'step-name-validation') {
@@ -118,11 +127,11 @@ export function createMarkersAndDecorations(
         },
       });
     } else if (validationResult.owner === 'connector-id-validation') {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message ?? '',
+          message: validationResult.message,
           source: 'connector-id-validation',
         });
       }
@@ -131,7 +140,7 @@ export function createMarkersAndDecorations(
         options: createSelectionDecoration(validationResult),
       });
     } else if (validationResult.owner === 'step-property-validation') {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
@@ -155,13 +164,11 @@ export function createMarkersAndDecorations(
         options: {
           inlineClassName: `workflow-output-validation-${validationResult.severity}`,
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
+          hoverMessage: decorationHoverMessage(),
         },
       });
     } else {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
@@ -174,9 +181,7 @@ export function createMarkersAndDecorations(
         options: {
           inlineClassName: `${validationResult.owner}-${validationResult.severity ?? 'valid'}`,
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
+          hoverMessage: decorationHoverMessage(),
           after: validationResult.afterMessage
             ? {
                 content: validationResult.afterMessage,

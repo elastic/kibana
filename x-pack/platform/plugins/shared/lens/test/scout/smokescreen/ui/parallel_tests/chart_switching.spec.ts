@@ -8,6 +8,8 @@
 import { expect } from '@kbn/scout/ui';
 import { getImportedSavedObjectId, spaceTest, testData } from '../fixtures';
 
+const MAX_BYTES_VALUE = '19,986' as const;
+
 // Every chart switch passes an explicit `search` label: the switcher list is virtualized, and
 // its filter keeps whatever was typed last, so filtering makes the target option deterministic.
 
@@ -47,16 +49,16 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
 
       await lens.workspace.openEditor(artistMetricId, 'legacyMtrVis');
       await expect(lens.metric.legacyMetricLabel).toHaveText(testData.MAX_BYTES_LABEL);
-      await expect(lens.metric.legacyMetricValue).toHaveText(testData.MAX_BYTES_VALUE);
+      await expect(lens.metric.legacyMetricValue).toHaveText(MAX_BYTES_VALUE);
 
       await lens.switchToVisualization('lnsDatatable', { search: 'table' });
       // EUI data grid appends expand/filter glyphs to cell text, so match on a substring.
-      await expect(lens.datatable.getCellLocator(0, 0)).toContainText(testData.MAX_BYTES_VALUE);
+      await expect(lens.datatable.getCellLocator(0, 0)).toContainText(MAX_BYTES_VALUE);
       expect(await lens.datatable.getHeaderText(0)).toBe(testData.MAX_BYTES_LABEL);
 
       await lens.switchToVisualization('lnsLegacyMetric', { search: 'legacy' });
       await expect(lens.metric.legacyMetricLabel).toHaveText(testData.MAX_BYTES_LABEL);
-      await expect(lens.metric.legacyMetricValue).toHaveText(testData.MAX_BYTES_VALUE);
+      await expect(lens.metric.legacyMetricValue).toHaveText(MAX_BYTES_VALUE);
     }
   );
 

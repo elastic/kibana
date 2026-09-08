@@ -188,19 +188,19 @@ describe('getSuperTimelineQueryTypeColumn', () => {
   const renderCell = (savedSearchId: string | null | undefined, row: Partial<OpenTimelineResult>) =>
     column.render!(savedSearchId, row as OpenTimelineResult);
 
-  it('renders the ES|QL incompatible icon when savedSearchId is set', () => {
+  it('renders the ES|QL info icon when savedSearchId is set', () => {
     const node = renderCell('some-saved-search-id', { savedSearchId: 'some-saved-search-id' });
     const { container } = render(<>{node}</>);
     expect(
-      container.querySelector('[data-test-subj="super-timeline-esql-incompatible-icon"]')
+      container.querySelector('[data-test-subj="super-timeline-esql-query-not-merged-icon"]')
     ).toBeInTheDocument();
   });
 
-  it('renders the EQL incompatible icon when queryType.hasEql is true', () => {
+  it('renders the EQL info icon when queryType.hasEql is true', () => {
     const node = renderCell(null, { queryType: { hasEql: true, hasQuery: false } });
     const { container } = render(<>{node}</>);
     expect(
-      container.querySelector('[data-test-subj="super-timeline-eql-incompatible-icon"]')
+      container.querySelector('[data-test-subj="super-timeline-eql-query-not-merged-icon"]')
     ).toBeInTheDocument();
   });
 
@@ -221,10 +221,10 @@ describe('getSuperTimelineQueryTypeColumn', () => {
     });
     const { container } = render(<>{node}</>);
     expect(
-      container.querySelector('[data-test-subj="super-timeline-esql-incompatible-icon"]')
+      container.querySelector('[data-test-subj="super-timeline-esql-query-not-merged-icon"]')
     ).toBeInTheDocument();
     expect(
-      container.querySelector('[data-test-subj="super-timeline-eql-incompatible-icon"]')
+      container.querySelector('[data-test-subj="super-timeline-eql-query-not-merged-icon"]')
     ).not.toBeInTheDocument();
   });
 });

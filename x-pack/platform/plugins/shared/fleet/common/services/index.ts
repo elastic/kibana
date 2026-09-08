@@ -145,6 +145,7 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  inferVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module

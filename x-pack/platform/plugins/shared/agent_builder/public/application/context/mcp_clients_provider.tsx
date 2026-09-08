@@ -13,12 +13,14 @@ import {
 } from '@kbn/agent-builder-browser';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
+import { DeleteMcpClientModal } from '../components/mcp_clients/delete_mcp_client_modal';
 import { RevokeMcpClientModal } from '../components/mcp_clients/revoke_mcp_client_modal';
 
 export interface McpClientsActionsContextType {
   createMcpClient: () => void;
   editMcpClient: (clientId: string) => void;
   revokeMcpClient: (clientId: string, clientName: string, connectionCount: number) => void;
+  deleteMcpClient: (clientId: string, clientName: string) => void;
   viewClientDetails: (
     clientDetails: McpClientDetailsData,
     presentation: McpClientDetailsPresentation
@@ -33,6 +35,11 @@ interface RevokeState {
   connectionCount: number;
 }
 
+interface DeleteState {
+  clientId: string;
+  clientName: string;
+}
+
 interface ViewDetailsState {
   clientDetails: McpClientDetailsData;
   presentation: McpClientDetailsPresentation;
@@ -42,6 +49,7 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const [revokeState, setRevokeState] = useState<RevokeState | null>(null);
+  const [deleteState, setDeleteState] = useState<DeleteState | null>(null);
   const [viewDetailsState, setViewDetailsState] = useState<ViewDetailsState | null>(null);
 
   const createMcpClient = useCallback(() => {
@@ -62,6 +70,10 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
     []
   );
 
+  const deleteMcpClient = useCallback((clientId: string, clientName: string) => {
+    setDeleteState({ clientId, clientName });
+  }, []);
+
   const viewClientDetails = useCallback(
     (clientDetails: McpClientDetailsData, presentation: McpClientDetailsPresentation) => {
       setViewDetailsState({ clientDetails, presentation });
@@ -73,13 +85,23 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
     setRevokeState(null);
   }, []);
 
+  const closeDeleteModal = useCallback(() => {
+    setDeleteState(null);
+  }, []);
+
   const closeViewDetails = useCallback(() => {
     setViewDetailsState(null);
   }, []);
 
   return (
     <McpClientsActionsContext.Provider
-      value={{ createMcpClient, editMcpClient, revokeMcpClient, viewClientDetails }}
+      value={{
+        createMcpClient,
+        editMcpClient,
+        revokeMcpClient,
+        deleteMcpClient,
+        viewClientDetails,
+      }}
     >
       {children}
       {revokeState && (
@@ -88,6 +110,13 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
           clientName={revokeState.clientName}
           connectionCount={revokeState.connectionCount}
           onClose={closeRevokeModal}
+        />
+      )}
+      {deleteState && (
+        <DeleteMcpClientModal
+          clientId={deleteState.clientId}
+          clientName={deleteState.clientName}
+          onClose={closeDeleteModal}
         />
       )}
       {viewDetailsState && (

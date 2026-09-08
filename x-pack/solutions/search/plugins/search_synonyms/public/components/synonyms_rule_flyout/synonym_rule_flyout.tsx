@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -32,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { synonymsOptionToString } from '../../utils/synonyms_utils';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
 import { useSynonymRuleFlyoutState } from './use_flyout_state';
@@ -116,19 +116,17 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         `}
         banner={
           backendError && (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               data-test-subj="searchSynonymsSynonymsRuleFlyoutErrorBanner"
-              color="danger"
               title={i18n.translate(
                 'xpack.searchSynonyms.synonymsSetRuleFlyout.errorCallout.title',
                 {
                   defaultMessage: 'An error occured while saving your changes',
                 }
               )}
-            >
-              {backendError}
-            </EuiCallOut>
+              text={backendError}
+            />
           )
         }
       >

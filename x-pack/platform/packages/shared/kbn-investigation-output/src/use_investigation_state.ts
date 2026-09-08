@@ -22,6 +22,7 @@ import {
   type InvestigationState,
 } from '@kbn/significant-events-schema';
 import type { InvestigationStatus } from './types';
+import { normalizeLegacyInvestigationState } from './normalize_legacy_investigation_state';
 
 /**
  * Path of the internal route that resolves the agent execution tagged with a given metadata
@@ -100,7 +101,10 @@ export interface UseInvestigationStateResult {
  * - When the stream ends (or the caller already knows the run is over), reads the persisted
  *   final result via `WorkflowApi`, keyed by `workflowExecutionId` — but only trusts it once the
  *   workflow execution itself is terminal. A just-completed execution whose output hasn't been
- *   persisted yet is retried briefly instead of being reported as unloadable.
+ *   persisted yet is retried briefly instead of being reported as unloadable. Before validating,
+ *   the persisted output passes through {@link normalizeLegacyInvestigationState}, which recovers
+ *   investigations predating structured `recommendations`/`blind_spots` — the live stream never
+ *   needs this, since its events always come from a current agent.
  * - The investigation *failing* (`failed`, with the step's error) is distinguished from its
  *   result being *unloadable* (`unavailable`, e.g. missing privileges) — see
  *   {@link InvestigationStatus}.
@@ -189,14 +193,21 @@ export function useInvestigationState({
           return;
         }
 
-        const stepExecution = execution.stepExecutions?.find(
+        const investigateStepExecutions = execution.stepExecutions?.filter(
           (step) => step.stepId === INVESTIGATE_STEP_ID
         );
 
-        if (stepExecution?.error) {
-          applySettled({ status: 'failed', error: stepExecution.error.message });
+        // A timeout is reported on the engine's step_level_timeout wrapper, not on the ai.agent
+        // step execution below, so any matching stepId is checked here regardless of stepType.
+        const stepError = investigateStepExecutions?.find((step) => step.error)?.error;
+        if (stepError) {
+          applySettled({ status: 'failed', error: stepError.message });
           return;
         }
+
+        const stepExecution = investigateStepExecutions?.find(
+          (step) => step.stepType === 'ai.agent'
+        );
 
         const output = stepExecution?.output as
           | { structured_output?: unknown; conversation_id?: string }
@@ -204,7 +215,9 @@ export function useInvestigationState({
         if (output?.conversation_id) {
           setConversationId(output.conversation_id);
         }
-        const parsed = investigationStateSchema.safeParse(output?.structured_output);
+        const parsed = investigationStateSchema.safeParse(
+          normalizeLegacyInvestigationState(output?.structured_output)
+        );
 
         if (parsed.success) {
           applySettled({ status: 'complete', state: parsed.data });

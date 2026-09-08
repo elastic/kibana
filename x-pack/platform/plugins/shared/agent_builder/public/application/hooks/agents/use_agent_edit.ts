@@ -14,7 +14,7 @@ import {
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';

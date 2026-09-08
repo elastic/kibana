@@ -66,6 +66,7 @@ export {
   type PublishesTimeRange,
   type PublishesTimeslice,
   type PublishesUnifiedSearch,
+  type PublishesWritableTimeRange,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
 export {
@@ -79,6 +80,10 @@ export {
   apiPublishesApproximation,
   type PublishesApproximation,
 } from './interfaces/fetch/publishes_approximation';
+export {
+  type PublishesFetchOnlyVisible,
+  apiPublishesFetchOnlyVisible,
+} from './interfaces/fetch/fetch_only_visible';
 export {
   apiHasAppContext,
   type EmbeddableAppContext,

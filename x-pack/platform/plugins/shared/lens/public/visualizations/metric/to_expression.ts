@@ -29,7 +29,6 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import {
   getColorMode,
-  getSecondaryLabelSelected,
   getSecondaryTrendPalettes,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
@@ -176,13 +175,6 @@ export const toExpression = (
 
   const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
 
-  // Replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
-  const secondaryLabelConfig = getSecondaryLabelSelected(state, {
-    defaultSecondaryLabel: '',
-    colorMode: secondaryDynamicColorMode,
-    isPrimaryMetricNumeric: isMetricNumeric,
-  });
-
   const secondaryTrendConfig =
     state.secondaryTrend?.type === secondaryDynamicColorMode
       ? state.secondaryTrend
@@ -211,8 +203,8 @@ export const toExpression = (
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryLabel:
-      secondaryLabelConfig.mode === 'custom' ? secondaryLabelConfig.label : state.secondaryLabel,
+    // Legacy custom name; the renderer falls back to the column name when it is absent
+    secondaryLabel: state.secondaryLabel ?? undefined,
     secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
     secondaryTrendVisuals:
       secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
@@ -250,8 +242,8 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
-    secondaryLabelPosition:
-      state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+    secondaryNameVisibility:
+      state.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility,
     applyColorTo: state.applyColorTo,
   });
 
