@@ -110,7 +110,7 @@ describe('LensClient', () => {
 
         await builderClient.create(mockAttributes, [TAG_REFERENCE, DATA_VIEW_REFERENCE]);
 
-        const [, { body }] = httpMock.post.mock.calls[0] as [string, { body: string }];
+        const [, { body }] = httpMock.post.mock.calls[0] as unknown as [string, { body: string }];
         expect(JSON.parse(body).tags).toEqual([TAG_ID]);
       });
 
@@ -139,7 +139,7 @@ describe('LensClient', () => {
 
         await builderClient.update('some-id', mockAttributes, [TAG_REFERENCE, DATA_VIEW_REFERENCE]);
 
-        const [, { body }] = httpMock.put.mock.calls[0] as [string, { body: string }];
+        const [, { body }] = httpMock.put.mock.calls[0] as unknown as [string, { body: string }];
         expect(JSON.parse(body).tags).toEqual([TAG_ID]);
       });
 
