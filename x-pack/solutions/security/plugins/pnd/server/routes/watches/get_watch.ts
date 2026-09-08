@@ -44,8 +44,7 @@ export const registerGetWatchRoute = ({
       async (_context, request, response) => {
         try {
           const { watchId } = request.params;
-          // Settings ride along so the settings page loads in a single request.
-          const body = await getWatchesService().get(request, watchId, getSpaceId(request));
+          const body = await getWatchesService().get(watchId, getSpaceId(request));
           if (!body) {
             return response.notFound({
               body: { message: `Watch "${watchId}" not found` },

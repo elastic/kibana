@@ -674,6 +674,8 @@ TS edge-case-gauge-to-counter
           counterAggregation: 'max',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p95',
+          dimensions: [],
+          searchTerm: '',
         },
       });
       expect(query).toBe(
@@ -692,6 +694,8 @@ TS metrics-*
           counterAggregation: 'sum',
           gaugeAggregation: 'sum',
           histogramPercentile: 'p95',
+          dimensions: [],
+          searchTerm: '',
         },
       });
       expect(query).toBe(
@@ -710,6 +714,8 @@ TS metrics-*
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p90',
+          dimensions: [],
+          searchTerm: '',
         },
       });
       expect(query).toBe(
@@ -728,6 +734,8 @@ TS metrics-*
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p50',
+          dimensions: [],
+          searchTerm: '',
         },
       });
       expect(query).toBe(
