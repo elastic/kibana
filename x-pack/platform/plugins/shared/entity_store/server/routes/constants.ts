@@ -6,8 +6,13 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import type { z } from '@kbn/zod/v4';
-import { HistorySnapshotState, LogExtractionShape } from '../domain/saved_objects';
+import { z } from '@kbn/zod/v4';
+import { EntityType } from '../../common/domain/definitions/entity_schema';
+import {
+  HistorySnapshotState,
+  LogExtractionOverride,
+  LogExtractionTypeOverride,
+} from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -27,7 +32,11 @@ export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
 
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded — TODO: add once we have a way to set it as a task override param
-export const LogExtractionInstallParams = LogExtractionShape.omit({ timeout: true }).partial();
+export const LogExtractionInstallParams = LogExtractionOverride;
+
+export type LogExtractionByTypeParams = z.infer<typeof LogExtractionByTypeParams>;
+/** Per entity-type log extraction params. These win over the store-wide params and survive later store-wide updates. */
+export const LogExtractionByTypeParams = z.partialRecord(EntityType, LogExtractionTypeOverride);
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
 export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
