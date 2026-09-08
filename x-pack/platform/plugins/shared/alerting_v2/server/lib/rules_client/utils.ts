@@ -12,7 +12,7 @@ import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
-  isRecoveryDelayAllowed,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isSignalQueryBreachOnly,
@@ -407,7 +407,7 @@ export function validateMergedRuleAttributes(
       details: { rule_id: ruleId },
     },
     {
-      valid: isRecoveryDelayAllowed(attrs),
+      valid: isRecoveryTransitionConsistentWithStrategy(attrs),
       message:
         'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
       code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION_CONFIG,

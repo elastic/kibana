@@ -809,14 +809,18 @@ describe('utils', () => {
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
 
-    it('does not throw for recovering_count 0 (immediate) when recovery is disabled', () => {
+    it('throws INVALID_STATE_TRANSITION_CONFIG for recovering_count 0 when recovery is disabled', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
         recovery_strategy: 'none',
         state_transition: { pending_count: 0, recovering_count: 0 },
       });
 
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
     });
   });
 

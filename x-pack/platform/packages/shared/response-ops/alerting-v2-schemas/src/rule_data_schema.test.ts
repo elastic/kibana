@@ -9,7 +9,7 @@ import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-c
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
-  isRecoveryDelayAllowed,
+  isRecoveryTransitionConsistentWithStrategy,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -732,6 +732,7 @@ describe('createRuleDataSchema', () => {
     it('accepts recovering_count of 0', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: { recovering_count: 0 },
       });
 
@@ -913,14 +914,14 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts recovering_count of 0 when recovery is disabled', () => {
+    it('rejects recovering_count of 0 when recovery is disabled', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         recovery_strategy: 'none',
         state_transition: { pending_count: 0, recovering_count: 0 },
       });
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
     it('accepts pending-only state_transition when recovery is disabled', () => {
@@ -1744,16 +1745,16 @@ describe('tagsResponseSchema', () => {
   });
 });
 
-describe('isRecoveryDelayAllowed', () => {
+describe('isRecoveryTransitionConsistentWithStrategy', () => {
   it('returns true when recovery is enabled, regardless of recovering delay', () => {
     expect(
-      isRecoveryDelayAllowed({
+      isRecoveryTransitionConsistentWithStrategy({
         recovery_strategy: 'no_breach',
         state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
       })
     ).toBe(true);
     expect(
-      isRecoveryDelayAllowed({
+      isRecoveryTransitionConsistentWithStrategy({
         recovery_strategy: 'query',
         state_transition: { recovering_count: 3 },
       })
@@ -1761,34 +1762,41 @@ describe('isRecoveryDelayAllowed', () => {
   });
 
   it('returns true when recovery is disabled but no recovering delay is set', () => {
-    expect(isRecoveryDelayAllowed({ recovery_strategy: 'none' })).toBe(true);
-    expect(isRecoveryDelayAllowed({ recovery_strategy: null })).toBe(true);
-    expect(isRecoveryDelayAllowed({})).toBe(true);
-    expect(isRecoveryDelayAllowed({ recovery_strategy: 'none', state_transition: {} })).toBe(true);
-  });
-
-  it('treats recovering_count 0 as no delay even when recovery is disabled', () => {
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: 'none' })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: null })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({})).toBe(true);
     expect(
-      isRecoveryDelayAllowed({
+      isRecoveryTransitionConsistentWithStrategy({
         recovery_strategy: 'none',
-        state_transition: { recovering_count: 0 },
+        state_transition: {},
       })
     ).toBe(true);
   });
 
+  it('rejects recovering_count 0 when recovery is disabled (immediate recovery is not a delay)', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 0 },
+      })
+    ).toBe(false);
+  });
+
   it('returns false for a positive recovering delay when recovery is disabled', () => {
     expect(
-      isRecoveryDelayAllowed({
+      isRecoveryTransitionConsistentWithStrategy({
         recovery_strategy: 'none',
         state_transition: { recovering_count: 1 },
       })
     ).toBe(false);
     expect(
-      isRecoveryDelayAllowed({
+      isRecoveryTransitionConsistentWithStrategy({
         recovery_strategy: null,
         state_transition: { recovering_timeframe: '5m' },
       })
     ).toBe(false);
-    expect(isRecoveryDelayAllowed({ state_transition: { recovering_count: 2 } })).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({ state_transition: { recovering_count: 2 } })
+    ).toBe(false);
   });
 });
