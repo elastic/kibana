@@ -68,7 +68,7 @@ async function hydrateOnboardingSession(
     const { item } = await sendGetCloudOnboardingDeployment(deploymentId);
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'servicesStep'),
-      JSON.stringify({ selectedServiceIds: item.services })
+      JSON.stringify({ selectedServiceIds: item.services, dataFormat: item.dataFormat })
     );
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'serviceSettingsStep'),

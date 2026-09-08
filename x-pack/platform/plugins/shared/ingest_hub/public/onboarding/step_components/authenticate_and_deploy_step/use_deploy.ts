@@ -52,7 +52,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const { selectedServiceIds, dataFormat } = servicesStep;
 
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
@@ -194,6 +194,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             Record<string, unknown>
           >,
           globalRegion,
+          dataFormat,
         }).catch(() => null);
         onboardingDeploymentId = createResp?.item?.id;
         if (onboardingDeploymentId) {
@@ -258,6 +259,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.failedInstances,
       detectAndReviewStep.onboardingDeploymentId,
       selectedServiceIds,
+      dataFormat,
     ]
   );
 

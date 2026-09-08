@@ -33,6 +33,8 @@ export interface CloudOnboardingDeployment {
   serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
   /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
   globalRegion?: string;
+  /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
+  dataFormat?: string;
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism. Separate from packagePolicyIds (in agentless those are equal; for agent_based the agent policy is user-managed). */
   agentPolicyId?: string;

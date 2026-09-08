@@ -19,6 +19,7 @@ export interface CreateCloudOnboardingDeploymentRequest {
     services: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     globalRegion?: string;
+    dataFormat?: string;
   };
 }
 

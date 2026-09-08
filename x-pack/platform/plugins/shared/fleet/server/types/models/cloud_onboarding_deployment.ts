@@ -37,6 +37,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
     schema.recordOf(schema.string({ minLength: 1 }), schema.recordOf(schema.string(), schema.any()))
   ),
   globalRegion: schema.maybe(schema.string()),
+  dataFormat: schema.maybe(schema.string()),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),
