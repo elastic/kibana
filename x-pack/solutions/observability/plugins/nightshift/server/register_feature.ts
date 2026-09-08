@@ -33,8 +33,9 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
     name: i18n.translate('xpack.nightshift.featureRegistry.featureName', {
       defaultMessage: 'Nightshift',
     }),
-    // After Observability AI Assistant (~1200) and before Stack Management extras.
-    order: 1300,
+    // After Observability AI Assistant (8600). Management extras live in
+    // another category, so they stay in their own accordion.
+    order: 8700,
     category: DEFAULT_APP_CATEGORIES.observability,
     minimumLicense: 'enterprise',
     // Root `app` is the allowlist. Privileges cannot grant an app that is not

@@ -87,6 +87,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'apm',
         'infrastructure',
         'logs',
+        'nightshift',
         'observabilityAlerts',
         'observabilityCasesV3',
         'securitySolutionAlertsV1',
@@ -98,10 +99,9 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'securitySolutionSiemMigrations',
         'securitySolutionTimeline',
         'siemV5',
-        'nightshift',
         'slo',
         'uptime',
-      ],
+      ].sort(),
       solution: 'es',
     };
 
