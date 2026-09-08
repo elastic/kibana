@@ -77,6 +77,7 @@ export {
   GCP_ACCOUNT_TYPE_VAR_NAME,
   FLEET_LOG_INDICES,
   OBLT_DEFAULT_CATEGORIES,
+  CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
 } from './constants';
 export {
   // Route services

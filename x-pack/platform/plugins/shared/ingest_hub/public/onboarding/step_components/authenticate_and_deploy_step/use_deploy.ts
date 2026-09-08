@@ -183,10 +183,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           connectorId,
           mechanisms: ['agentless'],
           services: selectedServiceIds,
-          serviceVars: storedServiceVars as Record<string, Record<string, unknown>>,
+          serviceVars: storedServiceVars as unknown as Record<string, Record<string, unknown>>,
           globalRegion,
         }).catch(() => null);
-        onboardingDeploymentId = createResp?.data?.item?.id;
+        onboardingDeploymentId = createResp?.item?.id;
         if (onboardingDeploymentId) {
           updateDetectAndReviewStep({ onboardingDeploymentId });
         }
