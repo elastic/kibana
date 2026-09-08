@@ -890,13 +890,13 @@ class MyPlugin {
     agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
 
     // Assign a display name, icon, and tabs (in render order) to a template
-    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
       icon: 'mail',
       tabs: ['security.entities', 'security.overview'],
-    });
+    }));
   }
 }
 ```
@@ -929,16 +929,61 @@ const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition =
 class SecurityPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
-    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
       icon: 'mail',
       tabs: ['security.overview'],
-    });
+    }));
   }
 }
 ```
+
+### Brief cards
+
+A template UI definition can include an optional `briefCard` React component receiving
+`{ conversation }`, where `conversation` is a list endpoint result without rounds.
+Agent Builder calls the registration callback once with its navigation methods. The returned card can capture those methods when needed:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', (context) => ({
+  name: phishingTemplateName,
+  tabs: ['security.overview'],
+  briefCard: ({ conversation }) => (
+    <PhishingBriefCard
+      conversation={conversation}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+Sidebar navigation accepts a conversation ID and delegates to the existing sidebar opening behavior.
+Fullscreen navigation accepts `{ conversationId, agentId }`, closes the sidebar, and opens the
+canonical conversation route in the Agent Builder app without fetching the conversation.
+Callers should apply the same access checks as other programmatic chat entry points.
+Consumers pass an inline registration callback; they do not construct the navigation methods.
+Callbacks that do not need navigation can ignore the context argument.
+Cards may use hooks and, like tabs, must supply any solution-specific providers they need.
+
+The registry stores the returned definition directly. The host retrieves the original component
+and supplies only the conversation; no context prop, wrapper, or provider is needed:
+
+```tsx
+const BriefCard = conversation.template_id
+  ? conversationTemplates.getTemplateUIDefinition(conversation.template_id)?.briefCard
+  : undefined;
+return BriefCard ? (
+  <BriefCard conversation={conversation} />
+) : null;
+```
+
+The registry does not fetch card data or provide a default card when none is registered.
 
 ### Rules
 

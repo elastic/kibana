@@ -34,6 +34,7 @@ import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
+import { RunLimitsBanner } from './components/run_limits_banner';
 
 const significantEventsTabs = [
   'streams',
@@ -348,6 +349,7 @@ export function SignificantEventsPage() {
                 <EuiSpacer />
               </>
             )}
+            {showMaintenanceBanners && <RunLimitsBanner />}
             {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}
