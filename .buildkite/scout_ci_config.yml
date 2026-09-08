@@ -18,6 +18,7 @@ plugins:
     - context_engine
     - cross_cluster_replication
     - custom_branding
+    - custom_content
     - dashboard
     - dashboard_markdown
     - data
@@ -31,7 +32,6 @@ plugins:
     - dev_tools
     - discover
     - discoverCustomizationExamples
-    - discover_enhanced
     - discoveries
     - embeddable_alerts_table
     - entity_store
@@ -84,6 +84,7 @@ plugins:
     - security_solution
     - security_solution_serverless
     - serverless_observability
+    - serverless_vectordb
     - share
     - significant_events
     - significant_events_app
