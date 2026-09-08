@@ -188,6 +188,12 @@ describe('useCloudConnectorTemplate', () => {
       );
       expect(openedUrl).not.toContain('static.example');
       expect(openedUrl).toContain('param_ElasticResourceId=kibana-component-id');
+      expect(result.current.iacConfirm).toEqual({
+        templateSha: 'sha256:661cb7def1c7101f',
+        blueprintId: 'federated-identity',
+        blueprintVersion: 'v1',
+        staticTemplate: false,
+      });
     });
 
     it('sends every enabled policy template of the package', async () => {
@@ -289,6 +295,10 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       expect(cloudFormationTab.location.href).toContain('static.example');
+      expect(result.current.iacConfirm).toEqual({
+        staticTemplate: true,
+        templateSha: null,
+      });
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'not_deployable',
@@ -432,6 +442,7 @@ describe('useCloudConnectorTemplate', () => {
       expect(cloudFormationTab.location.href).toBe('');
       expect(result.current.templateAlreadyCurrent).toBeDefined();
       expect(result.current.templateGenerationError).toBeUndefined();
+      expect(result.current.iacConfirm).toBeUndefined();
       expect(reportEvent).not.toHaveBeenCalled();
     });
 

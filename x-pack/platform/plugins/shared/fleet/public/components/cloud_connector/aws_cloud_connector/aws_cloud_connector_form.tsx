@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
@@ -34,6 +34,7 @@ import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
   packageInfo,
+  updatePolicy,
   cloud,
   hasInvalidRequiredVars = false,
   credentials,
@@ -64,13 +65,38 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     isGeneratingTemplate,
     templateGenerationError,
     templateAlreadyCurrent,
+    iacConfirm,
   } = useCloudConnectorTemplate({
     cloud,
     accountType,
     iacTemplateUrl,
     packageName: packageInfo?.name,
     policyTemplates: enabledPolicyTemplates,
+    templateSha: newPolicy.cloud_connector_iac?.staticTemplate
+      ? undefined
+      : newPolicy.cloud_connector_iac?.templateSha ?? undefined,
   });
+
+  useEffect(() => {
+    if (!iacConfirm) {
+      return;
+    }
+    const current = newPolicy.cloud_connector_iac;
+    if (
+      current?.templateSha === iacConfirm.templateSha &&
+      current?.blueprintId === iacConfirm.blueprintId &&
+      current?.blueprintVersion === iacConfirm.blueprintVersion &&
+      current?.staticTemplate === iacConfirm.staticTemplate
+    ) {
+      return;
+    }
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        cloud_connector_iac: iacConfirm,
+      },
+    });
+  }, [iacConfirm, newPolicy, updatePolicy]);
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);

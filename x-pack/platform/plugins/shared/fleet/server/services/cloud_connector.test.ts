@@ -207,6 +207,74 @@ describe('CloudConnectorService', () => {
       expect(result.accountType).toEqual(SINGLE_ACCOUNT);
     });
 
+    it('persists templateSha and blueprint on confirm', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          templateSha: 'sha256:661cb7def1c7101f',
+          blueprintId: 'federated-identity',
+          blueprintVersion: '1.0.0',
+          staticTemplate: false,
+        },
+      });
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        templateSha: 'sha256:661cb7def1c7101f',
+        blueprintId: 'federated-identity',
+        blueprintVersion: '1.0.0',
+        staticTemplate: false,
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          templateSha: 'sha256:661cb7def1c7101f',
+          blueprintId: 'federated-identity',
+          blueprintVersion: '1.0.0',
+          staticTemplate: false,
+        })
+      );
+    });
+
+    it('stores staticTemplate and clears templateSha after a static fallback', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          staticTemplate: true,
+          templateSha: null,
+        },
+      });
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        staticTemplate: true,
+        templateSha: 'sha256:should-be-cleared',
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          staticTemplate: true,
+          templateSha: null,
+        })
+      );
+    });
+
     it('should create a cloud connector with organization accountType', async () => {
       jest
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
@@ -1060,6 +1128,66 @@ describe('CloudConnectorService', () => {
           updated_at: expect.any(String),
         }
       );
+
+      expect(result.name).toEqual('updated-name');
+      expect(result.id).toEqual('cloud-connector-123');
+
+      const awsVarsFromNameUpdate = result.vars as AwsCloudConnectorVars;
+      expect(awsVarsFromNameUpdate.role_arn?.value).toEqual(
+        'arn:aws:iam::123456789012:role/OriginalRole'
+      );
+    });
+
+    it('clears templateSha when confirm records a static-template fallback', async () => {
+      mockSoClient.get.mockResolvedValue({
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          templateSha: 'sha256:old',
+          staticTemplate: false,
+        },
+      });
+      mockSoClient.update.mockResolvedValue({
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          staticTemplate: true,
+          templateSha: null,
+        },
+      });
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
+
+      await service.update(mockSoClient, 'cloud-connector-123', {
+        staticTemplate: true,
+      });
+
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cloud-connector-123',
+        expect.objectContaining({
+          staticTemplate: true,
+          templateSha: null,
+        })
+      );
+    });
+
+    it('should keep original vars after a name-only update', async () => {
+      const mockUpdatedSavedObject = {
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          name: 'updated-name',
+          updated_at: '2023-01-01T02:00:00.000Z',
+        },
+      };
+
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockUpdatedSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
+
+      const result = await service.update(mockSoClient, 'cloud-connector-123', {
+        name: 'updated-name',
+      });
 
       expect(result.name).toEqual('updated-name');
       expect(result.id).toEqual('cloud-connector-123');

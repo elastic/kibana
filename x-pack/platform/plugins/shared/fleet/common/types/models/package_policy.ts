@@ -8,6 +8,7 @@
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
 import type { GlobalDataTag } from './agent_policy';
+import type { CloudConnectorIacState } from './cloud_connector';
 
 /** Boolean expression syntax evaluated by Elastic Agent. */
 export type AgentConditionExpression = string;
@@ -101,6 +102,11 @@ export interface NewPackagePolicy {
   output_id?: string | null;
   cloud_connector_id?: string | null;
   cloud_connector_name?: string | null;
+  /**
+   * Transient IaC provenance copied onto the cloud connector when the
+   * package policy is saved. Not stored on the package policy SO.
+   */
+  cloud_connector_iac?: CloudConnectorIacState | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;

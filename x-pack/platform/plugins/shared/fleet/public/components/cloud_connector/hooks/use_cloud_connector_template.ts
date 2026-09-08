@@ -22,7 +22,10 @@ import {
   IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED,
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
-import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
+import {
+  AWS_CLOUD_PROVIDER,
+  type CloudConnectorIacState,
+} from '../../../../common/types/models/cloud_connector';
 import {
   IAC_FEDERATED_IDENTITY_WORKFLOW,
   blueprintMatchesWorkflow,
@@ -73,6 +76,8 @@ export interface UseCloudConnectorTemplateResult {
   templateGenerationError?: string;
   /** Shown when IaCP reports the stored templateSha still matches. */
   templateAlreadyCurrent?: string;
+  /** Written onto the package policy and persisted on the connector at confirm. */
+  iacConfirm?: CloudConnectorIacState;
 }
 
 const firstDeployableWorkflowBlueprint = (
@@ -98,6 +103,7 @@ export const useCloudConnectorTemplate = ({
   const [templateAlreadyCurrent, setTemplateAlreadyCurrent] = useState<string | undefined>(
     undefined
   );
+  const [iacConfirm, setIacConfirm] = useState<CloudConnectorIacState | undefined>(undefined);
 
   // The static URL doubles as the quick-create scaffold for the rendered
   // artifact (console host plus any quick-create params the package's URL
@@ -152,6 +158,7 @@ export const useCloudConnectorTemplate = ({
     ) {
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
+        setIacConfirm({ staticTemplate: true, templateSha: null });
         window.open(staticTemplateUrl, '_blank');
       } else {
         setTemplateGenerationError(
@@ -180,6 +187,7 @@ export const useCloudConnectorTemplate = ({
 
     const fallbackToStatic = (reason: string) => {
       reportFallback(reason);
+      setIacConfirm({ staticTemplate: true, templateSha: null });
       navigateTo(staticTemplateUrl);
     };
 
@@ -238,6 +246,13 @@ export const useCloudConnectorTemplate = ({
         return;
       }
 
+      setIacConfirm({
+        templateSha: data.templateSha,
+        blueprintId: data.blueprint.id,
+        blueprintVersion: data.blueprint.version,
+        staticTemplate: false,
+      });
+
       // Only the template source changes: swap the templateURL query param on
       // the existing quick-create URL. artifactUrl embeds signing credentials
       // — never cache it and never write it anywhere other than the URL.
@@ -274,5 +289,6 @@ export const useCloudConnectorTemplate = ({
     isGeneratingTemplate,
     templateGenerationError,
     templateAlreadyCurrent,
+    iacConfirm,
   };
 };

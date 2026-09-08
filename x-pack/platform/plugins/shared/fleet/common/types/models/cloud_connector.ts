@@ -83,6 +83,22 @@ export type CloudConnectorVars =
 
 export type VerificationStatus = 'pending' | 'success' | 'failed';
 
+/**
+ * IaC provenance written on the connector when the user confirms
+ * (saves the package policy after applying the template). Never written
+ * on render. `templateSha` is omitted after a static-template fallback.
+ */
+export interface CloudConnectorIacState {
+  templateSha?: string | null;
+  blueprintId?: string | null;
+  blueprintVersion?: string | null;
+  stackId?: string;
+  region?: string;
+  staticTemplate?: boolean;
+  cftUpgradeStatus?: string;
+  cftUpgradeCheckedAt?: string;
+}
+
 export interface CloudConnector {
   id: string;
   name: string;
@@ -96,6 +112,14 @@ export interface CloudConnector {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+  templateSha?: string | null;
+  blueprintId?: string | null;
+  blueprintVersion?: string | null;
+  stackId?: string;
+  region?: string;
+  staticTemplate?: boolean;
+  cftUpgradeStatus?: string;
+  cftUpgradeCheckedAt?: string;
 }
 
 export interface CloudConnectorListOptions {

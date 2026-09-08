@@ -769,7 +769,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'spaceIds'),
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'cloud_connector_iac', 'spaceIds'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1879,7 +1879,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...restOfPackagePolicy,
+          ...omit(restOfPackagePolicy, 'cloud_connector_name', 'cloud_connector_iac'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -2333,7 +2333,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id,
           attributes: {
-            ...restOfPackagePolicy,
+            ...omit(restOfPackagePolicy, 'cloud_connector_name', 'cloud_connector_iac'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -3669,6 +3669,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             enrichedPackagePolicy.cloud_connector_id,
             {
               vars: cloudConnectorVars,
+              ...enrichedPackagePolicy.cloud_connector_iac,
             }
           );
           logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
@@ -3692,6 +3693,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             vars: cloudConnectorVars,
             cloudProvider,
             accountType,
+            ...enrichedPackagePolicy.cloud_connector_iac,
           });
           logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
           return cloudConnector;
