@@ -287,8 +287,8 @@ describe.each([
     it('should be registered and return colors', () => {
       const palette = palettes.elastic_line_optimized;
       expect(palette).toBeDefined();
-      const colors = palette.getCategoricalColors(10);
-      expect(colors).toHaveLength(10);
+      const colors = palette.getCategoricalColors(12);
+      expect(colors).toHaveLength(12);
     });
 
     it('should return different colors based on rank at current series', () => {
@@ -311,8 +311,8 @@ describe.each([
     });
 
     it('should produce a different color order than the default palette', () => {
-      const defaultColors = palettes.default.getCategoricalColors(10);
-      const lineOptimizedColors = palettes.elastic_line_optimized.getCategoricalColors(10);
+      const defaultColors = palettes.default.getCategoricalColors(12);
+      const lineOptimizedColors = palettes.elastic_line_optimized.getCategoricalColors(12);
       expect(lineOptimizedColors).not.toEqual(defaultColors);
     });
 

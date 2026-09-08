@@ -1998,29 +1998,24 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.5.0-snapshot.1788752437240.tgz#91ccb7419aaeebd7a203bc0bbfe4f94aa8207ef3"
   integrity sha512-vuSoYimsHXUau35iWM2sY+75XIQinv9KgyWKdDW57ml7Iok3tdDe0ZpWHYcGmIZlKHbXSs6h7SmYY6ydY9uQ/A==
 
-"@elastic/eui-theme-borealis@8.0.0":
+"@elastic/eui-theme-borealis@file:./elastic-eui-theme-borealis-8.0.0-1.tgz":
   version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-8.0.0.tgz#51b11163728fc634bea4848586642eecc0b6b39c"
-  integrity sha512-mNcZxVYPr5c1VDru42Z/VnFZn9GtgNSiEF3SfCiI1c29LNWVzz9qle35tffDxJSu/A2iIWA8tBmuxAFYYLydnw==
+  resolved "file:./elastic-eui-theme-borealis-8.0.0-1.tgz#7b9177b51823da108510473462844cbdbc0a6cdb"
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@10.0.0":
+"@elastic/eui-theme-common@file:./eui-theme-common-10.0.0_vis_purple.tgz":
   version "10.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-10.0.0.tgz#d2f71b0863e026ca55b06c1cecc5f6f130aefa37"
-  integrity sha512-cnUZx3S6XlDcm3ArkEGB3Q5Ehq+E5g4gB+a74ob0+Csjglvus0QO4Fyr5UwYHLJqueSMuV9YefVtKDC41lh16g==
+  resolved "file:./eui-theme-common-10.0.0_vis_purple.tgz#9c38f99bcd0e7285da79f3de9fc35d8f42456bb3"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@120.0.0":
+"@elastic/eui@file:./eui-120.0.0_vis_purple.tgz":
   version "120.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-120.0.0.tgz#30ee329210b3cd608fb55e31690edfe01711cd0f"
-  integrity sha512-iUutRU4JIG4eolU3LCE4CWe/H7juRCKYQaT+UeXQyegHRGttYFlunPEisS7+BLV1qrJRWiIq2lwykf0HwT7osw==
+  resolved "file:./eui-120.0.0_vis_purple.tgz#aa07a2f3abababc5356fe58e336352572315cb02"
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
