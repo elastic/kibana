@@ -42,14 +42,12 @@ export const openLazyModal = ({
   loadContent,
   onClose: onCloseCallback,
 }: OpenLazyModalParams): void => {
-  let overlayRef: ReturnType<typeof core.overlays.openModal> | undefined;
-
   const closeModal = () => {
     overlayRef?.close();
     onCloseCallback?.();
   };
 
-  overlayRef = core.overlays.openModal(
+  const overlayRef = core.overlays.openModal(
     toMountPoint(<LazyModal loadContent={loadContent} closeModal={closeModal} />, core)
   );
 };
