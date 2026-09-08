@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-utils'
   - '@kbn/i18n'
+  - '@kbn/nightshift-ai'
 tags:
   - shared-server
   - package

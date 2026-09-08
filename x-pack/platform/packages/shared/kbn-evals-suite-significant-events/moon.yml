@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/evals'
   - '@kbn/tooling-log'
+  - '@kbn/nightshift-ai'
   - '@kbn/scout'
   - '@kbn/streams-schema'
   - '@kbn/significant-events-schema'
