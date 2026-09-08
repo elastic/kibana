@@ -1028,20 +1028,26 @@ export class WorkflowsManagementApi {
         options?.stepExecutionId ??
         (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
 
-      if (stepExecutionId) {
-        const claimed = await this.workflowsService.markStepAsResponded(
-          stepExecutionId,
-          request,
-          channel,
-          spaceId
+      if (!stepExecutionId) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          'waiting step not found',
+          'waiting_for_input'
         );
-        if (!claimed) {
-          throw new WorkflowExecutionInvalidStatusError(
-            executionId,
-            'already responded to or no longer waiting for input',
-            'waiting_for_input'
-          );
-        }
+      }
+
+      const claimed = await this.workflowsService.markStepAsResponded(
+        stepExecutionId,
+        request,
+        channel,
+        spaceId
+      );
+      if (!claimed) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          'already responded to or no longer waiting for input',
+          'waiting_for_input'
+        );
       }
 
       const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
