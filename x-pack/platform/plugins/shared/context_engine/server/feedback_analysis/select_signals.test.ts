@@ -49,9 +49,10 @@ const patternBucket = (tag: string, target: string, tool: string, count: number)
   },
 });
 
+// `spaces` keys are backing index names, which is what a `_index` terms agg buckets on.
 const mainResponse = ({
   patterns = [],
-  spaces = ['context-engine-signals-default'],
+  spaces = ['context-engine-signals-default-000001'],
   total = 0,
   signals = [],
 }: {
@@ -63,7 +64,7 @@ const mainResponse = ({
   hits: {
     total: { value: total, relation: 'eq' },
     hits: signals.map((signal) => ({
-      _index: 'context-engine-signals-default',
+      _index: 'context-engine-signals-default-000001',
       _id: signal.signal_id,
       _source: signal,
     })),
@@ -356,7 +357,10 @@ describe('selectSignals', () => {
   it('reads every space and reports the ones the evidence came from', async () => {
     esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
       mainResponse({
-        spaces: ['context-engine-signals-marketing', 'context-engine-signals-default'],
+        spaces: [
+          'context-engine-signals-marketing-000001',
+          'context-engine-signals-default-000001',
+        ],
       }) as never
     );
 
@@ -369,6 +373,33 @@ describe('selectSignals', () => {
       track_total_hits: true,
     });
     expect(result.spaces).toEqual(['default', 'marketing']);
+  });
+
+  it('reports a space once when its signals span more than one backing index', async () => {
+    esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
+      mainResponse({
+        spaces: [
+          'context-engine-signals-marketing-000001',
+          'context-engine-signals-marketing-000002',
+        ],
+      }) as never
+    );
+
+    const result = await run();
+
+    expect(result.spaces).toEqual(['marketing']);
+  });
+
+  it('keeps a space id that itself ends in digits', async () => {
+    esClient.search
+      .mockResolvedValueOnce(conversationsResponse([]) as never)
+      .mockResolvedValueOnce(
+        mainResponse({ spaces: ['context-engine-signals-team-2026-000001'] }) as never
+      );
+
+    const result = await run();
+
+    expect(result.spaces).toEqual(['team-2026']);
   });
 
   it('skips the conversation lookup when the destination matches nothing', async () => {

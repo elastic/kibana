@@ -125,11 +125,15 @@ export const rawIndexExpressionsFor = (sources: AiIndexSource[]): string[] => {
   return [...expressions];
 };
 
+/**
+ * A `_index` bucket key is the backing index, not the write alias, so it carries the storage
+ * adapter's generational suffix (`context-engine-signals-marketing-000001`).
+ */
 const spaceFromIndexName = (index: string | undefined): string | undefined => {
   if (!index || !index.startsWith(SIGNAL_INDEX_PREFIX)) {
     return undefined;
   }
-  const spaceId = index.slice(SIGNAL_INDEX_PREFIX.length);
+  const spaceId = index.slice(SIGNAL_INDEX_PREFIX.length).replace(/-\d{6}$/, '');
   return spaceId.length > 0 ? spaceId : undefined;
 };
 
