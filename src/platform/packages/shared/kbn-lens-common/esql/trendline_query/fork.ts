@@ -167,11 +167,13 @@ const removeForkDiscriminatorReferences = (commands: ESQLCommand[], fromIndex: n
  * themselves contain FORK (and any residual FORKs) are also flattened.
  */
 export const flattenForkCommands = (commands: ESQLCommand[], metricFields?: string[]): void => {
-  let forkIndex = commands.findIndex((command) => command.name === 'fork');
-  while (forkIndex !== -1) {
-    const branch = selectForkBranch(getForkBranches(commands[forkIndex]), metricFields) ?? [];
-    commands.splice(forkIndex, 1, ...branch);
-    removeForkDiscriminatorReferences(commands, forkIndex + branch.length);
-    forkIndex = commands.findIndex((command) => command.name === 'fork');
+  // single forward pass: flattening never introduces a FORK before the splice
+  // point, so earlier commands need no rescan
+  for (let i = 0; i < commands.length; i++) {
+    if (commands[i].name !== 'fork') continue;
+    const branch = selectForkBranch(getForkBranches(commands[i]), metricFields) ?? [];
+    commands.splice(i, 1, ...branch);
+    removeForkDiscriminatorReferences(commands, i + branch.length);
+    i--; // re-check current index: inlined branch may itself start with FORK
   }
 };
