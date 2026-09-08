@@ -15,6 +15,7 @@ const mockTrackRequest = jest.fn(
     return result.data;
   }
 );
+const mockResetRequests = jest.fn();
 const mockTrackMetricsInfo = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
@@ -29,17 +30,12 @@ jest.mock('../utils/get_esql_query', () => ({
   getEsqlQuery: jest.fn((query: { esql?: string } | undefined) => query?.esql),
 }));
 jest.mock('@kbn/esql-utils', () => ({
-  buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[], postFilter?: string) => {
+  buildMetricsInfoQuery: jest.fn((esql: string, options?: { postFilter?: string }) => {
     if (!esql?.trim()) return '';
-    const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
-    const post = postFilter ? ` | WHERE ${postFilter}` : '';
-    return `${esql}${preFilter} | METRICS_INFO${post}`;
+    const post = options?.postFilter ? ` | WHERE ${options.postFilter}` : '';
+    return `${esql} | METRICS_INFO${post}`;
   }),
   escapeStringValue: jest.fn((val: string) => `"${val}"`),
-  buildJoinedFilter: jest.fn(
-    (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
-      fields?.map(clause).join(separator) ?? ''
-  ),
   // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
   // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
   hasTransformationalCommand: jest.fn(() => false),
@@ -55,6 +51,7 @@ jest.mock('../../../../context/ebt_telemetry_context', () => ({
 jest.mock('../../../../context/chart_section_inspector', () => ({
   useChartSectionInspector: () => ({
     trackRequest: mockTrackRequest,
+    resetRequests: mockResetRequests,
   }),
 }));
 const mockReportError = jest.fn();
@@ -64,6 +61,7 @@ jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Filter } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
@@ -160,20 +158,13 @@ describe('useFetchMetricsData', () => {
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
-    const { buildMetricsInfoQuery, buildJoinedFilter, hasTransformationalCommand } =
+    const { buildMetricsInfoQuery, hasTransformationalCommand } =
       jest.requireMock('@kbn/esql-utils');
-    buildMetricsInfoQuery.mockImplementation(
-      (esql: string, dims?: string[], postFilter?: string) => {
-        if (!esql?.trim()) return '';
-        const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
-        const post = postFilter ? ` | WHERE ${postFilter}` : '';
-        return `${esql}${preFilter} | METRICS_INFO${post}`;
-      }
-    );
-    buildJoinedFilter.mockImplementation(
-      (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
-        fields?.map(clause).join(separator) ?? ''
-    );
+    buildMetricsInfoQuery.mockImplementation((esql: string, options?: { postFilter?: string }) => {
+      if (!esql?.trim()) return '';
+      const post = options?.postFilter ? ` | WHERE ${options.postFilter}` : '';
+      return `${esql} | METRICS_INFO${post}`;
+    });
     hasTransformationalCommand.mockImplementation(() => false);
 
     mockTrackRequest.mockImplementation(
@@ -698,7 +689,7 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [], '');
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', undefined);
       expect(result.current.activeDimensions).toEqual([]);
       // Intent must not be mutated — the caller still sees the original array.
       expect(params.selectedDimensionNames).toEqual([hostDimension]);
@@ -718,11 +709,9 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
-        'TS metrics-*',
-        ['host.name'],
-        'MV_CONTAINS(dimension_fields, "host.name")'
-      );
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', {
+        postFilter: 'MV_CONTAINS(dimension_fields, "host.name")',
+      });
       expect(result.current.activeDimensions).toEqual([hostDimension]);
     });
 
@@ -737,11 +726,10 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
-        'TS metrics-*',
-        ['host.name', 'service.name'],
-        'MV_CONTAINS(dimension_fields, "host.name") AND MV_CONTAINS(dimension_fields, "service.name")'
-      );
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', {
+        postFilter:
+          'MV_CONTAINS(dimension_fields, "host.name") AND MV_CONTAINS(dimension_fields, "service.name")',
+      });
       expect(result.current.activeDimensions).toEqual([hostDimension, serviceDimension]);
     });
 
@@ -809,7 +797,7 @@ describe('useFetchMetricsData', () => {
         expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [], '');
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', undefined);
     });
   });
 
@@ -855,6 +843,254 @@ describe('useFetchMetricsData', () => {
       });
 
       expect(mockTrackMetricsInfo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('capability ∩ membership', () => {
+    it('runs only Grid of metrics when the user query has no WHERE', async () => {
+      const params = createDefaultParams();
+      params.selectedDimensionNames = [hostDimension];
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockResetRequests).toHaveBeenCalledTimes(1);
+      expect(mockTrackRequest).toHaveBeenCalledWith(
+        'Grid of metrics',
+        expect.any(String),
+        expect.any(Function)
+      );
+      expect(mockTrackRequest).not.toHaveBeenCalledWith(
+        'Metrics with data',
+        expect.any(String),
+        expect.any(Function)
+      );
+    });
+
+    it('intersects Grid of metrics with Metrics with data when a WHERE is present', async () => {
+      const capable = createMockParsedMetrics(
+        ['demo.dimension.sentinel', 'demo.dimension.named_only'],
+        [serviceDimension]
+      );
+      const withData = createMockParsedMetrics(
+        ['demo.dimension.sentinel', 'demo.request.rate'],
+        [hostDimension]
+      );
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(capable).mockReturnValueOnce(withData);
+
+      const params = createDefaultParams({
+        query: { esql: 'TS metrics-* | WHERE service.name IS NULL' },
+      });
+      params.selectedDimensionNames = [serviceDimension];
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      expect(mockResetRequests).toHaveBeenCalledTimes(1);
+      expect(mockTrackRequest.mock.calls.map((call) => call[0])).toEqual([
+        'Grid of metrics',
+        'Metrics with data',
+      ]);
+      expect(result.current.metricItems.map((item) => item.metricName)).toEqual([
+        'demo.dimension.sentinel',
+      ]);
+      expect(result.current.allDimensions).toEqual([serviceDimension]);
+      expect(mockTrackMetricsInfo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          total_number_of_metrics: 1,
+          metrics_by_type: { gauge: 1 },
+        })
+      );
+    });
+
+    it('intersects when a WHERE is present even if it does not mention the selected dimension', async () => {
+      const capable = createMockParsedMetrics(
+        ['demo.dimension.sentinel', 'demo.dimension.named_only'],
+        [serviceDimension]
+      );
+      const withData = createMockParsedMetrics(['demo.dimension.sentinel'], [hostDimension]);
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(capable).mockReturnValueOnce(withData);
+
+      const params = createDefaultParams({
+        query: { esql: 'TS metrics-* | WHERE host.name IS NOT NULL' },
+      });
+      params.selectedDimensionNames = [serviceDimension];
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      expect(mockTrackRequest.mock.calls.map((call) => call[0])).toEqual([
+        'Grid of metrics',
+        'Metrics with data',
+      ]);
+      expect(result.current.metricItems.map((item) => item.metricName)).toEqual([
+        'demo.dimension.sentinel',
+      ]);
+    });
+  });
+
+  describe('Discover filter pills', () => {
+    const serviceMissingFilter: Filter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        index: 'metrics-*',
+        key: 'service.name',
+        negate: true,
+        type: 'exists',
+      },
+      query: { exists: { field: 'service.name' } },
+    };
+
+    const disabledServiceFilter: Filter = {
+      ...serviceMissingFilter,
+      meta: { ...serviceMissingFilter.meta, disabled: true },
+    };
+
+    it('keeps pills on the single listing search when no dimension is selected', async () => {
+      const params = createDefaultParams({ filters: [serviceMissingFilter] });
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ filters: [serviceMissingFilter] })
+      );
+    });
+
+    it('omits pills from Grid of metrics and applies them on Metrics with data', async () => {
+      const capable = createMockParsedMetrics(
+        ['demo.dimension.sentinel', 'demo.dimension.named_only'],
+        [serviceDimension]
+      );
+      const withData = createMockParsedMetrics(['demo.dimension.sentinel'], [serviceDimension]);
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(capable).mockReturnValueOnce(withData);
+
+      const params = createDefaultParams({ filters: [serviceMissingFilter] });
+      params.selectedDimensionNames = [serviceDimension];
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      expect(mockExecuteEsqlQuery.mock.calls[0][0].filters).toEqual([]);
+      expect(mockExecuteEsqlQuery.mock.calls[1][0].filters).toEqual([serviceMissingFilter]);
+      expect(mockTrackRequest.mock.calls.map((call) => call[0])).toEqual([
+        'Grid of metrics',
+        'Metrics with data',
+      ]);
+      expect(result.current.metricItems.map((item) => item.metricName)).toEqual([
+        'demo.dimension.sentinel',
+      ]);
+    });
+
+    it('does not run membership for a disabled pill only', async () => {
+      const params = createDefaultParams({ filters: [disabledServiceFilter] });
+      params.selectedDimensionNames = [serviceDimension];
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filters: [] }));
+      expect(mockTrackRequest).not.toHaveBeenCalledWith(
+        'Metrics with data',
+        expect.any(String),
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe('Inspector abort gating', () => {
+    it('does not track Metrics with data after a superseded fetch is aborted', async () => {
+      let resolveFirstCapability:
+        | ((value: Awaited<ReturnType<typeof executeEsqlQuery>>) => void)
+        | undefined;
+      const firstCapability = new Promise<Awaited<ReturnType<typeof executeEsqlQuery>>>(
+        (resolve) => {
+          resolveFirstCapability = resolve;
+        }
+      );
+
+      mockExecuteEsqlQuery
+        .mockImplementationOnce(() => firstCapability)
+        .mockResolvedValue({
+          documents: [
+            {
+              metric_name: 'system.cpu.utilization',
+              index_name: 'metrics-*',
+              unit: null,
+              metric_type: 'gauge',
+              field_type: 'double',
+              dimension_fields: ['service.name'],
+            },
+          ],
+          rawResponse: {},
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        });
+
+      const params = createDefaultParams({
+        query: { esql: 'TS metrics-* | WHERE service.name IS NULL' },
+      });
+      params.selectedDimensionNames = [serviceDimension];
+
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      });
+
+      rerender({
+        ...params,
+        fetchParams: { ...params.fetchParams, timeRange: { from: 'now-1h', to: 'now' } },
+      });
+
+      resolveFirstCapability?.({
+        documents: [
+          {
+            metric_name: 'stale.metric',
+            index_name: 'metrics-*',
+            unit: null,
+            metric_type: 'gauge',
+            field_type: 'double',
+            dimension_fields: ['service.name'],
+          },
+        ],
+        rawResponse: {},
+        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      const trackedNames = mockTrackRequest.mock.calls.map((call) => call[0]);
+      expect(trackedNames.filter((name) => name === 'Metrics with data')).toHaveLength(1);
+      expect(result.current.metricItems[0]?.metricName).not.toBe('stale.metric');
     });
   });
 });

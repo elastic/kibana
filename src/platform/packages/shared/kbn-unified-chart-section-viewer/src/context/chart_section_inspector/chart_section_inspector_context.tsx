@@ -24,8 +24,14 @@ export interface ChartSectionInspectorContextValue {
   requestAdapter: RequestAdapter;
 
   /**
+   * Clears previously recorded chart-section Inspector requests.
+   * Call once at the start of a fetch cycle that may log more than one request.
+   */
+  resetRequests: () => void;
+
+  /**
    * Wraps a fetch function with RequestAdapter lifecycle management.
-   * Handles reset, start, json, ok on success, and error on failure.
+   * Handles start, json, ok on success, and error on failure.
    *
    * @param name - The display name for the request in the Inspector
    * @param description - A description of the request shown in the Inspector
@@ -65,13 +71,16 @@ export const ChartSectionInspectorProvider = ({
     };
   }, [setLensRequestAdapter, requestAdapter]);
 
+  const resetRequests = useCallback(() => {
+    requestAdapter.reset();
+  }, [requestAdapter]);
+
   const trackRequest = useCallback(
     async <T,>(
       name: string,
       description: string,
       fn: () => Promise<TrackRequestResult<T>>
     ): Promise<T> => {
-      requestAdapter.reset();
       const responder = requestAdapter.start(name, { description });
       try {
         const { data, request, response } = await fn();
@@ -86,7 +95,10 @@ export const ChartSectionInspectorProvider = ({
     [requestAdapter]
   );
 
-  const value = useMemo(() => ({ requestAdapter, trackRequest }), [requestAdapter, trackRequest]);
+  const value = useMemo(
+    () => ({ requestAdapter, resetRequests, trackRequest }),
+    [requestAdapter, resetRequests, trackRequest]
+  );
 
   return (
     <ChartSectionInspectorContext.Provider value={value}>

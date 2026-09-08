@@ -57,6 +57,7 @@ describe('createESQLQuery', () => {
     const query = createESQLQuery({ metricItem: mockMetric });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -69,6 +70,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS SUM(RATE(requests.count)) BY TBUCKET(100)
 `.trim()
@@ -81,6 +83,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100)
 `.trim()
@@ -93,6 +96,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100)
 `.trim()
@@ -105,6 +109,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY TBUCKET(100)
 `.trim()
@@ -118,6 +123,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
@@ -131,6 +137,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`
 `.trim()
@@ -144,6 +151,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
@@ -157,6 +165,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`
 `.trim()
@@ -170,6 +179,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
@@ -183,6 +193,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
 `.trim()
@@ -196,6 +207,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`, \`container.id\`
 `.trim()
@@ -209,6 +221,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`
 `.trim()
@@ -222,6 +235,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`cpu.cores\`, \`host.name\`
 `.trim()
@@ -235,6 +249,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
@@ -247,6 +262,7 @@ TS metrics-*
     });
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS custom-metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -261,6 +277,7 @@ TS custom-metrics-*
 
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -275,6 +292,7 @@ TS metrics-*
 
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL
   | STATS AVG(cpu.usage) BY TBUCKET(100)
@@ -291,6 +309,7 @@ TS metrics-*
 
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | WHERE host.name == "host-01"
   | WHERE cpu.cores > 4
@@ -307,6 +326,7 @@ TS metrics-*
 
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -321,6 +341,7 @@ TS metrics-*
 
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -335,6 +356,7 @@ TS metrics-*
 
     expect(query).toBe(
       `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -358,6 +380,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`
 `.trim()
@@ -371,6 +394,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`, \`container-id\`
 `.trim()
@@ -384,6 +408,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`host-ip\`, \`service-name\`
 `.trim()
@@ -406,6 +431,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100), \`field\`\`with\`\`ticks\`
 `.trim()
@@ -429,6 +455,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS timeseries-rich-metrics-primary
   | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
@@ -442,6 +469,7 @@ TS timeseries-rich-metrics-primary
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS timeseries-rich-metrics-primary
   | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100), \`service.name\`
 `.trim()
@@ -463,6 +491,7 @@ TS timeseries-rich-metrics-primary
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS SUM(RATE(TO_LONG(requests.count))) BY TBUCKET(100)
 `.trim()
@@ -484,6 +513,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(TO_DOUBLE(metric.value)) BY TBUCKET(100)
 `.trim()
@@ -497,6 +527,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS timeseries-rich-metrics-primary
   | WHERE service.name == "api-server"
   | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
@@ -519,6 +550,7 @@ TS timeseries-rich-metrics-primary
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -542,6 +574,7 @@ TS metrics-*
       // surface its own error message
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(request.duration, 95) BY TBUCKET(100)
 `.trim()
@@ -570,6 +603,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
   | STATS AVG(request_duration) BY TBUCKET(100)
 `.trim()
@@ -583,6 +617,7 @@ TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS edge-case-gauge-to-counter
   | STATS AVG(request_duration) BY TBUCKET(100)
 `.trim()
@@ -596,6 +631,7 @@ TS edge-case-gauge-to-counter
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS edge-case-gauge-to-counter
   | STATS AVG(request_duration) BY TBUCKET(100)
 `.trim()
@@ -608,6 +644,7 @@ TS edge-case-gauge-to-counter
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS edge-case-gauge-to-counter
   | STATS AVG(request_duration) BY TBUCKET(100)
 `.trim()
@@ -621,6 +658,7 @@ TS edge-case-gauge-to-counter
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS edge-case-gauge-to-counter
   | STATS AVG(request_duration) BY TBUCKET(100)
 `.trim()
@@ -642,6 +680,7 @@ TS edge-case-gauge-to-counter
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS MAX(RATE(requests.count)) BY TBUCKET(100)
 `.trim()
@@ -661,6 +700,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS SUM(cpu.usage) BY TBUCKET(100)
 `.trim()
@@ -680,6 +720,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 90) BY TBUCKET(100)
 `.trim()
@@ -699,6 +740,7 @@ TS metrics-*
       });
       expect(query).toBe(
         `
+SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 50) BY TBUCKET(100)
 `.trim()
