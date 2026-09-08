@@ -2216,7 +2216,7 @@
     "meow": "14.1.0",
     "mini-css-extract-plugin": "2.9.1",
     "minimist": "1.2.8",
-    "mocha": "11.3.0",
+    "mocha": "11.7.6",
     "mocha-junit-reporter": "2.2.1",
     "mocha-multi-reporters": "1.5.1",
     "mochawesome": "7.1.4",
