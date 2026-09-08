@@ -33,7 +33,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
 
       await spaceTest.step('share disabled on empty visualization', async () => {
         await lens.waitForLensApp();
-        await expect(lens.workspace.shareButton).toBeDisabled();
+        await expect(await lens.workspace.revealAppMenuItem('lnsApp_shareButton')).toBeDisabled();
       });
 
       await spaceTest.step('share stays disabled for incomplete XY', async () => {
@@ -45,7 +45,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
           operation: 'date_histogram',
           field: '@timestamp',
         });
-        await expect(lens.workspace.shareButton).toBeDisabled();
+        await expect(await lens.workspace.revealAppMenuItem('lnsApp_shareButton')).toBeDisabled();
       });
 
       await spaceTest.step('share and export enable for a valid config', async () => {
@@ -56,8 +56,8 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         });
         // Share/export enable after Lens has produced a request/visualization.
         await lens.waitForVisualization('xyVisChart');
-        await expect(lens.workspace.shareButton).toBeEnabled();
-        await expect(lens.workspace.exportButton).toBeEnabled();
+        await expect(await lens.workspace.revealAppMenuItem('lnsApp_shareButton')).toBeEnabled();
+        await expect(await lens.workspace.revealAppMenuItem('lnsApp_exportButton')).toBeEnabled();
 
         // Modern share modal exposes Copy link directly (no `link` tab / tabbedModal-link-content).
         await lens.workspace.openShareModal();

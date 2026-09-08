@@ -8,7 +8,9 @@
 import type { DebugState } from '@elastic/charts';
 import { encode as encodeRison } from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
+import { clickLensAppMenuItem, revealLensAppMenuItem } from '../../app_menu';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -399,23 +401,28 @@ export class LensWorkspace {
   /** No-op — auto-apply is an inline AppMenu switch, not a settings popover. */
   async closeSettingsMenu() {}
   /**
+   * Makes an AppMenu control visible, opening the overflow popover when needed.
+   * Share, Export, Inspect, and Open in Discover are overflow items on classic chrome.
+   */
+  async revealAppMenuItem(testId: string): Promise<Locator> {
+    return revealLensAppMenuItem(this.page, testId);
+  }
+
+  /** Clicks an AppMenu control, opening the overflow popover when needed. */
+  async clickAppMenuItem(testId: string): Promise<void> {
+    await clickLensAppMenuItem(this.page, testId);
+  }
+
+  /**
    * Opens the Share modal. Waits until the share button is enabled (can lag after save).
    * Dismisses save toasts first — they sit over the top nav and intercept the click.
    */
   async openShareModal() {
-    await this.page.waitForFunction(
-      () => {
-        const btn = document.querySelector(
-          '[data-test-subj="lnsApp_shareButton"]'
-        ) as HTMLButtonElement | null;
-        return Boolean(btn && !btn.disabled);
-      },
-      undefined,
-      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
-    );
+    const shareButton = await this.revealAppMenuItem('lnsApp_shareButton');
+    await expect(shareButton).toBeEnabled({ timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
 
     await this.page.components.toast().closeAll();
-    await this.shareButton.click();
+    await shareButton.click();
     await this.shareModal.waitFor({ state: 'visible' });
     await this.copyShareUrlButton.waitFor({ state: 'visible' });
   }
