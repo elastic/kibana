@@ -140,6 +140,17 @@ describe('parseIndicatorList', () => {
       expect(blocks[0].iocs[0].tier_basis).toBe('maltrail_indicator_list');
     });
 
+    it('stamps tier_basis from the tierBasis argument when the caller overrides it', () => {
+      const ioc = makeIoc('ip', '1.2.3.4', { tier: 'contextual', tier_basis: 'original' });
+      extractIocsMock.mockReturnValue(makeResult(ioc));
+
+      const blocks = parseIndicatorList(
+        '# Reference: https://example.com/report\n1.2.3.4',
+        'curated_ip_list'
+      );
+      expect(blocks[0].iocs[0].tier_basis).toBe('curated_ip_list');
+    });
+
     it('preserves type and value from extractIocs', () => {
       const ioc = makeIoc('domain', 'evil.com');
       extractIocsMock.mockReturnValue(makeResult(ioc));

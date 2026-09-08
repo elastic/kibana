@@ -43,13 +43,11 @@ const buildSource = (overrides: Partial<SourceHit['_source']> = {}): SourceHit =
 
 const NOW = new Date('2026-05-16T12:00:00.000Z');
 
-const buildContext = (
-  fetchImpl: jest.Mock<Promise<Response>, [string | URL | Request, RequestInit?]>
-): AdapterRunContext => ({
+const buildContext = (fetchImpl: typeof fetch): AdapterRunContext => ({
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,
   now: () => NOW,
-  fetchFn: fetchImpl as unknown as typeof fetch,
+  fetchFn: fetchImpl,
   lookupFn: async () => [{ address: '93.184.216.34' }],
 });
 

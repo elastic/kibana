@@ -13,12 +13,8 @@ import { fetchSourceStepCommonDefinition } from '../../../../../common/threat_in
 export const fetchSourceStepDefinition: PublicStepDefinition = {
   ...fetchSourceStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/download')
-      .then(({ icon }) => ({ default: icon }))
-      .catch(() =>
-        import('@elastic/eui/es/components/icon/assets/globe').then(({ icon }) => ({
-          default: icon,
-        }))
-      )
+    import('@elastic/eui/es/components/icon/assets/download').then(({ icon }) => ({
+      default: icon,
+    }))
   ),
 };

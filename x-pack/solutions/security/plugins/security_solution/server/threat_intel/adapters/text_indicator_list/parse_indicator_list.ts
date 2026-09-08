@@ -22,16 +22,27 @@ export interface IndicatorBlock {
 
 const REFERENCE_PREFIX = '# Reference:';
 
+/** Default provenance stamp, kept for the Maltrail trail sources in the catalog. */
+export const DEFAULT_INDICATOR_LIST_TIER_BASIS = 'maltrail_indicator_list';
+
 /**
  * Parses a Maltrail-format indicator list body into blocks, each block grouping
  * IOCs under the nearest preceding # Reference: line.
  *
  * - Skips all other # comment lines (copyright, license, blank comments).
  * - Uses extractIocs for value classification; never reinvents IOC parsing.
- * - Stamps every IOC with tier_basis 'maltrail_indicator_list' and tier 'discriminating'.
+ * - Stamps every elevated IOC with `tierBasis` and tier 'discriminating'.
  * - Tolerant: blank lines and unrecognised lines are silently skipped.
+ *
+ * `tierBasis` is a parameter because this parser is the generic
+ * `text_indicator_list` reader, and `tier_basis` flows through to indicator
+ * documents and detection rules. A second, non-Maltrail text list would
+ * otherwise be stamped with the wrong provenance.
  */
-export const parseIndicatorList = (body: string): IndicatorBlock[] => {
+export const parseIndicatorList = (
+  body: string,
+  tierBasis: string = DEFAULT_INDICATOR_LIST_TIER_BASIS
+): IndicatorBlock[] => {
   if (!body || !body.trim()) {
     return [];
   }
@@ -73,7 +84,7 @@ export const parseIndicatorList = (body: string): IndicatorBlock[] => {
                 ...ioc,
                 tier: 'discriminating',
                 tier_heuristic: 'discriminating',
-                tier_basis: 'maltrail_indicator_list',
+                tier_basis: tierBasis,
               }
         );
       }

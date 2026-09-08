@@ -10,10 +10,6 @@ import { buildFingerprint } from './fingerprint';
 
 describe('buildFingerprint', () => {
   it('length-prefixes each part so the seed is unambiguous', () => {
-    // The seed is `<len>:<part>` per part, concatenated. There is no workflow-side
-    // computation to match: the definitions only pass `content_fingerprint`
-    // through, and the engine has no sha256 Liquid filter, so this encoding is
-    // ours alone and only has to be self-consistent.
     const expected = createHash('sha256')
       .update('28:https://example.com/feed.xml7:item-425:Title')
       .digest('hex');
@@ -49,13 +45,10 @@ describe('buildFingerprint', () => {
   });
 
   it('treats undefined/null parts as empty strings (still positional)', () => {
-    // Two leading missing parts are still part of the seed shape — a
-    // re-fetch with the same shape produces the same digest.
     const a = buildFingerprint([undefined, undefined, 'id']);
     const b = buildFingerprint([undefined, undefined, 'id']);
     expect(a).toBe(b);
-    // …but a missing part is *positionally distinct* from the part
-    // moving up by one — `:::id` and `id` produce different digests.
+    // A missing part is positionally distinct from the part moving up.
     expect(a).not.toBe(buildFingerprint(['id']));
   });
 
