@@ -89,6 +89,58 @@ describe('getBulkAssets', () => {
     ]);
   });
 
+  it('returns external assets alongside resolved saved-object assets', async () => {
+    const soClient = {
+      bulkResolve: jest.fn().mockResolvedValue({
+        resolved_objects: [
+          {
+            saved_object: {
+              id: 'fleet-default-sdlc-intel-overview',
+              type: KibanaSavedObjectType.dashboard,
+              attributes: { title: 'SDLC Overview' },
+            },
+          },
+        ],
+      }),
+    } as unknown as SavedObjectsClientContract;
+    const soTypeRegistry = {
+      getType: jest.fn(),
+    } as unknown as ISavedObjectTypeRegistry;
+
+    const assets = await getBulkAssets(
+      soClient,
+      soTypeRegistry,
+      [
+        {
+          id: 'fleet-default-sdlc-intel-github-catalog-repos',
+          type: KibanaSavedObjectType.workflow,
+        },
+        { id: 'fleet-default-sdlc-intel-overview', type: KibanaSavedObjectType.dashboard },
+      ],
+      {
+        externalAssetEnricher: async () => ({
+          'fleet-default-sdlc-intel-github-catalog-repos': {
+            title: 'SDLC GitHub catalog repos (GraphQL)',
+          },
+        }),
+      }
+    );
+
+    // Only the saved-object asset may be looked up; the workflow is external.
+    expect(soClient.bulkResolve).toHaveBeenCalledWith([
+      { id: 'fleet-default-sdlc-intel-overview', type: KibanaSavedObjectType.dashboard },
+    ]);
+
+    // Both halves must survive the merge, external ones first.
+    expect(assets.map(({ id }) => id)).toEqual([
+      'fleet-default-sdlc-intel-github-catalog-repos',
+      'fleet-default-sdlc-intel-overview',
+    ]);
+    expect(assets[0].appLink).toBe(
+      '/app/workflows/fleet-default-sdlc-intel-github-catalog-repos'
+    );
+  });
+
   it('uses attributes.name as the display title when attributes.title is unavailable', async () => {
     const soClient = {
       bulkResolve: jest.fn().mockResolvedValue({

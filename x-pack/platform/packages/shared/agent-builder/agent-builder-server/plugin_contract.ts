@@ -248,6 +248,8 @@ export interface TopSnippetsConfig {
  * (e.g. Fleet package install/uninstall).
  */
 export interface AgentBuilderManagementSetup {
+  /** Read a single agent, or null when it does not exist. Used to enrich Fleet asset listings. */
+  getAgent(agentId: string, request: KibanaRequest): Promise<unknown>;
   createOrUpdateAgent(params: AgentCreateRequest, request: KibanaRequest): Promise<unknown>;
   deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
   createOrUpdateSkill(params: PersistedSkillCreateRequest, request: KibanaRequest): Promise<unknown>;
