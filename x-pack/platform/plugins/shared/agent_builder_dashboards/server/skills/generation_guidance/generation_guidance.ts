@@ -7,21 +7,15 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
-  getChartDesignPromptContent,
   getChartTypeSelectionPromptContent,
-  getPaletteCatalogPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
-import { prettifyGuidancePrompt } from './prettify_guidance';
+import { reviewWorkflowPrompt } from './review_workflow';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
-const chartDesignGuidance = getChartDesignPromptContent();
-
-/** Referenced skill file holding the Kibana palette catalog, loaded on demand. */
-const PALETTE_CATALOG_FILE = 'color-palettes';
 
 const guidance = `## Building a Dashboard
 
@@ -90,17 +84,9 @@ ${seriesStatisticsAgentGuidance}
 
 ${chartTypeSelectionGuidance}
 
-## Chart Design Guidance
-
-Use this when describing a new chart's important visual choices, when reviewing existing charts, and when writing edit instructions. Choices you leave unspecified fall back to these same defaults in the chart author.
-
-${chartDesignGuidance}
-
-When choosing or checking palettes, read this skill's \`${PALETTE_CATALOG_FILE}\` reference file for the palette names, ids, and colors. Use the saved color values, not a screenshot, to decide whether a color belongs to a palette.
-
 ${dashboardDesignGuidancePrompt}
 
-${prettifyGuidancePrompt}
+${reviewWorkflowPrompt}
 
 ## ES|QL
 
@@ -141,20 +127,13 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard, including the detailed design guidance
- * (composition + panel layout) inlined directly. It deliberately says nothing about how the
- * current dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across environments. Pair it with
- * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
- * generated dashboard is surfaced.
+ * The `guidance` describes how to build a dashboard, including the design guidance (composition +
+ * panel layout) inlined directly, plus the short Prettify review-and-apply workflow. Chart-specific
+ * design defaults and palettes are owned by the chart author and the `review_dashboard` tool and are
+ * deliberately not repeated here. The block says nothing about how the current dashboard is
+ * referenced or how the result is surfaced; pair it with an environment-specific rendering guidance
+ * block (e.g. the Kibana one).
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
-  referencedContent: [
-    {
-      relativePath: '.',
-      name: PALETTE_CATALOG_FILE,
-      content: getPaletteCatalogPromptContent(),
-    },
-  ],
 };

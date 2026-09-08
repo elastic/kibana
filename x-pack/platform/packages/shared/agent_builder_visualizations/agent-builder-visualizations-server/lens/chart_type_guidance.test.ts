@@ -54,7 +54,7 @@ describe('chart type guidance', () => {
       - Color table values as badges, and only where color adds meaning (status, severity, magnitude). Do not color cell backgrounds or text unless the user asks.
 
       CONFIGURATION RULES FOR DATA_TABLE:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "gauge": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -64,7 +64,7 @@ describe('chart type guidance', () => {
       - For new gauges, prefer four equal percentage color bands unless the user specifies different bands. When prettifying, request four equal percentage bands explicitly unless the existing bands reflect explicit user thresholds or meaningful business ranges. A focused color or palette edit keeps the existing band count, thresholds, and percentage or absolute scale.
 
       CONFIGURATION RULES FOR GAUGE:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
       - Omit \`min\`, \`max\`, and \`goal\` unless the user supplied them or the existing configuration already has them.",
           "heatmap": "DESIGN GUIDANCE:
@@ -74,7 +74,7 @@ describe('chart type guidance', () => {
       - Keep the default \\"Temperature\\" palette that Lens binds to the data; use a custom palette or thresholds only when the user asks.
 
       CONFIGURATION RULES FOR HEATMAP:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "metric": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -87,7 +87,7 @@ describe('chart type guidance', () => {
       - Color the value, not the background, and only when it carries meaning. Clearly bounded metrics (percent, ratio, CPU/memory/disk utilization, error rate, success rate, SLO compliance) benefit from status bands in the same scale as the value; for adverse metrics such as error rate, higher is worse. Unbounded values (raw counts, bytes, durations, throughput, rates with unknown scale) stay uncolored.
 
       CONFIGURATION RULES FOR METRIC:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
       - Trend backgrounds (\`background_chart: { type: \\"trend\\" }\`) and secondary metrics (a second \`metrics[]\` entry with \`type: \\"secondary\\"\`) must bind columns the same ES|QL query returns. Never invent another index or field.
       - Progress bar: \`background_chart\` with \`type: \\"bar\\"\` and a \`max_value\` column, only for meaningful progress-to-max.
@@ -98,7 +98,7 @@ describe('chart type guidance', () => {
       - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
 
       CONFIGURATION RULES FOR MOSAIC:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "pie": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -107,7 +107,7 @@ describe('chart type guidance', () => {
       - Use the default palette; per-slice or custom colors only when the user asks.
 
       CONFIGURATION RULES FOR PIE:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "region_map": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -115,7 +115,7 @@ describe('chart type guidance', () => {
       - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
 
       CONFIGURATION RULES FOR REGION_MAP:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "tag_cloud": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -123,7 +123,7 @@ describe('chart type guidance', () => {
       - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
 
       CONFIGURATION RULES FOR TAG_CLOUD:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "treemap": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -131,7 +131,7 @@ describe('chart type guidance', () => {
       - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
 
       CONFIGURATION RULES FOR TREEMAP:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "waffle": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -139,7 +139,7 @@ describe('chart type guidance', () => {
       - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
 
       CONFIGURATION RULES FOR WAFFLE:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
           "xy": "DESIGN GUIDANCE:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
@@ -151,7 +151,7 @@ describe('chart type guidance', () => {
       - Let Lens assign series colors. Add explicit colors only when the user asks or when the same category must keep one color across charts.
 
       CONFIGURATION RULES FOR XY:
-      - Titles: omit the \`title\` field to show no title.
+      - Titles: when the design guidance calls for no panel title (metric, gauge, tagcloud, waffle), omit the \`title\` field; every other chart needs a \`title\` string that is self-explanatory and exhaustive.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
       - For horizontal bars, use type: \\"bar_horizontal\\" with x = category field and y = metric field. Example: \\"top OS by count as horizontal bar\\" → type: \\"bar_horizontal\\", x: { column: \\"OS\\" }, y: [{ column: \\"Count\\" }]. Do NOT put the metric on x.
       - Hide axis titles with \`title: { visible: false }\` on both the x and y axes; do not set axis title text.

@@ -19,7 +19,7 @@ import {
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
-import { retrieveLatestVersion } from './attachment_state';
+import { retrieveLatestVersion } from '../attachment_state';
 import {
   createVisPanelResolver,
   executeDashboardOperations,
