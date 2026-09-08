@@ -136,11 +136,8 @@ export const attackDiscoveryAdapter: ReferenceAdapter = {
       // emitting a placeholder would grade answers against nothing.
       if (parts.length === 0) return;
 
-      // Key on the scenario key golden varies per document. Fall back to an
-      // explicit id, then the index, so datasets that DO carry ids still join.
-      const scenarioKey = (example as { metadata?: { scenarioKey?: unknown } })?.metadata
-        ?.scenarioKey;
-      const key = isNonEmptyString(scenarioKey) ? scenarioKey : example.id ?? String(index);
+      // Same key derivation as the structured map, so both lookups agree.
+      const key = exampleKey(example, index);
       refs.set(key, parts.join('\n\n'));
     });
     return refs;
@@ -240,6 +237,23 @@ export function selectAdapter(examples: DatasetExample[]): ReferenceAdapter | un
 }
 
 /**
+ * The key both reference maps use for an example.
+ *
+ * attack-discovery registers each scenario as its own single-example dataset, so
+ * golden records `example.id = '0'` on every document and only
+ * `example.metadata.scenarioKey` distinguishes them. Prefer that key, fall back
+ * to an explicit id, then to the position, so datasets that do carry ids or rely
+ * on order keep working.
+ */
+function exampleKey(example: DatasetExample, index: number): string {
+  const scenarioKey = (example as { metadata?: { scenarioKey?: unknown } })?.metadata?.scenarioKey;
+  if (isNonEmptyString(scenarioKey)) {
+    return scenarioKey;
+  }
+  return example.id ?? String(index);
+}
+
+/**
  * Build the STRUCTURED ground truth, keyed the same way as the prose reference.
  *
  * `build()` renders truth as prose because the correctness judge compares text.
@@ -247,7 +261,12 @@ export function selectAdapter(examples: DatasetExample[]): ReferenceAdapter | un
  * the `criteria[]` array and its Rubric evaluator wants the `attackDiscoveries`
  * objects. Re-deriving those from the rendered prose would mean parsing back out
  * of a lossy format, so the raw `output` is exposed under the same key the
- * prose lookup uses -- positional for AD, `example.id` elsewhere.
+ * prose lookup uses.
+ *
+ * Both maps MUST derive their key identically. Keying this by index while
+ * `build()` keys by scenario key returns `undefined` for every lookup, and a
+ * jury that requires structured truth then reports the cell as ungradable --
+ * which reads as missing model output rather than as a key mismatch.
  */
 export function buildStructuredReferences(
   examples: DatasetExample[]
@@ -258,7 +277,7 @@ export function buildStructuredReferences(
     if (!output || typeof output !== 'object') {
       return;
     }
-    refs.set(example.id ?? String(index), output as Record<string, unknown>);
+    refs.set(exampleKey(example, index), output as Record<string, unknown>);
   });
   return refs;
 }

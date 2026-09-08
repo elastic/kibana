@@ -9,6 +9,7 @@ import {
   attackDiscoveryAdapter,
   automaticMigrationsAdapter,
   personaMatrixAdapter,
+  buildStructuredReferences,
   collectExamples,
   selectAdapter,
   type DatasetExample,
@@ -188,6 +189,18 @@ describe('reference adapters', () => {
 
       expect(refs.has('explicit-id')).toBe(true);
       expect(refs.has('1')).toBe(true);
+    });
+
+    it('keys structured ground truth identically to the prose references', () => {
+      // A jury looks up prose and structured truth with ONE key. If the two maps
+      // derive keys differently, every structured lookup returns undefined and a
+      // jury that requires structured truth reports the cell as ungradable --
+      // which reads as missing model output rather than as a key mismatch.
+      const prose = attackDiscoveryAdapter.build(scenarioExamples);
+      const structured = buildStructuredReferences(scenarioExamples);
+
+      expect([...structured.keys()].sort()).toEqual([...prose.keys()].sort());
+      expect(structured.get('wmi-lateral')).toBe(scenarioExamples[1].output);
     });
   });
 });
