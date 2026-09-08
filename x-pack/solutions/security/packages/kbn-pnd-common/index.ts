@@ -49,6 +49,7 @@ export {
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
+  WORKER_SCHEDULE_UNITS,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
@@ -106,6 +107,7 @@ export {
   WatchWorkerAttachment,
   Worker,
   WorkerRunState,
+  WorkerScheduleInterval,
   WorkerSettings,
   WorkflowTriggerType,
   type TimelineEvent,
@@ -140,5 +142,6 @@ export {
 export type {
   SystemSecurityWatchCatalogEntry,
   SystemSecurityWorkerCatalogEntry,
+  WorkerScheduleUnit,
 } from './constants';
 export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';
