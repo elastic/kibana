@@ -24,6 +24,8 @@ import {
 } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import {
@@ -63,9 +65,14 @@ describe('WorkflowsManagementApi', () => {
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
   const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
+  let mockWorkflowsExtensions: jest.Mocked<WorkflowsExtensionsServerPluginStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
+    // By default no trigger declares exclusivity; individual test suites override as needed.
+    mockWorkflowsExtensions.getTriggerDefinition.mockReturnValue(undefined);
+
     mockWorkflowsExecutionEngine = workflowsExecutionEngineMock.createStart();
     mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
       workflowExecutionId: 'test-exec-id',
@@ -93,6 +100,7 @@ describe('WorkflowsManagementApi', () => {
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
+      getWorkflowsExtensions: async () => mockWorkflowsExtensions,
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
@@ -1331,14 +1339,32 @@ steps:
       expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
     });
 
-    describe('inference.aroundCompletion conflict check', () => {
-      const aroundCompletionDefinition = {
-        triggers: [{ type: 'inference.aroundCompletion' }],
+    describe('exclusive trigger conflict check', () => {
+      // Fixture trigger IDs — not real production triggers, so this suite is never
+      // accidentally invalidated by upstream registration changes.
+      const EXCLUSIVE_TRIGGER = 'test-ns.exclusiveTrigger';
+      const SHARED_TRIGGER = 'test-ns.sharedTrigger';
+
+      const exclusiveDefinition = {
+        triggers: [{ type: EXCLUSIVE_TRIGGER }],
       } as unknown as WorkflowDetailDto['definition'];
 
-      it('rejects enabling when another workflow with inference.aroundCompletion is already enabled', async () => {
+      beforeEach(() => {
+        // Override the top-level default: make EXCLUSIVE_TRIGGER exclusive, SHARED_TRIGGER not.
+        mockWorkflowsExtensions.getTriggerDefinition.mockImplementation((id) => {
+          if (id === EXCLUSIVE_TRIGGER) {
+            return { id, exclusivity: 'per-space' } as any;
+          }
+          if (id === SHARED_TRIGGER) {
+            return { id } as any;
+          }
+          return undefined;
+        });
+      });
+
+      it('rejects enabling when another workflow is already enabled for the exclusive trigger', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue(
-          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDefinition })
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: exclusiveDefinition })
         );
         mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
           createWorkflowDto({ id: 'wf-other', name: 'Existing Workflow', enabled: true }),
@@ -1353,7 +1379,7 @@ steps:
 
       it('includes the conflicting workflow id in the error', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue(
-          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDefinition })
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: exclusiveDefinition })
         );
         mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
           createWorkflowDto({ id: 'wf-conflict', name: 'Conflicting Workflow', enabled: true }),
@@ -1367,10 +1393,10 @@ steps:
         expect((err as WorkflowConflictError).workflowId).toBe('wf-conflict');
       });
 
-      it('allows enabling when no other workflow with the trigger is already enabled', async () => {
+      it('allows enabling when no other workflow is already enabled for the exclusive trigger', async () => {
         const updateResult = { enabled: true } as any;
         mockWorkflowsService.getWorkflow.mockResolvedValue(
-          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDefinition })
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: exclusiveDefinition })
         );
         mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([]);
         mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
@@ -1383,7 +1409,7 @@ steps:
       it('allows re-enabling the same workflow (self is excluded from conflict check)', async () => {
         const updateResult = { enabled: true } as any;
         mockWorkflowsService.getWorkflow.mockResolvedValue(
-          createWorkflowDto({ id: 'wf-1', enabled: true, definition: aroundCompletionDefinition })
+          createWorkflowDto({ id: 'wf-1', enabled: true, definition: exclusiveDefinition })
         );
         // Simulate the workflow appearing in its own subscribed-trigger results
         mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
@@ -1396,14 +1422,36 @@ steps:
         ).resolves.toBe(updateResult);
       });
 
-      it('skips conflict check when the workflow has no inference.aroundCompletion trigger', async () => {
+      it('does not special-case inference.aroundCompletion — search not issued without registration', async () => {
+        // This is the regression guard: 'inference.aroundCompletion' must not be treated as
+        // exclusive unless a definition explicitly registers it as such. Without registration
+        // the guard must be a no-op and not issue any subscribed-trigger search.
+        const updateResult = { enabled: true } as any;
+        // No definition registered for inference.aroundCompletion (returns undefined above)
+        const aroundCompletionDef = {
+          triggers: [{ type: 'inference.aroundCompletion' }],
+        } as unknown as WorkflowDetailDto['definition'];
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDef })
+        );
+        mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+        await expect(
+          api.updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
+        ).resolves.toBe(updateResult);
+
+        // No search should have been issued — no definition declares exclusivity for this trigger
+        expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).not.toHaveBeenCalled();
+      });
+
+      it('skips conflict check when the trigger is registered but not exclusive', async () => {
         const updateResult = { enabled: true } as any;
         mockWorkflowsService.getWorkflow.mockResolvedValue(
           createWorkflowDto({
             id: 'wf-1',
             enabled: false,
             definition: {
-              triggers: [{ type: 'manual' }],
+              triggers: [{ type: SHARED_TRIGGER }],
             } as unknown as WorkflowDetailDto['definition'],
           })
         );
@@ -1419,12 +1467,32 @@ steps:
       it('skips conflict check when updating a field other than enabled', async () => {
         const updateResult = { name: 'New Name' } as any;
         mockWorkflowsService.getWorkflow.mockResolvedValue(
-          createWorkflowDto({ id: 'wf-1', enabled: true, definition: aroundCompletionDefinition })
+          createWorkflowDto({ id: 'wf-1', enabled: true, definition: exclusiveDefinition })
         );
         mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
 
         await expect(
           api.updateWorkflow('wf-1', { name: 'New Name' }, 'default', mockRequest)
+        ).resolves.toBe(updateResult);
+
+        expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).not.toHaveBeenCalled();
+      });
+
+      it('skips conflict check when enabling with no exclusive triggers in the definition', async () => {
+        const updateResult = { enabled: true } as any;
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({
+            id: 'wf-1',
+            enabled: false,
+            definition: {
+              triggers: [{ type: 'manual' }],
+            } as unknown as WorkflowDetailDto['definition'],
+          })
+        );
+        mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+        await expect(
+          api.updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
         ).resolves.toBe(updateResult);
 
         expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).not.toHaveBeenCalled();
