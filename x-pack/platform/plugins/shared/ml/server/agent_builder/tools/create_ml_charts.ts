@@ -10,7 +10,6 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
@@ -111,18 +110,12 @@ const schema = z.object({
 
 /**
  * Maps a minimum score (0–100) to the SeverityThreshold[] format expected by
- * the anomaly charts embeddable. Includes all severity bands whose floor is >= minScore.
+ * the anomaly charts embeddable. Uses a single open-ended floor so any value
+ * in range filters as `score >= minScore`, matching the swim lane path.
  */
-const buildAnomalyChartsThresholds = (minScore: number): SeverityThreshold[] => {
-  const bands = [
-    { min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING },
-    { min: ML_ANOMALY_THRESHOLD.WARNING, max: ML_ANOMALY_THRESHOLD.MINOR },
-    { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
-    { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
-    { min: ML_ANOMALY_THRESHOLD.CRITICAL },
-  ] as SeverityThreshold[];
-  return bands.filter((b) => b.min >= minScore);
-};
+export const buildAnomalyChartsThresholds = (minScore: number): SeverityThreshold[] => [
+  { min: minScore },
+];
 
 export const createMlChartsTool = (
   resolveMlCapabilities: ResolveMlCapabilities,

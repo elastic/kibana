@@ -53,6 +53,18 @@ export const anomalyChartsPanelConfigInputSchema = z.object({
 
 export const anomalyChartsPanelDefinition = definePanelType({
   embeddableType: 'ml_anomaly_charts',
+  buildPanelContent: (config) => {
+    const { severity_threshold: severityThreshold, ...rest } = config;
+    return {
+      type: 'ml_anomaly_charts',
+      config: {
+        ...rest,
+        ...(typeof severityThreshold === 'number'
+          ? { severity_threshold: [{ min: severityThreshold }] }
+          : {}),
+      },
+    };
+  },
 });
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────

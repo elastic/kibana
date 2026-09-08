@@ -21,6 +21,36 @@ import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
 /** Groups that mark a scratch job created by the agent builder. */
 const SCRATCH_GROUP = 'ml-agent-scratch';
 
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** Terminal datafeed states: the lookback run has finished (or failed). */
+const TERMINAL_DATAFEED_STATES = new Set(['stopped', 'failed']);
+const FAILED_JOB_STATE = 'failed';
+const POLL_INTERVAL_MS = 2000;
+const MAX_WAIT_SECONDS_CAP = 600;
+
+const clampWaitSeconds = (maxWaitSeconds: number): number => {
+  if (!Number.isFinite(maxWaitSeconds)) {
+    return 120;
+  }
+  return Math.min(Math.max(maxWaitSeconds, 0), MAX_WAIT_SECONDS_CAP);
+};
+
+const computeProgressPct = (
+  latestRecordTimestamp: number | undefined,
+  startMs: number | undefined,
+  endMs: number | undefined
+): number | undefined => {
+  if (startMs === undefined || endMs === undefined || endMs <= startMs) {
+    return undefined;
+  }
+  if (typeof latestRecordTimestamp !== 'number') {
+    return 0;
+  }
+  const raw = (latestRecordTimestamp - startMs) / (endMs - startMs);
+  return Math.max(0, Math.min(100, Math.round(raw * 100)));
+};
+
 const schema = z.object({
   operation: z.enum([
     'open_job',
@@ -59,7 +89,7 @@ const schema = z.object({
     .number()
     .optional()
     .describe(
-      'For await_batch_completion: maximum seconds to block. Default 120, hard cap 600. Returns timed_out if the job has not closed by then. Call again to extend the wait.'
+      'For await_batch_completion: maximum seconds to block. Default 120, hard cap 600. Returns timed_out if the datafeed has not stopped by then. Call again to extend the wait.'
     ),
   datafeed_start_ms: z
     .number()
@@ -228,6 +258,108 @@ export const createAdManageJobStateTool = (
             delete_user_annotations: deleteUserAnnotations,
           });
           return { results: [{ type: ToolResultType.other, data: response }] };
+        }
+
+        case 'await_batch_completion': {
+          await hasMlCapabilities(['canGetJobs']);
+          const waitSeconds = clampWaitSeconds(maxWaitSeconds);
+          const deadlineMs = Date.now() + waitSeconds * 1000;
+          const statsApi = mlClient ?? ml;
+
+          while (true) {
+            const [datafeedStats, jobStats] = await Promise.all([
+              statsApi.getDatafeedStats({ datafeed_id: datafeedId }),
+              statsApi.getJobStats({ job_id: jobId }),
+            ]);
+
+            const datafeedState: string | undefined = datafeedStats.datafeeds?.[0]?.state;
+            const job = jobStats.jobs?.[0];
+            const jobState: string | undefined = job?.state;
+            const latestRecordTimestamp: number | undefined =
+              job?.data_counts?.latest_record_timestamp;
+
+            let progressPct = computeProgressPct(
+              latestRecordTimestamp,
+              datafeedStartMs,
+              datafeedEndMs
+            );
+            const datafeedDone =
+              datafeedState !== undefined && TERMINAL_DATAFEED_STATES.has(datafeedState);
+            const jobFailed = jobState === FAILED_JOB_STATE;
+
+            if (datafeedDone && progressPct !== undefined) {
+              progressPct = 100;
+            } else if (progressPct === 100 && !datafeedDone) {
+              progressPct = 99;
+            }
+
+            const progressLabel =
+              progressPct !== undefined ? `${progressPct}%` : datafeedState ?? 'unknown';
+            events?.reportProgress(`Waiting for batch datafeed to complete (${progressLabel})`, {
+              metadata: {
+                datafeed_state: datafeedState ?? 'unknown',
+                ...(progressPct !== undefined ? { progress_pct: String(progressPct) } : {}),
+              },
+            });
+
+            if (jobFailed) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.other,
+                    data: {
+                      status: 'failed',
+                      job_id: jobId,
+                      datafeed_id: datafeedId,
+                      datafeed_state: datafeedState,
+                      job_state: jobState,
+                      progress_pct: progressPct,
+                    },
+                  },
+                ],
+              };
+            }
+
+            if (datafeedDone) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.other,
+                    data: {
+                      status: 'completed',
+                      job_id: jobId,
+                      datafeed_id: datafeedId,
+                      datafeed_state: datafeedState,
+                      job_state: jobState,
+                      progress_pct: progressPct ?? 100,
+                    },
+                  },
+                ],
+              };
+            }
+
+            if (Date.now() >= deadlineMs) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.other,
+                    data: {
+                      status: 'timed_out',
+                      job_id: jobId,
+                      datafeed_id: datafeedId,
+                      datafeed_state: datafeedState,
+                      job_state: jobState,
+                      progress_pct: progressPct,
+                      message:
+                        'Batch datafeed has not completed yet. Call await_batch_completion again to extend the wait.',
+                    },
+                  },
+                ],
+              };
+            }
+
+            await sleep(POLL_INTERVAL_MS);
+          }
         }
 
         default:

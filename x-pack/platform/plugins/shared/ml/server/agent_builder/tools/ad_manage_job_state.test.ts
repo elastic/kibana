@@ -21,13 +21,24 @@ const createMlMock = () => ({
   stopDatafeed: jest.fn().mockResolvedValue({ stopped: true }),
   revertModelSnapshot: jest.fn().mockResolvedValue({ model: {} }),
   previewDatafeed: jest.fn().mockResolvedValue([]),
+  getDatafeedStats: jest.fn().mockResolvedValue({ datafeeds: [{ state: 'stopped' }] }),
+  getJobStats: jest.fn().mockResolvedValue({
+    jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 100 } }],
+  }),
 });
 
-const createContext = (mlMock = createMlMock()) =>
+const createContext = (
+  mlMock = createMlMock(),
+  events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() }
+) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock } },
     request: {},
+    events,
   } as any);
+
+const getResultData = (result: unknown) =>
+  (result as { results: Array<{ type: string; data: Record<string, unknown> }> }).results[0];
 
 describe('adManageJobStateTool', () => {
   it('has the correct ID and type', () => {
@@ -136,6 +147,114 @@ describe('adManageJobStateTool', () => {
       };
       expect(standardResult.results[0].type).toBe(ToolResultType.error);
       expect(standardResult.results[0].data.message).toBe('Error executing open_job: already open');
+    });
+
+    it('operation=await_batch_completion returns completed when the datafeed has stopped', async () => {
+      const ml = createMlMock();
+      const events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() };
+      const result = await adManageJobStateTool.handler(
+        {
+          operation: 'await_batch_completion',
+          job_id: 'my-job',
+          datafeed_start_ms: 0,
+          datafeed_end_ms: 200,
+        },
+        createContext(ml, events)
+      );
+
+      expect(ml.getDatafeedStats).toHaveBeenCalledWith({ datafeed_id: 'datafeed-my-job' });
+      expect(ml.getJobStats).toHaveBeenCalledWith({ job_id: 'my-job' });
+      const resultData = getResultData(result);
+      expect(resultData.type).toBe(ToolResultType.other);
+      expect(resultData.data).toMatchObject({
+        status: 'completed',
+        job_id: 'my-job',
+        datafeed_id: 'datafeed-my-job',
+        datafeed_state: 'stopped',
+        progress_pct: 100,
+      });
+      expect(events.reportProgress).toHaveBeenCalled();
+    });
+
+    it('operation=await_batch_completion returns timed_out when the datafeed is still running', async () => {
+      const ml = createMlMock();
+      ml.getDatafeedStats.mockResolvedValue({ datafeeds: [{ state: 'started' }] });
+      ml.getJobStats.mockResolvedValue({
+        jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 50 } }],
+      });
+
+      const result = await adManageJobStateTool.handler(
+        {
+          operation: 'await_batch_completion',
+          job_id: 'my-job',
+          max_wait_seconds: 0,
+          datafeed_start_ms: 0,
+          datafeed_end_ms: 200,
+        },
+        createContext(ml)
+      );
+
+      const resultData = getResultData(result);
+      expect(resultData.type).toBe(ToolResultType.other);
+      expect(resultData.data).toMatchObject({
+        status: 'timed_out',
+        datafeed_state: 'started',
+        progress_pct: 25,
+      });
+      expect(String(resultData.data.message)).toMatch('Call await_batch_completion again');
+    });
+
+    it('operation=await_batch_completion polls until the datafeed stops', async () => {
+      jest.useFakeTimers();
+      try {
+        const ml = createMlMock();
+        ml.getDatafeedStats
+          .mockResolvedValueOnce({ datafeeds: [{ state: 'started' }] })
+          .mockResolvedValue({ datafeeds: [{ state: 'stopped' }] });
+        ml.getJobStats.mockResolvedValue({
+          jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 50 } }],
+        });
+
+        const resultPromise = adManageJobStateTool.handler(
+          {
+            operation: 'await_batch_completion',
+            job_id: 'my-job',
+            max_wait_seconds: 30,
+            datafeed_start_ms: 0,
+            datafeed_end_ms: 100,
+          },
+          createContext(ml)
+        );
+
+        await jest.runAllTimersAsync();
+        const resultData = getResultData(await resultPromise);
+        expect(ml.getDatafeedStats.mock.calls.length).toBeGreaterThanOrEqual(2);
+        expect(resultData.data).toMatchObject({
+          status: 'completed',
+          datafeed_state: 'stopped',
+          progress_pct: 100,
+        });
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('operation=await_batch_completion returns failed when the job is failed', async () => {
+      const ml = createMlMock();
+      ml.getDatafeedStats.mockResolvedValue({ datafeeds: [{ state: 'started' }] });
+      ml.getJobStats.mockResolvedValue({
+        jobs: [{ state: 'failed', data_counts: {} }],
+      });
+
+      const result = await adManageJobStateTool.handler(
+        { operation: 'await_batch_completion', job_id: 'my-job', max_wait_seconds: 0 },
+        createContext(ml)
+      );
+
+      expect(getResultData(result).data).toMatchObject({
+        status: 'failed',
+        job_state: 'failed',
+      });
     });
   });
 });
