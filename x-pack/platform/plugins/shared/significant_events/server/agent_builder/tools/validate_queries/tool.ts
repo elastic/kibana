@@ -14,7 +14,8 @@ import {
   createQueryValidationContext,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   validateKIQueries,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
+import { getSourcesForStream } from '@kbn/streams-schema';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../routes/types';
@@ -108,7 +109,7 @@ export const createValidateQueriesTool = ({
           AbortSignal.timeout(TOOL_EXECUTION_TIMEOUT_MS),
         ]);
         const validationContext = await createQueryValidationContext({
-          stream,
+          sources: getSourcesForStream(stream),
           esClient: scopedClients.streamDataEsClient,
           existingQueries,
           signal,

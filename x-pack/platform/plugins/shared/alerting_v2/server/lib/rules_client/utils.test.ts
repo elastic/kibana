@@ -47,7 +47,7 @@ const createRuleSoAttributesWithArtifacts = () =>
   createRuleSoAttributes({
     artifacts: [
       { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-      { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
     ],
   });
 
@@ -155,6 +155,57 @@ describe('utils', () => {
 
       expect(result.metadata.name).toBe('renamed');
       expect(result.metadata.description).toBe('Existing desc');
+    });
+
+    it('clears tags when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toBeUndefined();
+    });
+
+    it('preserves existing tags when update omits them', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('sets tags when update provides a value', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['old'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: ['prod', 'infra'] },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
     });
 
     it('clears state_transition when update sends null (immediate mode)', () => {
@@ -403,7 +454,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
   });
@@ -416,7 +467,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -434,7 +485,7 @@ describe('utils', () => {
           {
             id: 'dashboard-1',
             type: 'dashboard',
-            data: { dashboardId: 'dash-1' },
+            data: { dashboard_id: 'dash-1' },
             // @ts-expect-error legacy key retained on disk for rollback
             value: 'dash-1',
           },
@@ -445,7 +496,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -871,6 +922,7 @@ describe('groupCandidatesByInterval', () => {
     taskId: `task:${id}`,
     attrs: createRuleSoAttributes({ schedule: { every, lookback: '1m' } }),
     version: 'v1',
+    references: [],
   });
 
   it('groups candidates by their schedule interval, preserving order', () => {

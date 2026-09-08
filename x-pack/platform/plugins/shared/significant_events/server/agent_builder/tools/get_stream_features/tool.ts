@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
-import { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES, toFeatureForLlmContext } from '@kbn/streams-ai';
+import { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES, toFeatureForLlmContext } from '@kbn/nightshift-ai';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../routes/types';

@@ -38,10 +38,18 @@ export {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_IDS,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  SYSTEM_SECURITY_WORKER_CATALOG,
+  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_IDS,
   TEMPLATE_ID_INCIDENT,
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
+  WORKER_SCHEDULE_UNITS,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
@@ -74,8 +82,8 @@ export {
   ScheduleHandoff,
   ScheduleMode,
   ScopeAccess,
-  UpdateWatchRequestBody,
-  UpdateWatchResponse,
+  UpdateWorkerRequestBody,
+  UpdateWorkerResponse,
   Watch,
   WatchApprovalGate,
   WatchAutonomyLevel,
@@ -97,7 +105,10 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
+  Worker,
   WorkerRunState,
+  WorkerScheduleInterval,
+  WorkerSettings,
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';
@@ -128,5 +139,9 @@ export {
   getMockProposalById,
   getMockProposalsByInvestigationId,
 } from './impl/samples';
-export type { SystemSecurityWatchCatalogEntry } from './constants';
+export type {
+  SystemSecurityWatchCatalogEntry,
+  SystemSecurityWorkerCatalogEntry,
+  WorkerScheduleUnit,
+} from './constants';
 export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';

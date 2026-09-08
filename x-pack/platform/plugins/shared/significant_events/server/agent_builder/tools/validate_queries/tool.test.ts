@@ -11,7 +11,7 @@ import {
   createQueryValidationContext,
   validateKIQueries,
   type ValidatedKIQuery,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
