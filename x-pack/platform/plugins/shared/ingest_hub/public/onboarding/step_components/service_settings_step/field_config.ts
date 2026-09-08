@@ -79,14 +79,21 @@ export function resolveFieldMeta(
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
-export function toTyped(raw: string | string[] | undefined, meta: FieldMeta): string | boolean | string[] {
+export function toTyped(
+  raw: string | string[] | undefined,
+  meta: FieldMeta
+): string | boolean | string[] {
   if (meta.isBool) {
     const s = Array.isArray(raw) ? raw[0] : raw;
     return s === undefined ? meta.def.default === true : s === 'true';
   }
   if (meta.multi) {
     if (Array.isArray(raw)) return raw;
-    if (raw) return raw.split(',').map((s) => s.trim()).filter(Boolean);
+    if (raw)
+      return raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
     if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
     return [];
   }

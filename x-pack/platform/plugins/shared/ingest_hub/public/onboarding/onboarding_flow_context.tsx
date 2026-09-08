@@ -191,8 +191,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
           failedInstances: rest.failedInstances ?? prev?.failedInstances ?? [],
           deployErrors:
             rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
-          onboardingDeploymentId:
-            rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
+          onboardingDeploymentId: rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
         });
       }
     },
