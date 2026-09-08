@@ -5,19 +5,38 @@
  * 2.0.
  */
 
-import { Liquid } from 'liquidjs';
+import type { Liquid } from 'liquidjs';
 import type { ESQLColumn } from '@kbn/es-types';
 
-const liquid = new Liquid({
-  strictFilters: false,
-  strictVariables: false,
-  dynamicPartials: false,
-  relativeReference: false,
-  outputEscape: 'escape',
-  renderLimit: 1_000,
-  memoryLimit: 100_000_000,
-  parseLimit: 1_000_000,
-});
+/**
+ * Loaded on demand so the template engine ships in its own chunk rather than being embedded
+ * in every chunk that renders custom content. A static import puts liquidjs into each
+ * importing chunk, and once it appears in three the optimizer extracts it into the shared
+ * `vendors` chunk — which is pulled by most of the app, so a template engine only this
+ * feature needs would be downloaded far more widely than it is used.
+ *
+ * Memoized: the engine is built once and reused, as it was when constructed at module scope.
+ */
+let enginePromise: Promise<Liquid> | undefined;
+
+const getEngine = (): Promise<Liquid> => {
+  if (!enginePromise) {
+    enginePromise = import('liquidjs').then(
+      ({ Liquid: LiquidEngine }) =>
+        new LiquidEngine({
+          strictFilters: false,
+          strictVariables: false,
+          dynamicPartials: false,
+          relativeReference: false,
+          outputEscape: 'escape',
+          renderLimit: 1_000,
+          memoryLimit: 100_000_000,
+          parseLimit: 1_000_000,
+        })
+    );
+  }
+  return enginePromise;
+};
 
 function isFiniteNumber(value: unknown): value is number {
   return Number.isFinite(value);
@@ -62,5 +81,6 @@ export async function fillTemplate(
   // pays off with async filters or file-backed includes, and there are none. Registering either
   // means going back to `parseAndRender` — a sync render does not reject on an async filter, it
   // prints `[object Promise]` into the panel.
+  const liquid = await getEngine();
   return liquid.parseAndRenderSync(template.trim(), { rows: rowObjects, max: maxValues });
 }
