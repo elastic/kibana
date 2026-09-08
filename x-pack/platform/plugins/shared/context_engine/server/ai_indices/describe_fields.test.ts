@@ -14,7 +14,8 @@ import {
 import { describeAiIndexFields } from './describe_fields';
 import { AiIndexDescribeResponseTooLargeError } from './errors';
 
-const caps = (searchable: boolean, aggregatable: boolean) => ({
+/** One `_field_caps` capability entry. */
+const capability = (searchable: boolean, aggregatable: boolean) => ({
   searchable,
   aggregatable,
   metadata_field: false,
@@ -71,11 +72,11 @@ describe('describeAiIndexFields', () => {
     fieldCaps.mockResolvedValue({
       indices: ['ai-index-idx-a'],
       fields: {
-        title: { text: caps(true, false) },
-        'title.keyword': { keyword: caps(true, true) },
-        attributes: { flattened: caps(true, true) },
-        'permissions.kibana.privileges': { nested: caps(false, false) },
-        'permissions.kibana.privileges.space': { keyword: caps(true, true) },
+        title: { text: capability(true, false) },
+        'title.keyword': { keyword: capability(true, true) },
+        attributes: { flattened: capability(true, true) },
+        'permissions.kibana.privileges': { nested: capability(false, false) },
+        'permissions.kibana.privileges.space': { keyword: capability(true, true) },
       },
     });
 
@@ -124,9 +125,9 @@ describe('describeAiIndexFields', () => {
     fieldCaps.mockResolvedValue({
       indices: ['ai-index-idx-a'],
       fields: {
-        title: { text: caps(true, false) },
-        day_of_week: { keyword: caps(true, true) },
-        'parsed.code': { long: caps(true, true) },
+        title: { text: capability(true, false) },
+        day_of_week: { keyword: capability(true, true) },
+        'parsed.code': { long: capability(true, true) },
       },
     });
 
@@ -148,7 +149,7 @@ describe('describeAiIndexFields', () => {
     });
     fieldCaps.mockResolvedValue({
       indices: ['ai-index-idx-a', 'ai-index-idx-b', 'ai-index-idx-c'],
-      fields: { status: { keyword: caps(true, true), long: caps(true, false) } },
+      fields: { status: { keyword: capability(true, true), long: capability(true, false) } },
     });
 
     const { fields } = await describeAiIndexFields({ esClient, target: 'ai-index-idx-*' });
@@ -185,9 +186,9 @@ describe('describeAiIndexFields', () => {
     fieldCaps.mockResolvedValue({
       indices: ['ai-index-idx-a'],
       fields: {
-        'content.semantic': { semantic_text: caps(true, false) },
-        'summary.semantic': { text: caps(true, false) },
-        disabled: { semantic_text: caps(false, false) },
+        'content.semantic': { semantic_text: capability(true, false) },
+        'summary.semantic': { text: capability(true, false) },
+        disabled: { semantic_text: capability(false, false) },
       },
     });
 
@@ -212,8 +213,8 @@ describe('describeAiIndexFields', () => {
     fieldCaps.mockResolvedValue({
       indices: ['ai-index-idx-a'],
       fields: {
-        aaa_semantic: { semantic_text: caps(true, false) },
-        zzz_semantic: { semantic_text: caps(true, false) },
+        aaa_semantic: { semantic_text: capability(true, false) },
+        zzz_semantic: { semantic_text: capability(true, false) },
       },
     });
 

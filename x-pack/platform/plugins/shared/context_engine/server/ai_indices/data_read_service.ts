@@ -16,11 +16,7 @@ import { describeAiIndex } from './describe';
 import { AiIndexNotFoundError } from './errors';
 import { queryAiIndices } from './query';
 import type { AiIndexService } from './service';
-
-/** Result, not thrown error: cross-plugin consumers need no `instanceof`. */
-export type DescribeAiIndexResult =
-  | { status: 'ok'; response: string }
-  | { status: 'not_found'; id: string };
+import type { DescribeAiIndexResult } from './types';
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {

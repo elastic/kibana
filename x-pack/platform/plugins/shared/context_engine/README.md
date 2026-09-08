@@ -95,8 +95,7 @@ content.semantic
   `_mapping`; `searchable`/`aggregatable` from `_field_caps`. A path mapped to
   different types across the matched indices is reported as `conflict`.
 - `Semantic fields` lists the searchable `semantic_text` fields among those
-  shown, detected from the mapping type rather than the field name. Omitted
-  when there are none.
+  shown, detected from the mapping type. Omitted when there are none.
 
 Field metadata is read as the current user. 404 when the AI index is not
 registered; Elasticsearch 4xx (missing index privilege) is returned with its

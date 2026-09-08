@@ -21,11 +21,15 @@ import type { AiIndexField } from './types';
 const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
 
-interface MappingProperties {
-  [key: string]: {
+/**
+ * Field name to mapping, as `_mapping` nests it: `properties` holds an object's sub-fields,
+ * `fields` a field's multi-fields. Both nest the same shape, hence the recursion.
+ */
+interface MappingPropertyMap {
+  [name: string]: {
     type?: string;
-    properties?: MappingProperties;
-    fields?: MappingProperties;
+    properties?: MappingPropertyMap;
+    fields?: MappingPropertyMap;
   };
 }
 
@@ -48,7 +52,7 @@ export interface DescribeAiIndexFieldsParams {
  * fields (`mapping.runtime`, composite subfields under `fields`) are included too.
  */
 const flattenMappingTypes = (mapping: MappingTypeMapping): Array<[string, string]> => {
-  const walk = (properties: MappingProperties, prefix: string): Array<[string, string]> =>
+  const walk = (properties: MappingPropertyMap, prefix: string): Array<[string, string]> =>
     Object.entries(properties).flatMap(([name, property]) => {
       const path = prefix ? `${prefix}.${name}` : name;
       const own: Array<[string, string]> = property.type ? [[path, property.type]] : [];

@@ -86,7 +86,7 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('describe', () => {
-    it('resolves the registry entry, describes it as the caller, and audits success', async () => {
+    it('resolves the registry entry, describes it as the current user, and audit-logs success', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
       describeAiIndexMock.mockResolvedValue(contextBlock);
 
@@ -104,7 +104,7 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
-    it('returns not_found for an unknown id and audits the failure', async () => {
+    it('returns not_found for an unknown id and audit-logs the failure', async () => {
       aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
       const result = await service.describe('missing');
@@ -120,7 +120,7 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
-    it('audits other failures and rethrows', async () => {
+    it('audit-logs other failures and rethrows', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
       describeAiIndexMock.mockRejectedValue(new Error('boom'));
 
