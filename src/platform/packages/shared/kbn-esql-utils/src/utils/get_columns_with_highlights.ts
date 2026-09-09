@@ -118,7 +118,7 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
     };
   }
 
-  const highlightCommandCandidates = Walker.findAll(
+  const highlightCommands = Walker.findAll(
     root,
     (node) => node.type === 'command' && node.name === 'highlight'
   ) as ESQLAstHighlightCommand[];
