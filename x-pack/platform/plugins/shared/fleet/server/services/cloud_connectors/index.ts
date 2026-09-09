@@ -24,10 +24,9 @@ export {
 } from './iac_integrations';
 
 export {
+  checkIacTemplate,
   compareIacKey,
-  computeIacKeyMismatch,
-  getCurrentIacKey,
   verifyCloudConnectorIacKey,
-  type GetCurrentIacKeyOptions,
+  type CheckIacTemplateOptions,
   type IacKeyVerification,
 } from './iac_key_verification';

@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 
+import { RenderIacTemplateIntegrationSchema } from './iac_provisioner';
+
 // Upper bounds prevent unbounded-input DoS: the key is a prefixed sha256 digest, the deployment id an ARN.
 const IacRequestFieldsSchema = {
   iac_key: schema.maybe(
@@ -302,32 +304,17 @@ export const VerifyCloudConnectorIacKeyRequestSchema = {
     }),
   }),
   body: schema.object({
-    integration: schema.maybe(
-      schema.object({
-        name: schema.string({
-          minLength: 1,
-          maxLength: 255,
-          meta: { description: 'EPR package name being added.' },
-        }),
-        policyTemplates: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
-          minSize: 1,
-          maxSize: 100,
-          meta: { description: 'Policy templates enabled for the integration being added.' },
-        }),
-      })
-    ),
+    // The integration being added carries the same shape the render route takes:
+    // the policy templates the user enabled, with only the inputs they enabled.
+    integration: schema.maybe(RenderIacTemplateIntegrationSchema),
   }),
 };
-
-const IacIntegrationSelectionSchema = schema.object({
-  name: schema.string(),
-  policyTemplates: schema.arrayOf(schema.string()),
-});
 
 export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
   matches: schema.boolean(),
   reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
   deploymentId: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),
-  integrations: schema.arrayOf(IacIntegrationSelectionSchema),
+  // Same shape the render route takes, so the browser can re-render exactly this set.
+  integrations: schema.arrayOf(RenderIacTemplateIntegrationSchema),
 });

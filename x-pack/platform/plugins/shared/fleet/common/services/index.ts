@@ -70,6 +70,7 @@ export {
   getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
   getEnabledPolicyTemplates,
+  getEnabledInputsByPolicyTemplate,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,

@@ -6,10 +6,11 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common/constants/cloud_connector';
-import { getEnabledPolicyTemplates } from '../../../common/services/policy_template';
+import { getEnabledInputsByPolicyTemplate } from '../../../common/services/policy_template';
 import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 import type { RenderIacTemplateIntegration } from '../../../common/types/rest_spec/iac_provisioner';
 import { appContextService } from '../app_context';
@@ -19,26 +20,43 @@ import type { IacProvisionerRenderIntegration } from '../iac_provisioner';
 /** A package plus the policy templates the user enabled — the browser-facing render shape. */
 export type IacIntegrationSelection = RenderIacTemplateIntegration;
 
-/** Merges same-package entries into one with the union of policy templates; output is code-point sorted so it hashes stably. */
+const byCodePoint = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * Merges same-package entries into one, unioning the enabled inputs of same-named policy
+ * templates; packages, templates and inputs are code-point sorted so the result hashes stably.
+ */
 export const mergeIntegrationSelections = (
   selections: IacIntegrationSelection[]
 ): IacIntegrationSelection[] => {
-  const templatesByPackage = new Map<string, Set<string>>();
+  const templatesByPackage = new Map<string, Map<string, Set<string>>>();
   for (const { name, policyTemplates } of selections) {
-    const templates = templatesByPackage.get(name) ?? new Set<string>();
-    for (const template of policyTemplates) {
-      templates.add(template);
+    const templates = templatesByPackage.get(name) ?? new Map<string, Set<string>>();
+    for (const { name: templateName, enabledInputs } of policyTemplates) {
+      const inputTypes = templates.get(templateName) ?? new Set<string>();
+      for (const inputType of enabledInputs) {
+        inputTypes.add(inputType);
+      }
+      templates.set(templateName, inputTypes);
     }
     templatesByPackage.set(name, templates);
   }
   return [...templatesByPackage.entries()]
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-    .map(([name, templates]) => ({ name, policyTemplates: [...templates].sort() }));
+    .sort(([a], [b]) => byCodePoint(a, b))
+    .map(([name, templates]) => ({
+      name,
+      policyTemplates: [...templates.entries()]
+        .sort(([a], [b]) => byCodePoint(a, b))
+        .map(([templateName, inputTypes]) => ({
+          name: templateName,
+          enabledInputs: [...inputTypes].sort(byCodePoint),
+        })),
+    }));
 };
 
 interface PackagePolicyIacAttributes {
   package?: { name?: string };
-  inputs?: Array<{ enabled: boolean; policy_template?: string }>;
+  inputs?: Array<{ type: string; enabled: boolean; policy_template?: string }>;
 }
 
 /** The connector's live integration set, derived from the package policies that reference it. */
@@ -49,13 +67,15 @@ export const getCloudConnectorIntegrationSelections = async (
   // Same filter CloudConnectorService uses for packagePolicyCount: hidden internal packages
   // (verifier_otel) and `:prev` rollback snapshots are excluded.
   const filter = buildPackagePolicyFilterExcludingHiddenPackages(
-    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
+    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${escapeQuotes(
+      cloudConnectorId
+    )}"`
   );
   const { saved_objects: packagePolicies } = await soClient.find<PackagePolicyIacAttributes>({
     type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     filter,
     perPage: SO_SEARCH_LIMIT,
-    fields: ['package.name', 'inputs.enabled', 'inputs.policy_template'],
+    fields: ['package.name', 'inputs.type', 'inputs.enabled', 'inputs.policy_template'],
   });
 
   const selections = packagePolicies.flatMap(({ attributes }) => {
@@ -63,7 +83,9 @@ export const getCloudConnectorIntegrationSelections = async (
     if (!name) {
       return [];
     }
-    const policyTemplates = getEnabledPolicyTemplates(attributes);
+    // Only what the user enabled. A policy template appears here only if it has at least one
+    // enabled input, so a package with no such template contributes nothing to the render.
+    const policyTemplates = getEnabledInputsByPolicyTemplate(attributes);
     return policyTemplates.length > 0 ? [{ name, policyTemplates }] : [];
   });
 
@@ -79,20 +101,24 @@ export const getCloudConnectorIntegrationSelections = async (
 
 export interface ResolvedIacRenderIntegrations {
   integrations: IacProvisionerRenderIntegration[];
-  /** Packages with no provider-relevant inputs under the requested templates. */
+  /** Packages none of whose requested policy templates exist in the package manifest. */
   skipped: string[];
 }
 
 /**
  * Turns browser-shaped selections into the IaCP wire shape: resolves the installed (or latest)
- * package version and keeps only inputs whose type names the provider. Moved verbatim from the
- * render route handler so the Existing FI check and the upgrade task share it.
+ * package version and lists the input types the user enabled per policy template. The caller's
+ * `enabledInputs` are passed through untouched — IaCP builds a blueprint patch from every input
+ * listed, so anything the user did not enable would over-grant permissions, and IaCP validates
+ * the names itself (render.no_matching_inputs_for_policy_template). `provider` is log context
+ * only. Shared by the render route handler, the Existing FI check and the upgrade task.
  */
 export const resolveIacRenderIntegrations = async (
   soClient: SavedObjectsClientContract,
   provider: CloudProvider,
   selections: IacIntegrationSelection[]
 ): Promise<ResolvedIacRenderIntegrations> => {
+  const logger = appContextService.getLogger().get('IacIntegrations');
   const resolved = await Promise.all(
     mergeIntegrationSelections(selections).map(async ({ name: pkgName, policyTemplates }) => {
       // Empty pkgVersion resolves to the installed version, falling back to the latest
@@ -103,21 +129,24 @@ export const resolveIacRenderIntegrations = async (
         pkgVersion: '',
         skipArchive: true,
       });
-      const requested = new Set(policyTemplates);
-      // MVP heuristic pending confirmation with the provisioner team (OQ-A in
-      // security-team#18632): only provider-relevant input types are sent.
-      const resolvedPolicyTemplates = (packageInfo.policy_templates ?? [])
-        .filter(({ name }) => requested.has(name))
-        .map((template) => {
-          const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-          const enabledInputs = [
-            ...new Set(
-              inputs.map(({ type }) => type).filter((type) => type.toLowerCase().includes(provider))
-            ),
-          ];
-          return { name: template.name, enabledInputs };
-        })
-        .filter(({ enabledInputs }) => enabledInputs.length > 0);
+      const manifestTemplates = new Set(
+        (packageInfo.policy_templates ?? []).map(({ name }) => name)
+      );
+      const resolvedPolicyTemplates = policyTemplates.filter(({ name }) =>
+        manifestTemplates.has(name)
+      );
+      const unknownTemplates = policyTemplates
+        .filter(({ name }) => !manifestTemplates.has(name))
+        .map(({ name }) => name);
+      if (unknownTemplates.length > 0) {
+        // The rendered template then covers less than the user enabled; warn so the
+        // package/version mismatch is visible in the logs.
+        logger.warn(
+          `Dropped policy templates not declared by ${pkgName}@${
+            packageInfo.version
+          }: ${unknownTemplates.join(', ')}`
+        );
+      }
 
       return {
         name: pkgName,
@@ -133,10 +162,13 @@ export const resolveIacRenderIntegrations = async (
       .filter(({ policyTemplates }) => policyTemplates.length === 0)
       .map(({ name }) => name),
   };
-  const logger = appContextService.getLogger().get('IacIntegrations');
   logger.debug(`Resolved ${provider} render integrations: ${JSON.stringify(result.integrations)}`);
   if (result.skipped.length > 0) {
-    logger.debug(`Skipped packages with no ${provider} inputs: ${result.skipped.join(', ')}`);
+    logger.debug(
+      `Skipped packages whose manifest declares none of the requested policy templates: ${result.skipped.join(
+        ', '
+      )}`
+    );
   }
   return result;
 };

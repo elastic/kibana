@@ -26,7 +26,7 @@ import {
 
 jest.mock('../services/utils/iac_provisioner');
 jest.mock('../services/telemetry/iac_provisioner_telemetry');
-// compareIacKey calls getCurrentIacKey internally (same module) — Jest module mocks cannot
+// compareIacKey calls checkIacTemplate internally (same module) — Jest module mocks cannot
 // intercept intra-module references, so we stub compareIacKey at the barrel level directly.
 jest.mock('../services/cloud_connectors', () => ({
   ...jest.requireActual('../services/cloud_connectors'),
@@ -69,7 +69,9 @@ describe('iac_upgrade_check_task', () => {
       .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
       .mockReturnValue(mockSoClient);
     mockedEnabled.mockReturnValue(true);
-    mockedSelections.mockResolvedValue([{ name: 'aws', policyTemplates: ['cloudtrail'] }]);
+    mockedSelections.mockResolvedValue([
+      { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+    ]);
   });
 
   it('registers the task definition', () => {
@@ -139,7 +141,7 @@ describe('iac_upgrade_check_task', () => {
     expect(mockedCompareIacKey).toHaveBeenCalledWith(
       mockSoClient,
       expect.objectContaining({ cloudProvider: 'aws' }),
-      [{ name: 'aws', policyTemplates: ['cloudtrail'] }],
+      [{ name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] }],
       { flow: 'iac_upgrade_task', contextForLog: 'connector legacy' }
     );
   });
@@ -188,7 +190,9 @@ describe('iac_upgrade_check_task', () => {
     );
     mockedSelections
       .mockRejectedValueOnce(new Error('SO unavailable'))
-      .mockResolvedValueOnce([{ name: 'aws', policyTemplates: ['cloudtrail'] }]);
+      .mockResolvedValueOnce([
+        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+      ]);
     mockedCompareIacKey.mockResolvedValue('matches');
     mockSoClient.update.mockResolvedValue({});
 

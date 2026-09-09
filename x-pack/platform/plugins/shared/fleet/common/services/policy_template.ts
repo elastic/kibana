@@ -28,6 +28,7 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyInput,
 } from '../types';
+import type { RenderIacTemplatePolicyTemplate } from '../types/rest_spec/iac_provisioner';
 
 export const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
@@ -368,6 +369,33 @@ export const getEnabledPolicyTemplates = (
 
 export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean =>
   getEnabledPolicyTemplates(packagePolicy).length > 1;
+
+/**
+ * The distinct input types the user enabled, grouped by the policy template they belong to.
+ * Inputs that are disabled, or that carry no policy template, are ignored. Policy templates
+ * keep first-appearance order and input types are code-point sorted, so the same policy always
+ * produces the same value. Accepts any policy-like shape (package policy, SO attributes,
+ * wizard draft).
+ */
+export const getEnabledInputsByPolicyTemplate = (
+  policy:
+    | { inputs?: Array<{ type: string; enabled: boolean; policy_template?: string }> }
+    | undefined
+): RenderIacTemplatePolicyTemplate[] => {
+  const inputTypesByTemplate = new Map<string, Set<string>>();
+  for (const { type, enabled, policy_template: policyTemplate } of policy?.inputs ?? []) {
+    if (!enabled || !policyTemplate) {
+      continue;
+    }
+    const inputTypes = inputTypesByTemplate.get(policyTemplate) ?? new Set<string>();
+    inputTypes.add(type);
+    inputTypesByTemplate.set(policyTemplate, inputTypes);
+  }
+  return [...inputTypesByTemplate.entries()].map(([name, inputTypes]) => ({
+    name,
+    enabledInputs: [...inputTypes].sort(),
+  }));
+};
 
 export function filterPolicyTemplatesTiles<T>(
   templatesBehavior: string | undefined,

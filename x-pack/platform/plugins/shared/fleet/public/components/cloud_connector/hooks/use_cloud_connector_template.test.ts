@@ -40,7 +40,7 @@ const HOOK_PARAMS = {
   accountType: 'single-account' as const,
   iacTemplateUrl: IAC_TEMPLATE_URL,
   packageName: 'cloud_security_posture',
-  policyTemplates: ['cspm'],
+  policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
 };
 
 describe('useCloudConnectorTemplate', () => {
@@ -144,7 +144,12 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
         flow: 'cloud_connector',
-        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+        integrations: [
+          {
+            name: 'cloud_security_posture',
+            policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+          },
+        ],
       });
       // The tab opens blank within the click gesture, then gets navigated.
       expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
@@ -167,7 +172,10 @@ describe('useCloudConnectorTemplate', () => {
         useCloudConnectorTemplate({
           ...HOOK_PARAMS,
           packageName: 'aws',
-          policyTemplates: ['guardduty', 's3'],
+          policyTemplates: [
+            { name: 'guardduty', enabledInputs: ['aws-s3'] },
+            { name: 's3', enabledInputs: ['aws-s3'] },
+          ],
         })
       );
       await launch(result);
@@ -175,7 +183,15 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
         flow: 'cloud_connector',
-        integrations: [{ name: 'aws', policyTemplates: ['guardduty', 's3'] }],
+        integrations: [
+          {
+            name: 'aws',
+            policyTemplates: [
+              { name: 'guardduty', enabledInputs: ['aws-s3'] },
+              { name: 's3', enabledInputs: ['aws-s3'] },
+            ],
+          },
+        ],
       });
     });
 
@@ -325,7 +341,9 @@ describe('useCloudConnectorTemplate', () => {
         data: {
           artifactUrl: 'https://s3.example/rendered?sig=SECRET',
           expiresAt: '2026-07-28T12:00:00Z',
-          key: 'sha256:abc',
+          templateSha: 'sha256:abc',
+          render: true,
+          blueprint: { id: 'aws/federated-identity', version: '1.0.0' },
         },
         error: null,
       } as any);
@@ -420,8 +438,17 @@ describe('useCloudConnectorTemplate', () => {
       } as any);
 
       const customIntegrations = [
-        { name: 'aws', policyTemplates: ['guardduty', 's3'] },
-        { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+        {
+          name: 'aws',
+          policyTemplates: [
+            { name: 'guardduty', enabledInputs: ['aws-s3'] },
+            { name: 's3', enabledInputs: ['aws-s3'] },
+          ],
+        },
+        {
+          name: 'cloud_security_posture',
+          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+        },
       ];
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, integrations: customIntegrations })

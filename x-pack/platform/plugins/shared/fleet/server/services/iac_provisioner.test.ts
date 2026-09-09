@@ -49,7 +49,22 @@ const RENDER_REQUEST = {
   ],
 };
 
+/** What the service must put on the wire: the caller's request plus the required workflow. */
+const RENDER_BODY = {
+  provider: RENDER_REQUEST.provider,
+  workflow: 'federated_identity',
+  integrations: RENDER_REQUEST.integrations,
+};
+
 const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
+
+const RENDERED = {
+  artifactUrl: ARTIFACT_URL,
+  expiresAt: '2026-07-28T12:00:00Z',
+  templateSha: 'sha256:abc',
+  render: true,
+  blueprint: { id: 'aws-federated-identity', version: '1.2.0' },
+};
 
 const jsonResponse = (status: number, body: unknown) =>
   ({
@@ -99,7 +114,7 @@ describe('IacProvisionerService', () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
     mockLogger();
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
     );
   });
@@ -108,7 +123,7 @@ describe('IacProvisionerService', () => {
     mockConfig({ api: undefined });
     mockLogger();
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
     );
   });
@@ -116,18 +131,19 @@ describe('IacProvisionerService', () => {
   it('POSTs the render request with mTLS and returns the rendered artifact', async () => {
     mockConfig();
     mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDERED));
 
-    const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    const result = await iacProvisionerService.render(RENDER_REQUEST);
 
-    expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
+    // Every response field is passed through untouched — the route and the key
+    // comparison both read them straight off this object.
+    expect(result).toEqual(RENDERED);
     expect(mockedFetch).toHaveBeenCalledWith(
       'https://iac-provisioner.example/api/v1/render',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify(RENDER_REQUEST),
+        // `workflow` is required by the provider and is the service's to set.
+        body: JSON.stringify(RENDER_BODY),
       })
     );
     expect(mockedAgent).toHaveBeenCalledWith({
@@ -150,13 +166,11 @@ describe('IacProvisionerService', () => {
       api: { url: 'https://iac-provisioner.example', tls: { ca: '/path/ca.crt' } },
     });
     mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDERED));
 
-    const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    const result = await iacProvisionerService.render(RENDER_REQUEST);
 
-    expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
+    expect(result).toEqual(RENDERED);
     expect(mockedAgent).toHaveBeenCalledWith({
       connect: expect.objectContaining({
         cert: undefined,
@@ -175,7 +189,7 @@ describe('IacProvisionerService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.render(RENDER_REQUEST);
 
     const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
     // The full outbound request is visible: URL, body, timeout…
@@ -201,7 +215,7 @@ describe('IacProvisionerService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.render(RENDER_REQUEST);
 
     const allLogged = [
       ...logger.info.mock.calls,
@@ -223,7 +237,7 @@ describe('IacProvisionerService', () => {
       jsonResponse(422, { code: 'render.blueprint_not_found', message: 'blueprint not found' })
     );
 
-    const promise = iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    const promise = iacProvisionerService.render(RENDER_REQUEST);
     await expect(promise).rejects.toThrow(IacProvisionerRenderError);
     await promise.catch((error: IacProvisionerRenderError) => {
       expect(error.statusCode).toBe(422);
@@ -238,7 +252,7 @@ describe('IacProvisionerService', () => {
       jsonResponse(500, { code: 'render.internal_error', message: 'boom' })
     );
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerUnavailableError
     );
   });
@@ -248,7 +262,7 @@ describe('IacProvisionerService', () => {
     mockLogger();
     mockedFetch.mockRejectedValueOnce(new TypeError('fetch failed'));
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerUnavailableError
     );
   });
@@ -260,7 +274,7 @@ describe('IacProvisionerService', () => {
     failure.cause = new Error('unable to get issuer certificate');
     mockedFetch.mockRejectedValueOnce(failure);
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerUnavailableError
     );
     const errorLogged = logger.error.mock.calls.flat().map(String).join(' ');
@@ -285,7 +299,7 @@ describe('IacProvisionerService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.render(RENDER_REQUEST);
 
     expect(mockedAgent).toHaveBeenCalledWith({
       connect: expect.objectContaining({
@@ -309,7 +323,7 @@ describe('IacProvisionerService', () => {
       },
     } as any);
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerUnavailableError
     );
   });
@@ -329,7 +343,7 @@ describe('IacProvisionerService', () => {
         })
     );
 
-    const promise = iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    const promise = iacProvisionerService.render(RENDER_REQUEST);
     const assertion = expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
     await jest.advanceTimersByTimeAsync(30_000);
     await assertion;
@@ -347,7 +361,7 @@ describe('IacProvisionerService', () => {
     });
     mockLogger();
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
     );
     expect(mockedFetch).not.toHaveBeenCalled();
@@ -364,7 +378,7 @@ describe('IacProvisionerService', () => {
     });
     mockLogger();
 
-    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+    await expect(iacProvisionerService.render(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
     );
     expect(mockedFetch).not.toHaveBeenCalled();
@@ -381,7 +395,7 @@ describe('IacProvisionerService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.render(RENDER_REQUEST);
 
     expect(mockedAgent).toHaveBeenCalledWith({
       connect: expect.objectContaining({
@@ -393,88 +407,67 @@ describe('IacProvisionerService', () => {
     });
   });
 
-  describe('renderKey', () => {
+  describe('templateSha', () => {
     beforeEach(() => {
       mockConfig();
       mockLogger();
     });
 
-    it('POSTs to /api/v1/render?render=false and returns the key', async () => {
-      mockedFetch.mockResolvedValueOnce(jsonResponse(200, { key: 'sha256:abc' }));
-
-      const result = await iacProvisionerService.renderKey(RENDER_REQUEST);
-
-      expect(result).toEqual({ key: 'sha256:abc' });
-      expect(mockedFetch).toHaveBeenCalledWith(
-        'https://iac-provisioner.example/api/v1/render?render=false',
-        expect.objectContaining({ method: 'POST', body: JSON.stringify(RENDER_REQUEST) })
-      );
-    });
-
-    it('treats a 2xx without a key as unavailable (provider predates render=false)', async () => {
+    it('sends the stored templateSha so the provider can compare', async () => {
       mockedFetch.mockResolvedValueOnce(
-        jsonResponse(200, {
-          artifactUrl: 'https://s3.example/x',
-          expiresAt: '2026-01-01T00:00:00Z',
+        jsonResponse(200, { ...RENDERED, templateSha: 'sha256:stored', render: false })
+      );
+
+      const result = await iacProvisionerService.render({
+        ...RENDER_REQUEST,
+        templateSha: 'sha256:stored',
+      });
+
+      expect(result.render).toBe(false);
+      expect(mockedFetch).toHaveBeenCalledWith(
+        'https://iac-provisioner.example/api/v1/render',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ ...RENDER_BODY, templateSha: 'sha256:stored' }),
         })
       );
-
-      await expect(iacProvisionerService.renderKey(RENDER_REQUEST)).rejects.toBeInstanceOf(
-        IacProvisionerUnavailableError
-      );
     });
 
-    it('maps 5xx to IacProvisionerUnavailableError', async () => {
-      mockedFetch.mockResolvedValueOnce(jsonResponse(503, { message: 'down' }));
+    it('omits templateSha entirely when the caller has none', async () => {
+      mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDERED));
 
-      await expect(iacProvisionerService.renderKey(RENDER_REQUEST)).rejects.toBeInstanceOf(
-        IacProvisionerUnavailableError
-      );
+      await iacProvisionerService.render(RENDER_REQUEST);
+
+      const [, options] = mockedFetch.mock.calls[0] as unknown as [string, { body: string }];
+      // An absent digest must not be sent as an empty one.
+      expect(JSON.parse(options.body)).not.toHaveProperty('templateSha');
     });
 
-    it('maps a 422 response to IacProvisionerRenderError with the provider error codes', async () => {
-      mockedFetch.mockResolvedValueOnce(jsonResponse(422, { code: 'unsupported', message: 'x' }));
-
-      const promise = iacProvisionerService.renderKey(RENDER_REQUEST);
-      await expect(promise).rejects.toThrow(IacProvisionerRenderError);
-      await promise.catch((error: IacProvisionerRenderError) => {
-        expect(error.statusCode).toBe(422);
-        expect(error.errorCodes).toEqual(['unsupported']);
-      });
-    });
-
-    it('logs warn when the provider returns no key', async () => {
+    it('warns once when a 200 carries neither templateSha nor render (pre-contract provider)', async () => {
       const logger = mockLogger();
       mockedFetch.mockResolvedValueOnce(
-        jsonResponse(200, {
-          artifactUrl: 'https://s3.example/x',
-          expiresAt: '2026-01-01T00:00:00Z',
-        })
+        jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-01-01T00:00:00Z' })
       );
 
-      await expect(iacProvisionerService.renderKey(RENDER_REQUEST)).rejects.toBeInstanceOf(
-        IacProvisionerUnavailableError
-      );
+      // Fails open: the artifact is still returned and callers decide what to do
+      // with the missing verdict.
+      const result = await iacProvisionerService.render(RENDER_REQUEST);
 
-      const warnLogged = logger.warn.mock.calls.flat().map(String).join(' ');
-      expect(warnLogged).toContain('contained no key');
+      expect(result.templateSha).toBeUndefined();
+      expect(result.render).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls.flat().map(String).join(' ')).toContain(
+        'contained no templateSha/render'
+      );
     });
-  });
 
-  describe('renderTemplate key passthrough', () => {
-    it('returns key when the provider includes it', async () => {
-      mockConfig();
-      mockLogger();
-      mockedFetch.mockResolvedValueOnce(
-        jsonResponse(200, {
-          artifactUrl: ARTIFACT_URL,
-          expiresAt: '2026-01-01T00:00:00Z',
-          key: 'sha256:abc',
-        })
-      );
+    it('does not warn when the provider honours the contract', async () => {
+      const logger = mockLogger();
+      mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDERED));
 
-      const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
-      expect(result.key).toBe('sha256:abc');
+      await iacProvisionerService.render(RENDER_REQUEST);
+
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

@@ -39,14 +39,19 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
     mockedVerify.mockResolvedValueOnce({ matches: false, reason: 'no_key', integrations: [] });
     const request = httpServerMock.createKibanaRequest({
       params: { cloudConnectorId: 'cc-1' },
-      body: { integration: { name: 'aws', policyTemplates: ['guardduty'] } },
+      body: {
+        integration: {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+        },
+      },
     });
 
     await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
 
     expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', {
       name: 'aws',
-      policyTemplates: ['guardduty'],
+      policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
     });
     expect(response.ok).toHaveBeenCalledWith({
       body: { matches: false, reason: 'no_key', integrations: [] },

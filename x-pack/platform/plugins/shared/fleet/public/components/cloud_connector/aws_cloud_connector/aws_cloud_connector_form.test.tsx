@@ -27,7 +27,7 @@ jest.mock('../../../../common/services/cloud_connectors', () => ({
     .parseAwsRegionFromArn,
 }));
 jest.mock('../../../../common/services/policy_template', () => ({
-  getEnabledPolicyTemplates: jest.fn().mockReturnValue([]),
+  getEnabledInputsByPolicyTemplate: jest.fn().mockReturnValue([]),
 }));
 jest.mock('../form/cloud_connector_input_fields', () => ({
   CloudConnectorInputFields: () => null,

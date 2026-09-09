@@ -48,12 +48,12 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       requestedIntegrations
     );
 
-    // An integration with no provider-relevant inputs cannot contribute to
-    // the template; sending it would only produce confusing provider errors.
+    // A package whose manifest declares none of the requested policy templates has
+    // nothing to render from; sending it would only produce confusing provider errors.
     if (skipped.length > 0) {
       return response.badRequest({
         body: {
-          message: `${skipped[0]} has no ${provider} inputs under the requested policy templates`,
+          message: `${skipped[0]} declares none of the requested policy templates`,
         },
       });
     }
@@ -63,7 +63,9 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       integrationCount: integrations.length,
     });
 
-    const rendered = await iacProvisionerService.renderTemplate({ provider, integrations });
+    // No stored digest is sent: this route only serves browser-initiated renders,
+    // where the user is about to apply the template regardless of the comparison.
+    const rendered = await iacProvisionerService.render({ provider, integrations });
 
     reportIacProvisionerRenderCompleted({
       flow,

@@ -14,13 +14,14 @@ import type { EventTypeOpts } from '@elastic/ebt/client';
  *
  * `flow` distinguishes the consumer: 'cloud_connector' for the MVP;
  * 'iac_key_check' is used by the verify endpoint and 'iac_upgrade_task' by the
- * daily upgrade-check background task (both are key-only, render=false flows).
+ * daily upgrade-check background task (both compare a stored digest rather
+ * than presenting the artifact to a user).
  */
 
 export const CLOUD_CONNECTOR_RENDER_FLOW = 'cloud_connector' as const;
-/** Key-only render (`render=false`) issued by the Existing FI check / verify endpoint. */
+/** Comparison render issued by the Existing FI check / verify endpoint. */
 export const IAC_KEY_CHECK_FLOW = 'iac_key_check' as const;
-/** Key-only render issued by the daily `fleet:iac_upgrade_check` task. */
+/** Comparison render issued by the daily `fleet:iac_upgrade_check` task. */
 export const IAC_UPGRADE_TASK_FLOW = 'iac_upgrade_task' as const;
 
 export type IacProvisionerRenderFlow =
@@ -152,7 +153,7 @@ export const IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT: EventTypeOpts<Iac
         type: 'keyword',
         _meta: {
           description:
-            "Result of comparing the stored key with the current render: 'matches'; 'no_key' (connector deployed the static template); 'key_mismatch' (deployed template differs from the current render); 'unsupported_provider' (IaCP has no blueprints for this provider); 'no_integrations' (nothing renderable attached); 'key_unavailable' (IaCP unreachable or predates render=false — failed open).",
+            "Result of comparing the stored key with the current render: 'matches'; 'no_key' (connector deployed the static template); 'key_mismatch' (deployed template differs from the current render); 'unsupported_provider' (IaCP has no blueprints for this provider); 'no_integrations' (nothing renderable attached); 'key_unavailable' (IaCP unreachable or predates the templateSha contract — failed open).",
         },
       },
       hasDeploymentId: {

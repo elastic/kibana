@@ -921,7 +921,12 @@ describe('CloudConnectorPoliciesFlyout', () => {
       mockUseVerifyIacKey.mockReturnValue({
         data: {
           matches: false,
-          integrations: [{ name: 'aws', policyTemplates: ['cspm'] }],
+          integrations: [
+            {
+              name: 'aws',
+              policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+            },
+          ],
         },
       } as unknown as ReturnType<typeof useVerifyIacKey>);
 
@@ -1030,7 +1035,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
     });
 
     it('(k) useCloudConnectorTemplate receives provider aws, integrations from verification, and edited deploymentId', () => {
-      const mockIntegrations = [{ name: 'aws', policyTemplates: ['cspm'] }];
+      const mockIntegrations = [
+        { name: 'aws', policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }] },
+      ];
       mockUseVerifyIacKey.mockReturnValue({
         data: {
           matches: false,

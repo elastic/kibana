@@ -52,7 +52,10 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
     expect(() => VerifyCloudConnectorIacKeyRequestSchema.body.validate({})).not.toThrow();
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({
-        integration: { name: 'aws', policyTemplates: ['guardduty'] },
+        integration: {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+        },
       })
     ).not.toThrow();
   });
@@ -61,6 +64,16 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({
         integration: { name: 'aws', policyTemplates: [] },
+      })
+    ).toThrow();
+  });
+
+  it('rejects a policy template with no enabled inputs', () => {
+    // An empty list would let IaCP render a template for a package the user enabled
+    // nothing in; the render route takes the same shape and must reject it too.
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({
+        integration: { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: [] }] },
       })
     ).toThrow();
   });

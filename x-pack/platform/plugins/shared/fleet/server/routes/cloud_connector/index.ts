@@ -393,7 +393,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
-          // Read-only: loads the connector + its policies and proxies a key-only render.
+          // Read-only: loads the connector + its policies and proxies a comparison render.
           requiredPrivileges: [
             {
               anyRequired: [

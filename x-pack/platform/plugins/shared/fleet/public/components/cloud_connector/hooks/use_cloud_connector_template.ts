@@ -19,6 +19,7 @@ import {
 import type { AccountType } from '../../../types';
 import type {
   RenderIacTemplateIntegration,
+  RenderIacTemplatePolicyTemplate,
   RenderIacTemplateRequest,
 } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { CloudSetupForCloudConnector } from '../types';
@@ -52,15 +53,16 @@ export interface UseCloudConnectorTemplateParams {
   iacTemplateUrl?: string;
   packageName?: string;
   /**
-   * Policy templates the user has enabled in the policy being configured.
-   * The rendered template grants permissions for exactly these — no more.
+   * Policy templates the user has enabled in the policy being configured, each with
+   * the input types they enabled. The rendered template grants permissions for exactly
+   * these — no more.
    */
-  policyTemplates?: string[];
+  policyTemplates?: RenderIacTemplatePolicyTemplate[];
   /** Full integration set to render (union). When set, overrides packageName + policyTemplates. */
   integrations?: RenderIacTemplateIntegration[];
   /** Existing stack to update; makes the launch URL a stack-update deep link. */
   deploymentId?: string;
-  /** Called after a successful render with the key IaCP returned (undefined until IaCP ships it). */
+  /** Called right before the console opens, with the templateSha IaCP returned for the rendered template (undefined for a pre-contract provider). Stored on the connector as iac_key. */
   onTemplateRendered?: (rendered: { key?: string }) => void;
 }
 
@@ -183,7 +185,7 @@ export const useCloudConnectorTemplate = ({
         setTemplateGenerationError(MISSING_CONTEXT_ERROR);
         return;
       }
-      onTemplateRendered?.({ key: data.key });
+      onTemplateRendered?.({ key: data.templateSha });
       navigateTo(launchUrl);
     } catch (e) {
       cloudFormationTab?.close();

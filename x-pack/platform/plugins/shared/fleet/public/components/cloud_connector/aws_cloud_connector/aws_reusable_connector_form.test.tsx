@@ -543,7 +543,12 @@ describe('AWSReusableConnectorForm', () => {
     it('(i) useCloudConnectorTemplate receives integrations, deploymentId, and provider aws', () => {
       useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
 
-      const integrations = [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }];
+      const integrations = [
+        {
+          name: 'cloud_security_posture',
+          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+        },
+      ];
       const deploymentId = 'arn:aws:cloudformation:us-east-1:123:stack/my-stack/abc';
 
       mockUseVerifyIacKey.mockReturnValue({

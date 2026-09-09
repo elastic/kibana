@@ -28,7 +28,7 @@ import {
   getCredentialKeyFromVarName,
   parseAwsRegionFromArn,
 } from '../../../../common/services/cloud_connectors';
-import { getEnabledPolicyTemplates } from '../../../../common/services/policy_template';
+import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
 import { type CloudConnectorFormProps } from '../types';
 
 import {
@@ -55,10 +55,12 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
-  // The rendered template must cover every policy template the user enabled
-  // in this policy — not just the first enabled input's.
+  // The rendered template must cover every input the user enabled — no more.
   const inputs = newPolicy?.inputs;
-  const enabledPolicyTemplates = useMemo(() => getEnabledPolicyTemplates({ inputs }), [inputs]);
+  const enabledPolicyTemplates = useMemo(
+    () => getEnabledInputsByPolicyTemplate({ inputs }),
+    [inputs]
+  );
 
   // Always keep a ref to the latest credentials and setCredentials so that
   // onTemplateRendered (called after an async render) never closes over a

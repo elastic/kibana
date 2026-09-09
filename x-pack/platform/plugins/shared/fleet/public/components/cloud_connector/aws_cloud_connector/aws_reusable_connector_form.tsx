@@ -11,7 +11,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../../common';
-import { getEnabledPolicyTemplates } from '../../../../common/services/policy_template';
+import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
 import {
   IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT,
   type IacKeyCheckAction,
@@ -49,7 +49,8 @@ const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   const { analytics, http } = useStartServices();
 
   const inputs = newPolicy.inputs;
-  const policyTemplates = useMemo(() => getEnabledPolicyTemplates({ inputs }), [inputs]);
+  // The rendered template must cover every input the user enabled — no more.
+  const policyTemplates = useMemo(() => getEnabledInputsByPolicyTemplate({ inputs }), [inputs]);
   const integration = useMemo(
     () =>
       packageInfo?.name && policyTemplates.length

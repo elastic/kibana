@@ -91,7 +91,10 @@ describe('useVerifyIacKey', () => {
       error: null,
     } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
 
-    const integration = { name: 'aws', policyTemplates: ['cspm'] };
+    const integration = {
+      name: 'aws',
+      policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+    };
 
     renderHook(() => useVerifyIacKey({ cloudConnectorId: 'cc-1', integration, enabled: true }), {
       wrapper,

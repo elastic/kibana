@@ -33,50 +33,95 @@ describe('mergeIntegrationSelections', () => {
   it('unions policy templates per package and sorts deterministically', () => {
     expect(
       mergeIntegrationSelections([
-        { name: 'aws', policyTemplates: ['s3', 'cloudtrail'] },
-        { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
-        { name: 'aws', policyTemplates: ['guardduty', 'cloudtrail'] },
+        {
+          name: 'aws',
+          policyTemplates: [
+            { name: 's3', enabledInputs: ['aws-s3'] },
+            { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+          ],
+        },
+        {
+          name: 'cloud_security_posture',
+          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+        },
+        {
+          name: 'aws',
+          policyTemplates: [
+            { name: 'guardduty', enabledInputs: ['aws-s3'] },
+            { name: 'cloudtrail', enabledInputs: ['aws-cloudwatch'] },
+          ],
+        },
       ])
     ).toEqual([
-      { name: 'aws', policyTemplates: ['cloudtrail', 'guardduty', 's3'] },
-      { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+      {
+        name: 'aws',
+        policyTemplates: [
+          { name: 'cloudtrail', enabledInputs: ['aws-cloudwatch', 'aws-s3'] },
+          { name: 'guardduty', enabledInputs: ['aws-s3'] },
+          { name: 's3', enabledInputs: ['aws-s3'] },
+        ],
+      },
+      {
+        name: 'cloud_security_posture',
+        policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+      },
     ]);
+  });
+
+  it('dedupes an input type enabled under the same policy template twice', () => {
+    expect(
+      mergeIntegrationSelections([
+        { name: 'aws', policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }] },
+        { name: 'aws', policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }] },
+      ])
+    ).toEqual([{ name: 'aws', policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }] }]);
   });
 });
 
 describe('getCloudConnectorIntegrationSelections', () => {
   beforeEach(() => soClient.find.mockReset());
 
-  it('derives {name, policyTemplates} from enabled inputs of policies on the connector', async () => {
+  it('derives the enabled input types per policy template from the policies on the connector', async () => {
     soClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
           attributes: {
             package: { name: 'aws' },
             inputs: [
-              { enabled: true, policy_template: 'cloudtrail' },
-              { enabled: false, policy_template: 's3' },
+              { type: 'aws-s3', enabled: true, policy_template: 'cloudtrail' },
+              { type: 'aws-cloudwatch', enabled: false, policy_template: 'cloudtrail' },
+              { type: 'aws-s3', enabled: false, policy_template: 's3' },
             ],
           },
         },
         {
           attributes: {
             package: { name: 'aws' },
-            inputs: [{ enabled: true, policy_template: 'guardduty' }],
+            inputs: [{ type: 'aws-cloudwatch', enabled: true, policy_template: 'guardduty' }],
           },
         },
-        { attributes: { inputs: [{ enabled: true, policy_template: 'orphan' }] } },
+        {
+          attributes: { inputs: [{ type: 'aws-s3', enabled: true, policy_template: 'orphan' }] },
+        },
       ],
     } as any);
 
     const result = await getCloudConnectorIntegrationSelections(soClient, 'cc-1');
 
-    expect(result).toEqual([{ name: 'aws', policyTemplates: ['cloudtrail', 'guardduty'] }]);
+    expect(result).toEqual([
+      {
+        name: 'aws',
+        policyTemplates: [
+          { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+          { name: 'guardduty', enabledInputs: ['aws-cloudwatch'] },
+        ],
+      },
+    ]);
     expect(soClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         perPage: SO_SEARCH_LIMIT,
-        fields: ['package.name', 'inputs.enabled', 'inputs.policy_template'],
+        fields: ['package.name', 'inputs.type', 'inputs.enabled', 'inputs.policy_template'],
         filter: expect.stringContaining('cloud_connector_id:"cc-1"'),
       })
     );
@@ -92,13 +137,20 @@ describe('getCloudConnectorIntegrationSelections', () => {
     expect(await getCloudConnectorIntegrationSelections(soClient, 'cc-1')).toEqual([]);
   });
 
+  it('escapes quotes in the connector id so it cannot break out of the KQL phrase', async () => {
+    soClient.find.mockResolvedValueOnce({ saved_objects: [] } as any);
+    await getCloudConnectorIntegrationSelections(soClient, 'cc-1" or attributes.name:*');
+    const { filter } = soClient.find.mock.calls[0][0];
+    expect(filter).toContain('cloud_connector_id:"cc-1\\" or attributes.name:*"');
+  });
+
   it('drops a policy whose inputs are all disabled', async () => {
     soClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
           attributes: {
             package: { name: 'aws' },
-            inputs: [{ enabled: false, policy_template: 's3' }],
+            inputs: [{ type: 'aws-s3', enabled: false, policy_template: 's3' }],
           },
         },
       ],
@@ -110,37 +162,30 @@ describe('getCloudConnectorIntegrationSelections', () => {
 describe('resolveIacRenderIntegrations', () => {
   beforeEach(() => mockedGetPackageInfo.mockReset());
 
-  it('resolves version and provider-relevant enabled inputs, reporting empty packages as skipped', async () => {
-    mockedGetPackageInfo.mockImplementation(async ({ pkgName }) => {
-      if (pkgName === 'cloud_security_posture') {
-        return {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          policy_templates: [
-            {
-              name: 'cspm',
-              inputs: [
-                { type: 'cloudbeat/cis_aws', title: '', description: '' },
-                { type: 'cloudbeat/cis_gcp', title: '', description: '' },
-              ],
-            },
+  it('resolves the package version and sends only the inputs the caller enabled', async () => {
+    mockedGetPackageInfo.mockResolvedValueOnce({
+      name: 'cloud_security_posture',
+      version: '3.5.0',
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            { type: 'cloudbeat/cis_aws', title: '', description: '' },
+            { type: 'cloudbeat/cis_gcp', title: '', description: '' },
           ],
-        } as any;
-      }
-      return {
-        name: 'azure_only',
-        version: '1.0.0',
-        policy_templates: [
-          { name: 'logs', inputs: [{ type: 'azure-eventhub', title: '', description: '' }] },
-        ],
-      } as any;
-    });
+        },
+      ],
+    } as any);
 
     const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
-      { name: 'azure_only', policyTemplates: ['logs'] },
+      {
+        name: 'cloud_security_posture',
+        policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+      },
     ]);
 
+    // cis_gcp is declared by the manifest but the user did not enable it, so IaCP must
+    // never see it — every input listed becomes a blueprint patch, i.e. a granted permission.
     expect(result).toEqual({
       integrations: [
         {
@@ -149,7 +194,7 @@ describe('resolveIacRenderIntegrations', () => {
           policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
         },
       ],
-      skipped: ['azure_only'],
+      skipped: [],
     });
     expect(mockedGetPackageInfo).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -160,32 +205,85 @@ describe('resolveIacRenderIntegrations', () => {
     );
   });
 
-  it('dedupes input types within a policy template', async () => {
+  it('sends input types that name no cloud provider (cel/httpjson)', async () => {
+    // The user enabled both, so both go out. IaCP validates the names itself and rejects
+    // unknown ones with render.no_matching_inputs_for_policy_template.
     mockedGetPackageInfo.mockResolvedValueOnce({
-      name: 'aws',
-      version: '7.0.0',
+      name: 'some_saas',
+      version: '1.0.0',
       policy_templates: [
         {
-          name: 'cloudtrail',
+          name: 'logs',
           inputs: [
-            { type: 'cloudbeat/cis_aws', title: '', description: '' },
-            { type: 'cloudbeat/cis_aws', title: '', description: '' },
+            { type: 'cel', title: '', description: '' },
+            { type: 'httpjson', title: '', description: '' },
           ],
         },
       ],
     } as any);
 
     const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      { name: 'aws', policyTemplates: ['cloudtrail'] },
-    ]);
-
-    expect(result.integrations).toEqual([
       {
-        name: 'aws',
-        version: '7.0.0',
-        policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['cloudbeat/cis_aws'] }],
+        name: 'some_saas',
+        policyTemplates: [{ name: 'logs', enabledInputs: ['cel', 'httpjson'] }],
       },
     ]);
+
+    expect(result).toEqual({
+      integrations: [
+        {
+          name: 'some_saas',
+          version: '1.0.0',
+          policyTemplates: [{ name: 'logs', enabledInputs: ['cel', 'httpjson'] }],
+        },
+      ],
+      skipped: [],
+    });
+  });
+
+  it('drops a requested policy template the package manifest does not declare', async () => {
+    mockedGetPackageInfo.mockResolvedValueOnce({
+      name: 'aws',
+      version: '7.0.0',
+      policy_templates: [
+        { name: 'cloudtrail', inputs: [{ type: 'aws-s3', title: '', description: '' }] },
+      ],
+    } as any);
+
+    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
+      {
+        name: 'aws',
+        policyTemplates: [
+          { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+          { name: 'removed_in_this_version', enabledInputs: ['aws-s3'] },
+        ],
+      },
+    ]);
+
+    expect(result).toEqual({
+      integrations: [
+        {
+          name: 'aws',
+          version: '7.0.0',
+          policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }],
+        },
+      ],
+      skipped: [],
+    });
+  });
+
+  it('reports a package as skipped when the manifest declares none of the requested templates', async () => {
+    mockedGetPackageInfo.mockResolvedValueOnce({
+      name: 'inputless',
+      version: '1.0.0',
+      policy_templates: [{ name: 'other', inputs: [] }],
+    } as any);
+
+    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
+      { name: 'inputless', policyTemplates: [{ name: 'logs', enabledInputs: ['cel'] }] },
+    ]);
+
+    expect(result).toEqual({ integrations: [], skipped: ['inputless'] });
   });
 
   it('tolerates package info with no policy_templates', async () => {
@@ -195,7 +293,7 @@ describe('resolveIacRenderIntegrations', () => {
     } as any);
 
     const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      { name: 'pkg', policyTemplates: ['tpl'] },
+      { name: 'pkg', policyTemplates: [{ name: 'tpl', enabledInputs: ['aws-s3'] }] },
     ]);
 
     expect(result).toEqual({ integrations: [], skipped: ['pkg'] });

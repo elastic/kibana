@@ -51,19 +51,7 @@ export interface IacKeyVerification {
   integrations: IacIntegrationSelection[];
 }
 
-/** No stored key means the static template is deployed and must be reported, not skipped. */
-export const computeIacKeyMismatch = (
-  storedKey: string | undefined,
-  currentKey: string
-): IacKeyCheckReason | undefined => {
-  const stored = storedKey?.trim();
-  if (!stored) {
-    return 'no_key';
-  }
-  return stored === currentKey ? undefined : 'key_mismatch';
-};
-
-export interface GetCurrentIacKeyOptions {
+export interface CheckIacTemplateOptions {
   /** Telemetry flow for the render_requested/completed events. */
   flow: IacProvisionerRenderFlow;
   /** Short label for log lines, e.g. `connector cc-1`. */
@@ -71,18 +59,20 @@ export interface GetCurrentIacKeyOptions {
 }
 
 /**
- * The key IaCP would produce today for this integration set, or undefined when it cannot be
- * determined (provider unreachable, pre-`render=false` provider, unknown package, nothing
- * renderable). Undefined always means "fail open" for callers.
- * Callers must already have checked `isIacProvisionerSupportedFor`; an IaCP-disabled config
- * error would otherwise be reported as a failed render.
+ * IaCP's verdict on the stored digest for this integration set, or undefined when it cannot be
+ * determined (provider unreachable, pre-contract provider, unknown package, nothing renderable).
+ * Undefined always means "fail open" for callers.
+ * Callers must already have checked `isIacProvisionerSupportedFor` (an IaCP-disabled config error
+ * would otherwise be reported as a failed render) and must hold a digest to compare — a connector
+ * without one is `no_key`, which `compareIacKey` answers without a provider call.
  */
-export const getCurrentIacKey = async (
+export const checkIacTemplate = async (
   soClient: SavedObjectsClientContract,
   provider: typeof AWS_CLOUD_PROVIDER,
   selections: IacIntegrationSelection[],
-  { flow, contextForLog }: GetCurrentIacKeyOptions
-): Promise<string | undefined> => {
+  storedSha: string,
+  { flow, contextForLog }: CheckIacTemplateOptions
+): Promise<{ render: boolean; templateSha: string } | undefined> => {
   const logger = appContextService.getLogger().get('IacKeyVerification');
   const startTime = Date.now();
   try {
@@ -91,8 +81,8 @@ export const getCurrentIacKey = async (
       provider,
       selections
     );
-    // The render route rejects any set with skipped packages, so a key computed over the
-    // survivors could never match a stored key. Cannot compare → fail open.
+    // The render route rejects any set with skipped packages, so a digest computed over the
+    // survivors could never describe what the user deployed. Cannot compare → fail open.
     if (integrations.length === 0 || skipped.length > 0) {
       logger.debug(
         `No comparable ${provider} integration set for ${contextForLog} (renderable: ${
@@ -102,7 +92,11 @@ export const getCurrentIacKey = async (
       return undefined;
     }
     reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
-    const { key } = await iacProvisionerService.renderKey({ provider, integrations });
+    const { render, templateSha } = await iacProvisionerService.render({
+      provider,
+      integrations,
+      templateSha: storedSha,
+    });
     reportIacProvisionerRenderCompleted({
       flow,
       success: true,
@@ -110,8 +104,19 @@ export const getCurrentIacKey = async (
       errorCodes: [],
       latencyMs: Date.now() - startTime,
     });
-    logger.debug(`Current IaC key for ${contextForLog}: ${key}`);
-    return key;
+    if (render === undefined || templateSha === undefined) {
+      // A provider predating the render/templateSha contract cannot answer the question.
+      // The service already warned about it, so this side only records the consequence.
+      // https://github.com/elastic/ingest-dev/issues/9415
+      logger.debug(
+        `IaC template check skipped for ${contextForLog} (fail open): provider returned no render/templateSha`
+      );
+      return undefined;
+    }
+    logger.debug(
+      `Provider compared ${contextForLog}: stored ${storedSha}, current ${templateSha}, render=${render}`
+    );
+    return { render, templateSha };
   } catch (error) {
     // Mirror the render route's telemetry mapping: provider status when we have one, 404 for a
     // package that no longer exists, 500 for anything else; 0 is reserved for "no response".
@@ -130,7 +135,7 @@ export const getCurrentIacKey = async (
       latencyMs: Date.now() - startTime,
     });
     logger.warn(
-      `IaC key check skipped for ${contextForLog} (fail open): ${getErrorMessage(error)}`
+      `IaC template check skipped for ${contextForLog} (fail open): ${getErrorMessage(error)}`
     );
     return undefined;
   }
@@ -138,8 +143,9 @@ export const getCurrentIacKey = async (
 
 /**
  * The shared comparison both the verify route and the daily upgrade task run: gate the provider,
- * ask IaCP for today's key, compare it with the stored one. Never throws for IaCP problems
- * (`key_unavailable` = fail open); SO errors from the caller's own reads propagate before this runs.
+ * then let IaCP compare the connector's stored `iac_key` (IaCP's `templateSha`) with what it would
+ * render now. Never throws for IaCP problems (`key_unavailable` = fail open); SO errors from the
+ * caller's own reads propagate before this runs.
  */
 export const compareIacKey = async (
   soClient: SavedObjectsClientContract,
@@ -148,31 +154,36 @@ export const compareIacKey = async (
     iac_key: storedKey,
   }: Pick<CloudConnectorSOAttributes, 'cloudProvider' | 'iac_key'>,
   integrations: IacIntegrationSelection[],
-  { flow, contextForLog }: GetCurrentIacKeyOptions
+  { flow, contextForLog }: CheckIacTemplateOptions
 ): Promise<IacKeyVerificationOutcome> => {
-  // The literal comparison narrows the type for renderKey; the gate adds the "IaCP enabled" half.
+  // The literal comparison narrows the provider for the render call; the gate adds the
+  // "IaCP enabled" half.
   if (cloudProvider !== AWS_CLOUD_PROVIDER || !isIacProvisionerSupportedFor(cloudProvider)) {
     return 'unsupported_provider';
   }
   if (integrations.length === 0) {
     return 'no_integrations';
   }
-  appContextService
-    .getLogger()
-    .get('IacKeyVerification')
-    .debug(
-      `Comparing stored key ${
-        storedKey ?? '<none>'
-      } for ${contextForLog} against integration set ${JSON.stringify(integrations)}`
-    );
-  const currentKey = await getCurrentIacKey(soClient, cloudProvider, integrations, {
+  const logger = appContextService.getLogger().get('IacKeyVerification');
+  // No stored digest means the static template is deployed — a fact about this connector
+  // that holds whether or not IaCP is reachable, so it is reported without asking.
+  if (!storedKey?.trim()) {
+    logger.debug(`No stored IaC key for ${contextForLog}; static template deployed`);
+    return 'no_key';
+  }
+  logger.debug(
+    `Comparing stored key ${storedKey} for ${contextForLog} against integration set ${JSON.stringify(
+      integrations
+    )}`
+  );
+  const result = await checkIacTemplate(soClient, cloudProvider, integrations, storedKey.trim(), {
     flow,
     contextForLog,
   });
-  if (currentKey === undefined) {
+  if (result === undefined) {
     return 'key_unavailable';
   }
-  return computeIacKeyMismatch(storedKey, currentKey) ?? 'matches';
+  return result.render ? 'key_mismatch' : 'matches';
 };
 
 export const verifyCloudConnectorIacKey = async (
@@ -202,7 +213,9 @@ export const verifyCloudConnectorIacKey = async (
     logger.info(
       `IaC key check for connector ${cloudConnectorId} (${surface}, ${cloudProvider}): ${outcome}` +
         (newIntegration
-          ? ` — adding ${newIntegration.name}[${newIntegration.policyTemplates.join(',')}]`
+          ? ` — adding ${newIntegration.name}[${newIntegration.policyTemplates
+              .map(({ name }) => name)
+              .join(',')}]`
           : '')
     );
     reportIacProvisionerKeyVerificationCompleted({

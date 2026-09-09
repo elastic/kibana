@@ -84,10 +84,10 @@ export const scheduleIacUpgradeCheckTask = async (
 };
 
 /**
- * For every AWS connector (IaCP's only provider today), compare the stored `iac_key` with the
- * key IaCP produces now for the connector's live integration set. No key means the static template
- * is deployed and must be flagged as upgrade available. IaCP unreachable means leave the last
- * known status untouched (fail open).
+ * For every AWS connector (IaCP's only provider today), ask IaCP whether the stored `iac_key`
+ * still describes what it would render for the connector's live integration set. No key means the
+ * static template is deployed and must be flagged as upgrade available. IaCP unreachable means
+ * leave the last known status untouched (fail open).
  */
 export const runIacUpgradeCheckTask = async (
   signal: AbortSignal
@@ -178,7 +178,7 @@ const checkConnector = async (
   });
   const status = toUpgradeStatus(outcome);
   if (status === undefined) {
-    // getCurrentIacKey already warned for key_unavailable; the other two are expected states.
+    // checkIacTemplate already warned for key_unavailable; the other two are expected states.
     logger.debug(`${IAC_UPGRADE_CHECK_TASK} Connector ${id} not comparable (${outcome}), skipping`);
     return 'skipped';
   }
