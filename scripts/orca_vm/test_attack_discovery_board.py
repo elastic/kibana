@@ -37,7 +37,8 @@ BASE = {
 }
 
 
-def render(agg, missing=()):
+def render(agg, missing=(), false_green=None):
+    """Run the real renderer. Returns (returncode, html)."""
     with tempfile.TemporaryDirectory() as d:
         a = os.path.join(d, "agg.json")
         o = os.path.join(d, "out.html")
@@ -49,6 +50,11 @@ def render(agg, missing=()):
             with open(m, "w") as fh:
                 json.dump({"referenceOnly": list(missing)}, fh)
             cmd += ["--field-diff", m]
+        if false_green is not None:
+            f = os.path.join(d, "fg.json")
+            with open(f, "w") as fh:
+                json.dump(false_green, fh)
+            cmd += ["--false-green", f]
         p = subprocess.run(cmd, capture_output=True, text=True)
         out = open(o).read() if os.path.exists(o) else ""
         return p.returncode, out
@@ -126,11 +132,42 @@ def main():
         if len(cells) >= 4 and (re.match(r"^8(\s|$)", cells[2]) or re.match(r"^95(\s|$)", cells[3])):
             failures.append(f"reference constant leaked into a data cell: {cells[:4]}")
 
+    # 9. The false-green section must carry real per-model rows and its caveat.
+    #    A section that renders its heading but loses its data is worse than absent.
+    fg = {
+        "scan": {
+            "suites": ["security-persona-matrix"],
+            "positiveControlDocsMentioningSlack": 2744,
+            "caveat": "sample spans two suites",
+        },
+        "summary": {
+            "expectedToolCalledPass": 36,
+            "reallyTargetsConnector": 26,
+            "falseGreen": 30,
+        },
+        "perModel": [{"model": "some-model", "real": 1, "total": 26, "rate": 3.8}],
+    }
+    rc_fg, html_fg = render(BASE, false_green=fg)
+    if rc_fg != 0:
+        failures.append("renderer failed on a valid false-green file")
+    if "Connector false green" not in html_fg:
+        failures.append("false-green section missing from the board")
+    if "1/26" not in html_fg:
+        failures.append("false-green per-model rate did not reach the HTML")
+    if "sample spans two suites" not in html_fg:
+        failures.append("false-green caveat was dropped -- the number would read as a clean rate")
+
+    # 10. A hollow false-green file must be refused, not rendered as an empty table.
+    hollow = {"scan": fg["scan"], "summary": fg["summary"], "perModel": []}
+    rc_hollow, _ = render(BASE, false_green=hollow)
+    if rc_hollow == 0:
+        failures.append("renderer accepted a false-green file with no perModel rows")
+
     for f in failures:
         print("FAIL:", f)
     if failures:
         sys.exit(1)
-    print("ok - 8 guard groups passed (2 mutations correctly rejected)")
+    print("ok - 10 guard groups passed (3 mutations correctly rejected)")
 
 
 if __name__ == "__main__":

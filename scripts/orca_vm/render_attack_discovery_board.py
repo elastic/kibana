@@ -99,7 +99,7 @@ def render_missing_rows(missing):
     return cells
 
 
-def render(agg, source_note, missing_models=(), diff_summary=None):
+def render(agg, source_note, missing_models=(), diff_summary=None, false_green=None):
     rows = build_rows(agg["models"])
     absent = agg["absentFields"]
     absent_html = (
@@ -161,6 +161,44 @@ dressed up as a mean over 1040.</li>
 {rows}
 {missing_html}
 </tbody></table>
+{false_green_section(false_green)}
+"""
+
+
+def false_green_section(fg):
+    """Render the connector false-green measurement.
+
+    This is a different suite from the board above, so it is deliberately
+    kept in its own section with its own provenance rather than merged into
+    the model table.
+    """
+    if not fg:
+        return ""
+    s, scan = fg["summary"], fg["scan"]
+    rows = "\n".join(
+        f'<tr><td class="m">{html.escape(r["model"])}</td>'
+        f'<td class="n">{r["real"]}/{r["total"]}</td>'
+        f'<td class="n">{r["rate"]:.1f}%</td></tr>'
+        for r in fg["perModel"]
+    )
+    return f"""
+<h2 class="sec">Connector false green &mdash; why <code>ExpectedToolCalled</code> was not enough</h2>
+<div class="disc"><ul>
+<li><code>ExpectedToolCalled</code> maps tool calls to <code>tool_id</code> and asserts the id is
+present. It never inspects arguments or output, so a model scores 1 for <em>calling</em>
+<code>generate_workflow</code> even when the workflow it produced targets no connector at all.</li>
+<li><strong>{s['falseGreen']} false greens:</strong> {s['expectedToolCalledPass']} cells score 1.0,
+but only {s['reallyTargetsConnector']} author a real <code>type: http</code> step at the connector.</li>
+<li>Positive control: {scan['positiveControlDocsMentioningSlack']} scanned documents mention Slack,
+so this scan detects the signal it is looking for &mdash; it is not a null instrument.</li>
+<li><strong>Caveat:</strong> {html.escape(scan['caveat'])}</li>
+<li>Source: <code>measure_connector_false_green.py</code> &rarr;
+<code>connector_false_green.json</code>. Suites: {html.escape(', '.join(scan['suites']))}.</li>
+</ul></div>
+<table><thead><tr><th>Model</th><th>Really targets connector</th><th>Rate</th></tr></thead>
+<tbody>
+{rows}
+</tbody></table>
 """
 
 
@@ -169,6 +207,7 @@ def main():
     ap.add_argument("--aggregate", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--field-diff", help="field_diff.json from diff_attack_discovery_vs_reference.py")
+    ap.add_argument("--false-green", help="connector_false_green.json from measure_connector_false_green.py")
     args = ap.parse_args()
 
     agg = json.load(open(args.aggregate))
@@ -184,11 +223,18 @@ def main():
         missing_models = diff.get("referenceOnly", [])
         diff_summary = diff.get("fieldTotals")
 
+    false_green = None
+    if args.false_green:
+        false_green = json.load(open(args.false_green))
+        if not false_green.get("perModel"):
+            sys.exit("--false-green given but carries no perModel rows -- refusing to render a hollow section")
+
     html_out = render(
         agg,
         f"golden ES, suite_id={agg['suiteId']}, {agg['sourceDocCount']} docs",
         missing_models=missing_models,
         diff_summary=diff_summary,
+        false_green=false_green,
     )
     with open(args.out, "w") as fh:
         fh.write(html_out)
