@@ -140,8 +140,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.arrayOf(schema.string(), {
       maxSize: 100,
       meta: {
-        description:
-          'Package policy IDs created for managed_integration services.',
+        description: 'Package policy IDs created for managed_integration services.',
       },
     })
   ),

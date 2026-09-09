@@ -8,7 +8,11 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { mockAwsPackage, navigateToOnboardingStep, useOnboardingFeatureFlag } from '../helpers/onboarding';
+import {
+  mockAwsPackage,
+  navigateToOnboardingStep,
+  useOnboardingFeatureFlag,
+} from '../helpers/onboarding';
 
 // Minimal aws manifest with elb (managed_integration) so ManagedIntegrationsSection renders.
 // hide_in_var_group_options forces identityFederationSupported=false on all inputs so
@@ -77,7 +81,12 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     );
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(url.pathname),
-      (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ item: { id: 'dep-e2e-001' } }) })
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ item: { id: 'dep-e2e-001' } }),
+        })
     );
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
@@ -137,8 +146,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     page,
   }) => {
     await page.route(
-      (url) =>
-        /\/api\/fleet\/cloud_onboarding_deployments\/dep-static-resume$/.test(url.pathname),
+      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-static-resume$/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
