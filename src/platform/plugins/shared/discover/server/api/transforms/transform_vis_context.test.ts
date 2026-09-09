@@ -9,7 +9,7 @@
 
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import type { DiscoverSessionApiTab } from '../schema';
-import { transformVisContextIn, transformVisContextOut } from './transform_vis_context';
+import { transformVisContextIn, transformVisContextOut } from '../../../common/session/vis_context';
 
 describe('vis context transforms', () => {
   describe('transformVisContextOut', () => {

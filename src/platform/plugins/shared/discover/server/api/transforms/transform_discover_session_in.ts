@@ -15,50 +15,17 @@ import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { toStoredTab } from '../../../common/embeddable/transform_utils';
-import { extractEsqlFingerprint } from '../../../common/session/extract_esql_fingerprint';
+import { getVisContextRequestData } from '../../../common/session/get_vis_context_request_data';
 import type {
   DiscoverSessionApiData,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
 } from '../schema';
 import { transformControlPanelsIn } from './transform_control_panels';
-import { transformVisContextIn } from './transform_vis_context';
+import { transformVisContextIn } from '../../../common/session/vis_context';
 
 const isEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsqlTab =>
   tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
-
-const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
-  const esqlFingerprint = tab.vis_context
-    ? extractEsqlFingerprint(tab.vis_context.attributes)
-    : undefined;
-
-  if (esqlFingerprint) {
-    return {
-      dataViewId: esqlFingerprint.dataViewId,
-      ...(esqlFingerprint.timeField !== undefined && { timeField: esqlFingerprint.timeField }),
-      ...(tab.breakdown_field !== undefined &&
-        tab.breakdown_field !== '' && { breakdownField: tab.breakdown_field }),
-    };
-  }
-
-  const dataViewId =
-    tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE && 'ref_id' in tab.data_source
-      ? tab.data_source.ref_id
-      : undefined;
-  const timeField =
-    tab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE && 'time_field' in tab.data_source
-      ? tab.data_source.time_field
-      : undefined;
-
-  return {
-    ...(dataViewId !== undefined && { dataViewId }),
-    ...(timeField !== undefined && { timeField }),
-    ...(!isEsqlTab(tab) &&
-      tab.chart_interval !== undefined && { timeInterval: tab.chart_interval }),
-    ...(tab.breakdown_field !== undefined &&
-      tab.breakdown_field !== '' && { breakdownField: tab.breakdown_field }),
-  };
-};
 
 export const transformDiscoverSessionIn = (
   data: DiscoverSessionApiData

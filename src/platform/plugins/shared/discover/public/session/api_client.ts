@@ -20,12 +20,23 @@ import type {
   DiscoverSessionApiResponse,
   DiscoverSessionGetResponse,
 } from '../../server';
+import type { deserializeEsqlControls } from '../../common/session/control_panels';
 
 export interface DiscoverSessionClient {
-  create: (data: DiscoverSessionApiDataInput) => Promise<DiscoverSessionApiResponse>;
+  create: (data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
   get: (id: string) => Promise<DiscoverSessionGetResult>;
-  upsert: (id: string, data: DiscoverSessionApiDataInput) => Promise<DiscoverSessionApiResponse>;
+  upsert: (id: string, data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
 }
+
+export type DiscoverSessionRequestData = Omit<DiscoverSessionApiDataInput, 'tabs'> & {
+  tabs: DiscoverSessionRequestTab[];
+};
+
+export type DiscoverSessionRequestTab<Tab = DiscoverSessionApiDataInput['tabs'][number]> = {
+  [Key in keyof Tab]: Key extends 'control_panels'
+    ? ReturnType<typeof deserializeEsqlControls>
+    : Tab[Key];
+};
 
 export type DiscoverSessionResolve = Pick<
   NonNullable<DiscoverSession['sharingSavedObjectProps']>,
@@ -75,14 +86,14 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 });
 
 /** Builds the path for one Discover session. */
-const buildDiscoverSessionPath = (id: string): string =>
+const buildDiscoverSessionPath = (id: string) =>
   buildPath(`${DISCOVER_SESSION_API_BASE_PATH}/{id}`, { id });
 
 /** Preserves server error details while allowing callers to handle missing sessions separately. */
 const requestWithReadableError = async <T>(
   request: () => Promise<T>,
   getNotFoundError?: () => Error
-): Promise<T> => {
+) => {
   try {
     return await request();
   } catch (error) {
@@ -100,7 +111,7 @@ const requestWithReadableError = async <T>(
 };
 
 /** Returns the human-readable message included in an HTTP error response. */
-const getResponseErrorMessage = (error: unknown): string | undefined => {
+const getResponseErrorMessage = (error: unknown) => {
   if (!isHttpFetchError(error) || !error.body || typeof error.body !== 'object') {
     return undefined;
   }

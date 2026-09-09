@@ -9,7 +9,6 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
-import type { SavedObjectReference } from '@kbn/core/server';
 import {
   injectReferences,
   parseSearchSourceJSON,
@@ -17,14 +16,21 @@ import {
 } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { fromStoredTab, toStoredSort, toStoredTab } from '../../common/embeddable/transform_utils';
+import {
+  deserializeEsqlControls,
+  serializeEsqlControls,
+} from '../../common/session/control_panels';
 import type {
   DiscoverSessionApiData,
   DiscoverSessionApiResponse,
   DiscoverSessionApiTab,
 } from '../../server';
-import type { DiscoverSessionResolve } from './api_client';
-import { toApiControlPanels, toControlGroupJson } from './control_panels';
-import { fromApiVisContext, toApiVisContext } from './vis_context';
+import type {
+  DiscoverSessionRequestData,
+  DiscoverSessionRequestTab,
+  DiscoverSessionResolve,
+} from './api_client';
+import { fromApiVisContext, toApiVisContext } from '../../common/session/vis_context';
 
 // The HTTP path uses this adapter because Discover still works with saved-search-shaped state.
 // Removing the legacy persistence path does not remove the need for these conversions.
@@ -52,7 +58,7 @@ export const fromDiscoverSessionApiResponse = (
 /** Converts a Discover session into a create or upsert request body. */
 export const toDiscoverSessionApiData = (
   session: Pick<DiscoverSession, 'title' | 'description' | 'tabs' | 'tags'>
-): DiscoverSessionApiData => ({
+): DiscoverSessionRequestData => ({
   title: session.title,
   description: session.description,
   ...(session.tags !== undefined && { tags: session.tags }),
@@ -60,9 +66,7 @@ export const toDiscoverSessionApiData = (
 });
 
 /** Rebuilds saved-object references from the API document without rebuilding Discover tabs. */
-export const getDiscoverSessionReferences = (
-  data: DiscoverSessionApiData
-): SavedObjectReference[] => {
+export const getDiscoverSessionReferences = (data: DiscoverSessionApiData) => {
   const { references: tagReferences } = toStoredTags({ tags: data.tags });
   const tabReferences = data.tabs.flatMap((tab) => {
     const { references } = toStoredTab(tab, { refNamePrefix: `tab_${tab.id}` });
@@ -72,9 +76,7 @@ export const getDiscoverSessionReferences = (
   return [...tagReferences, ...tabReferences];
 };
 
-const fromApiTab = (
-  apiTab: DiscoverSessionApiTab
-): { tab: DiscoverSessionTab; references: SavedObjectReference[] } => {
+const fromApiTab = (apiTab: DiscoverSessionApiTab) => {
   // Reuse the stored-format conversion to rebuild search source fields and references in memory.
   const { state: storedTab, references } = toStoredTab(apiTab, {
     refNamePrefix: `tab_${apiTab.id}`,
@@ -110,8 +112,8 @@ const fromApiTab = (
     refreshInterval: apiTab.refresh_interval,
     breakdownField: apiTab.breakdown_field,
     chartInterval: apiTab.chart_interval,
-    visContext: fromApiVisContext(apiTab.vis_context, apiTab.breakdown_field),
-    controlGroupJson: toControlGroupJson(apiTab.control_panels),
+    visContext: fromApiVisContext(apiTab),
+    controlGroupJson: serializeEsqlControls(apiTab.control_panels),
   };
 
   return {
@@ -120,7 +122,7 @@ const fromApiTab = (
   };
 };
 
-const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionApiTab => {
+const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionRequestTab => {
   const { id, label, serializedSearchSource: _searchSource, ...tabAttributes } = tab;
   // Only the search source needs a different shape here. The transformer selects the API fields.
   const storedTab: Parameters<typeof fromStoredTab>[0] = {
@@ -129,7 +131,7 @@ const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionApiTab => {
   };
   const apiTab = fromStoredTab(storedTab);
   const visContext = toApiVisContext(tab.visContext);
-  const controlPanels = toApiControlPanels(tab.controlGroupJson);
+  const controlPanels = deserializeEsqlControls(tab.controlGroupJson);
 
   return {
     id,
@@ -154,7 +156,7 @@ const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionApiTab => {
 };
 
 /** Removes the ID only from filters targeting the tab's inline Data View. */
-const toApiSearchSource = (tab: DiscoverSessionTab): SerializedSearchSourceFields => {
+const toApiSearchSource = (tab: DiscoverSessionTab) => {
   const searchSource = tab.serializedSearchSource;
   const inlineDataViewId = getInlineDataViewId(searchSource);
 
@@ -179,7 +181,7 @@ const toApiSearchSource = (tab: DiscoverSessionTab): SerializedSearchSourceField
 };
 
 /** Returns the tab's inline Data View ID. */
-const getInlineDataViewId = (searchSource: SerializedSearchSourceFields): string | undefined => {
+const getInlineDataViewId = (searchSource: SerializedSearchSourceFields) => {
   const { index } = searchSource;
   return index && typeof index !== 'string' ? index.id : undefined;
 };

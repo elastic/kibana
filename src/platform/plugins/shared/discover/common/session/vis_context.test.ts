@@ -8,10 +8,20 @@
  */
 
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionApiTab } from '../../server';
 import { fromApiVisContext } from './vis_context';
 
 type ApiVisContext = NonNullable<DiscoverSessionApiTab['vis_context']>;
+
+const esqlTab: DiscoverSessionApiTab = {
+  id: 'esql-tab',
+  label: 'ES|QL',
+  data_source: { type: 'esql', query: 'FROM logs-*' },
+  sort: [],
+  hide_chart: false,
+  hide_table: false,
+};
 
 describe('fromApiVisContext', () => {
   it.each([
@@ -24,7 +34,9 @@ describe('fromApiVisContext', () => {
       dataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
     });
 
-    expect(fromApiVisContext(visContext, 'host.name')).toStrictEqual({
+    expect(
+      fromApiVisContext({ ...esqlTab, vis_context: visContext, breakdown_field: 'host.name' })
+    ).toStrictEqual({
       suggestionType,
       attributes: visContext.attributes,
       requestData: {
@@ -41,28 +53,67 @@ describe('fromApiVisContext', () => {
       dataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
     });
 
-    expect(fromApiVisContext(visContext, breakdownField)).toStrictEqual({
+    expect(
+      fromApiVisContext({ ...esqlTab, vis_context: visContext, breakdown_field: breakdownField })
+    ).toStrictEqual({
       suggestionType: visContext.suggestion_type,
       attributes: visContext.attributes,
       requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
     });
   });
 
-  it('keeps the client fallback empty even with a breakdown', () => {
+  it('uses the tab breakdown without adding a classic interval to an ES|QL fallback', () => {
     const visContext: ApiVisContext = {
       suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
       attributes: { visualizationType: 'lnsXY', state: { foo: 'bar' } },
     };
 
-    expect(fromApiVisContext(visContext, 'host.name')).toStrictEqual({
+    expect(
+      fromApiVisContext({
+        ...esqlTab,
+        vis_context: visContext,
+        breakdown_field: 'host.name',
+        chart_interval: 'h',
+      })
+    ).toStrictEqual({
       suggestionType: visContext.suggestion_type,
       attributes: visContext.attributes,
-      requestData: {},
+      requestData: { breakdownField: 'host.name' },
+    });
+  });
+
+  it('uses the inline time field and classic interval without inventing a data view ID', () => {
+    const visContext: ApiVisContext = {
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: { visualizationType: 'lnsXY' },
+    };
+
+    expect(
+      fromApiVisContext({
+        id: 'inline-tab',
+        label: 'Inline',
+        data_source: {
+          type: 'data_view_spec',
+          index_pattern: 'logs-*',
+          time_field: '@timestamp',
+        },
+        filters: [],
+        sort: [],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        hide_chart: false,
+        hide_table: false,
+        chart_interval: 'h',
+        vis_context: visContext,
+      })
+    ).toStrictEqual({
+      suggestionType: visContext.suggestion_type,
+      attributes: visContext.attributes,
+      requestData: { timeField: '@timestamp', timeInterval: 'h' },
     });
   });
 
   it('returns undefined when the tab has no chart', () => {
-    expect(fromApiVisContext(undefined, 'host.name')).toBeUndefined();
+    expect(fromApiVisContext({ ...esqlTab, breakdown_field: 'host.name' })).toBeUndefined();
   });
 });
 

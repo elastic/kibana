@@ -18,6 +18,7 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { DiscoverSessionApiClassicTab, DiscoverSessionApiResponse } from '../../server';
+import { discoverSessionApiDataSchema } from '../../server/api/schema';
 import { prepareDiscoverSession } from './prepare_session';
 import {
   fromDiscoverSessionApiResponse,
@@ -269,7 +270,7 @@ describe('Discover session conversion and UI preparation', () => {
     });
   });
 
-  it('preserves a chart whose ES|QL fingerprint cannot be reconstructed', () => {
+  it('preserves a classic chart with the fallback fingerprint from the tab', () => {
     const classicTab: DiscoverSessionApiClassicTab = {
       ...inlineApiTab,
       data_source: { type: 'data_view_reference', ref_id: 'logs-data-view' },
@@ -290,7 +291,11 @@ describe('Discover session conversion and UI preparation', () => {
     expect(session.tabs[0].visContext).toStrictEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
       attributes: classicTab.vis_context?.attributes,
-      requestData: {},
+      requestData: {
+        dataViewId: 'logs-data-view',
+        timeInterval: 'h',
+        breakdownField: 'service.name',
+      },
     });
     expect(fromDiscoverSessionApiResponse(chartResponse).tabs[0].visContext).toStrictEqual(
       session.tabs[0].visContext
@@ -363,7 +368,9 @@ describe('Discover session conversion and UI preparation', () => {
 
     const data = toDiscoverSessionApiData(session);
 
-    expect(getDiscoverSessionReferences(data)).toStrictEqual([
+    const validatedData = discoverSessionApiDataSchema.parse(data);
+
+    expect(getDiscoverSessionReferences(validatedData)).toStrictEqual([
       { id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' },
       {
         id: 'logs-data-view',
@@ -473,23 +480,56 @@ describe('Discover session conversion and UI preparation', () => {
     const session = fromDiscoverSessionApiResponse(response);
     session.tabs[2].controlGroupJson = '{';
 
-    expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'control panel state is not valid JSON'
-    );
+    expect(() => toDiscoverSessionApiData(session)).toThrow(SyntaxError);
   });
 
-  it('fails the save rather than dropping an unsupported control panel', () => {
+  it.each(['options_list_control', 'optionsListControl'])(
+    'preserves unsupported control type %s for server validation',
+    (type) => {
+      const session = fromDiscoverSessionApiResponse(response);
+      session.tabs[2].controlGroupJson = JSON.stringify({
+        'unsupported-control': { order: 0, type },
+      });
+
+      const apiTab = toDiscoverSessionApiData(session).tabs[2];
+
+      expect(apiTab.control_panels).toEqual([
+        {
+          id: 'unsupported-control',
+          type,
+          config: {},
+        },
+      ]);
+    }
+  );
+
+  it('rejects a control without a type, matching the server transform', () => {
     const session = fromDiscoverSessionApiResponse(response);
     session.tabs[2].controlGroupJson = JSON.stringify({
-      'unsupported-control': {
-        order: 0,
-        type: 'options_list_control',
-      },
+      'missing-type-control': { order: 0 },
     });
 
     expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'Unsupported Discover control panel type [options_list_control]'
+      'controlGroupJson panels must have a type'
     );
+  });
+
+  it('uses zero for missing control order, matching the server transform', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    const { order: _order, ...control } = JSON.parse(session.tabs[2].controlGroupJson ?? '{}')[
+      'service-control'
+    ];
+    session.tabs[2].controlGroupJson = JSON.stringify({
+      'later-control': { ...control, order: 2 },
+      'unordered-control': control,
+    });
+
+    const apiTab = toDiscoverSessionApiData(session).tabs[2];
+
+    expect(apiTab.control_panels?.map(({ id }) => id)).toEqual([
+      'unordered-control',
+      'later-control',
+    ]);
   });
 
   it('fails the save with a clear error when a control panel is malformed', () => {
@@ -497,7 +537,7 @@ describe('Discover session conversion and UI preparation', () => {
     session.tabs[2].controlGroupJson = JSON.stringify({ 'broken-control': null });
 
     expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'control panel [broken-control] must be an object'
+      'controlGroupJson panels must be JSON objects'
     );
   });
 });

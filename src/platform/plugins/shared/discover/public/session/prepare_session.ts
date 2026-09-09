@@ -39,7 +39,7 @@ const prepareTab = (
   tab: DiscoverSessionTab,
   apiTab: DiscoverSessionApiTab,
   inlineDataViewIds: Map<string, string>
-): DiscoverSessionTab => {
+) => {
   const searchSource = assignInlineDataViewId(
     apiTab,
     tab.serializedSearchSource,
@@ -56,7 +56,7 @@ const assignInlineDataViewId = (
   apiTab: DiscoverSessionApiTab,
   searchSource: SerializedSearchSourceFields,
   inlineDataViewIds: Map<string, string>
-): SerializedSearchSourceFields => {
+) => {
   const { index } = searchSource;
   if (
     apiTab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE ||
@@ -93,9 +93,7 @@ const assignInlineDataViewId = (
   };
 };
 
-const normalizeSearchSourceFilters = (
-  searchSource: SerializedSearchSourceFields
-): SerializedSearchSourceFields => {
+const normalizeSearchSourceFilters = (searchSource: SerializedSearchSourceFields) => {
   const { filter } = searchSource;
   if (!filter) {
     return searchSource;
