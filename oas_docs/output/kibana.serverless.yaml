@@ -104148,8 +104148,8 @@ components:
                 type: object
                 properties:
                   min:
-                    enum:
-                      - 75
+                    maximum: 100
+                    minimum: 0
                     type: number
                 required:
                   - min
