@@ -27,7 +27,7 @@ import { probeHttp } from './profiles';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
-const SCOUT_READY_TIMEOUT_MS = 180_000;
+const SCOUT_READY_TIMEOUT_MS = Number(process.env.SCOUT_READY_TIMEOUT_MS) || 180_000;
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -297,6 +297,40 @@ export const ensureEvalStack = async ({
   });
 
   if (requiresEisCcm) {
+    // Wait for the .inference index to be ready before enabling CCM.
+    // On a freshly booted ES cluster the .inference index shard may not be
+    // assigned yet, causing CCM enablement to fail with 500/503.
+    const esConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
+    let esUrl = 'http://localhost:9220';
+    try {
+      const config = JSON.parse(Fs.readFileSync(esConfigPath, 'utf-8'));
+      const es = config.servers?.elasticsearch;
+      if (es) {
+        esUrl = `${es.protocol}://${es.hostname}:${es.port}`;
+      }
+    } catch {
+      // Fall back to default
+    }
+    log.info('[eis-ccm] Waiting for .inference index to be active...');
+    const inferenceReadyDeadline = Date.now() + 300_000; // 5 min
+    while (Date.now() < inferenceReadyDeadline) {
+      try {
+        const resp = await fetch(`${esUrl}/_cat/indices/.inference?h=status`, {
+          headers: { authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}` },
+        });
+        if (resp.ok) {
+          const text = (await resp.text()).trim();
+          if (text.includes('green') || text.includes('yellow')) {
+            log.info(`[eis-ccm] .inference index ready (${text})`);
+            break;
+          }
+        }
+      } catch {
+        // Not ready yet
+      }
+      await new Promise((r) => setTimeout(r, 5_000));
+    }
+
     await ensureEisCcm({ repoRoot, log });
   } else {
     log.info('[eis-ccm] Skipping EIS CCM (no eis- judge/models selected)');
