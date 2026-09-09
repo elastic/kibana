@@ -112,7 +112,7 @@ const configSchema = schema.object({
      * entries to Elasticsearch inline (same as async executions). Useful for
      * A/B comparisons to measure the drain's overhead vs. direct ES writes.
      */
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
     /**
      * How often (ms) the background timer flushes buffered events to ES.
      * Lower values reduce event latency but increase write frequency.
