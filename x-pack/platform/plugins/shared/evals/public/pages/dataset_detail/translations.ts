@@ -94,6 +94,13 @@ export const ADD_EXAMPLE_BUTTON = i18n.translate('xpack.evals.datasetDetail.addE
   defaultMessage: 'Add example',
 });
 
+export const IMPORT_FILE_BUTTON = i18n.translate(
+  'xpack.evals.importDatasetFlyout.datasetDetailButtonLabel',
+  {
+    defaultMessage: 'Import file',
+  }
+);
+
 export const COLUMN_EXAMPLE_ID = i18n.translate('xpack.evals.datasetDetail.columns.exampleId', {
   defaultMessage: 'Example ID',
 });

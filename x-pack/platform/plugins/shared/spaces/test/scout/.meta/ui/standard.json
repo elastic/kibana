@@ -1,5 +1,5 @@
 {
-  "sha1": "c607331ba5dd4e1177a4b9b41363cf4c18962358",
+  "sha1": "0d32a88681c7c649be9dc9871b5d774a923b4ace",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -307,8 +307,8 @@
       }
     },
     {
-      "id": "7bf445453bc0eb8-09afb294d1a4cfa",
-      "title": "last selected space recollection redirects to the last selected space when preference is already enabled",
+      "id": "7bf445453bc0eb8-8748608e7c7ba6a",
+      "title": "last selected space recollection records the last selected space when a space is entered from the nav",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -316,13 +316,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
-        "line": 29,
-        "column": 65
+        "line": 39,
+        "column": 48
       }
     },
     {
-      "id": "7bf445453bc0eb8-d355bdb76e00f2f",
-      "title": "last selected space recollection shows the space selector when remember last space is disabled",
+      "id": "7bf445453bc0eb8-56b99c91425fafd",
+      "title": "last selected space recollection redirects to the last selected space when the preference is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -330,8 +330,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
-        "line": 52,
-        "column": 23
+        "line": 50,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bf445453bc0eb8-87dcf17fb3a5f7b",
+      "title": "last selected space recollection shows the space selector when the preference is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 77,
+        "column": 11
       }
     },
     {
