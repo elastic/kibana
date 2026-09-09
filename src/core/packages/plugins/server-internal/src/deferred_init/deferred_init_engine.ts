@@ -15,6 +15,7 @@ import {
   DEFERRED_INIT_BACKOFF_BASE_MS,
   DEFERRED_INIT_BACKOFF_FACTOR,
   DEFERRED_INIT_BACKOFF_MAX_MS,
+  DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS,
 } from './backoff';
 
 /** A plugin's deferred initialization work, bound to its {@link LazyInitContext}. */
@@ -142,19 +143,29 @@ export class DeferredInitEngine {
    * Never awaits completion: the first gated request therefore observes `initializing` (not a
    * hung connection).
    *
-   * Deliberately does *not* re-kick a `failed` plugin here. Both the UI's status poll and every
-   * gated route call this on each hit, so re-kicking on `failed` too would immediately flip it to
-   * `initializing` again before the caller ever observes the failure, silently defeating
-   * {@link scheduleCooldown}'s backoff and hiding the error from the initializing UI entirely. A
-   * `failed` plugin becomes auto-kickable again once its cooldown elapses and flips it back to
-   * `idle`; an explicit {@link trigger} call can still force a sooner retry.
+   * During the first {@link DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS} failures the background
+   * cooldown timer re-kicks the plugin automatically, so `ensureInitialized` deliberately does
+   * NOT re-kick a `failed` plugin — both the UI status poll and every gated route call this on
+   * each hit, so kicking on every `failed` hit would immediately flip the state to `initializing`
+   * before the caller ever observes the failure, silently defeating {@link scheduleCooldown}'s
+   * backoff.
+   *
+   * Once background retries are exhausted (attempt count exceeds
+   * {@link DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS}) the cooldown timer stops firing. At that point
+   * `ensureInitialized` switches to on-demand recovery: a `failed` plugin is re-kicked on the
+   * next incoming gated request, so any API hit or UI poll can trigger a fresh attempt without
+   * requiring a Kibana restart.
    */
   public ensureInitialized(pluginId: string): InitState {
     const record = this.records.get(pluginId);
     if (!record) {
       return 'idle';
     }
-    if (record.state$.value === 'idle') {
+    const { value: state } = record.state$;
+    if (
+      state === 'idle' ||
+      (state === 'failed' && record.failedAttempts >= DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS)
+    ) {
       this.kick(pluginId, record);
     }
     return record.state$.value;
@@ -269,8 +280,19 @@ export class DeferredInitEngine {
    * (flipping it from `failed` back to `idle`). Full jitter, rather than a fixed delay, so a set
    * of instances that all failed against the same unhealthy Elasticsearch cluster don't retry in
    * lockstep, mirroring Fleet's `backOff({ jitter: 'full' })` rationale.
+   *
+   * Once {@link DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS} consecutive failures have accumulated, no
+   * further timer is scheduled — the plugin stays `failed` and relies on on-demand kicks from
+   * incoming gated requests (see {@link ensureInitialized}) rather than unsolicited background
+   * retries.
    */
   private scheduleCooldown(record: DeferredInitRecord): void {
+    if (record.failedAttempts >= DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS) {
+      // Background retries exhausted. On-demand recovery takes over: the next gated request or
+      // loadPluginContract call will re-kick the runner via ensureInitialized/waitUntilAvailable.
+      return;
+    }
+
     const upperBoundMs = Math.min(
       DEFERRED_INIT_BACKOFF_BASE_MS * DEFERRED_INIT_BACKOFF_FACTOR ** (record.failedAttempts - 1),
       DEFERRED_INIT_BACKOFF_MAX_MS

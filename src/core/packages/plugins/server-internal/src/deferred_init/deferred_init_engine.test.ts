@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { LazyInitContext } from '@kbn/core-plugins-server';
 import { isDeferredInitializationError } from '@kbn/core-deferred-init-common';
 import { DeferredInitEngine } from './deferred_init_engine';
+import { DEFERRED_INIT_BACKOFF_MAX_MS, DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS } from './backoff';
 
 const PLUGIN_ID = 'myPlugin';
 
@@ -214,12 +215,60 @@ describe('DeferredInitEngine', () => {
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         expect(engine.getState(PLUGIN_ID)).toBe('failed');
 
-        await jest.advanceTimersByTimeAsync(60_000);
+        await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
         expect(engine.getState(PLUGIN_ID)).toBe('idle');
 
         expect(engine.ensureInitialized(PLUGIN_ID)).toBe('initializing');
         await jest.advanceTimersByTimeAsync(0);
         expect(runner).toHaveBeenCalledTimes(2);
+        expect(engine.getState(PLUGIN_ID)).toBe('available');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('does not schedule a cooldown timer after background retries are exhausted', async () => {
+      jest.useFakeTimers();
+      try {
+        const runner = jest.fn().mockRejectedValue(new Error('boom'));
+        engine.register(PLUGIN_ID);
+        engine.setRunner(PLUGIN_ID, runner, createCtx());
+
+        // Exhaust background retries by triggering MAX_BACKGROUND_ATTEMPTS failures.
+        for (let i = 0; i < DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS; i++) {
+          await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
+          expect(engine.getState(PLUGIN_ID)).toBe('failed');
+          // Advance past the max cooldown to allow background timer to fire (if scheduled).
+          await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
+        }
+
+        // After exhaustion, the state must remain `failed` even after a long wait — no timer fires.
+        expect(engine.getState(PLUGIN_ID)).toBe('failed');
+        await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS * 10);
+        expect(engine.getState(PLUGIN_ID)).toBe('failed');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('recovers on demand via ensureInitialized once background retries are exhausted', async () => {
+      jest.useFakeTimers();
+      try {
+        const runner = jest.fn().mockRejectedValue(new Error('boom'));
+        engine.register(PLUGIN_ID);
+        engine.setRunner(PLUGIN_ID, runner, createCtx());
+
+        // Drive through all background attempts (each advances past the cooldown timer).
+        for (let i = 0; i < DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS; i++) {
+          await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
+          await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
+        }
+        expect(engine.getState(PLUGIN_ID)).toBe('failed');
+
+        // Now make the recovery attempt succeed and simulate an incoming gated request.
+        runner.mockResolvedValueOnce(undefined);
+        expect(engine.ensureInitialized(PLUGIN_ID)).toBe('initializing');
+        await jest.advanceTimersByTimeAsync(0);
         expect(engine.getState(PLUGIN_ID)).toBe('available');
       } finally {
         jest.useRealTimers();
@@ -244,7 +293,7 @@ describe('DeferredInitEngine', () => {
         engine.setRunner(PLUGIN_ID, runner, createCtx());
 
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
-        await jest.advanceTimersByTimeAsync(60_000);
+        await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
         engine.ensureInitialized(PLUGIN_ID);
 
         expect(engine.getFailureDetails(PLUGIN_ID)).toBeUndefined();
@@ -276,11 +325,11 @@ describe('DeferredInitEngine', () => {
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         expect(engine.getFailureDetails(PLUGIN_ID)).toEqual({ message: 'first', attempts: 1 });
 
-        await jest.advanceTimersByTimeAsync(60_000);
+        await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         expect(engine.getFailureDetails(PLUGIN_ID)).toEqual({ message: 'second', attempts: 2 });
 
-        await jest.advanceTimersByTimeAsync(60_000);
+        await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
         await engine.waitUntilAvailable(PLUGIN_ID);
 
         expect(engine.getState(PLUGIN_ID)).toBe('available');
