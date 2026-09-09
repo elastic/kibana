@@ -8,9 +8,9 @@
  */
 
 import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows/graph';
-import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { evaluateCondition } from '../evaluate_condition';
 import type { NodeImplementation } from '../node_implementation';

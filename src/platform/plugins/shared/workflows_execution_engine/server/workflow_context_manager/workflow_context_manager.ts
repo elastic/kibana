@@ -19,11 +19,11 @@ import {
   type WorkflowContext,
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import {
   callKibanaApi,

@@ -22,7 +22,6 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import {
@@ -33,6 +32,7 @@ import type { StepIoService } from '../step_io_service';
 import type { ContextDependencies } from '../types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
 jest.mock('../build_workflow_context', () => {
   return {

@@ -13,7 +13,7 @@ import type { StepExecutionRuntime } from '../../workflow_context_manager/step_e
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowRuntimeGraph } from '../../workflow_context_manager/workflow_runtime_graph';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -25,7 +25,7 @@ export class LoopContinueNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private stepIoService: StepIoService,
-    private workflowGraph: WorkflowRuntimeGraph
+    private workflowGraph: RuntimeGraphView
   ) {}
 
   public run(): void {

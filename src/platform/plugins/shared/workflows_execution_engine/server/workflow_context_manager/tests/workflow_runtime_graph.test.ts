@@ -10,12 +10,12 @@
 import type { ConnectorStep, ForEachStep, WorkflowYaml } from '@kbn/workflows';
 import type { ExitForeachNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
 import {
   ENTER_SYNTHETIC_PREFIX,
   EXIT_SYNTHETIC_PREFIX,
   WorkflowRuntimeGraph,
 } from '../workflow_runtime_graph';
-import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
 
 const SCOPE_HASH = /[0-9a-f]{16}$/;
 
@@ -64,16 +64,8 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
   it('gives nested owners that both mint iteration 0 distinct hashed pair ids', () => {
     const overlay = createOverlay();
 
-    const outerEnter = overlay.insertSyntheticScope(
-      'enterForeach_outerLoop',
-      '0',
-      'iteration'
-    );
-    const innerEnter = overlay.insertSyntheticScope(
-      'enterForeach_innerLoop',
-      '0',
-      'iteration'
-    );
+    const outerEnter = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
+    const innerEnter = overlay.insertSyntheticScope('enterForeach_innerLoop', '0', 'iteration');
 
     const outer = hashedPair('0', outerEnter);
     const inner = hashedPair('0', innerEnter);
@@ -89,9 +81,9 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     const overlay = createOverlay();
     overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
 
-    expect(() =>
-      overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration')
-    ).toThrow('Synthetic scope 0 is already in the graph');
+    expect(() => overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration')).toThrow(
+      'Synthetic scope 0 is already in the graph'
+    );
   });
 
   it('omits the synthetic enter from getNodeStack when the cursor is on that enter', () => {
@@ -106,24 +98,20 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
   });
 
   it('hydrates a hashed enter when the stack is taken from a body node inside it', () => {
-    const compiled = WorkflowGraph.fromWorkflowDefinition(
-      nestedForeachDefinition as WorkflowYaml
-    );
+    const compiled = WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml);
     const first = new WorkflowRuntimeGraph(compiled, []);
     const enterId = first.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
     const stack = first.getNodeStack('enterForeach_innerLoop');
-    const stackNodeIds = stack.flatMap((frame) =>
-      frame.nestedScopes.map((scope) => scope.nodeId)
-    );
+    const stackNodeIds = stack.flatMap((frame) => frame.nestedScopes.map((scope) => scope.nodeId));
 
     expect(stackNodeIds).toContain(enterId);
 
     const hydrated = new WorkflowRuntimeGraph(compiled, stack);
 
     expect(hydrated.getNode(enterId)?.type).toBe('enter-iteration');
-    expect(() =>
-      hydrated.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration')
-    ).toThrow('Synthetic scope 0 is already in the graph');
+    expect(() => hydrated.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration')).toThrow(
+      'Synthetic scope 0 is already in the graph'
+    );
   });
 
   describe('sequential copies vs foreach remint', () => {
@@ -156,14 +144,14 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
       overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
       overlay.insertSyntheticScope('enterForeach_outerLoop', '1', 'iteration');
 
-      const compiledInnerExit = overlay.getNode(
-        'exitForeach_innerLoop'
-      ) as ExitForeachNode | undefined;
-      const clonedInnerEnter = overlay
-        .topologicalOrder.filter((id) => id.startsWith('enterForeach_innerLoop_'))
+      const compiledInnerExit = overlay.getNode('exitForeach_innerLoop') as
+        | ExitForeachNode
+        | undefined;
+      const clonedInnerEnter = overlay.topologicalOrder
+        .filter((id) => id.startsWith('enterForeach_innerLoop_'))
         .map((id) => overlay.getNode(id));
-      const clonedInnerExit = overlay
-        .topologicalOrder.filter((id) => id.startsWith('exitForeach_innerLoop_'))
+      const clonedInnerExit = overlay.topologicalOrder
+        .filter((id) => id.startsWith('exitForeach_innerLoop_'))
         .map((id) => overlay.getNode(id) as ExitForeachNode | undefined);
 
       expect(compiledInnerExit?.startNodeId).toBe('enterForeach_innerLoop');
@@ -194,9 +182,7 @@ describe('WorkflowExecutionCursor synthetic commit', () => {
     });
     cursor.commitPendingNavigation();
 
-    expect(cursor.currentNode?.id).toMatch(
-      new RegExp(`^${ENTER_SYNTHETIC_PREFIX}0_`)
-    );
+    expect(cursor.currentNode?.id).toMatch(new RegExp(`^${ENTER_SYNTHETIC_PREFIX}0_`));
     expect(cursor.currentNode?.id).not.toBe('iteration:0');
     expect(cursor.currentNode?.id).not.toContain('iteration:0');
     expect(overlay.getNode(`${EXIT_SYNTHETIC_PREFIX}iteration:0`)).toBeUndefined();

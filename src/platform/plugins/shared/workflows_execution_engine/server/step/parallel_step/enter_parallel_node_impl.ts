@@ -15,7 +15,6 @@ import {
   ExecutionStatus,
 } from '@kbn/workflows';
 import type { EnterParallelNode } from '@kbn/workflows/graph';
-import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type {
   ParallelBranchResult,
   ParallelBranchState,
@@ -27,6 +26,7 @@ import { isTemplateExpression, parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';

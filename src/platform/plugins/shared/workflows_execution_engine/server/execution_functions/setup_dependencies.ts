@@ -28,12 +28,12 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionCursor } from '../workflow_context_manager/workflow_execution_cursor';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';

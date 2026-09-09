@@ -8,12 +8,12 @@
  */
 
 import type { LoopBreakNode } from '@kbn/workflows/graph';
-import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 

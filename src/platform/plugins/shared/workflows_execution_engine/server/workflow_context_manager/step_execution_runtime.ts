@@ -16,11 +16,11 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';

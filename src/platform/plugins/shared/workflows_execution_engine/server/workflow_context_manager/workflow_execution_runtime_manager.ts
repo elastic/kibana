@@ -30,8 +30,8 @@ import type { StepExecutionRuntimeFactory } from './step_execution_runtime_facto
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
-import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
