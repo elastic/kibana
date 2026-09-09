@@ -12,6 +12,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiIcon,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -27,9 +28,15 @@ import {
 } from '@kbn/user-profile-components';
 import { ConversationAccessModeSelect } from './conversation_access_mode_select';
 import { ConversationParticipantsList } from './conversation_participants_list';
-import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
+import {
+  agentAccessHelpAriaLabel,
+  agentAccessHelpLabel,
+  currentMembersLabel,
+  searchUsersLabel,
+} from './conversation_share_i18n';
 
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
+const AGENT_ACCESS_TOOLTIP_OFFSET = 8;
 
 /**
  * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
@@ -99,12 +106,14 @@ interface ConversationShareEditableContentProps {
   access: ConversationShareAccessProps;
   members: ConversationShareMembersProps;
   userSearch: ConversationShareUserSearchProps;
+  agentName?: string;
 }
 
 export const ConversationShareEditableContent: React.FC<ConversationShareEditableContentProps> = ({
   access,
   members,
   userSearch,
+  agentName,
 }) => {
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
@@ -145,7 +154,27 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       {editableHeader}
 
       <EuiSpacer size="l" />
-      <EuiFormRow label={currentMembersLabel} fullWidth css={currentMembersLabelStyle}>
+      <EuiFormRow
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{currentMembersLabel}</EuiFlexItem>
+            {agentName ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="question"
+                  size="s"
+                  color="subdued"
+                  offset={AGENT_ACCESS_TOOLTIP_OFFSET}
+                  aria-label={agentAccessHelpAriaLabel}
+                  content={agentAccessHelpLabel(agentName)}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        }
+        fullWidth
+        css={currentMembersLabelStyle}
+      >
         <EuiComboBox<string>
           compressed
           fullWidth
