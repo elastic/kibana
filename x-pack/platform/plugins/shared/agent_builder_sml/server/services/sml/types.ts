@@ -154,10 +154,10 @@ export interface SmlTypeDefinition {
    *
    * Omit when the type wraps a resource that is intentionally public within
    * the space (e.g. taxonomy entries, public schema docs). The indexer then
-   * stamps no privilege elements at all, which the read-path security filter
-   * treats as "no actions required". A type that wraps a sensitive
-   * resource MUST implement this hook — there is no other way to attach an
-   * access-control gate to its entry.
+   * stamps one `count: 0` privilege element per space, which the read-path
+   * security filter treats as "no actions required" — the entry stays space
+   * scoped but is visible to every caller in those spaces. A type that wraps a
+   * sensitive resource MUST implement this hook.
    *
    * Prefer the `kibanaPermissions` helper over hand-writing the action string. Its `kiType` MUST
    * match the KI type the owning feature declares in `aiIndex: { read: [...] }` — which is the
@@ -354,6 +354,13 @@ interface SmlIndexerBaseParams {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
+  /**
+   * Set to `true` when `savedObjectsClient` comes from `getScopedClient` — that
+   * client determines the namespace automatically and throws if one is passed
+   * explicitly. Leave unset for internal repositories, which need an explicit
+   * namespace to access non-default spaces.
+   */
+  clientHasSpacesExtension?: boolean;
 }
 
 export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;

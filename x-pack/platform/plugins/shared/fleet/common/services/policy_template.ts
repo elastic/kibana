@@ -29,7 +29,7 @@ import type {
   PackagePolicyInput,
 } from '../types';
 
-const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
   type: 'text',
   title: i18n.translate('xpack.fleet.policyTemplate.datasetVar.title', {
@@ -157,7 +157,7 @@ export function registryInputAllowsDynamicSignalTypes(input: RegistryInput): boo
  *   - Composable integration packages (nested `inputs[]` entries)
  */
 export const hasDynamicSignalTypes = (
-  packageInfo: PackageInfo | undefined,
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
   scope?: { policyTemplateName?: string; inputType?: string }
 ): boolean =>
   (packageInfo?.policy_templates ?? []).some((template) => {

@@ -19,10 +19,15 @@ import { CONFIRM_MODAL } from '../screens/navigation';
 
 import { request } from './common';
 
-export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
+export const addIntegration = ({
+  useExistingPolicy,
+  skipButtonClick,
+}: { useExistingPolicy?: boolean; skipButtonClick?: boolean } = {}) => {
   cy.intercept('/api/fleet/agent_status?*').as('agentStatus');
 
-  cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+  if (!skipButtonClick) {
+    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+  }
   if (useExistingPolicy) {
     cy.getBySel(EXISTING_HOSTS_TAB).click();
     cy.wait('@agentStatus');

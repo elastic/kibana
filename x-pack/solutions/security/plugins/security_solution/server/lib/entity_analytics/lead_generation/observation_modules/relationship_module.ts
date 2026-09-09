@@ -6,21 +6,17 @@
  */
 
 import pMap from 'p-map';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getLatestEntitiesIndexName, type RelationshipsClient } from '@kbn/entity-store/server';
-import { hashEuid } from '@kbn/entity-store/common/domain/euid';
-import type { Entity } from '@kbn/entity-store/common';
-import { EntityField } from '@kbn/entity-store/common/domain/definitions/entity.gen';
-import type { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
+import type { RelationshipsClient } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule } from '../types';
-import { entityRecordToLeadEntity } from '../entity_conversion';
+import { getEntityRelationships, type EntityRelationships } from '../entities_relationships';
 import {
   makeObservation,
-  getEntityField,
   entityTypeLabel,
   errorMessage,
   getAssetCriticality,
   isHighCriticality,
+  getEntityRisk,
 } from './utils';
 import { OBSERVATION_MODULE_WEIGHTS } from './weights';
 
@@ -28,8 +24,6 @@ const MODULE_ID = 'entity_relationships';
 const MODULE_NAME = 'Entity Relationship Analysis';
 const MODULE_PRIORITY = 6;
 const MODULE_WEIGHT = OBSERVATION_MODULE_WEIGHTS.entity_relationships;
-
-const MGET_CHUNK_SIZE = 1000;
 
 const CONNECTED_TO_RISK_CRITICAL_BASE = 45;
 const CONNECTED_TO_RISK_HIGH_BASE = 25;
@@ -47,17 +41,15 @@ const NEW_CONTROL_HIGH_SCORE = 70;
 const NEW_CONTROL_CONFIDENCE = 0.7;
 
 interface RelationshipModuleDeps {
-  readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
-  readonly spaceId: string;
   readonly relationshipsClient: RelationshipsClient;
+  readonly entitiesMap: ReadonlyMap<string, LeadEntity>;
 }
 
 export const createRelationshipModule = ({
-  esClient,
   logger,
-  spaceId,
   relationshipsClient,
+  entitiesMap,
 }: RelationshipModuleDeps): ObservationModule => ({
   config: {
     id: MODULE_ID,
@@ -67,7 +59,6 @@ export const createRelationshipModule = ({
   },
   isEnabled: () => true,
   async collect(entities: LeadEntity[]): Promise<Observation[]> {
-    const entitiesMap = await getAllEntities(entities, esClient, spaceId, logger);
     const now = Date.now();
 
     // Each entity's `administers` history is resolved with its own query, so cap
@@ -148,123 +139,6 @@ const buildRelationshipObservations = async (
   return observations;
 };
 
-const EntityRelationshipsSchema = EntityField.shape.relationships
-  .unwrap()
-  .pick({ administers: true, communicates_with: true, accesses_infrequently: true })
-  .strip();
-type EntityRelationships = z.infer<typeof EntityRelationshipsSchema>;
-const getEntityRelationships = (entity: LeadEntity): undefined | EntityRelationships => {
-  const entityField = getEntityField(entity);
-  if (!entityField) return;
-
-  const parsed = EntityRelationshipsSchema.safeParse(entityField.relationships);
-  if (!parsed.success || parsed.data == null) return;
-
-  return parsed.data;
-};
-
-/**
- * Create a map containing all the candidate entities and their related entities
- * for easy lookup when building observations from the related entities
- * First list all related entities for each candidate entity then fetch any missing
- * ones from the already fetched candidates list from the ES index to create complete map
- */
-const getAllEntities = async (
-  candidatesEntities: LeadEntity[],
-  esClient: ElasticsearchClient,
-  spaceId: string,
-  logger: Logger
-): Promise<Map<string, LeadEntity>> => {
-  const entitiesMap = new Map(candidatesEntities.map((entity) => [entity.id, entity]));
-
-  // Collect all related entity IDs from the candidates
-  const allRelatedIds = new Set<string>();
-  for (const entity of candidatesEntities) {
-    const relationships = getEntityRelationships(entity);
-    if (relationships) {
-      for (const relationship of Object.values(relationships)) {
-        relationship.ids?.forEach((id) => allRelatedIds.add(id));
-      }
-    }
-  }
-
-  // identify which entities are not already fetched
-  const missingEntitiesIds = Array.from(allRelatedIds).filter((id) => !entitiesMap.has(id));
-
-  // fetch the missing entities from the ES index
-  const fetchedRelatedEntities = await fetchMissingEntities(
-    esClient,
-    spaceId,
-    missingEntitiesIds,
-    logger
-  );
-  fetchedRelatedEntities.forEach((entity) => {
-    entitiesMap.set(entity.id, entity);
-  });
-
-  return entitiesMap;
-};
-
-const fetchMissingEntities = async (
-  esClient: ElasticsearchClient,
-  spaceId: string,
-  entitiesIds: readonly string[],
-  logger: Logger
-): Promise<LeadEntity[]> => {
-  if (entitiesIds.length === 0) {
-    return [];
-  }
-
-  const fetched: LeadEntity[] = [];
-  try {
-    for (let offset = 0; offset < entitiesIds.length; offset += MGET_CHUNK_SIZE) {
-      const chunk = entitiesIds.slice(offset, offset + MGET_CHUNK_SIZE);
-      const { docs } = await esClient.mget<Entity>({
-        index: getLatestEntitiesIndexName(spaceId),
-        ids: chunk.map(hashEuid),
-        _source: [
-          'entity.id',
-          'entity.name',
-          'entity.type',
-          'entity.EngineMetadata.Type',
-          'entity.risk.calculated_score_norm',
-          'entity.risk.calculated_level',
-          'asset.criticality',
-          'user.name',
-          'user.email',
-          'host.name',
-          'host.hostname',
-          'service.name',
-        ],
-      });
-
-      for (const doc of docs) {
-        if ('found' in doc && doc.found && doc._source) {
-          const lead = entityRecordToLeadEntity(doc._source);
-          if (lead) {
-            fetched.push(lead);
-          }
-        }
-      }
-    }
-  } catch (error) {
-    logger.warn(`[${MODULE_ID}] Failed to fetch related entities: ${errorMessage(error)}`);
-  }
-
-  return fetched;
-};
-
-const EntityRiskSchema = EntityField.shape.risk;
-const getEntityRiskLevel = (entity: LeadEntity) => {
-  const entityField = getEntityField(entity);
-  if (!entityField) return;
-
-  const parsed = EntityRiskSchema.safeParse(entityField.risk);
-  if (!parsed.success || parsed.data == null) return;
-
-  return parsed.data.calculated_level;
-};
-
 /**
  * Fires when an entity communicates with one or more entities that are currently
  * High/Critical risk — circumstantial contamination via a lateral channel. The
@@ -287,7 +161,7 @@ const buildConnectedToRiskObservation = (
     const peer = entitiesMap.get(peerId);
     if (peer) {
       resolvedPeerCount++;
-      const riskLevel = getEntityRiskLevel(peer);
+      const riskLevel = getEntityRisk(peer)?.calculatedLevel;
       if (riskLevel === 'Critical') {
         criticalRiskEntities.push(peerId);
       } else if (riskLevel === 'High') {
@@ -337,7 +211,7 @@ const buildSensitiveInfrequentAccessObservation = (
     const target = entitiesMap.get(targetId);
     if (target) {
       const criticality = getAssetCriticality(target);
-      const riskLevel = getEntityRiskLevel(target);
+      const riskLevel = getEntityRisk(target)?.calculatedLevel;
       if (criticality === 'extreme_impact' || riskLevel === 'Critical') {
         criticalEntities.push(targetId);
       } else if (criticality === 'high_impact' || riskLevel === 'High') {
@@ -439,20 +313,4 @@ const buildNewControlObservation = async (
       total_administered_asset_count: administersRelationships.length,
     },
   });
-};
-
-/** Exported for unit testing. */
-export const __testables = {
-  CONNECTED_TO_RISK_CRITICAL_BASE,
-  CONNECTED_TO_RISK_HIGH_BASE,
-  INFREQUENT_ACCESS_CRITICAL_POINTS,
-  INFREQUENT_ACCESS_HIGH_POINTS,
-  NEW_CONTROL_WINDOW_MS,
-  NEW_CONTROL_CRITICAL_SCORE,
-  NEW_CONTROL_HIGH_SCORE,
-  buildRelationshipObservations,
-  buildConnectedToRiskObservation,
-  buildSensitiveInfrequentAccessObservation,
-  buildNewControlObservation,
-  getEntityRelationships,
 };

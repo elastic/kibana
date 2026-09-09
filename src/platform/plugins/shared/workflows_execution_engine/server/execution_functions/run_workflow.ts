@@ -140,7 +140,7 @@ export async function runWorkflow({
   }
 
   const triggeredBy = execution.triggeredBy;
-  const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(execution);
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
     await workflowExecutionRepository.updateWorkflowExecution({

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getTriggerSchema } from '@kbn/workflows';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
 
 describe('generateTriggerSnippet', () => {
@@ -37,6 +38,42 @@ describe('generateTriggerSnippet', () => {
       const snippet = generateTriggerSnippet('custom.my_trigger', { full: true });
       expect(snippet).toContain('condition:');
       expect(snippet).not.toContain('event.source:ui');
+    });
+  });
+
+  describe('requiresConnectorId', () => {
+    const connectorEventTriggerId = 'example.connector_event';
+
+    it('should include connector-id for connector-event triggers', () => {
+      const snippet = generateTriggerSnippet(connectorEventTriggerId, {
+        full: true,
+        requiresConnectorId: true,
+      });
+      expect(snippet).toContain(`type: ${connectorEventTriggerId}`);
+      expect(snippet).toContain('connector-id: ""');
+      expect(snippet).toContain('Id of the connector instance this trigger is bound to');
+      expect(snippet).toMatch(
+        /# Id of the connector instance this trigger is bound to\n\s+connector-id:/
+      );
+      expect(snippet).not.toMatch(/# Id of the connector instance this trigger is bound to\n\n/);
+      expect(snippet).toContain('condition:');
+      const schema = getTriggerSchema([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
+      expect(schema.safeParse({ type: connectorEventTriggerId, 'connector-id': '' }).success).toBe(
+        false
+      );
+    });
+
+    it('should not include connector-id for other custom triggers', () => {
+      const snippet = generateTriggerSnippet('cases.updated', { full: true });
+      expect(snippet).not.toContain('connector-id:');
+    });
+
+    it('should not include connector-id for built-in triggers even if the flag is set', () => {
+      const snippet = generateTriggerSnippet('manual', {
+        full: true,
+        requiresConnectorId: true,
+      });
+      expect(snippet).not.toContain('connector-id:');
     });
   });
 });

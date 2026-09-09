@@ -1,5 +1,5 @@
 {
-  "sha1": "e9d7dce997f11fe638369a414c4bcca25e0174fd",
+  "sha1": "b2fbebec52d5f862acebddb133d128990b6f8ff9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -184,6 +184,48 @@
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
         "line": 33,
         "column": 56
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-6c44cfc85599642",
+      "title": "Notification Center - read-state annotation annotates isRead against the newest copy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 76,
+        "column": 18
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-3cb5922cc1892c9",
+      "title": "Notification Center - read-state annotation orders by recency, not by read state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 110,
+        "column": 36
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-f8a9f1c422234bd",
+      "title": "Notification Center - read-state annotation omits isRead for callers without a user profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 119,
+        "column": 14
       }
     }
   ]
