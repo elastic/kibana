@@ -7,6 +7,7 @@
 
 import type { WorkflowAnonymizationProvider } from './workflow_anonymization_provider';
 import { resolveReplacementsEncryptionKey, resolveWorkflowAnonymizationOptions } from './plugin';
+import { createPiiRegexWorkerServiceMock } from './test_utils';
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -45,6 +46,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
     supportsSynchronousExecution: true,
     execute: jest.fn(),
   };
+  const piiRegexWorker = createPiiRegexWorkerServiceMock();
 
   it('does not enable or log when workflow mode is disabled', () => {
     const logger = { error: jest.fn() };
@@ -55,6 +57,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
         failureMode: 'block',
         preLLMTimeoutMs: 5000,
         provider,
+        piiRegexWorker,
         logger,
       })
     ).toBeUndefined();
@@ -70,6 +73,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
         failureMode: 'allow_unsafe',
         preLLMTimeoutMs: 3000,
         provider,
+        piiRegexWorker,
         logger,
       })
     ).toEqual({
@@ -77,6 +81,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
       failureMode: 'allow_unsafe',
       preLLMTimeoutMs: 3000,
       encryptionKey: undefined,
+      piiRegexWorker,
     });
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -91,6 +96,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
         preLLMTimeoutMs: 5000,
         encryptionKey: 'my-hmac-key',
         provider,
+        piiRegexWorker,
         logger,
       })
     ).toEqual({
@@ -98,6 +104,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
       failureMode: 'block',
       preLLMTimeoutMs: 5000,
       encryptionKey: 'my-hmac-key',
+      piiRegexWorker,
     });
   });
 
@@ -109,6 +116,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
         enabled: true,
         failureMode: 'block',
         preLLMTimeoutMs: 5000,
+        piiRegexWorker,
         logger,
       })
     ).toBeUndefined();
@@ -130,6 +138,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
         failureMode: 'block',
         preLLMTimeoutMs: 5000,
         provider: asyncOnlyProvider,
+        piiRegexWorker,
         logger,
       })
     ).toBeUndefined();
