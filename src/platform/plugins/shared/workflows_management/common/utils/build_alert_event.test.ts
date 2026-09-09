@@ -99,4 +99,65 @@ describe('buildAlertEvent', () => {
 
     expect(result.ruleUrl).toBeUndefined();
   });
+
+  it('should attach getContext() values keyed by kibana.alert.uuid', () => {
+    const uuid = 'alert-uuid-1';
+    const context = { message: 'cpu high', value: 90 };
+    const alerts = {
+      all: { count: 1, data: [] },
+      new: {
+        count: 1,
+        data: [
+          {
+            _id: 'a1',
+            _index: 'test-index',
+            kibana: { alert: { uuid } },
+          },
+        ],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    } as unknown as CombinedSummarizedAlerts;
+
+    const result = buildAlertEvent({
+      alerts,
+      rule: mockRule,
+      spaceId: 'default',
+      contextByAlertUuid: { [uuid]: context },
+    });
+
+    expect(result.alerts).toEqual([
+      expect.objectContaining({
+        _id: 'a1',
+        context,
+      }),
+    ]);
+  });
+
+  it('should leave alerts without matching context unchanged', () => {
+    const alerts = {
+      all: { count: 1, data: [] },
+      new: {
+        count: 1,
+        data: [
+          {
+            _id: 'a1',
+            _index: 'test-index',
+            kibana: { alert: { uuid: 'other-uuid' } },
+          },
+        ],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    } as unknown as CombinedSummarizedAlerts;
+
+    const result = buildAlertEvent({
+      alerts,
+      rule: mockRule,
+      spaceId: 'default',
+      contextByAlertUuid: { 'alert-uuid-1': { message: 'nope' } },
+    });
+
+    expect(result.alerts[0]).not.toHaveProperty('context');
+  });
 });

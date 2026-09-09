@@ -237,7 +237,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
   return {
     connectorTypeId: ConnectorTypeId,
     ruleActionParamsSchema: WorkflowsRuleActionParamsSchema,
-    buildActionParams: ({ alerts, rule, params, ruleUrl, spaceId }) => {
+    buildActionParams: ({ alerts, rule, params, ruleUrl, spaceId, contextByAlertUuid }) => {
       try {
         const subActionParams = params?.subActionParams;
         if (!subActionParams) {
@@ -271,6 +271,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           rule,
           ruleUrl,
           spaceId,
+          contextByAlertUuid,
         });
 
         return {
