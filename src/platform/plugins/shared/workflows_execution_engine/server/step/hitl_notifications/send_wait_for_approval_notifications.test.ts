@@ -34,6 +34,30 @@ describe('send_wait_for_approval_notifications', () => {
         })
       ).toBe(true);
     });
+
+    it('returns true when email channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          email: { 'connector-id': 'email-1', to: ['a@example.com'] },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when slack2 channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123'] },
+        })
+      ).toBe(true);
+    });
+
+    it('returns false when email lacks recipients', () => {
+      expect(
+        hasExternalHitlChannels({
+          email: { 'connector-id': 'email-1', to: [] },
+        })
+      ).toBe(false);
+    });
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
@@ -59,6 +83,15 @@ describe('send_wait_for_approval_notifications', () => {
       approveUrl: 'https://kibana.example/approve',
       rejectUrl: 'https://kibana.example/reject',
     };
+    const baseNotifyArgs = {
+      message: 'Approve change?',
+      approveLabel: 'Approve',
+      rejectLabel: 'Decline',
+      resumeLinks,
+      spaceId: 'default',
+      executionId: 'exec-1',
+      abortController: new AbortController(),
+    };
 
     it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
@@ -68,15 +101,12 @@ describe('send_wait_for_approval_notifications', () => {
       };
 
       await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
         channels: {
           slack: { 'connector-id': 'slack-webhook-1' },
         },
-        message: 'Approve change?',
-        approveLabel: 'Approve',
-        rejectLabel: 'Decline',
         resumeLinks: resumeLinksWithQuery,
         connectorExecutor: { execute } as never,
-        abortController: new AbortController(),
       });
 
       expect(execute).toHaveBeenCalledTimes(1);
@@ -94,16 +124,12 @@ describe('send_wait_for_approval_notifications', () => {
         .mockResolvedValueOnce({ status: 'ok' });
 
       await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
         channels: {
           slack: { 'connector-id': 'slack-webhook-1' },
           slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
         },
-        message: 'Approve change?',
-        approveLabel: 'Approve',
-        rejectLabel: 'Decline',
-        resumeLinks,
         connectorExecutor: { execute } as never,
-        abortController: new AbortController(),
       });
 
       expect(execute).toHaveBeenCalledTimes(2);
@@ -125,15 +151,11 @@ describe('send_wait_for_approval_notifications', () => {
         .mockResolvedValueOnce({ status: 'ok' });
 
       await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
         channels: {
           slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123', 'C0456'] },
         },
-        message: 'Approve change?',
-        approveLabel: 'Approve',
-        rejectLabel: 'Decline',
-        resumeLinks,
         connectorExecutor: { execute } as never,
-        abortController: new AbortController(),
       });
 
       expect(execute).toHaveBeenCalledTimes(2);
@@ -145,15 +167,11 @@ describe('send_wait_for_approval_notifications', () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 
       await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
         channels: {
           slack_api: { 'connector-id': 'slack-api-1', channels: ['#alerts', 'C0123'] },
         },
-        message: 'Approve change?',
-        approveLabel: 'Approve',
-        rejectLabel: 'Decline',
-        resumeLinks,
         connectorExecutor: { execute } as never,
-        abortController: new AbortController(),
       });
 
       expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
@@ -164,6 +182,70 @@ describe('send_wait_for_approval_notifications', () => {
       );
     });
 
+    it('sends slack2 sendMessage notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123', 'C0456'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          connectorType: 'slack2',
+          input: {
+            subAction: 'sendMessage',
+            subActionParams: {
+              channel: 'C0123',
+              text: 'Approve change?\n\n<https://kibana.example/approve|Approve>  <https://kibana.example/reject|Decline>',
+            },
+          },
+        })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('sends a Kibana-style email notification with markdown links and footer path', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          email: {
+            'connector-id': 'email-1',
+            to: ['oncall@example.com'],
+            // channel message is ignored for waitForApproval (built-in body only)
+            message: 'should be ignored',
+          },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(execute.mock.calls[0][0]).toEqual({
+        connectorType: 'email',
+        connectorNameOrId: 'email-1',
+        input: {
+          to: ['oncall@example.com'],
+          subject: 'Approval required',
+          message:
+            'Approve change?\n\n[Approve](https://kibana.example/approve)  [Decline](https://kibana.example/reject)',
+          kibanaFooterLink: {
+            path: '/app/workflows/executions/exec-1',
+            text: 'View in Kibana',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
+    });
+
     it('throws when a configured connector fails', async () => {
       const execute = jest
         .fn()
@@ -171,15 +253,11 @@ describe('send_wait_for_approval_notifications', () => {
 
       await expect(
         sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
           channels: {
             slack: { 'connector-id': 'slack-1' },
           },
-          message: 'Approve change?',
-          approveLabel: 'Approve',
-          rejectLabel: 'Decline',
-          resumeLinks,
           connectorExecutor: { execute } as never,
-          abortController: new AbortController(),
         })
       ).rejects.toThrow('Slack unavailable');
     });
