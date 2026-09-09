@@ -174,15 +174,26 @@ export class ManifestManager {
       this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
       this.licenseService.isEnterprise();
 
+    // Custom YARA Signatures requires enterprise license (ess) or Endpoint Complete add-on (serverless).
+    // In serverless .isEnterprise() will always yield true, in ESS feature check .isEnabled() will also always yield true.
+    // Therefore both conditions must be met in both environments.
+    const isCustomYaraSignaturesWithFeatureAndEnterpriseLicense =
+      listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id &&
+      this.experimentalFeatures.customYaraSignaturesEnabled &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointCustomYaraSignatures) &&
+      this.licenseService.isEnterprise();
+
     // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
     const isOtherArtifactWithFeatureEnabled =
       listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
       listId !== ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      listId !== ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id &&
       this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement);
 
     return (
       isHostIsolationWithFeatureEnabled ||
       isTrustedDevicesWithFeatureAndEnterpriseLicense ||
+      isCustomYaraSignaturesWithFeatureAndEnterpriseLicense ||
       isOtherArtifactWithFeatureEnabled
     );
   }
@@ -211,6 +222,7 @@ export class ManifestManager {
       let itemsByListId: ExceptionListItemSchema[] = [];
       // If there are host isolation exceptions in place but there is a downgrade scenario (serverless), those shouldn't be taken into account when generating artifacts.
       // If there are trusted devices in place but there is a downgrade scenario (ess/serverless), those shouldn't be taken into account when generating artifacts.
+      // If there are custom YARA signatures in place but there is a downgrade scenario (ess/serverless), those shouldn't be taken into account when generating artifacts.
       if (this.shouldRetrieveExceptions(listId)) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
