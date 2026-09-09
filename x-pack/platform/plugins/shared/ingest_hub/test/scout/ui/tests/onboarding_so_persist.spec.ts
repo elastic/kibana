@@ -140,7 +140,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     expect(soUpdateBody.packagePolicyIds).toContain('p-e2e-001');
   });
 
-  test('?deploymentId= param hydrates session from SO and strips param from URL', async ({
+  test('?deploymentId= hydrates session from SO and keeps the param in the URL', async ({
     browserAuth,
     page,
   }) => {

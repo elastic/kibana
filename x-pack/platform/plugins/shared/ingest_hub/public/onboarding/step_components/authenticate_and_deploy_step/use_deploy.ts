@@ -227,10 +227,14 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       // Update SO with deploy outcome (best-effort).
       if (onboardingDeploymentId) {
         await updateDeployment(onboardingDeploymentId, {
-          packagePolicyIds: Object.values({
-            ...detectAndReviewStep.policyIdsByInstance,
-            ...policyIdsByInstance,
-          }),
+          packagePolicyIds: [
+            ...new Set(
+              Object.values({
+                ...detectAndReviewStep.policyIdsByInstance,
+                ...policyIdsByInstance,
+              })
+            ),
+          ],
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
         });
       }
