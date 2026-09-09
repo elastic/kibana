@@ -116,7 +116,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-table-column-severity-low');
+          await testSubjects.missingOrFail('case-severity-badge-low');
         });
       });
 
@@ -507,9 +507,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('persists severity filters', async () => {
         await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
         await browser.refresh();
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
       });
 
       it('persists multiple severity filters', async () => {
@@ -519,8 +519,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.filterBySeverity(CaseSeverity.MEDIUM);
         await cases.casesTable.validateCasesTableHasNthRows(2);
         await browser.refresh();
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.HIGH}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
         await cases.casesTable.validateCasesTableHasNthRows(2);
       });
 
