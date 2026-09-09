@@ -196,7 +196,7 @@ POST /api/synthetics/monitors
 {
   "type": "http",
   "name": "Website Availability",
-  "url": "https://example.com",
+  "url": "https://<example-url>",
   "tags": ["website", "availability"],
   "locations": ["united_kingdom"]
 }

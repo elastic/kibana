@@ -1,3 +1,6 @@
+.artifacts
+docs/**/.artifacts
+/.superset
 .aws-config.json
 .signing-config.json
 .ackrc
@@ -19,7 +22,9 @@ target
 /build
 .jruby
 .idea
-.cursor
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
 !x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
@@ -80,6 +85,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn
@@ -137,12 +143,9 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel | TODO: Remove later
-.ijwb
-/bazel
-/bazel-*
-.bazelrc.user
-.bazelrc.cache
+# PNPM
+.pnpm-store
+.pnpm
 
 elastic-agent-*
 fleet-server-*

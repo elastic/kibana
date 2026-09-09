@@ -8,7 +8,6 @@
 import { escapeQuotes } from '@kbn/es-query';
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
-import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
@@ -32,6 +31,8 @@ import { asyncForEach } from '@kbn/std';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
+
+import yaml from 'yaml';
 
 import {
   getAllowedOutputTypesForAgentPolicy,
@@ -433,10 +434,14 @@ class AgentPolicyService {
       options
     );
 
-    await appContextService
-      .getUninstallTokenService()
-      ?.scoped(soClient.getCurrentNamespace())
-      ?.generateTokenForPolicyId(newSo.id);
+    if (!agentPolicy.supports_agentless) {
+      await appContextService
+        .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
+        ?.generateTokenForPolicyId(newSo.id);
+    } else {
+      logger.debug('Skipping uninstall token generation for agentless policy');
+    }
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -1529,7 +1534,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentVersion: string,
-    options?: { standalone: boolean }
+    options?: { standalone: boolean; redactProxySecrets?: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
     if (fullAgentPolicy) {
@@ -1548,7 +1553,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, yaml);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
@@ -1577,7 +1582,12 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+    options?: {
+      standalone?: boolean;
+      agentPolicy?: AgentPolicy;
+      agentVersion?: string;
+      redactProxySecrets?: boolean;
+    }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }

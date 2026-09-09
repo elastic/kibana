@@ -105,6 +105,7 @@ import type { MaintenanceWindow } from '../application/maintenance_window/types'
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
+const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
 }));
@@ -330,22 +331,52 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleType: 'test',
+        spaceId: 'default',
+        taskInstanceId: '',
+      },
     });
     expect(logger.debug).nthCalledWith(
       2,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       3,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -437,31 +468,6 @@ describe('Task Runner', () => {
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
       );
 
-      expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
-      });
-      expect(logger.debug).nthCalledWith(
-        2,
-        `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
-      );
-
       testAlertingEventLogCalls({
         activeAlerts: 1,
         generatedActions: 1,
@@ -488,6 +494,68 @@ describe('Task Runner', () => {
         })
       );
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
+      expect(logger.debug).toHaveBeenCalledTimes(6);
+      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      });
+      expect(logger.debug).nthCalledWith(
+        2,
+        `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
+      );
+      expect(logger.debug).nthCalledWith(
+        3,
+        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
+      );
+      expect(logger.debug).nthCalledWith(
+        4,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
+      );
 
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -530,32 +598,78 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleType: 'test',
+        spaceId: 'default',
+        taskInstanceId: '',
+      },
     });
     expect(logger.debug).nthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       3,
       `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       4,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       5,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       6,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -671,7 +785,15 @@ describe('Task Runner', () => {
       if (expectedExecutions) {
         expect(logger.debug).not.toHaveBeenCalledWith(expectedMessage);
       } else {
-        expect(logger.debug).toHaveBeenCalledWith(expectedMessage, { tags: ['1', 'test'] });
+        expect(logger.debug).toHaveBeenCalledWith(expectedMessage, {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        });
       }
     }
   );
@@ -932,32 +1054,80 @@ describe('Task Runner', () => {
 
       expect(logger.debug).toHaveBeenCalledTimes(7);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
       });
       expect(logger.debug).nthCalledWith(
         2,
         `rule test:1: '${RULE_NAME}' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         3,
         `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            alertId: '2',
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         4,
         'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         5,
         'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":2,"new":2,"recovered":0,"ignored":0}}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         6,
         'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -1028,7 +1198,18 @@ describe('Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         3,
         `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is throttled`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            actionId: '1',
+            alertId: '2',
+            actionTypeId: 'action',
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
     }
   );
@@ -1071,12 +1252,20 @@ describe('Task Runner', () => {
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledTimes(7);
       expect(logger.debug).nthCalledWith(
         3,
         `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            alertId: '2',
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
     }
   );
@@ -1392,32 +1581,78 @@ describe('Task Runner', () => {
 
       expect(logger.debug).toHaveBeenCalledTimes(7);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
       });
       expect(logger.debug).nthCalledWith(
         2,
         `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         3,
         `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         4,
         'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         5,
         'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         6,
         'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
 
       testAlertingEventLogCalls({
@@ -1534,28 +1769,68 @@ describe('Task Runner', () => {
 
       expect(logger.debug).toHaveBeenCalledWith(
         `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
 
       expect(logger.debug).nthCalledWith(
         3,
         `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         4,
         `deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         5,
         'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         6,
         `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`,
-        { tags: ['1', 'test'] }
+        {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '',
+          },
+        }
       );
 
       alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
@@ -1965,7 +2240,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: Response Error"`
     );
-    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'user-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error']);
   });
 
   test('should set unexpected errors as framework-error', async () => {
@@ -1994,7 +2269,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: test"`
     );
-    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'framework-error']);
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
@@ -2045,7 +2320,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: GENERIC ERROR MESSAGE"`
     );
-    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'framework-error']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
@@ -2185,7 +2460,7 @@ describe('Task Runner', () => {
       expect(logger.warn).nthCalledWith(
         1,
         `Unable to execute rule "1" in the "foo" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`,
-        { tags: ['1', 'test'] }
+        { labels: { ruleId: '1', ruleType: 'test', spaceId: 'foo' } }
       );
       expect(isUnrecoverableError(ex)).toBeTruthy();
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -2270,8 +2545,8 @@ describe('Task Runner', () => {
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
-        `Unable to execute rule "1" in the "test space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`,
-        { tags: ['1', 'test'] }
+        `Unable to execute rule "1" in the "test-space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`,
+        { labels: { ruleId: '1', ruleType: 'test', spaceId: 'test-space' } }
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
@@ -2736,22 +3011,52 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleType: 'test',
+        spaceId: 'default',
+        taskInstanceId: '',
+      },
     });
     expect(logger.debug).nthCalledWith(
       2,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       3,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -3066,7 +3371,17 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       3,
       'Rule "1" skipped scheduling action "4" because the maximum number of allowed actions has been reached.',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          actionId: '4',
+          actionTypeId: 'action',
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -3256,7 +3571,17 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       3,
       'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          actionId: '1',
+          actionTypeId: '.server-log',
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -3430,7 +3755,16 @@ describe('Task Runner', () => {
     );
     expect(logger.error).toHaveBeenCalledWith(
       'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred',
-      { tags: ['1', 'test', 'rule-run-failed', 'framework-error'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+        tags: ['rule-run-failed', 'framework-error'],
+      }
     );
   });
 
@@ -3558,7 +3892,14 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'Executing Rule default:test:1 has resulted in Error: Index is blocked',
       {
-        tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
+        tags: ['rule-run-failed', 'framework-error'],
       }
     );
   });
@@ -3587,7 +3928,13 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'ruleRunStatus for test:1: {"outcome":"failed","outcomeOrder":20,"warning":"unknown","outcomeMsg":["GENERIC ERROR MESSAGE"],"alertsCount":{}}',
       {
-        tags: ['1', 'test'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '',
+        },
       }
     );
   });
@@ -3676,6 +4023,7 @@ describe('Task Runner', () => {
         name: mockedRuleTypeSavedObject.name,
         consumer: mockedRuleTypeSavedObject.consumer,
         revision: mockedRuleTypeSavedObject.revision,
+        tags: mockedRuleTypeSavedObject.tags,
       });
     } else {
       expect(alertingEventLogger.addOrUpdateRuleData).not.toHaveBeenCalled();

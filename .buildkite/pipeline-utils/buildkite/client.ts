@@ -29,12 +29,8 @@ export interface BuildkiteClientConfig {
   exec?: ExecType;
 }
 
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
-}
-
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
@@ -52,6 +48,20 @@ export interface BuildkiteAgentTargetingRule {
   minCpuPlatform?: string;
   preemptible?: boolean;
   diskSizeGb?: number;
+}
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
+  env?: { [key: string]: string | number };
 }
 
 export interface BuildkiteCommandStep {
@@ -431,7 +441,7 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
       input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],

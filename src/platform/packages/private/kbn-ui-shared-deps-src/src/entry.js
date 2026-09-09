@@ -43,7 +43,6 @@ export const ReactDomServer = require('react-dom/server');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
-export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const StyledComponents = require('styled-components');
 export const FastestLevenshtein = require('fastest-levenshtein');
@@ -95,3 +94,4 @@ export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root
 export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-render');
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
+export const KbnCoreUserProfileBrowserContext = require('@kbn/core-user-profile-browser-context');

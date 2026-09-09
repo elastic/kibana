@@ -17,7 +17,7 @@ import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { EsqlTable } from '../../../../common';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
 
@@ -52,13 +52,9 @@ export async function fetchEsqlQuery({
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
-  let response: EsqlTable;
+  let response: EsqlQueryResponse;
   try {
-    response = await esClient.transport.request<EsqlTable>({
-      method: 'POST',
-      path: '/_query',
-      body: query,
-    });
+    response = await esClient.esql.query(query);
   } catch (e) {
     if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);
@@ -102,7 +98,7 @@ export const getEsqlQuery = (
   dateStart: string,
   dateEnd: string
 ) => {
-  const rangeFilter: unknown[] = [
+  const rangeFilter = [
     {
       range: {
         [params.timeField]: {
@@ -125,7 +121,7 @@ export const getEsqlQuery = (
   return query;
 };
 
-export const getSourceFields = (results: EsqlTable) => {
+export const getSourceFields = (results: EsqlQueryResponse) => {
   const resultFields = results.columns.map((c) => ({
     label: c.name,
     searchPath: c.name,

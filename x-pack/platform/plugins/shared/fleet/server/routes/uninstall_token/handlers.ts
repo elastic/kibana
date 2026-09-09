@@ -35,13 +35,13 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
 
   const soClient = coreContext.savedObjects.client;
 
-  const { items: managedPolicies } = await agentPolicyService.list(soClient, {
+  const { items: excludedPolicies } = await agentPolicyService.list(soClient, {
     fields: ['id'],
     perPage: SO_SEARCH_LIMIT,
-    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true OR ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
   });
 
-  const managedPolicyIds = managedPolicies.map((policy) => policy.id);
+  const excludedPolicyIds = excludedPolicies.map((policy) => policy.id);
 
   let policyIdSearchTerm: string | undefined;
   let policyNameSearchTerm: string | undefined;
@@ -57,7 +57,7 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     policyNameSearchTerm,
     page,
     perPage,
-    managedPolicyIds.length > 0 ? managedPolicyIds : undefined
+    excludedPolicyIds.length > 0 ? excludedPolicyIds : undefined
   );
 
   return response.ok({ body });

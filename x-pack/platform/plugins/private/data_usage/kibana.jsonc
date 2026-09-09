@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/data-usage-plugin",
   "owner": [
-    "@elastic/obs-ai-assistant",
+    "@elastic/nightshift-context-and-research-team",
     "@elastic/security-solution"
   ],
   "group": "platform",

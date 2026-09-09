@@ -189,6 +189,42 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should not show proxy input for kafka output', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).toBeNull();
+  });
+
+  it('should show proxy input for elasticsearch output', async () => {
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'es output',
+      id: 'output456',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).not.toBeNull();
+  });
+
+  it('should show proxy input for logstash output', async () => {
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'output789',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).not.toBeNull();
+  });
+
   it('should populate secret input with plain text value when editing kafka output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
@@ -224,6 +260,38 @@ describe('EditOutputFlyout', () => {
         expect.objectContaining({
           secrets: { ssl: { key: 'key' } },
           ssl: { certificate: 'cert', key: '', verification_mode: 'full' },
+        })
+      );
+    });
+  });
+
+  it('should send dynamic kafka topic verbatim without wrapping on save', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topics: [{ topic: '%{[data_stream.type]}-%{[data_stream.namespace]}' }],
+      auth_type: 'none',
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({
+          topics: [{ topic: '%{[data_stream.type]}-%{[data_stream.namespace]}' }],
         })
       );
     });

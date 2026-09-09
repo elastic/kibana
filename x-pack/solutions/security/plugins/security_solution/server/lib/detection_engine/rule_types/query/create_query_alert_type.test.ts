@@ -19,6 +19,7 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
+import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
@@ -57,8 +58,9 @@ describe('Custom Query Alerts', () => {
   const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
 
   const eventsTelemetry = createMockTelemetryEventsSender(true);
+  const endpointAppContextService = createMockEndpointAppContextService();
 
-  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+  const wrapperOptions = {
     actions,
     docLinks,
     lists,
@@ -72,8 +74,11 @@ describe('Custom Query Alerts', () => {
     alerting,
     eventsTelemetry,
     licensing,
+    endpointAppContextService,
     scheduleNotificationResponseActionsService: () => null,
-  });
+  };
+
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(wrapperOptions);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -201,5 +206,46 @@ describe('Custom Query Alerts', () => {
           "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
       })
     );
+  });
+
+  describe('response actions', () => {
+    const buildWrapper = (isPreview: boolean, scheduleService: jest.Mock) =>
+      createSecurityRuleTypeWrapper({
+        ...wrapperOptions,
+        isPreview,
+        scheduleNotificationResponseActionsService: scheduleService,
+      });
+
+    const runRule = async ({ isPreview }: { isPreview: boolean }) => {
+      const scheduleService = jest.fn();
+      const queryAlertType = buildWrapper(
+        isPreview,
+        scheduleService
+      )(createQueryAlertType({ id: QUERY_RULE_TYPE_ID, name: 'Custom Query Rule' }));
+      alerting.registerType(queryAlertType);
+
+      services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        hits: {
+          hits: [sampleDocNoSortId()],
+          total: { relation: 'eq', value: 1 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+      });
+
+      await executor({ params: getQueryRuleParams() });
+      return scheduleService;
+    };
+
+    it('dispatches response actions on a normal rule run', async () => {
+      const scheduleService = await runRule({ isPreview: false });
+      expect(scheduleService).toHaveBeenCalled();
+    });
+
+    it('never dispatches response actions during preview', async () => {
+      const scheduleService = await runRule({ isPreview: true });
+      expect(scheduleService).not.toHaveBeenCalled();
+    });
   });
 });

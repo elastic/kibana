@@ -104,6 +104,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       next_generation_managed_by: 'Index Lifecycle Management',
       prefer_ilm: false,
       rollover_on_write: false,
+      settings: {},
     },
   ],
 };

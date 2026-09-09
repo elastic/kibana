@@ -1,7 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/typed-react-router-config",
-  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-presentation-team"],
+  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-signals-traces-team"],
   "group": "platform",
   "visibility": "shared"
 }

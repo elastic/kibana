@@ -15,8 +15,8 @@ import { handleEsError } from '../../../shared_imports';
 import { KibanaFramework } from '../../../lib/kibana_framework';
 
 const requestBodySchema = schema.object({
-  pattern: schema.string(),
-  rawEvent: schema.string(),
+  pattern: schema.string({ maxLength: 10000 }),
+  rawEvent: schema.string({ maxLength: 100000 }),
   // We don't know these key / values up front as they depend on user input
   customPatterns: schema.object({}, { unknowns: 'allow' }),
 });

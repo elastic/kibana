@@ -70,12 +70,15 @@ export class HomePageObject extends FtrService {
     // hence we setup a delay so the interstitial has enough time to fade in
     const animSpeedExtraSlow = 500;
     await new Promise((resolve) => setTimeout(resolve, animSpeedExtraSlow));
-    return this.retry.try(async () => {
-      return await this.testSubjects.isDisplayed(
-        'homeWelcomeInterstitial',
-        animSpeedExtraSlow * 16
-      );
-    });
+    // Use waitForWithTimeout (retries on false) rather than retry.try (only retries on thrown errors).
+    // In slower environments (e.g. FIPS builds) isDisplayed can return false before the interstitial
+    // finishes fading in, and retry.try would return that false result immediately without retrying.
+    await this.retry.waitForWithTimeout(
+      'homeWelcomeInterstitial to be displayed',
+      animSpeedExtraSlow * 30, // 15s — generous for slow FIPS builds
+      async () => await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow)
+    );
+    return true;
   }
 
   async isGuidedOnboardingLandingDisplayed() {
@@ -87,11 +90,13 @@ export class HomePageObject extends FtrService {
   }
 
   async getVisibileSolutions() {
-    const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
-    const panelAttributes = await Promise.all(
-      solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
-    );
-    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
+    return this.retry.try(async () => {
+      const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
+      const panelAttributes = await Promise.all(
+        solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
+      );
+      return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
+    });
   }
 
   async goToSampleDataPage() {
@@ -100,11 +105,13 @@ export class HomePageObject extends FtrService {
   }
 
   async addSampleDataSet(id: string) {
-    await this.openSampleDataAccordion();
     await this.retry.waitFor(`${id} sample data to be installed`, async () => {
       if (await this.isSampleDataSetInstalled(id)) {
         return true;
       }
+
+      // The accordion is uncontrolled and re-collapses when the card list loads async, so re-open it each attempt.
+      await this.openSampleDataAccordion();
 
       this.log.debug(`Attempting to add sample data: ${id}`);
 
@@ -120,11 +127,13 @@ export class HomePageObject extends FtrService {
   }
 
   async removeSampleDataSet(id: string) {
-    await this.openSampleDataAccordion();
     await this.retry.waitFor('sample data to be removed', async () => {
       if (!(await this.isSampleDataSetInstalled(id))) {
         return true;
       }
+
+      // The accordion is uncontrolled and re-collapses when the card list loads async, so re-open it each attempt.
+      await this.openSampleDataAccordion();
 
       this.log.debug(`Attempting to remove sample data: ${id}`);
 
@@ -191,6 +200,8 @@ export class HomePageObject extends FtrService {
     await this.addSampleDataSet(id);
     await this.toasts.dismissIfExists();
     await this.retry.try(async () => {
+      // The accordion is uncontrolled and may be collapsed; re-open it before each attempt.
+      await this.openSampleDataAccordion();
       await this.testSubjects.click(`launchSampleDataSet${id}`);
       await this.find.byCssSelector(
         `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`

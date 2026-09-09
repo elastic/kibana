@@ -173,7 +173,7 @@ export const MetricItem = ({
               if (!testInProgress && locationName) {
                 onClick({
                   configId: monitor.configId,
-                  id: monitor.configId,
+                  id: monitor.monitorQueryId,
                   location: locationName,
                   locationId: monitor.locationId,
                   spaces: monitor.spaces,

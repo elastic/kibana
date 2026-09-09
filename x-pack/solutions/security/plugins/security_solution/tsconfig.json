@@ -51,6 +51,7 @@
     "@kbn/threat-intelligence-plugin",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
+    "@kbn/es-errors",
     "@kbn/utility-types",
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-io-ts-list-types",

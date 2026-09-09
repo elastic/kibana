@@ -28,6 +28,7 @@ import {
 
 import { NotificationsStart } from '@kbn/core/public';
 import { useServicesContext } from '../../contexts';
+import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
 import { type DevToolsVariable } from './types';
@@ -37,17 +38,11 @@ export interface Props {
   variables: [];
 }
 
-const sendToBrowserClipboard = async (text: string) => {
-  if (window.navigator?.clipboard) {
-    await window.navigator.clipboard.writeText(text);
-    return;
-  }
-  throw new Error('Could not copy to clipboard!');
-};
-
 const copyToClipboard = async (text: string, notifications: Pick<NotificationsStart, 'toasts'>) => {
   try {
-    await sendToBrowserClipboard(text);
+    if (!(await copyTextToClipboard(text))) {
+      throw new Error('Could not copy to clipboard!');
+    }
 
     notifications.toasts.addSuccess({
       title: i18n.translate('console.variabllesPage.copyToClipboardSuccess', {

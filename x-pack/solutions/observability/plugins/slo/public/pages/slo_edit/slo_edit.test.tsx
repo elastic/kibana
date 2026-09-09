@@ -36,7 +36,11 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => {
+  const mock = jest.createMockFromModule('@kbn/observability-shared-plugin/public');
+  (mock as Record<string, unknown>).TagsComboBox = () => null;
+  return mock;
+});
 jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_create_data_view');

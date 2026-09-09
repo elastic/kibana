@@ -12,7 +12,7 @@ import type { ConfigType } from '@kbn/screenshotting-server';
 import type { CDPSession } from 'puppeteer';
 import { truncate } from 'lodash';
 import open from 'opn';
-import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
+import type { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';

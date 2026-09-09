@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiModal,
@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
+import { useYaml } from '../../../../../../../services';
 
 import { getFormattedChangelog } from '../utils';
 
@@ -46,6 +47,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const { notifications } = useStartServices();
+  const yaml = useYaml();
 
   const {
     data: changelogResponse,
@@ -55,9 +57,12 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   const changelogText = changelogResponse?.data;
 
   // currentVersion is used to display the changelog up to the current installed version, when there is a newer one available
-  const finalChangelog = currentVersion
-    ? getFormattedChangelog(changelogText, latestVersion, currentVersion)
-    : getFormattedChangelog(changelogText, latestVersion);
+  const finalChangelog = useMemo(() => {
+    if (!yaml) return '';
+    return currentVersion
+      ? getFormattedChangelog(yaml.parse, changelogText, latestVersion, currentVersion)
+      : getFormattedChangelog(yaml.parse, changelogText, latestVersion);
+  }, [yaml, changelogText, latestVersion, currentVersion]);
 
   if (changelogError) {
     notifications.toasts.addError(changelogError, {
@@ -76,7 +81,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
         <EuiSkeletonText
           lines={10}
           size="s"
-          isLoading={isLoading}
+          isLoading={isLoading || !yaml}
           contentAriaLabel="changelog text"
         >
           <EuiCodeBlock overflowHeight={360}>{finalChangelog}</EuiCodeBlock>

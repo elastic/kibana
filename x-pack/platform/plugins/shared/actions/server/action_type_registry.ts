@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures } from '../common';
+import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskRunnerFactory, ILicenseState, ActionExecutionSourceType } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -171,6 +172,19 @@ export class ActionTypeRegistry {
       );
     }
 
+    if (actionType.supportedFeatureIds.some((id) => id.length > MAX_FEATURE_ID_LENGTH)) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.featureIdTooLong', {
+          defaultMessage:
+            'Feature IDs for connector type "{connectorTypeId}" must not exceed {maxLength} characters.',
+          values: {
+            connectorTypeId: actionType.id,
+            maxLength: MAX_FEATURE_ID_LENGTH,
+          },
+        })
+      );
+    }
+
     if (!areValidFeatures(actionType.supportedFeatureIds)) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
@@ -207,9 +221,11 @@ export class ActionTypeRegistry {
         title: actionType.name,
         maxAttempts,
         cost: TaskCost.Tiny,
+        taskTypeGroup: TaskTypeGroup.Actions,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
+
     // No need to notify usage on basic action types
     if (actionType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(

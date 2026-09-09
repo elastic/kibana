@@ -207,7 +207,7 @@ export const validatePackagePolicy = (
   }, {});
 
   // Validate each package policy input with either its own var fields and stream vars
-  packagePolicy.inputs.forEach((input) => {
+  (packagePolicy.inputs ?? []).forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
@@ -346,7 +346,9 @@ export const validatePackagePolicyConfig = (
 
   if (varDef.type === 'yaml') {
     try {
-      parsedValue = safeLoadYaml(value);
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      parsedValue = safeLoadYaml(String(value));
     } catch (e) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {

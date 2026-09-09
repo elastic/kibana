@@ -24,7 +24,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -96,12 +96,14 @@ import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema 
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyPostUpdateCallback,
+  PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -556,11 +558,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return p;
     });
 
-    const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-      logger,
-      packageInfos: [...packageInfos.values()],
-      savedObjectsClient: soClient,
-    });
+    const [packageInfosandAssetsMap, secretStorageEnabled] = await Promise.all([
+      getPkgInfoAssetsMap({
+        logger,
+        packageInfos: [...packageInfos.values()],
+        savedObjectsClient: soClient,
+      }),
+      isSecretStorageEnabled(esClient, soClient),
+    ]);
 
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
@@ -569,9 +574,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
 
-        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+        // eslint-disable-next-line prefer-const
+        let { id, ...pkgPolicyWithoutId } = packagePolicy;
 
         let elasticsearch: PackagePolicy['elasticsearch'];
+        let secretReferences: PolicySecretReference[] | undefined;
         if (packagePolicy.package) {
           const packageInfoAndAsset = packageInfosandAssetsMap.get(
             `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -585,10 +592,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
           validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
+          if (secretStorageEnabled) {
+            const secretsRes = await extractAndWriteSecrets({
+              packagePolicy: { ...pkgPolicyWithoutId, inputs },
+              packageInfo: pkgInfo,
+              esClient,
+            });
+
+            pkgPolicyWithoutId = secretsRes.packagePolicy;
+            secretReferences = secretsRes.secretReferences;
+            inputs = pkgPolicyWithoutId.inputs as PackagePolicyInput[];
+          }
+
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
                 pkgInfo,
-                packagePolicy.vars || {},
+                pkgPolicyWithoutId.vars || {},
                 inputs,
                 assetsMap
               )
@@ -617,6 +636,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            ...(secretReferences?.length && { secret_references: secretReferences }),
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
@@ -937,7 +957,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
-    }
+    },
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
@@ -956,11 +977,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
+      const packagePolicyUpdateWithId = { ...packagePolicyUpdate, id };
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
-        packagePolicyUpdate,
+        packagePolicyUpdateWithId,
         soClient,
-        esClient
+        esClient,
+        context
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
@@ -999,7 +1022,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     // eslint-disable-next-line prefer-const
-    let { version, ...restOfPackagePolicy } = packagePolicy;
+    let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
     let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -1174,7 +1197,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -2059,6 +2082,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
             for (const callback of externalCallbacks) {
               let thisCallbackResponse;
+              let packagePolicyId: string | undefined;
 
               if (externalCallbackType === 'packagePolicyPostCreate') {
                 thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
@@ -2078,6 +2102,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   request
                 );
                 updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+              } else if (externalCallbackType === 'packagePolicyUpdate') {
+                // id is stripped by the schema validation below; re-inject it so every
+                // callback in the chain receives it regardless of registration order.
+                packagePolicyId = (updatedNewData as UpdatePackagePolicyWithId).id;
+                thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
+                  updatedNewData as UpdatePackagePolicyWithId,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
               } else {
                 thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                   updatedNewData as NewPackagePolicy,
@@ -2108,7 +2143,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   ),
                 };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                updatedNewData = {
+                  ...UpdatePackagePolicySchema.validate(omitted),
+                  id: packagePolicyId,
+                };
               }
             }
 
@@ -2410,7 +2448,8 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           force?: boolean | undefined;
           skipUniqueNameVerification?: boolean | undefined;
         }
-      | undefined
+      | undefined,
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -2418,7 +2457,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
   }
 
   async create(
@@ -2451,7 +2490,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => ({
@@ -2951,7 +2990,7 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))

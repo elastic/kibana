@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowResponseSchemaV1 } from '../../../response';
+import { SEARCH_MAX_LENGTH, STATUS_FILTER_MAX_SIZE } from '../../../../shared/constants/latest';
 
 const MAX_DOCS = 10000;
 
@@ -43,9 +44,15 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
           description:
             'An Elasticsearch simple_query_string query that filters the objects in the response.',
         },
+        maxLength: SEARCH_MAX_LENGTH,
       })
     ),
-    status: schema.maybe(schema.oneOf([statusSchema, schema.arrayOf(statusSchema)])),
+    status: schema.maybe(
+      schema.oneOf([
+        statusSchema,
+        schema.arrayOf(statusSchema, { maxSize: STATUS_FILTER_MAX_SIZE }),
+      ])
+    ),
   },
   {
     validate: (params) => {

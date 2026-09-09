@@ -22,6 +22,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
@@ -33,6 +34,7 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  authc: CoreAuthenticationService;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -141,6 +143,7 @@ export class RenderingService implements IRenderingService {
           i18n={deps.i18n}
           theme={deps.theme}
           userProfile={deps.userProfile}
+          authc={deps.authc}
         >
           {element}
         </KibanaRenderContextProvider>

@@ -18,6 +18,9 @@ export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () =>
       checkGroup: schema.string(),
       stepIndex: schema.number(),
     }),
+    query: schema.object({
+      timestamp: schema.maybe(schema.string({ maxLength: 30 })),
+    }),
   },
   handler: async (routeProps) => {
     return await journeyScreenshotHandler(routeProps);

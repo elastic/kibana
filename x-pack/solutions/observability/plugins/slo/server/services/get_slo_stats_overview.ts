@@ -52,19 +52,34 @@ export class GetSLOStatsOverview {
         aggs: {
           stale: {
             filter: {
-              range: {
-                summaryUpdatedAt: {
-                  lt: `now-${settings.staleThresholdInHours}h`,
-                },
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      summaryUpdatedAt: {
+                        lt: `now-${settings.staleThresholdInHours}h`,
+                      },
+                    },
+                  },
+                ],
+                must_not: [{ term: { isTempDoc: true } }],
               },
             },
           },
           not_stale: {
             filter: {
-              range: {
-                summaryUpdatedAt: {
-                  gte: `now-${settings.staleThresholdInHours}h`,
-                },
+              bool: {
+                should: [
+                  { term: { isTempDoc: true } },
+                  {
+                    range: {
+                      summaryUpdatedAt: {
+                        gte: `now-${settings.staleThresholdInHours}h`,
+                      },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
             aggs: {
