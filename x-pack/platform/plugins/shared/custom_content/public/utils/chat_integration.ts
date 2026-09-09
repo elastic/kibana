@@ -10,6 +10,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   MAX_FETCH_CONTEXT_BYTES,
+  MAX_SHORT_FIELD_LENGTH,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
@@ -78,7 +79,8 @@ export const buildCustomContentContextAttachment = ({
   data: {
     panel_template: template,
     esql_query: esqlQuery,
-    panel_title: panelTitle,
+    // Truncated rather than left to fail validation
+    panel_title: panelTitle?.slice(0, MAX_SHORT_FIELD_LENGTH),
     embeddable_id: embeddableId,
     ...(panelHeight ? { panel_height: panelHeight } : {}),
     ...(fetchContext?.timeRange ? { time_range: fetchContext.timeRange } : {}),

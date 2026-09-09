@@ -6,7 +6,10 @@
  */
 
 import { ESQLVariableType } from '@kbn/esql-types';
-import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
+import {
+  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+  MAX_SHORT_FIELD_LENGTH,
+} from '../../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './chat_integration';
 
 describe('buildCustomContentContextAttachment', () => {
@@ -175,5 +178,15 @@ describe('buildCustomContentContextAttachment', () => {
 
     expect(attachment.data).not.toHaveProperty('filters');
     expect(attachment.data).toMatchObject({ query: { query: 'status:200', language: 'kuery' } });
+  });
+
+  it('truncates an over-long panel title rather than failing validation', () => {
+    const attachment = buildCustomContentContextAttachment({
+      template: '<div>hi</div>',
+      embeddableId: 'panel-1',
+      panelTitle: 'a'.repeat(500),
+    });
+
+    expect(attachment.data?.panel_title).toHaveLength(MAX_SHORT_FIELD_LENGTH);
   });
 });

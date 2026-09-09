@@ -20,7 +20,7 @@ export const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.p
 export const MAX_PREVIEW_HEIGHT = 1200;
 
 /** Ceiling for the identifier- and label-sized strings in this schema. */
-const MAX_SHORT_FIELD_LENGTH = 256;
+export const MAX_SHORT_FIELD_LENGTH = 256;
 
 /**
  * Serialized-size budget for the opaque fetch context (`filters`, `query`, `esql_variables` etc).
