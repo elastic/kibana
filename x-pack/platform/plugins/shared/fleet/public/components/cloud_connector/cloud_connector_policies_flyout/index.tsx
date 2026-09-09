@@ -32,6 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { pagePathGetters } from '../../../constants';
@@ -40,13 +41,18 @@ import type {
   CloudConnectorVars,
   AccountType,
   GcpCloudConnectorVars,
+  IacUpgradeStatus,
 } from '../../../../common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
+import { parseAwsRegionFromArn } from '../../../../common/services/cloud_connectors/iac_deployment';
+import { IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT } from '../../../../common/telemetry/iac_provisioner_events';
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
-import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
+import { useUpdateCloudConnector, updateCloudConnector } from '../hooks/use_update_cloud_connector';
 import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
-import { GCP_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
+import { GCP_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 import {
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
@@ -55,6 +61,9 @@ import {
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
+import { IacTemplateDetails } from '../components/iac_template_details';
+import { IacUpgradeCallout } from '../components/iac_upgrade_callout';
+import { useIacProvisioner, useStartServices } from '../../../hooks';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -63,6 +72,10 @@ interface CloudConnectorPoliciesFlyoutProps {
   accountType?: AccountType;
   provider: CloudProviders;
   onClose: () => void;
+  iacKey?: string;
+  iacDeploymentId?: string;
+  iacUpgradeStatus?: IacUpgradeStatus;
+  iacUpgradeCheckedAt?: string;
 }
 
 export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyoutProps> = ({
@@ -72,16 +85,35 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   accountType,
   provider,
   onClose,
+  iacKey,
+  iacDeploymentId,
+  iacUpgradeStatus,
+  iacUpgradeCheckedAt,
 }) => {
   const { application } = useKibana().services;
+  const { analytics, http } = useStartServices();
+  const { isIacProvisionerEnabled } = useIacProvisioner();
+  const queryClient = useQueryClient();
+
   const flyoutTitleId = useGeneratedHtmlId();
   const deleteModalTitleId = useGeneratedHtmlId();
   const [cloudConnectorName, setCloudConnectorName] = useState(initialName);
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
+  const [editedIacKey, setEditedIacKey] = useState(iacKey ?? '');
+  const [editedIacDeploymentId, setEditedIacDeploymentId] = useState(iacDeploymentId ?? '');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+  const showIac = provider === AWS_PROVIDER && isIacProvisionerEnabled;
+
+  const deploymentIdInvalid =
+    editedIacDeploymentId !== '' && parseAwsRegionFromArn(editedIacDeploymentId) === undefined;
+  const iacDeploymentIdToSave =
+    showIac && editedIacDeploymentId && editedIacDeploymentId !== (iacDeploymentId ?? '')
+      ? editedIacDeploymentId
+      : undefined;
 
   const {
     data: usageData,
@@ -111,6 +143,41 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       onClose();
     }
   );
+
+  const { data: verification } = useVerifyIacKey({
+    cloudConnectorId,
+    enabled: showIac && iacUpgradeStatus === 'upgrade_available',
+  });
+
+  const onTemplateRendered = useCallback(
+    ({ key }: { key?: string }) => {
+      // Runs on the "Update CloudFormation stack" click once the render succeeds; Kibana cannot see
+      // the user apply the update in AWS, so the key is stored at click time. Raw request: no toast.
+      if (key && cloudConnectorId) {
+        updateCloudConnector(http, cloudConnectorId, {
+          iac_key: key,
+          ...(iacDeploymentIdToSave ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
+        })
+          .then(() => {
+            setEditedIacKey(key);
+            queryClient.invalidateQueries(['get-cloud-connectors']);
+            queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
+          })
+          .catch(() => {
+            // Silent: the daily iac_upgrade_check task self-heals key mismatches.
+          });
+      }
+    },
+    [cloudConnectorId, http, iacDeploymentIdToSave, queryClient]
+  );
+
+  const { launchButtonProps, isGeneratingTemplate } = useCloudConnectorTemplate({
+    provider: AWS_PROVIDER,
+    accountType: accountType ?? 'single-account',
+    integrations: verification?.integrations,
+    deploymentId: deploymentIdInvalid ? undefined : editedIacDeploymentId || undefined,
+    onTemplateRendered,
+  });
 
   const handleDeleteConnector = useCallback(() => {
     setIsDeleteModalVisible(true);
@@ -167,18 +234,28 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     }
   );
 
-  const handleSaveName = () => {
-    if (editedName && editedName !== cloudConnectorName) {
-      updateConnector({ name: editedName });
-    }
-  };
-
   const handleNameChange = useCallback((name: string, valid: boolean) => {
     setEditedName(name);
     setIsNameValid(valid);
   }, []);
 
-  const isSaveDisabled = !isNameValid || editedName === cloudConnectorName || isUpdating;
+  // The API rejects empty strings (minLength 1): clearing a value is not supported, so only
+  // non-empty, changed values are sent.
+  const iacKeyToSave =
+    showIac && editedIacKey && editedIacKey !== (iacKey ?? '') ? editedIacKey : undefined;
+  const iacChanged = iacKeyToSave !== undefined || iacDeploymentIdToSave !== undefined;
+  const nameChanged = editedName !== cloudConnectorName;
+
+  const handleSave = () => {
+    updateConnector({
+      ...(nameChanged && editedName ? { name: editedName } : {}),
+      ...(iacKeyToSave !== undefined ? { iac_key: iacKeyToSave } : {}),
+      ...(iacDeploymentIdToSave !== undefined ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
+    });
+  };
+
+  const isSaveDisabled =
+    !isNameValid || deploymentIdInvalid || (!nameChanged && !iacChanged) || isUpdating;
 
   const tableCaption = useMemo(
     () =>
@@ -329,6 +406,45 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {showIac && iacUpgradeStatus === 'upgrade_available' && (
+          <>
+            <IacUpgradeCallout
+              checkedAt={iacUpgradeCheckedAt}
+              hasKey={Boolean(iacKey)}
+              canUpdate={
+                Boolean(editedIacDeploymentId) &&
+                !deploymentIdInvalid &&
+                Boolean(verification?.integrations?.length)
+              }
+              isUpdating={isGeneratingTemplate}
+              onUpdateStack={() => {
+                analytics.reportEvent(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT.eventType, {
+                  surface: 'flyout',
+                  action: 'update_stack_clicked',
+                  reason: iacKey ? 'key_mismatch' : 'no_key',
+                  hasDeploymentId: Boolean(editedIacDeploymentId),
+                });
+                if ('onClick' in launchButtonProps) {
+                  launchButtonProps.onClick();
+                }
+              }}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {showIac && (
+          <>
+            <IacTemplateDetails
+              iacKey={editedIacKey}
+              iacDeploymentId={editedIacDeploymentId}
+              isDeploymentIdInvalid={deploymentIdInvalid}
+              onIacKeyChange={setEditedIacKey}
+              onIacDeploymentIdChange={setEditedIacDeploymentId}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {/* Usage Section */}
         <EuiText
           size="xs"
@@ -458,7 +574,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={handleSaveName}
+                  onClick={handleSave}
                   isDisabled={isSaveDisabled}
                   iconType="save"
                   isLoading={isUpdating}

@@ -619,6 +619,15 @@ export const getIacLaunchUrl = ({
   return staticUrl.replace(TEMPLATE_URL_PARAM_REGEX, `templateURL=${encodedArtifact}`);
 };
 
+/** Shared by the wizard's stack ARN field and the flyout's Deployment ID field. */
+export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.stackArnInvalid',
+  {
+    defaultMessage:
+      'Enter a CloudFormation stack ARN, for example arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/…',
+  }
+);
+
 /** Read-only link to the deployed stack; needs no render. */
 export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {
   const region = parseAwsRegionFromArn(deploymentId);

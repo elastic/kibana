@@ -237,6 +237,10 @@ export const CloudConnectorSelector = ({
           accountType={flyoutConnector.accountType}
           provider={provider}
           onClose={handleCloseFlyout}
+          iacKey={flyoutConnector.iac_key}
+          iacDeploymentId={flyoutConnector.iac_deployment_id}
+          iacUpgradeStatus={flyoutConnector.iac_upgrade_status}
+          iacUpgradeCheckedAt={flyoutConnector.iac_upgrade_checked_at}
         />
       )}
     </>

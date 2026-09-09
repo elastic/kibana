@@ -12,11 +12,11 @@ import {
   EuiAccordion,
   EuiSpacer,
   EuiButton,
-  EuiCallOut,
   EuiLink,
   EuiFieldText,
   EuiFormRow,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
@@ -31,7 +31,11 @@ import {
 import { getEnabledPolicyTemplates } from '../../../../common/services/policy_template';
 import { type CloudConnectorFormProps } from '../types';
 
-import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
+import {
+  updateInputVarsWithCredentials,
+  isAwsCredentials,
+  INVALID_STACK_ARN_MESSAGE,
+} from '../utils';
 import { AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
@@ -40,11 +44,6 @@ import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
-
-const STACK_ARN_ERROR = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnInvalid', {
-  defaultMessage:
-    'Enter a CloudFormation stack ARN, for example arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/…',
-});
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
@@ -146,12 +145,10 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       {templateGenerationError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
             title={templateGenerationError}
-            color="danger"
-            iconType="error"
             size="s"
           />
         </>
@@ -169,7 +166,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
                 'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
             })}
             isInvalid={stackArnInvalid}
-            error={stackArnInvalid ? STACK_ARN_ERROR : undefined}
+            error={stackArnInvalid ? INVALID_STACK_ARN_MESSAGE : undefined}
           >
             <EuiFieldText
               fullWidth
