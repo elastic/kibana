@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRole } from '@kbn/scout';
+import { randomUUID } from 'crypto';
+import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
@@ -36,24 +37,25 @@ apiTest.describe(
   () => {
     let devToolsSpaceId: string;
     let dashboardSpaceId: string;
-    // dev_tools in one space, dashboard in the other, so the same credentials must be
-    // accepted in the first space and rejected in the second.
-    let spaceScopedRole: KibanaRole;
+    // One API key for a role with dev_tools in one space and dashboard in the other,
+    // so the same credentials are accepted in the first space and rejected in the second.
+    let spaceScopedCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ apiServices }, workerInfo) => {
-      devToolsSpaceId = `console-dev-tools-${workerInfo.parallelIndex}`;
-      dashboardSpaceId = `console-dashboard-${workerInfo.parallelIndex}`;
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
+      // UUID per space so an interrupted run's leftovers cannot collide with the next run.
+      devToolsSpaceId = `console-dev-tools-${randomUUID()}`;
+      dashboardSpaceId = `console-dashboard-${randomUUID()}`;
 
       await apiServices.spaces.create({ id: devToolsSpaceId, name: devToolsSpaceId });
       await apiServices.spaces.create({ id: dashboardSpaceId, name: dashboardSpaceId });
 
-      spaceScopedRole = {
+      spaceScopedCredentials = await requestAuth.getApiKeyForCustomRole({
         elasticsearch: { cluster: [] },
         kibana: [
           { base: [], feature: { dev_tools: ['all'] }, spaces: [devToolsSpaceId] },
           { base: [], feature: { dashboard: ['all'] }, spaces: [dashboardSpaceId] },
         ],
-      };
+      });
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -96,10 +98,9 @@ apiTest.describe(
 
     apiTest(
       'accepts a space-scoped role in the space that grants dev_tools',
-      async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(spaceScopedRole);
+      async ({ apiClient }) => {
         const response = await apiClient.post(proxyPath(devToolsSpaceId), {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+          headers: { ...COMMON_HEADERS, ...spaceScopedCredentials.apiKeyHeader },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -108,10 +109,9 @@ apiTest.describe(
 
     apiTest(
       'rejects a space-scoped role in a space that does not grant dev_tools',
-      async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(spaceScopedRole);
+      async ({ apiClient }) => {
         const response = await apiClient.post(proxyPath(dashboardSpaceId), {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+          headers: { ...COMMON_HEADERS, ...spaceScopedCredentials.apiKeyHeader },
         });
 
         expect(response).toHaveStatusCode(403);
