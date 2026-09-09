@@ -16,7 +16,7 @@ import {
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
-import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { matcherDataFieldsOasExamples } from './matcher_data_fields_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -25,13 +25,14 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions'
 @injectable()
 export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH;
+  static path = ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get matcher data fields suggestions',
     description: 'Get suggestions for matcher data fields.',
     oasOperationObject: matcherDataFieldsOasExamples,

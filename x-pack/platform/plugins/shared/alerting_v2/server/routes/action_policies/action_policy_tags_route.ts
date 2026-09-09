@@ -16,7 +16,7 @@ import {
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { actionPolicyTagsOasExamples } from './action_policy_tags_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -25,13 +25,14 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions'
 @injectable()
 export class ActionPolicyTagsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`;
+  static path = `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/tags`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get action policy tags',
     description: 'Get unique tags used across action policies.',
     oasOperationObject: actionPolicyTagsOasExamples,
