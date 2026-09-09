@@ -766,7 +766,7 @@ describe('Execution Routes', () => {
         'default',
         { resume: true },
         request,
-        { channel: 'kibana_execution_view' }
+        { channel: 'kibana_execution_view', stepExecutionId: undefined }
       );
       expect(result).toMatchObject({
         type: 'ok',
@@ -776,6 +776,27 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+
+    it('forwards stepExecutionId so the HITL claim skips search lookup', async () => {
+      mockApi.resumeWorkflowExecution.mockResolvedValue({
+        resumedBy: 'user',
+      });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        body: { input: { resume: true }, stepExecutionId: 'step-exec-1' },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        { resume: true },
+        request,
+        { channel: 'kibana_execution_view', stepExecutionId: 'step-exec-1' }
+      );
     });
   });
 
