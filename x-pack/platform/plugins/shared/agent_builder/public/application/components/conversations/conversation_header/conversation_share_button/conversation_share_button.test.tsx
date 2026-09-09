@@ -37,15 +37,10 @@ jest.mock('../../../../hooks/use_suggest_users', () => ({
   useSuggestUsers: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_conversation_access_control', () => {
-  const actual = jest.requireActual('../../../../hooks/use_conversation_access_control');
-
-  return {
-    hasInviteMembersSummary: actual.hasInviteMembersSummary,
-    useInviteMembersSummary: jest.fn(),
-    useUpdateConversationAccessControl: jest.fn(),
-  };
-});
+jest.mock('../../../../hooks/use_conversation_access_control', () => ({
+  useInviteMembersSummary: jest.fn(),
+  useUpdateConversationAccessControl: jest.fn(),
+}));
 
 jest.mock('../../../../hooks/use_user_profiles', () => ({
   useUserProfiles: jest.fn(),

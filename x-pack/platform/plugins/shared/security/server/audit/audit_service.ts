@@ -273,12 +273,9 @@ const withAuditOtelTransforms = (
   return {
     ...baseAppender,
     transformAttributes: applyAuditOtelFieldMap,
-    // Keep only the configured attributes plus promoted keys (log delivery reads them
-    // from the resource); drops the detectors' host/OS/process/env fields.
-    includeResources: [
-      ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
-      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-    ],
+    // Only service identity belongs in the resource. Promotion captures project.id and
+    // other configured keys before filtering, so they remain available on each record.
+    includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
     promoteResourceAttributes: [
       ...(baseAppender.promoteResourceAttributes ?? []),
       ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
