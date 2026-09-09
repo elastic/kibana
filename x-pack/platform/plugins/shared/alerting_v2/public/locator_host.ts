@@ -74,3 +74,5 @@ export const createAlertingV2HostApp = (
   actionPolicies: { app: appId, basePath: pageBasePaths.actionPolicies },
   executionHistory: { app: appId, basePath: pageBasePaths.executionHistory },
 });
+
+export type CreateAlertingV2HostApp = typeof createAlertingV2HostApp;

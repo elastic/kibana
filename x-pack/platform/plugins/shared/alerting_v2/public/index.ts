@@ -52,6 +52,7 @@ import {
   AlertingV2EpisodesLocatorDefinition,
   AlertingV2ActionPoliciesLocatorDefinition,
   AlertingV2ExecutionHistoryLocatorDefinition,
+  createAlertingV2HostApp,
 } from './locators';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
@@ -90,8 +91,12 @@ export type {
   AlertingV2PageProps,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export { createAlertingV2HostApp, MANAGEMENT_HOST } from './locator_host';
-export type { AlertingV2HostApp, AlertingV2LocatorHost } from './locator_host';
+export type {
+  AlertingV2HostApp,
+  AlertingV2LocatorHost,
+  CreateAlertingV2HostApp,
+} from './locator_host';
+export { MANAGEMENT_HOST } from './locator_host';
 export type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
@@ -136,6 +141,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
         default: m.AlertingV2ExecutionHistoryPage,
       }))
     ),
+    createAlertingV2HostApp,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
