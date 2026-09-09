@@ -20,8 +20,11 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ kbnClient, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+
+      await apiServices.spaces.delete(CLASSIC_SPACE);
+      await apiServices.spaces.delete(SOLUTION_SPACE);
 
       await kbnClient.request({
         method: 'POST',

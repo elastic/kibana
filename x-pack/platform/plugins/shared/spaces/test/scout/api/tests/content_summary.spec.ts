@@ -42,6 +42,8 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+      await apiServices.spaces.delete(A_TEST_SPACE);
+      await apiServices.spaces.delete(B_TEST_SPACE);
       await apiServices.spaces.create({ id: A_TEST_SPACE, name: 'AB Space' });
       await apiServices.spaces.create({ id: B_TEST_SPACE, name: 'AC Space' });
     });

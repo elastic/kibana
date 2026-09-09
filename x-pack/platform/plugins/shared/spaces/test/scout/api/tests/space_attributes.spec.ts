@@ -20,8 +20,11 @@ apiTest.describe('Space attributes', { tag: tags.stateful.all }, () => {
   let adminApiCredentials: RoleApiCredentials;
   const createdSpaceIds: string[] = [];
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
+    await apiServices.spaces.delete('api-test-space');
+    await apiServices.spaces.delete('api-test-space2');
+    await apiServices.spaces.delete('api-test-space3');
   });
 
   apiTest.afterAll(async ({ apiServices }) => {

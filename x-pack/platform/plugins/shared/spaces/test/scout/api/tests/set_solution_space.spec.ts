@@ -27,6 +27,7 @@ apiTest.describe('PUT /internal/spaces/space/{id}/solution', { tag: tags.statefu
 
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
     ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+    await apiServices.spaces.delete(FOO_SPACE);
     await apiServices.spaces.create({ id: FOO_SPACE, name: 'Foo Space' });
   });
 
