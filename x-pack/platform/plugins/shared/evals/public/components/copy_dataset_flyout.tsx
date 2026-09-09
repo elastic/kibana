@@ -60,6 +60,13 @@ const ERROR_TITLE = i18n.translate('xpack.evals.copyDatasetFlyout.copyErrorTitle
   defaultMessage: 'Unable to copy dataset',
 });
 
+const NAME_REQUIRED_ERROR = i18n.translate(
+  'xpack.evals.copyDatasetFlyout.nameRequiredErrorMessage',
+  {
+    defaultMessage: 'Name is required.',
+  }
+);
+
 const getDefaultCopiedName = (name: string) =>
   i18n.translate('xpack.evals.copyDatasetFlyout.defaultCopiedNameLabel', {
     defaultMessage: '{name} (copy)',
@@ -77,6 +84,7 @@ export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
   const [description, setDescription] = useState(datasetDescription);
   const [error, setError] = useState<string | null>(null);
   const copyDataset = useCopyDataset();
+  const nameIsEmpty = name.trim().length === 0;
 
   const clearError = () => {
     if (error) {
@@ -120,12 +128,18 @@ export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
         ) : null}
 
         <EuiForm component="form">
-          <EuiFormRow label={NAME_LABEL} fullWidth>
+          <EuiFormRow
+            label={NAME_LABEL}
+            fullWidth
+            isInvalid={nameIsEmpty}
+            error={nameIsEmpty ? NAME_REQUIRED_ERROR : undefined}
+          >
             <EuiFieldText
               autoFocus
               required
               value={name}
               maxLength={MAX_DATASET_NAME_LENGTH}
+              isInvalid={nameIsEmpty}
               onChange={(event) => {
                 setName(event.target.value);
                 clearError();
@@ -159,7 +173,7 @@ export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
             <EuiButton
               fill
               onClick={onConfirm}
-              disabled={name.trim().length === 0 || copyDataset.isLoading}
+              disabled={nameIsEmpty || copyDataset.isLoading}
               isLoading={copyDataset.isLoading}
             >
               {CONFIRM}

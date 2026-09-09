@@ -63,9 +63,10 @@ describe('CopyDatasetFlyout', () => {
 
     expect(screen.getByTestId('copyDatasetNameInput')).toHaveValue('Golden set (copy)');
     expect(screen.getByTestId('copyDatasetDescriptionInput')).toHaveValue('Original description');
+    expect(screen.queryByText('Name is required.')).not.toBeInTheDocument();
   });
 
-  it('disables confirmation when the trimmed name is empty', async () => {
+  it('disables confirmation and shows an inline error when the trimmed name is empty', async () => {
     renderFlyout();
     const confirmButton = screen.getByRole('button', { name: 'Copy dataset' });
     const nameInput = screen.getByTestId('copyDatasetNameInput');
@@ -74,6 +75,7 @@ describe('CopyDatasetFlyout', () => {
     await userEvent.type(nameInput, '   ');
 
     expect(confirmButton).toBeDisabled();
+    expect(screen.getByText('Name is required.')).toBeInTheDocument();
   });
 
   it('trims the name and reports the new dataset ID on success', async () => {
