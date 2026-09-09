@@ -39,6 +39,60 @@ const drain = async (fixture: WorkflowRunFixture) => {
 };
 
 describe('parallel edge-case review workflows', () => {
+  it('resumes unequal waits independently and joins only after the later deadline', async () => {
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({ workflowYaml: example('25_unequal_waits') });
+    const deadlines = [...executions(fixture, 'short_pause'), ...executions(fixture, 'long_pause')]
+      .map((step) => new Date(String(step.state?.resumeAt)).getTime())
+      .sort();
+    expect(deadlines[1] - deadlines[0]).toBeGreaterThan(1500);
+    const date = jest.spyOn(Date, 'now').mockReturnValue(deadlines[0] + 100);
+    try {
+      await fixture.resumeWorkflow();
+      expect([...outputs(fixture, 'short_result'), ...outputs(fixture, 'long_result')]).toEqual([
+        '1s',
+      ]);
+      expect(executions(fixture, 'joined')).toHaveLength(0);
+      expect(
+        [...executions(fixture, 'short_pause'), ...executions(fixture, 'long_pause')]
+          .map((step) => step.status)
+          .sort()
+      ).toEqual([ExecutionStatus.COMPLETED, ExecutionStatus.WAITING].sort());
+      date.mockReturnValue(deadlines[1] + 100);
+      await fixture.resumeWorkflow();
+      expect([...outputs(fixture, 'short_result'), ...outputs(fixture, 'long_result')]).toEqual([
+        '1s',
+        '3s',
+      ]);
+      expect(executions(fixture, 'joined')).toHaveLength(1);
+      expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    } finally {
+      date.mockRestore();
+    }
+  });
+
+  it('unwinds timed-out foreach, while and retry scopes without invoking their handlers', async () => {
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({ workflowYaml: example('26_timeout_scopes') });
+    const date = jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 2500);
+    try {
+      await fixture.resumeWorkflow();
+      expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(executions(fixture, 'forbidden')).toHaveLength(0);
+      for (const name of ['items', 'loop', 'pause']) {
+        expect(executions(fixture, name).length).toBeGreaterThan(0);
+        for (const step of executions(fixture, name))
+          expect(step.status).toBe(ExecutionStatus.TIMED_OUT);
+      }
+      const active = [...fixture.stepExecutionRepositoryMock.stepExecutions.values()].filter(
+        (step) => [ExecutionStatus.RUNNING, ExecutionStatus.WAITING].includes(step.status)
+      );
+      expect(active).toEqual([]);
+    } finally {
+      date.mockRestore();
+    }
+  });
+
   it('keeps foreach/while break and continue scoped to each branch and selects switch paths', async () => {
     const fixture = new WorkflowRunFixture();
     await fixture.runWorkflow({ workflowYaml: example('07_loop_control') });

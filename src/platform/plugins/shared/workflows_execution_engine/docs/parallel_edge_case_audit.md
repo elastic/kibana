@@ -31,8 +31,20 @@ This audit compares branch execution with the existing sequential engine and che
 | [20: child cancellation](../examples/parallel_audit/20_child_cancellation.yml), [21: slow child helper](../examples/parallel_audit/21_slow_child.yml) | Branch deadlines cancel both real child executions; no result step runs. |
 | [22: overall step timeout](../examples/parallel_audit/22_overall_timeout.yml) | All nested waits terminate; parent fallback and continue recover. |
 | [23: workflow timeout](../examples/parallel_audit/23_workflow_timeout.yml) | Root is timed_out; all nested waits terminate without executing after_wait. |
-
 | [24: fail-fast with a long wait](../examples/parallel_audit/24_fail_fast_long_wait.yml) | Fails after the started sibling drains; permanently blocked queued work does not cause periodic re-ticks. |
+
+| [25: unequal waits](../examples/parallel_audit/25_unequal_waits.yml) | The 1-second branch finishes while the 3-second branch stays parked; join runs once after both. |
+| [26: timed-out scopes](../examples/parallel_audit/26_timeout_scopes.yml) | The deadline unwinds foreach, while and retry records; fallback does not run. |
+| [27: workflow.output](../examples/parallel_audit/27_workflow_termination.yml) | First return wins, sibling waits are cleaned up, later returns and after_join cannot change the result. |
+| [28: workflow.fail](../examples/parallel_audit/28_workflow_termination.yml) | Explicit workflow failure bypasses the parent's retry/fallback and terminates siblings. |
+
+## V4 hardening
+
+V4 adds an execution-wide fatal path for checkpoint, rehydration, event persistence, and cancellation-status read failures. Cleanup failures and operations that ignore abort beyond a five-second grace period stop the workflow and queued admission. The limit-one regression verifies that the queued operation never starts, including after the abandoned operation eventually returns. Cleanup hooks run at most once per step per task.
+
+Recovery tests now include two sibling fallback checkpoints with disjoint ancestor records, and an accepted workflow termination recovered before sibling cleanup. Rollout tests cover both flag directions while a workflow is parked: the persisted engine selection remains unchanged. The flag defaults off; the dedicated review instance opts in. Sequential workflows continue through the V1 driver.
+
+Dark Watch is intentionally deferred at the user's request.
 
 ## Automated coverage
 
@@ -45,6 +57,6 @@ node scripts/check.js --scope=local
 
 ## Evidence limits
 
-The local checks are regression evidence, not proof that every possible connector or interleaving is safe. Restart testing used persisted parked cursors; exact commit-window failures are injected through repository mocks. A multi-Kibana lease takeover during an Elasticsearch partition, sustained load/soak testing, and every external connector's abort/idempotency behavior were not exercised by this audit. External delivery remains at least once. Child workflows have independent execution budgets. HITL inside branches, branch-local timeout zones, and workflow terminators inside branches remain explicitly unsupported.
+The local checks are regression evidence, not proof that every possible connector or interleaving is safe. Restart testing used persisted parked cursors; exact commit-window failures are injected through repository mocks. A multi-Kibana lease takeover during an Elasticsearch partition, sustained load/soak testing, and every external connector's abort/idempotency behavior were not exercised by this audit. External delivery remains at least once. Child workflows have independent execution budgets. HITL inside branches and branch-local timeout zones remain explicitly unsupported. Whole-workflow terminators are supported by V4.
 
 Cancellation currently records the root workflow as cancelled and interrupted parallel descendants as timed_out; the audit checks that none remain running/waiting. These labels do not imply an external effect can be undone.

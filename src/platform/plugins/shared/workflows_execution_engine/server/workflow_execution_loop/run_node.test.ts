@@ -13,6 +13,7 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 
 import * as catchErrorModule from './catch_error';
 import { ExecutionBudget } from './execution_budget';
+import { ExecutionFailure } from './execution_failure';
 import * as handleExecutionDelayModule from './handle_execution_delay';
 import { runNode } from './run_node';
 import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
@@ -196,6 +197,40 @@ describe('runNode', () => {
         signal: mockParams.signal,
       });
     });
+  });
+
+  it('bounds cancellation while the initial monitor is waiting on storage', async () => {
+    const failure = new ExecutionFailure();
+    jest
+      .spyOn(mockParams.workflowExecutionRepository, 'getWorkflowExecutionById')
+      .mockImplementation(() => new Promise(() => {}));
+    const run = runNode(
+      { ...mockParams, executionFailure: failure, cancellationGraceMs: 10 },
+      { deadline: Date.now() + 10 }
+    );
+    await expect(run).rejects.toThrow('Cancelled operation did not settle');
+    expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+    expect(mockCatchError).not.toHaveBeenCalled();
+  });
+
+  it('fails the execution when an operation never settles and bypasses workflow handlers', async () => {
+    const failure = new ExecutionFailure();
+    const budget = new ExecutionBudget(1);
+    mockNodeImplementation.run.mockImplementation(() => new Promise<void>(() => {}));
+    await expect(
+      runNode(
+        {
+          ...mockParams,
+          boundaryNodeId: 'parallel',
+          executionFailure: failure,
+          cancellationGraceMs: 10,
+        },
+        { budget, deadline: Date.now() + 10 }
+      )
+    ).rejects.toThrow('Cancelled operation did not settle');
+    expect(failure.signal.aborted).toBe(true);
+    expect(mockCatchError).not.toHaveBeenCalled();
+    expect(() => budget.acquire(failure.signal)).toThrow();
   });
 
   it('retains operation capacity until an abort-ignoring node actually settles', async () => {

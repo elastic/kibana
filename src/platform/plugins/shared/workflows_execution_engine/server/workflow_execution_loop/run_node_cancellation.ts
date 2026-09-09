@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ExecutionFailure } from './execution_failure';
 import { createExecutionFence } from './execution_fence';
 import type { NodeImplementation } from '../step/node_implementation';
 import { isCancellableNode } from '../step/node_implementation';
@@ -15,12 +16,13 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
  * Invokes the cancellable node's `onCancel` hook when the step's abort signal fired.
- * Errors are logged and swallowed so workflow teardown can continue.
+ * Cleanup failures stop hardened executions while teardown continues.
  */
 export async function runOnCancelIfNeeded(
   nodeImplementation: NodeImplementation,
   stepExecutionRuntime: StepExecutionRuntime,
-  workflowLogger: IWorkflowEventLogger
+  workflowLogger: IWorkflowEventLogger,
+  failure?: ExecutionFailure
 ): Promise<void> {
   if (
     !stepExecutionRuntime.abortController.signal.aborted ||
@@ -29,19 +31,31 @@ export async function runOnCancelIfNeeded(
     return;
   }
 
+  if (failure && !failure.beginCleanup(stepExecutionRuntime.stepExecutionId)) return;
   const cleanupFence = createExecutionFence();
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
+    const cleanup = cleanupFence.run(() => Promise.resolve(nodeImplementation.onCancel()));
+    if (stepExecutionRuntime.node.type === 'enter-parallel' && failure) {
+      // The coordinator joins descendant cleanup; the descendant hooks own the deadlines.
+      await cleanup;
+      return;
+    }
     await Promise.race([
-      cleanupFence.run(() => Promise.resolve(nodeImplementation.onCancel())),
+      cleanup,
       new Promise<void>((resolve) => {
         timer = setTimeout(() => {
+          failure?.fail('Node cancellation cleanup exceeded its 1s deadline');
           workflowLogger.logWarn('Node cancellation cleanup exceeded its 1s deadline');
           resolve();
         }, 1000);
       }),
     ]);
   } catch (onCancelError) {
+    failure?.fail(
+      'Node cancellation cleanup failed',
+      onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
+    );
     workflowLogger.logError(
       'Failed to execute onCancel hook - continuing execution',
       onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))

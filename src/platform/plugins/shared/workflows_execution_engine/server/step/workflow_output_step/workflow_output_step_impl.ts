@@ -96,7 +96,16 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           // Fail the step with validation error (failStep also sets workflow-level error via updateWorkflowExecution)
           this.stepExecutionRuntime.failStep(validationError);
 
-          this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
+          if (this.workflowExecutionRuntime.branchExecutor) {
+            await this.workflowExecutionRuntime.branchExecutor.requestTermination(
+              this.stepExecutionRuntime,
+              {},
+              ExecutionStatus.FAILED,
+              validationError
+            );
+          } else {
+            this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
+          }
           return;
         }
       }
@@ -110,6 +119,28 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
       const stepStatus = step.status;
       let executionStatus: ExecutionStatus;
       let outcome: 'success' | 'failure' | 'unknown';
+
+      if (this.workflowExecutionRuntime.branchExecutor) {
+        const status =
+          stepStatus === 'failed'
+            ? ExecutionStatus.FAILED
+            : stepStatus === 'cancelled'
+            ? ExecutionStatus.CANCELLED
+            : ExecutionStatus.COMPLETED;
+        const message =
+          typeof outputValues.message === 'string'
+            ? outputValues.message
+            : typeof outputValues.reason === 'string'
+            ? outputValues.reason
+            : 'Workflow terminated with failed status';
+        await this.workflowExecutionRuntime.branchExecutor.requestTermination(
+          this.stepExecutionRuntime,
+          outputValues,
+          status,
+          status === ExecutionStatus.FAILED ? new Error(message) : undefined
+        );
+        return;
+      }
 
       // Store outputs in workflow execution context and persist them
       // This ensures outputs are saved before the workflow terminates

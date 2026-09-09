@@ -136,6 +136,17 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
 export interface EsWorkflowExecution {
+  /** Engine selected before execution starts; retained across resumes and rollout changes. */
+  executionMode?: 'legacy' | 'parallel_v4';
+  /** Accepted whole-workflow termination, persisted before cleanup and final status. */
+  pendingTermination?: {
+    nodeId: string;
+    stackFrames: StackFrame[];
+    stepExecutionId: string;
+    status: ExecutionStatus;
+    output: Record<string, unknown>;
+    error?: SerializedError;
+  } | null;
   spaceId: string;
   id: string;
   workflowId: string;
