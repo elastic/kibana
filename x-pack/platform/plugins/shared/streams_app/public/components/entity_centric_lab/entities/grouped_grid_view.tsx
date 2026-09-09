@@ -136,6 +136,12 @@ interface Props {
    */
   readonly groupCloudByProvider?: boolean;
   /**
+   * When true the outer category panel + header is omitted because the
+   * page is already scoped to a single category and the title + count
+   * are shown in the page header. Sub-type rows still render normally.
+   */
+  readonly hideCategoryHeader?: boolean;
+  /**
    * When true (ElasticOn), each bucket's pencil flyout exposes the
    * value-ramp coloring options (Gradient / Steps palette, number of
    * colors, reverse, auto range, min / max) modelled on the classic
@@ -174,6 +180,12 @@ const SelectedEntityContext = createContext<string | null>(null);
  * forward the flag down to `SubTypeRow` / `CategoryCardInner`.
  */
 const PaletteColoringEnabledContext = createContext<boolean>(false);
+
+/**
+ * When true the outer category panel + header is skipped because the
+ * page is already scoped to a single category. Sub-type rows still render.
+ */
+const HideCategoryHeaderContext = createContext<boolean>(false);
 
 /**
  * Auto-refresh cache-buster (see {@link setMetricRefreshSalt}). Threaded so
@@ -2191,6 +2203,7 @@ const KubernetesCard = ({
   onSelectEntity: (entityName: string) => void;
 }) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
+  const hideHeader = useContext(HideCategoryHeaderContext);
   const { euiTheme } = useEuiTheme();
   const subRowClass = css`
     padding: ${euiTheme.size.s} 0;
@@ -2236,6 +2249,50 @@ const KubernetesCard = ({
     return null;
   }
 
+  const subTypeContent =
+    orderedSubTypes.length === 0 ? (
+      <EuiText size="s" color="subdued">
+        {i18n.translate(
+          'xpack.streams.entityCentricLab.entities.bucket.kubernetes.clusterFilter.empty',
+          {
+            defaultMessage: 'No Kubernetes {things} match the current cluster filter.',
+            values: { things: labThings(paletteEnabled) },
+          }
+        )}
+      </EuiText>
+    ) : (
+      orderedSubTypes.map((group, index) => (
+        <div key={group.label} className={index === 0 ? undefined : subRowClass}>
+          <SubTypeRow
+            bucketKey={bucketKeyFor('kubernetes', group.label)}
+            label={group.label}
+            entities={group.rows}
+            onSelectEntity={onSelectEntity}
+          />
+          {index === 0 ? <EuiSpacer size="s" /> : null}
+        </div>
+      ))
+    );
+
+  if (hideHeader) {
+    return (
+      <>
+        {orderedSubTypes.map((group) => (
+          <EuiFlexItem key={group.label} grow={false}>
+            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+              <SubTypeRow
+                bucketKey={bucketKeyFor('kubernetes', group.label)}
+                label={group.label}
+                entities={group.rows}
+                onSelectEntity={onSelectEntity}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </>
+    );
+  }
+
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
@@ -2254,29 +2311,7 @@ const KubernetesCard = ({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {orderedSubTypes.length === 0 ? (
-        <EuiText size="s" color="subdued">
-          {i18n.translate(
-            'xpack.streams.entityCentricLab.entities.bucket.kubernetes.clusterFilter.empty',
-            {
-              defaultMessage: 'No Kubernetes {things} match the current cluster filter.',
-              values: { things: labThings(paletteEnabled) },
-            }
-          )}
-        </EuiText>
-      ) : (
-        orderedSubTypes.map((group, index) => (
-          <div key={group.label} className={index === 0 ? undefined : subRowClass}>
-            <SubTypeRow
-              bucketKey={bucketKeyFor('kubernetes', group.label)}
-              label={group.label}
-              entities={group.rows}
-              onSelectEntity={onSelectEntity}
-            />
-            {index === 0 ? <EuiSpacer size="s" /> : null}
-          </div>
-        ))
-      )}
+      {subTypeContent}
     </EuiPanel>
   );
 };
@@ -2305,12 +2340,32 @@ const MultiTypeCategoryCard = ({
   onSelectEntity: (entityName: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const hideHeader = useContext(HideCategoryHeaderContext);
   const subRowClass = css`
     padding: ${euiTheme.size.s} 0;
     border-top: ${euiTheme.border.thin};
   `;
 
   const orderedTypes = useMemo(() => groupEntitiesByType(entities), [entities]);
+
+  if (hideHeader) {
+    return (
+      <>
+        {orderedTypes.map((group) => (
+          <EuiFlexItem key={group.label} grow={false}>
+            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+              <SubTypeRow
+                bucketKey={bucketKeyFor(category, group.label)}
+                label={group.label}
+                entities={group.rows}
+                onSelectEntity={onSelectEntity}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </>
+    );
+  }
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
@@ -2536,6 +2591,7 @@ const CategoryCardInner = ({
   labelOverride,
 }: CategoryCardInnerProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
+  const hideHeader = useContext(HideCategoryHeaderContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
   const metrics = getBucketMetrics(bucketKey);
   const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
@@ -2571,17 +2627,15 @@ const CategoryCardInner = ({
     paletteActive && (coloring.type === 'gradient' || hasCustomStepRules(coloring, metric.id))
       ? coloring
       : null;
-  return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      data-test-subj={`entityCentricLabBucket-${bucketKey}`}
-    >
+
+  const controlsAndTiles = (
+    <>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <CategoryHeader category={category} total={entities.length} label={labelOverride} />
-        </EuiFlexItem>
+        {!hideHeader && (
+          <EuiFlexItem grow={false}>
+            <CategoryHeader category={category} total={entities.length} label={labelOverride} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <BucketMetricControls
@@ -2598,9 +2652,6 @@ const CategoryCardInner = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      {/* Legend pairs visually with the controls above so users can map
-          a Color-by choice straight to its tone palette before scanning
-          the tile row. */}
       <BucketMetricLegend
         metric={metric}
         coloring={coloringForRender}
@@ -2616,6 +2667,21 @@ const CategoryCardInner = ({
         paletteRange={paletteRange}
         sortReverse={selection.coloring.sortReverse}
       />
+    </>
+  );
+
+  if (hideHeader) {
+    return controlsAndTiles;
+  }
+
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj={`entityCentricLabBucket-${bucketKey}`}
+    >
+      {controlsAndTiles}
     </EuiPanel>
   );
 };
@@ -2868,6 +2934,7 @@ export const GroupedGridView = ({
   enablePaletteColoring = false,
   refreshTick = 0,
   customGroupBy,
+  hideCategoryHeader = false,
 }: Props) => {
   // Subscribe to chaos-mode flips so PayFlow storyline tiles can
   // swap colour the moment the user rolls back. `getEffectiveEntityHealth`
@@ -2955,6 +3022,7 @@ export const GroupedGridView = ({
   return (
     <SelectedEntityContext.Provider value={selectedEntityName}>
       <PaletteColoringEnabledContext.Provider value={enablePaletteColoring}>
+        <HideCategoryHeaderContext.Provider value={hideCategoryHeader}>
         <RefreshTickContext.Provider value={refreshTick}>
           <EuiFlexGroup direction="column" gutterSize="m">
             {useCustomGrouping
@@ -2986,6 +3054,7 @@ export const GroupedGridView = ({
                 )}
           </EuiFlexGroup>
         </RefreshTickContext.Provider>
+        </HideCategoryHeaderContext.Provider>
       </PaletteColoringEnabledContext.Provider>
     </SelectedEntityContext.Provider>
   );

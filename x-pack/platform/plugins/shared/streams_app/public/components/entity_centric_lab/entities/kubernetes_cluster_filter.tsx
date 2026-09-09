@@ -18,7 +18,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from './fake_entities';
 import { labThings, useIsElasticOn } from '../lab_terminology';
@@ -108,11 +108,6 @@ export const filterEntitiesByCluster = (
   );
 };
 
-// Fixed width so the filter dropdown lines up neatly with the other
-// inline controls on the K8s card (Grouped grid) or above the K8s
-// section (List view).
-const CLUSTER_FILTER_WIDTH = 200;
-
 interface KubernetesClusterFilterProps {
   readonly clusterNames: readonly string[];
   readonly value: string;
@@ -145,32 +140,23 @@ export const KubernetesClusterFilter = ({
     [clusterNames]
   );
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.label', {
-            defaultMessage: 'Cluster',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div style={{ width: CLUSTER_FILTER_WIDTH }}>
-          <EuiSelect
-            compressed
-            options={options}
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            aria-label={i18n.translate(
-              'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.ariaLabel',
-              {
-                defaultMessage: 'Filter Kubernetes {things} by cluster',
-                values: { things: labThings(isElasticOn) },
-              }
-            )}
-            data-test-subj="entityCentricLabKubernetesClusterFilter"
-          />
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSelect
+      compressed
+      prepend={i18n.translate(
+        'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.label',
+        { defaultMessage: 'Cluster' }
+      )}
+      options={options}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      aria-label={i18n.translate(
+        'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.ariaLabel',
+        {
+          defaultMessage: 'Filter Kubernetes {things} by cluster',
+          values: { things: labThings(isElasticOn) },
+        }
+      )}
+      data-test-subj="entityCentricLabKubernetesClusterFilter"
+    />
   );
 };

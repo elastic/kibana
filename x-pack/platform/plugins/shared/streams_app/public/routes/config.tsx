@@ -22,6 +22,7 @@ import {
   CategoryEntitiesView,
   CloudProviderView,
   CloudServiceView,
+  EntityDetailPage,
   ManageEntityTypesView,
   SignificantEventsView,
   IntegrationsOverviewView,
@@ -132,6 +133,19 @@ const streamsAppRoutes = {
           path: t.type({
             provider: t.string,
             service: t.string,
+          }),
+        }),
+      },
+      /**
+       * Entity-centric lab: full-page entity detail (variation-gated via
+       * `v_detail=fullPage`). More specific than `/entities/{category}`
+       * so the `detail` literal segment is matched before the param.
+       */
+      '/entities/detail/{entityName}': {
+        element: <EntityDetailPage />,
+        params: t.type({
+          path: t.type({
+            entityName: t.string,
           }),
         }),
       },

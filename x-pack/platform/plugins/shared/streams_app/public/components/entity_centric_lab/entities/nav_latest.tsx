@@ -207,11 +207,14 @@ const ManageSavedViewsModal = ({
   const modalTitleId = useGeneratedHtmlId({ prefix: 'entityCentricLabManageSavedViewsTitle' });
   const renameModalTitleId = useGeneratedHtmlId({ prefix: 'entityCentricLabRenameSavedViewTitle' });
 
+  const [renameIsDefault, setRenameIsDefault] = useState(false);
+
   const openRename = useCallback((view: SavedView) => {
     setRenameTarget(view);
     setRenameValue(view.name);
     setRenameStoreTime(Boolean(view.state.storeTime));
-  }, []);
+    setRenameIsDefault(view.id === defaultViewId);
+  }, [defaultViewId]);
 
   const handleRename = useCallback(() => {
     if (!renameTarget) return;
@@ -221,14 +224,16 @@ const ManageSavedViewsModal = ({
       renameView(renameTarget.id, name);
     }
     if (renameStoreTime !== Boolean(renameTarget.state.storeTime)) {
-      // Capture the current shared time range only when turning it on; keep the
-      // existing range otherwise (setViewStoreTime clears it when off).
       const captured =
         renameStoreTime && !renameTarget.state.storeTime ? getTime?.() : undefined;
       setViewStoreTime(renameTarget.id, renameStoreTime, captured);
     }
+    const wasDefault = renameTarget.id === defaultViewId;
+    if (renameIsDefault !== wasDefault) {
+      setDefaultView(renameIsDefault ? renameTarget.id : null);
+    }
     setRenameTarget(null);
-  }, [renameTarget, renameValue, renameStoreTime, renameView, setViewStoreTime, getTime]);
+  }, [renameTarget, renameValue, renameStoreTime, renameIsDefault, renameView, setViewStoreTime, setDefaultView, defaultViewId, getTime]);
 
   const handleDelete = useCallback(() => {
     if (!deleteTarget) return;
@@ -236,15 +241,6 @@ const ManageSavedViewsModal = ({
     setDeleteTarget(null);
   }, [deleteTarget, deleteView]);
 
-  // Flip "store time" straight from the list row: capture the current shared
-  // range when turning it on, clear it when turning it off.
-  const toggleStoreTime = useCallback(
-    (view: SavedView) => {
-      const next = !view.state.storeTime;
-      setViewStoreTime(view.id, next, next ? getTime?.() : undefined);
-    },
-    [setViewStoreTime, getTime]
-  );
 
   return (
     <>
@@ -302,66 +298,11 @@ const ManageSavedViewsModal = ({
                   <EuiFlexItem css={rowLabelCss}>
                     <EuiListGroupItem label={view.name} size="s" showToolTip wrapText />
                   </EuiFlexItem>
-                  {showDefault ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={
-                          view.id === defaultViewId
-                            ? i18n.translate(
-                                'xpack.streams.entityCentricLab.savedViews.manageModal.clearDefault',
-                                { defaultMessage: 'Remove as default' }
-                              )
-                            : i18n.translate(
-                                'xpack.streams.entityCentricLab.savedViews.manageModal.setDefault',
-                                { defaultMessage: 'Set as default' }
-                              )
-                        }
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          iconType={view.id === defaultViewId ? 'starFilled' : 'starEmpty'}
-                          color={view.id === defaultViewId ? 'warning' : 'text'}
-                          size="xs"
-                          aria-label={
-                            view.id === defaultViewId
-                              ? i18n.translate(
-                                  'xpack.streams.entityCentricLab.savedViews.manageModal.clearDefaultAria',
-                                  {
-                                    defaultMessage: 'Remove {name} as default',
-                                    values: { name: view.name },
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.streams.entityCentricLab.savedViews.manageModal.setDefaultAria',
-                                  {
-                                    defaultMessage: 'Set {name} as default',
-                                    values: { name: view.name },
-                                  }
-                                )
-                          }
-                          onClick={() => setDefaultView(view.id === defaultViewId ? null : view.id)}
-                          data-test-subj={`entityCentricLabManageSavedViewDefault-${view.id}`}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      compressed
-                      label={i18n.translate(
-                        'xpack.streams.entityCentricLab.savedViews.manageModal.storeTimeToggle',
-                        { defaultMessage: 'Store time' }
-                      )}
-                      checked={Boolean(view.state.storeTime)}
-                      onChange={() => toggleStoreTime(view)}
-                      data-test-subj={`entityCentricLabManageSavedViewStoreTime-${view.id}`}
-                    />
-                  </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       content={i18n.translate(
-                        'xpack.streams.entityCentricLab.savedViews.manageModal.rename',
-                        { defaultMessage: 'Rename' }
+                        'xpack.streams.entityCentricLab.savedViews.manageModal.edit',
+                        { defaultMessage: 'Edit' }
                       )}
                       disableScreenReaderOutput
                     >
@@ -370,11 +311,11 @@ const ManageSavedViewsModal = ({
                         color="text"
                         size="xs"
                         aria-label={i18n.translate(
-                          'xpack.streams.entityCentricLab.savedViews.manageModal.renameAria',
-                          { defaultMessage: 'Rename {name}', values: { name: view.name } }
+                          'xpack.streams.entityCentricLab.savedViews.manageModal.editAria',
+                          { defaultMessage: 'Edit {name}', values: { name: view.name } }
                         )}
                         onClick={() => openRename(view)}
-                        data-test-subj={`entityCentricLabManageSavedViewRename-${view.id}`}
+                        data-test-subj={`entityCentricLabManageSavedViewEdit-${view.id}`}
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -441,6 +382,32 @@ const ManageSavedViewsModal = ({
               />
             </EuiFormRow>
             <EuiSpacer size="m" />
+            {showDefault ? (
+              <>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.streams.entityCentricLab.savedViews.manageModal.setAsDefault',
+                    { defaultMessage: 'Set as default view' }
+                  )}
+                  checked={renameIsDefault}
+                  onChange={(event) => setRenameIsDefault(event.target.checked)}
+                  data-test-subj="entityCentricLabManageSavedViewsDefault"
+                />
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.entityCentricLab.savedViews.manageModal.setAsDefaultHelp',
+                      {
+                        defaultMessage:
+                          'The default view is automatically loaded when opening the inventory.',
+                      }
+                    )}
+                  </p>
+                </EuiText>
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             <EuiSwitch
               label={i18n.translate(
                 'xpack.streams.entityCentricLab.savedViews.manageModal.storeTime',
@@ -475,7 +442,8 @@ const ManageSavedViewsModal = ({
               isDisabled={
                 !renameValue.trim() ||
                 (renameValue.trim() === renameTarget.name &&
-                  renameStoreTime === Boolean(renameTarget.state.storeTime))
+                  renameStoreTime === Boolean(renameTarget.state.storeTime) &&
+                  renameIsDefault === (renameTarget.id === defaultViewId))
               }
               data-test-subj="entityCentricLabManageSavedViewsRenameConfirm"
             >

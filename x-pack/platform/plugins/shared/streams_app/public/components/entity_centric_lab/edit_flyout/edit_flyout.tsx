@@ -20,6 +20,8 @@ import {
   EuiLink,
   EuiSpacer,
   EuiStepsHorizontal,
+  EuiTabs,
+  EuiTab,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -356,6 +358,9 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
             entityType={draft.entityType}
             entityTypeName={draft.general.name}
             horizontalSteps={horizontalSteps}
+            currentStep={currentStep}
+            onStepChange={setCurrentStep}
+            stepLabel={stepLabel}
           />
         )}
       </EuiFlyoutHeader>
@@ -404,6 +409,9 @@ interface WizardHeaderProps {
   readonly entityType: FakeEntityType;
   readonly entityTypeName: string;
   readonly horizontalSteps: EuiStepsHorizontalProps['steps'];
+  readonly currentStep: WizardStepId;
+  readonly onStepChange: (stepId: WizardStepId) => void;
+  readonly stepLabel: Record<WizardStepId, string>;
 }
 
 const WizardHeader = ({
@@ -412,6 +420,9 @@ const WizardHeader = ({
   entityType,
   entityTypeName,
   horizontalSteps,
+  currentStep,
+  onStepChange,
+  stepLabel,
 }: WizardHeaderProps) => {
   const isCreate = mode === 'create';
   const isManaged = entityType.generatedBy === 'Elastic';
@@ -452,10 +463,6 @@ const WizardHeader = ({
           />
         </EuiFlexItem>
         {isCreate ? (
-          // Create mode shows only the kind-of-ownership badge so the
-          // user sees what they're authoring will be User-defined. The
-          // counts + last-update badges are meaningless for a row that
-          // doesn't exist yet.
           <EuiFlexItem grow={false}>
             <EuiBadge color="primary">
               {i18n.translate('xpack.streams.entityCentricLab.editFlyout.userBadge', {
@@ -507,11 +514,26 @@ const WizardHeader = ({
         </>
       )}
       <EuiSpacer size="m" />
-      <EuiStepsHorizontal
-        size="s"
-        steps={horizontalSteps}
-        data-test-subj="entityCentricLabEditFlyoutStepsHorizontal"
-      />
+      {isCreate ? (
+        <EuiStepsHorizontal
+          size="s"
+          steps={horizontalSteps}
+          data-test-subj="entityCentricLabEditFlyoutStepsHorizontal"
+        />
+      ) : (
+        <EuiTabs size="s" bottomBorder={false}>
+          {WIZARD_STEPS.map((id) => (
+            <EuiTab
+              key={id}
+              isSelected={id === currentStep}
+              onClick={() => onStepChange(id)}
+              data-test-subj={`entityCentricLabEditFlyoutTab-${id}`}
+            >
+              {stepLabel[id]}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      )}
     </>
   );
 };
@@ -646,18 +668,42 @@ const FooterWizard = ({
   onNext,
 }: FooterWizardProps) => {
   const isElasticOn = useIsElasticOn();
-  // "Save modifications" reads weird when the entity type doesn't exist
-  // yet — relabel to "Create entity type" in create mode so the primary
-  // action matches the user's intent.
-  const saveLabel =
-    mode === 'create'
-      ? i18n.translate('xpack.streams.entityCentricLab.createFlyout.save', {
-          defaultMessage: 'Create {thing} type',
-          values: { thing: labThing(isElasticOn) },
-        })
-      : i18n.translate('xpack.streams.entityCentricLab.editFlyout.save', {
-          defaultMessage: 'Save modifications',
-        });
+  const isCreate = mode === 'create';
+  const saveLabel = isCreate
+    ? i18n.translate('xpack.streams.entityCentricLab.createFlyout.save', {
+        defaultMessage: 'Create {thing} type',
+        values: { thing: labThing(isElasticOn) },
+      })
+    : i18n.translate('xpack.streams.entityCentricLab.editFlyout.save', {
+        defaultMessage: 'Save modifications',
+      });
+
+  // Edit mode: tabs replace the stepper, so the footer is always a
+  // simple Cancel / Save pair — no "Next step" progression.
+  if (!isCreate) {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="entityCentricLabEditFlyoutCancel">
+            {i18n.translate('xpack.streams.entityCentricLab.editFlyout.cancel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={onSaveModifications}
+            data-test-subj="entityCentricLabEditFlyoutSave"
+          >
+            {saveLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  // Create mode: stepper footer with Next step + Save.
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -669,11 +715,6 @@ const FooterWizard = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {isLastStep ? (
-          // On the final step there is nothing left to navigate to, so the
-          // old "Save modifications" link + "Finish" pair collapsed into a
-          // single primary action that both persists the draft and closes
-          // the flyout. The previous "Finish" button only closed without
-          // saving, which was the source of confusion.
           <EuiButton
             fill
             onClick={onSaveModifications}

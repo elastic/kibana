@@ -45,6 +45,15 @@ export interface EntityFlyoutServices {
   readonly charts: ChartsPluginStart;
   readonly renderEntityDashboard?: (context: EntityDashboardRenderContext) => ReactNode;
   /**
+   * Optional renderer for the Dashboards tab. Hosts that can embed a Kibana
+   * dashboard by title return a node for the given dashboard descriptor
+   * scoped to the entity name. Returning `null` renders a fallback prompt.
+   */
+  readonly renderTabDashboard?: (
+    dashboard: { savedObjectTitle: string; scopeField: string; hiddenPanelIds?: ReadonlySet<string> },
+    entityName: string
+  ) => ReactNode;
+  /**
    * ElasticOn inventory copy uses "resource(s)" instead of "entity/entities".
    * Latest / entity-centric leave this unset (or false).
    */

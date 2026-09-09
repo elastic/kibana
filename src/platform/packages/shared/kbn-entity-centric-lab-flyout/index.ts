@@ -8,6 +8,19 @@
  */
 
 export { EntityFlyout } from './src/entity_flyout';
+
+// Individual tab components — exported so the full-page detail view
+// (streams_app) can reuse them outside the flyout shell.
+export { OverviewTab } from './src/overview_tab';
+export { MetricsTab } from './src/metrics_tab';
+export { LogsTab } from './src/logs_tab';
+export { AlertsTab } from './src/alerts_tab';
+export { RelationshipsTab } from './src/relationships_tab';
+export { TracesTab } from './src/traces_tab';
+export { ProfilingTab } from './src/profiling_tab';
+export { DashboardsTab, getOotbDashboards } from './src/dashboards_tab';
+export type { DashboardDescriptor } from './src/dashboards_tab';
+export { labThing } from './src/lab_terminology';
 export { EntityFlyoutServicesProvider, useEntityFlyoutServices } from './src/services_context';
 export type { EntityFlyoutServices, EntityDashboardRenderContext } from './src/services_context';
 

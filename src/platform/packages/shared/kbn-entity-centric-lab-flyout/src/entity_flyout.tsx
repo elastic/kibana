@@ -51,6 +51,7 @@ import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
 import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
+import { DashboardsTab } from './dashboards_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
 import type { OnSelectEntity } from './fake_entity_tabs';
@@ -154,6 +155,27 @@ interface EntityFlyoutProps {
    * surfaces the Relationships tab.
    */
   readonly minimalTabs?: boolean;
+  /**
+   * Optional callback fired when the user clicks the expand icon in the
+   * flyout header. When provided, a full-screen button appears next to
+   * the close X, allowing the user to transition from flyout to full-page
+   * detail view (progressive disclosure pattern).
+   */
+  readonly onExpand?: () => void;
+  /**
+   * When true, the health indicator badge (Healthy / At risk / Unhealthy) is
+   * hidden from the header and replaced by an alerts badge (if
+   * {@link alertsBadge} is supplied). Used by Phase 1 (alerts-first, no health).
+   */
+  readonly hideHealthBadge?: boolean;
+  /**
+   * Optional alerts-status badge to show in the header when
+   * {@link hideHealthBadge} is true. Rendered as a single `EuiBadge` in
+   * the position normally occupied by the health badge.
+   */
+  readonly alertsBadge?: { label: string; color: string };
+  /** When true the AI-generated summary is hidden from the Overview tab (Phase 1). */
+  readonly hideAiSummary?: boolean;
 }
 
 type BuiltInTabId =
@@ -163,6 +185,7 @@ type BuiltInTabId =
   | 'traces'
   | 'alerts'
   | 'relationships'
+  | 'dashboards'
   | 'custom'
   | 'profiling';
 
@@ -181,6 +204,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'traces',
   'alerts',
   'relationships',
+  'dashboards',
   'custom',
   'profiling',
 ];
@@ -203,6 +227,7 @@ const CORE_TAB_IDS: readonly string[] = [
   'logs',
   'traces',
   'alerts',
+  'dashboards',
   'custom',
   'profiling',
 ];
@@ -235,6 +260,10 @@ export const EntityFlyout = ({
   session,
   size = 'l',
   minimalTabs = false,
+  onExpand,
+  hideHealthBadge = false,
+  alertsBadge,
+  hideAiSummary = false,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -247,7 +276,6 @@ export const EntityFlyout = ({
   const {
     agentBuilder,
     notifications,
-    renderEntityDashboard,
     resourceCopy = false,
   } = useEntityFlyoutServices();
 
@@ -280,12 +308,21 @@ export const EntityFlyout = ({
 
   // Header badges always lead with the health indicator (see
   // {@link HEALTH_TAG_LABELS}); the remaining tags keep their per-kind order.
+  // In Phase 1 (hideHealthBadge), the health tag is dropped and replaced
+  // with an alerts badge provided by the caller.
   const orderedTags = useMemo(() => {
+    if (hideHealthBadge) {
+      const withoutHealth = overview.tags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
+      if (alertsBadge) {
+        return [alertsBadge, ...withoutHealth];
+      }
+      return withoutHealth;
+    }
     const healthIndex = overview.tags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
     if (healthIndex <= 0) return overview.tags;
     const rest = overview.tags.filter((_, index) => index !== healthIndex);
     return [overview.tags[healthIndex], ...rest];
-  }, [overview.tags]);
+  }, [overview.tags, hideHealthBadge, alertsBadge]);
   const tabsData = useMemo(
     () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth),
     [entityName, entityType, effectiveHealth]
@@ -306,16 +343,6 @@ export const EntityFlyout = ({
   const kind = useMemo(
     () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
     [entityType, entityName]
-  );
-
-  // Host-injected dashboard embedded in the Overview tab (e.g. Streams app
-  // renders the "[Kubernetes OTel] Pod Detail" dashboard scoped to the pod).
-  // The shared package can't depend on the `dashboard` plugin, so the host
-  // decides whether to return a node — non-pod entities get `null` and the
-  // Overview tab renders as before.
-  const dashboardSlot = useMemo(
-    () => renderEntityDashboard?.({ entityName, entityType, kind }) ?? null,
-    [renderEntityDashboard, entityName, entityType, kind]
   );
 
   // Ambient hidden `screen_context` attachment. Registered via
@@ -591,6 +618,12 @@ export const EntityFlyout = ({
         }),
       },
       {
+        id: 'dashboards',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.dashboards', {
+          defaultMessage: 'Dashboards',
+        }),
+      },
+      {
         id: 'custom',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.custom', {
           defaultMessage: 'Custom',
@@ -706,6 +739,32 @@ export const EntityFlyout = ({
               size="s"
             />
           </EuiFlexItem>
+          {onExpand ? (
+            <EuiFlexItem grow>
+              <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'entityCentricLabFlyout.flyout.expandToFullPageTooltip',
+                      { defaultMessage: 'Open as full page' }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      iconType="fullScreen"
+                      aria-label={i18n.translate(
+                        'entityCentricLabFlyout.flyout.expandToFullPageAriaLabel',
+                        { defaultMessage: 'Open as full page' }
+                      )}
+                      color="text"
+                      display="empty"
+                      onClick={onExpand}
+                      data-test-subj="entityCentricLabFlyoutExpand"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiText size="xs" color="subdued">
           {i18n.translate('entityCentricLabFlyout.flyout.lastUpdate', {
@@ -756,11 +815,12 @@ export const EntityFlyout = ({
           activeTab={activeTab}
           activeTabLabel={tabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
           entityName={entityName}
+          entityType={entityType}
           overview={overview}
           tabsData={tabsData}
           customLinks={templateOverride?.customLinks}
           onSelectEntity={onSelectEntity}
-          dashboardSlot={dashboardSlot}
+          hideAiSummary={hideAiSummary}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -854,22 +914,25 @@ const TabContent = ({
   activeTab,
   activeTabLabel,
   entityName,
+  entityType,
   overview,
   tabsData,
   customLinks,
   onSelectEntity,
-  dashboardSlot,
+  hideAiSummary = false,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
   readonly entityName: string;
+  readonly entityType?: string;
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
   readonly customLinks?: readonly FlyoutCustomLink[];
   readonly onSelectEntity?: OnSelectEntity;
-  readonly dashboardSlot?: React.ReactNode;
+  readonly hideAiSummary?: boolean;
 }) => {
-  const { resourceCopy = false } = useEntityFlyoutServices();
+  const { resourceCopy = false, renderTabDashboard } = useEntityFlyoutServices();
+
   // Shared fallback: rendered for the `default` branch (unknown tab id from
   // an override) and for the `traces` branch when the active entity has no
   // curated trace payload (e.g. an override enabled the tab on a non-
@@ -895,7 +958,7 @@ const TabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} dashboardSlot={dashboardSlot} />;
+      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} />;
     case 'metrics':
       return <MetricsTab metrics={tabsData.metrics} />;
     case 'logs':
@@ -910,6 +973,14 @@ const TabContent = ({
     case 'relationships':
       return (
         <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />
+      );
+    case 'dashboards':
+      return (
+        <DashboardsTab
+          entityName={entityName}
+          entityType={entityType}
+          renderDashboard={renderTabDashboard}
+        />
       );
     case 'profiling':
       // Profiling data isn't seeded in the lab — always render the

@@ -34,7 +34,10 @@ export interface VariationDimension {
 // Starter dimensions
 // ---------------------------------------------------------------------------
 
-export type DataVariation = 'default' | 'full' | 'degraded';
+export type DataVariation = 'default' | 'full' | 'degraded' | 'overflow';
+
+/** Maximum number of entities surfaced in the UI at once. */
+export const MAX_VISIBLE_ENTITIES = 10_000;
 
 export const DATA_DIMENSION: VariationDimension = {
   id: 'data',
@@ -48,23 +51,55 @@ export const DATA_DIMENSION: VariationDimension = {
       label: 'Degraded',
       description: 'Most entities unhealthy with active alerts',
     },
+    {
+      id: 'overflow',
+      label: '10k+',
+      description: 'More than 10,000 resources — tests truncation banner',
+    },
   ],
 };
 
-export type DetailVariation = 'flyout' | 'fullPage';
+export type DetailVariation = 'flyout' | 'largeFlyout' | 'flyoutExpandable' | 'fullPage';
 
 export const DETAIL_DIMENSION: VariationDimension = {
   id: 'detail',
   label: 'Detail view',
   defaultOption: 'flyout',
   options: [
-    { id: 'flyout', label: 'Flyout', description: 'Side flyout (current)' },
-    { id: 'fullPage', label: 'Full page', description: 'Dedicated detail page (coming soon)' },
+    { id: 'flyout', label: 'Flyout', description: 'Side flyout (current, size M)' },
+    { id: 'largeFlyout', label: 'Large flyout', description: 'Wider flyout (size L)' },
+    {
+      id: 'flyoutExpandable',
+      label: 'Expandable flyout',
+      description: 'Flyout with expand-to-full-page button',
+    },
+    { id: 'fullPage', label: 'Full page', description: 'Dedicated detail page' },
+  ],
+};
+
+export type PhaseVariation = 'phase1' | 'phase3';
+
+export const PHASE_DIMENSION: VariationDimension = {
+  id: 'phase',
+  label: 'Phase',
+  defaultOption: 'phase3',
+  options: [
+    {
+      id: 'phase1',
+      label: 'Phase 1',
+      description: 'Alerts-first — no health concept, alert count badges',
+    },
+    {
+      id: 'phase3',
+      label: 'Phase 3',
+      description: 'Current — health + alerts side by side',
+    },
   ],
 };
 
 /** All registered dimensions, in display order. */
 export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
+  PHASE_DIMENSION,
   DATA_DIMENSION,
   DETAIL_DIMENSION,
 ];

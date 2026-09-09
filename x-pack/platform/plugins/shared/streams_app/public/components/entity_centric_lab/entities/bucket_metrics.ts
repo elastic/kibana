@@ -1117,17 +1117,52 @@ const withSharedMetrics = (metrics: readonly MetricDescriptor[]): readonly Metri
 };
 
 export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescriptor[] => {
-  if (CATALOG[bucketKey]) return withSharedMetrics(CATALOG[bucketKey]);
-  const colonIdx = bucketKey.indexOf(':');
-  if (colonIdx > 0) {
-    const parentKey = bucketKey.slice(0, colonIdx);
-    if (CATALOG[parentKey]) return withSharedMetrics(CATALOG[parentKey]);
+  let metrics: readonly MetricDescriptor[];
+  if (CATALOG[bucketKey]) {
+    metrics = withSharedMetrics(CATALOG[bucketKey]);
+  } else {
+    const colonIdx = bucketKey.indexOf(':');
+    if (colonIdx > 0) {
+      const parentKey = bucketKey.slice(0, colonIdx);
+      metrics = CATALOG[parentKey]
+        ? withSharedMetrics(CATALOG[parentKey])
+        : withSharedMetrics(FALLBACK_METRICS);
+    } else {
+      metrics = withSharedMetrics(FALLBACK_METRICS);
+    }
   }
-  return withSharedMetrics(FALLBACK_METRICS);
+  // Phase 1: remove the Health metric entirely — Alerts is the primary signal.
+  try {
+    const phase = typeof window !== 'undefined'
+      ? window.localStorage.getItem('elasticOn_v_phase')
+      : null;
+    if (phase === 'phase1') {
+      return metrics.filter((m) => m.id !== ENTITY_HEALTH_METRIC_ID);
+    }
+  } catch {
+    // localStorage blocked — keep all metrics
+  }
+  return metrics;
 };
 
+/**
+ * Returns the default metric id for a bucket. In Phase 1 (alerts-first,
+ * no health concept) the default is `entity-alerts`; Phase 3 (current)
+ * uses the first metric in the catalog (typically health).
+ */
 export const getDefaultMetricId = (bucketKey: BucketKey): string => {
   const metrics = getBucketMetrics(bucketKey);
+  try {
+    const phase = typeof window !== 'undefined'
+      ? window.localStorage.getItem('elasticOn_v_phase')
+      : null;
+    if (phase === 'phase1') {
+      const alertsMetric = metrics.find((m) => m.id === ENTITY_ALERTS_METRIC_ID);
+      if (alertsMetric) return alertsMetric.id;
+    }
+  } catch {
+    // localStorage blocked — fall through to default
+  }
   return metrics[0]?.id ?? 'status';
 };
 

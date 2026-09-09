@@ -38,6 +38,8 @@ import { i18n } from '@kbn/i18n';
 import { useEntityDisplayName } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
+import { useVariation } from './variation_context';
+import type { PhaseVariation } from './variation_registry';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 import {
   K8S_CONTEXT_KEYS,
@@ -460,6 +462,9 @@ const GridSectionHeader = ({
   );
 };
 
+/** Column ids hidden in Phase 1 (alerts-first, no health concept). */
+const PHASE1_HIDDEN_COLUMN_IDS = new Set(['health', 'lastHealthChange']);
+
 export const EntityDataGridSection = ({
   category,
   subTypeLabel,
@@ -468,6 +473,8 @@ export const EntityDataGridSection = ({
   onSelectEntity,
   refreshTick,
 }: Props) => {
+  const phase = useVariation('phase') as PhaseVariation;
+  const isPhase1 = phase === 'phase1';
   // Bucket key = entity type identity (Kubernetes groups by sub-type, everyone
   // else by `.type`), matching the hex-map metric catalog so metric columns and
   // the per-type column config line up.
@@ -491,18 +498,21 @@ export const EntityDataGridSection = ({
   );
 
   const k8sContext = useMemo(() => getK8sContextColumnIds(bucketKey), [bucketKey]);
-  const defaultVisibleIds = useMemo(() => defaultVisibleIdsFor(bucketKey), [bucketKey]);
+  const defaultVisibleIds = useMemo(() => {
+    const ids = defaultVisibleIdsFor(bucketKey);
+    return isPhase1 ? ids.filter((id) => !PHASE1_HIDDEN_COLUMN_IDS.has(id)) : ids;
+  }, [bucketKey, isPhase1]);
 
-  const catalog = useMemo<CatalogColumn[]>(
-    () => [
+  const catalog = useMemo<CatalogColumn[]>(() => {
+    const allColumns = [
       ...BASE_VISIBLE_COLUMNS,
       ...k8sContext.defaultVisible.map(k8sContextCatalogColumn),
       ...k8sContext.hidden.map(k8sContextCatalogColumn),
       ...BASE_HIDDEN_COLUMNS,
       ...metricColumns,
-    ],
-    [k8sContext, metricColumns]
-  );
+    ];
+    return isPhase1 ? allColumns.filter((col) => !PHASE1_HIDDEN_COLUMN_IDS.has(col.id)) : allColumns;
+  }, [k8sContext, metricColumns, isPhase1]);
   const catalogIds = useMemo(() => catalog.map((column) => column.id), [catalog]);
 
   const { visibleColumns, setVisibleColumns, reset } = useColumnConfig(
@@ -543,7 +553,9 @@ export const EntityDataGridSection = ({
     setMetricRefreshSalt(refreshTick ? String(refreshTick) : '');
     const copy = [...rows];
     const sorters =
-      sortingColumns.length > 0 ? sortingColumns : [{ id: 'health', direction: 'asc' as const }];
+      sortingColumns.length > 0
+        ? sortingColumns
+        : [{ id: isPhase1 ? 'alerts' : 'health', direction: 'asc' as const }];
     copy.sort((a, b) => {
       for (const { id, direction } of sorters) {
         const va = sortValueFor(a, id, bucketKey);

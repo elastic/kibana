@@ -71,6 +71,12 @@ interface Props {
    * built-in layout untouched.
    */
   readonly customGroupBy?: readonly GroupByFieldDef[];
+  /**
+   * When true the outer category headers are omitted because the
+   * page is already scoped to a single category and the title + count
+   * are shown in the page header. Sub-type tables still render.
+   */
+  readonly hideCategoryHeader?: boolean;
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -495,6 +501,7 @@ export const EntitiesListView = ({
   enableColumnSettings = false,
   refreshTick,
   customGroupBy,
+  hideCategoryHeader = false,
 }: Props) => {
   const columns = useColumns(onSelectEntity);
   // `undefined` keeps the built-in Category → Type layout; an empty array means
@@ -729,6 +736,7 @@ export const EntitiesListView = ({
         const groupGap = index > 0 ? { marginTop: 16 } : undefined;
 
         if (item.kind === 'kubernetes-header') {
+          if (hideCategoryHeader) return null;
           return (
             <EuiFlexItem key={`kubernetes-header-${index}`} grow={false} style={groupGap}>
               <KubernetesSectionHeader
@@ -741,6 +749,7 @@ export const EntitiesListView = ({
           );
         }
         if (item.kind === 'category-header') {
+          if (hideCategoryHeader) return null;
           return (
             <EuiFlexItem key={`${item.category}-header-${index}`} grow={false} style={groupGap}>
               <CategorySectionHeader category={item.category} total={item.total} />

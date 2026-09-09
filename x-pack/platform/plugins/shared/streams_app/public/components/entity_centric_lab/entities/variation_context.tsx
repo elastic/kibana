@@ -7,7 +7,9 @@
 
 /**
  * React context + provider that exposes a multi-dimensional variation
- * system backed by URL query params (`v_<dimensionId>=<optionId>`).
+ * system backed by `localStorage`. Each dimension is stored under the
+ * key `elasticOn_v_<dimensionId>`. The value persists across all
+ * navigations and page reloads.
  *
  * Consumers read the active option for any dimension via
  * {@link useVariation} and the switcher popover writes back via the
@@ -19,17 +21,50 @@ import React, {
   useCallback,
   useContext,
   useMemo,
+  useState,
   type PropsWithChildren,
 } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 
 import {
   VARIATION_DIMENSIONS,
   type VariationDimension,
 } from './variation_registry';
 
-/** URL param prefix so variation keys don't collide with app params. */
-const PARAM_PREFIX = 'v_';
+/** localStorage key prefix so variation keys don't collide with other state. */
+const STORAGE_PREFIX = 'elasticOn_v_';
+
+// ---------------------------------------------------------------------------
+// localStorage helpers
+// ---------------------------------------------------------------------------
+
+const readFromStorage = (): Record<string, string> => {
+  const map: Record<string, string> = {};
+  try {
+    for (const dim of VARIATION_DIMENSIONS) {
+      const raw = localStorage.getItem(`${STORAGE_PREFIX}${dim.id}`);
+      if (raw && dim.options.some((opt) => opt.id === raw)) {
+        map[dim.id] = raw;
+      }
+    }
+  } catch {
+    // localStorage unavailable (private browsing, etc.) — fall back to defaults
+  }
+  return map;
+};
+
+const writeToStorage = (dimensionId: string, optionId: string): void => {
+  try {
+    const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
+    if (!dim) return;
+    if (optionId === dim.defaultOption) {
+      localStorage.removeItem(`${STORAGE_PREFIX}${dimensionId}`);
+    } else {
+      localStorage.setItem(`${STORAGE_PREFIX}${dimensionId}`, optionId);
+    }
+  } catch {
+    // ignore
+  }
+};
 
 // ---------------------------------------------------------------------------
 // Context shape
@@ -38,7 +73,7 @@ const PARAM_PREFIX = 'v_';
 interface VariationContextValue {
   /** Returns the active option id for the given dimension. */
   get: (dimensionId: string) => string;
-  /** Replaces the active option for one dimension (updates the URL). */
+  /** Replaces the active option for one dimension (persists to localStorage). */
   set: (dimensionId: string, optionId: string) => void;
   /** Full dimension registry (used by the switcher UI). */
   dimensions: readonly VariationDimension[];
@@ -60,22 +95,9 @@ const VariationContext = createContext<VariationContextValue>({
 // ---------------------------------------------------------------------------
 
 export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
-  const location = useLocation();
-  const history = useHistory();
-
-  // Parse `v_*` params from the current URL on every render so the
-  // context value stays in sync with browser back/forward.
-  const selections = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    const map: Record<string, string> = {};
-    for (const dim of VARIATION_DIMENSIONS) {
-      const raw = params.get(`${PARAM_PREFIX}${dim.id}`);
-      if (raw && dim.options.some((opt) => opt.id === raw)) {
-        map[dim.id] = raw;
-      }
-    }
-    return map;
-  }, [location.search]);
+  // Initialise from localStorage once on mount, then keep in React state
+  // so writes trigger re-renders instantly.
+  const [selections, setSelections] = useState<Record<string, string>>(readFromStorage);
 
   const get = useCallback(
     (dimensionId: string): string => {
@@ -88,23 +110,29 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const set = useCallback(
     (dimensionId: string, optionId: string) => {
-      const params = new URLSearchParams(location.search);
-      const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
-      if (!dim) return;
-      // Only write the param when it differs from the default — keeps
-      // the URL clean for the common "everything default" case.
-      if (optionId === dim.defaultOption) {
-        params.delete(`${PARAM_PREFIX}${dimensionId}`);
-      } else {
-        params.set(`${PARAM_PREFIX}${dimensionId}`, optionId);
+      writeToStorage(dimensionId, optionId);
+      // When the phase changes, clear persisted bucket metric selections
+      // so the hex map re-defaults to the phase-appropriate metric
+      // (e.g. Alerts for Phase 1, Health for Phase 3).
+      if (dimensionId === 'phase') {
+        try {
+          localStorage.removeItem('entityCentricLab.bucketMetricSelection.v4');
+        } catch {
+          // ignore
+        }
       }
-      const search = params.toString();
-      history.replace({
-        pathname: location.pathname,
-        search: search ? `?${search}` : '',
+      setSelections((prev) => {
+        const next = { ...prev };
+        const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
+        if (dim && optionId === dim.defaultOption) {
+          delete next[dimensionId];
+        } else {
+          next[dimensionId] = optionId;
+        }
+        return next;
       });
     },
-    [history, location.pathname, location.search]
+    []
   );
 
   const value = useMemo<VariationContextValue>(

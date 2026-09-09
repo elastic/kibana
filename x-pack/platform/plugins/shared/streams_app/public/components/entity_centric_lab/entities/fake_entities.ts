@@ -223,6 +223,8 @@ export interface FakeEntitiesDataset {
   readonly categoryCounts: ReadonlyArray<EntityCategoryCounts>;
   readonly totalEntities: number;
   readonly totalGroups: number;
+  /** When the dataset was truncated, this is the count before truncation. */
+  readonly totalBeforeTruncation?: number;
 }
 
 /**
@@ -706,7 +708,7 @@ const findSpec = (category: EntityCategoryId): CategorySpec => {
 // Scenario-aware entity generation
 // ---------------------------------------------------------------------------
 
-type DataVariation = 'default' | 'full' | 'degraded';
+type DataVariation = 'default' | 'full' | 'degraded' | 'overflow';
 
 /**
  * Multiplier applied to every `CategorySpec.total` and every
@@ -714,6 +716,13 @@ type DataVariation = 'default' | 'full' | 'degraded';
  * are instance-seeded (not count-driven) so they stay unchanged.
  */
 const FULL_MULTIPLIER = 4;
+
+/**
+ * Multiplier for the `overflow` data profile. Sized so the raw entity
+ * count exceeds {@link MAX_VISIBLE_ENTITIES} (10 000), triggering the
+ * truncation banner in the UI.
+ */
+const OVERFLOW_MULTIPLIER = 12;
 
 /**
  * When the `degraded` scenario is active, override the health
@@ -830,7 +839,12 @@ export const buildFakeEntities = (
 ): FakeEntitiesDataset => {
   const healthFn =
     scenario === 'degraded' ? degradedHealth : undefined;
-  const multiplier = scenario === 'full' ? FULL_MULTIPLIER : 1;
+  const multiplier =
+    scenario === 'overflow'
+      ? OVERFLOW_MULTIPLIER
+      : scenario === 'full'
+        ? FULL_MULTIPLIER
+        : 1;
 
   const effectiveKubeSpecs =
     multiplier > 1 ? scaleKubernetesSpecs(multiplier) : KUBERNETES_SUB_SPECS;
@@ -885,11 +899,17 @@ export const buildFakeEntities = (
     return { category: descriptor.id, total: base * multiplier };
   });
 
+  const MAX_VISIBLE = 10_000;
+  const rawTotal = entities.length;
+  const truncated = rawTotal > MAX_VISIBLE;
+  const visibleEntities = truncated ? entities.slice(0, MAX_VISIBLE) : entities;
+
   return {
-    entities,
+    entities: visibleEntities,
     categoryCounts,
-    totalEntities: entities.length,
+    totalEntities: visibleEntities.length,
     totalGroups: categoryCounts.length,
+    ...(truncated ? { totalBeforeTruncation: rawTotal } : {}),
   };
 };
 

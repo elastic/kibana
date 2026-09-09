@@ -36,140 +36,116 @@ import { formatGoldenSignalValue } from './fake_entity_overview';
 
 interface OverviewTabProps {
   readonly overview: EntityOverview;
-  /**
-   * Optional host-injected content (e.g. an embedded Kibana dashboard for a
-   * K8s pod) rendered in a collapsible section directly below the entity
-   * summary. Omitted for entities the host has no dashboard for.
-   */
-  readonly dashboardSlot?: React.ReactNode;
+  /** When true the AI-generated summary section is hidden (e.g. Phase 1). */
+  readonly hideAiSummary?: boolean;
 }
 
-export const OverviewTab = ({ overview, dashboardSlot }: OverviewTabProps) => {
+export const OverviewTab = ({ overview, hideAiSummary = false }: OverviewTabProps) => {
   const { resourceCopy = false } = useEntityFlyoutServices();
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSummary' });
-  const dashboardAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabDashboard' });
   const signalsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSignals' });
   const detailsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabDetails' });
   const ownershipAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabOwnership' });
 
   return (
     <>
+      {!hideAiSummary && (
+        <>
+          <EuiAccordion
+            id={summaryAccordionId}
+            initialIsOpen
+            buttonContent={
+              <SectionTitle
+                title={i18n.translate('entityCentricLabFlyout.flyout.overview.entitySummaryTitle', {
+                  defaultMessage: '{thing} Summary',
+                  values: { thing: labThingLabel(resourceCopy) },
+                })}
+                adornment={<AssistanceSparklesIcon />}
+              />
+            }
+            paddingSize="s"
+            data-test-subj="entityCentricLabOverviewEntitySummary"
+          >
+            <EntitySummaryCard overview={overview} />
+          </EuiAccordion>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       <EuiAccordion
-        id={summaryAccordionId}
+        id={signalsAccordionId}
         initialIsOpen
         buttonContent={
           <SectionTitle
-            title={i18n.translate('entityCentricLabFlyout.flyout.overview.entitySummaryTitle', {
-              defaultMessage: '{thing} Summary',
-              values: { thing: labThingLabel(resourceCopy) },
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalsTitle', {
+              defaultMessage: 'Golden signals',
             })}
-            adornment={<AssistanceSparklesIcon />}
           />
         }
         paddingSize="s"
-        data-test-subj="entityCentricLabOverviewEntitySummary"
+        data-test-subj="entityCentricLabOverviewGoldenSignals"
       >
-        <EntitySummaryCard overview={overview} />
+        <GoldenSignalsRow signals={overview.goldenSignals} />
       </EuiAccordion>
 
       <EuiSpacer size="m" />
 
-      {dashboardSlot ? (
-        <EuiAccordion
-          id={dashboardAccordionId}
-          initialIsOpen
-          buttonContent={
-            <SectionTitle
-              title={i18n.translate('entityCentricLabFlyout.flyout.overview.dashboardTitle', {
-                defaultMessage: 'Dashboard',
-              })}
-            />
+      <EuiAccordion
+        id={detailsAccordionId}
+        initialIsOpen
+        buttonContent={
+          <SectionTitle
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.entityDetailsTitle', {
+              defaultMessage: '{thing} details',
+              values: { thing: labThingLabel(resourceCopy) },
+            })}
+          />
+        }
+        paddingSize="s"
+        data-test-subj="entityCentricLabOverviewEntityDetails"
+      >
+        <KeyValueGrid
+          rows={
+            resourceCopy
+              ? overview.details.map((row) =>
+                  row.label === 'Entity id' ? { ...row, label: 'Resource id' } : row
+                )
+              : overview.details
           }
-          paddingSize="s"
-          data-test-subj="entityCentricLabOverviewDashboard"
-        >
-          {dashboardSlot}
-        </EuiAccordion>
-      ) : (
-        // When a real dashboard is embedded (K8s pods), the mock Golden
-        // signals / Entity details / Ownership sections are redundant and are
-        // hidden. Other entity kinds keep them.
-        <>
-          <EuiAccordion
-            id={signalsAccordionId}
-            initialIsOpen
-            buttonContent={
-              <SectionTitle
-                title={i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalsTitle', {
-                  defaultMessage: 'Golden signals',
-                })}
-              />
+          ariaLabel={i18n.translate(
+            'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
+            {
+              defaultMessage: '{thing} details',
+              values: { thing: labThingLabel(resourceCopy) },
             }
-            paddingSize="s"
-            data-test-subj="entityCentricLabOverviewGoldenSignals"
-          >
-            <GoldenSignalsRow signals={overview.goldenSignals} />
-          </EuiAccordion>
+          )}
+        />
+      </EuiAccordion>
 
-          <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-          <EuiAccordion
-            id={detailsAccordionId}
-            initialIsOpen
-            buttonContent={
-              <SectionTitle
-                title={i18n.translate('entityCentricLabFlyout.flyout.overview.entityDetailsTitle', {
-                  defaultMessage: '{thing} details',
-                  values: { thing: labThingLabel(resourceCopy) },
-                })}
-              />
-            }
-            paddingSize="s"
-            data-test-subj="entityCentricLabOverviewEntityDetails"
-          >
-            <KeyValueGrid
-              rows={
-                resourceCopy
-                  ? overview.details.map((row) =>
-                      row.label === 'Entity id' ? { ...row, label: 'Resource id' } : row
-                    )
-                  : overview.details
-              }
-              ariaLabel={i18n.translate(
-                'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
-                {
-                  defaultMessage: '{thing} details',
-                  values: { thing: labThingLabel(resourceCopy) },
-                }
-              )}
-            />
-          </EuiAccordion>
-
-          <EuiSpacer size="m" />
-
-          <EuiAccordion
-            id={ownershipAccordionId}
-            initialIsOpen
-            buttonContent={
-              <SectionTitle
-                title={i18n.translate('entityCentricLabFlyout.flyout.overview.ownershipTitle', {
-                  defaultMessage: 'Ownership',
-                })}
-              />
-            }
-            paddingSize="s"
-            data-test-subj="entityCentricLabOverviewOwnership"
-          >
-            <KeyValueGrid
-              rows={overview.ownership}
-              ariaLabel={i18n.translate(
-                'entityCentricLabFlyout.flyout.overview.ownershipAriaLabel',
-                { defaultMessage: 'Ownership' }
-              )}
-            />
-          </EuiAccordion>
-        </>
-      )}
+      <EuiAccordion
+        id={ownershipAccordionId}
+        initialIsOpen
+        buttonContent={
+          <SectionTitle
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.ownershipTitle', {
+              defaultMessage: 'Ownership',
+            })}
+          />
+        }
+        paddingSize="s"
+        data-test-subj="entityCentricLabOverviewOwnership"
+      >
+        <KeyValueGrid
+          rows={overview.ownership}
+          ariaLabel={i18n.translate(
+            'entityCentricLabFlyout.flyout.overview.ownershipAriaLabel',
+            { defaultMessage: 'Ownership' }
+          )}
+        />
+      </EuiAccordion>
     </>
   );
 };

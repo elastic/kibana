@@ -10,11 +10,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, Query } from '@kbn/es-query';
 import {
+  EuiBadge,
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCopy,
+  EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -55,10 +56,9 @@ import {
   resolveEntityTypeIdForName,
   type EntityKind,
   type EntitySelectionContext,
-  type EntityDashboardRenderContext,
 } from '@kbn/entity-centric-lab-flyout';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
-import { K8sDetailDashboard, getK8sDetailDashboardConfig } from './k8s_detail_dashboard';
+import { K8sDetailDashboard } from './k8s_detail_dashboard';
 
 /**
  * Last-ditch fallback when neither the entity's `.type` string nor any
@@ -129,7 +129,7 @@ import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
-import type { DataVariation } from './variation_registry';
+import type { DataVariation, DetailVariation } from './variation_registry';
 import {
   DEFAULT_GROUP_BY,
   getGroupByFields,
@@ -138,6 +138,12 @@ import {
   type GroupByFieldDef,
   type GroupByFieldId,
 } from './entity_group_by';
+import {
+  KUBERNETES_CLUSTER_FILTER_ALL,
+  KubernetesClusterFilter,
+  filterEntitiesByCluster,
+  getKubernetesClusterNames,
+} from './kubernetes_cluster_filter';
 import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
@@ -399,6 +405,20 @@ interface AllEntitiesViewProps {
   readonly cloudServiceScope?: string;
 }
 
+/**
+ * Compute the Phase 1 alerts badge from an entity's `alerts` field.
+ * Returns an `{ label, color }` object suitable for `EntityFlyout.alertsBadge`.
+ */
+const computeAlertsBadge = (
+  entity: Entity | undefined
+): { label: string; color: string } | undefined => {
+  if (!entity) return undefined;
+  if (!entity.alerts) return { label: 'N/A', color: 'hollow' };
+  const { total, active } = entity.alerts;
+  if (active > 0) return { label: `Alerting (${active}/${total})`, color: 'danger' };
+  return { label: `OK (${total}/${total})`, color: 'success' };
+};
+
 const AllEntitiesViewInner = ({
   categoryScope,
   cloudProviderScope,
@@ -488,6 +508,11 @@ const AllEntitiesViewInner = ({
   const savedViewsApi = useSavedViews();
 
   const dataVariation = useVariation('data') as DataVariation;
+  const detailVariation = useVariation('detail') as DetailVariation;
+  const phaseVariation = useVariation('phase');
+  const isPhase1 = phaseVariation === 'phase1';
+
+  const flyoutSize = detailVariation === 'largeFlyout' ? 'l' : 'm';
   const dataset = useMemo(() => buildFakeEntities(dataVariation), [dataVariation]);
   // Narrow the dataset to the active category once, then drive every
   // downstream concern (facets, summary, grid, list, flyout context) off
@@ -611,8 +636,29 @@ const AllEntitiesViewInner = ({
     // Hosts-only attribute after walking to Kubernetes) — the intent was to
     // group, so fall back to the built-in layout rather than flattening.
     if (activeGroupByFields.length === 0) return undefined;
+
+    // On a category-scoped page, grouping by "Category" is redundant (only
+    // one value). Strip it so the user sees meaningful sub-groups instead of
+    // a single wrapper matching the page title.
+    if (categoryScope) {
+      const withoutCategory = activeGroupByFields.filter((f) => f.id !== 'category');
+      // If Category was the *only* field → flat / ungrouped.
+      if (withoutCategory.length === 0) return [];
+      return withoutCategory;
+    }
+
     return activeGroupByFields;
-  }, [isElasticOn, groupBy, activeGroupByFields]);
+  }, [isElasticOn, groupBy, activeGroupByFields, categoryScope]);
+
+  // Kubernetes cluster filter lifted to page level when on the K8s
+  // category page so it appears in the toolbar row (the inner card's
+  // header is hidden by `hideCategoryHeader`).
+  const isK8sCategoryPage = !!categoryScope && categoryScope === 'kubernetes' && isElasticOn;
+  const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_CLUSTER_FILTER_ALL);
+  const k8sClusterNames = useMemo(
+    () => (isK8sCategoryPage ? getKubernetesClusterNames(scopedEntities) : []),
+    [isK8sCategoryPage, scopedEntities]
+  );
 
   // Pending-search consumption: the `search` string can't ride the
   // persisted-state pipeline (it's per-mount `useState`, not
@@ -629,7 +675,19 @@ const AllEntitiesViewInner = ({
   // mirrors the parent so the stable `openEntity` callback can decide, without
   // re-creating on every selection change, whether a click should open the
   // parent (nothing open yet) or a child (parent already open).
-  const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
+  // Restore flyout when returning from a full-page expand (back-navigation
+  // puts `flyoutEntity=<name>` back into the URL).
+  const [selectedEntityName, setSelectedEntityName] = useState<string | null>(() => {
+    const params = new URLSearchParams(location.search);
+    const restored = params.get('flyoutEntity');
+    if (restored) {
+      // Clean the query param so it doesn't stick around on subsequent
+      // navigations / refreshes.
+      params.delete('flyoutEntity');
+      history.replace({ ...location, search: params.toString() });
+    }
+    return restored;
+  });
   const [childEntityName, setChildEntityName] = useState<string | null>(null);
   // The health/type the child was opened with when it comes from an in-flyout
   // click (a Dependencies row / topology-map node). Those entities are
@@ -755,7 +813,7 @@ const AllEntitiesViewInner = ({
     history.replace({ pathname, search: `?loadView=${encodeURIComponent(view.id)}` });
   }, [isElasticOn, categoryScope, loadViewId, defaultViewId, savedViewsList, history]);
 
-  const filteredEntities = useMemo(() => {
+  const filteredEntitiesBeforeCluster = useMemo(() => {
     // ElasticOn: `search` holds a KQL expression driven by the unified
     // search bar (reusing the same state slot so saved views keep working).
     // Evaluate it — plus any "+ Add filter" chips — against the entities.
@@ -784,17 +842,53 @@ const AllEntitiesViewInner = ({
     extraFilterDefs,
   ]);
 
+  // When on the K8s category page the cluster filter is lifted to page level.
+  // Apply it to the filtered slice so counts, summary, and child views all
+  // reflect the selection. All downstream code uses `filteredEntities`.
+  const filteredEntities = useMemo(
+    () =>
+      isK8sCategoryPage && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL
+        ? filterEntitiesByCluster(
+            filteredEntitiesBeforeCluster,
+            k8sClusterFilter,
+            k8sClusterNames
+          )
+        : filteredEntitiesBeforeCluster,
+    [filteredEntitiesBeforeCluster, isK8sCategoryPage, k8sClusterFilter, k8sClusterNames]
+  );
+
   // ElasticOn summary "· N Groups": count distinct level-1 buckets under the
   // active grouping (Category by default), so the header stays truthful when
   // the user regroups (e.g. by Environment).
+  // On a single-category page with the default grouping the visible groups
+  // are sub-types (e.g. Clusters / Nodes / Pods), not categories — count
+  // those instead so the badge matches what the user actually sees.
   const elasticOnGroupCount = useMemo(() => {
     if (!isElasticOn) return 0;
     // Flat / ungrouped: everything sits in a single "All entities" block.
     if (groupBy.length === 0) return filteredEntities.length > 0 ? 1 : 0;
+
+    // On a category-scoped page with the built-in default grouping, count
+    // distinct sub-types (the visible panels) rather than distinct categories
+    // (which would always be 1).
+    if (categoryScope && isDefaultGroupBy(groupBy)) {
+      return new Set(
+        filteredEntities.map((entity) => entity.subType ?? entity.type)
+      ).size;
+    }
+
     const field = activeGroupByFields[0] ?? groupByFields[0];
     if (!field) return 0;
     return new Set(filteredEntities.map((entity) => field.valueOf(entity))).size;
-  }, [isElasticOn, groupBy, activeGroupByFields, groupByFields, filteredEntities]);
+  }, [isElasticOn, groupBy, activeGroupByFields, groupByFields, filteredEntities, categoryScope]);
+
+  const entityCountLabel = useMemo(() => {
+    const count = filteredEntities.length.toLocaleString();
+    if (dataset.totalBeforeTruncation && filteredEntities.length >= dataset.totalEntities) {
+      return `${count} (out of ${dataset.totalBeforeTruncation.toLocaleString()})`;
+    }
+    return count;
+  }, [filteredEntities.length, dataset.totalBeforeTruncation, dataset.totalEntities]);
 
   // Any filter dimension active (tags, extra facets, "+ Add filter" chips, or a
   // typed KQL query) — drives the unified "Clear filters" affordance below.
@@ -802,7 +896,8 @@ const AllEntitiesViewInner = ({
     getVisibleTagKeys(isElasticOn).some((key) => activeTagFilters[key].length > 0) ||
     Object.values(activeExtraFilters).some((values) => values.length > 0) ||
     labFilters.length > 0 ||
-    search.trim() !== '';
+    search.trim() !== '' ||
+    (isK8sCategoryPage && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
   const handleClearFilters = useCallback(() => {
@@ -810,6 +905,7 @@ const AllEntitiesViewInner = ({
     setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
     setLabFilters([]);
     setSearch('');
+    setK8sClusterFilter(KUBERNETES_CLUSTER_FILTER_ALL);
   }, [setActiveTagFilters]);
 
   // Resolve the clicked entity's `type` and `health` from the dataset so the
@@ -870,11 +966,18 @@ const AllEntitiesViewInner = ({
   const openEntity = useCallback(
     (entityName: string) => {
       if (!isEntityOpenable(entityName)) return;
+      if (detailVariation === 'fullPage') {
+        router.push('/entities/detail/{entityName}', {
+          path: { entityName: encodeURIComponent(entityName) },
+          query: {},
+        });
+        return;
+      }
       setSelectedEntityName(entityName);
       setChildEntityName(null);
       setChildEntityContext(null);
     },
-    [isEntityOpenable]
+    [isEntityOpenable, detailVariation, router]
   );
 
   // Selecting an entity from *inside* a flyout (Dependencies row, etc.)
@@ -888,6 +991,30 @@ const AllEntitiesViewInner = ({
     },
     [isEntityOpenable]
   );
+
+  // Expand flyout to full page — closes the flyout and navigates to the
+  // dedicated detail route. Only wired when `detailVariation` is
+  // `flyoutExpandable`.
+  //
+  // Before navigating away we inject a `flyoutEntity` query param into
+  // the *current* URL (via `history.replace`) so that when the user
+  // presses "back" on the detail page, the list view re-opens with the
+  // flyout already visible for that entity.
+  const handleExpandToFullPage = useCallback(() => {
+    if (!selectedEntityName) return;
+    // Stamp the current URL so the flyout re-opens on back-navigation.
+    const params = new URLSearchParams(location.search);
+    params.set('flyoutEntity', selectedEntityName);
+    history.replace({ ...location, search: params.toString() });
+
+    setSelectedEntityName(null);
+    setChildEntityName(null);
+    setChildEntityContext(null);
+    router.push('/entities/detail/{entityName}', {
+      path: { entityName: encodeURIComponent(selectedEntityName) },
+      query: {},
+    });
+  }, [selectedEntityName, router, location, history]);
 
   // Closing the parent tears the whole session down (the child can't
   // outlive its parent); closing the child leaves the parent open.
@@ -941,26 +1068,24 @@ const AllEntitiesViewInner = ({
     [router]
   );
 
-  // Kubernetes resources (pod, node, namespace, cluster, deployment) embed
-  // their matching "[Kubernetes OTel] … Detail" dashboard in the flyout's
-  // Overview tab, scoped to the clicked resource. The shared flyout package
-  // can't depend on the `dashboard` plugin, so Streams injects the renderer
-  // here; kinds without a matching dashboard return `null` and the Overview
-  // tab renders as before. Time range follows the page's picker.
-  const renderEntityDashboard = useCallback(
-    ({ entityName, entityType, kind }: EntityDashboardRenderContext) => {
-      const resolvedKind = kind ?? entityTypeToKind(entityType) ?? inferEntityKind(entityName);
-      const dashboardConfig = getK8sDetailDashboardConfig(resolvedKind);
-      if (!dashboardConfig) return null;
-      return (
-        <K8sDetailDashboard
-          config={dashboardConfig}
-          resourceName={entityName}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-        />
-      );
-    },
+  // Dashboards tab: embed a specific dashboard by its saved-object title,
+  // scoped to the entity via a phrase filter on `scopeField`.
+  const renderTabDashboard = useCallback(
+    (
+      dashboard: { savedObjectTitle: string; scopeField: string; hiddenPanelIds?: ReadonlySet<string> },
+      entityName: string
+    ) => (
+      <K8sDetailDashboard
+        config={{
+          dashboardTitle: dashboard.savedObjectTitle,
+          scopeField: dashboard.scopeField,
+          hiddenPanelIds: dashboard.hiddenPanelIds ?? new Set(),
+        }}
+        resourceName={entityName}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+      />
+    ),
     [rangeFrom, rangeTo]
   );
 
@@ -974,10 +1099,10 @@ const AllEntitiesViewInner = ({
       agentBuilder,
       notifications,
       charts,
-      renderEntityDashboard,
+      renderTabDashboard,
       resourceCopy: isElasticOn,
     }),
-    [agentBuilder, notifications, charts, renderEntityDashboard, isElasticOn]
+    [agentBuilder, notifications, charts, renderTabDashboard, isElasticOn]
   );
 
   // Latest: the view currently loaded from the nav (`?loadView=<id>`), if it
@@ -1199,6 +1324,16 @@ const AllEntitiesViewInner = ({
                 color="hollow"
               />
             </EuiFlexItem>
+            {loadedView && isLoadedViewModified ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning" data-test-subj="entityCentricLabUnsavedBadgeHeader">
+                  {i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.unsavedChanges',
+                    { defaultMessage: 'Unsaved changes' }
+                  )}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         }
         tabs={
@@ -1255,10 +1390,47 @@ const AllEntitiesViewInner = ({
                     values: { thing: labThing(isElasticOn) },
                   })}
                 </EuiButton>,
+                ...(isElasticOn
+                  ? [
+                      <SaveViewButton
+                        key="save-view"
+                        currentState={currentViewState}
+                        loadedView={loadedView}
+                        isModified={isLoadedViewModified}
+                        onUpdate={handleUpdateLoadedView}
+                        onSaveAsNew={handleSaveAsNewView}
+                        showMakeDefault
+                        isLoadedViewDefault={
+                          Boolean(loadedView) &&
+                          savedViewsApi.defaultViewId === loadedView?.id
+                        }
+                        compact
+                        neutral
+                        hideBadge
+                      />,
+                    ]
+                  : []),
               ]
         }
       />
       <StreamsAppPageTemplate.Body>
+        {dataset.totalBeforeTruncation && filteredEntities.length >= dataset.totalEntities ? (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.streams.entityCentricLab.allEntities.truncationBanner',
+                {
+                  defaultMessage:
+                    'We can only show 10,000 resources at a time. Use filters to slice and dice further your data.',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+              size="s"
+            />
+            <EuiSpacer size="s" />
+          </>
+        ) : null}
         <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
           {isCloudScoped && !isLatest ? (
             <EuiFlexItem grow={false} css={CLOUD_SIDE_NAV_COLUMN}>
@@ -1351,15 +1523,15 @@ const AllEntitiesViewInner = ({
                       />
                     </EuiFlexItem>
                   ) : null}
-                  <EuiFlexItem grow={false}>
-                    <EntityGroupByControls
-                      fields={groupByFields}
-                      groupBy={groupBy}
-                      onChange={setGroupBy}
-                      compressed
-                      disabledFieldIds={categoryScope ? ['category'] : []}
-                    />
-                  </EuiFlexItem>
+                  {isK8sCategoryPage && k8sClusterNames.length > 0 ? (
+                    <EuiFlexItem grow={false}>
+                      <KubernetesClusterFilter
+                        clusterNames={k8sClusterNames}
+                        value={k8sClusterFilter}
+                        onChange={setK8sClusterFilter}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   {hasActiveFilters ? (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
@@ -1390,7 +1562,7 @@ const AllEntitiesViewInner = ({
                         {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
                           defaultMessage: '{count} {things} · {groups} Groups',
                           values: {
-                            count: filteredEntities.length.toLocaleString(),
+                            count: entityCountLabel,
                             things: labThingsLabel(isElasticOn),
                             groups: isElasticOn
                               ? elasticOnGroupCount
@@ -1421,46 +1593,20 @@ const AllEntitiesViewInner = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <SaveViewButton
-                      currentState={currentViewState}
-                      loadedView={loadedView}
-                      isModified={isLoadedViewModified}
-                      onUpdate={handleUpdateLoadedView}
-                      onSaveAsNew={handleSaveAsNewView}
-                      showMakeDefault={isElasticOn}
-                      isLoadedViewDefault={
-                        Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
-                      }
-                      compact
-                      neutral
+                    <EntityGroupByControls
+                      fields={groupByFields}
+                      groupBy={groupBy}
+                      onChange={setGroupBy}
+                      lockedFieldIds={categoryScope ? ['category'] : []}
+                      variant="link"
+                      linkPrefix={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.groupBy.linkLabel',
+                        {
+                          defaultMessage: 'Group {things} by',
+                          values: { things: labThingsLabel(isElasticOn) },
+                        }
+                      )}
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiCopy
-                      textToCopy={typeof window !== 'undefined' ? window.location.href : ''}
-                      beforeMessage={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.copyUrl.tooltip',
-                        { defaultMessage: 'Copy a link to this view to share' }
-                      )}
-                      afterMessage={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.copyUrl.copied',
-                        { defaultMessage: 'Copied' }
-                      )}
-                    >
-                      {(copy) => (
-                        <EuiButton
-                          size="s"
-                          color="text"
-                          iconType="link"
-                          onClick={copy}
-                          data-test-subj="entityCentricLabCopyUrlButton"
-                        >
-                          {i18n.translate('xpack.streams.entityCentricLab.entities.copyUrl.label', {
-                            defaultMessage: 'Copy URL',
-                          })}
-                        </EuiButton>
-                      )}
-                    </EuiCopy>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
@@ -1473,6 +1619,7 @@ const AllEntitiesViewInner = ({
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
+                    hideCategoryHeader={!!categoryScope}
                   />
                 ) : (
                   <EntitiesListView
@@ -1482,6 +1629,7 @@ const AllEntitiesViewInner = ({
                     enableColumnSettings={isElasticOn}
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
+                    hideCategoryHeader={!!categoryScope}
                   />
                 )}
               </>
@@ -1583,7 +1731,7 @@ const AllEntitiesViewInner = ({
                         {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
                           defaultMessage: '{count} {things} · {groups} Groups',
                           values: {
-                            count: filteredEntities.length.toLocaleString(),
+                            count: entityCountLabel,
                             things: labThingsLabel(isElasticOn),
                             // On the cross-category page the dataset-wide group
                             // total is the right summary. When scoped to one
@@ -1663,7 +1811,7 @@ const AllEntitiesViewInner = ({
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
             session="start"
-            size="m"
+            size={flyoutSize}
             entityName={selectedEntityName}
             entityType={selectedEntityType}
             entityHealth={selectedEntityHealth}
@@ -1675,6 +1823,12 @@ const AllEntitiesViewInner = ({
               isInfraShortTerm ? undefined : () => manageEntityType(selectedEntity)
             }
             minimalTabs={isInfraShortTerm}
+            onExpand={
+              detailVariation === 'flyoutExpandable' ? handleExpandToFullPage : undefined
+            }
+            hideHealthBadge={isPhase1}
+            alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
+            hideAiSummary={isPhase1}
           />
           {childEntityName ? (
             <EntityFlyout
@@ -1691,6 +1845,9 @@ const AllEntitiesViewInner = ({
                 isInfraShortTerm ? undefined : () => manageEntityType(childEntity)
               }
               minimalTabs={isInfraShortTerm}
+              hideHealthBadge={isPhase1}
+              alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
+              hideAiSummary={isPhase1}
             />
           ) : null}
         </EntityFlyoutServicesProvider>

@@ -81,6 +81,7 @@ export type FlyoutTabId =
   | 'traces'
   | 'alerts'
   | 'relationships'
+  | 'dashboards'
   | 'custom'
   | 'profiling';
 
@@ -229,6 +230,12 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     id: 'relationships',
     label: 'Relationships',
     description: 'Related entities: upstream, downstream',
+    enabled: true,
+  },
+  {
+    id: 'dashboards',
+    label: 'Dashboards',
+    description: 'Linked Kibana dashboards for this entity type',
     enabled: true,
   },
   {
