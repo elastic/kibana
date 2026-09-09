@@ -107,7 +107,10 @@ function makeEcfReturn(
       crowdstrikeLaunchUrl: undefined,
       globalRegion: 'us-east-1',
       launchedFamilies: [],
+      stackNames: {},
+      stackVersions: {},
       onLaunch: jest.fn(),
+      onStackNameChange: jest.fn(),
     },
   };
 }
@@ -128,6 +131,8 @@ describe('AuthenticateAndDeployStep', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['guardduty'] },
       awsServicesMap: awsServicesMapWithMI,
+      deploymentMethod: 'managed_integration',
+      setDeploymentMethod: jest.fn(),
     });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
     mockUseEcfDeployment.mockReturnValue(makeEcfReturn());
@@ -205,7 +210,7 @@ describe('AuthenticateAndDeployStep', () => {
     // storage, so the local state does not reset on remount.
 
     it('hasFailed=true when hook returns non-empty failedInstances on first render (no deploy attempted)', () => {
-      // Simulates the hook having been seeded from persisted deployAndDetectStep.failedInstances.
+      // Simulates the hook having been seeded from persisted detectAndReviewStep.failedInstances.
       mockUseDeploy.mockReturnValue(
         makeDeployReturn({ failedInstances: ['guardduty'], isDeploying: false })
       );
@@ -228,6 +233,8 @@ describe('AuthenticateAndDeployStep', () => {
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: [] },
         awsServicesMap: awsServicesMapEmpty,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
       renderStep();

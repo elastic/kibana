@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fleet-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/fleet'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/fleet-plugin'
   description: Moon project for @kbn/fleet-plugin
   channel: ''
-  owner: '@elastic/fleet'
+  owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
@@ -153,6 +153,7 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - test/scout_automatic_import/**/*
+    - test/scout_fi_agentless/**/*
     - test/scout_iac_provisioner/**/*
     - '!target/**/*'
 tasks: {}

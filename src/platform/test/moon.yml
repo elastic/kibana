@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-provider-plugin'
   - '@kbn/test'
   - '@kbn/repo-info'
-  - '@kbn/utils'
   - '@kbn/expect'
   - '@kbn/data-plugin'
   - '@kbn/ftr-common-functional-services'
@@ -61,7 +60,6 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/data-grid-in-table-search'
   - '@kbn/scout-info'
-  - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
@@ -72,7 +70,6 @@ dependsOn:
   - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'
-  - '@kbn/unified-tabs'
 tags:
   - test-helper
   - package

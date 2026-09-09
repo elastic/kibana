@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/mitre-attack-plugin",
+  "owner": [
+    "@elastic/security-detection-engineering"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Managed MITRE ATT&CK data source plugin",
+  "plugin": {
+    "id": "mitreAttack",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "mitreAttack"
+    ],
+    "requiredPlugins": [],
+    "requiredBundles": []
+  }
+}
