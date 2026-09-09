@@ -398,6 +398,14 @@ export const toNewAgentlessPolicy = (
           packagePolicy.cloud_connector_name && {
             name: packagePolicy.cloud_connector_name,
           }),
+        ...(!packagePolicy.cloud_connector_id &&
+          packagePolicy.cloud_connector_iac_key && {
+            iac_key: packagePolicy.cloud_connector_iac_key,
+          }),
+        ...(!packagePolicy.cloud_connector_id &&
+          packagePolicy.cloud_connector_iac_deployment_id && {
+            iac_deployment_id: packagePolicy.cloud_connector_iac_deployment_id,
+          }),
       },
     }),
   };

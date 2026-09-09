@@ -61,6 +61,16 @@ export async function createAndIntegrateCloudConnector(params: {
   cloudConnectorName?: string;
   accountType?: 'single-account' | 'organization-account';
   /**
+   * Only for a new connector; from the agentless API body or the package policy's transient fields.
+   * IaC key of the template deployed for this connector.
+   */
+  iacKey?: string;
+  /**
+   * Only for a new connector; from the agentless API body or the package policy's transient fields.
+   * Provider deployment identity (AWS: CloudFormation stack ARN).
+   */
+  iacDeploymentId?: string;
+  /**
    * Update path only: the connector currently attached to the policy being updated.
    * Re-saving a policy with its already-attached connector is not a new attachment,
    * so policy-group enforcement is skipped (pre-enforcement attachments stay editable).
@@ -77,6 +87,8 @@ export async function createAndIntegrateCloudConnector(params: {
     logger,
     cloudConnectorName: providedCloudConnectorName,
     accountType: providedAccountType,
+    iacKey,
+    iacDeploymentId,
     attachedCloudConnectorId,
   } = params;
 
@@ -204,12 +216,28 @@ export async function createAndIntegrateCloudConnector(params: {
   const accountType =
     providedAccountType ?? extractAccountType(cloudProvider, updatedPackagePolicy, packageInfo);
 
+  // IaC key and deployment id from the API request params, falling back to the package policy's
+  // transient fields (set by the UI before calling the agentless API).
+  const resolvedIacKey = iacKey ?? updatedPackagePolicy.cloud_connector_iac_key ?? undefined;
+  const resolvedIacDeploymentId =
+    iacDeploymentId ?? updatedPackagePolicy.cloud_connector_iac_deployment_id ?? undefined;
+
+  if (resolvedIacKey || resolvedIacDeploymentId) {
+    logger.debug(
+      `Creating cloud connector "${cloudConnectorName}" from IaC template: key ${resolvedIacKey}, deployment id ${
+        resolvedIacDeploymentId ? 'present' : 'absent'
+      }`
+    );
+  }
+
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {
       name: cloudConnectorName,
       vars: cloudConnectorVars,
       cloudProvider,
       accountType,
+      iac_key: resolvedIacKey,
+      iac_deployment_id: resolvedIacDeploymentId,
     });
 
     logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);

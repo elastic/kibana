@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SimplifiedPackagePolicyBaseSchema, SimplifiedVarsSchema } from './package_policy_schema';
+import {
+  NewPackagePolicySchema,
+  SimplifiedPackagePolicyBaseSchema,
+  SimplifiedVarsSchema,
+} from './package_policy_schema';
 
 describe('SimplifiedVarsSchema', () => {
   it('should validate a string "true" as a string and not coerce it to boolean', () => {
@@ -52,5 +56,41 @@ describe('SimplifiedPackagePolicyBaseSchema', () => {
         additional_datastreams_permissions: ['profiling-events-default'],
       })
     ).toThrow(/profiling-events-default/);
+  });
+});
+
+describe('NewPackagePolicySchema — IaC transient fields', () => {
+  const basePolicy = {
+    name: 'test-policy',
+    enabled: true,
+    policy_ids: ['agent-policy-1'],
+    inputs: [],
+  };
+
+  it('rejects an empty cloud_connector_iac_key', () => {
+    expect(() =>
+      NewPackagePolicySchema.validate({ ...basePolicy, cloud_connector_iac_key: '' })
+    ).toThrow();
+  });
+
+  it('accepts a non-empty cloud_connector_iac_key', () => {
+    expect(() =>
+      NewPackagePolicySchema.validate({ ...basePolicy, cloud_connector_iac_key: 'sha256:abc' })
+    ).not.toThrow();
+  });
+
+  it('rejects an empty cloud_connector_iac_deployment_id', () => {
+    expect(() =>
+      NewPackagePolicySchema.validate({ ...basePolicy, cloud_connector_iac_deployment_id: '' })
+    ).toThrow();
+  });
+
+  it('accepts a non-empty cloud_connector_iac_deployment_id', () => {
+    expect(() =>
+      NewPackagePolicySchema.validate({
+        ...basePolicy,
+        cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+      })
+    ).not.toThrow();
   });
 });

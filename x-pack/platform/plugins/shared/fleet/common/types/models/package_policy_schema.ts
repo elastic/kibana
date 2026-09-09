@@ -260,6 +260,28 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  cloud_connector_iac_key: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 512,
+        meta: {
+          description: 'Transient field for the IaC template key during connector creation.',
+        },
+      })
+    )
+  ),
+  cloud_connector_iac_deployment_id: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 2048,
+        meta: {
+          description: 'Transient field for the IaC deployment id during connector creation.',
+        },
+      })
+    )
+  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),

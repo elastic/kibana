@@ -336,6 +336,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
+        iacKey: data.cloud_connector?.iac_key,
+        iacDeploymentId: data.cloud_connector?.iac_deployment_id,
       });
 
       newPackagePolicy = updatedPackagePolicy;
@@ -549,6 +551,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
+        iacKey: data.cloud_connector?.iac_key,
+        iacDeploymentId: data.cloud_connector?.iac_deployment_id,
         attachedCloudConnectorId: existingPackagePolicy.cloud_connector_id ?? undefined,
       });
 

@@ -325,4 +325,104 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
       );
     });
   });
+
+  describe('IaC field forwarding on connector creation', () => {
+    const { extractAndCreateCloudConnectorSecrets } = jest.requireMock(
+      '../secrets/cloud_connector'
+    );
+
+    let createSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      extractAndCreateCloudConnectorSecrets.mockResolvedValue({
+        role_arn: { type: 'text', value: 'arn:aws:iam::123:role/elastic' },
+      });
+      createSpy = jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
+        id: 'new-connector-1',
+        name: 'test',
+        cloudProvider: 'aws',
+        vars: {},
+      } as any);
+    });
+
+    afterEach(() => {
+      createSpy.mockRestore();
+    });
+
+    it('passes iacKey and iacDeploymentId params to cloudConnectorService.create', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      await createAndIntegrateCloudConnector({
+        packagePolicy: buildPackagePolicy(),
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+        iacKey: 'sha256:abc',
+        iacDeploymentId: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+      });
+
+      expect(createSpy).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({
+          iac_key: 'sha256:abc',
+          iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+        })
+      );
+    });
+
+    it('falls back to package policy transient fields when iacKey param is absent', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const packagePolicy: NewPackagePolicy = {
+        ...buildPackagePolicy(),
+        cloud_connector_iac_key: 'sha256:abc',
+        cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+      };
+
+      await createAndIntegrateCloudConnector({
+        packagePolicy,
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+      });
+
+      expect(createSpy).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({
+          iac_key: 'sha256:abc',
+          iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+        })
+      );
+    });
+
+    it('iacKey param takes precedence over package policy transient field', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const packagePolicy: NewPackagePolicy = {
+        ...buildPackagePolicy(),
+        cloud_connector_iac_key: 'sha256:policy',
+      };
+
+      await createAndIntegrateCloudConnector({
+        packagePolicy,
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+        iacKey: 'sha256:param',
+      });
+
+      expect(createSpy).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({ iac_key: 'sha256:param' })
+      );
+    });
+  });
 });

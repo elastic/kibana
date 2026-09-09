@@ -772,6 +772,39 @@ describe('toNewAgentlessPolicy', () => {
 
       expect(detectTargetCsp).toHaveBeenCalledWith(policy, varGroups);
     });
+
+    it('maps transient IaC fields into cloud_connector for a new connector', () => {
+      const result = toNewAgentlessPolicy(
+        createPackagePolicy({
+          supports_cloud_connector: true,
+          cloud_connector_id: undefined,
+          cloud_connector_name: 'my-connector',
+          cloud_connector_iac_key: 'sha256:abc',
+          cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+        })
+      );
+
+      expect(result.cloud_connector).toMatchObject({
+        enabled: true,
+        name: 'my-connector',
+        iac_key: 'sha256:abc',
+        iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+      });
+    });
+
+    it('does not send IaC fields when reusing an existing connector', () => {
+      const result = toNewAgentlessPolicy(
+        createPackagePolicy({
+          supports_cloud_connector: true,
+          cloud_connector_id: 'cc-1',
+          cloud_connector_iac_key: 'sha256:abc',
+          cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+        })
+      );
+
+      expect(result.cloud_connector).not.toHaveProperty('iac_key');
+      expect(result.cloud_connector).not.toHaveProperty('iac_deployment_id');
+    });
   });
 });
 
