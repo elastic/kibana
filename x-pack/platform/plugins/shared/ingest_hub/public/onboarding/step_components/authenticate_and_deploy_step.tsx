@@ -135,26 +135,26 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const [isSavingSO, setIsSavingSO] = useState(false);
 
   const handleNext = useCallback(async () => {
-    // When only ECF services are selected, no handleDeploy runs, so the SO must be created here.
+    const defaultNames: Record<string, string> = {
+      unified: ECF_UNIFIED_STACK_NAME,
+      otel: ECF_OTEL_STACK_NAME,
+      crowdstrike: ECF_CROWDSTRIKE_STACK_NAME,
+    };
+    const ecfStacks = ecfSectionProps.launchedFamilies
+      .map((family) => {
+        const version = ecfSectionProps.stackVersions[family];
+        if (!version) return null;
+        return {
+          family,
+          stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
+          templateVersion: version,
+        };
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null);
+
+    // ECF-only: handleDeploy never runs, so create the SO here then navigate.
     if (miServiceIds.length === 0 && hasAnyEcf) {
       setIsSavingSO(true);
-      const defaultNames: Record<string, string> = {
-        unified: ECF_UNIFIED_STACK_NAME,
-        otel: ECF_OTEL_STACK_NAME,
-        crowdstrike: ECF_CROWDSTRIKE_STACK_NAME,
-      };
-      const ecfStacks = ecfSectionProps.launchedFamilies
-        .map((family) => {
-          const version = ecfSectionProps.stackVersions[family];
-          if (!version) return null;
-          return {
-            family,
-            stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
-            templateVersion: version,
-          };
-        })
-        .filter((s): s is NonNullable<typeof s> => s !== null);
-
       // Reuse an existing deployment id (user clicked Back then Next again) rather
       // than creating a second SO and orphaning the first.
       const existingId = detectAndReviewStep.onboardingDeploymentId;
@@ -183,6 +183,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       }
       return;
     }
+
+    // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
+    if (hasAnyEcf && detectAndReviewStep.onboardingDeploymentId) {
+      onContinue();
+      await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
+      return;
+    }
+
     onContinue();
   }, [
     miServiceIds.length,

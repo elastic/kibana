@@ -65,6 +65,14 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     () => detectAndReviewStep.failedInstances ?? []
   );
 
+  const hasEcfServices = useMemo(
+    () =>
+      selectedServiceIds.some((id) =>
+        servicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
+      ),
+    [selectedServiceIds, servicesMap]
+  );
+
   const deployGroups: DeployGroup[] = useMemo(
     () =>
       buildDeployGroups(
@@ -183,7 +191,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           (await createDeployment({
             provider: 'aws',
             connectorId,
-            mechanisms: ['agentless'],
+            mechanisms: hasEcfServices ? ['agentless', 'cloud_forwarder'] : ['agentless'],
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
               string,
@@ -270,6 +278,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       selectedServiceIds,
       dataFormat,
       servicesMap,
+      hasEcfServices,
     ]
   );
 
