@@ -189,6 +189,16 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
+    it('leaves ai.prompt unpinned so it resolves the default connector at run time', () => {
+      expect(content).toMatch(/leave its\s+`connector-id` off/);
+      expect(content).toMatch(/omitting it resolves the deployment's default AI\s+connector/);
+    });
+
+    it('strips the connector the scaffolder pins, since it is primed with the environment', () => {
+      expect(content).toMatch(/tends to pin a named `connector-id` onto\s+`ai\.prompt` steps/);
+      expect(content).toMatch(/first edit to make on the scaffold/);
+    });
+
     it('requires the pilot to tag its indicators and delete them afterwards', () => {
       expect(content).toContain('ce-pilot-');
       expect(content).toContain('context-engine.deleteKi');

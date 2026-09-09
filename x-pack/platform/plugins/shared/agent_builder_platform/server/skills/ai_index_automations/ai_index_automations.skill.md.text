@@ -40,7 +40,11 @@ Whatever the strategy, a generated workflow has to:
   detections a distribution aggregation whose observed counts every threshold must quote. Sample
   with `function_score` + `random_score` so repeated runs see different records rather than always
   the first-ingested ones.
-- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and leave its
+  `connector-id` off. The field is optional, and omitting it resolves the deployment's default AI
+  connector at run time. Naming one pins a saved automation to a connector that can be renamed,
+  removed, or run out of billing quota long after the conversation that wrote it — and the failure
+  lands on a scheduled run with nobody watching.
 - **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and gate every
   write on `context-engine.verifyKi` so an indicator whose ES|QL fails to parse is reported rather
   than persisted.
@@ -212,6 +216,10 @@ attachment id rather than a definition, so call `attachments.read` on that id to
 Once means once: after that call the definition is text you are holding, and every later change is an
 edit to that text. A second `generate_workflow` produces a second attachment to read back and re-rolls
 what the first one settled.
+
+Because it is primed with the connectors configured here, it tends to pin a named `connector-id` onto
+`ai.prompt` steps. Deleting those lines is the first edit to make on the scaffold — leaving one in is
+how a workflow ends up running against a connector that happens to be out of quota.
 
 Work in text from there. `platform.workflows.validate_workflow`, `platform.core.execute_workflow` and
 `platform.workflows.workflow_execute_step` all take a raw `yaml` string, so once the definition is in
