@@ -64,7 +64,7 @@ const consumeRequestSchema = z.discriminatedUnion('group', [
 const CONSUME_GROUP_PRIVILEGES = {
   detection: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
   ki_extraction: NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
-  investigation: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
+  investigation: NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,
 } as const;
 
 const readRunQuotaSnapshot = async ({
