@@ -62,6 +62,24 @@ export const createTestQueryClient = () =>
     },
   });
 
+export const createHookTestProviders = ({
+  locators = createMockLocators(),
+}: {
+  locators?: AlertingV2Locators;
+} = {}): React.ComponentType<PropsWithChildren> => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return ({ children }) => (
+    <MockLocatorProvider locators={locators}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </MockLocatorProvider>
+  );
+};
+
 export type TestProvidersProps = PropsWithChildren<{
   services?: AlertEpisodesKibanaServices;
   queryClient?: QueryClient;

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useCreateRule } from './use_create_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { LocatorProvider } from '../application/locator_context';
-import { createMockLocators } from '../test_utils/test_providers';
+import { createHookTestProviders, createMockLocators } from '../test_utils/test_providers';
 
 const mockLocators = createMockLocators();
 
@@ -50,20 +47,7 @@ const mockCreatePayload: CreateRuleData = {
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
 };
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(
-      LocatorProvider,
-      { locators: mockLocators },
-      React.createElement(QueryClientProvider, { client: queryClient }, children)
-    );
-};
+const createWrapper = () => createHookTestProviders({ locators: mockLocators });
 
 describe('useCreateRule', () => {
   const mockCreateRule = jest.fn();
