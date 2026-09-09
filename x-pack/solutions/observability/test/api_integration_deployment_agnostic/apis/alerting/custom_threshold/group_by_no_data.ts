@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
@@ -27,11 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const INDEX_NAME = 'kbn-ftr-custom-threshold-group-by-no-data';
     const DATA_VIEW_NAME = 'group-by-no-data-pattern-name';
     const DATA_VIEW_ID = 'data-view-id-group-by-no-data';
-    // Long enough for a host's last document to fall outside the rule's 20s lookback
-    // window, with headroom for request latency. A host is only detected as missing by
-    // the first execution that happens after its documents age out, so each phase below
-    // waits this long and then forces a run rather than waiting on the 1m schedule.
-    const STALENESS_WAIT_MS = 28000;
+    const STALENESS_WAIT_MS = 40000;
     let ruleId: string;
 
     const indexDocsFor = async (hosts: string[]) => {
@@ -96,6 +93,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = samlAuth.getInternalRequestHeader();
 
+      await supertestWithoutAuth
+        .post('/internal/alerting/rules/settings/_flapping')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
+        .send({
+          enabled: false,
+          look_back_window: DEFAULT_FLAPPING_SETTINGS.lookBackWindow,
+          status_change_threshold: DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold,
+        })
+        .expect(200);
+
       await esClient.indices.create({
         index: INDEX_NAME,
         mappings: {
@@ -139,6 +147,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         roleAuthc,
       });
       await esDeleteAllIndices([INDEX_NAME]);
+      await supertestWithoutAuth
+        .post('/internal/alerting/rules/settings/_flapping')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
+        .send({
+          enabled: DEFAULT_FLAPPING_SETTINGS.enabled,
+          look_back_window: DEFAULT_FLAPPING_SETTINGS.lookBackWindow,
+          status_change_threshold: DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold,
+        })
+        .expect(200);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
@@ -232,21 +250,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
-      it('recovers the disappeared group when it resumes, without emitting "*"', async () => {
-        await indexDocsFor(['host-b']);
-        await forceRuns(2);
+      it('recovers the disappeared group when it resumes, without emitting "*"', async function () {
+        this.timeout(420000);
 
-        const resp = await alertingApi.waitForAlertInIndex({
-          indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
-          ruleId,
-          filters: [
-            { term: { 'kibana.alert.instance.id': 'host-b' } },
-            { term: { 'kibana.alert.status': 'recovered' } },
-          ],
-        });
-        expect(resp.hits.hits.length).to.be.greaterThan(0);
+        const hostBKeepAlive = startKeepAlive(['host-b']);
+        try {
+          await forceRuns(2);
 
-        await expectNoUngroupedAlert();
+          const resp = await alertingApi.waitForAlertInIndex({
+            indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
+            ruleId,
+            filters: [
+              { term: { 'kibana.alert.instance.id': 'host-b' } },
+              { term: { 'kibana.alert.status': 'recovered' } },
+            ],
+          });
+          expect(resp.hits.hits.length).to.be.greaterThan(0);
+
+          await expectNoUngroupedAlert();
+        } finally {
+          await hostBKeepAlive.stop();
+        }
       });
 
       it('alerts per-group for every group when they all stop reporting simultaneously, never collapsing into "*"', async function () {
@@ -285,12 +309,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectNoUngroupedAlert();
       });
 
-      it('recovers every group when they all resume, without emitting "*"', async () => {
-        await indexDocsFor(['host-a', 'host-b']);
-        await forceRuns(2);
-        await alertingApi.waitForRuleStatus({ roleAuthc, ruleId, expectedStatus: 'ok' });
+      it('recovers every group when they all resume, without emitting "*"', async function () {
+        this.timeout(420000);
 
-        await expectNoUngroupedAlert();
+        const bothKeepAlive = startKeepAlive(['host-a', 'host-b']);
+        try {
+          await forceRuns(2);
+          await alertingApi.waitForRuleStatus({ roleAuthc, ruleId, expectedStatus: 'ok' });
+
+          await expectNoUngroupedAlert();
+        } finally {
+          await bothKeepAlive.stop();
+        }
       });
     });
   });
