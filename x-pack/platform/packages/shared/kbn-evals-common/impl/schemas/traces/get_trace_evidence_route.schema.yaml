@@ -102,6 +102,15 @@ components:
           anyOf:
             - {}
 
+    EvidenceMessage:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Full reconstructed message content; deliberately unbounded in this response schema.
+
     EvidenceRound:
       type: object
       required:
@@ -110,21 +119,9 @@ components:
         - steps
       properties:
         input:
-          type: object
-          required:
-            - message
-          properties:
-            message:
-              type: string
-              description: Full reconstructed message content; deliberately unbounded in this response schema.
+          $ref: '#/components/schemas/EvidenceMessage'
         response:
-          type: object
-          required:
-            - message
-          properties:
-            message:
-              type: string
-              description: Full reconstructed message content; deliberately unbounded in this response schema.
+          $ref: '#/components/schemas/EvidenceMessage'
         steps:
           type: array
           maxItems: 200

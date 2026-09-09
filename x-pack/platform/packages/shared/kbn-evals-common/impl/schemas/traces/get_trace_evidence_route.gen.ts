@@ -53,28 +53,24 @@ export const EvidenceToolCall = lazySchema(() =>
 );
 export type EvidenceToolCall = z.infer<typeof EvidenceToolCall>;
 
+export const EvidenceMessage = lazySchema(() =>
+  z.object({
+    /**
+     * Full reconstructed message content; deliberately unbounded in this response schema.
+     */
+    message: z
+      .string()
+      .describe(
+        'Full reconstructed message content; deliberately unbounded in this response schema.'
+      ),
+  })
+);
+export type EvidenceMessage = z.infer<typeof EvidenceMessage>;
+
 export const EvidenceRound = lazySchema(() =>
   z.object({
-    input: z.object({
-      /**
-       * Full reconstructed message content; deliberately unbounded in this response schema.
-       */
-      message: z
-        .string()
-        .describe(
-          'Full reconstructed message content; deliberately unbounded in this response schema.'
-        ),
-    }),
-    response: z.object({
-      /**
-       * Full reconstructed message content; deliberately unbounded in this response schema.
-       */
-      message: z
-        .string()
-        .describe(
-          'Full reconstructed message content; deliberately unbounded in this response schema.'
-        ),
-    }),
+    input: EvidenceMessage,
+    response: EvidenceMessage,
     steps: z.array(EvidenceToolCall).max(200),
   })
 );
