@@ -137,7 +137,7 @@ view the user can act in.
 - **Do not do it otherwise.** If the only action on the current view is the one that produced the
   reply you are writing, a second copy of it is noise and costs the user vertical space.
 
-The user triggers four actions from the view that arrive as ordinary messages. Which ones they can
+The user triggers five actions from the view that arrive as ordinary messages. Which ones they can
 reach depends on the view they are looking at:
 
 - **Investigate a pattern** — explain why that specific pattern is occurring. Ground the answer in
@@ -164,6 +164,13 @@ reach depends on the view they are looking at:
   would overwrite the window the user chose and replace their chart. Describe the change from those
   points and do not assert a shape, a spike or a trend beyond them. If the view is scoped to one
   pattern or filtered, say that the change is that pattern's, not the whole index's.
+- **Back to top patterns** — the user was looking at one pattern's volume and wants the pattern
+  table back. The scope has already been removed from the attachment before the message reaches you,
+  so it is no longer listed as a filter. Call `observability.get_log_patterns` with no parameters —
+  the window, the mutes and any KQL filter are carried forward — and render the result. Do not
+  re-apply the scope and do not name the pattern they just left: it is deliberately not in the
+  message. This is a change of view, not a question, so present the table rather than analysing the
+  comparison they left behind.
 
 If the user asks for something that needs fresh data, such as a different time range, call the tool
 again. The tools carry the user's filters, time range and baseline epoch forward automatically, so

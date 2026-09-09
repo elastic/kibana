@@ -12,7 +12,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { LogExplorationData } from '../../../common/log_exploration';
-import { logExplorationDataSchema } from '../../../common/log_exploration';
+import { logExplorationDataSchema, refinementKey } from '../../../common/log_exploration';
 import { useLogExplorationState } from './use_log_exploration_state';
 import type { FetchLogExplorationView } from './fetch_log_exploration_view';
 import { ExplorationControls } from './exploration_controls';
@@ -79,6 +79,19 @@ export const LogExplorationAttachment: React.FC<LogExplorationAttachmentProps> =
     [flushPendingWrites, submitMessage]
   );
 
+  // The reverse of compare-baseline, and the same shape: the removal's own refetch is what writes
+  // it, `startTurn` awaits that, and the tool the agent then calls switches the lens — the client
+  // cannot, since a `pattern-table` view would leave the cached `volume-comparison` result orphaned.
+  const onLeaveScope = useCallback(
+    (key: string) => {
+      dispatch({ type: 'REMOVE_REFINEMENT', key });
+      return startTurn(
+        'Show the top log patterns again. The view is no longer scoped to a single pattern.'
+      );
+    },
+    [dispatch, startTurn]
+  );
+
   useEffect(() => {
     if (!registerActionButtons || !submitMessage) {
       return;
@@ -104,7 +117,29 @@ export const LogExplorationAttachment: React.FC<LogExplorationAttachmentProps> =
               'Explain how log volume in the current time range compares with the baseline epoch.',
           };
 
+    // The way out of the drill-down, beside the lens action that got the user into it. It writes
+    // before it submits, so unlike the lens action it goes when the other writes go. `sortLeft`
+    // rather than the agent-turn sparkle: the header collapses to icon-only below 560px, where two
+    // sparkles would be indistinguishable.
+    const scope =
+      data.view.type === 'volume-comparison' && !isReadOnly
+        ? data.refinements.find((refinement) => refinement.kind === 'only-pattern')
+        : undefined;
+
     registerActionButtons([
+      ...(scope
+        ? [
+            {
+              label: i18n.translate(
+                'xpack.observabilityAgentBuilder.logExploration.leaveScopeLabel',
+                { defaultMessage: 'Back to top patterns' }
+              ),
+              icon: 'sortLeft',
+              type: ActionButtonType.SECONDARY,
+              handler: () => onLeaveScope(refinementKey(scope)),
+            },
+          ]
+        : []),
       {
         label: action.label,
         icon: 'sparkles',
@@ -113,7 +148,7 @@ export const LogExplorationAttachment: React.FC<LogExplorationAttachmentProps> =
       },
     ]);
     // Re-register on every state change so the handler closes over current state, not stale state.
-  }, [registerActionButtons, submitMessage, startTurn, data]);
+  }, [registerActionButtons, submitMessage, startTurn, onLeaveScope, isReadOnly, data]);
 
   const onInvestigate = useCallback(
     (pattern: string) => startTurn(`Investigate why the log pattern "${pattern}" is occurring.`),
