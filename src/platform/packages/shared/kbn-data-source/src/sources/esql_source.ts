@@ -82,7 +82,12 @@ export class EsqlSource implements DataSource {
   /** Async factory — id derivation via `crypto.subtle` requires async. */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
     const title = getIndexPatternFromESQLQuery(args.query);
-    const hashInput = JSON.stringify(['esql', title, args.projectRouting ?? null, args.timeFieldName ?? null]);
+    const hashInput = JSON.stringify([
+      'esql',
+      title,
+      args.projectRouting ?? null,
+      args.timeFieldName ?? null,
+    ]);
     const hash = await sha256(hashInput);
     return new EsqlSource({
       id: `esql-${hash}`,
