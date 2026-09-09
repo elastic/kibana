@@ -96,6 +96,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   packagePolicyId?: string;
   deploymentSelector?: React.ReactNode;
   hideInVarGroupOptions?: Record<string, string[]>;
+  /** Cloud connector section validity (a blocking IaC key mismatch sets false). */
+  onCloudConnectorValidityChange?: (isValid: boolean) => void;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -113,6 +115,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     packagePolicyId,
     deploymentSelector,
     hideInVarGroupOptions,
+    onCloudConnectorValidityChange,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -173,6 +176,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       varGroupSelections,
       packagePolicy,
       updatePackagePolicy,
+      onValidityChange: onCloudConnectorValidityChange,
     });
 
     // Package-level vars, filtered by var_group visibility

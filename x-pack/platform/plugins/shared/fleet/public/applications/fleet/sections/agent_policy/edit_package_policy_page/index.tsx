@@ -314,6 +314,13 @@ export const EditPackagePolicyForm = memo<{
     [updatePackagePolicy, setFormState]
   );
 
+  // Same channel as the extension view: the cloud connector section can block submission
+  // (IaC key mismatch, https://github.com/elastic/ingest-dev/issues/9415).
+  const handleCloudConnectorValidityChange = useCallback(
+    (isValid: boolean) => setFormState(isValid ? 'VALID' : 'INVALID'),
+    [setFormState]
+  );
+
   // Cancel url + Success redirect Path:
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
@@ -522,6 +529,7 @@ export const EditPackagePolicyForm = memo<{
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               agentPolicies={agentPolicies}
+              onCloudConnectorValidityChange={handleCloudConnectorValidityChange}
               onNamespaceCustomizationEnabledChange={(enabled, isInit) => {
                 namespaceCustomizationEnabledRef.current = enabled;
                 if (!isInit) {
@@ -580,6 +588,7 @@ export const EditPackagePolicyForm = memo<{
       extensionView,
       formState,
       handleExtensionViewOnChange,
+      handleCloudConnectorValidityChange,
       hasAgentlessAgentPolicy,
       originalPackagePolicy,
       packageInfo,

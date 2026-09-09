@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -69,6 +69,18 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   });
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
+
+  // Propagates the IaC key-check blocking state up to the wizard. Reads the policy through a
+  // ref so the callback identity is stable and the check's effect fires only when the blocking
+  // state itself changes, not after every policy edit.
+  const newPolicyRef = useRef(newPolicy);
+  newPolicyRef.current = newPolicy;
+  const onValidityChange = useCallback(
+    (isValid: boolean) => {
+      updatePolicy({ updatedPolicy: newPolicyRef.current, isValid });
+    },
+    [updatePolicy]
+  );
 
   useEffect(() => {
     if (isEditPage) {
@@ -167,6 +179,10 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithExistingCredentials}
           accountType={accountType}
           packageName={packageInfo.name}
+          cloud={cloud}
+          iacTemplateUrl={iacTemplateUrl}
+          packageInfo={packageInfo}
+          onValidityChange={onValidityChange}
         />
       ),
     },

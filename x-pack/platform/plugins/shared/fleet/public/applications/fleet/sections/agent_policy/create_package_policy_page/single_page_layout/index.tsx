@@ -458,6 +458,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [updatePackagePolicy, setFormState]
   );
 
+  // Same channel as the extension view: the cloud connector section can block submission
+  // (IaC key mismatch, https://github.com/elastic/ingest-dev/issues/9415).
+  const handleCloudConnectorValidityChange = useCallback(
+    (isValid: boolean) => setFormState(isValid ? 'VALID' : 'INVALID'),
+    [setFormState]
+  );
+
   const { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest } = useDevToolsRequest({
     newAgentPolicy,
     packagePolicy,
@@ -653,6 +660,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
             }
             hideInVarGroupOptions={hiddenVarGroupOptions}
+            onCloudConnectorValidityChange={handleCloudConnectorValidityChange}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -704,6 +712,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
+      handleCloudConnectorValidityChange,
       varGroupSelections,
       hiddenVarGroupOptions,
       setupTechnologySelector,

@@ -9,7 +9,15 @@ import type {
   RenderIacTemplateRequest,
   RenderIacTemplateResponse,
 } from '../../../common/types/rest_spec/iac_provisioner';
-import { API_VERSIONS, IAC_PROVISIONER_API_ROUTES } from '../../../common/constants';
+import type {
+  VerifyCloudConnectorIacKeyRequest,
+  VerifyCloudConnectorIacKeyResponse,
+} from '../../../common/types/rest_spec/cloud_connector';
+import {
+  API_VERSIONS,
+  IAC_PROVISIONER_API_ROUTES,
+  CLOUD_CONNECTOR_API_ROUTES,
+} from '../../../common/constants';
 
 import { sendRequest } from './use_request';
 
@@ -17,6 +25,21 @@ export function sendRenderIacTemplate(body: RenderIacTemplateRequest) {
   return sendRequest<RenderIacTemplateResponse>({
     method: 'post',
     path: IAC_PROVISIONER_API_ROUTES.RENDER_TEMPLATE_PATTERN,
+    version: API_VERSIONS.internal.v1,
+    body,
+  });
+}
+
+export function sendVerifyCloudConnectorIacKey(
+  cloudConnectorId: string,
+  body: VerifyCloudConnectorIacKeyRequest
+) {
+  return sendRequest<VerifyCloudConnectorIacKeyResponse>({
+    method: 'post',
+    path: CLOUD_CONNECTOR_API_ROUTES.VERIFY_IAC_KEY_PATTERN.replace(
+      '{cloudConnectorId}',
+      cloudConnectorId
+    ),
     version: API_VERSIONS.internal.v1,
     body,
   });
