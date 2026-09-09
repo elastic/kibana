@@ -60,7 +60,6 @@ function getServicesMock(
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
-    hasUserDataView: jest.fn(() => Promise.resolve(hasDataView)),
     hasDataView: jest.fn(() => Promise.resolve(hasDataView)),
   };
   dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
