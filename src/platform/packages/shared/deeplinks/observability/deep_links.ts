@@ -112,6 +112,7 @@ export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules
 
 export type ObservabilityAlertingLinkId =
   | 'inbox'
+  | 'rules-v1'
   | 'rules-v2'
   | 'rule-library'
   | 'action-policies'
