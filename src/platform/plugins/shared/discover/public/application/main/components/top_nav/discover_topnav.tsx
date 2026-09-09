@@ -17,7 +17,7 @@ import {
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
-import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
+import { type Query, type TimeRange, type AggregateQuery, isEmptyEsqlQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -332,6 +332,9 @@ export const DiscoverTopNav = ({
   );
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
+      if (isEmptyEsqlQuery(payload.query)) {
+        return;
+      }
       if (isUninitializedEsqlTab) {
         onEsqlEditorInitialStateChange({
           ...esqlEditorUiState,

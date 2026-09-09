@@ -263,6 +263,7 @@ export function createSearchBar({
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
+            disableSubmitAction={props.disableSubmitAction}
             screenTitle={props.screenTitle}
             indexPatterns={props.indexPatterns}
             indicateNoData={props.indicateNoData}

@@ -24,7 +24,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -192,7 +192,7 @@ export function getDataStateContainer({
    */
   const refetch$ = new Subject<DataRefetchMsg>();
   const getInitialFetchStatus = () => {
-    if (getCurrentTab().skipInitialFetch) {
+    if (getCurrentTab().skipInitialFetch || isEmptyEsqlQuery(getCurrentTab().appState.query)) {
       return FetchStatus.UNINITIALIZED;
     }
     const shouldSearchOnPageLoad =
@@ -296,6 +296,14 @@ export function getDataStateContainer({
             appState,
             globalState,
           } = tabState;
+
+          // Timefilter changes fetch via getFetch$(), not fetchQuery(). Skip empty
+          // ES|QL so changing the date picker does not execute an invalid query.
+          if (isEmptyEsqlQuery(appState.query)) {
+            autoRefreshDone?.();
+            autoRefreshDone = undefined;
+            return;
+          }
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
@@ -616,6 +624,11 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
+    const query = getCurrentTab().appState.query;
+    if (isEmptyEsqlQuery(query)) {
+      return;
+    }
+
     if (getCurrentTab().skipInitialFetch) {
       // The tab has been initialized by an explicit search; later query-language
       // switches should fetch normally instead of returning to the empty state.
@@ -623,8 +636,6 @@ export function getDataStateContainer({
         injectCurrentTab(internalStateActions.setSkipInitialFetch)({ skipInitialFetch: false })
       );
     }
-
-    const query = getCurrentTab().appState.query;
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
     const currentDataView = currentDataView$.getValue();
 

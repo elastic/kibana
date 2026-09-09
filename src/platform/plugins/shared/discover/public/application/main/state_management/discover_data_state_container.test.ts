@@ -20,6 +20,7 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
+import { fetchEsql } from '../data_fetching/fetch_esql';
 import {
   DEFAULT_TAB_STATE,
   createTabItem,
@@ -44,6 +45,7 @@ jest.mock('@kbn/ebt-tools', () => ({
 }));
 
 const mockFetchDocuments = jest.mocked(fetchDocuments);
+const mockFetchEsql = jest.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
@@ -74,6 +76,65 @@ describe('test getDataStateContainer', () => {
     await dataState.fetch();
 
     expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(false);
+  });
+
+  test('fetch does not run or clear skipInitialFetch for an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setSkipInitialFetch)({
+        skipInitialFetch: true,
+      })
+    );
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    await dataStateContainer.fetch();
+
+    expect(toolkit.getCurrentTab().skipInitialFetch).toBe(true);
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+  });
+
+  test('timefilter-triggered refetch does not search an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+
+    jest.spyOn(toolkit.searchSessionManager, 'getNextSearchSessionId');
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    const unsubscribe = dataStateContainer.subscribe();
+    dataStateContainer.refetch$.next(undefined);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(toolkit.searchSessionManager.getNextSearchSessionId).not.toHaveBeenCalled();
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    unsubscribe();
   });
 
   test('refetch$ triggers a search', async () => {
