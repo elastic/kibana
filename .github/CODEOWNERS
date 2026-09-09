@@ -1235,7 +1235,7 @@ x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/obse
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/nightshift-context-and-research-team
-x-pack/solutions/observability/packages/synthetics-test-data @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
