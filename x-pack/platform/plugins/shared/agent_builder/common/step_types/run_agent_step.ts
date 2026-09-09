@@ -313,12 +313,13 @@ export const ConfigSchema = z
     /**
      * Reasoning effort level forwarded to the LLM as `reasoning.effort` for this step's calls.
      * Ignored when the fast model is selected. Support depends on the underlying model.
+     * Tech preview — behavior and accepted values may change.
      */
     'reasoning-level': z
       .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
       .optional()
       .describe(
-        "Reasoning effort level forwarded to the LLM for this step's calls. Ignored when the fast model is selected. Support depends on the underlying model."
+        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Ignored when the fast model is selected. Support depends on the underlying model."
       ),
   })
   .superRefine((cfg, ctx) => {
