@@ -157,7 +157,7 @@ describe('EventInvestigation', () => {
       'aria-selected',
       'true'
     );
-    expect(screen.queryByText('95%')).not.toBeInTheDocument();
+    expect(screen.getByText('95%')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
     expect(screen.getByText('92%')).toBeInTheDocument();
 
