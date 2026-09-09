@@ -10,6 +10,8 @@ This audit compares branch execution with the existing sequential engine and che
 - **Unbounded parked cleanup:** reconstructed parked nodes bypassed the cancellation helper. Active and parked nodes now share the bounded cleanup lifetime, and delayed cleanup cannot mutate execution state after it expires.
 - **Phantom running switch records:** case/default entry markers were treated as durable operations although they only navigate. They now use the navigation-marker path, avoiding unfinishable step records.
 
+- **Fail-fast wake-up churn:** pending branches blocked by an existing failure cannot make the parent runnable. The parent waits for its already-started sibling or deadline instead of scheduling repeated one-second ticks.
+
 ## Review workflows
 
 | Example | Expected behavior |
@@ -29,6 +31,8 @@ This audit compares branch execution with the existing sequential engine and che
 | [20: child cancellation](../examples/parallel_audit/20_child_cancellation.yml), [21: slow child helper](../examples/parallel_audit/21_slow_child.yml) | Branch deadlines cancel both real child executions; no result step runs. |
 | [22: overall step timeout](../examples/parallel_audit/22_overall_timeout.yml) | All nested waits terminate; parent fallback and continue recover. |
 | [23: workflow timeout](../examples/parallel_audit/23_workflow_timeout.yml) | Root is timed_out; all nested waits terminate without executing after_wait. |
+
+| [24: fail-fast with a long wait](../examples/parallel_audit/24_fail_fast_long_wait.yml) | Fails after the started sibling drains; permanently blocked queued work does not cause periodic re-ticks. |
 
 ## Automated coverage
 
