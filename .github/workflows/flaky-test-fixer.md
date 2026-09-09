@@ -217,8 +217,9 @@ max-ai-credits: 1200
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - a PR already addresses this root cause (open or merged) — see [Duplicate detection](#duplicate-detection), which runs first as step 1;
-- you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
-- the fix has to target a version branch (see "Fixes that must target a version branch").
+- you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix;
+- the fix has to target a version branch (see "Fixes that must target a version branch"); or
+- the failing test is under `x-pack/solutions/security/test/security_solution_cypress/cypress/` and the doctor's action is one this fixer does not ship (migrate, a new Scout spec, or a new API/unit test) — see [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship).
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
 
@@ -261,7 +262,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
-5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
+5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). If the failing test is Security Cypress, apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) first — a migrate / new-Scout verdict means skip to step 8, not a Scout rewrite. Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 7. Open the PR (see "PR format" below) without release-note or backport labels. The Flaky Fix Verifier applies both after it validates the PR. If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
@@ -280,9 +281,37 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 - **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
 - the comment is **absent**, or offers no actionable root cause.
 
-To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
+To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). The doctor owns the diagnosis and recommended action; if the two skills disagree, the doctor wins. Use the `flaky-test-investigator` skill only for CI artifact retrieval, pipeline context, and this workflow's steps, PR format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance. Then apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) before writing any patch.
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## Security Cypress: what this fixer may ship
+
+When the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, the doctor names one action. This fixer may **execute** only a subset of those actions. Diagnosis still belongs to the doctor; shipping does not.
+
+| Doctor action | This fixer |
+| --- | --- |
+| `delete` | Open a **delete-only** draft PR. Also delete helpers, screens, tasks, fixtures, users/roles, and archives that become unused. Grep remaining Cypress, Scout, and API tests before deleting a shared file. |
+| `migrate`, or any action that requires writing a **new** Scout spec or page object | **No PR.** Do not scaffold a spec, copy Cypress into Playwright, or add a page object to start a migration. Hand off in the outcome comment (see below). |
+| `move-to-api-or-unit` when that test **already exists** and Cypress is duplicate | Treat as `delete`. |
+| `move-to-api-or-unit` when a **new** API/unit test would be needed | **No PR.** Same handoff as migrate. |
+| `fix-app`, or a Cypress patch on a `@serverlessQA` test | Smallest product or Cypress fix, existing guardrails. |
+| environment / no repo change | No PR. |
+
+Hard bans (do not "helpfully" do these anyway):
+
+- Do not migrate Cypress to Scout.
+- Do not write a new Scout spec or page object from scratch.
+- Do not delete a test **instead of** migrating. If Scout coverage is still required, that is a handoff, not a delete.
+- Do not implement an investigator Cypress wait (toast, intercept, timeout) when the doctor said leave Cypress.
+
+A doctor `delete` is an intentional removal (navigation/page-load, or coverage already at API/unit), not skipping a flake. It is the one exception to the imported "don't reduce coverage" guardrail.
+
+**Handoff** (no PR): use the "Migrate Cypress test to Scout" outcome comment. Point the requester at these skills — read the files; do not invoke them, and do not follow the doctor's "open CI in the browser" guidance:
+
+- `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/`
+- `.agents/skills/scout-ui-testing/`
+- `.agents/skills/scout-api-testing/`
 
 ## Verifying a Jest fix
 
@@ -461,6 +490,13 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Migrate Cypress test to Scout** (Security Cypress — doctor action is migrate, a new Scout spec, or a new API/unit test; no PR opened):
+  ```markdown
+  ### 🔄 Migrate Cypress test to Scout
+
+  The doctor recommends migrating this Cypress coverage to Scout, which this fixer does not implement. Use the [`security-cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/SKILL.md), [`scout-ui-testing`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-ui-testing/SKILL.md) and [`scout-api-testing`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-api-testing/SKILL.md) skills as needed. Do not patch the Cypress spec.
+  ```
+  For a new API or unit test rather than Scout, swap the heading to `### 🔄 Move Cypress coverage to API` or `### 🔄 Move Cypress coverage to unit` — pick the destination the doctor named — and name that destination in the sentence.
 - **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
   ```markdown
   ### 🕒 Pre-fix CI lag, not a regression
