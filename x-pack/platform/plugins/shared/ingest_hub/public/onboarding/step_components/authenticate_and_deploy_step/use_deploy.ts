@@ -7,22 +7,12 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { useHistory, useParams } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-
-import {
-  sendCreateCloudOnboardingDeployment,
-  sendUpdateCloudOnboardingDeployment,
-} from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
-import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import {
   buildDeployGroups,
   buildInstanceStatuses,
@@ -31,6 +21,7 @@ import {
 } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
+import { useOnboardingSO } from './use_onboarding_so';
 
 export {
   getRegionFieldName,
@@ -49,9 +40,7 @@ export interface UseDeployResult {
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
-  const history = useHistory();
-  const { integrationId } = useParams<{ integrationId: string }>();
-  const { services } = useKibana<CoreStart>();
+  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
   const {
     servicesStep,
     authenticateAndDeployStep,
@@ -190,7 +179,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         : detectAndReviewStep.onboardingDeploymentId;
 
       if (isInitialDeploy) {
-        const createResp = await sendCreateCloudOnboardingDeployment({
+        onboardingDeploymentId = (await createDeployment({
           provider: 'aws',
           connectorId,
           mechanisms: ['agentless'],
@@ -202,29 +191,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           globalRegion,
           dataFormat,
           authMethod: connectorId ? 'identity_federation' : 'static_keys',
-        }).catch(() => {
-          services.notifications.toasts.addDanger(
-            i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soCreateError', {
-              defaultMessage:
-                'Could not save deployment record. Deploy will proceed, but resume may not be available.',
-            })
-          );
-          return null;
-        });
-        onboardingDeploymentId = createResp?.item?.id;
+        })) ?? undefined;
         if (onboardingDeploymentId) {
-          updateDetectAndReviewStep({ onboardingDeploymentId });
           // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
           // and any reload identifies this as a resumable deployment.
-          // Set the session flag first so the reload guard doesn't re-hydrate from SO.
-          sessionStorage.setItem(
-            getOnboardingSessionKey(integrationId, 'hydratedDeploymentId'),
-            onboardingDeploymentId
-          );
-          history.replace({
-            ...history.location,
-            search: `?deploymentId=${onboardingDeploymentId}`,
-          });
+          persistDeploymentId(onboardingDeploymentId);
         }
       }
 
@@ -255,19 +226,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
       // Update SO with deploy outcome (best-effort).
       if (onboardingDeploymentId) {
-        await sendUpdateCloudOnboardingDeployment(onboardingDeploymentId, {
+        await updateDeployment(onboardingDeploymentId, {
           packagePolicyIds: Object.values({
             ...detectAndReviewStep.policyIdsByInstance,
             ...policyIdsByInstance,
           }),
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
-        }).catch(() => {
-          services.notifications.toasts.addDanger(
-            i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soUpdateError', {
-              defaultMessage:
-                'Could not update deployment record. Deploy outcome may not be reflected on resume.',
-            })
-          );
         });
       }
 
@@ -295,12 +259,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.failedInstances,
       detectAndReviewStep.onboardingDeploymentId,
       detectAndReviewStep.policyIdsByInstance,
-      services,
+      createDeployment,
+      updateDeployment,
+      persistDeploymentId,
       selectedServiceIds,
       dataFormat,
       servicesMap,
-      history,
-      integrationId,
     ]
   );
 

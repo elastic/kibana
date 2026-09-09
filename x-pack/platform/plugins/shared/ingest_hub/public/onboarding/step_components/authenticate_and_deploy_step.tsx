@@ -15,22 +15,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { useHistory, useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import {
-  sendCreateCloudOnboardingDeployment,
-  sendUpdateCloudOnboardingDeployment,
-} from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
-import { getOnboardingSessionKey } from '../onboarding_session_storage';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import {
   useEcfDeployment,
   EcfDeploymentSection,
@@ -57,11 +51,9 @@ interface AuthenticateAndDeployStepProps {
 
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod, updateDetectAndReviewStep } =
-    useOnboardingFlow();
+  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
-  const history = useHistory();
-  const { integrationId } = useParams<{ integrationId: string }>();
+  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
@@ -160,7 +152,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         })
         .filter((s): s is NonNullable<typeof s> => s !== null);
 
-      const createResp = await sendCreateCloudOnboardingDeployment({
+      const deploymentId = await createDeployment({
         provider: 'aws',
         mechanisms: ['cloud_forwarder'],
         services: selectedServiceIds,
@@ -170,39 +162,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         >,
         globalRegion,
         dataFormat,
-      }).catch(() => {
-        services.notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soCreateError', {
-            defaultMessage:
-              'Could not save deployment record. Deploy will proceed, but resume may not be available.',
-          })
-        );
-        return null;
       });
 
-      const deploymentId = createResp?.item?.id;
       if (deploymentId) {
-        await sendUpdateCloudOnboardingDeployment(deploymentId, {
-          status: 'succeeded',
-          ecfStacks,
-        }).catch(() => {
-          services.notifications.toasts.addDanger(
-            i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soUpdateError', {
-              defaultMessage:
-                'Could not update deployment record. Deploy outcome may not be reflected on resume.',
-            })
-          );
-        });
-
-        updateDetectAndReviewStep({ onboardingDeploymentId: deploymentId });
-        sessionStorage.setItem(
-          getOnboardingSessionKey(integrationId, 'hydratedDeploymentId'),
-          deploymentId
-        );
-        history.replace({
-          ...history.location,
-          search: `?deploymentId=${deploymentId}`,
-        });
+        await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
+        persistDeploymentId(deploymentId);
       }
       setIsSavingSO(false);
     }
@@ -216,10 +180,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     globalRegion,
     dataFormat,
-    services,
-    updateDetectAndReviewStep,
-    history,
-    integrationId,
+    createDeployment,
+    updateDeployment,
+    persistDeploymentId,
     onContinue,
   ]);
 
