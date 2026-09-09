@@ -172,11 +172,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           dataFormat,
         }));
 
+      setIsSavingSO(false);
+      // Navigate first so onContinue uses the current history.location (not the stale closure
+      // location). persistDeploymentId then replaces the already-navigated URL to add ?deploymentId=,
+      // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
+      onContinue();
       if (deploymentId) {
         await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
         if (!existingId) persistDeploymentId(deploymentId);
       }
-      setIsSavingSO(false);
+      return;
     }
     onContinue();
   }, [
