@@ -505,10 +505,16 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   // otherwise the fetcher never fires and status would stay pending forever.
   const loading = esqlQuery ? isPending(status) : !indexPattern;
 
+  // `useFetcher` keeps the last successful result when `fn` returns undefined
+  // (`preservePreviousData`). Shrinking the time range to a window with no
+  // schema data does exactly that (`schemaHasData` → no query), so the stale
+  // numbers must not be shown as if they belonged to the new range.
+  const hasQuery = Boolean(esqlQuery);
+
   return {
-    kpis: result ?? EMPTY_KPIS,
+    kpis: hasQuery ? result ?? EMPTY_KPIS : EMPTY_KPIS,
     loading,
-    error,
+    error: hasQuery ? error : undefined,
   };
 };
 
