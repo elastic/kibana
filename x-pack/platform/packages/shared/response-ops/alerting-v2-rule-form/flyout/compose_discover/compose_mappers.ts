@@ -63,10 +63,7 @@ export const composeFormToCreateRequest = (
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
-  const noDataStrategy =
-    formValues.kind === 'alert' && formValues.noDataStrategy
-      ? formValues.noDataStrategy
-      : undefined;
+  const noDataStrategy = formValues.noDataStrategy;
 
   return {
     kind: formValues.kind,

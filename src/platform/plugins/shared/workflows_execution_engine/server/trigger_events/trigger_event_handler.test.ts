@@ -12,6 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowRepository } from '@kbn/workflows/server';
 import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_event_handler';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 const mockClassifyWorkflowTriggerMatch = jest.fn().mockReturnValue('matched');
 
@@ -92,6 +93,9 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
   return {
     coreStart: coreMock.createStart(),
     workflowRepository: createWorkflowRepositoryMock(),
+    workflowExecutionRepository: {
+      getWorkflowExecutionById: (...args: unknown[]) => mockGetWorkflowExecutionById(...args),
+    } as unknown as WorkflowExecutionRepository,
     workflowsExtensions: {
       getTriggerDefinition: jest.fn().mockReturnValue({ id: 'cases.updated' }),
     } as any,

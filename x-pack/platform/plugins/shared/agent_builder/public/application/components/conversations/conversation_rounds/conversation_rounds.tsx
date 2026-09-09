@@ -37,7 +37,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
 
         return (
           <RoundLayout
-            key={index}
+            key={round.id ?? index}
             scrollContainerHeight={scrollContainerHeight}
             isCurrentRound={isCurrentRound}
             rawRound={round}

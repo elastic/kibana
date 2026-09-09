@@ -15,7 +15,6 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
-  useBatchedPublishingSubjects,
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
@@ -42,6 +41,7 @@ import {
   crossPanelActionsComparators,
   initializeCrossPanelActions,
 } from './initialize_cross_panel_actions';
+import { cancelAllInFlightRequests } from '../actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
@@ -148,11 +148,15 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);
 
-        await savedMap.reset(nextState);
+        savedMap.reset(nextState);
+        reduxSync.internalApi.syncWithStore();
       },
     });
 
     api = finalizeApi({
+      cancelRequests: () => {
+        savedMap.getStore().dispatch<any>(cancelAllInFlightRequests());
+      },
       defaultTitle$,
       defaultDescription$,
       ...stateApi,
@@ -195,13 +199,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     return {
       api,
       Component: () => {
-        const [defaultTitle, title, defaultDescription, description] = useBatchedPublishingSubjects(
-          defaultTitle$,
-          titleManager.api.title$,
-          defaultDescription$,
-          titleManager.api.description$
-        );
-
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
@@ -245,14 +242,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   ? parentApi.getTooltipRenderer()
                   : undefined
               }
-              title={title ?? defaultTitle}
-              description={description ?? defaultDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={
-                isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'
-                  ? parentApi.isSharable
-                  : true
-              }
             />
           </Provider>
         );

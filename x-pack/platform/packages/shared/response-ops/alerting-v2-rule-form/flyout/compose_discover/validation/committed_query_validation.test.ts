@@ -29,14 +29,14 @@ describe('committed query validation', () => {
       ).toBe(true);
     });
 
-    it('returns false for a base-only alert persisted as standalone', () => {
+    it('returns true for a standalone alert query without an explicit alert condition (conditionless rule)', () => {
       expect(
         isCommittedQueryValid(
           { format: 'standalone', breach: { query: 'FROM logs-*' } },
           'alert',
           true
         )
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it('returns true for a signal rule with a non-empty standalone query', () => {
@@ -71,14 +71,13 @@ describe('committed query validation', () => {
       ).toBe(true);
     });
 
-    it('returns an error string when the alert query has no alert condition', () => {
+    it('returns true when the alert query has no alert condition (conditionless rule)', () => {
       const result = validateCommittedQuery(
         { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
         'alert',
         true
       );
-      expect(typeof result).toBe('string');
-      expect(result).toMatch(/alert condition/i);
+      expect(result).toBe(true);
     });
 
     it('returns an error string when the query is not committed', () => {
@@ -109,14 +108,13 @@ describe('committed query validation', () => {
       expect(result).toMatch(/query/i);
     });
 
-    it('returns an error string for a standalone alert query (no_where)', () => {
+    it('returns true for a standalone alert query with no WHERE clause (conditionless rule)', () => {
       const result = validateCommittedQuery(
         { format: 'standalone', breach: { query: 'FROM logs-*' } },
         'alert',
         true
       );
-      expect(typeof result).toBe('string');
-      expect(result).toMatch(/alert condition/i);
+      expect(result).toBe(true);
     });
   });
 });

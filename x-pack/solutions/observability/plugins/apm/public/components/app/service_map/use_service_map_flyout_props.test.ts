@@ -52,8 +52,6 @@ describe('useServiceMapFlyoutProps', () => {
       service: {
         name: 'opbeans-java',
         agentName: 'java',
-        sloStatus: 'healthy',
-        sloCount: 2,
       },
       filters: {
         environment: 'production',

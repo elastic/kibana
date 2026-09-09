@@ -9,6 +9,7 @@ import { encode } from '@kbn/rison';
 import {
   decodeFlyoutV2UrlParam,
   encodeFlyoutV2UrlParam,
+  toFlyoutV2UrlParamValue,
   FLYOUT_V2_URL_PARAM,
   FLYOUT_V2_TIMELINE_URL_PARAM,
   urlParamKeyForHistoryKey,
@@ -24,6 +25,26 @@ describe('flyoutV2 URL param', () => {
 
     it('exports the correct timeline param name', () => {
       expect(FLYOUT_V2_TIMELINE_URL_PARAM).toBe('flyoutV2Timeline');
+    });
+  });
+
+  describe('toFlyoutV2UrlParamValue', () => {
+    it('returns null for null, undefined, or empty arrays', () => {
+      expect(toFlyoutV2UrlParamValue(null)).toBeNull();
+      expect(toFlyoutV2UrlParamValue(undefined)).toBeNull();
+      expect(toFlyoutV2UrlParamValue([])).toBeNull();
+    });
+
+    it('returns null when any entry has an unknown kind', () => {
+      expect(toFlyoutV2UrlParamValue([{ kind: 'host' }, { kind: 'not-a-real-kind' }])).toBeNull();
+    });
+
+    it('returns the array when every kind is known', () => {
+      const value = [
+        { kind: 'entityResolution', entityId: 'user:a', entityType: 'user', entityName: 'a' },
+        { kind: 'user', userName: 'a', entityId: 'user:a' },
+      ];
+      expect(toFlyoutV2UrlParamValue(value)).toEqual(value);
     });
   });
 

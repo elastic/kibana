@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { isDataConnectorType } from '../../common/data_connectors';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
 import { InvalidConnectorSourceError } from './errors';
 
@@ -32,6 +32,11 @@ export const validateConnectorSources = async ({
 
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
+  const supportedTypes = await actionsClient.listTypes({
+    featureId: ContextEngineConnectorFeatureId,
+  });
+  const supportedTypeIds = new Set(supportedTypes.map((type) => type.id));
+
   let connectorTypeById: Map<string, string>;
   try {
     const connectors = await actionsClient.getBulk({ ids: connectorIds });
@@ -52,7 +57,7 @@ export const validateConnectorSources = async ({
       throw new InvalidConnectorSourceError(`Connector [${connectorId}] was not found`);
     }
 
-    if (!isDataConnectorType(connectorTypeId)) {
+    if (!supportedTypeIds.has(connectorTypeId)) {
       throw new InvalidConnectorSourceError(
         `Connector [${connectorId}] of type [${connectorTypeId}] cannot be used as an AI index source`
       );

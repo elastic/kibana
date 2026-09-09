@@ -626,6 +626,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 <EuiFlexGroup gutterSize="xs">
                   {renderSaveButton({ size: 'm' })}
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.agentBuilder.agents.form.saveActionsMenuAriaLabel',
+                      {
+                        defaultMessage: 'Save actions',
+                      }
+                    )}
                     panelPaddingSize="xs"
                     isOpen={isAdditionalActionsMenuOpen}
                     closePopover={() => setAdditionalActionsMenuOpen(false)}
@@ -686,6 +692,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             : !isCreateMode
             ? [
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.agents.form.agentActionsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Agent actions',
+                    }
+                  )}
                   button={
                     <EuiToolTip
                       content={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {

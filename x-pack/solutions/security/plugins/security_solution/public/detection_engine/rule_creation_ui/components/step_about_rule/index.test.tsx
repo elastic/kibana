@@ -93,13 +93,15 @@ describe('StepAboutRuleComponent', () => {
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
     defineStepDefaultOverride,
+    aboutStepDefaultOverride,
     onSubmit,
   }: {
     defineStepDefaultOverride?: DefineStepRule;
+    aboutStepDefaultOverride?: AboutStepRule;
     onSubmit?: (data: AboutStepRule, isValid: boolean) => void;
   }) => {
     const defineStepDefault = defineStepDefaultOverride ?? stepDefineDefaultValue;
-    const aboutStepDefault = stepAboutDefaultValue;
+    const aboutStepDefault = aboutStepDefaultOverride ?? stepAboutDefaultValue;
     const { aboutStepForm } = useRuleForms({
       defineStepDefault,
       aboutStepDefault,
@@ -295,16 +297,17 @@ describe('StepAboutRuleComponent', () => {
   it('it allows user to set the risk score as a number (and not a string)', async () => {
     const handleSubmit = jest.fn();
 
-    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
+    const { user } = setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          name: 'Test name text',
+          description: 'Test description text',
+        }}
+        onSubmit={handleSubmit}
+      />
+    );
 
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
-    );
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
-    );
     await user.clear(
       within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
         'spinbutton'
@@ -334,15 +337,15 @@ describe('StepAboutRuleComponent', () => {
   it('does not modify the provided risk score until the user changes the severity', async () => {
     const handleSubmit = jest.fn();
 
-    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
-
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
-    );
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+    const { user } = setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          name: 'Test name text',
+          description: 'Test description text',
+        }}
+        onSubmit={handleSubmit}
+      />
     );
 
     await submitForm();

@@ -47,3 +47,19 @@ export const COLUMN_WORKFLOWS = i18n.translate(
     defaultMessage: 'Workflows',
   }
 );
+
+/** --- Outcome badge labels --- */
+export const OUTCOME_DISPATCHED = i18n.translate(
+  'xpack.alertingV2.executionHistory.table.outcome.dispatched',
+  { defaultMessage: 'Dispatched' }
+);
+
+export const OUTCOME_THROTTLED = i18n.translate(
+  'xpack.alertingV2.executionHistory.table.outcome.throttled',
+  { defaultMessage: 'Throttled' }
+);
+
+export const OUTCOME_FAILED = i18n.translate(
+  'xpack.alertingV2.executionHistory.table.outcome.failed',
+  { defaultMessage: 'Failed' }
+);

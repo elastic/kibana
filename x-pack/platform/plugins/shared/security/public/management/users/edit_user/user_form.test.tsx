@@ -68,7 +68,7 @@ describe('UserForm', () => {
     const { unmount } = renderUserForm({ disabled: true });
     expect(() => {
       screen.getByTestId('editUserFormSubmitButton');
-    }).toThrowError();
+    }).toThrow();
     unmount();
   });
 

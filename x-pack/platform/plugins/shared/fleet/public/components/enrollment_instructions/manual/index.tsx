@@ -127,9 +127,9 @@ export const ManualInstructions = ({
   const debOrRpmWithInstallServers = showInstallServers ? `ELASTIC_AGENT_FLAVOR=servers ` : '';
 
   const linuxAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-arm64.tar.gz ${curlDownloadSourceProxyArgs}
-  tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
-  cd elastic-agent-${agentVersion}-linux-arm64
-  sudo ./elastic-agent install ${getEnrollArgsByPlatForm('linux_aarch64')}`;
+tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
+cd elastic-agent-${agentVersion}-linux-arm64
+sudo ./elastic-agent install ${getEnrollArgsByPlatForm('linux_aarch64')}`;
 
   const linuxX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
 tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz

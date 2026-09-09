@@ -83,6 +83,9 @@ const skipList: Record<string, string[]> = {
     '[Tomcat OTel] Overview (panel: 15)',
     '[vSphere OTel] Storage (panel: 9)',
     'Memory Usage',
+    // TODO: ibmmq panel has `limit` stored as a string and unrecognized bucket keys —
+    // investigate whether a data migration or schema coercion is needed.
+    'Errors over time by Queue Manager [Logs IBM MQ]',
   ],
 };
 

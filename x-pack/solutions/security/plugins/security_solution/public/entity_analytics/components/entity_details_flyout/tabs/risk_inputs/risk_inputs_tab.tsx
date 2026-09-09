@@ -413,6 +413,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   });
 
   const alerts = useRiskContributingAlerts<T>({ riskScore: activeRiskScore, entityType });
+  const { hasAlertsRead } = alerts;
 
   const entityNameByEuid = useMemo(() => {
     const map = new Map<string, string>();
@@ -460,7 +461,7 @@ const RiskInputsTabContent = <T extends EntityType>({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
-              iconType="expand"
+              iconType="maximize"
               data-test-subj={EXPAND_ALERT_TEST_ID}
               onClick={() => onShowAlert(data._id, data.input.index)}
               aria-label={i18n.translate(
@@ -670,7 +671,7 @@ const RiskInputsTabContent = <T extends EntityType>({
         watchlistNamesById={watchlistNamesById}
       />
       <EuiSpacer size="m" />
-      {riskInputsAlertSection}
+      {hasAlertsRead && riskInputsAlertSection}
     </>
   );
 };

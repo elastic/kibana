@@ -122,6 +122,7 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
+    rebalancePrivateLocationShardsEnabled: attr.rebalancePrivateLocationShardsEnabled ?? true,
   };
 };
 
@@ -144,6 +145,7 @@ export const DynamicSettingsSchema = schema.object({
   defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
   defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
   defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
+  rebalancePrivateLocationShardsEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string()),

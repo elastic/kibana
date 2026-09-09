@@ -74,9 +74,12 @@ export const collectSampleDocuments = async ({
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const seen = new Set<string>();
 
+  // Rerun criteria are included so a rerun-only `sampling_filter` still pulls docs and is still
+  // covered by the drift guard below. Both arms read the same sample, keyed by `scenario_id`.
   const allCriteria = [
     ...(extractionScenario?.output.criteria ?? []),
     ...(queryGenerationScenario?.output.criteria ?? []),
+    ...(queryGenerationScenario?.rerun?.criteria ?? []),
   ];
 
   const criteriaWithFilters = allCriteria.filter(

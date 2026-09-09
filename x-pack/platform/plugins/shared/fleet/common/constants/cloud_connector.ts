@@ -106,45 +106,28 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
 ];
 
-// Cloud connector permission allowlist
-// Defines which integrations can share cloud connectors within the same policy group.
-// Connectors created by an integration in one group cannot be reused by integrations in another group.
+export type DefaultPolicyGroup = `${CloudProvider}_default`;
+export type PolicyGroup = 'security_audit_policy_group' | DefaultPolicyGroup;
 
-export type PolicyGroup = 'security_audit_policy_group' | 'aws_global_policy_group';
-
-export interface CloudConnectorAllowlistEntry {
-  provider: CloudProvider;
-  package: string;
-  policyTemplate: string;
-}
-
-export const CLOUD_CONNECTOR_PERMISSION_ALLOWLIST: Record<
-  PolicyGroup,
-  ReadonlyArray<CloudConnectorAllowlistEntry>
-> = {
-  security_audit_policy_group: [
-    { provider: 'aws', package: 'cloud_security_posture', policyTemplate: 'cspm' },
-    { provider: 'aws', package: 'cloud_asset_inventory', policyTemplate: 'asset_inventory' },
-  ],
-  aws_global_policy_group: [
-    { provider: 'aws', package: 'aws', policyTemplate: 'guardduty' },
-    { provider: 'aws', package: 'aws', policyTemplate: 's3' },
-  ],
+/**
+ * Packages whose cloud connectors are isolated from provider-default sharing.
+ * Keyed by package name: usage listings only expose the package name (not the policy
+ * template), and each of these packages is isolated for all of its policy templates.
+ */
+export const ISOLATED_CLOUD_CONNECTOR_PACKAGES: Readonly<Record<string, PolicyGroup>> = {
+  cloud_security_posture: 'security_audit_policy_group',
+  cloud_asset_inventory: 'security_audit_policy_group',
 };
 
 /**
- * Returns the policy group that a given integration belongs to, or undefined if not in any group.
+ * Returns the policy group for an integration: its isolated group if the package is
+ * registered in {@link ISOLATED_CLOUD_CONNECTOR_PACKAGES}, otherwise the provider-default
+ * group shared by all other integrations targeting the same cloud provider.
+ * Own-property lookup so package names shadowing `Object.prototype` members
+ * (e.g. `constructor`) fall through to the provider-default group.
  */
-export function getPolicyGroupForIntegration(
-  pkg: string,
-  policyTemplate: string
-): PolicyGroup | undefined {
-  for (const [group, entries] of Object.entries(CLOUD_CONNECTOR_PERMISSION_ALLOWLIST) as Array<
-    [PolicyGroup, ReadonlyArray<CloudConnectorAllowlistEntry>]
-  >) {
-    if (entries.some((entry) => entry.package === pkg && entry.policyTemplate === policyTemplate)) {
-      return group;
-    }
-  }
-  return undefined;
+export function getPolicyGroupForIntegration(pkg: string, provider: CloudProvider): PolicyGroup {
+  return Object.hasOwn(ISOLATED_CLOUD_CONNECTOR_PACKAGES, pkg)
+    ? ISOLATED_CLOUD_CONNECTOR_PACKAGES[pkg]
+    : `${provider}_default`;
 }

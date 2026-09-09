@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { identifyKIQueries, QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from '@kbn/streams-ai';
+import {
+  identifyKIQueries,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+  type ExistingQuerySummary,
+} from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import {
   createMemoryDiscoveryTools,
@@ -13,10 +17,21 @@ import {
 } from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
+import { connectorToInference, getConnectorDefaultModel } from '@kbn/inference-common';
 
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import {
+  getCurrentTraceId,
+  createSpanLatencyEvaluator,
+  createChatCallsEvaluator,
+} from '@kbn/evals';
 import type { Streams } from '@kbn/streams-schema';
 import type { Feature } from '@kbn/significant-events-schema';
+import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
+import {
+  assertRerunRequiresCanonicalKIs,
+  buildQueryGenerationExamples,
+  type CollectedQueryGenExample,
+} from './build_query_gen_examples';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
@@ -31,7 +46,6 @@ import {
 import { evaluate } from '../../src/evaluate';
 import { createEvalSignificantEventSearchTool } from '../../src/tools/significant_event_search_tool';
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
-import { createScenarioCriteriaLlmEvaluator } from '../../src/evaluators/scenario_criteria/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -42,6 +56,13 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
+import { resolveMaxSteps } from './resolve_max_steps';
+import {
+  assertQueryGenerationDatasetSafety,
+  resolveQueryGenerationDatasets,
+  resolveQueryGenerationDatasetName,
+} from './resolve_scenarios';
+import { getEmptyDatastreamEvaluators, selectQueryGenerationEvaluators } from './select_evaluators';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
 import { collectSampleDocuments } from './collect_sample_documents';
@@ -55,16 +76,22 @@ import {
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
-interface CollectedQueryGenExample {
-  scenario: KIQueryGenerationScenario;
-  kis: Feature[];
-  sampleLogs: string[];
-  sampleDocs: Array<Record<string, unknown>>;
-}
+const EMPTY_DATASTREAM_MAX_STEPS = 4;
+
+const resolveConnectorModel = (connector: Parameters<typeof connectorToInference>[0]): string => {
+  try {
+    return getConnectorDefaultModel(connectorToInference(connector)) ?? connector.id;
+  } catch {
+    return connector.id;
+  }
+};
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
-  const activeDatasets = getActiveDatasets();
+  const scenarioResolution = resolveQueryGenerationDatasets(getActiveDatasets());
+  const activeDatasets = scenarioResolution.datasets;
   const availableSnapshotsBySource = new Map<string, Set<string>>();
+
+  assertQueryGenerationDatasetSafety(scenarioResolution, TRUST_UPSTREAM);
 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     // The significant_event_search tool is only registered when significant
@@ -137,6 +164,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     expectedGroundTruth: extractionScenario.output.expected_ground_truth,
                   })
                 : [];
+
+            assertRerunRequiresCanonicalKIs(scenario, canonicalKIs);
 
             const shouldUseCanonicalKIs =
               kiSource === 'canonical' || (kiSource === 'auto' && canonicalKIs.length > 0);
@@ -228,8 +257,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             traceEsClient,
             log,
             fetch,
+            connector,
+            evaluationConnector,
+            repetitions,
           }) => {
             let lastReplayedSnapshot: string | undefined;
+            const maxStepsOverride = resolveMaxSteps();
 
             const heavyDataByScenario = new Map(
               collectedExamples.map(({ scenario, kis, sampleLogs, sampleDocs }) => [
@@ -263,24 +296,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             const groundingModes = resolveGroundingModes();
             const codeIndex = resolveCodeIndexForDataset(dataset.id);
 
-            const examples = collectedExamples.map(({ scenario }) => ({
-              id: scenario.input.scenario_id,
-              input: {
-                ...scenario.input,
-                snapshot_source: scenario.snapshot_source,
-              },
-              output: {
-                ...scenario.output,
-                criteria: scenario.output.criteria,
-                expected: scenario.output.expected_ground_truth,
-              },
-              metadata: {
-                ...scenario.metadata,
-                test_index: MANAGED_STREAM_SEARCH_PATTERN,
-              },
-            }));
+            const examples = buildQueryGenerationExamples(
+              collectedExamples,
+              MANAGED_STREAM_SEARCH_PATTERN
+            );
 
-            const evaluatorsList = [
+            const evaluatorsList = selectQueryGenerationEvaluators([
               ...createKIQueryGenerationEvaluators(
                 esClient,
                 {
@@ -288,14 +309,16 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 },
                 logger
               ),
+              ...createReportedTokenEvaluators(),
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
               evaluators.traceBasedEvaluators.toolCalls,
+              createChatCallsEvaluator({ traceEsClient, log }),
               createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
-            ];
+            ]);
 
-            const makeTask = (groundingMode: GroundingMode) => {
+            const makeTask = (groundingMode: GroundingMode, effectiveMaxSteps: number) => {
               const groundingTools =
                 groundingMode === 'grounded' && codeIndex
                   ? createEvalSemanticCodeSearchTools({
@@ -310,7 +333,13 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     })
                   : undefined;
 
-              return async ({ input }: { input: KIQueryGenerationScenario['input'] }) => {
+              return async ({
+                input,
+              }: {
+                input: KIQueryGenerationScenario['input'] & {
+                  existing_queries?: ExistingQuerySummary[];
+                };
+              }) => {
                 const heavy = heavyDataByScenario.get(input.scenario_id);
                 if (!heavy) {
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
@@ -365,34 +394,41 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   .filter(Boolean)
                   .join('\n');
 
-                const { queries, toolUsage } = await identifyKIQueries({
-                  stream,
-                  esClient,
-                  inferenceClient,
-                  logger,
-                  signal: new AbortController().signal,
-                  systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
-                  // Mirror production: the plugin excludes these at retrieval,
-                  // but the fixture still builds them — filter here to match.
-                  getFeatures: async () =>
-                    kis.filter(
-                      (feature) =>
-                        !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(
-                          feature.type
-                        )
-                    ),
-                  additionalTools: {
-                    ...memoryTools.tools,
-                    ...eventSearchTool.tools,
-                    ...groundingTools?.additionalTools,
-                  },
-                  additionalToolCallbacks: {
-                    ...memoryTools.callbacks,
-                    ...eventSearchTool.callbacks,
-                    ...groundingTools?.additionalToolCallbacks,
-                  },
-                  maxSteps: groundingTools ? 12 : 8,
-                });
+                const { queries, toolUsage, tokensUsed, queryAttempts, reasoningDiagnostics } =
+                  await identifyKIQueries({
+                    stream,
+                    esClient,
+                    inferenceClient,
+                    logger,
+                    signal: new AbortController().signal,
+                    systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
+                    // Mirror production: the plugin excludes these at retrieval,
+                    // but the fixture still builds them — filter here to match.
+                    getFeatures: async () =>
+                      kis.filter(
+                        (feature) =>
+                          !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(
+                            feature.type
+                          )
+                      ),
+                    additionalTools: {
+                      ...memoryTools.tools,
+                      ...eventSearchTool.tools,
+                      ...groundingTools?.additionalTools,
+                    },
+                    additionalToolCallbacks: {
+                      ...memoryTools.callbacks,
+                      ...eventSearchTool.callbacks,
+                      ...groundingTools?.additionalToolCallbacks,
+                    },
+                    maxSteps: effectiveMaxSteps,
+                    requireQueryIntent: true,
+                    collectQueryAttempts: true,
+                    existingQueries: input.existing_queries?.map((q) => ({
+                      ...q,
+                      description: q.description.slice(0, 200),
+                    })),
+                  });
 
                 logger.info(
                   `[DEBUG] Tool usage: get_stream_features calls=${toolUsage.get_stream_features.calls}, failures=${toolUsage.get_stream_features.failures}; add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}; generated_queries=${queries.length}`
@@ -401,7 +437,13 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 return {
                   queries,
                   toolUsage,
+                  tokens_used: tokensUsed,
+                  query_attempts: queryAttempts,
+                  reasoning_diagnostics: reasoningDiagnostics,
+                  evaluation_arm: input.existing_queries ? ('rerun' as const) : ('clean' as const),
                   traceId: getCurrentTraceId(),
+                  ki_source: kiSource,
+                  grounding_mode: groundingMode,
                   sample_logs: sampleLogs,
                   sample_docs: sampleDocs,
                   features: kis,
@@ -419,18 +461,47 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 continue;
               }
 
+              const effectiveMaxSteps = maxStepsOverride ?? (groundingMode === 'grounded' ? 12 : 8);
+
+              logger.info(
+                `QUERY_GENERATION_EVAL_CONFIG ${JSON.stringify({
+                  dataset: dataset.id,
+                  ki_source: kiSource,
+                  grounding: groundingMode,
+                  scenario_ids: dataset.kiQueryGeneration.map(
+                    (scenario) => scenario.input.scenario_id
+                  ),
+                  example_ids: examples.map((example) => example.id),
+                  evaluator_names: evaluatorsList.map((evaluator) => evaluator.name),
+                  effective_max_steps: effectiveMaxSteps,
+                  repetitions,
+                  generation_model: resolveConnectorModel(connector),
+                  judge_model: resolveConnectorModel(evaluationConnector),
+                })}`
+              );
+
+              const canonicalDatasetName = `sigevents: KI query generation (${dataset.id}) (${kiSource}) [${groundingMode}]`;
+              const datasetName = resolveQueryGenerationDatasetName(
+                scenarioResolution,
+                canonicalDatasetName
+              );
+              const description = scenarioResolution.isFocused
+                ? `[${dataset.id}] KI query generation across scenarios (${kiSource}) [${groundingMode}] ` +
+                  `focused=${scenarioResolution.selectedScenarioIds.join(',')}`
+                : `[${dataset.id}] KI query generation across scenarios (${kiSource}) [${groundingMode}]`;
+
               await executorClient.runExperiment(
                 {
                   datasets: [
                     {
-                      name: `sigevents: KI query generation (${dataset.id}) (${kiSource}) [${groundingMode}]`,
-                      description: `[${dataset.id}] KI query generation across scenarios (${kiSource}) [${groundingMode}]`,
+                      name: datasetName,
+                      description,
                       examples,
                     },
                   ],
                   concurrency: 1,
                   trustUpstreamDataset: TRUST_UPSTREAM,
-                  task: makeTask(groundingMode),
+                  task: makeTask(groundingMode, effectiveMaxSteps),
                 },
                 evaluatorsList
               );
@@ -459,10 +530,35 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
     evaluate(
       'KI query generation',
-      async ({ executorClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
+      async ({
+        executorClient,
+        esClient,
+        inferenceClient,
+        logger,
+        apiServices,
+        connector,
+        evaluationConnector,
+        repetitions,
+      }) => {
         if (!emptyDataStreamTestIndex) {
           throw new Error('Missing temporary test index for empty datastream evaluation');
         }
+
+        const emptyDatastreamEvaluators = getEmptyDatastreamEvaluators();
+        logger.info(
+          `QUERY_GENERATION_EVAL_CONFIG ${JSON.stringify({
+            dataset: 'empty-datastream',
+            ki_source: 'none',
+            grounding: 'baseline',
+            scenario_ids: ['empty-datastream'],
+            example_ids: ['empty-datastream'],
+            evaluator_names: emptyDatastreamEvaluators.map((evaluator) => evaluator.name),
+            effective_max_steps: EMPTY_DATASTREAM_MAX_STEPS,
+            repetitions,
+            generation_model: resolveConnectorModel(connector),
+            judge_model: resolveConnectorModel(evaluationConnector),
+          })}`
+        );
 
         await executorClient.runExperiment(
           {
@@ -472,8 +568,9 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 description: 'Significant events KI query generation with empty stream data',
                 examples: [
                   {
+                    id: 'empty-datastream',
                     input: {},
-                    output: {},
+                    output: { expect_queries: false },
                     metadata: {},
                   },
                 ],
@@ -484,25 +581,33 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 emptyDataStreamTestIndex!
               );
 
-              const { queries } = await identifyKIQueries({
-                stream: streamFromApi as Streams.all.Definition,
-                esClient,
-                inferenceClient,
-                logger,
-                signal: new AbortController().signal,
-                systemPrompt: significantEventsPrompt,
-                getFeatures: async () => [],
-              });
+              const { queries, queryAttempts, toolUsage, reasoningDiagnostics } =
+                await identifyKIQueries({
+                  stream: streamFromApi as Streams.all.Definition,
+                  esClient,
+                  inferenceClient,
+                  logger,
+                  signal: new AbortController().signal,
+                  systemPrompt: significantEventsPrompt,
+                  getFeatures: async () => [],
+                  maxSteps: EMPTY_DATASTREAM_MAX_STEPS,
+                  collectQueryAttempts: true,
+                });
 
-              return queries;
+              return {
+                queries,
+                query_attempts: queryAttempts,
+                toolUsage,
+                reasoning_diagnostics: reasoningDiagnostics,
+                traceId: getCurrentTraceId(),
+                ki_source: 'none' as const,
+                grounding_mode: 'baseline' as const,
+              };
             },
           },
-          [
-            createScenarioCriteriaLlmEvaluator({
-              criteriaFn: evaluators.criteria.bind(evaluators),
-              criteria: ['Assert the ES|QL queries are generated following the user intent'],
-            }),
-          ]
+          // The empty-stream safety canary always runs its mandatory deterministic
+          // evaluator. Evaluator-selection variables must never disable this canary.
+          emptyDatastreamEvaluators
         );
       }
     );

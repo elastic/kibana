@@ -112,6 +112,17 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_range',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'dense_vector',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
@@ -124,6 +135,17 @@ const absentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double_range',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
         },
@@ -487,6 +509,18 @@ const countDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_range',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'dense_vector',
           optional: true,
           description:
@@ -511,10 +545,40 @@ const countDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'double_range',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'exponential_histogram',
           optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+        {
+          name: 'bucket',
+          type: 'double_range',
+          optional: true,
+          description: 'Range of histogram values to count.',
         },
       ],
       returnType: 'long',
@@ -647,6 +711,24 @@ const countDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+        {
+          name: 'bucket',
+          type: 'double_range',
+          optional: true,
+          description: 'Range of histogram values to count.',
         },
       ],
       returnType: 'long',
@@ -1066,6 +1148,228 @@ const countDistinctDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'flattened',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'Column or literal for which to count the number of distinct values.',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
           optional: false,
           description: 'Column or literal for which to count the number of distinct values.',
         },
@@ -5961,6 +6265,17 @@ const presentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_range',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'dense_vector',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
@@ -5973,6 +6288,17 @@ const presentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double_range',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
         },
@@ -8833,12 +9159,34 @@ const valuesDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_range',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'date_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: '',
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double_range',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double_range',
     },
     {
       params: [

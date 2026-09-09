@@ -1,0 +1,280 @@
+version: "1"
+name: Detection Rule Tuning Worker
+description: >
+  Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
+  and applies an approved query change.
+enabled: true
+tags:
+  - security
+  - detection-rule-tuning
+settings:
+  concurrency:
+    key: detection-rule-tuning
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        min_fp_count:
+          type: number
+          default: 1
+          description: Minimum false-positive alerts a rule needs before it is diagnosed.
+        preview_invocation_count:
+          type: number
+          default: 2
+          description: Rule executions each backtest preview simulates.
+        lookback_hours:
+          type: number
+          default: 24
+          description: How far back to look for alerts analysts closed as false positives.
+      additionalProperties: false
+outputs:
+  - name: rules_examined
+    type: number
+  - name: harvest_failed
+    type: boolean
+consts:
+  # Liquid has no array literal, so `| default: []` yields undefined rather than an
+  # empty array. A const is the only way to spell an empty-array fallback.
+  no_rows: []
+  # Written onto every alert that reached a decision, and filtered out by the harvest,
+  # so a later sweep cannot rediagnose the same alerts into the same proposal.
+  reviewed_tag: detection-watch:tuning-reviewed
+  dismissed_tag: detection-watch:tuning-dismissed
+  applied_tag: detection-watch:tuning-applied
+  dismissed_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-dismissed
+  applied_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-applied
+steps:
+  # Scoped to one space because the tag API writes to the space's own alerts index, so
+  # a cross-space harvest would keep rediagnosing alerts it can never mark.
+  # `allow_partial_results: false` because a partial aggregation would both undercount
+  # fp_count and return a short alert_ids list, leaving alerts that drove a decision
+  # untagged. The 1000-id slice keeps the bulk tag request inside Kibana's payload
+  # limit; a rule noisier than that surfaces again on the next sweep.
+  - name: harvest_fp_alerts_by_rule
+    type: elasticsearch.esql.query
+    with:
+      allow_partial_results: false
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+        | WHERE `kibana.alert.workflow_status` == "closed"
+          AND `kibana.alert.workflow_reason` == "false_positive"
+          AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+          AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp), alert_ids = MV_SLICE(VALUES(_id), 0, 999) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
+        | WHERE fp_count >= {{ inputs.min_fp_count }}
+        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+        | SORT fp_count DESC
+        | LIMIT 10
+    on-failure:
+      continue: true
+
+  # No iteration-timeout: an enclosing step-timeout zone would cut short the 72h
+  # approval gate below. Runaway work is bounded by the agent step's own timeout.
+  - name: tune_each_rule
+    type: foreach
+    foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
+    steps:
+      - name: fetch_rule
+        type: kibana.request
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ foreach.item.3 }}"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+        on-failure:
+          continue: true
+
+      - name: diagnose_rule
+        type: ai.agent
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+        timeout: "10m"
+        create-conversation: true
+        with:
+          message: |-
+            Use the [/investigate-rule](skill://investigate-rule) skill to investigate
+            rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}).
+
+            {{ foreach.item.2 }} alerts from this rule were closed as false positives
+            during the last {{ inputs.lookback_hours }} hours. Return one structured
+            tuning proposal.
+
+            This pipeline backtests and applies query changes directly, so prefer
+            change_type "query": narrow the KQL to exclude the confirmed benign
+            pattern while keeping detection coverage. Pick exception, suppression, or
+            threshold only when narrowing the query is genuinely unsafe for this rule,
+            since those stay manual analyst actions. This rule has type
+            "{{ steps.fetch_rule.output.type }}", so propose a query change only when
+            that type is "query".
+          schema:
+            type: object
+            properties:
+              change_type:
+                type: string
+                enum: [exception, suppression, query, threshold]
+              summary:
+                type: string
+              current_query:
+                type: string
+              proposed_query:
+                type: string
+              exception_condition:
+                type: string
+              rekey_required:
+                type: boolean
+            required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
+
+      # Both previews end at the last false positive, not at now, so the rule's own
+      # `from` lookback covers the events analysts judged. Anchoring at now would
+      # backtest a window where those events no longer exist.
+      - name: preview_current_query
+        type: workflow.execute
+        if: >-
+          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+            and steps.fetch_rule.output.type == 'query' }}
+        with:
+          workflow-id: system-security-rule-preview
+          inputs:
+            space_id: "{{ workflow.spaceId }}"
+            preview_body:
+              type: query
+              name: "{{ steps.fetch_rule.output.name }}"
+              description: "{{ steps.fetch_rule.output.description }}"
+              query: "{{ steps.fetch_rule.output.query }}"
+              language: "{{ steps.fetch_rule.output.language }}"
+              index: "${{ steps.fetch_rule.output.index }}"
+              severity: "{{ steps.fetch_rule.output.severity }}"
+              risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+              interval: "{{ steps.fetch_rule.output.interval }}"
+              from: "{{ steps.fetch_rule.output.from }}"
+              to: "{{ steps.fetch_rule.output.to }}"
+              invocationCount: "${{ inputs.preview_invocation_count }}"
+              timeframeEnd: "{{ foreach.item.4 }}"
+
+      - name: preview_proposed_query
+        type: workflow.execute
+        if: >-
+          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+            and steps.fetch_rule.output.type == 'query' }}
+        with:
+          workflow-id: system-security-rule-preview
+          inputs:
+            space_id: "{{ workflow.spaceId }}"
+            preview_body:
+              type: query
+              name: "{{ steps.fetch_rule.output.name }}"
+              description: "{{ steps.fetch_rule.output.description }}"
+              query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+              language: "{{ steps.fetch_rule.output.language }}"
+              index: "${{ steps.fetch_rule.output.index }}"
+              severity: "{{ steps.fetch_rule.output.severity }}"
+              risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+              interval: "{{ steps.fetch_rule.output.interval }}"
+              from: "{{ steps.fetch_rule.output.from }}"
+              to: "{{ steps.fetch_rule.output.to }}"
+              invocationCount: "${{ inputs.preview_invocation_count }}"
+              timeframeEnd: "{{ foreach.item.4 }}"
+
+      - name: review_tuning
+        type: waitForApproval
+        if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
+        timeout: "72h"
+        with:
+          approveLabel: Apply tuning
+          rejectLabel: Dismiss
+          message: |-
+            Rule tuning proposal for {{ foreach.item.1 }}
+            {{ foreach.item.2 }} alerts were closed as false positives.
+
+            {{ steps.diagnose_rule.output.structured_output.summary }}
+
+            {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+            Current query:
+            {{ steps.diagnose_rule.output.structured_output.current_query }}
+
+            Proposed query:
+            {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+
+            Backtest:
+            current {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }}{% else %}inconclusive{% endif %},
+            proposed {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }}{% else %}inconclusive{% endif %}.
+            {% if steps.preview_current_query.output.error_text != '' %}
+            Current query preview errors: {{ steps.preview_current_query.output.error_text }}
+            {% endif %}
+            {% if steps.preview_proposed_query.output.error_text != '' %}
+            Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
+            {% endif %}
+            {% else %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+            Proposed exception:
+            {{ steps.diagnose_rule.output.structured_output.exception_condition }}
+            {% endif %}
+            Apply this {{ steps.diagnose_rule.output.structured_output.change_type }}
+            proposal manually in the Detection Rules UI. Approving records the handoff;
+            it does not change the rule.
+            {% endif %}
+
+            {% if steps.diagnose_rule.output.conversation_id %}
+            Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
+            {% endif %}
+
+      - name: apply_query_tuning
+        type: kibana.request
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+            and steps.fetch_rule.output.type == 'query'
+            and steps.preview_proposed_query.output.succeeded == true
+            and steps.preview_proposed_query.output.is_aborted == false }}
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ foreach.item.0 }}"
+            query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+
+      # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
+      # harvest's KEEP projects: the alert_ids multivalue.
+      - name: mark_alerts_dismissed
+        type: security.setAlertTags
+        if: "${{ steps.review_tuning.output.response.approved == false }}"
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add: "${{ consts.dismissed_tags }}"
+        on-failure:
+          continue: true
+
+      - name: mark_alerts_applied
+        type: security.setAlertTags
+        if: "${{ steps.review_tuning.output.response.approved == true }}"
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add: "${{ consts.applied_tags }}"
+        on-failure:
+          continue: true
+
+  # Size is computed on its own because comparison operators cannot follow a filter chain.
+  - name: count_examined_rules
+    type: data.set
+    with:
+      rules_examined: "${{ steps.harvest_fp_alerts_by_rule.output.values | size | default: 0 }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      rules_examined: "${{ steps.count_examined_rules.output.rules_examined }}"
+      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"

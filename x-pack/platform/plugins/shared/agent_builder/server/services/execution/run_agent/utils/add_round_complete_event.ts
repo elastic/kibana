@@ -24,6 +24,7 @@ import type {
   CompactionStep,
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
+  SubagentRosterUpdatedEvent,
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
@@ -46,6 +47,8 @@ import {
   isReasoningEvent,
   isToolCallStep,
   isBackgroundAgentCompleteEvent,
+  isSubagentRosterUpdatedEvent,
+  createSubagentRosterUpdatedStep,
   isToolUiEvent,
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
@@ -54,6 +57,7 @@ import {
   isUserQuestionAnsweredEvent,
   isAskUserQuestionStep,
   createAskUserQuestionStep,
+  createRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -69,6 +73,7 @@ import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
+import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 
 type SourceEvents = ConvertedEvents;
@@ -77,6 +82,7 @@ type StepEvents =
   | ReasoningEvent
   | ToolCallEvent
   | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
@@ -84,6 +90,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
     isReasoningEvent(event) ||
     isToolCallEvent(event) ||
     isBackgroundAgentCompleteEvent(event) ||
+    isSubagentRosterUpdatedEvent(event) ||
     isUserQuestionAskedEvent(event)
   );
 };
@@ -97,12 +104,14 @@ export const addRoundCompleteEvent = ({
   endTime,
   getConversationState,
   modelProvider,
+  mainConnectorId,
   stateManager,
   attachmentStateManager,
   configurationOverrides,
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  relevantSkillsSelection,
   getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
@@ -119,6 +128,11 @@ export const addRoundCompleteEvent = ({
   author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
+  /**
+   * Connector id of the model driving the agent graph for this round. Used to
+   * attribute `model_usage` to the right connector.
+   */
+  mainConnectorId: string;
   stateManager: ConversationStateManager;
   getConversationState: () => ConversationInternalState;
   attachmentStateManager: AttachmentStateManager;
@@ -130,6 +144,8 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Skills selected as relevant this round; persisted as a `relevant_skills` step (fresh rounds only) */
+  relevantSkillsSelection?: RelevantSkillSelection;
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
@@ -149,6 +165,7 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                mainConnectorId,
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
@@ -162,10 +179,12 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                mainConnectorId,
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
                 initialTodos,
+                relevantSkillsSelection,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -206,6 +225,7 @@ const resumeRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
   compactionResult,
@@ -216,6 +236,7 @@ const resumeRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
@@ -258,6 +279,7 @@ const resumeRound = ({
     startTime,
     endTime,
     modelProvider,
+    mainConnectorId,
     attachmentRefs,
     configurationOverrides,
     compactionResult,
@@ -340,10 +362,12 @@ const createRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
   compactionResult,
   initialTodos,
+  relevantSkillsSelection,
 }: {
   roundId?: string;
   events: SourceEvents[];
@@ -353,10 +377,12 @@ const createRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
+  relevantSkillsSelection?: RelevantSkillSelection;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -400,6 +426,9 @@ const createRound = ({
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
     }
+    if (isSubagentRosterUpdatedEvent(event)) {
+      return [createSubagentRosterUpdatedStep({ roster: event.data.roster })];
+    }
     if (isUserQuestionAskedEvent(event)) {
       return [
         createAskUserQuestionStep({
@@ -436,6 +465,14 @@ const createRound = ({
     steps.push(compactionStep);
   }
 
+  // Relevant-skills step is placed before the event-derived steps so, on replay, its notification
+  // renders right after the round's user input and before the round's tool calls.
+  if (relevantSkillsSelection && relevantSkillsSelection.skills.length > 0) {
+    steps.push(
+      createRelevantSkillsStep({ skills: relevantSkillsSelection.skills, source: 'implicit' })
+    );
+  }
+
   steps.push(...stepEvents.flatMap(eventToStep));
 
   const todosForStep = lastTodosData ?? carriedOverTodos(initialTodos);
@@ -468,7 +505,7 @@ const createRound = ({
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats()),
+    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
     response: lastMessage
       ? {
           message: lastMessage.message_content,
@@ -524,7 +561,10 @@ const createToolCallStep = ({
   };
 };
 
-const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
+const getModelUsage = (
+  stats: ModelProviderStats,
+  mainConnectorId: string
+): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
   let cachedInputTokens = 0;
@@ -537,11 +577,12 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
       hasCachedInputTokens = true;
     }
   }
-  const modelFromResponse = stats.calls.find((call) => call.model)?.model;
+  const modelFromResponse = stats.calls.find(
+    (call) => call.connectorId === mainConnectorId && call.model
+  )?.model;
 
   return {
-    // we don't support multi-models yet, so we can just pick from the first call
-    connector_id: stats.calls.length ? stats.calls[0].connectorId : 'unknown',
+    connector_id: mainConnectorId,
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,

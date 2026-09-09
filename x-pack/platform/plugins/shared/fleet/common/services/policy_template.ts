@@ -29,7 +29,7 @@ import type {
   PackagePolicyInput,
 } from '../types';
 
-const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
   type: 'text',
   title: i18n.translate('xpack.fleet.policyTemplate.datasetVar.title', {

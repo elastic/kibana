@@ -76,13 +76,20 @@ export function DataPreviewChart({
 
   const indicator = watch('indicator');
   const groupBy = watch('groupBy');
+  const projectRoutings = watch('settings.projectRoutings');
 
   const {
     data: previewData,
     isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range, groupBy);
+  } = useDebouncedGetPreviewData({
+    isIndicatorValid: isIndicatorSectionValid,
+    indicator,
+    range,
+    groupBy,
+    projectRoutings,
+  });
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&

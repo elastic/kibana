@@ -15,34 +15,4 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
     'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
   );
   log.debug('[setup:logstash] logstash_functional ES data ready');
-
-  log.debug('[setup:hamlet] loading hamlet ES data (only if it does not exist)...');
-  await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/hamlet');
-  log.debug('[setup:hamlet] hamlet ES data ready');
-
-  log.debug(
-    '[setup:unmapped_fields] loading unmapped_fields ES data (only if it does not exist)...'
-  );
-  await esArchiver.loadIfNeeded(
-    'src/platform/test/functional/fixtures/es_archiver/unmapped_fields'
-  );
-  log.debug('[setup:unmapped_fields] unmapped_fields ES data ready');
-
-  log.debug(
-    '[setup:index_pattern_without_timefield] loading index_pattern_without_timefield ES data (only if it does not exist)...'
-  );
-  await esArchiver.loadIfNeeded(
-    'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
-  );
-  log.debug(
-    '[setup:index_pattern_without_timefield] index_pattern_without_timefield ES data ready'
-  );
-
-  log.debug(
-    '[setup:kibana_sample_data_flights] loading kibana_sample_data_flights ES data (only if it does not exist)...'
-  );
-  await esArchiver.loadIfNeeded(
-    'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
-  );
-  log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
 });

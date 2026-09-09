@@ -101,6 +101,7 @@ describe('SyntheticsService', () => {
       manifestUrl: 'https://test-manifest.com',
     },
     enabled: true,
+    rebalancePrivateLocationShardsTaskEnabled: true,
   };
 
   mockLicense();
@@ -189,6 +190,7 @@ describe('SyntheticsService', () => {
         password: '12345',
       },
       enabled: true,
+      rebalancePrivateLocationShardsTaskEnabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
@@ -262,7 +264,7 @@ describe('SyntheticsService', () => {
 
       expect(axios).not.toHaveBeenCalled();
 
-      expect(serverMock.logger.error).not.toBeCalledWith(
+      expect(serverMock.logger.error).not.toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     });
@@ -283,7 +285,7 @@ describe('SyntheticsService', () => {
 
       await service.pushConfigs(ALL_SPACES_ID);
 
-      expect(serverMock.logger.debug).toBeCalledWith(
+      expect(serverMock.logger.debug).toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     });

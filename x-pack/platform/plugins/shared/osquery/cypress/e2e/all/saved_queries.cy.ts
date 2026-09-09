@@ -127,7 +127,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
-      navigateTo('/app/osquery/live_queries');
+      navigateTo('/app/osquery/history');
       cy.get('tbody tr', { timeout: 60000 })
         .first()
         .within(() => {

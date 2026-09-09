@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
@@ -38,7 +39,6 @@ import { NotFoundPage } from '../../../../app/404';
 import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   fetchAlertAnalysisWorkflowSettings,
@@ -69,7 +69,15 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     application.capabilities.advancedSettings?.save && canEditRules && canEditWorkflow
   );
   const canAccessPage = isEnterprise && canEditAdvancedSettings;
-  const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
+  const { data: loadedAiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
+    http,
+    toasts: notifications.toasts,
+    featureId: 'agent_builder',
+  });
+  const aiConnectors = useMemo(
+    () => loadedAiConnectors?.filter((connector) => !connector.isMissingSecrets) ?? [],
+    [loadedAiConnectors]
+  );
   const { agents, isLoading: isLoadingAgents } = useAlertAnalysisWorkflowAgents(canAccessPage);
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,

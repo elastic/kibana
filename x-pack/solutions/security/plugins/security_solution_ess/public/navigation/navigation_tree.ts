@@ -34,6 +34,10 @@ export const createNavigationTree = (
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
+  const contextEngineLink = {
+    icon: 'sparkles',
+    link: 'context_engine' as AppDeepLinkId,
+  };
 
   return {
     body: [
@@ -45,50 +49,19 @@ export const createNavigationTree = (
         title: SOLUTION_NAME,
       },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      contextEngineLink,
       {
         link: 'inbox' as AppDeepLinkId,
-        icon: 'email',
+        icon: 'mail',
       },
       // PND body (nodes omitted when xpack.pnd.enabled is false)
-      {
-        link: 'pnd' as AppDeepLinkId,
-        icon: 'sparkles',
-      },
-      {
-        link: 'pnd:chats' as AppDeepLinkId,
-        icon: 'comment',
-      },
+      ...defaultNavigationTree.pnd(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      {
-        link: 'pnd:alerts' as AppDeepLinkId,
-        icon: 'bell',
-      },
-      {
-        link: 'pnd:attacks' as AppDeepLinkId,
-        icon: 'warning',
-      },
-      {
-        link: 'pnd:records' as AppDeepLinkId,
-        icon: 'documents',
-      },
-      {
-        link: 'pnd:threat_hunt' as AppDeepLinkId,
-        icon: 'inspect',
-      },
-      {
-        link: 'pnd:streams' as AppDeepLinkId,
-        icon: 'aggregate',
-      },
-      {
-        link: 'pnd:watches' as AppDeepLinkId,
-        icon: 'eye',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
-      },
+      ...defaultNavigationTree.pndSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,

@@ -3,7 +3,7 @@ name: Watch Floor
 description: >
   Tier-1 Security Watch Floor. Triages alerts via the alert-analysis skill.
   Full Alert Analysis managed-workflow wrap (workflow.execute) is the next Floor spike.
-enabled: true
+enabled: false
 tags:
   - watch
   - watch-floor
@@ -12,28 +12,13 @@ triggers:
   - type: manual
 consts:
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy semantics are defined separately.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Frontline triage
-    autonomyLevel: 3
-    handoff: officer
-    onDemand: false
-    draft: false
-    cadence: stream
-    mode: always
     ui:
       color: "#16b3a6"
-      icon: alert
       order: 10
-    scopeSummary: Security indices · APM · logs
-    scopes:
-      - name: Security indices
-        access: full
-        label: Read
-      - name: APM · logs · SLOs
-        access: full
-        label: Read
-      - name: Finance PII
-        access: masked
-        label: Masked
     # Display overrides only — capabilities are projected from steps below.
     callables:
       - id: alert-analysis

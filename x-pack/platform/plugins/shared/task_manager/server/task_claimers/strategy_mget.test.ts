@@ -280,6 +280,51 @@ describe('TaskClaiming', () => {
       };
     }
 
+    test('does not claim and returns NoTasksClaimed when execution is paused', async () => {
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {},
+        taskClaimingOpts: {
+          getExecutionControlState: () => ({ paused: true, pausedTaskTypes: [] }),
+        },
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      expect(isOk(resultOrErr)).toBe(false);
+      expect(unwrap(resultOrErr)).toEqual('NoTasksClaimed');
+      expect(store.msearch).not.toHaveBeenCalled();
+    });
+
+    test('merges runtime paused task types into the excluded task types', async () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: { title: 'foo', createTaskRunner: jest.fn() },
+        bar: { title: 'bar', createTaskRunner: jest.fn() },
+      });
+
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: { definitions },
+        taskClaimingOpts: {
+          getExecutionControlState: () => ({ paused: false, pausedTaskTypes: ['bar'] }),
+        },
+        excludedTaskTypes: ['foobar'],
+        hits: [generateFakeTasks(1)],
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      // 'bar' is excluded at claim time, so only 'foo' is queried for.
+      const queriedTypes = store.msearch.mock.calls
+        .flatMap(([searches]) => searches ?? [])
+        .flatMap((search) => JSON.stringify(search));
+      expect(queriedTypes.some((s) => s.includes('"foo"'))).toBe(true);
+      expect(queriedTypes.some((s) => s.includes('"bar"'))).toBe(false);
+    });
+
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);

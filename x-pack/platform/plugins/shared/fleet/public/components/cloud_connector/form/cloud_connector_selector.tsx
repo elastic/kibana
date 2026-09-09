@@ -43,7 +43,6 @@ interface CloudConnectorSelectorProps {
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   accountType?: AccountType;
   packageName?: string;
-  policyTemplate?: string;
 }
 
 export const CloudConnectorSelector = ({
@@ -53,13 +52,11 @@ export const CloudConnectorSelector = ({
   setCredentials,
   accountType,
   packageName,
-  policyTemplate,
 }: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors({
     cloudProvider: provider,
     accountType,
     packageName,
-    policyTemplate,
   });
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
   const [selectKey, setSelectKey] = useState(0);

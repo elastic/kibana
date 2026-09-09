@@ -16,12 +16,21 @@ export {
 } from './feature_flags';
 
 export {
+  notificationIdSchema,
   notificationWriteSchema,
   notificationReadSchema,
   ctaSchema,
   SEVERITY,
   SEVERITIES,
 } from './notification_schema';
+
+export {
+  NOTIFICATION_CENTER_API_BASE,
+  GET_NOTIFICATIONS_PATH,
+  MARK_READ_PATH,
+  MARK_ALL_READ_PATH,
+  NOTIFICATION_CENTER_API_VERSION,
+} from './routes';
 
 export { NOTIFICATION_REGISTRY } from './notification_registry';
 export {
@@ -43,10 +52,13 @@ export type {
 
 export type {
   Notification,
+  NotificationListItem,
   NotificationInput,
   NotificationDocument,
   NotificationContent,
   NotificationSubmitInput,
+  NotificationQueryParams,
+  NotificationQueryResult,
   StateSubmitIdParts,
   TimeseriesSubmitIdParts,
   Severity,

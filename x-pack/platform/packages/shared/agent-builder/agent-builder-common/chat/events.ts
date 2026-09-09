@@ -12,6 +12,7 @@ import type {
   ConversationInternalState,
   ConversationRound,
   BackgroundExecutionState,
+  SubagentRosterEntry,
   TodoItem,
 } from './conversation';
 import type {
@@ -22,6 +23,7 @@ import type {
 } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 import type { ConversationAccessControl } from './access_control';
+import type { UserIdAndName } from '../base/users';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -41,6 +43,7 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
 }
@@ -318,6 +321,7 @@ export interface ConversationCreatedEventData {
   conversation_id: string;
   title: string;
   access_control: ConversationAccessControl;
+  user: UserIdAndName;
 }
 
 export type ConversationCreatedEvent = ChatEventBase<
@@ -420,6 +424,29 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+export interface SubagentRosterUpdatedEventData {
+  /** Full active roster at time of emission. */
+  roster: SubagentRosterEntry[];
+}
+
+export type SubagentRosterUpdatedEvent = ChatEventBase<
+  ChatEventType.subagentRosterUpdated,
+  SubagentRosterUpdatedEventData
+>;
+
+export const createSubagentRosterUpdatedEvent = (
+  roster: SubagentRosterEntry[]
+): SubagentRosterUpdatedEvent => ({
+  type: ChatEventType.subagentRosterUpdated,
+  data: { roster },
+});
+
+export const isSubagentRosterUpdatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is SubagentRosterUpdatedEvent => {
+  return event.type === ChatEventType.subagentRosterUpdated;
+};
+
 export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
 
 export interface TodosUpdatedUiEventData {
@@ -451,6 +478,7 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
 

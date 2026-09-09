@@ -44,3 +44,5 @@ xpack.ml.nlp.enabled: false   # Disables NLP/Trained Models
 
 ## Hide index mode in index management UI. vectorDB is the only allowed mode in this project type
 xpack.index_management.enableIndexMode: false
+## Show the indexed vector count in index management UI. Limited to this project type for now
+xpack.index_management.enableVectorCount: true

@@ -6,7 +6,12 @@
  */
 
 import type { BaseFeature } from './feature';
-import { computeFeatureUuid, mergeFeature, normalizeFeatureSlugForMatching } from './feature';
+import {
+  computeFeatureUuid,
+  MAX_FEATURE_ARRAY_ITEMS,
+  mergeFeature,
+  normalizeFeatureSlugForMatching,
+} from './feature';
 import { MAX_ID_LENGTH } from './significant_events/constants';
 
 const createFeature = ({
@@ -164,4 +169,18 @@ describe('mergeFeature version history', () => {
 
     expect(merged.meta?.version_history).toEqual(['3.13.0']);
   });
+});
+
+it('evidence does not grow unbounded across repeated merges with distinct values', () => {
+  let feature: BaseFeature = { ...createFeature(), evidence: [] };
+  for (let iteration = 0; iteration < 20; iteration++) {
+    feature = mergeFeature(feature, {
+      ...createFeature(),
+      evidence: Array.from({ length: 5 }, (_, i) => `iter-${iteration}-${i}`),
+    });
+  }
+
+  expect(feature.evidence?.length ?? 0).toBeLessThanOrEqual(MAX_FEATURE_ARRAY_ITEMS);
+  expect(feature.evidence).toContain('iter-19-4');
+  expect(feature.evidence).not.toContain('iter-0-0');
 });

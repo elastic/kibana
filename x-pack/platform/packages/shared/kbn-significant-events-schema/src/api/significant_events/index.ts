@@ -19,19 +19,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
 import type { ChangePointType } from '../../significant_events/detections';
-import type { SignificantEvent } from '../../significant_events/events';
-
-/**
- * SignificantEvents Get Response
- */
-type ChangePointsType =
-  | 'dip'
-  | 'distribution_change'
-  | 'non_stationary'
-  | 'spike'
-  | 'stationary'
-  | 'step_change'
-  | 'trend_change';
+import type { SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
   p_value: number;
@@ -51,7 +39,7 @@ type QueryWithOccurrences = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
-    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
+    type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
 };
@@ -91,7 +79,7 @@ interface LifecycleDetection {
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  events: SignificantEvent[];
+  events: SignificantEventResponse[];
 }
 
 export type {

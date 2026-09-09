@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

@@ -509,7 +509,6 @@ export const Workday: ConnectorSpec = {
       await ctx.client.get(url, { params: { limit: 1 } });
 
       return {
-        ok: true,
         message: 'Successfully connected to Workday',
       };
     },

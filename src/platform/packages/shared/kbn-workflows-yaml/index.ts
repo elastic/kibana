@@ -17,12 +17,17 @@ export {
   isWorkflowConflictError,
 } from './common/errors';
 export type { FormattedZodError, MockZodError, MockZodIssue } from './common/errors';
+export type { VariableMatch } from './common/regex';
 
 // Regex patterns and predicates
 export {
   VARIABLE_REGEX,
   VARIABLE_REGEX_GLOBAL,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  matchVariable,
+  matchAllVariables,
+  matchLastVariable,
+  matchLastUnfinishedVariable,
   ALLOWED_KEY_REGEX,
   PROPERTY_PATH_REGEX,
   LIQUID_FILTER_REGEX,

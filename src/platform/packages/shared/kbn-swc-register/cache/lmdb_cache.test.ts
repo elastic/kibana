@@ -54,8 +54,6 @@ const openDb = () => {
   return LmdbStore.open<unknown, string>(DB_DIR, databaseOptions);
 };
 
-const waitForAsyncWrites = () => new Promise((resolve) => setTimeout(resolve, 50));
-
 const makeTestLog = () => {
   const log = Object.assign(
     new Writable({
@@ -237,14 +235,15 @@ it('only refreshes atime for entries older than the refresh interval', async () 
 
   log.output = '';
   expect(cache.getCode(freshKey)).toBe('fresh');
-  await waitForAsyncWrites();
-  expect(log.output).toBe(`HIT   [db]   ${getCodeKey(freshKey)}\n`);
-
-  log.output = '';
   expect(cache.getCode(staleKey)).toBe('stale');
-  await waitForAsyncWrites();
+
+  // Drain the fire-and-forget atime-refresh put so its PUT log line is deterministic.
+  await cache.close();
+
   expect(log.output).toBe(
-    `HIT   [db]   ${getCodeKey(staleKey)}\nPUT   [db]   ${getCodeKey(staleKey)}\n`
+    `HIT   [db]   ${getCodeKey(freshKey)}\n` +
+      `HIT   [db]   ${getCodeKey(staleKey)}\n` +
+      `PUT   [db]   ${getCodeKey(staleKey)}\n`
   );
 });
 
@@ -257,10 +256,11 @@ it('prunes stale code entries and their source maps', async () => {
   db.putSync('legacy', [GLOBAL_ATIME - 31 * DAY, 'legacy', { legacy: true }]);
   await db.close();
 
-  makeCache({
+  const cache = makeCache({
     dir: DIR,
     prefix: 'prefix',
   });
+  await cache.close();
 
   const updatedDb = openDb();
   expect(updatedDb.get('code:old')).toBe(undefined);

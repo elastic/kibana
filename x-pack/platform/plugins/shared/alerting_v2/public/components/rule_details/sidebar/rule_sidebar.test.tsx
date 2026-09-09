@@ -28,14 +28,14 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Rule' },
+  metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 import type { RuleSidebarProps } from './rule_sidebar';

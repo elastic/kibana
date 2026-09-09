@@ -16,6 +16,7 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   meanA: 0.8,
   meanB: 0.7,
   pValue: 0.03,
+  direction: 'maximize',
   ...overrides,
 });
 
@@ -190,6 +191,60 @@ describe('formatMarkdownCompareReport', () => {
       });
 
       expect(output).not.toContain('Comparison may be incomplete');
+    });
+  });
+
+  describe('outcome column', () => {
+    it('shows Improvement for maximize direction with positive delta', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult({ meanA: 0.8, meanB: 0.7, pValue: 0.03, direction: 'maximize' })],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).toContain('Improvement');
+    });
+
+    it('shows Regression for maximize direction with negative delta', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult({ meanA: 0.6, meanB: 0.8, pValue: 0.03, direction: 'maximize' })],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).toContain('Regression');
+    });
+
+    it('shows Improvement for minimize direction with negative delta', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult({ meanA: 100, meanB: 150, pValue: 0.03, direction: 'minimize' })],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).toContain('Improvement');
+    });
+
+    it('shows - for neutral direction', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult({ pValue: 0.03, direction: 'neutral' })],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).not.toContain('Improvement');
+      expect(dataRow).not.toContain('Regression');
+    });
+
+    it('shows - for non-significant results regardless of direction', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult({ meanA: 0.8, meanB: 0.7, pValue: 0.5, direction: 'maximize' })],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).not.toContain('Improvement');
+      expect(dataRow).not.toContain('Regression');
     });
   });
 

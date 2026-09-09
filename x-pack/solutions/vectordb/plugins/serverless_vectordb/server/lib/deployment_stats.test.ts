@@ -6,12 +6,54 @@
  */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import { fetchDashboardsCount, fetchIndexStats } from './deployment_stats';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { fetchApiKeysStats, fetchIndexStats, hasIndexManagePrivilege } from './deployment_stats';
+
+describe('hasIndexManagePrivilege', () => {
+  let client: ScopedClusterClientMock;
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    client = elasticsearchServiceMock.createScopedClusterClient();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockHasPrivileges = (hasAllRequested: boolean) => {
+    client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: hasAllRequested,
+      username: 'elastic',
+      application: {},
+      cluster: {},
+      index: {},
+    });
+  };
+
+  it('asks Elasticsearch whether the caller can manage every index', async () => {
+    mockHasPrivileges(true);
+
+    await expect(hasIndexManagePrivilege(client, logger)).resolves.toBe(true);
+
+    expect(client.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      index: [{ names: ['*'], privileges: ['manage'] }],
+    });
+  });
+
+  it('denies a caller that holds the privilege on only some indices', async () => {
+    mockHasPrivileges(false);
+
+    await expect(hasIndexManagePrivilege(client, logger)).resolves.toBe(false);
+  });
+
+  it('denies access (rather than granting it) when the check itself fails', async () => {
+    client.asCurrentUser.security.hasPrivileges.mockRejectedValue(new Error('boom'));
+
+    await expect(hasIndexManagePrivilege(client, logger)).resolves.toBe(false);
+    expect(logger.warn).toHaveBeenCalled();
+  });
+});
 
 describe('fetchIndexStats', () => {
   let client: ScopedClusterClientMock;
@@ -19,6 +61,7 @@ describe('fetchIndexStats', () => {
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createScopedClusterClient();
+    mockDocumentCount(0);
   });
 
   afterEach(() => {
@@ -37,14 +80,22 @@ describe('fetchIndexStats', () => {
     });
   };
 
-  const mockFieldCaps = (fields: Record<string, Record<string, unknown>>) => {
-    client.asCurrentUser.fieldCaps.mockResolvedValue({ indices: [], fields } as any);
+  const mockDocumentCount = (count: number, failedShards = 0) => {
+    client.asCurrentUser.count.mockResolvedValue({
+      count,
+      _shards: { total: 2, successful: 2 - failedShards, skipped: 0, failed: failedShards },
+    });
   };
 
-  const mockEsqlCount = (count: number) => {
-    client.asCurrentUser.esql.query.mockResolvedValue({
-      columns: [{ name: 'doc_count', type: 'long' }],
-      values: [[count]],
+  const mockVectorStats = (denseCount: number, sparseCount = 0) => {
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _all: {
+        primaries: {
+          dense_vector: { value_count: denseCount },
+          sparse_vector: { value_count: sparseCount },
+        },
+      },
+      indices: {},
     } as any);
   };
 
@@ -53,220 +104,58 @@ describe('fetchIndexStats', () => {
       { name: 'products', num_docs: 10, size_in_bytes: 100 },
       { name: '.kibana', num_docs: 999, size_in_bytes: 999 },
     ]);
-    // No vector fields.
-    mockFieldCaps({
-      title: { text: { type: 'text', searchable: true, aggregatable: false, inference: false } },
-    });
+    mockVectorStats(0);
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 100, vectorDocsCount: 0 });
-    expect(client.asCurrentUser.esql.query).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      indicesCount: 1,
+      storeSizeBytes: 100,
+      vectorCount: 0,
+      documentsCount: 0,
+    });
   });
 
-  it('restricts field caps to vector-relevant field types and skips metadata fields', async () => {
+  it('sums dense and sparse vector value_counts from operator indices.stats', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+    mockVectorStats(100, 25);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asInternalUser.indices.stats).toHaveBeenCalledWith({
+      index: ['*', '-.*'],
+      expand_wildcards: ['open'],
+      level: 'cluster',
+      metric: ['dense_vector', 'sparse_vector'],
+    });
+    expect(result.vectorCount).toBe(125);
+  });
+
+  it('treats missing dense/sparse stats as zero', async () => {
     mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
-    mockFieldCaps({});
-
-    await fetchIndexStats(client, logger);
-
-    expect(client.asCurrentUser.fieldCaps).toHaveBeenCalledWith({
-      index: ['products'],
-      fields: '*',
-      // `text` is included because `semantic_text` may be reported as `text` + `inference: true`
-      types: ['dense_vector', 'sparse_vector', 'semantic_text', 'semantic', 'text'],
-      filters: '-metadata',
-      // Required so partially-mapped fields carry an explicit `indices` list.
-      include_unmapped: true,
-    });
-  });
-
-  it('detects semantic_text via the field caps inference flag and counts docs via ES|QL', async () => {
-    // metering over-reports num_docs (20) for the semantic_text index; ES|QL returns the real 10.
-    // `semantic_text` is reported as `text` by field caps, so it is detected via `inference: true`.
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    mockFieldCaps({
-      semantic_content: {
-        text: { type: 'text', searchable: true, aggregatable: false, inference: true },
-      },
-    });
-    mockEsqlCount(10);
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _all: { primaries: {} },
+      indices: {},
+    } as any);
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
+    expect(result.vectorCount).toBe(0);
   });
 
-  it('detects an inference field reported by its own `type` (no inference flag)', async () => {
-    // In some versions/formats field caps reports `semantic_text` by its own type rather than as
-    // `text` + `inference: true`, so the type set must also catch it.
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    mockFieldCaps({
-      semantic_content: {
-        semantic_text: { type: 'semantic_text', searchable: true, aggregatable: false },
-      },
-    });
-    mockEsqlCount(10);
-
-    const result = await fetchIndexStats(client, logger);
-
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
-  });
-
-  it('detects a `semantic` field by its own reported type', async () => {
+  it('returns a null vectorCount (not 0) when the vector stats call fails', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    mockFieldCaps({
-      body: {
-        semantic: { type: 'semantic', searchable: true, aggregatable: false },
-      },
-    });
-    mockEsqlCount(10);
+    client.asInternalUser.indices.stats.mockRejectedValue(new Error('boom'));
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
-  });
-
-  it('only queries indices whose field caps report a vector field', async () => {
-    mockMetering([
-      { name: 'vectordb', num_docs: 10, size_in_bytes: 500 },
-      { name: 'plain-text', num_docs: 5, size_in_bytes: 50 },
-    ]);
-    // `embedding` (dense_vector) only exists in `vectordb`, so field caps scopes it via `indices`.
-    mockFieldCaps({
-      embedding: {
-        dense_vector: {
-          type: 'dense_vector',
-          searchable: true,
-          aggregatable: false,
-          inference: false,
-          indices: ['vectordb'],
-        },
-      },
-      title: { text: { type: 'text', searchable: true, aggregatable: false, inference: false } },
+    // index/size counts are still valid; only the vector count is unavailable
+    expect(result).toEqual({
+      indicesCount: 1,
+      storeSizeBytes: 500,
+      vectorCount: null,
+      documentsCount: 0,
     });
-    mockEsqlCount(10);
-
-    await fetchIndexStats(client, logger);
-
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-  });
-
-  it('does not classify indices where the vector field is unmapped', async () => {
-    mockMetering([
-      { name: 'test-vector', num_docs: 10, size_in_bytes: 500 },
-      { name: 'test-plain', num_docs: 5000, size_in_bytes: 50 },
-    ]);
-    mockFieldCaps({
-      embedding: {
-        unmapped: {
-          type: 'unmapped',
-          searchable: false,
-          aggregatable: false,
-          inference: false,
-          indices: ['test-plain'],
-        },
-        dense_vector: {
-          type: 'dense_vector',
-          searchable: true,
-          aggregatable: false,
-          inference: false,
-          indices: ['test-vector'],
-        },
-      },
-    });
-    mockEsqlCount(10);
-
-    const result = await fetchIndexStats(client, logger);
-
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "test-vector" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
-  });
-
-  it('treats a vector field with no `indices` as present in every requested index', async () => {
-    mockMetering([
-      { name: 'vectordb-a', num_docs: 10, size_in_bytes: 500 },
-      { name: 'vectordb-b', num_docs: 10, size_in_bytes: 500 },
-    ]);
-    // `indices` is omitted when the field is uniform across all requested indices.
-    mockFieldCaps({
-      embedding: {
-        dense_vector: {
-          type: 'dense_vector',
-          searchable: true,
-          aggregatable: false,
-          inference: false,
-        },
-      },
-    });
-    mockEsqlCount(20);
-
-    await fetchIndexStats(client, logger);
-
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: 'FROM "vectordb-a","vectordb-b" | STATS doc_count = COUNT(*)',
-      })
-    );
-  });
-
-  it('batches the ES|QL count when there are more than 500 vector indices', async () => {
-    const indices = Array.from({ length: 501 }, (_, i) => ({
-      name: `vectordb-${i}`,
-      num_docs: 1,
-      size_in_bytes: 10,
-    }));
-    mockMetering(indices);
-    // A uniform vector field means every index is a vector index.
-    mockFieldCaps({
-      embedding: {
-        dense_vector: { type: 'dense_vector', searchable: true, aggregatable: false },
-      },
-    });
-    client.asCurrentUser.esql.query
-      .mockResolvedValueOnce({
-        columns: [{ name: 'doc_count', type: 'long' }],
-        values: [[500]],
-      } as any)
-      .mockResolvedValueOnce({
-        columns: [{ name: 'doc_count', type: 'long' }],
-        values: [[1]],
-      } as any);
-
-    const result = await fetchIndexStats(client, logger);
-
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledTimes(2);
-    const queries = client.asCurrentUser.esql.query.mock.calls.map(
-      ([request]) => (request as { query: string }).query
-    );
-    expect(queries[0]).toContain('"vectordb-0"');
-    expect(queries[0]).toContain('"vectordb-499"');
-    expect(queries[0]).not.toContain('"vectordb-500"');
-    expect(queries[1]).toBe('FROM "vectordb-500" | STATS doc_count = COUNT(*)');
-    expect(result.vectorDocsCount).toBe(501);
-  });
-
-  it('returns a null vectorDocsCount (not 0) when the vector lookup fails', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    client.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
-
-    const result = await fetchIndexStats(client, logger);
-
-    // index/size counts are still valid; only the vector doc count is unavailable
-    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 500, vectorDocsCount: null });
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -278,9 +167,43 @@ describe('fetchIndexStats', () => {
     expect(result).toEqual({
       indicesCount: null,
       storeSizeBytes: null,
-      vectorDocsCount: null,
+      vectorCount: null,
+      documentsCount: null,
     });
     expect(logger.warn).toHaveBeenCalled();
+    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
+    expect(client.asCurrentUser.count).not.toHaveBeenCalled();
+  });
+
+  it('treats a metering response without indices as an empty deployment', async () => {
+    client.asSecondaryAuthUser.transport.request.mockResolvedValue({
+      _total: { num_docs: 0, size_in_bytes: 0 },
+    });
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(result).toEqual({
+      indicesCount: 0,
+      storeSizeBytes: 0,
+      vectorCount: 0,
+      documentsCount: 0,
+    });
+  });
+
+  it('treats an index reported without a size as contributing nothing to the total', async () => {
+    client.asSecondaryAuthUser.transport.request.mockResolvedValue({
+      _total: { num_docs: 10, size_in_bytes: 100 },
+      indices: [
+        { name: 'sizeless', num_docs: 10 },
+        { name: 'products', num_docs: 10, size_in_bytes: 100 },
+      ],
+    });
+    mockVectorStats(0);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(result.indicesCount).toBe(2);
+    expect(result.storeSizeBytes).toBe(100);
   });
 
   it('skips vector lookups when there are no user indices', async () => {
@@ -289,31 +212,149 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     // a genuinely empty deployment reports real zeros, not null
-    expect(result).toEqual({ indicesCount: 0, storeSizeBytes: 0, vectorDocsCount: 0 });
-    expect(client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      indicesCount: 0,
+      storeSizeBytes: 0,
+      vectorCount: 0,
+      documentsCount: 0,
+    });
+    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
+    expect(client.asCurrentUser.count).not.toHaveBeenCalled();
+  });
+
+  it('counts top-level documents rather than reusing the metering num_docs', async () => {
+    // metering counts the hidden nested docs that `semantic_text` chunking creates
+    mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
+    mockVectorStats(0);
+    mockDocumentCount(500);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.count).toHaveBeenCalledWith({
+      index: ['*', '-.*'],
+      expand_wildcards: ['open'],
+    });
+    expect(result.documentsCount).toBe(500);
+  });
+
+  it('returns a null documentsCount when shards fail, rather than an undercount', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
+    mockVectorStats(10);
+    mockDocumentCount(120, 1);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(result.documentsCount).toBeNull();
+    expect(result.vectorCount).toBe(10);
+    // a partial count resolves rather than throwing, so it needs its own warning
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 2 shards'));
+  });
+
+  it('returns a null documentsCount (not 0) when the count call fails', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
+    mockVectorStats(10);
+    client.asCurrentUser.count.mockRejectedValue(new Error('boom'));
+
+    const result = await fetchIndexStats(client, logger);
+
+    // index/size/vector counts are still valid; only the document count is unavailable
+    expect(result).toEqual({
+      indicesCount: 1,
+      storeSizeBytes: 500,
+      vectorCount: 10,
+      documentsCount: null,
+    });
+    expect(logger.warn).toHaveBeenCalled();
   });
 });
 
-describe('fetchDashboardsCount', () => {
+describe('fetchApiKeysStats', () => {
+  let client: ScopedClusterClientMock;
   const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    client = elasticsearchServiceMock.createScopedClusterClient();
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns the total from the saved objects client', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.find.mockResolvedValue({ total: 7, page: 1, per_page: 0, saved_objects: [] });
+  it('counts the same keys as the Stack Management API keys list', async () => {
+    client.asCurrentUser.security.queryApiKeys.mockResolvedValue({
+      total: 4,
+      count: 0,
+      api_keys: [],
+      aggregations: { expiring: { doc_count: 2 } },
+    });
 
-    await expect(fetchDashboardsCount(soClient, logger)).resolves.toBe(7);
-    expect(soClient.find).toHaveBeenCalledWith({ type: 'dashboard', perPage: 0 });
+    await expect(fetchApiKeysStats(client, logger)).resolves.toEqual({ total: 4, expiring: 2 });
+
+    // keys Kibana creates on the user's behalf are hidden from that list, so they aren't counted
+    expect(client.asCurrentUser.security.queryApiKeys).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: 0,
+        query: {
+          bool: {
+            must: [{ term: { invalidated: false } }, { term: { type: 'rest' } }],
+            must_not: [
+              { prefix: { name: { value: 'Alerting: ' } } },
+              { term: { 'metadata.managed': true } },
+            ],
+          },
+        },
+      })
+    );
   });
 
-  it('returns null (not 0) and logs when the lookup fails', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.find.mockRejectedValue(new Error('nope'));
+  // an unbounded `expiration > now` would also count keys that are not due for months
+  it('counts only the keys expiring within the next 30 days', async () => {
+    client.asCurrentUser.security.queryApiKeys.mockResolvedValue({
+      total: 4,
+      count: 0,
+      api_keys: [],
+      aggregations: { expiring: { doc_count: 2 } },
+    });
 
-    await expect(fetchDashboardsCount(soClient, logger)).resolves.toBeNull();
+    await fetchApiKeysStats(client, logger);
+
+    expect(client.asCurrentUser.security.queryApiKeys).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: {
+          expiring: { filter: { range: { expiration: { gt: 'now', lte: 'now+30d' } } } },
+        },
+      })
+    );
+  });
+
+  it('reports 0 expiring keys when none of the keys expire', async () => {
+    client.asCurrentUser.security.queryApiKeys.mockResolvedValue({
+      total: 1,
+      count: 0,
+      api_keys: [],
+      aggregations: { expiring: { doc_count: 0 } },
+    });
+
+    await expect(fetchApiKeysStats(client, logger)).resolves.toEqual({ total: 1, expiring: 0 });
+  });
+
+  it('reports 0 expiring keys when the aggregation is missing from the response', async () => {
+    client.asCurrentUser.security.queryApiKeys.mockResolvedValue({
+      total: 2,
+      count: 0,
+      api_keys: [],
+    });
+
+    await expect(fetchApiKeysStats(client, logger)).resolves.toEqual({ total: 2, expiring: 0 });
+  });
+
+  it('returns null values (not zeros) and logs when the lookup fails', async () => {
+    client.asCurrentUser.security.queryApiKeys.mockRejectedValue(new Error('forbidden'));
+
+    await expect(fetchApiKeysStats(client, logger)).resolves.toEqual({
+      total: null,
+      expiring: null,
+    });
     expect(logger.warn).toHaveBeenCalled();
   });
 });

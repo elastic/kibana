@@ -39,6 +39,7 @@ import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vec
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { DeepLinkId as ContextEngineLink } from '@kbn/deeplinks-context-engine';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
+import type { DeepLinkId as EvalsLink } from '@kbn/deeplinks-evals';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 import type { BadgeType } from '@kbn/ui-side-navigation';
 
@@ -79,7 +80,8 @@ export type AppDeepLinkId =
   | VectordbLink
   | AgentBuilderLink
   | ContextEngineLink
-  | WorkflowsLink;
+  | WorkflowsLink
+  | EvalsLink;
 
 /** @public */
 export type CloudLinkId =
@@ -195,7 +197,12 @@ export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon 
   isExternalLink?: boolean;
 }
 
-/** @public */
+/**
+ * @deprecated Project breadcrumb overrides remain only for compatibility fallback back navigation.
+ * Declare hierarchy in the project navigation tree and pass explicit `back` configuration to
+ * `AppHeader` from `@kbn/app-header`.
+ * @public
+ */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }

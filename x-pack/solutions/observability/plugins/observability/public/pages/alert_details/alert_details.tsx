@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,7 +102,8 @@ export function AlertDetails() {
     observabilityAgentBuilder,
   } = services;
 
-  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
+  const AlertAskAiAgentButtonRef = useRef(observabilityAgentBuilder?.getAlertAskAiAgentButton());
+  const AlertAskAiAgentButton = AlertAskAiAgentButtonRef.current;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -134,10 +135,24 @@ export function AlertDetails() {
     refetchRelatedDashboards,
   } = useRelatedDashboards(alertId, { enabled: canReadAlertRule });
 
-  const { rule, refetch } = useFetchRule({
+  const {
+    rule,
+    isLoading: isLoadingRule,
+    isRuleNotFound,
+    refetch,
+  } = useFetchRule({
     ruleId: ruleId || '',
     enabled: canReadAlertRule,
   });
+
+  const ruleStatus =
+    !canReadAlertRule || isLoadingRule
+      ? 'unknown'
+      : isRuleNotFound
+      ? 'deleted'
+      : rule?.enabled === false
+      ? 'disabled'
+      : 'ok';
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
@@ -329,12 +344,6 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
-          {AlertAiInsight && (
-            <AlertAiInsight
-              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-              alertTitle={ruleTypeBreached}
-            />
-          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -360,14 +369,12 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
-        {AlertAiInsight && (
-          <AlertAiInsight
-            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-            alertTitle={ruleTypeBreached}
-          />
-        )}
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
+        <AlertOverview
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          ruleStatus={ruleStatus}
+        />
       </EuiPanel>
     )
   ) : (
@@ -502,7 +509,7 @@ export function AlertDetails() {
                 </span>
               </EuiToolTip>
               <EuiSpacer size="xs" />
-              <AlertSubtitle alert={alertDetail.formatted} />
+              <AlertSubtitle alert={alertDetail.formatted} ruleStatus={ruleStatus} />
             </>
           ) : (
             <EuiLoadingSpinner />
@@ -517,6 +524,14 @@ export function AlertDetails() {
             rule={rule}
             refetch={refetch}
           />,
+          ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
+            ? [
+                <AlertAskAiAgentButton
+                  alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
+                  alertTitle={ruleTypeBreached}
+                />,
+              ]
+            : []),
         ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',

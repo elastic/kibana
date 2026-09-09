@@ -22,9 +22,11 @@ import type {
   SOSecret,
   KafkaOutput,
   NewRemoteElasticsearchOutput,
+  NewOtlpOutput,
+  BeatsOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
-import { isOtelExporterOutput } from '../../../common/services/output_helpers';
+import { isBeatsOutput, isOtelExporterOutput } from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
 import {
   DEFAULT_OUTPUT_ID,
@@ -34,6 +36,7 @@ import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
+import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -142,6 +145,29 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   });
 }
 
+/**
+ * Builds a predicate matching outputs that route through the managed `_bulk` endpoint.
+ */
+export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
+  const managedBulkUrls = new Set(
+    (config ? getPreconfiguredOutputFromConfig(config) : [])
+      .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
+      .flatMap((output) => ('hosts' in output ? output.hosts ?? [] : []))
+      .flatMap((host) => {
+        try {
+          return [normalizeHostsForAgents(host)];
+        } catch {
+          // cloud.managed_otlp.url is only schema.string(); never throw on the full-policy path
+          return [];
+        }
+      })
+  );
+
+  return (output: Output) =>
+    output.type === outputType.Elasticsearch &&
+    (output.hosts?.some((host) => managedBulkUrls.has(host)) ?? false);
+};
+
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -177,14 +203,17 @@ export async function createOrUpdatePreconfiguredOutputs(
     const data: NewOutput = {
       ...outputData,
       is_preconfigured: true,
-      config_yaml: configYaml ?? null,
-      // Set value to null to update these fields on update
-      ca_sha256: outputData.ca_sha256 ?? null,
-      ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
-      ssl: outputData.ssl ?? null,
+      // Beats-specific fields: null these out on update so fields are cleared when not set.
+      // isBeatsOutput narrows `output` so beats-only properties are accessible.
+      ...(isBeatsOutput(output) && {
+        config_yaml: configYaml ?? null,
+        ca_sha256: output.ca_sha256 ?? null,
+        ca_trusted_fingerprint: output.ca_trusted_fingerprint ?? null,
+        ssl: output.ssl ?? null,
+      }),
     } as NewOutput;
 
-    if (!data.hosts || data.hosts.length === 0) {
+    if (isBeatsOutput(data) && (!data.hosts || data.hosts.length === 0)) {
       data.hosts = outputService.getDefaultESHosts();
     }
 
@@ -276,9 +305,8 @@ async function hashSecrets(output: PreconfiguredOutput) {
       };
     }
   }
-  // common to all types
-  if (typeof output.secrets?.ssl?.key === 'string') {
-    const key = await hashSecret(output.secrets?.ssl?.key);
+  if (isBeatsOutput(output) && typeof output.secrets?.ssl?.key === 'string') {
+    const key = await hashSecret(output.secrets.ssl.key);
     secrets = {
       ...(secrets ? secrets : {}),
       ssl: { key },
@@ -293,14 +321,11 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list();
-  const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
-  );
+  const existingPreconfiguredOutputs = await outputService.listPreconfigured();
 
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput) {
+  for (const output of existingPreconfiguredOutputs.items) {
     const hasBeenDelete = !outputs.find(({ id }) => output.id === id);
     if (!hasBeenDelete) {
       continue;
@@ -383,9 +408,32 @@ async function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
 ): Promise<boolean> {
-  // ssl fields are common to all output types
+  // Type change always requires an update; subsequent branches assume same type.
+  if (isDifferent(existingOutput.type, preconfiguredOutput.type)) {
+    return true;
+  }
+
+  // Fields common to all output types.
+  if (
+    !existingOutput.is_preconfigured ||
+    isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
+    isDifferent(existingOutput.is_default_monitoring, preconfiguredOutput.is_default_monitoring) ||
+    isDifferent(existingOutput.name, preconfiguredOutput.name) ||
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
+    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal)
+  ) {
+    return true;
+  }
+
+  if (existingOutput.type === 'otlp') {
+    const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
+    return isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter);
+  }
+
+  const preconfiguredBeats = preconfiguredOutput as Partial<BeatsOutput>;
+
   const sslKeyHashIsDifferent = await isSecretDifferent(
-    preconfiguredOutput.secrets?.ssl?.key,
+    preconfiguredBeats.secrets?.ssl?.key,
     existingOutput.secrets?.ssl?.key
   );
 
@@ -456,27 +504,21 @@ async function isPreconfiguredOutputDifferentFromCurrent(
   };
 
   return (
-    !existingOutput.is_preconfigured ||
-    isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
-    isDifferent(existingOutput.is_default_monitoring, preconfiguredOutput.is_default_monitoring) ||
-    isDifferent(existingOutput.name, preconfiguredOutput.name) ||
-    isDifferent(existingOutput.type, preconfiguredOutput.type) ||
-    (preconfiguredOutput.hosts &&
+    !!(
+      preconfiguredBeats.hosts &&
       !isEqual(
-        existingOutput?.type === 'elasticsearch'
+        existingOutput.type === 'elasticsearch'
           ? existingOutput.hosts?.map(normalizeHostsForAgents)
           : existingOutput.hosts,
         preconfiguredOutput.type === 'elasticsearch'
-          ? preconfiguredOutput.hosts.map(normalizeHostsForAgents)
-          : preconfiguredOutput.hosts
-      )) ||
-    isDifferent(preconfiguredOutput.ssl, existingOutput.ssl) ||
-    isDifferent(existingOutput.ca_sha256, preconfiguredOutput.ca_sha256) ||
-    isDifferent(
-      existingOutput.ca_trusted_fingerprint,
-      preconfiguredOutput.ca_trusted_fingerprint
+          ? preconfiguredBeats.hosts.map(normalizeHostsForAgents)
+          : preconfiguredBeats.hosts
+      )
     ) ||
-    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    isDifferent(preconfiguredBeats.ssl, existingOutput.ssl) ||
+    isDifferent(existingOutput.ca_sha256, preconfiguredBeats.ca_sha256) ||
+    isDifferent(existingOutput.ca_trusted_fingerprint, preconfiguredBeats.ca_trusted_fingerprint) ||
+    isDifferent(existingOutput.config_yaml, preconfiguredBeats.config_yaml) ||
     (isOtelExporterOutput(existingOutput) &&
       isOtelExporterOutput(preconfiguredOutput) &&
       (isDifferent(
@@ -487,11 +529,12 @@ async function isPreconfiguredOutputDifferentFromCurrent(
           existingOutput.otel_disable_beatsauth,
           preconfiguredOutput.otel_disable_beatsauth
         ))) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
-    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
-    (preconfiguredOutput.preset &&
-      isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||
-    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal) ||
+    // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
+    (existingOutput.type !== 'kafka' &&
+      isDifferent(existingOutput.proxy_id, preconfiguredBeats.proxy_id)) ||
+    !!(
+      preconfiguredBeats.preset && isDifferent(existingOutput.preset, preconfiguredBeats.preset)
+    ) ||
     sslKeyHashIsDifferent ||
     (await kafkaFieldsAreDifferent()) ||
     (await logstashFieldsAreDifferent()) ||

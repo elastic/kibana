@@ -1,0 +1,888 @@
+{
+  "sha1": "f6f5d839adf069d15cda68cdc2adfd9c0e5e2a55",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6b664bb38f77a30-faf07b914e53ca6",
+      "title": "AddNewMonitorsUI permissions and warnings can create monitor with API key with proper permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
+        "line": 91,
+        "column": 15
+      }
+    },
+    {
+      "id": "6b664bb38f77a30-bc269a730934bbb",
+      "title": "AddNewMonitorsUI permissions and warnings can not create monitor with API key without proper permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "6b664bb38f77a30-655c23ebb4d8e65",
+      "title": "AddNewMonitorsUI permissions and warnings rejects a monitor pointing at a missing private location and leaves no orphan",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
+        "line": 122,
+        "column": 17
+      }
+    },
+    {
+      "id": "6b664bb38f77a30-70c325f9208dc63",
+      "title": "AddNewMonitorsUI permissions and warnings returns warning for browser timeout with public locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
+        "line": 145,
+        "column": 12
+      }
+    },
+    {
+      "id": "6b664bb38f77a30-af5320c7b437299",
+      "title": "AddNewMonitorsUI permissions and warnings allows lightweight monitor timeout below 30s",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
+        "line": 171,
+        "column": 27
+      }
+    },
+    {
+      "id": "ac476baa590cc7e-019801460b8f6ef",
+      "title": "ApiKeys [POST] internal/security/api_key allows an API key to be created with kibana privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/api_keys.spec.ts",
+        "line": 56,
+        "column": 17
+      }
+    },
+    {
+      "id": "219ae9c20262242-bede02239032d2a",
+      "title": "AddNewMonitorsUI returns the newly added monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 44,
+        "column": 25
+      }
+    },
+    {
+      "id": "219ae9c20262242-ae1440b80f7c536",
+      "title": "AddNewMonitorsUI sets namespace to Kibana space when not set to a custom namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 51,
+        "column": 57
+      }
+    },
+    {
+      "id": "af53064dc7b5ae9-227fa0218f93b5b",
+      "title": "DeleteMonitorRoute deletes monitor by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/delete_monitor.spec.ts",
+        "line": 57,
+        "column": 25
+      }
+    },
+    {
+      "id": "af53064dc7b5ae9-96f919e47a66bd1",
+      "title": "DeleteMonitorRoute deletes monitor by param id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/delete_monitor.spec.ts",
+        "line": 69,
+        "column": 84
+      }
+    },
+    {
+      "id": "af53064dc7b5ae9-48075221313eee8",
+      "title": "DeleteMonitorRoute throws error if both body and param are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/delete_monitor.spec.ts",
+        "line": 78,
+        "column": 84
+      }
+    },
+    {
+      "id": "af53064dc7b5ae9-f38838601062bfc",
+      "title": "DeleteMonitorRoute deletes multiple monitors by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/delete_monitor.spec.ts",
+        "line": 85,
+        "column": 36
+      }
+    },
+    {
+      "id": "af53064dc7b5ae9-970e6b5db28799e",
+      "title": "DeleteMonitorRoute returns 404 if monitor id is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/delete_monitor.spec.ts",
+        "line": 108,
+        "column": 75
+      }
+    },
+    {
+      "id": "af53064dc7b5ae9-6edcb673af35a37",
+      "title": "DeleteMonitorRoute validates empty monitor id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/delete_monitor.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "70038bf29ca7530-34ecbea716f0ad8",
+      "title": "EditMonitorAPI - Private Location edits the monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 83,
+        "column": 29
+      }
+    },
+    {
+      "id": "70038bf29ca7530-e03a96a105a5d38",
+      "title": "EditMonitorAPI - Private Location strips unknown keys from monitor edits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "70038bf29ca7530-0199467964b25d2",
+      "title": "EditMonitorAPI - Private Location returns 404 if monitor id is not present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 185,
+        "column": 8
+      }
+    },
+    {
+      "id": "70038bf29ca7530-5352e02dac573fa",
+      "title": "EditMonitorAPI - Private Location returns bad request if payload is invalid for HTTP monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 193,
+        "column": 25
+      }
+    },
+    {
+      "id": "70038bf29ca7530-d8707598aafc98a",
+      "title": "EditMonitorAPI - Private Location returns bad request if monitor type is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 204,
+        "column": 33
+      }
+    },
+    {
+      "id": "70038bf29ca7530-e1e55b8f11b1dc1",
+      "title": "EditMonitorAPI - Private Location sets config hash to empty string on edits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 213,
+        "column": 28
+      }
+    },
+    {
+      "id": "70038bf29ca7530-ac85e3ca308d1b1",
+      "title": "EditMonitorAPI - Private Location handles spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 257,
+        "column": 28
+      }
+    },
+    {
+      "id": "605783b838f2797-0147a7e9276e5eb",
+      "title": "EditMonitorAPI - Public Location edits the monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 86,
+        "column": 25
+      }
+    },
+    {
+      "id": "605783b838f2797-a56a9338bc80bac",
+      "title": "EditMonitorAPI - Public Location persists deletion of label and header keys instead of deep-merging them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 127,
+        "column": 28
+      }
+    },
+    {
+      "id": "605783b838f2797-1a5a3e9819d72f4",
+      "title": "EditMonitorAPI - Public Location strips unknown keys from monitor edits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 165,
+        "column": 32
+      }
+    },
+    {
+      "id": "605783b838f2797-6ec3b5be7eef524",
+      "title": "EditMonitorAPI - Public Location returns 404 if monitor id is not present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 210,
+        "column": 11
+      }
+    },
+    {
+      "id": "605783b838f2797-dade2862f11a459",
+      "title": "EditMonitorAPI - Public Location returns bad request if payload is invalid for HTTP monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 224,
+        "column": 14
+      }
+    },
+    {
+      "id": "605783b838f2797-e9913eea2227d7e",
+      "title": "EditMonitorAPI - Public Location returns bad request if monitor type is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 238,
+        "column": 19
+      }
+    },
+    {
+      "id": "605783b838f2797-83b9241cc932181",
+      "title": "EditMonitorAPI - Public Location sets config hash to empty string on edits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 246,
+        "column": 21
+      }
+    },
+    {
+      "id": "605783b838f2797-a7a861ea90b3a5c",
+      "title": "EditMonitorAPI - Public Location handles spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor.spec.ts",
+        "line": 285,
+        "column": 17
+      }
+    },
+    {
+      "id": "f25c77e74093a83-f51682f5b9fe1da",
+      "title": "getMonitorFilters get list of filters (empty)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
+        "line": 48,
+        "column": 23
+      }
+    },
+    {
+      "id": "f25c77e74093a83-b344c4dfb226675",
+      "title": "getMonitorFilters get list of filters with monitorTypes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
+        "line": 61,
+        "column": 17
+      }
+    },
+    {
+      "id": "f25c77e74093a83-4ab78d695c0f39a",
+      "title": "getMonitorFilters get list of filters for legacy saved object type monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
+        "line": 103,
+        "column": 17
+      }
+    },
+    {
+      "id": "f25c77e74093a83-3ebab78a714b591",
+      "title": "getMonitorFilters get list of filters with both legacy and modern monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
+        "line": 166,
+        "column": 8
+      }
+    },
+    {
+      "id": "2542e127239de1a-e12d61f1b5b4fbb",
+      "title": "getSyntheticsMonitors get many monitors - without params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "2542e127239de1a-5b2b2b011db279d",
+      "title": "getSyntheticsMonitors get many monitors - with page params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "2542e127239de1a-08ce94335a08483",
+      "title": "getSyntheticsMonitors get many monitors - with single monitorQueryId filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 148,
+        "column": 7
+      }
+    },
+    {
+      "id": "2542e127239de1a-7878c0217da76f4",
+      "title": "getSyntheticsMonitors get many monitors - with multiple monitorQueryId filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 165,
+        "column": 14
+      }
+    },
+    {
+      "id": "2542e127239de1a-6fe6a6059d13449",
+      "title": "getSyntheticsMonitors get many monitors - monitorQueryId respects custom_heartbeat_id while filtering",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 189,
+        "column": 91
+      }
+    },
+    {
+      "id": "2542e127239de1a-549a2b7aed11e8b",
+      "title": "getSyntheticsMonitors get many monitors - gets monitors from all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 217,
+        "column": 19
+      }
+    },
+    {
+      "id": "2542e127239de1a-b79962fb591332e",
+      "title": "getSyntheticsMonitors get one monitor - should get by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 268,
+        "column": 71
+      }
+    },
+    {
+      "id": "2542e127239de1a-d7f071917df927c",
+      "title": "getSyntheticsMonitors get one monitor - should get by id with ui query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 300,
+        "column": 14
+      }
+    },
+    {
+      "id": "2542e127239de1a-23b9be515d0b0f5",
+      "title": "getSyntheticsMonitors get one monitor - returns 404 if monitor id is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 339,
+        "column": 28
+      }
+    },
+    {
+      "id": "2542e127239de1a-410c00f8a381898",
+      "title": "getSyntheticsMonitors get one monitor - validates param length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_monitor.spec.ts",
+        "line": 349,
+        "column": 98
+      }
+    },
+    {
+      "id": "534a6582e7c28ed-1c2550d2e2c1854",
+      "title": "inspectSyntheticsMonitor inspect http monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/inspect_monitor.spec.ts",
+        "line": 78,
+        "column": 13
+      }
+    },
+    {
+      "id": "534a6582e7c28ed-d0f86019dfa7251",
+      "title": "inspectSyntheticsMonitor inspect project browser monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/inspect_monitor.spec.ts",
+        "line": 164,
+        "column": 22
+      }
+    },
+    {
+      "id": "534a6582e7c28ed-ec94a6e4e5cbc5c",
+      "title": "inspectSyntheticsMonitor inspect http monitor in private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/inspect_monitor.spec.ts",
+        "line": 243,
+        "column": 31
+      }
+    },
+    {
+      "id": "aca450b6d2ba807-1710193b46d6489",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns both monitors when searching both tags without useLogicalAndFor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/list_monitors.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "aca450b6d2ba807-48f982ee378aeee",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns only the monitor matching all tags when useLogicalAndFor includes tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/list_monitors.spec.ts",
+        "line": 92,
+        "column": 16
+      }
+    },
+    {
+      "id": "aca450b6d2ba807-099419176223f41",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns both monitors when searching both locations without useLogicalAndFor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/list_monitors.spec.ts",
+        "line": 98,
+        "column": 32
+      }
+    },
+    {
+      "id": "aca450b6d2ba807-c192a3214102c78",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns only the monitor matching all locations when useLogicalAndFor includes locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/list_monitors.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "66867247d5e8f72-477aeb8cdb738c8",
+      "title": "Synthetics multi-space settings [GET] returns defaults anchored to the current space when no SO exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 77,
+        "column": 28
+      }
+    },
+    {
+      "id": "66867247d5e8f72-00458ca127bf246",
+      "title": "Synthetics multi-space settings [PUT] creates exactly one SO and persists the requested attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 87,
+        "column": 31
+      }
+    },
+    {
+      "id": "66867247d5e8f72-9fa1c56ac73b6ff",
+      "title": "Synthetics multi-space settings [PUT] remains a singleton even when the saves come from different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 116,
+        "column": 13
+      }
+    },
+    {
+      "id": "66867247d5e8f72-7e5b44173916c75",
+      "title": "Synthetics multi-space settings [GET] returns the SO from another space when shared via ALL_SPACES",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 150,
+        "column": 17
+      }
+    },
+    {
+      "id": "66867247d5e8f72-3caffe79eda0863",
+      "title": "Synthetics multi-space settings [PUT] removing a space hides the settings from that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 184,
+        "column": 31
+      }
+    },
+    {
+      "id": "66867247d5e8f72-e804b1dc151bf2d",
+      "title": "Synthetics multi-space settings [PUT] from a space that does not own the SO still updates the singleton",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 233,
+        "column": 9
+      }
+    },
+    {
+      "id": "66867247d5e8f72-18ff6a75d38b4ec",
+      "title": "Synthetics multi-space settings [PUT] collapses ALL_SPACES with specific spaces into [*]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 275,
+        "column": 19
+      }
+    },
+    {
+      "id": "66867247d5e8f72-00a378f9346d5ef",
+      "title": "Synthetics multi-space settings [PUT] is forbidden for a role without uptime-write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/multi_space_settings.spec.ts",
+        "line": 289,
+        "column": 13
+      }
+    },
+    {
+      "id": "0748b0e208605b1-ceb30d1a52ecd1f",
+      "title": "SyntheticsSuggestions returns the suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/suggestions.spec.ts",
+        "line": 123,
+        "column": 42
+      }
+    },
+    {
+      "id": "0748b0e208605b1-949a015a9a2da79",
+      "title": "SyntheticsSuggestions handles query params for projects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/suggestions.spec.ts",
+        "line": 159,
+        "column": 29
+      }
+    },
+    {
+      "id": "2491f9e3d4a2eb4-30c675c4d8c37fd",
+      "title": "SyntheticsAPISecurity throws permissions errors for un-auth user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
+        "line": 142,
+        "column": 4
+      }
+    },
+    {
+      "id": "2491f9e3d4a2eb4-98b293be62579d2",
+      "title": "SyntheticsAPISecurity throws permissions errors for read user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
+        "line": 153,
+        "column": 7
+      }
+    },
+    {
+      "id": "a124b721d764038-c021c82d394c1b3",
+      "title": "RunTestManually runs test manually",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/test_now_monitor.spec.ts",
+        "line": 44,
+        "column": 47
+      }
+    },
+    {
+      "id": "a124b721d764038-a65e889f4b47119",
+      "title": "RunTestManually works in non default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/test_now_monitor.spec.ts",
+        "line": 52,
+        "column": 60
+      }
+    }
+  ]
+}

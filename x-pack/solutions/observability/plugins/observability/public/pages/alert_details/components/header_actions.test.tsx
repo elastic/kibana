@@ -161,7 +161,7 @@ describe('Header Actions', () => {
 
       mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 
-      const { getByTestId } = render(
+      const { getByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
           alertIndex={'alert-index'}
@@ -177,6 +177,7 @@ describe('Header Actions', () => {
         />
       );
 
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([
@@ -197,7 +198,7 @@ describe('Header Actions', () => {
     it('should NOT offer an "Add to case" button without cases privileges', async () => {
       mockCases.helpers.canUseCases = jest.fn().mockReturnValue(noCasesPermissions());
 
-      const { queryByTestId } = render(
+      const { queryByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
           alertIndex={'alert-index'}
@@ -213,6 +214,7 @@ describe('Header Actions', () => {
         />
       );
 
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       expect(queryByTestId(`add-to-cases-button-${mockRuleTypeId}`)).not.toBeInTheDocument();
     });
 

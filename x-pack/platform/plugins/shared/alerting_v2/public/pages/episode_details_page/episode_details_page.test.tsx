@@ -21,6 +21,7 @@ import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule'
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { TestProviders } from '../../test_utils/test_providers';
+import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
@@ -29,6 +30,10 @@ const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockCanReadExecutionHistory = true;
+
+jest.mock('../../agent_builder/use_episode_auto_attach', () => ({
+  useEpisodeAutoAttach: jest.fn(),
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -128,6 +133,7 @@ const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
 const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
+const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
@@ -440,5 +446,68 @@ describe('EpisodeDetailsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
+  });
+
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded episode to useEpisodeAutoAttach', () => {
+      renderPage();
+
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
+        ruleName: 'Rule A',
+        groupingFields: ['host.name'],
+      });
+    });
+
+    it('omits grouping fields when the rule is not loaded', () => {
+      mockUseFetchRule.mockReturnValue({
+        ...fetchRuleResult,
+        data: undefined,
+        ruleState: {
+          status: RuleStateStatus.loading,
+          ruleId: 'rule-1',
+        },
+      } as unknown as FetchRuleResult);
+
+      renderPage();
+
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
+        ruleName: undefined,
+        groupingFields: undefined,
+      });
+    });
+
+    it('passes the next episode when the episode id changes', () => {
+      const { rerender } = render(
+        <MockChromeContextProvider>
+          <TestProviders>
+            <MemoryRouter>
+              <EpisodeDetailsPage />
+            </MemoryRouter>
+          </TestProviders>
+        </MockChromeContextProvider>
+      );
+
+      const nextEpisode = { ...mockEpisode, 'episode.id': 'ep-2' };
+      mockUseParams.mockReturnValue({ episodeId: 'ep-2' });
+      mockUseFetchEpisodeQuery.mockReturnValue({
+        ...episodeQuery,
+        data: nextEpisode,
+      } as unknown as EpisodeQueryResult);
+
+      rerender(
+        <MockChromeContextProvider>
+          <TestProviders>
+            <MemoryRouter>
+              <EpisodeDetailsPage />
+            </MemoryRouter>
+          </TestProviders>
+        </MockChromeContextProvider>
+      );
+
+      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(nextEpisode, {
+        ruleName: 'Rule A',
+        groupingFields: ['host.name'],
+      });
+    });
   });
 });

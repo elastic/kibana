@@ -55,6 +55,7 @@ function extractEqPairs(
 export const filterGroundingEvaluator = {
   name: 'filter_grounding',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ input, output, expected }) => {
     if (!expected.expect_entity_filters) {
       return { score: null, explanation: 'Entity filter evaluation not requested — skipping' };
@@ -144,7 +145,7 @@ export const filterGroundingEvaluator = {
         issueLines.length > 0
           ? `Filter grounding issues — ${issueLines.join('; ')}`
           : `All ${entities.length} entity filter(s) are grounded in input documents`,
-      details: {
+      metadata: {
         totalEntities: entities.length,
         perEntity: perEntityDetails,
       },

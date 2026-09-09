@@ -145,14 +145,16 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   'POST:/api/workflows': [WORKFLOWS_INDEX],
   // Existence check before cancelAllActiveWorkflowExecutions (see WorkflowsManagementApi.cancelAllActiveWorkflowExecutions)
   'POST:/api/workflows/workflow/{workflowId}/executions/cancel': [WORKFLOWS_INDEX],
+  // Executing a persisted workflow loads its document to build the execution
+  // model. The definition is never returned to the caller (only an execution
+  // id), so running a workflow does not require the `read` privilege.
+  'POST:/api/workflows/workflow/{id}/run': [WORKFLOWS_INDEX],
+  'POST:/api/workflows/test': [WORKFLOWS_INDEX],
   // Resume resolves the waiting `waitForInput` step (by run id) before claiming
   // it — an internal lookup intrinsic to the resume action, not data exposed to
   // the caller. See WorkflowsManagementApi.resumeWorkflowExecution →
   // WorkflowExecutionQueryService.getWaitingStepExecutionId.
   'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
-  // Managed-execution authorization checks read the parent workflow metadata but do not return it.
-  'GET:/api/workflows/workflow/{workflowId}/executions': [WORKFLOWS_INDEX],
-  'GET:/api/workflows/workflow/{workflowId}/executions/steps': [WORKFLOWS_INDEX],
 };
 
 /**
@@ -372,6 +374,15 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   },
   'GET:/api/workflows/workflow/{workflowId}/executions': {
     params: { workflowId: 'test-workflow-id' },
+  },
+  'GET:/api/workflows/workflow/executions': {
+    query: {
+      query: JSON.stringify({ match_all: {} }),
+      from: 0,
+      size: 25,
+      sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
+      trackTotalHits: true,
+    },
   },
   'GET:/api/workflows/workflow/{workflowId}/executions/steps': {
     params: { workflowId: 'test-workflow-id' },

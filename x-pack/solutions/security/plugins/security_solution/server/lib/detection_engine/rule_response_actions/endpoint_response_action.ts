@@ -6,6 +6,7 @@
  */
 
 import { each } from 'lodash';
+import type { Mutable } from 'utility-types';
 import type {
   EndpointRunScriptActionRequestParams,
   KillProcessRequestBody,
@@ -132,6 +133,25 @@ export const endpointResponseAction = async (
                 alert_ids,
                 parameters,
               };
+
+              type EndpointOnlyKillProcessParams = Mutable<
+                Exclude<
+                  KillProcessRequestBody['parameters'],
+                  Readonly<{ process_name: string }> // Removes the SentinelOne type from the union
+                >
+              >;
+
+              if (
+                command === 'kill-process' &&
+                'kill_descendants' in processesActionRuleConfig &&
+                processesActionRuleConfig.kill_descendants &&
+                endpointAppContextService.experimentalFeatures
+                  .responseActionsEndpointKillProcessDescendants
+              ) {
+                (requestBody.parameters as EndpointOnlyKillProcessParams).kill_descendants =
+                  processesActionRuleConfig.kill_descendants;
+              }
+
               const requestOptions = {
                 hosts,
                 ruleId,

@@ -7,9 +7,11 @@
 
 import { esql } from '@elastic/esql';
 import type { ComposerQuery } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-import { addEpisodeAggregation } from './episodes_query';
-
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  DEFAULT_TIME_FIELD as TIME_FIELD,
+} from '@kbn/alerting-v2-constants';
+import { addEpisodeAggregation } from '@kbn/alerting-v2-common-queries';
 // Subset of `ALERT_EPISODE_FIELDS` actually populated by this query. The action
 // `last_*` columns are excluded because we only read from `.rule-events` here
 // and don't run the action INLINE STATS — keeping them caused a runtime error.

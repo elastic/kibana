@@ -12,12 +12,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import {
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-} from '@kbn/significant-events-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
@@ -27,8 +22,6 @@ export type StreamsFeatures = StreamsPrivileges['features'];
 export function useStreamsPrivileges() {
   const {
     core: {
-      pricing,
-      featureFlags,
       application: {
         capabilities: { streams },
       },
@@ -39,35 +32,10 @@ export function useStreamsPrivileges() {
     },
   } = useKibana();
 
+  // undefined while the license$ has not emitted yet (loading).
   const license = useObservable(licensing.license$);
 
-  // Outermost significant events gate: the Technical Preview rollout flag (defaults to false).
-  // Mirrors the server-side ordering in `assertSignificantEventsAccess` so entry points stay
-  // hidden in deployments where the feature has not been rolled out yet.
-  //
-  // The observable is memoized because every flag evaluation POSTs to the feature-flags usage
-  // counter endpoint. `useObservable` resubscribes whenever the observable reference changes, so
-  // recreating it each render (this hook is used by many frequently re-rendering components) would
-  // fire one counter request per render.
-  const significantEventsFeatureFlag$ = useMemo(
-    () => featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
-    [featureFlags]
-  );
-  const significantEventsFeatureFlagEnabled = useObservable(significantEventsFeatureFlag$, false);
-
   const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
-
-  const significantEventsAvailableForTier = pricing.isFeatureAvailable(
-    STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-  );
-
-  // Significant events is gated by the Technical Preview rollout flag plus the Enterprise
-  // license and pricing tier. There is no separate Advanced Setting toggle anymore.
-  const significantEventsAvailable = Boolean(
-    significantEventsFeatureFlagEnabled &&
-      license?.hasAtLeast('enterprise') &&
-      significantEventsAvailableForTier
-  );
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
@@ -87,9 +55,6 @@ export function useStreamsPrivileges() {
     features: {
       ui: {
         enabled: true,
-      },
-      significantEvents: license && {
-        available: significantEventsAvailable,
       },
       queryStreams: {
         enabled: queryStreamsEnabled,

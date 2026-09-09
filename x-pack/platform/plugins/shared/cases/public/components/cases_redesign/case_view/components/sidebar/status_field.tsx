@@ -10,8 +10,6 @@ import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import type { CaseStatuses } from '../../../../../../common/types/domain';
 import { StatusSelector } from '../../../../status/selector';
 import { STATUS } from '../../../../case_view/translations';
-import { InlineFieldActions } from '../../../../templates_v2/field_types/controls/inline_field_actions';
-import { usePendingFieldValue } from './hooks/use_pending_field_value';
 
 interface Props {
   selectedStatus: CaseStatuses;
@@ -26,25 +24,19 @@ export const StatusField: React.FC<Props> = ({
   isLoading,
   isDisabled,
 }) => {
-  const { currentValue, hasPendingChange, setPendingValue, onConfirm, onCancel } =
-    usePendingFieldValue<CaseStatuses>({
-      committedValue: selectedStatus,
-      onSubmit: onStatusChange,
-    });
-
+  // Picking a status from a menu of three named states is already an explicit choice; asking the
+  // reader to confirm it turned a one-click change into three, and the loading state plus the
+  // activity feed entry are the acknowledgement. Same for the other attributes below.
   return (
     <EuiFlexItem grow={false} data-test-subj="sidebar-status">
       <EuiFormRow label={STATUS} fullWidth>
         <StatusSelector
-          selectedStatus={currentValue}
-          onStatusChange={setPendingValue}
+          selectedStatus={selectedStatus}
+          onStatusChange={onStatusChange}
           isLoading={isLoading}
           isDisabled={isDisabled}
         />
       </EuiFormRow>
-      {hasPendingChange && !isLoading && (
-        <InlineFieldActions name="status" onConfirm={onConfirm} onCancel={onCancel} />
-      )}
     </EuiFlexItem>
   );
 };

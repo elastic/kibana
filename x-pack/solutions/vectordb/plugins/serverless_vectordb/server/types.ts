@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
@@ -14,6 +16,8 @@ export interface ServerlessVectordbPluginSetup {}
 export interface ServerlessVectordbPluginStart {}
 
 export interface SetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
+  cloud?: CloudSetup;
   serverless: ServerlessPluginSetup;
 }
 

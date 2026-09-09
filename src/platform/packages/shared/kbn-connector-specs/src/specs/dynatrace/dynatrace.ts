@@ -597,7 +597,7 @@ export const Dynatrace: ConnectorSpec = {
     handler: async (ctx) => {
       try {
         await dtGet(ctx, '/problems', { params: { pageSize: 1 } });
-        return { ok: true };
+        return {};
       } catch (error) {
         throw formatDynatraceError('test', error);
       }

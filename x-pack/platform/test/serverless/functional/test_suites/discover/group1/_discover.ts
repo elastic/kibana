@@ -214,24 +214,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('data-shared-item', function () {
-      it('should have correct data-shared-item title and description', async () => {
-        const expected = {
-          title: 'A Saved Search',
-          description: 'A Saved Search Description',
-        };
-
-        await retry.try(async () => {
-          await PageObjects.discover.loadSavedSearch(expected.title);
-          await PageObjects.discover.waitUntilTabIsLoaded();
-          const { title, description } =
-            await PageObjects.common.getSharedItemTitleAndDescription();
-          expect(title).to.eql(expected.title);
-          expect(description).to.eql(expected.description);
-        });
-      });
-    });
-
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });

@@ -9,7 +9,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-p
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -19,9 +19,13 @@ import {
   ensureStreamsEnabled,
   deleteTemporaryReplayIndices,
   canonicalDetectionsFromGroundTruth,
-  canonicalSignificantEventFromGroundTruth,
+  resetMemoryPages,
+  replayIntoMemoryPages,
+  shiftSnapshotTimestamp,
+  type ReplayShift,
 } from '../../src/data_generators/replay';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
+import { seedChronicBackground } from '../../src/data_generators/seed_chronic_background';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -38,19 +42,20 @@ import {
 import { buildAvailableSnapshotsBySource } from '../shared';
 import {
   extractDiscoveriesFromToolCall,
+  extractSignificantEventsFromToolCall,
   extractRequestedEventIdsFromToolCall,
+  extractWriteItemsFromToolCall,
 } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
-/** Events data stream — the same index the judge writes to via events_write. */
+/** Events data stream — the index the discovery agent writes to via events_write. */
 const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
-const SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM = '.significant_events-discoveries';
 
 evaluate.describe(
-  'Significant Events Discovery - Discovery Agent',
+  'Nightshift Triager - Discovery Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
@@ -98,19 +103,21 @@ evaluate.describe(
           expectTopologyEventSearch?: boolean;
           seedStatus?: 'closed';
           stripSeedTopology?: boolean;
-          seedUnconfirmedDetection?: Detection;
         }
 
         const collectedExamples: CollectedExample[] = [];
         const snapshotSources = new Map<string, { snapshotName: string; gcs: GcsConfig }>();
 
         evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
+          const replayedSnapshotKeys = new Set<string>();
+
           for (const scenario of dataset.discovery) {
             const snapshotSource = resolveScenarioSnapshotSource({
               scenarioId: scenario.input.scenario_id,
               datasetGcs: dataset.gcs,
               snapshotSource: scenario.snapshot_source,
             });
+            const key = snapshotSourceKey(snapshotSource);
 
             const availableSnapshots =
               availableSnapshotsBySource.get(snapshotCatalogKey(snapshotSource.gcs)) ?? new Set();
@@ -123,41 +130,45 @@ evaluate.describe(
               continue;
             }
 
+            if (!replayedSnapshotKeys.has(key)) {
+              // Ensure KI features index is available by replaying the snapshot once per source.
+              await cleanSignificantEventsDataStreams(esClient, log);
+              for (const name of SIGEVENTS_WIRED_ROOTS) {
+                await esClient.indices.deleteDataStream({ name }).catch(() => {});
+                await esClient.indices
+                  .delete({ index: name, ignore_unavailable: true })
+                  .catch(() => {});
+              }
+              await ensureStreamsEnabled({ esClient, apiServices, log });
+
+              const stats = await replayIntoManagedStream(
+                esClient,
+                log,
+                snapshotSource.snapshotName,
+                snapshotSource.gcs
+              );
+
+              if (stats.created === 0) {
+                log.info(
+                  `No documents indexed from snapshot "${snapshotSource.snapshotName}" — skipping`
+                );
+                continue;
+              }
+
+              await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+              replayedSnapshotKeys.add(key);
+            }
+
             // Detections always come from the canonical dataset regardless of source mode.
             // The snapshot only provides logs and KIs replayed into ES — schema changes
             // between snapshot capture and current code make snapshot detections unreliable.
+            // Change points are re-stamped onto the replayed timeline inside each task, using
+            // the shift of the replay the agent actually queries.
             const detections = canonicalDetectionsFromGroundTruth({
               streamName: scenario.input.stream_name,
               rules: scenario.input.detections,
             });
 
-            // Ensure KI features index is available by replaying the snapshot
-            await cleanSignificantEventsDataStreams(esClient, log);
-            for (const name of SIGEVENTS_WIRED_ROOTS) {
-              await esClient.indices.deleteDataStream({ name }).catch(() => {});
-              await esClient.indices
-                .delete({ index: name, ignore_unavailable: true })
-                .catch(() => {});
-            }
-            await ensureStreamsEnabled({ esClient, apiServices, log });
-
-            const stats = await replayIntoManagedStream(
-              esClient,
-              log,
-              snapshotSource.snapshotName,
-              snapshotSource.gcs
-            );
-
-            if (stats.created === 0) {
-              log.info(
-                `No documents indexed from snapshot "${snapshotSource.snapshotName}" — skipping`
-              );
-              continue;
-            }
-
-            await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
-
-            const key = snapshotSourceKey(snapshotSource);
             collectedExamples.push({ scenario, detections, snapshotKey: key });
             snapshotSources.set(scenario.input.scenario_id, snapshotSource);
           }
@@ -174,6 +185,7 @@ evaluate.describe(
             executorClient,
             evaluators,
             esClient,
+            kbnClient,
             agentBuilderClient,
             apiServices,
             log,
@@ -181,32 +193,53 @@ evaluate.describe(
             // Concurrency must remain 1 — this variable is not safe under concurrent tasks.
             // Raising concurrency requires replacing it with a per-invocation approach or a proper lock.
             let lastReplayedSnapshotKey: string | undefined;
+            let lastReplayShift: ReplayShift | undefined;
 
             const detectionsByScenario = new Map(
               collectedExamples.map(({ scenario, detections, snapshotKey }) => [
                 scenario.input.scenario_id,
-                { detections, snapshotKey },
+                { detections, snapshotKey, memoryPages: scenario.memoryPages },
               ])
+            );
+            const discoveryExamples = collectedExamples.filter(
+              ({ scenario }) => !scenario.memoryPages?.length
+            );
+            const memoryExamples = collectedExamples.filter(
+              ({ scenario }) => scenario.memoryPages?.length
             );
 
             await executorClient.runExperiment(
               {
                 datasets: [
-                  {
-                    name: `sigevents: Discovery (${dataset.id})`,
-                    description: `[${dataset.id}] discovery agent across scenarios`,
-                    examples: collectedExamples.flatMap(({ scenario }) => [
-                      {
+                  ...[
+                    {
+                      name: `sigevents: Discovery (${dataset.id})`,
+                      description: `[${dataset.id}] discovery agent across scenarios`,
+                      examples: discoveryExamples,
+                    },
+                    {
+                      name: `sigevents: Discovery memory (${dataset.id})`,
+                      description: `[${dataset.id}] discovery agent memory-aware scenarios`,
+                      examples: memoryExamples,
+                    },
+                  ]
+                    .filter(({ examples }) => examples.length > 0)
+                    .map(({ name, description, examples }) => ({
+                      name,
+                      description,
+                      examples: examples.map(({ scenario }) => ({
                         id: scenario.input.scenario_id,
-                        input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
+                        input: {
+                          ...scenario.input,
+                          snapshot_source: scenario.snapshot_source,
+                        },
                         output: { ...scenario.output, criteria: scenario.output.criteria },
                         metadata: {
                           ...scenario.metadata,
                           test_index: MANAGED_STREAM_SEARCH_PATTERN,
                         },
-                      },
-                    ]),
-                  },
+                      })),
+                    })),
                 ],
                 concurrency: 1,
                 trustUpstreamDataset: TRUST_UPSTREAM,
@@ -216,11 +249,28 @@ evaluate.describe(
                     throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                   }
 
-                  const { detections, snapshotKey } = data;
+                  const { detections, snapshotKey, memoryPages } = data;
                   const snapshotSource = snapshotSources.get(input.scenario_id);
                   if (!snapshotSource) {
                     throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
                   }
+
+                  // Each scenario must start with an empty events index. Scenarios that share a
+                  // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
+                  await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+
+                  // Memory must be hermetic per scenario: prior scenarios may have seeded pages or
+                  // the agent may have created first-sight chronic pages — either would leak a
+                  // severity cap (or its absence) into this scenario's grading.
+                  await resetMemoryPages({ esClient, log });
+                  if (memoryPages && memoryPages.length > 0) {
+                    await replayIntoMemoryPages({
+                      log,
+                      kbnClient,
+                      memoryPages,
+                    });
+                  }
+
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log);
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
@@ -243,6 +293,10 @@ evaluate.describe(
                     }
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshotKey = snapshotKey;
+                    lastReplayShift = {
+                      maxTimestamp: stats.maxTimestamp,
+                      replayNow: stats.replayNow,
+                    };
                   }
 
                   // Replay captured KIs into the live KI stream so search_knowledge_indicators
@@ -254,8 +308,36 @@ evaluate.describe(
                     snapshotSource.gcs
                   );
 
+                  // Stamp detection change points onto the timeline of the replay the agent will
+                  // actually query, so the grounding skill's pre/post rate windows frame the real
+                  // incident neighborhood instead of the canonical dummy timestamp. Chronic-seed
+                  // scenarios instead seed a synthetic rate-flat pattern and stamp from its
+                  // change point (already in live coordinates).
+                  let stampedDetections = detections;
+                  if (input.chronic_seed) {
+                    const [rule] = detections;
+                    const seeded = await seedChronicBackground({
+                      esClient,
+                      log,
+                      streamName: input.stream_name,
+                      ruleUuid: rule.rule_uuid,
+                      ruleName: rule.rule_name ?? rule.rule_uuid,
+                      config: input.chronic_seed,
+                    });
+                    stampedDetections = detections.map((d) => ({
+                      ...d,
+                      '@timestamp': seeded.detectionTimestamp,
+                    }));
+                  } else if (lastReplayShift) {
+                    stampedDetections = canonicalDetectionsFromGroundTruth({
+                      streamName: input.stream_name,
+                      rules: input.detections,
+                      shift: lastReplayShift,
+                    });
+                  }
+
                   // Same message shape as the production batch.
-                  const agentInput = buildDiscoveryInput({ detections });
+                  const agentInput = buildDiscoveryInput({ detections: stampedDetections });
 
                   const converseResult = await agentBuilderClient.converse({
                     agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -263,10 +345,10 @@ evaluate.describe(
                   });
 
                   return {
-                    // Agent outputs via discovery_write tool calls; extract discoveries from steps.
-                    discoveries: extractDiscoveriesFromToolCall(converseResult.steps),
+                    // Agent outputs via events_write tool calls; extract significant events from steps.
+                    significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
                     // Thread the input detections through so snapshot-mode evaluators can access them.
-                    inputDetections: detections,
+                    inputDetections: stampedDetections,
                     // Raw steps — trajectory/grounding evaluators read tool calls from these.
                     steps: converseResult.steps,
                     // Agent runs inline, so its gen_ai spans nest under the eval's trace.
@@ -291,22 +373,20 @@ evaluate.describe(
         const continuationSuites = [
           {
             title: 'continuation - open significant event with same rules',
-            description: 'same detection rule re-fires during an open significant event',
+            description:
+              'same detection rule re-fires during an open significant event; events_write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-no-topology',
           },
           {
             title: 'continuation - open significant events with topology-related rules',
-            description: 'topology-linked cascading rules join an open significant event',
+            description:
+              'topology-linked cascading rules join an open significant event; events_write must send expected causal_features and blast_radius',
             includesPath: (path: string) => path === 'cascade',
           },
           {
-            title: 'continuation - unconfirmed rule on open significant event',
-            description: 'an unconfirmed candidate rule does not establish continuation',
-            includesPath: (path: string) => path === 'unconfirmed-rule',
-          },
-          {
             title: 'continuation - closed significant event',
-            description: 'a detection starts a new significant event after the prior event closes',
+            description:
+              'a detection starts a new significant event after the prior event closes; the new write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-closed',
           },
         ] as const;
@@ -327,13 +407,12 @@ evaluate.describe(
               // establishing + one gradable follow-up).
               const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
                 if (detections.length === 0) return [];
+                if (scenario.memoryPages?.length) return [];
+                // Chronic-seeded scenarios grade the rate gate only; continuation policy for
+                // known-chronic patterns is owned by the memory-usage work.
+                if (scenario.input.chronic_seed) return [];
                 const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
                 const continuationChains = Object.entries(scenario.continuationChains ?? {});
-                const confirmedAnchor = byRuleName.get(
-                  'Frontend → Ledger Writer Payment Submission Error'
-                );
-                const unrelatedDetection = byRuleName.get('Successful User Login');
-
                 const allPlans: ContinuationPlan[] = [
                   {
                     path: 'rule-uuid-no-topology',
@@ -346,16 +425,6 @@ evaluate.describe(
                     expectReuse: false,
                     seedStatus: 'closed',
                   },
-                  ...(confirmedAnchor && unrelatedDetection
-                    ? [
-                        {
-                          path: 'unconfirmed-rule',
-                          sequence: [confirmedAnchor, unrelatedDetection],
-                          expectReuse: false,
-                          seedUnconfirmedDetection: unrelatedDetection,
-                        },
-                      ]
-                    : []),
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
                     .map(
@@ -381,7 +450,6 @@ evaluate.describe(
                   expectTopologyEventSearch: plan.expectTopologyEventSearch,
                   seedStatus: plan.seedStatus,
                   stripSeedTopology: plan.stripSeedTopology,
-                  seedUnconfirmedDetection: plan.seedUnconfirmedDetection,
                 }));
               });
 
@@ -393,6 +461,7 @@ evaluate.describe(
 
               const runById = new Map(runs.map((run) => [run.id, run]));
               let lastReplayedSnapshotKey: string | undefined;
+              let lastReplayShift: ReplayShift | undefined;
 
               await executorClient.runExperiment(
                 {
@@ -407,7 +476,7 @@ evaluate.describe(
                           snapshot_source: run.scenario.snapshot_source,
                           continuation_run: run.id,
                         },
-                        output: {},
+                        output: { ...run.scenario.output },
                         metadata: {
                           ...run.scenario.metadata,
                           test_index: MANAGED_STREAM_SEARCH_PATTERN,
@@ -416,7 +485,6 @@ evaluate.describe(
                             run.expectTopologyEventSearch ?? false,
                           continuation_seed_status: run.seedStatus,
                           continuation_without_topology: run.stripSeedTopology,
-                          continuation_unconfirmed_rule: run.seedUnconfirmedDetection?.rule_uuid,
                         },
                       })),
                     },
@@ -433,22 +501,13 @@ evaluate.describe(
                       throw new Error(`No continuation run "${input.continuation_run}"`);
                     }
 
-                    // Continuation examples must not inherit discoveries or events from a previous
-                    // path. The cycles within this task still share state.
-                    await Promise.all(
-                      [
-                        SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
-                        SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                      ].map((index) =>
-                        esClient
-                          .deleteByQuery({
-                            index,
-                            query: { match_all: {} },
-                            refresh: true,
-                          })
-                          .catch(() => {})
-                      )
-                    );
+                    // Continuation examples must not inherit events from a previous path.
+                    // The cycles within this task still share state.
+                    await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+
+                    // Wipe memory pages so first-sight chronic pages created by earlier runs do
+                    // not cap this run's severity reasoning.
+                    await resetMemoryPages({ esClient, log });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
                     if (!snapshotSource) {
@@ -481,6 +540,10 @@ evaluate.describe(
 
                       await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                       lastReplayedSnapshotKey = run.snapshotKey;
+                      lastReplayShift = {
+                        maxTimestamp: stats.maxTimestamp,
+                        replayNow: stats.replayNow,
+                      };
                     }
 
                     await replayKnowledgeIndicatorsSnapshot(
@@ -500,13 +563,25 @@ evaluate.describe(
 
                     try {
                       // Feed one detection per cycle, oldest first. After each cycle, seed a
-                      // SignificantEvent into the events data stream for each produced discovery so the
-                      // next cycle's `event_search status: "open"` call finds it — mirroring what the
-                      // judge would write between discovery invocations in production.
+                      // SignificantEvent into the events data stream for each produced event so the
+                      // next cycle's `event_search status: "open"` call finds it.
                       for (let i = 0; i < run.sequence.length; i++) {
                         const base = run.sequence[i];
+                        // Same re-stamping as the discovery task: change points must live on the
+                        // replayed timeline for the grounding rate windows to be meaningful.
+                        const authored = run.scenario.input.detections.find(
+                          (r) => r.rule_uuid === base.rule_uuid
+                        )?.['@timestamp'];
                         const detection: Detection = {
                           ...base,
+                          ...(authored && lastReplayShift
+                            ? {
+                                '@timestamp': shiftSnapshotTimestamp({
+                                  timestamp: authored,
+                                  ...lastReplayShift,
+                                }),
+                              }
+                            : {}),
                           detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
                         };
                         const agentInput = buildDiscoveryInput({ detections: [detection] });
@@ -516,98 +591,53 @@ evaluate.describe(
                           input: agentInput,
                         });
 
-                        const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
-                        if (discoveries.some((discovery) => discovery.event_id)) {
+                        const significantEvents = extractDiscoveriesFromToolCall(
+                          converseResult.steps
+                        );
+                        if (significantEvents.some((event) => event.event_id)) {
                           await esClient.indices.refresh({
-                            index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
+                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                           });
                         }
-                        const persistedDiscoveries = await Promise.all(
-                          discoveries.map(async (discovery): Promise<Discovery> => {
-                            if (!discovery.event_id) {
-                              return discovery;
-                            }
-                            const result = await esClient.search<Discovery>({
-                              index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
-                              size: 1,
-                              query: { term: { event_id: discovery.event_id } },
-                              sort: [{ '@timestamp': 'desc' }],
-                            });
-                            return result.hits.hits[0]?._source ?? discovery;
-                          })
-                        );
-                        const producedEventIds = discoveries
-                          .map((discovery) => discovery.event_id)
+                        const producedEventIds = significantEvents
+                          .map((event) => event.event_id)
                           .filter((eventId): eventId is string => Boolean(eventId));
 
                         cycles.push({
                           ruleName: detection.rule_name,
                           producedEventIds,
+                          producedEvents: significantEvents.map((event) => ({
+                            event_id: event.event_id,
+                            severity: event.severity,
+                            status: event.status,
+                          })),
                           requestedEventIds: extractRequestedEventIdsFromToolCall(
                             converseResult.steps
                           ),
+                          writeItems: extractWriteItemsFromToolCall(converseResult.steps),
                           expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
                           expectTopologyEventSearch: run.expectTopologyEventSearch,
                           steps: converseResult.steps,
                         });
 
-                        // Seed a SignificantEvent per produced discovery so event_search resolves it
+                        // Seed a SignificantEvent per produced event so event_search resolves it
                         // as an open episode in subsequent cycles.
-                        for (const [idx, discovery] of persistedDiscoveries.entries()) {
-                          if (!discovery.event_id) continue;
-                          const eventUuid = `${discovery.event_id}-cycle-${i}-${idx}`;
-                          const canonicalEvent = canonicalSignificantEventFromGroundTruth({
-                            discovery,
-                            eventUuid,
-                          });
-                          const event = {
-                            ...canonicalEvent,
-                            ...(i === 0 && run.seedUnconfirmedDetection
-                              ? {
-                                  signals: [
-                                    ...(canonicalEvent.signals ?? []).map((signal) => ({
-                                      ...signal,
-                                      confirmed: true as const,
-                                    })),
-                                    {
-                                      type: 'detection' as const,
-                                      stream_name: run.seedUnconfirmedDetection.stream_name,
-                                      confirmed: false,
-                                      description:
-                                        'The judge found no evidence that this signal supports the event.',
-                                      metadata: {
-                                        detection_id: run.seedUnconfirmedDetection.detection_id,
-                                        rule_name: run.seedUnconfirmedDetection.rule_name,
-                                        rule_uuid: run.seedUnconfirmedDetection.rule_uuid,
-                                        change_point_type:
-                                          run.seedUnconfirmedDetection.change_point_type,
-                                        p_value: run.seedUnconfirmedDetection.p_value,
-                                      },
-                                    },
-                                  ],
-                                }
-                              : {}),
+                        for (const [idx, event] of significantEvents.entries()) {
+                          if (!event.event_id) continue;
+                          const eventUuid = `${event.event_id}-cycle-${i}-${idx}`;
+                          const seededEvent: SignificantEvent = {
+                            ...event,
+                            '@timestamp': event['@timestamp'] ?? new Date().toISOString(),
+                            event_uuid: eventUuid,
                             ...(run.stripSeedTopology
                               ? { causal_features: [], blast_radius: [] }
                               : {}),
                             ...(i === 0 && run.seedStatus ? { status: run.seedStatus } : {}),
                           };
-                          if (i === 0 && run.seedStatus !== undefined) {
-                            await esClient.updateByQuery({
-                              index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
-                              query: { term: { event_id: discovery.event_id } },
-                              script: {
-                                lang: 'painless',
-                                source:
-                                  "ctx._source.kind = 'handled'; ctx._source.processed = true",
-                              },
-                              refresh: true,
-                            });
-                          }
 
                           await esClient.index({
                             index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                            document: event,
+                            document: seededEvent,
                           });
                           seededEventUuids.push(eventUuid);
                         }
@@ -650,6 +680,7 @@ evaluate.describe(
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log);
+          await resetMemoryPages({ esClient, log });
         });
       });
     }

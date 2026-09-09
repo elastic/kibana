@@ -1,0 +1,232 @@
+{
+  "sha1": "b2fbebec52d5f862acebddb133d128990b6f8ff9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "95cda9a57ffdcd7-45143c27db20c24",
+      "title": "Notification Center - read-state routes without a user profile mark read is forbidden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
+        "line": 22,
+        "column": 50
+      }
+    },
+    {
+      "id": "95cda9a57ffdcd7-563effeb9ea8943",
+      "title": "Notification Center - read-state routes without a user profile mark all read is forbidden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "95cda9a57ffdcd7-f958a9963f88500",
+      "title": "Notification Center - read-state routes without a user profile listing notifications stays available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
+        "line": 29,
+        "column": 26
+      }
+    },
+    {
+      "id": "ec3adfe4a124ece-5a1ab073171c2fa",
+      "title": "Notification Center - GET notifications returns the { items, truncated } contract",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
+        "line": 50,
+        "column": 31
+      }
+    },
+    {
+      "id": "ec3adfe4a124ece-87bb4c9e6941d7d",
+      "title": "Notification Center - GET notifications surfaces seeded notifications, collapsed to the newest doc per id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
+        "line": 54,
+        "column": 83
+      }
+    },
+    {
+      "id": "ec3adfe4a124ece-121697461254593",
+      "title": "Notification Center - GET notifications returns severity on each item for consumers to facet on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
+        "line": 75,
+        "column": 20
+      }
+    },
+    {
+      "id": "ec3adfe4a124ece-08ebf48b0094f3e",
+      "title": "Notification Center - GET notifications rejects an unknown query parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
+        "line": 84,
+        "column": 26
+      }
+    },
+    {
+      "id": "f35dbeeffc22287-d7d856d3ab3d50b",
+      "title": "Notification Center - mark all read advances the read_all_before marker and returns it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_all_read.spec.ts",
+        "line": 17,
+        "column": 45
+      }
+    },
+    {
+      "id": "6aaa32c09a06c56-d700c59c7e2cd18",
+      "title": "Notification Center - mark read marks a notification read for the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
+        "line": 17,
+        "column": 45
+      }
+    },
+    {
+      "id": "6aaa32c09a06c56-c1a4999862d4733",
+      "title": "Notification Center - mark read rejects a body without a notification_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
+        "line": 23,
+        "column": 24
+      }
+    },
+    {
+      "id": "6aaa32c09a06c56-bce43910ae32fba",
+      "title": "Notification Center - mark read rejects an empty notification_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
+        "line": 26,
+        "column": 12
+      }
+    },
+    {
+      "id": "6aaa32c09a06c56-02537f9a33562b2",
+      "title": "Notification Center - mark read rejects a notification_id longer than the 512-char bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
+        "line": 29,
+        "column": 64
+      }
+    },
+    {
+      "id": "6aaa32c09a06c56-21479ab2df6e2d6",
+      "title": "Notification Center - mark read rejects an unknown field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
+        "line": 33,
+        "column": 56
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-6c44cfc85599642",
+      "title": "Notification Center - read-state annotation annotates isRead against the newest copy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 76,
+        "column": 18
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-3cb5922cc1892c9",
+      "title": "Notification Center - read-state annotation orders by recency, not by read state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 110,
+        "column": 36
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-f8a9f1c422234bd",
+      "title": "Notification Center - read-state annotation omits isRead for callers without a user profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 119,
+        "column": 14
+      }
+    }
+  ]
+}

@@ -4966,7 +4966,7 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );

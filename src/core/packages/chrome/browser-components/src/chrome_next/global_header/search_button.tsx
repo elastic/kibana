@@ -90,7 +90,7 @@ export const SearchButton = React.memo(() => {
       style={baseStyleVars}
       onClick={config.onClick}
     >
-      <EuiIcon type="search" size="m" color={euiTheme.colors.textParagraph} aria-hidden />
+      <EuiIcon type="magnify" size="m" color={euiTheme.colors.textParagraph} aria-hidden />
       <span css={[placeholderStyles, collapsibleStyles]}>{PLACEHOLDER}</span>
       <EuiBadge css={[shortcutBadgeStyles, collapsibleStyles]}>{shortcutLabel}</EuiBadge>
     </button>

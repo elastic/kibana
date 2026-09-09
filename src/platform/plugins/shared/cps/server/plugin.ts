@@ -15,7 +15,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { CPS_TIER_ELIGIBLE_FEATURE } from '@kbn/cps-common';
+import { CPS_TIER_ELIGIBLE_FEATURE, CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
 import { NpreClient } from './npre/npre_client';
 import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
@@ -46,6 +46,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
 
     return {
       getCpsEnabled: () => !!cpsEnabled,
+      isTierEligible: () => core.pricing.isFeatureAvailable(CPS_TIER_ELIGIBLE_FEATURE_ID),
     };
   }
 

@@ -144,6 +144,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     suspendUser: {
       isTool: true,
+      scope: 'destroy',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.suspendUser.description',
         {
@@ -173,6 +174,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     reactivateUser: {
       isTool: true,
+      scope: 'destroy',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.reactivateUser.description',
         { defaultMessage: 'Reactivate a suspended user, restoring their access to 1Password' }
@@ -205,20 +207,15 @@ export const OnePasswordConnector: ConnectorSpec = {
     handler: async (ctx) => {
       ctx.log.debug('1Password test handler');
       const { accountUuid } = ctx.config as { accountUuid: string };
-
       try {
-        const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
+        await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
           params: { maxPageSize: 1 },
         });
-
-        if (response.status === 200) {
-          return { ok: true, message: 'Successfully connected to 1Password Users API' };
-        }
-
-        return { ok: false, message: 'Failed to connect to 1Password Users API' };
       } catch (error) {
-        return throwWithApiError(error);
+        throwWithApiError(error);
       }
+      return {};
     },
+    enabled: true,
   },
 };

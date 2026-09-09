@@ -8,8 +8,9 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PndConfig } from './config';
+import { PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE } from '../common/constants';
 import { PndPlugin } from './plugin';
-import { installStatic } from './managed_workflows/install_static';
+import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
 
@@ -17,8 +18,8 @@ jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
 }));
 
-jest.mock('./managed_workflows/install_static', () => ({
-  installStatic: jest.fn().mockResolvedValue(undefined),
+jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
+  initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('./routes/register_routes', () => ({
@@ -75,7 +76,7 @@ describe('PndPlugin feature-flag gating', () => {
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
       } as never);
 
-      expect(installStatic).not.toHaveBeenCalled();
+      expect(initializeManagedWorkflows).not.toHaveBeenCalled();
     });
   });
 
@@ -96,7 +97,17 @@ describe('PndPlugin feature-flag gating', () => {
       );
 
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
-      expect(features.registerKibanaFeature).toHaveBeenCalled();
+      expect(features.registerKibanaFeature).toHaveBeenCalledWith(
+        expect.objectContaining({
+          privileges: expect.objectContaining({
+            all: expect.objectContaining({
+              api: expect.arrayContaining([PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE]),
+              ui: expect.arrayContaining(['write']),
+            }),
+            read: expect.objectContaining({ api: [PND_API_PRIVILEGE_READ] }),
+          }),
+        })
+      );
       expect(registerRoutes).toHaveBeenCalled();
     });
 
@@ -110,9 +121,8 @@ describe('PndPlugin feature-flag gating', () => {
         workflowsExtensions,
       } as never);
 
-      expect(installStatic).toHaveBeenCalledWith(
+      expect(initializeManagedWorkflows).toHaveBeenCalledWith(
         expect.objectContaining({
-          enabled: true,
           workflowsExtensions,
         })
       );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -18,13 +18,23 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/agent_policies';
+import { AgentPolicyDetailsFlyout } from './agent_policy_details_flyout';
+import type { LocationAgentStats } from '../../../../../../common/types';
 
-export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
+export const PolicyName = ({
+  agentPolicyId,
+  locationStats,
+  hideAgentCount = false,
+}: {
+  agentPolicyId: string;
+  locationStats?: LocationAgentStats;
+  /** Suppress the "Agents: N" badge when the caller already renders an agent count. */
+  hideAgentCount?: boolean;
+}) => {
   const { canReadAgentPolicies } = useFleetPermissions();
-  const { basePath } = useSyntheticsSettingsContext();
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
 
   const { data: policies, loading } = useSelector(selectAgentPolicies);
 
@@ -39,12 +49,21 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       {canReadAgentPolicies ? (
         <EuiTextColor color="subdued">
           {policy ? (
-            <EuiLink
-              data-test-subj="syntheticsPolicyNameLink"
-              href={`${basePath}/app/fleet/policies/${agentPolicyId}`}
-            >
-              {policy?.name}
-            </EuiLink>
+            <>
+              <EuiLink
+                data-test-subj="syntheticsPolicyNameLink"
+                onClick={() => setFlyoutOpen(true)}
+              >
+                {policy?.name}
+              </EuiLink>
+              {flyoutOpen && (
+                <AgentPolicyDetailsFlyout
+                  agentPolicyId={agentPolicyId}
+                  locationStats={locationStats}
+                  onClose={() => setFlyoutOpen(false)}
+                />
+              )}
+            </>
           ) : (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={true}>
@@ -67,7 +86,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       ) : (
         agentPolicyId
       )}
-      {canReadAgentPolicies && policy && (
+      {canReadAgentPolicies && policy && !hideAgentCount && (
         <>
           &nbsp; &nbsp;
           <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>

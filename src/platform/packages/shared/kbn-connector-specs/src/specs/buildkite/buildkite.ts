@@ -575,7 +575,6 @@ export const Buildkite: ConnectorSpec = {
         const hasPipelines = (parsed?.items?.length ?? 0) > 0;
 
         return {
-          ok: true,
           message: hasPipelines
             ? `Connected to Buildkite organization "${orgSlug}".`
             : `Connected to Buildkite organization "${orgSlug}", but no pipelines were found. Verify the organization slug and that the token can see pipelines.`,

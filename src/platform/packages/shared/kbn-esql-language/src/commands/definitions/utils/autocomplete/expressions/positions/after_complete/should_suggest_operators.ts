@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isBinaryExpression, isUnaryExpression } from '@elastic/esql';
 import type { SupportedDataType } from '../../../../../types';
 import { supportsArithmeticOperations } from '../../../../../types';
 import type { ExpressionContext, FunctionParameterContext } from '../../types';
@@ -43,6 +44,10 @@ const stringPredicateOperatorNames = [
   ...nullCheckOperators.map(({ name }) => name),
 ];
 
+const parenthesizedBooleanOperatorNames = [...logicalOperators, ...nullCheckOperators].map(
+  ({ name }) => name
+);
+
 export interface OperatorDecision {
   shouldSuggest: boolean;
   allowedOperators?: string[];
@@ -77,12 +82,35 @@ type Rule = (context: EvaluatedOperatorRuleContext) => OperatorDecision | null;
 // Order matters: specific rules must come before general rules to avoid being shadowed.
 //
 // Rule ordering logic:
+// 0. Syntax-specific rules (parenthesized boolean operator expressions)
 // 1. Context-based rules (no function context, any type, boolean)
 // 2. Homogeneous function rules (first param, subsequent params)
 // 3. Type-specific rules (numeric, string/text, single string)
 // 4. Default fallback
 
 const rules: Rule[] = [
+  // Rule 0: A parenthesized boolean operator can be followed by logical and null-check operators
+  (ctx) => {
+    const { expressionRoot, parenthesizedExpressionPosition } = ctx.ctx;
+    const isOperatorExpression =
+      expressionRoot && (isBinaryExpression(expressionRoot) || isUnaryExpression(expressionRoot));
+
+    if (
+      !ctx.functionParameterContext &&
+      ctx.expressionType === 'boolean' &&
+      isOperatorExpression &&
+      parenthesizedExpressionPosition === 'after'
+    ) {
+      return {
+        shouldSuggest: true,
+        allowedOperators: parenthesizedBooleanOperatorNames,
+        reason: 'Parenthesized boolean expression',
+      };
+    }
+
+    return null;
+  },
+
   // Rule 1: No function context - allow operators (filtered by type and expression preference)
   (ctx) => {
     if (!ctx.functionParameterContext) {

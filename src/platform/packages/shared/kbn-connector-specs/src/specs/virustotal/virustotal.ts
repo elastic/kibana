@@ -201,6 +201,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     scanUrl: {
       isTool: true,
+      scope: 'write',
       input: lazySchema(() =>
         z.object({
           url: urlOrDomainSchema.describe('Absolute URL to scan, or bare domain to look up'),
@@ -313,6 +314,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     submitFile: {
       isTool: true,
+      scope: 'write',
       input: lazySchema(() =>
         z.object({
           file: z.string().describe('Base64-encoded file content'),
@@ -388,21 +390,12 @@ export const VirusTotalConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await ctx.client.get(`${VIRUSTOTAL_API_BASE_URL}/ip_addresses/8.8.8.8`);
-        return {
-          ok: true,
-          message: 'Successfully connected to VirusTotal API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get(`${VIRUSTOTAL_API_BASE_URL}/ip_addresses/8.8.8.8`);
+      return {};
     },
     description: i18n.translate('connectorSpecs.virustotal.test.description', {
       defaultMessage: 'Verifies VirusTotal API key',
     }),
+    enabled: true,
   },
 };

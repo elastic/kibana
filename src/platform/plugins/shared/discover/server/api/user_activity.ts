@@ -12,7 +12,7 @@ import type { DiscoverSessionApiResponse } from './schema';
 
 type DiscoverSessionOperation = 'create' | 'update' | 'delete';
 type DiscoverSessionActivityResult = Pick<DiscoverSessionApiResponse, 'id'> & {
-  data: Pick<DiscoverSessionApiResponse['data'], 'title'>;
+  data: Pick<DiscoverSessionApiResponse['data'], 'title' | 'tags'>;
 };
 
 const operationConfig = {
@@ -51,7 +51,8 @@ export const trackDiscoverSessionAction = (
         id: result.id,
         name: result.data.title,
         type: 'discover_session',
-        tags: [],
+        // Discover session activity records tag IDs
+        tags: result.data.tags ?? [],
       },
     });
   } catch {

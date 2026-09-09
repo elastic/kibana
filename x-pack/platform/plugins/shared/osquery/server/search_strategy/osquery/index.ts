@@ -26,13 +26,17 @@ import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
   esClient: CoreStart['elasticsearch']['client'],
-  osqueryContext: Pick<OsqueryAppContext, 'security' | 'service'>
+  osqueryContext: Pick<OsqueryAppContext, 'security' | 'service' | 'cpsEnabled'>
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  let es: typeof data.search.searchAsInternalUser;
+  // Only used by `cancel`, which has no access to the request that selected a
+  // client. Every search binds its own client locally, so concurrent requests
+  // cannot steal each other's identity.
+  let lastUsedEs: typeof data.search.searchAsInternalUser;
 
   return {
     search: (request, options, deps) => {
@@ -78,6 +82,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
             ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
             ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
+            ...('matchMissingSpaceId' in request
+              ? { matchMissingSpaceId: request.matchMissingSpaceId }
+              : {}),
             // exportResults factory fields — baseFilter is required and unique to this
             // factory type, so its presence is a reliable discriminator for all six fields.
             ...('baseFilter' in request
@@ -94,6 +101,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
           const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
 
+          const spaceScopeOptions =
+            'matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
+              ? { matchMissingSpaceId: request.matchMissingSpaceId }
+              : undefined;
+
           const dsl = enforceSpaceScope(
             queryFactory.buildDsl({
               ...strictRequest,
@@ -101,16 +113,31 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               componentTemplateExists: actionsIndexExists,
               ccsEnabled,
             } as StrategyRequestType<T>),
-            spaceId
+            spaceId,
+            spaceScopeOptions
           );
 
-          // Select internal client for all osquery indices that require it.
-          // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
-          // (e.g. '*:logs-osquery_manager.action...').
-          const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
-          es = indices.some((index) => index.includes('fleet') || index.includes('osquery_manager'))
-            ? data.search.searchAsInternalUser
-            : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          // Client selection is per search, not per request: the legacy and data-stream
+          // reads below target different index families, so a single decision taken from
+          // the legacy DSL would silently apply the wrong client to the other. On a project
+          // without the osquery integration installed the legacy read resolves to
+          // `.fleet-actions-results*`, which pins that read to the internal client, and
+          // reusing it for the data-stream read would cancel fan-out for every result.
+          const selectSearchClient = (searchDsl: typeof dsl) => {
+            const indices = Array.isArray(searchDsl.index)
+              ? searchDsl.index
+              : searchDsl.index
+              ? [searchDsl.index]
+              : [];
+
+            return shouldUseInternalSearchClient(indices, osqueryContext.cpsEnabled)
+              ? data.search.searchAsInternalUser
+              : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          };
+
+          const es = selectSearchClient(dsl);
+
+          lastUsedEs = es;
 
           // When a PIT is present ES rejects requests that also specify `index`,
           // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes
@@ -143,7 +170,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             mergeMap((legacyIndexResponse) => {
               if (
                 request.factoryQueryType === OsqueryQueries.actionResults &&
-                (newDataStreamIndexExists || ccsEnabled)
+                (newDataStreamIndexExists || ccsEnabled || osqueryContext.cpsEnabled)
               ) {
                 const dataStreamDsl = enforceSpaceScope(
                   queryFactory.buildDsl({
@@ -153,11 +180,16 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                     ccsEnabled,
                     useNewDataStream: true,
                   } as StrategyRequestType<T>),
-                  spaceId
+                  spaceId,
+                  spaceScopeOptions
                 );
 
+                const dataStreamEs = selectSearchClient(dataStreamDsl);
+
+                lastUsedEs = dataStreamEs;
+
                 return from(
-                  es.search(
+                  dataStreamEs.search(
                     {
                       ...strictRequest,
                       params: dataStreamDsl,
@@ -191,8 +223,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       );
     },
     cancel: async (id, options, deps) => {
-      if (es?.cancel) {
-        return es.cancel(id, options, deps);
+      if (lastUsedEs?.cancel) {
+        return lastUsedEs.cancel(id, options, deps);
       }
     },
   };

@@ -63,9 +63,10 @@ describe('Box', () => {
       expect(Box.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('should support both workflows and agentBuilder feature IDs', () => {
+    it('should support workflows, agentBuilder, and contextEngine feature IDs', () => {
       expect(Box.metadata.supportedFeatureIds).toContain('workflows');
       expect(Box.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(Box.metadata.supportedFeatureIds).toContain('contextEngine');
     });
 
     it('should be marked as technical preview', () => {
@@ -587,28 +588,20 @@ describe('Box', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
-      if (!Box.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await Box.test.handler(mockContext);
+    const testSpec = Box.test;
+
+    it('returns {} on successful connection', async () => {
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to Box MCP server. 2 tools available.',
-      });
+      expect(result).toEqual({});
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!Box.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(Box.test.handler(mockContext)).rejects.toThrow('connection refused');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 

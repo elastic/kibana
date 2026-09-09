@@ -108,5 +108,6 @@ export const transformAdHocRunToAdHocRunData = ({
     apiKeyId: adHocRunSO.attributes.apiKeyId,
     apiKeyToUse: adHocRunSO.attributes.apiKeyToUse,
     uiamApiKey: adHocRunSO.attributes.uiamApiKey,
+    uiamApiKeyExternal: adHocRunSO.attributes.uiamApiKeyExternal,
   } as AdHocRun;
 };

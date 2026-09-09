@@ -122,20 +122,6 @@ export default function (providerContext: FtrProviderContext) {
         createdConnectorIds.push(body.item.id);
       });
 
-      it('should return 400 when external_id is missing for AWS', async () => {
-        await supertest
-          .post(`/api/fleet/cloud_connectors`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'arn:aws:iam::123456789012:role/test-role-missing-external-id',
-            cloudProvider: 'aws',
-            vars: {
-              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
-            },
-          })
-          .expect(400);
-      });
-
       it('should return 400 when role_arn is missing for AWS', async () => {
         await supertest
           .post(`/api/fleet/cloud_connectors`)
@@ -1683,26 +1669,6 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body).to.have.property('message');
         expect(body.message).to.match(/Package policy must contain role_arn variable/);
-      });
-
-      it('should validate that external_id is required when updating AWS vars', async () => {
-        const updateData = {
-          vars: {
-            role_arn: { value: 'arn:aws:iam::123456789012:role/valid-role', type: 'text' },
-            // Missing external_id
-          },
-        };
-
-        const { body } = await supertest
-          .put(`/api/fleet/cloud_connectors/${createdAwsConnectorId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send(updateData)
-          .expect(400);
-
-        expect(body).to.have.property('message');
-        expect(body.message).to.match(
-          /Package policy must contain valid external_id secret reference/
-        );
       });
 
       it('should validate that tenant_id is required when updating Azure vars', async () => {

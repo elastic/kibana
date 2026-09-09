@@ -33,40 +33,6 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  live_queries: () => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.osquery.breadcrumbs.liveQueriesPageTitle', {
-        defaultMessage: 'Live queries',
-      }),
-    },
-  ],
-  live_query_new: () => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.live_queries(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.liveQueriesPageTitle', {
-        defaultMessage: 'Live queries',
-      }),
-    },
-    {
-      text: i18n.translate('xpack.osquery.breadcrumbs.newLiveQueryPageTitle', {
-        defaultMessage: 'New',
-      }),
-    },
-  ],
-  live_query_details: ({ liveQueryId }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.live_queries(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.liveQueriesPageTitle', {
-        defaultMessage: 'Live queries',
-      }),
-    },
-    {
-      text: liveQueryId,
-    },
-  ],
   history: () => [
     BASE_BREADCRUMB,
     {

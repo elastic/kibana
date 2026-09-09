@@ -139,6 +139,27 @@ export class UiamOAuth implements UiamOAuthType {
     }
   }
 
+  async deleteClient(request: KibanaRequest, clientId: string): Promise<true | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client deletion: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to delete OAuth client ${clientId}`);
+
+    try {
+      await this.uiam.deleteOAuthClient(accessToken, clientId);
+      this.logger.debug(`OAuth client ${clientId} deleted successfully`);
+      return true;
+    } catch (e) {
+      this.logger.error(`Failed to delete OAuth client ${clientId}: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
   async listConnections(
     request: KibanaRequest,
     clientId?: string,
@@ -231,6 +252,35 @@ export class UiamOAuth implements UiamOAuthType {
     } catch (e) {
       this.logger.error(
         `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(e)}`
+      );
+      throw e;
+    }
+  }
+
+  async deleteConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string
+  ): Promise<true | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection deletion: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to delete OAuth connection ${connectionId}`);
+
+    try {
+      await this.uiam.deleteOAuthConnection(accessToken, clientId, connectionId);
+      this.logger.debug(`OAuth connection ${connectionId} deleted successfully`);
+      return true;
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+          e
+        )}`
       );
       throw e;
     }

@@ -12,6 +12,8 @@ export const SERVICE_FLYOUT_EBT_ELEMENTS = {
   ANOMALIES_BADGE: 'serviceFlyoutAnomaliesBadge',
   ACTIONS_MENU: 'serviceFlyoutActionsMenu',
   TABS: 'serviceFlyoutTabs',
+  QUERY_CONTROLS: 'serviceFlyoutQueryControls',
+  CHART_CONTROLS: 'serviceFlyoutChartControls',
 } as const;
 
 export const SERVICE_FLYOUT_EBT_ACTIONS = {

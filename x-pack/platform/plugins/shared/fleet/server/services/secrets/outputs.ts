@@ -7,13 +7,9 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type {
-  SOSecretPath,
-  KafkaOutput,
-  NewRemoteElasticsearchOutput,
-  Output,
-} from '../../../common/types';
+import type { SOSecretPath, Output } from '../../../common/types';
 import type { NewOutput } from '../../../common';
+import { isBeatsOutput } from '../../../common/services/output_helpers';
 import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 
@@ -99,7 +95,7 @@ export async function deleteOutputSecrets(opts: {
 export function getOutputSecretReferences(output: Output): SecretReference[] {
   const outputSecretPaths: SecretReference[] = [];
 
-  if (typeof output.secrets?.ssl?.key === 'object') {
+  if (isBeatsOutput(output) && typeof output.secrets?.ssl?.key === 'object') {
     outputSecretPaths.push({
       id: output.secrets.ssl.key.id,
     });
@@ -127,33 +123,22 @@ function getOutputSecretPaths(
   output: NewOutput | Partial<Output>
 ): SOSecretPath[] {
   const outputSecretPaths: SOSecretPath[] = [];
+  const typed = { ...output, type: outputType } as NewOutput;
 
-  if (outputType === 'kafka') {
-    const kafkaOutput = output as KafkaOutput;
-    if (kafkaOutput?.secrets?.password) {
-      outputSecretPaths.push({
-        path: 'secrets.password',
-        value: kafkaOutput.secrets.password,
-      });
+  if (typed.type === 'kafka') {
+    if (typed.secrets?.password) {
+      outputSecretPaths.push({ path: 'secrets.password', value: typed.secrets.password });
     }
   }
 
-  if (outputType === 'remote_elasticsearch') {
-    const remoteESOutput = output as NewRemoteElasticsearchOutput;
-    if (remoteESOutput.secrets?.service_token) {
-      outputSecretPaths.push({
-        path: 'secrets.service_token',
-        value: remoteESOutput.secrets.service_token,
-      });
+  if (typed.type === 'remote_elasticsearch') {
+    if (typed.secrets?.service_token) {
+      outputSecretPaths.push({ path: 'secrets.service_token', value: typed.secrets.service_token });
     }
   }
 
-  // common to all outputs
-  if (output?.secrets?.ssl?.key) {
-    outputSecretPaths.push({
-      path: 'secrets.ssl.key',
-      value: output.secrets.ssl.key,
-    });
+  if (isBeatsOutput(typed) && typed.secrets?.ssl?.key) {
+    outputSecretPaths.push({ path: 'secrets.ssl.key', value: typed.secrets.ssl.key });
   }
 
   return outputSecretPaths;

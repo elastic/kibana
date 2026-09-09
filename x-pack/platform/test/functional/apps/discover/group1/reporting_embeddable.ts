@@ -8,6 +8,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. See individual tests. Panel-action wiring is covered in
+ * get_csv_panel_action.test.ts; time-range override in override_time_range.test.ts; ES|QL
+ * timestamp columns in get_sharing_data.test.ts. Keep Scout smokes for dashboard panel → CSV.
+ */
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -95,7 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
   };
 
-  describe('Discover Embeddable - Generate CSV report per panel', () => {
+  describe('Discover Embeddable - Generate CSV report per panel', function () {
+    this.timeout(5 * 60 * 1000);
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded(
@@ -170,6 +178,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
           });
 
+          /**
+           * Migration recommendation: MIXED. CSV contents belong in reporting API tests. Keep a
+           * short Scout smoke that the dashboard panel "Generate CSV" action downloads a report.
+           */
           it('generates a report with global time range', async () => {
             await dashboard.navigateToApp();
             await dashboard.clickNewDashboard();
@@ -180,6 +192,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expectSnapshot(csvFile).toMatch();
           });
 
+          /**
+           * Migration recommendation: MIXED. Time-range override logic is covered in
+           * src/platform/packages/private/kbn-generate-csv/src/lib/override_time_range.test.ts.
+           * Keep a short Scout smoke that a panel custom time range is applied to the CSV job.
+           */
           it('generates a report with custom time range', async () => {
             await dashboard.navigateToApp();
             await dashboard.clickNewDashboard();
@@ -199,6 +216,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
       });
 
+      /**
+       * Migration recommendation: DELETE. Prepending @timestamp for non-transformational ES|QL is
+       * covered in src/platform/plugins/shared/discover/public/utils/get_sharing_data.test.ts.
+       */
       it('generates a report with @timestamp prepended for non-transformational ES|QL', async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
@@ -219,6 +240,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
       });
 
+      /**
+       * Migration recommendation: DELETE. Not prepending @timestamp for transformational ES|QL is
+       * covered in src/platform/plugins/shared/discover/public/utils/get_sharing_data.test.ts.
+       */
       it('does not prepend @timestamp for transformational ES|QL', async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();

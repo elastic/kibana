@@ -15,7 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
@@ -123,6 +123,9 @@ export interface InternalChromeStart extends ChromeStart {
 
     /**
      * Set project breadcrumbs.
+     * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
+     * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
+     * configuration to `AppHeader`.
      * @param breadcrumbs - Breadcrumb(s) to set.
      * @param params.absolute If true, replaces defaults; otherwise appends. Defaults to false.
      */
@@ -167,7 +170,7 @@ export interface InternalChromeNext extends ChromeNext {
     set(mounted: boolean): void;
   };
   appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<AppHeaderConfig | undefined>;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
   };
   userMenu: ChromeNext['userMenu'] & {
     get$(): Observable<ReactNode>;

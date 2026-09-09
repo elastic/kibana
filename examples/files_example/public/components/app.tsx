@@ -62,7 +62,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       <EuiButton
         onClick={() => setShowUploadModal(true)}
         isDisabled={isLoading || isDeletingFile}
-        iconType="exportAction"
+        iconType="upload"
       >
         Upload image
       </EuiButton>,
@@ -86,7 +86,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       name: 'Status',
       render: (status: FileJSON['status']) =>
         status === 'READY' ? (
-          <EuiIcon color="success" type="checkInCircleFilled" aria-label={status} />
+          <EuiIcon color="success" type="checkCircleFill" aria-label={status} />
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (

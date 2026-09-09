@@ -31,5 +31,9 @@ process.stdout.write(
     id: suite.id,
     name: suite.name,
     slackChannel: suite.slackChannel,
+    // Shard `specFiles` are relative to this file's directory, so the fanout needs it to check them.
+    configPath: suite.configPath,
+    shards: Array.isArray(suite.shards) ? suite.shards : [],
+    stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
   })
 );

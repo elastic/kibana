@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EntityField } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 import type { LeadEntity, Observation } from '../types';
 
 /**
@@ -65,9 +66,25 @@ export const getAssetCriticality = (entity: LeadEntity): string | undefined => {
 };
 
 /** Returns true when the entity's asset criticality is a high-impact tier. */
-export const isHighCriticality = (entity: LeadEntity): boolean => {
-  const criticality = getAssetCriticality(entity);
+export const isHighCriticality = (
+  params: { entity: LeadEntity } | { criticality: string }
+): boolean => {
+  const criticality = 'entity' in params ? getAssetCriticality(params.entity) : params.criticality;
   return criticality != null && HIGH_CRITICALITY_LEVELS.has(criticality);
+};
+
+const EntityRiskSchema = EntityField.shape.risk;
+export const getEntityRisk = (entity: LeadEntity) => {
+  const entityField = getEntityField(entity);
+  if (!entityField) return;
+
+  const parsed = EntityRiskSchema.safeParse(entityField.risk);
+  if (!parsed.success || parsed.data == null) return;
+
+  return {
+    calculatedLevel: parsed.data.calculated_level,
+    calculatedScoreNorm: parsed.data.calculated_score_norm,
+  };
 };
 
 /** Capitalises the entity type for use in human-readable descriptions (e.g. "host" → "Host"). */

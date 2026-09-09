@@ -84,7 +84,7 @@ describe('generateParamsSchema', () => {
   });
 
   it('throws if actions has no keys', () => {
-    expect(() => generateParamsSchema({})).toThrowError('No actions defined');
+    expect(() => generateParamsSchema({})).toThrow('No actions defined');
   });
 
   describe('runtime parse behavior', () => {

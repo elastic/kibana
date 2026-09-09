@@ -19,6 +19,7 @@ interface ToolUsageTaskOutput {
 export const createToolUsageEvaluator = (): Evaluator => ({
   name: 'tool_usage_validation',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const toolUsage = (output as ToolUsageTaskOutput)?.toolUsage;
 
@@ -66,7 +67,7 @@ export const createToolUsageEvaluator = (): Evaluator => ({
         issues.length > 0
           ? issues.join('; ')
           : `All tool calls succeeded (get_stream_features: ${toolUsage.get_stream_features.calls}, add_queries: ${toolUsage.add_queries.calls})`,
-      details: {
+      metadata: {
         get_stream_features: toolUsage.get_stream_features,
         add_queries: toolUsage.add_queries,
       },

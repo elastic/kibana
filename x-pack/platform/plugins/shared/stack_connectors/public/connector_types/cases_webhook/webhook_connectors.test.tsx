@@ -524,7 +524,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       const { isPreconfigured, ...rest } = actionConnector;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             __internal__: {
@@ -560,7 +560,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: {
@@ -602,7 +602,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       const { isPreconfigured, ...rest } = actionConnector;
       const { headers, ...rest2 } = actionConnector.config;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: rest2,

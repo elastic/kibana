@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 import { fetchActionRequestById } from './utils/fetch_action_request_by_id';
 import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
 import { fetchActionResponses } from './utils/fetch_action_responses';
@@ -30,12 +33,15 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   actionId: string,
   {
     bypassSpaceValidation = false,
+    scoped,
   }: Partial<{
     /**
      * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
      * USE IT CAREFULLY!
      */
     bypassSpaceValidation: boolean;
+    /** Required for these reads to fan out under CPS; without it they are origin-only */
+    scoped: ScopedEndpointServices;
   }> = {}
 ): Promise<T> => {
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
@@ -45,12 +51,16 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
     // Get both the Action Request(s) and action Response(s)
     const [actionRequestEsDoc, actionResponseResult] = await Promise.all([
       // Get the action request(s)
-      fetchActionRequestById(endpointService, spaceId, actionId, { bypassSpaceValidation }),
+      fetchActionRequestById(endpointService, spaceId, actionId, {
+        bypassSpaceValidation,
+        scoped,
+      }),
 
       // Get all responses
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
         endpointService,
+        scoped,
         actionIds: [actionId],
       }),
     ]);

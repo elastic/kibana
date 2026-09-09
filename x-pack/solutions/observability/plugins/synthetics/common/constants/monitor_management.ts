@@ -21,6 +21,7 @@ export enum ConfigKey {
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
+  CERTIFICATE_ERROR_SPKI_ALLOWLIST = 'certificate_error_spki_allowlist',
   MONITOR_SOURCE_TYPE = 'origin',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',

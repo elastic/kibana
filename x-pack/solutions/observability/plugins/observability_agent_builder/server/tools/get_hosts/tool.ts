@@ -62,6 +62,13 @@ export function createGetHostsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getHostsSchema> = {
     id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Hosts',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves a list of hosts with their infrastructure metrics (CPU, memory, disk, network). Use this tool to get an overview of host health and resource utilization.
 
 When to use:
