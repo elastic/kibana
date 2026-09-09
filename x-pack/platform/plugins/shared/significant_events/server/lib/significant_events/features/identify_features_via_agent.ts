@@ -104,9 +104,9 @@ export async function executeFeatureIdentificationAgent({
 
   const successfulFinalizeCallIds = new Set(
     events
+      .filter(isToolResultEvent)
       .filter(
         (event) =>
-          isToolResultEvent(event) &&
           event.data.tool_id === FINALIZE_FEATURES_TOOL_ID &&
           event.data.results.some(
             (result) =>
