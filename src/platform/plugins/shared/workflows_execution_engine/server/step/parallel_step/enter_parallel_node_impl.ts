@@ -505,9 +505,14 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     const occupied = state.branches.filter(
       (branch) => branch.status === 'running' && (countWaiting || !branch.waiting)
     ).length;
+    const stoppedAdmission =
+      this.resolveMode() === 'fail-fast' &&
+      state.branches.some((branch) => branch.status === 'failed' || branch.status === 'timed_out');
     return (
       state.branches.some((branch) => branch.status === 'running' && !branch.waiting) ||
-      (occupied < max && state.branches.some((branch) => branch.status === 'pending'))
+      (!stoppedAdmission &&
+        occupied < max &&
+        state.branches.some((branch) => branch.status === 'pending'))
     );
   }
 

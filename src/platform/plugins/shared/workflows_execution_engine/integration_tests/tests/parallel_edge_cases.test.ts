@@ -156,6 +156,16 @@ describe('parallel failure handling at the join', () => {
     expect(outputs(fixture, 'parent_after')).toEqual(['done']);
   });
 
+  it('does not re-tick for pending branches that fail-fast will never admit', async () => {
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({ workflowYaml: failingExample('24_fail_fast_long_wait') });
+    expect(workflow(fixture)?.status).toBe(ExecutionStatus.WAITING);
+    expect(
+      new Date(String(executions(fixture, 'branches')[0].state?.resumeAt)).getTime() - Date.now()
+    ).toBeGreaterThan(50000);
+    expect(executions(fixture, 'never_queued')).toHaveLength(0);
+  });
+
   it('drains already-started siblings but never admits queued branches after fail-fast', async () => {
     const fixture = new WorkflowRunFixture();
     await fixture.runWorkflow({ workflowYaml: failingExample('12_fail_fast_queue') });
