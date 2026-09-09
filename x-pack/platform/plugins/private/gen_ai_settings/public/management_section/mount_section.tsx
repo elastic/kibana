@@ -43,10 +43,11 @@ export const mountManagementSection = async ({
 
   const genAiSettingsApi = createCallGenAiSettingsAPI(coreStart);
   const queryClient = new QueryClient();
+  const services = { ...coreStart, ...startDeps, genAiSettingsApi };
   const GenAiSettingsAppWithContext = () => (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <KibanaContextProvider services={{ ...coreStart, ...startDeps, genAiSettingsApi }}>
+        <KibanaContextProvider services={services}>
           <EnabledFeaturesContextProvider config={config}>
             <SettingsContextProvider>
               <Router history={history}>

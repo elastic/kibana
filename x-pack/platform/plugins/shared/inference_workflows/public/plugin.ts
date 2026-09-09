@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AnonymizationSection } from './anonymization_settings/anonymization_section';
 
 interface InferenceWorkflowsPublicSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
+export interface InferenceWorkflowsPublicStart {
+  /** Lazy component — renders the Anonymization settings section for gen_ai_settings. */
+  AnonymizationSection: typeof AnonymizationSection;
+}
+
 export class InferenceWorkflowsPublicPlugin
-  implements Plugin<{}, {}, InferenceWorkflowsPublicSetupDeps>
+  implements Plugin<{}, InferenceWorkflowsPublicStart, InferenceWorkflowsPublicSetupDeps>
 {
   setup(_core: CoreSetup, deps: InferenceWorkflowsPublicSetupDeps) {
     deps.workflowsExtensions.registerStepDefinition(() =>
@@ -42,7 +49,15 @@ export class InferenceWorkflowsPublicPlugin
     return {};
   }
 
-  start(_core: CoreStart) {
-    return {};
+  start(_core: CoreStart): InferenceWorkflowsPublicStart {
+    const LazyAnonymizationSection = React.lazy(
+      () =>
+        import('./anonymization_settings/anonymization_section').then((m) => ({
+          default: m.AnonymizationSection,
+        }))
+    );
+    return {
+      AnonymizationSection: LazyAnonymizationSection as unknown as typeof AnonymizationSection,
+    };
   }
 }

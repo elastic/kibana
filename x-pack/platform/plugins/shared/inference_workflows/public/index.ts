@@ -8,6 +8,8 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { InferenceWorkflowsPublicPlugin } from './plugin';
 
+export type { InferenceWorkflowsPublicStart } from './plugin';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new InferenceWorkflowsPublicPlugin();
 }

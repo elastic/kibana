@@ -355,6 +355,19 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               </EuiSplitPanel.Outer>
             </>
           )}
+
+          {services.inferenceWorkflows &&
+            application.capabilities.inferenceAnonymizationSettings?.show === true && (
+              <React.Suspense fallback={null}>
+                <services.inferenceWorkflows.AnonymizationSection
+                  http={http}
+                  notifications={notifications}
+                  canManage={
+                    application.capabilities.inferenceAnonymizationSettings?.manage === true
+                  }
+                />
+              </React.Suspense>
+            )}
         </EuiPageSection>
       </div>
       {!isEmpty(unsavedChanges) && (
