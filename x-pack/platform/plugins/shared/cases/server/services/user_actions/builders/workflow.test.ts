@@ -66,7 +66,7 @@ describe('WorkflowUserActionBuilder', () => {
 
   it('sets the correct descriptiveAction', () => {
     const { eventDetails } = builder.build(builderArgs);
-    expect(eventDetails.descriptiveAction).toBe('case_user_action_workflow');
+    expect(eventDetails.descriptiveAction).toBe('case_user_action_run_workflow');
   });
 
   it('includes the workflow id and case id in the audit message', () => {
