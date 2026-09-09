@@ -9,10 +9,11 @@ import { isMetricsHeaderPortalExcluded } from './is_metrics_header_portal_exclud
 import { METRICS_INVENTORY_PATH, METRICS_DETAIL_PATH } from './metrics_header_paths';
 
 describe('isMetricsHeaderPortalExcluded', () => {
-  it('excludes Inventory once that route consumes AppHeader', () => {
+  it('excludes Inventory and Hosts once those routes consume AppHeader', () => {
     expect(isMetricsHeaderPortalExcluded('/inventory')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/inventory/extra')).toBe(true);
-    expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
+    expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/hosts/extra')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/detail/host/web-01')).toBe(false);
   });
 
@@ -21,7 +22,7 @@ describe('isMetricsHeaderPortalExcluded', () => {
     expect(isMetricsHeaderPortalExcluded('/snapshot')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/snapshot/x')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/snapshot-other')).toBe(false);
-    expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
+    expect(isMetricsHeaderPortalExcluded('/explorer')).toBe(false);
   });
 
   it('matches a parent path and its nested segments', () => {
