@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-oblt';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { apiTest, mergeSyntheticsApiHeaders } from '../fixtures';
+import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_API_URLS } from '../../../common/fixtures';
 
 /**
  * "Run test manually" (`POST /api/synthetics/monitor/test/{monitorId}`) is gated by an
