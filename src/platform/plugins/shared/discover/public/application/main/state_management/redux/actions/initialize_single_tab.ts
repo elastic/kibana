@@ -347,7 +347,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dispatch(
         internalStateSlice.actions.setForceFetchOnSelect({
           tabId,
-          forceFetchOnSelect: !tabState.skipInitialFetch && !isEmptyEsqlQuery(initialAppState.query),
+          forceFetchOnSelect:
+            !tabState.skipInitialFetch && !isEmptyEsqlQuery(initialAppState.query),
         })
       );
     }
