@@ -8,20 +8,30 @@
 import { firstValueFrom, of, toArray } from 'rxjs';
 import {
   ChatEventType,
+  CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
+  ConversationRoundStepType,
   ConversationOriginType,
   isRoundCompleteEvent,
   isRelevantSkillsStep,
   type ChatEvent,
+  type ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
-import { createRound } from '../../../../test_utils/conversations';
+import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { createFinalStateEvent } from '../events';
+import { fromEs, toEs } from '../../../conversation/client/converters';
+import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
+import {
+  roundToEvents,
+  promptResponseEvent,
+  resumeExecutionToEvents,
+} from '../../../conversation/client/rounds_to_events';
 import { addRoundCompleteEvent } from './add_round_complete_event';
 
 describe('addRoundCompleteEvent', () => {
@@ -182,6 +192,103 @@ describe('addRoundCompleteEvent', () => {
     });
   });
 
+  it('emits a resume_execution payload whose follow-up leads with the resolved tool-call step', async () => {
+    const pendingRound = {
+      ...createRound({
+        status: ConversationRoundStatus.awaitingPrompt,
+        input: { message: 'delete it' },
+      }),
+      steps: [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'my_tool',
+          params: {},
+          results: [],
+          progression: [{ message: 'Paused' }],
+        } as ConversationRoundStep,
+      ],
+    };
+
+    const toolResultEvent = {
+      type: ChatEventType.toolResult,
+      data: {
+        tool_call_id: 'call-1',
+        tool_id: 'my_tool',
+        results: [{ type: 'other', data: 'resolved' }],
+      },
+    } as unknown as ConvertedEvents;
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'm', message_content: 'deleted' },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 1, errorCount: 0 } as never) as ConvertedEvents,
+        toolResultEvent,
+        {
+          type: ChatEventType.toolProgress,
+          data: { tool_call_id: 'call-1', message: 'Resumed' },
+        } as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound,
+          userInput: { message: '' },
+          startTime: new Date('2026-01-01T00:05:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const rc = events.find(isRoundCompleteEvent);
+    expect(rc?.data.resumed).toBe(true);
+    expect(rc?.data.resume_execution).toBeDefined();
+
+    const followUpSteps = rc!.data.resume_execution!.follow_up_round.steps;
+    expect(followUpSteps[0]).toMatchObject({
+      tool_call_id: 'call-1',
+      results: [{ type: 'other', data: 'resolved' }],
+      progression: [{ tool_call_id: 'call-1', message: 'Resumed' }],
+    });
+    const mergedToolCall = rc!.data.round.steps.find(
+      (s) => s.type === ConversationRoundStepType.toolCall
+    );
+    expect(mergedToolCall).toMatchObject({
+      tool_call_id: 'call-1',
+      results: [{ type: 'other', data: 'resolved' }],
+      progression: [{ message: 'Paused' }, { tool_call_id: 'call-1', message: 'Resumed' }],
+    });
+    if (!rc?.data.resume_execution) {
+      throw new Error('Expected resume execution');
+    }
+    const conversation = createEmptyConversation();
+    const followUpRound = rc.data.resume_execution.follow_up_round;
+    const response = promptResponseEvent({
+      roundId: pendingRound.id,
+      executionIndex: 1,
+      promptRequestedEventId: `${pendingRound.id}::execution_terminated`,
+      responses: {},
+      input: followUpRound.input,
+      conversation,
+      createdAt: followUpRound.started_at,
+    });
+    const reloaded = eventsToRounds([
+      ...roundToEvents(pendingRound, conversation),
+      response,
+      ...resumeExecutionToEvents({
+        followUpRound,
+        roundId: pendingRound.id,
+        executionIndex: 1,
+        triggerEventId: response.id,
+        conversation,
+      }),
+    ]);
+    expect(reloaded[0].steps).toEqual(rc.data.round.steps);
+  });
+
   it('stamps the resolved author on the round when there is no origin', async () => {
     const messageCompleteEvent: ChatEvent = {
       type: ChatEventType.messageComplete,
@@ -220,6 +327,89 @@ describe('addRoundCompleteEvent', () => {
       format: () => ({ getRepresentation: () => ({ type: 'text' as const, value: '' }) }),
     }),
   };
+  it('retains new attachment context after resume, save and reload', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], typeDefStub);
+    await attachmentStateManager.add(
+      { id: 'original', type: 'text', data: { content: 'first' }, description: 'Original note' },
+      'user'
+    );
+    const pendingRound = createRound({
+      status: ConversationRoundStatus.awaitingPrompt,
+      pending_prompts: [],
+      input: {
+        message: 'Read the notes',
+        attachment_refs: attachmentStateManager.getAccessedRefs(),
+        attachment_context: 'Original attachment metadata',
+      },
+    });
+    attachmentStateManager.clearAccessTracking();
+    await attachmentStateManager.add(
+      { id: 'new', type: 'text', data: { content: 'second' }, description: 'New note' },
+      'user'
+    );
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 1, errorCount: 0 } as never) as ConvertedEvents,
+        {
+          type: ChatEventType.messageComplete,
+          data: { message_id: 'm', message_content: 'Read both notes' },
+        } as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          attachmentStateManager,
+          pendingRound,
+          userInput: { message: 'Read this too' },
+          startTime: new Date('2026-01-01T00:05:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+    const completed = events.find(isRoundCompleteEvent);
+    if (!completed?.data.resume_execution) {
+      throw new Error('Expected resume execution');
+    }
+    const followUpRound = completed.data.resume_execution.follow_up_round;
+    const conversation = createEmptyConversation({ schema_version: CONVERSATION_SCHEMA_VERSION });
+    const initialEvents = roundToEvents(pendingRound, conversation);
+    const response = promptResponseEvent({
+      roundId: pendingRound.id,
+      executionIndex: 1,
+      promptRequestedEventId: `${pendingRound.id}::execution_terminated`,
+      responses: {},
+      input: followUpRound.input,
+      conversation,
+      createdAt: followUpRound.started_at,
+    });
+    const timeline = [
+      ...initialEvents,
+      response,
+      ...resumeExecutionToEvents({
+        followUpRound,
+        roundId: pendingRound.id,
+        executionIndex: 1,
+        triggerEventId: response.id,
+        conversation,
+      }),
+    ];
+    const saved = toEs({ ...conversation, events: timeline, rounds: [] }, 'default');
+    const loaded = fromEs(
+      { _id: conversation.id, _seq_no: 1, _primary_term: 1, _source: saved },
+      { id: 'unknown', username: 'unknown', isAdmin: false }
+    );
+    const [reloadedRound] = eventsToRounds(loaded.events ?? []);
+    expect(reloadedRound.input).toEqual(completed.data.round.input);
+    expect(reloadedRound.input.attachment_refs?.map((ref) => ref.attachment_id)).toEqual([
+      'original',
+      'new',
+    ]);
+    expect(reloadedRound.input.attachment_context).toContain('attachment_id="original"');
+    expect(reloadedRound.input.attachment_context).toContain('attachment_id="new"');
+    expect(reloadedRound.input.attachment_context).toContain('description="New note"');
+    expect(loaded.events?.slice(0, initialEvents.length)).toEqual(initialEvents);
+    expect(pendingRound.input.attachment_context).toBe('Original attachment metadata');
+  });
+
   it('persists attachment_refs and a rendered attachment_context for an attachment created this round', async () => {
     const attachmentStateManager = createAttachmentStateManager([], typeDefStub);
     // Mirrors what the attachment_add tool handler does mid-round.
