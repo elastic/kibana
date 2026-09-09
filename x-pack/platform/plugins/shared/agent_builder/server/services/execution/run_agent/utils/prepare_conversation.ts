@@ -81,7 +81,8 @@ const mergeInputAttachmentsIntoAttachmentState = async (
             data: input.data,
             ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
           },
-          ATTACHMENT_REF_ACTOR.user
+          ATTACHMENT_REF_ACTOR.user,
+          options.validateContext
         );
         if (options?.updateOriginSnapshot && existing.origin !== undefined) {
           await attachmentStateManager.updateOrigin(
@@ -207,7 +208,7 @@ export const prepareConversation = async ({
         attachmentStateManager,
         attachmentContentByKey,
         round.input.attachments,
-        { resolveContext }
+        { resolveContext, validateContext }
       );
     }
     const attachmentRefs = mergeAttachmentRefs(
