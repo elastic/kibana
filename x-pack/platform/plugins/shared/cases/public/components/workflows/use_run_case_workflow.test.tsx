@@ -125,6 +125,12 @@ describe('useRunCaseWorkflow', () => {
     });
   });
 
+  it('suppresses the panel success toast because the executor owns toasting', () => {
+    const { result } = renderHookWithDefaults();
+
+    expect(result.current.showSuccessToast).toBe(false);
+  });
+
   describe('origin', () => {
     it('uses the CASE_WORKFLOW_ORIGIN_TYPE for the case-level origin', () => {
       const { useCasesWorkflowExecutor } = jest.requireMock('./use_cases_workflow_executor');

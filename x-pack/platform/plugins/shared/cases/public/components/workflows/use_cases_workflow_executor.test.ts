@@ -20,13 +20,16 @@ const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 describe('useCasesWorkflowExecutor', () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
+  const mockGetAppUrl = jest.fn().mockReturnValue('/app/workflows/wf-1?executionId=exec-1');
 
-  const { useHttp, useToasts } = jest.requireMock('../../common/lib/kibana');
+  const { useAppUrl, useHttp, useKibana, useToasts } = jest.requireMock('../../common/lib/kibana');
 
   beforeEach(() => {
     jest.clearAllMocks();
     useHttp.mockReturnValue(mockHttp);
     useToasts.mockReturnValue(mockToasts);
+    useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
+    useKibana.mockReturnValue({ services: { rendering: {} } });
   });
 
   const renderExecutorHook = () =>
@@ -83,9 +86,10 @@ describe('useCasesWorkflowExecutor', () => {
     await result.current({ workflowId: 'wf-1', inputs: {} });
 
     expect(mockToasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(mockToasts.addSuccess).not.toHaveBeenCalled();
   });
 
-  it('does not show a warning toast when activityStatus is "succeeded"', async () => {
+  it('shows a success toast when activityStatus is "succeeded"', async () => {
     mockRunCaseWorkflow.mockResolvedValueOnce({
       workflowExecutionId: 'exec-ok',
       activityStatus: 'succeeded',
@@ -95,6 +99,10 @@ describe('useCasesWorkflowExecutor', () => {
     await result.current({ workflowId: 'wf-1', inputs: {} });
 
     expect(mockToasts.addWarning).not.toHaveBeenCalled();
+    expect(mockToasts.addSuccess).toHaveBeenCalledTimes(1);
+    expect(mockToasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ text: expect.anything() })
+    );
   });
 
   it('propagates errors thrown by the API', async () => {
