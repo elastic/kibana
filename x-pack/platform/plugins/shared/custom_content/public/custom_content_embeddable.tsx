@@ -60,13 +60,27 @@ import {
 } from '@kbn/custom-content-renderer';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { css } from '@emotion/react';
 import { getServices } from './services';
 import { getTelemetry } from './telemetry';
-import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
-import { buildCustomContentContextAttachment } from './utils/chat_integration';
+import {
+  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+  MAX_PREVIEW_HEIGHT,
+} from '../common/panel_context_attachment';
+import {
+  buildCustomContentContextAttachment,
+  type CustomContentFetchContext,
+} from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
+
+const panelMeasureCss = css({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 100%',
+  minHeight: 0,
+});
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
@@ -88,6 +102,22 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       uiSettings: core.uiSettings,
       search,
     };
+    // The panel's own container is outside the sandboxed iframe, so its height is readable.
+    // Captured when the panel is sent to chat so the preview there starts at the size the
+    // user was actually looking at.
+    const panelElement: { current: HTMLDivElement | null } = { current: null };
+    const currentFetchContext = (): CustomContentFetchContext => ({
+      timeRange: effectiveTimeRange$.getValue(),
+      esqlVariables: esqlVariables$.getValue(),
+      filters: filters$.getValue(),
+      query: query$.getValue(),
+      isApproximate: isApproximate$.getValue(),
+      projectRouting: projectRouting$.getValue(),
+    });
+    const measurePanelHeight = () => {
+      const measured = panelElement.current?.getBoundingClientRect().height;
+      return measured ? Math.min(MAX_PREVIEW_HEIGHT, Math.round(measured)) : undefined;
+    };
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
@@ -95,6 +125,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
@@ -161,6 +192,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...timeRangeManager.api,
       serializeState,
       usesEsql$,
+      approximationApplied$,
       dataViews$,
       dataLoading$,
       getTypeDisplayName: () =>
@@ -206,12 +238,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               agentBuilder.openChat({
                 newConversation: true,
                 attachments: [
-                  buildCustomContentContextAttachment(
-                    draftTemplate,
-                    draftEsqlQuery,
-                    uuid,
-                    titleManager.api.title$.getValue() ?? undefined
-                  ),
+                  buildCustomContentContextAttachment({
+                    template: draftTemplate,
+                    esqlQuery: draftEsqlQuery,
+                    embeddableId: uuid,
+                    panelTitle: titleManager.api.title$.getValue() ?? undefined,
+                    panelHeight: measurePanelHeight(),
+                    fetchContext: currentFetchContext(),
+                  }),
                 ],
               });
             };
@@ -419,6 +453,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           dataLoading$.next(isLoading);
         }, []);
 
+        const setApproximationApplied = useCallback((value: boolean | undefined) => {
+          if (approximationApplied$.getValue() !== value) {
+            approximationApplied$.next(value);
+          }
+        }, []);
+
         const handleGenerateWithChat = useCallback(() => {
           if (!agentBuilder) return;
           getTelemetry().trackGenerateWithChatClicked({
@@ -430,29 +470,43 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           agentBuilder.openChat({
             newConversation: true,
             attachments: [
-              buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
+              buildCustomContentContextAttachment({
+                template: '',
+                embeddableId: uuid,
+                panelTitle: panelTitle ?? undefined,
+                panelHeight: measurePanelHeight(),
+                fetchContext: currentFetchContext(),
+              }),
             ],
           });
         }, [panelTitle]);
 
         return (
-          <CustomContentComponent
-            services={rendererServices}
-            embeddableId={uuid}
-            esqlQuery={esqlQuery}
-            timeRange={timeRange}
-            generationVersion={generationVersion}
-            savedTemplate={savedTemplate}
-            isApproximate={isApproximate}
-            projectRouting={projectRouting}
-            query={query}
-            filters={filters}
-            esqlVariables={esqlVariables}
-            previewHtml={previewHtml}
-            isAiAvailable={Boolean(agentBuilder)}
-            onLoadingChange={handleLoadingChange}
-            onGenerateWithChat={handleGenerateWithChat}
-          />
+          <div
+            ref={(element) => {
+              panelElement.current = element;
+            }}
+            css={panelMeasureCss}
+          >
+            <CustomContentComponent
+              services={rendererServices}
+              embeddableId={uuid}
+              esqlQuery={esqlQuery}
+              timeRange={timeRange}
+              generationVersion={generationVersion}
+              savedTemplate={savedTemplate}
+              isApproximate={isApproximate}
+              projectRouting={projectRouting}
+              query={query}
+              filters={filters}
+              esqlVariables={esqlVariables}
+              previewHtml={previewHtml}
+              isAiAvailable={Boolean(agentBuilder)}
+              onLoadingChange={handleLoadingChange}
+              setApproximationApplied={setApproximationApplied}
+              onGenerateWithChat={handleGenerateWithChat}
+            />
+          </div>
         );
       },
     };

@@ -28,12 +28,12 @@ export const SemanticTextBanner = () => {
   const bannerTitle = i18n.translate(
     'xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.title',
     {
-      defaultMessage: 'The semantic_text field type is available with a Platinum license',
+      defaultMessage: 'Semantic field types are available with a Platinum license',
     }
   );
 
   const bannerText = i18n.translate('xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.text', {
-    defaultMessage: 'Upgrade to use the semantic_text type in your indices.',
+    defaultMessage: 'Upgrade to use the semantic_text and semantic types in your indices.',
   });
 
   const manageLicenseLabel = i18n.translate(
