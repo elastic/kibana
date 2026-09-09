@@ -187,7 +187,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
           })
           .expect(200);
-        expect((addBody as AddEvaluationDatasetExamplesResponse).added).to.eql(2);
+        expect(addBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: 2,
+          skipped_duplicates: 0,
+        });
 
         const { body: datasetBody } = await adminClient
           .get(datasetPath(exampleDatasetId))
@@ -240,6 +243,69 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(datasetPath(exampleDatasetId))
           .expect(200);
         expect((datasetBody as GetEvaluationDatasetResponse).examples.length).to.eql(1);
+      });
+    });
+
+    describe('example import', () => {
+      const importDatasetName = `FTR Import Dataset ${suffix}`;
+      const importPayload = [
+        { input: { question: 'import-a' }, output: { answer: '1' } },
+        { input: { question: 'import-b' }, output: { answer: '2' } },
+      ];
+      let importDatasetId = '';
+
+      before(async () => {
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name: importDatasetName, description: 'import fixture' })
+          .expect(200);
+        importDatasetId = (body as CreateEvaluationDatasetResponse).dataset_id;
+      });
+
+      after(async () => {
+        if (importDatasetId) {
+          await adminClient.delete(datasetPath(importDatasetId)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+      });
+
+      it('imports examples with their source and skips them when re-imported', async () => {
+        const { body: importBody } = await adminClient
+          .post(examplesPath(importDatasetId))
+          .send({ examples: importPayload, source: 'import', on_duplicate: 'skip' })
+          .expect(200);
+
+        expect(importBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: importPayload.length,
+          skipped_duplicates: 0,
+        });
+
+        const { body: firstDatasetBody } = await adminClient
+          .get(datasetPath(importDatasetId))
+          .expect(200);
+        const firstDataset = firstDatasetBody as GetEvaluationDatasetResponse;
+        const importedExamples = firstDataset.examples;
+
+        expect(importedExamples.length).to.eql(importPayload.length);
+        expect(importedExamples.every(({ source }) => source === 'import')).to.be(true);
+
+        const firstExampleIds = importedExamples.map(({ id }) => id).sort();
+        const { body: reimportBody } = await adminClient
+          .post(examplesPath(importDatasetId))
+          .send({ examples: importPayload, source: 'import', on_duplicate: 'skip' })
+          .expect(200);
+
+        expect(reimportBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: 0,
+          skipped_duplicates: importPayload.length,
+        });
+
+        const { body: reimportedDatasetBody } = await adminClient
+          .get(datasetPath(importDatasetId))
+          .expect(200);
+        const reimportedDataset = reimportedDatasetBody as GetEvaluationDatasetResponse;
+        expect(reimportedDataset.examples.map(({ id }) => id).sort()).to.eql(firstExampleIds);
       });
     });
 

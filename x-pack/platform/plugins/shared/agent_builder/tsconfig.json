@@ -148,5 +148,6 @@
     "@kbn/context-engine-plugin",
     "@kbn/files-plugin",
     "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks",
   ]
 }
