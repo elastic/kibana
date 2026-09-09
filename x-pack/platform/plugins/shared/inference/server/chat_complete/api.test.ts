@@ -207,7 +207,8 @@ describe('createChatCompleteApi', () => {
         connectorId: 'connectorId',
         system: 'original system',
         messages: [{ role: MessageRole.User, content: 'original question' }],
-        metadata: { anonymization: { sessionId: 'session-a', agentId: 'agent-a' } },
+        sessionId: 'session-a',
+        metadata: { agentId: 'agent-a' },
         maxRetries: 0,
       })
     ).resolves.toEqual(expect.objectContaining({ content: 'workflow restored' }));
