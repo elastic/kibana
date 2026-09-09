@@ -244,7 +244,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       // Update SO with deploy outcome (best-effort).
       if (onboardingDeploymentId) {
         await sendUpdateCloudOnboardingDeployment(onboardingDeploymentId, {
-          packagePolicyIds: Object.values(policyIdsByInstance),
+          packagePolicyIds: Object.values({
+            ...detectAndReviewStep.policyIdsByInstance,
+            ...policyIdsByInstance,
+          }),
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
         }).catch(() => {});
       }
@@ -272,6 +275,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.serviceStatuses,
       detectAndReviewStep.failedInstances,
       detectAndReviewStep.onboardingDeploymentId,
+      detectAndReviewStep.policyIdsByInstance,
       selectedServiceIds,
       dataFormat,
       servicesMap,
