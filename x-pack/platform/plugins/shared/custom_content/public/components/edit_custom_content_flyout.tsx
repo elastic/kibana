@@ -161,7 +161,12 @@ export const EditCustomContentFlyout = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}>
+              <h2
+                id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}
+                data-test-subj={
+                  isNewPanel ? 'customContentCreateFlyoutTitle' : 'customContentEditFlyoutTitle'
+                }
+              >
                 {isNewPanel
                   ? i18n.translate('xpack.customContent.editFlyout.createTitle', {
                       defaultMessage: 'Create custom panel',
@@ -235,12 +240,16 @@ export const EditCustomContentFlyout = ({
           fullWidth
           helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
             defaultMessage:
-              'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
+              'HTML and CSS, with Liquid tags to insert ES|QL results. For each row, row["column"].value is the value and row["column"].pct is its percentage of the column\'s highest value, useful for bar widths.',
           })}
         >
           <EuiResizeObserver onResize={onEditorContainerResize}>
             {(editorResizeRef) => (
-              <div ref={editorResizeRef} css={editorContainerCss}>
+              <div
+                ref={editorResizeRef}
+                css={editorContainerCss}
+                data-test-subj="customContentTemplateEditorContainer"
+              >
                 <CodeEditor
                   languageId="liquid"
                   value={draftTemplate}
@@ -250,7 +259,7 @@ export const EditCustomContentFlyout = ({
                     isAiAvailable
                       ? i18n.translate('xpack.customContent.editFlyout.templatePlaceholderAi', {
                           defaultMessage:
-                            '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+                            '<!-- Write your HTML, CSS, and Liquid here, or select Generate with chat. -->',
                         })
                       : i18n.translate('xpack.customContent.editFlyout.templatePlaceholderNoAi', {
                           defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',

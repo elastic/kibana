@@ -27,7 +27,7 @@ describe('AutonomySlider', () => {
 
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByTestId('pndAutonomyDescription')).toHaveTextContent(
-      'The Watch acts within its allow-list'
+      'This Worker acts within its allow-list'
     );
 
     fireEvent.pointerUp(window);

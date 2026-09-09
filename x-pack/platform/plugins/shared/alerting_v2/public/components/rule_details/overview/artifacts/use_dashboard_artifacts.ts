@@ -109,7 +109,7 @@ export const useDashboardArtifacts = (
   }, [dashboard, dashboardIds]);
 
   const artifactIdByDashboardId = useMemo(() => {
-    // Keyed by dashboard saved-object id (`data.dashboardId`). Duplicate values collapse
+    // Keyed by dashboard saved-object id (`data.dashboard_id`). Duplicate values collapse
     // to the last artifact id — deleting removes one artifact at a time.
     const map = new Map<string, string>();
     for (const artifact of dashboardArtifacts) {
