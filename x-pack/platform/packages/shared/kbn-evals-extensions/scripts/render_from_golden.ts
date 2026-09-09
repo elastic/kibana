@@ -331,6 +331,46 @@ const traces = tracesPath
   ? (JSON.parse(fs.readFileSync(tracesPath, 'utf8')) as MatrixTraceData)
   : undefined;
 
+// A trace cache that LOADS is not a trace cache that LANDS. The ES-direct
+// builder keys entries `execid::suite::model::example` and nests steps under
+// `task.output.steps`, while the renderer looks up `traceKey(modelId, columnId)`
+// and reads `entry.steps` at the top level. Passing the raw cache through
+// yields exit 0, zero warnings, and a board with no trace cards at all --
+// exactly the defect TRACES_JSON was added to prevent. So assert on resolved
+// lookups against the config, not on the env var being set.
+if (traces) {
+  const traceRows = [...matrix.proprietary, ...matrix.openSource];
+  const cols = config.columns.map((c) => c.id);
+  let hits = 0;
+  for (const row of traceRows) {
+    for (const col of cols) {
+      if (traces[`${row.modelId}:${col}`]?.steps?.length) hits++;
+    }
+  }
+  const withSteps = Object.values(traces).filter((t) => t?.steps?.length).length;
+  if (withSteps === 0) {
+    throw new Error(
+      `render_from_golden: ${tracesPath} has ${Object.keys(traces).length} entries but NONE ` +
+        `carry a top-level 'steps' array. This is the raw ES cache shape ` +
+        `(steps nested under task.output.steps); convert it to MatrixTraceEntry first ` +
+        `(scripts/orca_vm/to_matrix_trace_entries.py).`
+    );
+  }
+  if (hits === 0) {
+    throw new Error(
+      `render_from_golden: ${tracesPath} resolved 0 of ${traceRows.length * cols.length} ` +
+        `(model, column) lookups. Entries are keyed ` +
+        `'${Object.keys(traces)[0]}' but the renderer looks up ` +
+        `'${traceRows[0]?.modelId}:${cols[0]}'. Re-key to traceKey(modelId, columnId).`
+    );
+  }
+  // eslint-disable-next-line no-console
+  console.log(
+    `traces: ${hits}/${traceRows.length * cols.length} cell lookups resolved ` +
+      `(${withSteps} entries with steps)`
+  );
+}
+
 const html = renderMatrixHtml(matrix, config, provenance, traces);
 
 fs.mkdirSync(outDir, { recursive: true });
