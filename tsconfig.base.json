@@ -1341,8 +1341,6 @@
       "@kbn/evals-suite-llm-tasks/*": ["./x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/*"],
       "@kbn/evals-suite-ml": ["./x-pack/platform/plugins/shared/ml/evals"],
       "@kbn/evals-suite-ml/*": ["./x-pack/platform/plugins/shared/ml/evals/*"],
-      "@kbn/evals-suite-obs-ai-assistant": ["./x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant"],
-      "@kbn/evals-suite-obs-ai-assistant/*": ["./x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/*"],
       "@kbn/evals-suite-observability-ai": ["./x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai"],
       "@kbn/evals-suite-observability-ai/*": ["./x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/*"],
       "@kbn/evals-suite-pci-compliance": ["./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance"],
