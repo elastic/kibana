@@ -53,6 +53,7 @@ const REPORT_INDEX = '.kibana-threat-reports';
 /** Mapping shape for a reports index that is already on the current version. */
 const fullyMigratedReportMappings = () => ({
   properties: {
+    revision: {},
     content: {
       properties: {},
     },
@@ -148,6 +149,7 @@ const runMigrations = async ({
       mappings: args.index === THREAT_INTEL_INDICATORS_INDEX ? indicatorMappings : reportMappings,
     },
   })) as never);
+  esClient.updateByQuery.mockResolvedValue({ updated: 0 } as never);
 
   // The mock returns the same deficient mapping on every read, so the
   // post-migration schema check sees the field as still missing even though the
@@ -230,6 +232,16 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('adds revision when absent and backfills missing values', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties as Record<string, unknown>).revision;
+
+    const { patchedPaths, esClient } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('revision');
+    expect(esClient.updateByQuery).toHaveBeenCalled();
   });
 
   it('adds space_id to the indicators index when absent', async () => {
@@ -494,6 +506,28 @@ describe('index_templates — mapping coverage guard', () => {
 
     const callIdx = src.indexOf('await migrateExistingVulnerabilityMappings', installIdx);
     expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  it('migrateExistingRevisionMapping is wired into installIndexTemplates', () => {
+    expect(src).toContain('const migrateExistingRevisionMapping');
+
+    const installIdx = src.indexOf('export const installIndexTemplates');
+    expect(installIdx).toBeGreaterThan(-1);
+
+    const callIdx = src.indexOf('await migrateExistingRevisionMapping', installIdx);
+    expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  it('reports template declares a top-level revision integer (v28)', async () => {
+    const { byIndex } = await runInstall();
+
+    const properties = (
+      byIndex(THREAT_REPORTS_INDEX)?.template?.mappings as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+
+    expect(properties).toEqual(expect.objectContaining({ revision: { type: 'integer' } }));
   });
 
   it('indicators template declares a top-level space_id keyword (v24 space isolation)', async () => {

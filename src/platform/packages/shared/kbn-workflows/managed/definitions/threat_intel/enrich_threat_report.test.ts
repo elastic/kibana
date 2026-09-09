@@ -75,6 +75,16 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       expect(gate.with?.extraction_method).toBe('pending');
     });
 
+    it('bumps revision once after a successful enrich pass', () => {
+      const bump = findStepByName(workflow.steps, 'bump_revision') as {
+        if?: string;
+        with?: { script?: { source?: string } };
+      };
+      expect(bump).toBeDefined();
+      expect(bump.if).toContain('steps.extract_iocs.error == null');
+      expect(bump.with?.script?.source).toContain('ctx._source.revision');
+    });
+
     // The two gates are separate conditions over the same steps, so updating one
     // and not the other would leave a report neither marked complete nor retryable.
     it('keeps the two gates complementary', () => {
