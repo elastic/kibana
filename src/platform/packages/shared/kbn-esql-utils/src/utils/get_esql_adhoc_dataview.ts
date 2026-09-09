@@ -35,15 +35,15 @@ async function sha256(str: string) {
 async function getESQLAdHocDataviewId({
   indexPattern,
   timeFieldName,
-  effectiveProjectRouting,
+  projectRouting,
   idPrefix = 'esql',
 }: {
   indexPattern: string;
   timeFieldName: string | undefined;
-  effectiveProjectRouting: string | undefined;
+  projectRouting: string | undefined;
   idPrefix?: string;
 }): Promise<string> {
-  const dataViewIdentity = [idPrefix, indexPattern, effectiveProjectRouting, timeFieldName]
+  const dataViewIdentity = [idPrefix, indexPattern, projectRouting, timeFieldName]
     .filter(Boolean)
     .join('-');
   return sha256(dataViewIdentity);
@@ -71,8 +71,8 @@ async function getESQLAdHocDataviewId({
  * @param options.id - Explicit DataView ID. When provided, this ID is used as-is instead of generating one via SHA-256. Useful when the caller already knows the ID (e.g. from a persisted ad-hoc DataView spec) and wants the DataViewService cache to be populated under that exact key.
  * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
- * @param effectiveProjectRouting - The resolved CPS project routing to use. Callers must resolve
- * precedence themselves (i.e. `getProjectRoutingFromEsqlQuery(query) ?? pickerRouting`) before passing.
+ * @param projectRouting - The CPS project routing (picker routing) to forward to the timefield route.
+ * The server resolves SET project_routing precedence; callers do not need to pre-resolve it.
  *
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
  *
@@ -82,7 +82,7 @@ export async function getESQLAdHocDataview({
   query,
   options,
   http,
-  effectiveProjectRouting,
+  projectRouting,
 }: {
   // the data views service to use to create the data view
   dataViewsService: DataViewsPublicPluginStart;
@@ -97,12 +97,12 @@ export async function getESQLAdHocDataview({
   };
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
-  effectiveProjectRouting?: string;
+  projectRouting?: string;
 }) {
   const timeFieldName = await getESQLTimeField({
     query,
     http,
-    projectRouting: effectiveProjectRouting,
+    projectRouting,
   });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -111,7 +111,7 @@ export async function getESQLAdHocDataview({
     (await getESQLAdHocDataviewId({
       indexPattern,
       timeFieldName,
-      effectiveProjectRouting,
+      projectRouting,
       idPrefix: options?.idPrefix,
     }));
 

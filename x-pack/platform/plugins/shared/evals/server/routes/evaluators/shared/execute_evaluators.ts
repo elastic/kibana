@@ -12,6 +12,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
+import { withEvaluatorNameBaggage } from '../../../evaluators/evaluator_tracing_context';
 import { getInstrumentationProfile } from '../../../evaluators/evidence/resolve_instrumentation';
 import { formatEvidenceSchemaIssues } from '../../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../../evaluators/trace_accessor';
@@ -199,13 +200,15 @@ export const executeEvaluators = async ({
         definition.kind === 'llm' && connectorId
           ? await getInferenceClient(connectorId)
           : undefined;
-      const result = await definition.evaluate({
-        trace: traceAccessor,
-        round,
-        referenceData: parsedReferenceData.get(definition),
-        inferenceClient,
-        log: logger,
-      });
+      const result = await withEvaluatorNameBaggage(definition.name, () =>
+        definition.evaluate({
+          trace: traceAccessor,
+          round,
+          referenceData: parsedReferenceData.get(definition),
+          inferenceClient,
+          log: logger,
+        })
+      );
 
       results.push({
         status: 'ok',

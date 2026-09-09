@@ -17,7 +17,6 @@ import {
   useCreateEvaluator,
   useDeleteEvaluator,
   useEvaluators,
-  useModelConnectors,
   useUpdateEvaluator,
 } from './use_evaluators_api';
 
@@ -30,12 +29,7 @@ const JUDGE: LlmJudgeConfig = {
 
 const setup = () => {
   const http = httpServiceMock.createStartContract();
-  http.get.mockImplementation(async (path) => {
-    if ((path as unknown as string) === '/api/actions/connectors') {
-      return [];
-    }
-    return { evaluators: [] };
-  });
+  http.get.mockResolvedValue({ evaluators: [] });
   http.post.mockResolvedValue({ evaluator: { name: 'quality' } });
   http.put.mockResolvedValue({ evaluator: { name: 'quality' } });
   http.delete.mockResolvedValue({ deleted: 1 });
@@ -89,16 +83,11 @@ describe('evaluator API hooks', () => {
     await waitFor(() => expect(listCalls(http)).toBe(4));
   });
 
-  it('uses the shared evaluator and connector query keys', async () => {
+  it('uses the shared evaluator query key', async () => {
     const { queryClient, wrapper } = setup();
-    const { result } = renderHook(
-      () => ({ evaluators: useEvaluators(), connectors: useModelConnectors() }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useEvaluators(), { wrapper });
 
-    await waitFor(() => expect(result.current.evaluators.isSuccess).toBe(true));
-    await waitFor(() => expect(result.current.connectors.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryClient.getQueryData(queryKeys.evaluators.list())).toEqual({ evaluators: [] });
-    expect(queryClient.getQueryData(queryKeys.modelConnectors.list())).toEqual([]);
   });
 });

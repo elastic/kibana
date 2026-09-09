@@ -27,28 +27,10 @@ import {
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
-export interface ModelConnector {
-  id: string;
-  name: string;
-  connectorTypeId: string;
-  isDeprecated: boolean;
-  isMissingSecrets: boolean;
-}
-
-interface RawActionConnector {
-  id: string;
-  name: string;
-  connector_type_id: string;
-  is_deprecated?: boolean;
-  is_missing_secrets?: boolean;
-}
-
 interface UpdateEvaluatorVariables {
   name: string;
   updates: UpdateEvaluatorRequestBodyInput;
 }
-
-export const MODEL_CONNECTOR_TYPE_IDS = ['.inference', '.gen-ai', '.bedrock', '.gemini'] as const;
 
 const retryOnServerError = (_failureCount: number, error: unknown): boolean => {
   if (isHttpFetchError(error)) {
@@ -160,33 +142,5 @@ export const useResolveInstrumentation = () => {
         body: JSON.stringify({ trace_id: traceId }),
         version: API_VERSIONS.internal.v1,
       }),
-  });
-};
-
-export const useModelConnectors = () => {
-  const { services } = useKibana();
-
-  return useQuery({
-    queryKey: queryKeys.modelConnectors.list(),
-    queryFn: async (): Promise<ModelConnector[]> => {
-      const connectors = await services.http!.get<RawActionConnector[]>('/api/actions/connectors');
-      const availableConnectors = connectors
-        .filter((connector) => !connector.is_deprecated)
-        .map<ModelConnector>((connector) => ({
-          id: connector.id,
-          name: connector.name,
-          connectorTypeId: connector.connector_type_id,
-          isDeprecated: connector.is_deprecated ?? false,
-          isMissingSecrets: connector.is_missing_secrets ?? false,
-        }));
-      const supportedTypes = new Set<string>(MODEL_CONNECTOR_TYPE_IDS);
-      const modelConnectors = availableConnectors.filter((connector) =>
-        supportedTypes.has(connector.connectorTypeId)
-      );
-
-      return modelConnectors.length > 0 ? modelConnectors : availableConnectors;
-    },
-    retry: retryOnServerError,
-    refetchOnWindowFocus: false,
   });
 };

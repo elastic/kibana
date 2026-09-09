@@ -60,7 +60,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsLoading).toBeHidden();
 
     await eisModels.manageRegionsCustomPolicyToggle.click();
-    await expect(eisModels.manageRegionsGeoTab).toBeVisible();
+    await expect(eisModels.manageRegionsLocationTypeGeo).toBeVisible();
   });
 
   test('info callout is hidden until the custom policy toggle is on, and is dismissible', async ({
@@ -180,32 +180,28 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await test.step('the just-saved geo is pre-selected', async () => {
       await expect(eisModels.manageRegionsCustomPolicyToggle).toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('apac')).not.toBeChecked();
+      await expect(eisModels.geoZoneCheckbox('eu')).toHaveAttribute('aria-checked', 'true');
+      await expect(eisModels.geoZoneCheckbox('apac')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
-  test('switching to the Regions tab shows zone accordion panels', async ({ pageObjects }) => {
+  test('switching to the Regions tab shows zone panels', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
     await eisModels.manageRegionsCustomPolicyToggle.click();
 
-    await eisModels.manageRegionsRegionsTab.click();
+    await eisModels.manageRegionsLocationTypeRegions.click();
 
     await test.step('zone panels for all geos are visible', async () => {
       for (const geo of ['apac', 'eu', 'us']) {
         await expect(eisModels.regionZonePanel(geo)).toBeVisible();
       }
     });
-
-    await test.step('Expand all button is visible on the Regions tab', async () => {
-      await expect(eisModels.manageRegionsExpandAllButton).toBeVisible();
-    });
   });
 
-  test('Expand all on the Regions tab reveals individual region checkboxes', async ({
+  test('switching to the Regions tab reveals individual region checkboxes directly', async ({
     pageObjects,
   }) => {
     const { eisModels } = pageObjects;
@@ -214,8 +210,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsLoading).toBeHidden();
     await eisModels.manageRegionsCustomPolicyToggle.click();
 
-    await eisModels.manageRegionsRegionsTab.click();
-    await eisModels.manageRegionsExpandAllButton.click();
+    await eisModels.manageRegionsLocationTypeRegions.click();
 
     await test.step('region checkboxes for all CSP regions are visible', async () => {
       await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).toBeVisible();
@@ -224,9 +219,18 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     });
 
     await test.step('no region checkboxes are checked by default (new policy)', async () => {
-      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).not.toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::eu-west-1')).not.toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::us-east-1')).not.toBeChecked();
+      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      await expect(eisModels.regionCheckbox('aws::us-east-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
   });
 
@@ -237,8 +241,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsLoading).toBeHidden();
     await eisModels.manageRegionsCustomPolicyToggle.click();
 
-    await eisModels.manageRegionsRegionsTab.click();
-    await eisModels.manageRegionsExpandAllButton.click();
+    await eisModels.manageRegionsLocationTypeRegions.click();
 
     await eisModels.regionCheckbox('aws::ap-southeast-1').click();
     await eisModels.manageRegionsSaveButton.click();
@@ -264,13 +267,13 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await test.step('toggle is ON by default for an existing policy', async () => {
       await expect(eisModels.manageRegionsCustomPolicyToggle).toBeChecked();
-      await expect(eisModels.manageRegionsGeoTab).toBeVisible();
+      await expect(eisModels.manageRegionsLocationTypeGeo).toBeVisible();
     });
 
     await test.step('only eu is checked', async () => {
-      await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('apac')).not.toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('us')).not.toBeChecked();
+      await expect(eisModels.geoZoneCheckbox('eu')).toHaveAttribute('aria-checked', 'true');
+      await expect(eisModels.geoZoneCheckbox('apac')).toHaveAttribute('aria-checked', 'false');
+      await expect(eisModels.geoZoneCheckbox('us')).toHaveAttribute('aria-checked', 'false');
     });
 
     await test.step('Save is disabled when policy is unchanged', async () => {
@@ -298,14 +301,25 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsLoading).toBeHidden();
 
     await test.step('Regions tab is active when policy has allowed_regions', async () => {
-      await expect(eisModels.manageRegionsRegionsTab).toHaveAttribute('aria-selected', 'true');
+      await expect(eisModels.manageRegionsLocationTypeRegions).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
     });
 
     await test.step('eu-west-1 region is pre-selected', async () => {
-      await eisModels.manageRegionsExpandAllButton.click();
-      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).not.toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::us-east-1')).not.toBeChecked();
+      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      await expect(eisModels.regionCheckbox('aws::us-east-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
 
     await test.step('Save is disabled when policy is unchanged', async () => {

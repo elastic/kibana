@@ -43,11 +43,11 @@ import {
 import {
   useCreateEvaluator,
   useEvaluator,
-  useModelConnectors,
   useResolveInstrumentation,
   useTestEvaluator,
   useUpdateEvaluator,
 } from '../../hooks/use_evaluators_api';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
@@ -124,7 +124,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const { data: evaluatorData, isLoading: isLoadingEvaluator } = useEvaluator(
     mode === 'edit' ? evaluatorName : undefined
   );
-  const { data: connectors = [], isLoading: isLoadingConnectors } = useModelConnectors();
+  const { connectors, isLoading: isLoadingConnectors } = useModelConnectors();
   const createEvaluator = useCreateEvaluator();
   const updateEvaluator = useUpdateEvaluator();
   const testEvaluator = useTestEvaluator();
