@@ -12,7 +12,8 @@ import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERT_ZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID = 'system-security-floor-alert-triage';
+export const ALERT_ZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID =
+  'system-security-floor-alert-triage';
 
 export const ALERT_ZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW = {
   billable: false,

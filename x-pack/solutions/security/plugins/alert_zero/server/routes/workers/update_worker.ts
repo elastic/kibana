@@ -82,10 +82,13 @@ export const registerUpdateWorkerRoute = ({
             case 'conflict':
               return response.conflict({
                 body: {
-                  message: i18n.translate('xpack.alertzero.workerSettingsConflictResponseErrorMessage', {
-                    defaultMessage: 'Worker "{workerId}" settings changed; reload and retry',
-                    values: { workerId },
-                  }),
+                  message: i18n.translate(
+                    'xpack.alertzero.workerSettingsConflictResponseErrorMessage',
+                    {
+                      defaultMessage: 'Worker "{workerId}" settings changed; reload and retry',
+                      values: { workerId },
+                    }
+                  ),
                 },
               });
             case 'unavailable':

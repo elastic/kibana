@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALERT_ZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERT_ZERO_RULE_WORKFLOW_MANAGEMENT } from './constants';
+import {
+  ALERT_ZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  ALERT_ZERO_RULE_WORKFLOW_MANAGEMENT,
+} from './constants';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
 import RULE_TUNING_YAML from './rule_tuning.yaml';

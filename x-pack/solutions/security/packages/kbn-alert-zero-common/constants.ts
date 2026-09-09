@@ -35,7 +35,8 @@ export const buildSkillUrl = (skillId: string) =>
   `${ALERT_ZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
 
 export const ALERT_ZERO_INVESTIGATIONS_URL = `${ALERT_ZERO_INTERNAL_URL}/investigations` as const;
-export const ALERT_ZERO_INVESTIGATION_URL_TEMPLATE = `${ALERT_ZERO_INVESTIGATIONS_URL}/{id}` as const;
+export const ALERT_ZERO_INVESTIGATION_URL_TEMPLATE =
+  `${ALERT_ZERO_INVESTIGATIONS_URL}/{id}` as const;
 
 export const buildInvestigationUrl = (id: string) =>
   `${ALERT_ZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;

@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { API_VERSIONS, INTERNAL_API_ACCESS, ALERT_ZERO_INVESTIGATION_URL_TEMPLATE } from '@kbn/alert-zero-common';
+import {
+  API_VERSIONS,
+  INTERNAL_API_ACCESS,
+  ALERT_ZERO_INVESTIGATION_URL_TEMPLATE,
+} from '@kbn/alert-zero-common';
 import type { ListInvestigationProposalsResponse } from '@kbn/alert-zero-common';
 import { getMockProposalsByInvestigationId } from '@kbn/alert-zero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';

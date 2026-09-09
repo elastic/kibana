@@ -11,7 +11,10 @@ export const PAGE_TITLE = i18n.translate('xpack.alertzero.settings.pageTitle', {
   defaultMessage: 'Settings',
 });
 
-export const WATCH_ENABLEMENT_NOTE = i18n.translate('xpack.alertzero.settings.watchEnablementNote', {
-  defaultMessage:
-    'Enable or configure each watch from its own page. There is no space-level switch.',
-});
+export const WATCH_ENABLEMENT_NOTE = i18n.translate(
+  'xpack.alertzero.settings.watchEnablementNote',
+  {
+    defaultMessage:
+      'Enable or configure each watch from its own page. There is no space-level switch.',
+  }
+);

@@ -90,7 +90,11 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   );
 
   return (
-    <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="alertZeroWatchesSectionLayout">
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      data-test-subj="alertZeroWatchesSectionLayout"
+    >
       {!isCollapsed ? (
         /**
          * `sticky` must be passed explicitly. The EUI docs claim `EuiPageTemplate` makes its sidebar

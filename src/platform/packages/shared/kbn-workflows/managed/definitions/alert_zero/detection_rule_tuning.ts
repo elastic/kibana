@@ -12,7 +12,8 @@ import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERT_ZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID = 'system-security-detection-rule-tuning';
+export const ALERT_ZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID =
+  'system-security-detection-rule-tuning';
 
 export const ALERT_ZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   billable: false,

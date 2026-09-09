@@ -27,9 +27,12 @@ import {
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export const ENABLED_SWITCH_LABEL = i18n.translate('xpack.alertzero.watches.settings.enabledSwitch', {
-  defaultMessage: 'Enabled',
-});
+export const ENABLED_SWITCH_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.enabledSwitch',
+  {
+    defaultMessage: 'Enabled',
+  }
+);
 
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
@@ -55,9 +58,12 @@ export const TRIGGERS_SECTION_SUBTITLE = i18n.translate(
   { defaultMessage: 'owned by the Watch Orchestrator' }
 );
 
-export const SCOPE_SECTION_TITLE = i18n.translate('xpack.alertzero.watches.settings.scope.sectionTitle', {
-  defaultMessage: 'Scope & routing',
-});
+export const SCOPE_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.scope.sectionTitle',
+  {
+    defaultMessage: 'Scope & routing',
+  }
+);
 
 export const SCOPE_SECTION_SUBTITLE = i18n.translate(
   'xpack.alertzero.watches.settings.scope.sectionSubtitle',
@@ -98,9 +104,12 @@ export const SKILLS_VIEW_ALL = i18n.translate('xpack.alertzero.watches.settings.
   defaultMessage: 'View all skills',
 });
 
-export const GATES_SECTION_TITLE = i18n.translate('xpack.alertzero.watches.settings.gates.sectionTitle', {
-  defaultMessage: 'Approval gates',
-});
+export const GATES_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.gates.sectionTitle',
+  {
+    defaultMessage: 'Approval gates',
+  }
+);
 
 export const GATES_SECTION_SUBTITLE = i18n.translate(
   'xpack.alertzero.watches.settings.gates.sectionSubtitle',
@@ -233,13 +242,19 @@ export const AD_SCHEDULE_LABEL = i18n.translate(
   { defaultMessage: 'Attack Discovery schedule' }
 );
 
-export const SCHEDULE_LABEL = i18n.translate('xpack.alertzero.watches.settings.triggers.scheduleLabel', {
-  defaultMessage: 'Schedule',
-});
+export const SCHEDULE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.triggers.scheduleLabel',
+  {
+    defaultMessage: 'Schedule',
+  }
+);
 
-export const SCHEDULE_HELP = i18n.translate('xpack.alertzero.watches.settings.triggers.scheduleHelp', {
-  defaultMessage: 'How often the Orchestrator looks for new work.',
-});
+export const SCHEDULE_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.triggers.scheduleHelp',
+  {
+    defaultMessage: 'How often the Orchestrator looks for new work.',
+  }
+);
 
 export const MANUAL_RUN_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.triggers.manualRunLabel',
@@ -251,9 +266,12 @@ export const MANUAL_RUN_SWITCH_LABEL = i18n.translate(
   { defaultMessage: 'Allow manual run' }
 );
 
-export const MANUAL_RUN_HELP = i18n.translate('xpack.alertzero.watches.settings.triggers.manualRunHelp', {
-  defaultMessage: 'Lets an analyst start a run outside the schedule.',
-});
+export const MANUAL_RUN_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.triggers.manualRunHelp',
+  {
+    defaultMessage: 'Lets an analyst start a run outside the schedule.',
+  }
+);
 
 export const SCHEDULE_OPTION_LABELS: Record<string, string> = {
   'every-5m': i18n.translate('xpack.alertzero.watches.settings.schedule.every5m', {
@@ -274,9 +292,12 @@ export const SCHEDULE_OPTION_LABELS: Record<string, string> = {
 /* Scope & routing                                                            */
 /* -------------------------------------------------------------------------- */
 
-export const DATA_SOURCES_LABEL = i18n.translate('xpack.alertzero.watches.settings.scope.dataSources', {
-  defaultMessage: 'Allowed data sources',
-});
+export const DATA_SOURCES_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.scope.dataSources',
+  {
+    defaultMessage: 'Allowed data sources',
+  }
+);
 
 export const DATA_SOURCES_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.scope.dataSourcesHelp',
@@ -356,9 +377,12 @@ export const ESCALATION_CONTACT_OPTION_LABELS: Record<string, string> = {
   'ir-on-call': i18n.translate('xpack.alertzero.watches.settings.escalationContact.irOnCall', {
     defaultMessage: 'IR on-call',
   }),
-  'detection-lead': i18n.translate('xpack.alertzero.watches.settings.escalationContact.detectionLead', {
-    defaultMessage: 'Detection lead',
-  }),
+  'detection-lead': i18n.translate(
+    'xpack.alertzero.watches.settings.escalationContact.detectionLead',
+    {
+      defaultMessage: 'Detection lead',
+    }
+  ),
 };
 
 /* -------------------------------------------------------------------------- */
@@ -406,9 +430,12 @@ export const STATUS_PAUSED = i18n.translate('xpack.alertzero.watches.settings.st
   defaultMessage: 'paused',
 });
 
-export const STATUS_UNAVAILABLE = i18n.translate('xpack.alertzero.watches.settings.status.unavailable', {
-  defaultMessage: 'unavailable',
-});
+export const STATUS_UNAVAILABLE = i18n.translate(
+  'xpack.alertzero.watches.settings.status.unavailable',
+  {
+    defaultMessage: 'unavailable',
+  }
+);
 
 export const STATUS_DISABLED_GLOBALLY = i18n.translate(
   'xpack.alertzero.watches.settings.status.disabledGlobally',
@@ -427,17 +454,23 @@ export const degradedStatus = (reason: string) =>
     values: { reason },
   });
 
-export const STATUS_DEGRADED = i18n.translate('xpack.alertzero.watches.settings.status.degradedPlain', {
-  defaultMessage: 'degraded',
-});
+export const STATUS_DEGRADED = i18n.translate(
+  'xpack.alertzero.watches.settings.status.degradedPlain',
+  {
+    defaultMessage: 'degraded',
+  }
+);
 
 /* -------------------------------------------------------------------------- */
 /* Approval gates                                                             */
 /* -------------------------------------------------------------------------- */
 
-export const COL_ACTION_TYPE = i18n.translate('xpack.alertzero.watches.settings.gates.col.actionType', {
-  defaultMessage: 'Action type',
-});
+export const COL_ACTION_TYPE = i18n.translate(
+  'xpack.alertzero.watches.settings.gates.col.actionType',
+  {
+    defaultMessage: 'Action type',
+  }
+);
 
 export const COL_REQUIRES_APPROVAL = i18n.translate(
   'xpack.alertzero.watches.settings.gates.col.requiresApproval',
@@ -457,9 +490,12 @@ export const GATE_NAMES: Record<string, string> = {
     'xpack.alertzero.watches.settings.gates.detectionRuleChange.name',
     { defaultMessage: 'Detection rule change' }
   ),
-  'new-detection-rule': i18n.translate('xpack.alertzero.watches.settings.gates.newDetectionRule.name', {
-    defaultMessage: 'New detection rule',
-  }),
+  'new-detection-rule': i18n.translate(
+    'xpack.alertzero.watches.settings.gates.newDetectionRule.name',
+    {
+      defaultMessage: 'New detection rule',
+    }
+  ),
   'hunt-execution': i18n.translate('xpack.alertzero.watches.settings.gates.huntExecution.name', {
     defaultMessage: 'Hunt execution',
   }),
@@ -470,9 +506,12 @@ export const GATE_NAMES: Record<string, string> = {
 };
 
 export const GATE_QUALIFIERS: Record<string, string> = {
-  'host-isolation': i18n.translate('xpack.alertzero.watches.settings.gates.hostIsolation.qualifier', {
-    defaultMessage: 'Elastic Defend response',
-  }),
+  'host-isolation': i18n.translate(
+    'xpack.alertzero.watches.settings.gates.hostIsolation.qualifier',
+    {
+      defaultMessage: 'Elastic Defend response',
+    }
+  ),
   'detection-rule-change': i18n.translate(
     'xpack.alertzero.watches.settings.gates.detectionRuleChange.qualifier',
     { defaultMessage: 'tuning / suppression / exception' }
@@ -481,9 +520,12 @@ export const GATE_QUALIFIERS: Record<string, string> = {
     'xpack.alertzero.watches.settings.gates.newDetectionRule.qualifier',
     { defaultMessage: 'ships monitor-only until validated' }
   ),
-  'hunt-execution': i18n.translate('xpack.alertzero.watches.settings.gates.huntExecution.qualifier', {
-    defaultMessage: 'scoped query against telemetry',
-  }),
+  'hunt-execution': i18n.translate(
+    'xpack.alertzero.watches.settings.gates.huntExecution.qualifier',
+    {
+      defaultMessage: 'scoped query against telemetry',
+    }
+  ),
   'evidence-only-investigation': i18n.translate(
     'xpack.alertzero.watches.settings.gates.evidenceOnly.qualifier',
     { defaultMessage: 'no side effects' }
@@ -506,9 +548,12 @@ export const APPROVER_ROLE_LABELS: Record<string, string> = {
   'incident-lead': i18n.translate('xpack.alertzero.watches.settings.gates.role.incidentLead', {
     defaultMessage: 'Incident lead',
   }),
-  'detection-engineer': i18n.translate('xpack.alertzero.watches.settings.gates.role.detectionEngineer', {
-    defaultMessage: 'Detection engineer',
-  }),
+  'detection-engineer': i18n.translate(
+    'xpack.alertzero.watches.settings.gates.role.detectionEngineer',
+    {
+      defaultMessage: 'Detection engineer',
+    }
+  ),
   'threat-hunter': i18n.translate('xpack.alertzero.watches.settings.gates.role.threatHunter', {
     defaultMessage: 'Threat hunter',
   }),
@@ -586,9 +631,12 @@ export const RUN_ACTION_LABELS: Record<string, string> = {
 };
 
 export const RUN_OUTCOME_LABELS: Record<string, string> = {
-  'awaiting-review': i18n.translate('xpack.alertzero.watches.settings.ledger.outcome.awaitingReview', {
-    defaultMessage: 'Awaiting review',
-  }),
+  'awaiting-review': i18n.translate(
+    'xpack.alertzero.watches.settings.ledger.outcome.awaitingReview',
+    {
+      defaultMessage: 'Awaiting review',
+    }
+  ),
   accepted: i18n.translate('xpack.alertzero.watches.settings.ledger.outcome.accepted', {
     defaultMessage: 'Accepted',
   }),
@@ -612,10 +660,13 @@ const WATCH_INTROS: Record<string, string> = {
     defaultMessage:
       'Groups the Workers that reduce alert volume and route what still needs a person. Settings below belong to each Worker, not to this Watch.',
   }),
-  [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.officer', {
-    defaultMessage:
-      'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
-  }),
+  [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate(
+    'xpack.alertzero.watches.settings.intro.officer',
+    {
+      defaultMessage:
+        'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
+    }
+  ),
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.dark', {
     defaultMessage:
       'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',

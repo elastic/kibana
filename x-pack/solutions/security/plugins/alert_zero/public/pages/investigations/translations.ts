@@ -67,9 +67,12 @@ export const LOADING_PROPOSALS = i18n.translate('xpack.alertzero.investigation.l
   defaultMessage: 'Loading proposals…',
 });
 
-export const PROPOSALS_LOAD_ERROR = i18n.translate('xpack.alertzero.investigation.proposalsLoadError', {
-  defaultMessage: 'Unable to load proposals',
-});
+export const PROPOSALS_LOAD_ERROR = i18n.translate(
+  'xpack.alertzero.investigation.proposalsLoadError',
+  {
+    defaultMessage: 'Unable to load proposals',
+  }
+);
 
 export const PROPOSAL_NOT_FOUND = i18n.translate('xpack.alertzero.investigation.proposalNotFound', {
   defaultMessage: 'Proposal not found',

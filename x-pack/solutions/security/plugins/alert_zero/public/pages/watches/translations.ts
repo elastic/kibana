@@ -37,21 +37,33 @@ export const WATCH_NOT_FOUND_BODY = i18n.translate('xpack.alertzero.watches.notF
   defaultMessage: 'This watch may have been removed or the id is invalid.',
 });
 
-export const WATCH_LOAD_ERROR_TITLE = i18n.translate('xpack.alertzero.watches.detailLoadError.title', {
-  defaultMessage: 'Unable to load watch',
-});
+export const WATCH_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.alertzero.watches.detailLoadError.title',
+  {
+    defaultMessage: 'Unable to load watch',
+  }
+);
 
-export const WATCH_LOAD_ERROR_BODY = i18n.translate('xpack.alertzero.watches.detailLoadError.body', {
-  defaultMessage: 'Something went wrong while fetching this watch. Try again.',
-});
+export const WATCH_LOAD_ERROR_BODY = i18n.translate(
+  'xpack.alertzero.watches.detailLoadError.body',
+  {
+    defaultMessage: 'Something went wrong while fetching this watch. Try again.',
+  }
+);
 
-export const WORKERS_LOAD_ERROR_TITLE = i18n.translate('xpack.alertzero.watches.workersLoadError.title', {
-  defaultMessage: 'Unable to load workers',
-});
+export const WORKERS_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.alertzero.watches.workersLoadError.title',
+  {
+    defaultMessage: 'Unable to load workers',
+  }
+);
 
-export const WORKERS_LOAD_ERROR_BODY = i18n.translate('xpack.alertzero.watches.workersLoadError.body', {
-  defaultMessage: 'Something went wrong while fetching workers for this watch. Try again.',
-});
+export const WORKERS_LOAD_ERROR_BODY = i18n.translate(
+  'xpack.alertzero.watches.workersLoadError.body',
+  {
+    defaultMessage: 'Something went wrong while fetching workers for this watch. Try again.',
+  }
+);
 
 export const RETRY = i18n.translate('xpack.alertzero.watches.retry', {
   defaultMessage: 'Retry',
@@ -133,9 +145,12 @@ export const RUN_STATE_PAUSED = i18n.translate('xpack.alertzero.watches.runState
   defaultMessage: 'Paused',
 });
 
-export const RUN_STATE_UNAVAILABLE = i18n.translate('xpack.alertzero.watches.runState.unavailable', {
-  defaultMessage: 'Unavailable',
-});
+export const RUN_STATE_UNAVAILABLE = i18n.translate(
+  'xpack.alertzero.watches.runState.unavailable',
+  {
+    defaultMessage: 'Unavailable',
+  }
+);
 
 export const NOT_RUN_YET = i18n.translate('xpack.alertzero.watches.notRunYet', {
   defaultMessage: 'Never run',

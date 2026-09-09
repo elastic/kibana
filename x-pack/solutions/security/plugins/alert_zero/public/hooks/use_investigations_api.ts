@@ -8,7 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { API_VERSIONS, ALERT_ZERO_INVESTIGATIONS_URL, buildInvestigationUrl } from '@kbn/alert-zero-common';
+import {
+  API_VERSIONS,
+  ALERT_ZERO_INVESTIGATIONS_URL,
+  buildInvestigationUrl,
+} from '@kbn/alert-zero-common';
 import type {
   GetInvestigationResponse,
   ListInvestigationProposalsResponse,

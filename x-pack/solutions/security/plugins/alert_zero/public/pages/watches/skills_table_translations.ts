@@ -50,10 +50,13 @@ export const NOT_IMPLEMENTED_TITLE = i18n.translate(
   }
 );
 
-export const NOT_IMPLEMENTED_BODY = i18n.translate('xpack.alertzero.watches.skills.notImplemented.body', {
-  defaultMessage:
-    'The skill catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
-});
+export const NOT_IMPLEMENTED_BODY = i18n.translate(
+  'xpack.alertzero.watches.skills.notImplemented.body',
+  {
+    defaultMessage:
+      'The skill catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
+  }
+);
 
 export const enableSkillAriaLabel = (name: string) =>
   i18n.translate('xpack.alertzero.watches.skills.enableAriaLabel', {
@@ -105,9 +108,12 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
   'dark-web-feeds': i18n.translate('xpack.alertzero.watches.skills.darkWebFeeds.description', {
     defaultMessage: 'Ingests dark-web mentions relevant to monitored assets.',
   }),
-  'virustotal-lookup': i18n.translate('xpack.alertzero.watches.skills.virustotalLookup.description', {
-    defaultMessage: 'Looks up hashes and URLs; currently unavailable in pilot.',
-  }),
+  'virustotal-lookup': i18n.translate(
+    'xpack.alertzero.watches.skills.virustotalLookup.description',
+    {
+      defaultMessage: 'Looks up hashes and URLs; currently unavailable in pilot.',
+    }
+  ),
   'case-assembly': i18n.translate('xpack.alertzero.watches.skills.caseAssembly.description', {
     defaultMessage: 'Structures Floor drafts into reviewable cases.',
   }),

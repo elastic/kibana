@@ -38,7 +38,13 @@ import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_wor
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class AlertZeroPlugin
-  implements Plugin<AlertZeroPluginSetup, AlertZeroPluginStart, AlertZeroSetupDependencies, AlertZeroStartDependencies>
+  implements
+    Plugin<
+      AlertZeroPluginSetup,
+      AlertZeroPluginStart,
+      AlertZeroSetupDependencies,
+      AlertZeroStartDependencies
+    >
 {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;

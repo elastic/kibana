@@ -15,10 +15,13 @@ export const GREETING = i18n.translate('xpack.alertzero.chats.greeting', {
   defaultMessage: 'Ask Alert Zero anything — investigations, watches, or next steps.',
 });
 
-export const AGENT_BUILDER_UNAVAILABLE = i18n.translate('xpack.alertzero.chats.agentBuilderUnavailable', {
-  defaultMessage:
-    'Agent Builder is not available in this deployment. Enable the agentBuilder plugin to use Chats.',
-});
+export const AGENT_BUILDER_UNAVAILABLE = i18n.translate(
+  'xpack.alertzero.chats.agentBuilderUnavailable',
+  {
+    defaultMessage:
+      'Agent Builder is not available in this deployment. Enable the agentBuilder plugin to use Chats.',
+  }
+);
 
 export const LOADING = i18n.translate('xpack.alertzero.chats.loading', {
   defaultMessage: 'Loading chats…',

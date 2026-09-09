@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { API_VERSIONS, INTERNAL_API_ACCESS, ALERT_ZERO_WATCH_URL_TEMPLATE } from '@kbn/alert-zero-common';
+import {
+  API_VERSIONS,
+  INTERNAL_API_ACCESS,
+  ALERT_ZERO_WATCH_URL_TEMPLATE,
+} from '@kbn/alert-zero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERT_ZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';

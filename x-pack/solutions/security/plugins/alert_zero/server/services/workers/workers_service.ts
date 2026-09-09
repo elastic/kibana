@@ -7,7 +7,11 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alert-zero-common';
-import { ListWorkersResponse, type UpdateWorkerRequestBody, type Worker } from '@kbn/alert-zero-common';
+import {
+  ListWorkersResponse,
+  type UpdateWorkerRequestBody,
+  type Worker,
+} from '@kbn/alert-zero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSchema } from '@kbn/workflows';

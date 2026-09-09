@@ -132,7 +132,9 @@ describe('WatchDetailPage', () => {
     expect(screen.queryByTestId('alertZeroWatchEnabledSwitch')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
     expect(
-      screen.getByTestId(`alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`)
+      screen.getByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByTestId(
@@ -168,7 +170,9 @@ describe('WatchDetailPage', () => {
 
     expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue')).toHaveValue(24);
     expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('h');
-    expect(within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
+    expect(
+      within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')
+    ).not.toBeInTheDocument();
   });
 
   it('shows Dark Watch with one Worker that has enablement and autonomy', () => {
@@ -179,7 +183,9 @@ describe('WatchDetailPage', () => {
     );
     expect(section).toBeInTheDocument();
     expect(
-      screen.queryByTestId(`alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`)
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
     ).not.toBeInTheDocument();
     expect(
       within(section).getByTestId(
@@ -215,7 +221,9 @@ describe('WatchDetailPage', () => {
 
     expect(screen.getByTestId('alertZeroWatchWorkersLoadError')).toBeInTheDocument();
     expect(
-      screen.queryByTestId(`alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`)
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
     ).not.toBeInTheDocument();
   });
 
@@ -247,7 +255,9 @@ describe('WatchDetailPage', () => {
       expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
     }
     expect(
-      screen.queryByTestId(`alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`)
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
     ).not.toBeInTheDocument();
   });
 });

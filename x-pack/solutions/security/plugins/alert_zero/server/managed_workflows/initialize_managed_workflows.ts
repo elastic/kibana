@@ -27,15 +27,17 @@ export const initializeManagedWorkflows = async ({
   let canReconcile = true;
 
   const ruleWorkflowInstalls = await Promise.allSettled(
-    ALERT_ZERO_RULE_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    ALERT_ZERO_RULE_WORKFLOW_IDS.map((id) =>
+      client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID })
+    )
   );
   for (const [index, result] of ruleWorkflowInstalls.entries()) {
     if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed Alert Zero rule workflow "${ALERT_ZERO_RULE_WORKFLOW_IDS[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
-        }`
+        `Failed to install managed Alert Zero rule workflow "${
+          ALERT_ZERO_RULE_WORKFLOW_IDS[index]
+        }": ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`
       );
     }
   }
@@ -52,7 +54,9 @@ export const initializeManagedWorkflows = async ({
       );
     }
   } else {
-    logger.warn('Alert Zero managed workflow reconciliation skipped because initialization degraded');
+    logger.warn(
+      'Alert Zero managed workflow reconciliation skipped because initialization degraded'
+    );
   }
 
   if (ensureAgentForSpace) {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { API_VERSIONS, INTERNAL_API_ACCESS, ALERT_ZERO_INVESTIGATIONS_URL } from '@kbn/alert-zero-common';
+import {
+  API_VERSIONS,
+  INTERNAL_API_ACCESS,
+  ALERT_ZERO_INVESTIGATIONS_URL,
+} from '@kbn/alert-zero-common';
 import type { ListInvestigationsResponse } from '@kbn/alert-zero-common';
 import { MOCK_INVESTIGATIONS } from '@kbn/alert-zero-common';
 import { ALERT_ZERO_API_PRIVILEGE_READ } from '../../../common/constants';
