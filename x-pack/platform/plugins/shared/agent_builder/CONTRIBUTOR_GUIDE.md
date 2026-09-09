@@ -908,7 +908,7 @@ Register tabs and template UI definitions using the `conversationTemplates` API 
 class MyPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     // Register a reusable tab
-    agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
+    agentBuilder.conversationTemplates.registerTab('security.entities', () => entitiesTabDefinition);
 
     // Assign a display name, icon, and tabs (in render order) to a template
     agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
@@ -930,17 +930,20 @@ Tabs and templates register separately, so the same tab can be reused across tem
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
+import type { ConversationTemplateTabDefinition, ConversationTemplateUIContext } from '@kbn/agent-builder-browser';
 
 // Tab content must be self-contained: capture the services you need in a closure at
 // registration and mount your own providers inside `content`. The flyout can render
 // outside any KibanaContextProvider, so ambient context (useKibana() etc.) is not available OOTB.
-const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition => ({
+const createOverviewTab = (
+  core: CoreStart,
+  { attachmentsService }: ConversationTemplateUIContext
+): ConversationTemplateTabDefinition => ({
   label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
     defaultMessage: 'Overview',
   }),
-  // A React component receiving the conversation and public attachments service.
-  content: ({ conversation, attachmentsService }) => (
+  // Conversation data arrives at render time; the attachments service is captured at registration.
+  content: ({ conversation }) => (
     <SecurityProviders core={core}>
       <OverviewView conversation={conversation} attachmentsService={attachmentsService} />
     </SecurityProviders>
@@ -949,7 +952,7 @@ const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition =
 
 class SecurityPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
-    agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
+    agentBuilder.conversationTemplates.registerTab('security.overview', (context) => createOverviewTab(core, context));
     agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
@@ -961,7 +964,8 @@ class SecurityPlugin {
 }
 ```
 
-The `content` component receives `conversation` and `attachmentsService` as props in both the
+The `content` component receives `conversation` as a prop and captures `attachmentsService`
+from the registration context. This works in both the
 live chat flyout and the snapshot opened with `agentBuilder.openConversationDetails({ conversationId })`. The snapshot loads the conversation
 when opened; the live flyout follows conversation updates.
 
@@ -985,6 +989,35 @@ return latestVersion && definition?.renderConversationDetailsContent
     })
   : null;
 ```
+
+### Shared registration context
+
+Both `registerTab` and `registerTemplateUIDefinition` accept a callback that Agent Builder
+invokes once with the same `ConversationTemplateUIContext`. This shared interface is the
+extension point for additional capabilities. It exposes navigation methods and the public
+`attachmentsService`; consumers only use the capabilities they need.
+Callbacks that do not need any capabilities can ignore the argument.
+
+```tsx
+agentBuilder.conversationTemplates.registerTab('security.overview', (context) => ({
+  label: overviewTabLabel,
+  content: ({ conversation }) => (
+    <OverviewTab
+      conversation={conversation}
+      attachmentsService={context.attachmentsService}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+The registry stores the returned definitions directly. Components capture capabilities at
+registration; hosts only supply conversation data at render time. Attachment lookups remain
+live, so types registered after the callback runs are also available. No context provider or component wrapper is required.
 
 ### Brief cards
 
