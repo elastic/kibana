@@ -30,8 +30,17 @@ import {
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+<<<<<<< HEAD
 import { ConfigKey, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+=======
+import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
+import {
+  useCanEditSynthetics,
+  useCanRunTestManually,
+} from '../../../../../../hooks/use_capabilities';
+>>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
@@ -121,6 +130,9 @@ export function ActionsPopover({
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
   const canEditSynthetics = useCanEditSynthetics();
+
+  // Manual test runs are allowed for write users OR run-only (`canRunTestManually`) users.
+  const canRunTestManually = useCanRunTestManually();
 
   const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
 
@@ -219,11 +231,12 @@ export function ActionsPopover({
       ) : (
         <NoPermissionsTooltip
           canUsePublicLocations={canUsePublicLocations}
-          canEditSynthetics={canEditSynthetics}
+          canEditSynthetics={canRunTestManually}
         >
           {runTestManually}
         </NoPermissionsTooltip>
       ),
+<<<<<<< HEAD
       icon: 'beaker',
       disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
@@ -231,6 +244,26 @@ export function ActionsPopover({
         dispatch(setFlyoutConfig(null));
         setIsPopoverOpen(false);
       },
+=======
+      icon: 'flask',
+      disabled:
+        isReadOnly ||
+        testInProgress ||
+        !canUsePublicLocations ||
+        !isServiceAllowed ||
+        !canRunTestManually,
+      toolTipContent: readOnlyActionTooltip,
+      onClick: isReadOnly
+        ? undefined
+        : () => {
+            dispatch(
+              manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name })
+            );
+            dispatch(setFlyoutConfig(null));
+            setIsPopoverOpen(false);
+          },
+      'data-test-subj': 'syntheticsActionsPopoverRunTestManually',
+>>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
     },
     {
       name: (
