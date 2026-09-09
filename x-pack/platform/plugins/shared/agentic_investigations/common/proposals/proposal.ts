@@ -198,6 +198,36 @@ export interface ListProposalsResponse {
   total: number;
 }
 
+export const proposalStatsQuerySchema = z.object({
+  /**
+   * Lookback window in hours. Defaults to 24h (one day). Maximum 168h (one week)
+   * to keep the three ES|QL queries cheap.
+   */
+  windowHours: z.coerce.number().int().min(1).max(168).default(24),
+  /**
+   * Granularity of each time bucket in minutes. Defaults to 30 minutes.
+   * Must be at least 5 minutes (coarser granularity avoids overly large responses).
+   */
+  bucketMinutes: z.coerce.number().int().min(5).max(1440).default(30),
+});
+export type ProposalStatsQuery = z.infer<typeof proposalStatsQuerySchema>;
+
+export interface ProposalStatsBucket {
+  /** Unix milliseconds marking the start of the bucket. */
+  timestamp: number;
+  /**
+   * Open proposal count per category at the end of the bucket.
+   * A proposal is open if it was created at or before the bucket end and has
+   * not yet been decided (approved or dismissed).
+   */
+  counts: Record<string, number>;
+}
+
+export interface ProposalStatsResponse {
+  /** Dense array of buckets, one entry per slot, oldest first. */
+  buckets: ProposalStatsBucket[];
+}
+
 /** Terminal states: a decided or executed proposal can no longer be acted on. */
 export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
 

@@ -35,5 +35,6 @@
     "@kbn/core-spaces-common",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
+    "@kbn/charts-theme",
   ]
 }

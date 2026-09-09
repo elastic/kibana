@@ -20,6 +20,7 @@ export const PROPOSALS_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/pr
 export const PROPOSAL_BY_ID_URL = `${PROPOSALS_INTERNAL_URL}/{id}` as const;
 export const PROPOSAL_APPROVE_URL = `${PROPOSALS_INTERNAL_URL}/{id}/approve` as const;
 export const PROPOSAL_DISMISS_URL = `${PROPOSALS_INTERNAL_URL}/{id}/dismiss` as const;
+export const PROPOSAL_STATS_URL = `${PROPOSALS_INTERNAL_URL}/_stats` as const;
 
 /** Sub-feature privilege ids, granted implicitly by the top-level feature. */
 export const PROPOSALS_SUB_FEATURE_PRIVILEGE_ALL = 'proposals_all' as const;

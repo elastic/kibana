@@ -37,6 +37,9 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { PendingProposalsPanel } from '../../components/pending_proposals';
+import { STAT_PANELS } from '../../components/proposal_stats/constants';
+import { useProposalStats } from '../../hooks/use_proposal_stats';
+import { ProposalStatsRow } from '../../components/proposal_stats';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -62,6 +65,13 @@ export const ConversationsPage: React.FC = () => {
 
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+
+  const { data: statsData } = useProposalStats();
+  const proposalCount = useMemo(() => {
+    const lastBucket = statsData?.buckets.at(-1);
+    if (!lastBucket) return 0;
+    return STAT_PANELS.reduce((sum, panel) => sum + (lastBucket.counts[panel.category] ?? 0), 0);
+  }, [statsData]);
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
@@ -200,9 +210,12 @@ export const ConversationsPage: React.FC = () => {
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <PndPageHeader
-            isQueueEmpty={sortedConversations.length === 0}
-            eventCount={filteredQueueItems.length}
+            isQueueEmpty={sortedConversations.length === 0 && proposalCount === 0}
+            eventCount={proposalCount}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ProposalStatsRow />
         </EuiFlexItem>
         <EuiFlexItem>
           <BlastRadius
