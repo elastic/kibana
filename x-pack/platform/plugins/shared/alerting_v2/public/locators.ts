@@ -78,9 +78,7 @@ export interface AlertingV2ActionPoliciesLocatorParams extends SerializableRecor
 export const AlertingV2ActionPoliciesLocatorDefinition: LocatorDefinition<AlertingV2ActionPoliciesLocatorParams> =
   {
     id: ALERTING_V2_ACTION_POLICIES_LOCATOR,
-    getLocation: async (
-      params: AlertingV2ActionPoliciesLocatorParams
-    ): Promise<KibanaLocation> => {
+    getLocation: async (params: AlertingV2ActionPoliciesLocatorParams): Promise<KibanaLocation> => {
       const { getActionPoliciesLocation } = await import('./locator_get_location');
       return getActionPoliciesLocation(params);
     },

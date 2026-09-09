@@ -101,7 +101,7 @@ describe('restoreTSBuildArtifacts', () => {
 
     expect(restoreSpy).toHaveBeenCalledTimes(1);
     expect(restoreSpy).toHaveBeenCalledWith({
-      cacheInvalidationFiles: ['yarn.lock', '.nvmrc', '.node-version', 'tsconfig.base.json'],
+      cacheInvalidationFiles: ['pnpm-lock.yaml', '.nvmrc', '.node-version', 'tsconfig.base.json'],
       prNumber: '456',
       shas: candidateShas,
     });
