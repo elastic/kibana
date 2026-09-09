@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
+import pMap from 'p-map';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
+import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { isArtifactByPolicy } from '../../../common/endpoint/service/artifacts';
 import { ensureArtifactListExists } from '../common/endpoint_artifact_services';
 
 export const cli = () => {
   run(
     async (options) => {
       try {
-        await createHostIsolationException(options);
-        options.log.success(`${options.flags.count} endpoint host isolation exceptions`);
+        await createCustomYaraSignatures(options);
+        options.log.success(`${options.flags.count} endpoint custom YARA signatures created`);
       } catch (e) {
         options.log.error(e);
         throw createFailError(e.message);
       }
     },
     {
-      description: 'Load Host isolation exceptions',
+      description: 'Load Endpoint Custom YARA Signatures',
       flags: {
         string: ['kibana'],
         default: {
@@ -34,7 +36,9 @@ export const cli = () => {
           kibana: 'http://elastic:changeme@127.0.0.1:5601',
         },
         help: `
-        --count            Number of host isolation exceptions to create. Default: 10
+        Requires xpack.securitySolution.enableExperimental.customYaraSignaturesEnabled feature flag to be enabled.
+
+        --count            Number of custom YARA signatures to create. Default: 10
         --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
       `,
       },
@@ -42,45 +46,43 @@ export const cli = () => {
   );
 };
 
-class HostIsolationExceptionDataLoaderError extends Error {
+class CustomYaraSignatureDataLoaderError extends Error {
   constructor(message: string, public readonly meta: unknown) {
     super(message);
   }
 }
 
 const handleThrowHttpError = (err: Error): never => {
-  throw new HostIsolationExceptionDataLoaderError(err.message, err);
+  throw new CustomYaraSignatureDataLoaderError(err.message, err);
 };
 
-const createHostIsolationException: RunFn = async ({ flags, log }) => {
-  const exceptionGenerator = new HostIsolationExceptionGenerator();
+const createCustomYaraSignatures: RunFn = async ({ flags, log }) => {
+  const generator = new ExceptionsListItemGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
-  log.info('Creating Host isolation exceptions list');
-  await ensureArtifactListExists(kbn, 'hostIsolationExceptions');
+  await ensureArtifactListExists(kbn, 'customYaraSignatures');
 
   const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
 
-  log.info('Generating exceptions....');
-  await Promise.all(
-    Array.from({ length: flags.count as unknown as number }, async () => {
-      const body = exceptionGenerator.generate();
-      if (body.tags?.length && body.tags[0] !== 'policy:all') {
-        const nmExceptions = Math.floor(Math.random() * 3) || 1;
+  await pMap(
+    Array.from({ length: flags.count as unknown as number }),
+    () => {
+      const body = generator.generateCustomYaraSignatureForCreate();
+
+      if (isArtifactByPolicy(body)) {
+        const nmExceptions = generator.randomN(3) || 1;
         body.tags = Array.from({ length: nmExceptions }, () => {
           return `policy:${randomPolicyId()}`;
         });
       }
-      try {
-        return kbn.request({
+      return kbn
+        .request({
           method: 'POST',
           path: EXCEPTION_LIST_ITEM_URL,
           body,
-        });
-      } catch (e) {
-        return handleThrowHttpError(e);
-      }
-    })
+        })
+        .catch((e) => handleThrowHttpError(e));
+    },
+    { concurrency: 10 }
   );
-  log.info('Finished.');
 };
