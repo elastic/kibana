@@ -15,6 +15,11 @@ import {
   PII_TOKENIZATION_CAPABILITY_ID,
 } from '@kbn/inference-plugin/server';
 import {
+  INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+  type InferencePiiAnonymizationTemplateValues,
+} from '@kbn/workflows/managed';
+import type { ManagedWorkflowInstanceState } from '@kbn/workflows/server/types';
+import {
   aroundCompletionEventSchema,
   CALL_SITE_PROCEED_STEP_ID,
   INFERENCE_AROUND_COMPLETION_TRIGGER_ID,
@@ -25,6 +30,11 @@ type WorkflowAnonymizationManagement = Pick<
   WorkflowsManagementApi,
   'resolveWorkflowTriggerMatches' | 'executeWorkflowSynchronously'
 >;
+
+type GetInstalledWorkflowState = (
+  workflowId: string,
+  spaceId: string
+) => Promise<ManagedWorkflowInstanceState | null>;
 
 type TriggerResolution = Awaited<
   ReturnType<WorkflowAnonymizationManagement['resolveWorkflowTriggerMatches']>
@@ -44,6 +54,7 @@ export const createWorkflowAnonymizationProvider = ({
   management,
   ensureManagedWorkflow,
   triggerCacheTtlMs,
+  getInstalledWorkflowState,
 }: {
   management: WorkflowAnonymizationManagement;
   ensureManagedWorkflow: (
@@ -51,12 +62,25 @@ export const createWorkflowAnonymizationProvider = ({
     request: Parameters<WorkflowAnonymizationProvider['execute']>[0]['request']
   ) => Promise<void>;
   triggerCacheTtlMs: number;
+  /**
+   * Optional getter for the managed workflow's persisted instance state.
+   * Used to resolve per-space failure mode overrides at request time.
+   * When undefined (e.g. during setup before the managed client is available),
+   * the provider returns no override and the pipeline falls back to the cluster config.
+   */
+  getInstalledWorkflowState?: GetInstalledWorkflowState;
 }): WorkflowAnonymizationProvider => {
   // Cache keyed on (spaceId, agentId) — the two stable identifiers that workflow trigger
   // conditions are expected to vary on. Conditions on sessionId or message content are not
   // supported with caching; those use-cases are outside the anonymization policy model.
   // TTL is controlled by xpack.inference.anonymization.triggerCacheTtlSeconds (0 = no cache).
   const triggerCache = new Map<string, { result: TriggerResolution; expiresAt: number }>();
+
+  // Per-space failure mode cache. Keyed on spaceId. Same TTL as the trigger cache.
+  const failureModeCache = new Map<
+    string,
+    { value: 'block' | 'allow_unsafe' | undefined; expiresAt: number }
+  >();
 
   return {
     supportsSynchronousExecution: true,
@@ -165,5 +189,36 @@ export const createWorkflowAnonymizationProvider = ({
       triggerEvaluationsCounter.add(1, { outcome: 'matched' });
       return { matched: true, content };
     },
+
+    getFailureMode: getInstalledWorkflowState
+      ? async (namespace: string): Promise<'block' | 'allow_unsafe' | undefined> => {
+          const now = Date.now();
+          if (triggerCacheTtlMs > 0) {
+            const cached = failureModeCache.get(namespace);
+            if (cached && cached.expiresAt > now) {
+              return cached.value;
+            }
+          }
+
+          const state = await getInstalledWorkflowState(
+            INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+            namespace
+          );
+          const value = (state?.templateValues as InferencePiiAnonymizationTemplateValues | null)
+            ?.failureMode;
+
+          if (triggerCacheTtlMs > 0) {
+            // Prune stale entries on write to prevent unbounded accumulation.
+            for (const [key, entry] of failureModeCache) {
+              if (entry.expiresAt <= now) {
+                failureModeCache.delete(key);
+              }
+            }
+            failureModeCache.set(namespace, { value, expiresAt: now + triggerCacheTtlMs });
+          }
+
+          return value;
+        }
+      : undefined,
   };
 };

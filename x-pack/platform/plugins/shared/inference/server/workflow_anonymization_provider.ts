@@ -38,4 +38,13 @@ export interface WorkflowAnonymizationProvider {
     proceed: InferenceProceedCapability;
     abortSignal?: AbortSignal;
   }): Promise<WorkflowAroundCompletionResult>;
+  /**
+   * Returns a per-space failure mode override, or `undefined` when no override is
+   * configured for this space. The pipeline falls back to the cluster-level
+   * `xpack.inference.anonymization.failureMode` config when this returns `undefined`.
+   *
+   * Implementations should cache the result for the duration of the trigger cache TTL
+   * (default 30 s) to avoid an ES lookup on every inference request.
+   */
+  getFailureMode?(namespace: string): Promise<'block' | 'allow_unsafe' | undefined>;
 }

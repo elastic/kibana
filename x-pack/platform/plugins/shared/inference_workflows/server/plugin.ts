@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { InferenceWorkflowsSetupDeps, InferenceWorkflowsStartDeps } from './types';
 import { aiPromptStepDefinition } from './steps/ai/ai_prompt_step/step';
 import { aiSummarizeStepDefinition } from './steps/ai/ai_summarize_step/step';
@@ -35,6 +36,8 @@ export class InferenceWorkflowsPlugin
   private readonly logger: Logger;
 
   private managedWorkflowInstaller?: InferenceAnonymizationManagedWorkflowInstaller;
+  /** Resolved after start(); used by the provider's getFailureMode method. */
+  private managedWorkflowClientPromise?: Promise<PluginScopedManagedWorkflowsApi>;
 
   private workflowDrivenEnabled: boolean = false;
 
@@ -62,6 +65,16 @@ export class InferenceWorkflowsPlugin
           }
           await this.managedWorkflowInstaller.ensureInstalled(spaceId);
         },
+        // Lazy getter: the managed client is only available after start(), but the provider
+        // is created in setup(). Returning null before start() is safe — the pipeline falls
+        // back to the cluster-level config when getFailureMode returns undefined.
+        getInstalledWorkflowState: async (workflowId, spaceId) => {
+          if (!this.managedWorkflowClientPromise) {
+            return null;
+          }
+          const client = await this.managedWorkflowClientPromise;
+          return client.getInstalledWorkflowState(workflowId, spaceId);
+        },
       })
     );
 
@@ -73,8 +86,12 @@ export class InferenceWorkflowsPlugin
   }
 
   start(core: CoreStart, deps: InferenceWorkflowsStartDeps) {
+    // Store a single shared promise so both the installer and the getFailureMode provider
+    // call initManagedWorkflowsClient exactly once.
+    this.managedWorkflowClientPromise =
+      deps.workflowsExtensions.initManagedWorkflowsClient(MANAGED_WORKFLOW_OWNER);
     this.managedWorkflowInstaller = createInferenceAnonymizationManagedWorkflowInstaller({
-      getClient: () => deps.workflowsExtensions.initManagedWorkflowsClient(MANAGED_WORKFLOW_OWNER),
+      getClient: () => this.managedWorkflowClientPromise!,
       logger: this.logger.get('managed_workflow'),
     });
 

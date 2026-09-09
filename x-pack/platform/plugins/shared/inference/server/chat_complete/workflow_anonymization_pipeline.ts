@@ -142,6 +142,9 @@ export const createWorkflowAnonymizationPipeline = ({
   let proceedInvoked = false;
   let preLLMTimer: ReturnType<typeof setTimeout> | undefined;
   let timedOut = false;
+  // Effective failure mode for this request. Starts at the cluster-level config default
+  // and is overridden with the per-space value (if any) before the workflow runs.
+  let effectiveFailureMode = workflowAnonymization.failureMode;
 
   const clearPreLLMTimer = () => {
     if (preLLMTimer !== undefined) {
@@ -276,6 +279,15 @@ export const createWorkflowAnonymizationPipeline = ({
   };
 
   const around$ = defer(async () => {
+    // Resolve per-space failure mode override before executing the workflow.
+    // If the provider does not implement getFailureMode, the cluster-level default is used.
+    if (workflowAnonymization.provider.getFailureMode) {
+      const spaceOverride = await workflowAnonymization.provider.getFailureMode(namespace);
+      if (spaceOverride !== undefined) {
+        effectiveFailureMode = spaceOverride;
+      }
+    }
+
     const serverSalt = workflowAnonymization.encryptionKey;
 
     let effectiveAbortSignal = abortSignal;
@@ -336,10 +348,7 @@ export const createWorkflowAnonymizationPipeline = ({
     catchError((error) => {
       clearPreLLMTimer();
       relay$.complete();
-      if (
-        workflowAnonymization.failureMode === 'allow_unsafe' &&
-        !invocationState.connectorInvoked
-      ) {
+      if (effectiveFailureMode === 'allow_unsafe' && !invocationState.connectorInvoked) {
         logger.warn(
           'Workflow-driven anonymization failed before connector invocation; using the direct inference path because allow_unsafe is configured'
         );
