@@ -7,6 +7,7 @@
 
 import type { WorkflowAnonymizationFailureMode } from '../config';
 import type { WorkflowAnonymizationProvider } from '../workflow_anonymization_provider';
+import type { PiiRegexWorkerService } from '../workflow_anonymization/detection';
 
 export interface WorkflowAnonymizationOptions {
   readonly provider: WorkflowAnonymizationProvider;
@@ -14,4 +15,5 @@ export interface WorkflowAnonymizationOptions {
   readonly preLLMTimeoutMs: number;
   /** HMAC server salt derived from xpack.inference.anonymization.encryptionKey. Undefined when the key is not configured; tokens are session-ID-derived only. */
   readonly encryptionKey?: string;
+  readonly piiRegexWorker: PiiRegexWorkerService;
 }
