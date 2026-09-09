@@ -62,7 +62,14 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toContain('ask_user_question');
     expect(description).toMatch(/pilot limited to 1–3 KIs/);
     expect(description).toMatch(/render the diff in chat first/);
-    expect(description).toMatch(/Do not run a workflow until it has been saved/);
+  });
+
+  it('leaves the save decision to the tool confirmation rather than a chat question', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/Never end a turn asking for permission to save/);
+    expect(description).toMatch(/never offer saving and running as a choice/);
+    expect(description).toMatch(/Do not run a workflow, or offer to, unless the user asks/);
   });
 
   it('formats the attachment for the agent', async () => {
