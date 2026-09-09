@@ -595,6 +595,28 @@ describe('WorkflowExecutionRuntimeManager', () => {
       );
     });
 
+    it.each([
+      ExecutionStatus.WAITING,
+      ExecutionStatus.WAITING_FOR_INPUT,
+      ExecutionStatus.WAITING_FOR_CHILD,
+    ])('should not complete a parked %s execution when current node is missing', async (status) => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        ...workflowExecution,
+        status,
+      });
+      workflowExecutionCursor.setCurrentNodeId(undefined);
+
+      await underTest.saveState();
+
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.not.objectContaining({ status: ExecutionStatus.COMPLETED })
+      );
+      expect(workflowLogger.logInfo).not.toHaveBeenCalledWith(
+        `Workflow execution completed successfully`,
+        expect.anything()
+      );
+    });
+
     it('should log workflow completion', async () => {
       workflowExecutionCursor.setCurrentNodeId(undefined);
 
