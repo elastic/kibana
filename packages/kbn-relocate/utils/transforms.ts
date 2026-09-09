@@ -10,7 +10,6 @@
 import type { Package } from '../types';
 
 export const HARDCODED_MODULE_PATHS: Record<string, string> = {
-  '@kbn/apm-ftr-e2e': 'x-pack/solutions/observability/plugins/apm/ftr_e2e',
   '@kbn/core-test-helpers-kbn-server': 'src/core/test-helpers/kbn-server',
   '@kbn/core-test-helpers-model-versions': 'src/core/test-helpers/model-versions',
   '@kbn/test-suites-src': 'src/platform/test',

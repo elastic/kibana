@@ -28,18 +28,32 @@ export const getTestTagsForTarget = (target: string): string[] => {
   }
 };
 
-// Collects unique tags from spec files that have 'passed' expectedStatus (it means test is not skipped)
+const isScoutHookFile = (filePath: string | undefined): boolean => {
+  return (
+    filePath?.endsWith('global.setup.ts') === true ||
+    filePath?.endsWith('global.teardown.ts') === true
+  );
+};
+
+/** Runnable Scout tests, including those registered from a shared factory instead of a `*.spec.ts`. */
+export const isScoutTestFile = (test: {
+  expectedStatus?: string;
+  location?: { file?: string };
+}): boolean => {
+  return (
+    test.expectedStatus === 'passed' &&
+    Boolean(test.location?.file) &&
+    !isScoutHookFile(test.location?.file)
+  );
+};
+
+// Collects unique tags from runnable tests (skip global setup/teardown hooks)
 export const collectUniqueTags = (
   tests: Array<{ tags?: string[]; expectedStatus?: string; location?: { file?: string } }>
 ): string[] => {
   const tagSet = new Set<string>();
   for (const test of tests) {
-    // Only collect tags from tests that have passed status and are spec files (e.g. skip global.setup.ts)
-    if (
-      test.expectedStatus === 'passed' &&
-      test.location?.file?.endsWith('.spec.ts') &&
-      test.tags
-    ) {
+    if (isScoutTestFile(test) && test.tags) {
       for (const testTag of test.tags) {
         tagSet.add(testTag);
       }

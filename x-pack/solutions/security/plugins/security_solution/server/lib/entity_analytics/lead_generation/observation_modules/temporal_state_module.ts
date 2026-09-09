@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../utils/elasticsearch_terms_limits';
 import {
   errorMessage,
   makeObservation,
@@ -87,43 +88,47 @@ const fetchPrivilegeEscalations = async (
       const historyPattern = getHistorySnapshotIndexPattern(spaceId);
 
       try {
-        const response = await esClient.search({
-          index: historyPattern,
-          size: 0,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          query: {
-            bool: { filter: [{ terms: { 'entity.id': euids } }] },
-          },
-          aggs: {
-            by_entity: {
-              terms: { field: 'entity.id', size: euids.length },
-              aggs: {
-                oldest_snapshot: {
-                  top_hits: {
-                    size: 1,
-                    sort: [{ '@timestamp': { order: 'asc' } }],
-                    _source: ['entity.attributes.watchlists'],
+        for (let offset = 0; offset < euids.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {
+          const euidChunk = euids.slice(offset, offset + DEFAULT_MAX_TERMS_QUERY_COUNT);
+
+          const response = await esClient.search({
+            index: historyPattern,
+            size: 0,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            query: {
+              bool: { filter: [{ terms: { 'entity.id': euidChunk } }] },
+            },
+            aggs: {
+              by_entity: {
+                terms: { field: 'entity.id', size: euidChunk.length },
+                aggs: {
+                  oldest_snapshot: {
+                    top_hits: {
+                      size: 1,
+                      sort: [{ '@timestamp': { order: 'asc' } }],
+                      _source: ['entity.attributes.watchlists'],
+                    },
                   },
                 },
               },
             },
-          },
-        });
+          });
 
-        const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-          []) as Array<{
-          key: string;
-          oldest_snapshot: { hits: { hits: Array<{ _source: Record<string, unknown> }> } };
-        }>;
+          const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+            []) as Array<{
+            key: string;
+            oldest_snapshot: { hits: { hits: Array<{ _source: Record<string, unknown> }> } };
+          }>;
 
-        for (const bucket of buckets) {
-          const hit = bucket.oldest_snapshot.hits.hits[0];
-          if (hit) {
-            const entityField = hit._source?.entity as Record<string, unknown> | undefined;
-            const attrs = entityField?.attributes as { watchlists?: unknown } | undefined;
-            if (!matchesPrivilegedWatchlist(attrs?.watchlists)) {
-              escalated.add(bucket.key);
+          for (const bucket of buckets) {
+            const hit = bucket.oldest_snapshot.hits.hits[0];
+            if (hit) {
+              const entityField = hit._source?.entity as Record<string, unknown> | undefined;
+              const attrs = entityField?.attributes as { watchlists?: unknown } | undefined;
+              if (!matchesPrivilegedWatchlist(attrs?.watchlists)) {
+                escalated.add(bucket.key);
+              }
             }
           }
         }
