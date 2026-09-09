@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { buildSpaceFilter, getDatasetId } from '@kbn/evals-common';
+import { buildSpaceFilter, getDatasetId, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { DatasetStorageProperties } from './datasets_storage';
 import type {
@@ -19,6 +19,7 @@ import type {
 } from './dataset_client';
 import { DatasetClient } from './dataset_client';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
+import { DatasetExamplesLimitExceededError } from './dataset_examples_limit_exceeded_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
 import { ExampleNotFoundError } from './example_not_found_error';
 
@@ -401,21 +402,33 @@ const createExamplesStorageClient = () => {
     }: {
       operations: Array<{
         index?: { _id: string; document: DatasetExampleStorageDocument };
+        create?: { _id: string; document: DatasetExampleStorageDocument };
         delete?: { _id: string };
       }>;
       throwOnFail?: boolean;
     }) => {
-      const items: Array<{ index?: { status: number }; delete?: { status: number } }> = [];
+      const items: Array<{
+        index?: { status: number };
+        create?: { status: number };
+        delete?: { status: number };
+      }> = [];
 
       for (const operation of operations) {
-        if (operation.index) {
-          const { _id: id, document } = operation.index;
+        if (operation.create) {
+          const { _id: id, document } = operation.create;
           if (docs.has(id)) {
-            items.push({ index: { status: 409 } });
+            items.push({ create: { status: 409 } });
           } else {
             docs.set(id, document);
-            items.push({ index: { status: 201 } });
+            items.push({ create: { status: 201 } });
           }
+          continue;
+        }
+
+        if (operation.index) {
+          const { _id: id, document } = operation.index;
+          docs.set(id, document);
+          items.push({ index: { status: 200 } });
           continue;
         }
 
@@ -427,7 +440,9 @@ const createExamplesStorageClient = () => {
 
       if (
         throwOnFail &&
-        items.some((item) => (item.index?.status ?? item.delete?.status ?? 200) >= 400)
+        items.some(
+          (item) => (item.index?.status ?? item.create?.status ?? item.delete?.status ?? 200) >= 400
+        )
       ) {
         throw new Error('bulk operation failed');
       }
@@ -833,6 +848,107 @@ describe('DatasetClient', () => {
 
     const dataset = await client.get(created.id);
     expect(dataset?.examples).toHaveLength(1);
+  });
+
+  it('rejects additions that would exceed the dataset example limit before writing', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+    const search = examplesStorage.client.search as jest.Mock;
+    search.mockResolvedValueOnce({ hits: { hits: [], total: MAX_EXAMPLES_PER_DATASET } });
+
+    await expect(client.addExamples(created.id, [baseExampleA])).rejects.toThrow(
+      DatasetExamplesLimitExceededError
+    );
+    expect(examplesStorage.client.bulk).not.toHaveBeenCalled();
+  });
+
+  it('keeps numeric and boolean metadata values when adding examples', async () => {
+    const { client } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+
+    await client.addExamples(created.id, [
+      {
+        input: { question: 'How do I upgrade Elasticsearch?' },
+        output: { expected: 'Follow the upgrade docs' },
+        metadata: {
+          example_id: 'RGF0YXNldA==',
+          metadata_num_hops: 2,
+          metadata_query_id: 0,
+          enabled: false,
+          blank: '',
+          emptyObject: {},
+        },
+      },
+    ]);
+
+    const dataset = await client.get(created.id);
+    expect(dataset?.examples[0]?.metadata).toEqual({
+      example_id: 'RGF0YXNldA==',
+      metadata_num_hops: 2,
+      metadata_query_id: 0,
+      enabled: false,
+    });
+  });
+
+  it('stamps imported examples with their source', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+
+    await client.addExamples(created.id, [baseExampleA], { source: 'import' });
+
+    expect(Array.from(examplesStorage.docs.values())).toEqual([
+      expect.objectContaining({ source: 'import' }),
+    ]);
+  });
+
+  it('uses the same example ID regardless of the stored source', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+
+    await client.addExamples(created.id, [baseExampleA], { source: 'import' });
+    const regularAdd = await client.addExamples(created.id, [baseExampleA], {
+      rejectDuplicates: false,
+    });
+
+    expect(regularAdd).toEqual({ added: 0, conflicts: 1 });
+    expect(Array.from(examplesStorage.docs.keys())).toEqual([
+      DatasetClient.getExampleId({ datasetId: created.id, example: baseExampleA }),
+    ]);
+  });
+
+  it('preserves an imported example source when updating it', async () => {
+    const { client } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+    await client.addExamples(created.id, [baseExampleA], { source: 'import' });
+    const exampleId = DatasetClient.getExampleId({ datasetId: created.id, example: baseExampleA });
+
+    const updated = await client.updateExample(
+      exampleId,
+      { output: { expected: 'updated' } },
+      created.id
+    );
+
+    expect(updated.source).toBe('import');
   });
 
   it('filters datasets by name via search', async () => {
@@ -1500,7 +1616,7 @@ describe('DatasetClient', () => {
         // failing here would report an error for work that already succeeded.
         await expect(
           withoutRetryDelays(() => client.addExamples(created.id, [baseExampleA]))
-        ).resolves.toEqual({ added: 1 });
+        ).resolves.toEqual({ added: 1, conflicts: 0 });
         expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(created.id));
       });
 

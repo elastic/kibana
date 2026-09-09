@@ -51,11 +51,6 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed) => css`
 
 type LegacyFlyoutType = 'customField' | 'template';
 
-// This component intentionally mirrors the connector/closure/observable-types logic in
-// `../../configure_cases` (the legacy settings page) via the shared `useConfigureCasesController`
-// hook. Both pages are kept as separate presentational implementations while behind the
-// `casesRedesign.settings` feature flag so each can evolve without risking the other; the legacy
-// component will be deleted once the redesign ships.
 export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();

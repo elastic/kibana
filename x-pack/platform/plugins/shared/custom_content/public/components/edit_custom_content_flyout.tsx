@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   useEuiTheme,
   EuiFormRow,
+  EuiLink,
 } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
@@ -33,6 +34,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
 import { getTelemetry } from '../telemetry';
+import { getServices } from '../services';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
 // Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
@@ -161,7 +163,12 @@ export const EditCustomContentFlyout = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}>
+              <h2
+                id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}
+                data-test-subj={
+                  isNewPanel ? 'customContentCreateFlyoutTitle' : 'customContentEditFlyoutTitle'
+                }
+              >
                 {isNewPanel
                   ? i18n.translate('xpack.customContent.editFlyout.createTitle', {
                       defaultMessage: 'Create custom panel',
@@ -191,6 +198,24 @@ export const EditCustomContentFlyout = ({
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.customContent.editFlyout.description', {
+              defaultMessage: 'Present your data with HTML, optionally driven by an ES|QL query.',
+            })}{' '}
+            <EuiLink
+              href={getServices().core.docLinks.links.visualize.customPanels}
+              target="_blank"
+              external
+              data-test-subj="customContentFlyoutDocsLink"
+            >
+              {i18n.translate('xpack.customContent.editFlyout.learnMoreLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </p>
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -240,7 +265,11 @@ export const EditCustomContentFlyout = ({
         >
           <EuiResizeObserver onResize={onEditorContainerResize}>
             {(editorResizeRef) => (
-              <div ref={editorResizeRef} css={editorContainerCss}>
+              <div
+                ref={editorResizeRef}
+                css={editorContainerCss}
+                data-test-subj="customContentTemplateEditorContainer"
+              >
                 <CodeEditor
                   languageId="liquid"
                   value={draftTemplate}
