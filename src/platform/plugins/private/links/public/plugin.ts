@@ -17,6 +17,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -41,6 +42,7 @@ export interface LinksStartDependencies {
   contentManagement: ContentManagementPublicStart;
   usageCollection?: UsageCollectionStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  share: SharePluginStart;
 }
 
 export class LinksPlugin

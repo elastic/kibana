@@ -8,6 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownCreateRequestBody } from './types';
 import { getMarkdownCRUResponseBody } from '../get_cru_response_body';
@@ -21,10 +22,11 @@ export async function create(
 ): Promise<MarkdownCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
+  const { state, references } = toStoredTags(createBody);
   const savedObject = await core.savedObjects.client.create<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
-    createBody,
-    { id }
+    state,
+    { id, references }
   );
 
   return getMarkdownCRUResponseBody(savedObject);

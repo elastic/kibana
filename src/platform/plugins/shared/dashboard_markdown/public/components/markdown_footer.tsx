@@ -88,6 +88,13 @@ export interface MarkdownFooterProps {
   isPreview?: boolean;
   cancelButtonRef: React.RefObject<HTMLButtonElement>;
   isSaveable?: boolean;
+  cancelButtonLabel?: string;
+  saveButtonLabel?: string;
+  saveDisabledTooltip?: string;
+  helpText?: string;
+  onPreview?: () => void;
+  isPreviewable?: boolean;
+  previewButtonLabel?: string;
 }
 
 export const MarkdownFooter = ({
@@ -96,20 +103,30 @@ export const MarkdownFooter = ({
   isPreview,
   cancelButtonRef,
   isSaveable,
+  cancelButtonLabel = strings.discardButton,
+  saveButtonLabel = strings.applyButton,
+  saveDisabledTooltip = strings.applyButtonDisabledTooltip,
+  helpText = strings.markdownFooterHelpText,
+  onPreview,
+  isPreviewable,
+  previewButtonLabel,
 }: MarkdownFooterProps) => {
   const [saveInProgress, setSaveInProgress] = React.useState(false);
   const styles = useMemoCss(footerStyles);
 
   const handleSave = useCallback(async () => {
     setSaveInProgress(true);
-    await onSave();
-    setSaveInProgress(false);
+    try {
+      await onSave();
+    } finally {
+      setSaveInProgress(false);
+    }
   }, [onSave]);
   return (
     <div css={[styles.footer, isPreview && styles.previewFooter]}>
       {/* Hidden descriptive text for screen readers */}
       <p id={FOOTER_HELP_TEXT} hidden>
-        {strings.markdownFooterHelpText}
+        {helpText}
       </p>
       <EuiFlexGroup
         responsive={false}
@@ -121,7 +138,7 @@ export const MarkdownFooter = ({
           <EuiButtonEmpty
             data-test-subj="markdownEditorDiscardButton"
             color="primary"
-            size="xs"
+            size="s"
             onClick={onCancel}
             buttonRef={cancelButtonRef}
             onKeyDown={(e: React.KeyboardEvent) => {
@@ -130,19 +147,30 @@ export const MarkdownFooter = ({
               }
             }}
           >
-            {strings.discardButton}
+            {cancelButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>
+        {onPreview && previewButtonLabel ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="success"
+              data-test-subj="markdownEditorRunPreviewButton"
+              disabled={!isPreviewable}
+              iconType="play"
+              onClick={onPreview}
+              size="s"
+            >
+              {previewButtonLabel}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              !isSaveable && !saveInProgress ? strings.applyButtonDisabledTooltip : undefined
-            }
-          >
+          <EuiToolTip content={!isSaveable && !saveInProgress ? saveDisabledTooltip : undefined}>
             <SaveButton
               onSave={handleSave}
               disabled={!isSaveable || saveInProgress}
               isLoading={saveInProgress}
+              label={saveButtonLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -155,15 +183,17 @@ const SaveButton = ({
   onSave,
   disabled,
   isLoading,
+  label,
 }: {
   onSave: () => Promise<void>;
   disabled?: boolean;
   isLoading?: boolean;
+  label: string;
 }) => {
   return (
     <EuiButton
       data-test-subj="markdownEditorApplyButton"
-      size={'xs' as 's'}
+      size="s"
       color="primary"
       fill
       onClick={onSave}
@@ -171,7 +201,7 @@ const SaveButton = ({
       disabled={disabled}
       isLoading={isLoading}
     >
-      {strings.applyButton}
+      {label}
     </EuiButton>
   );
 };

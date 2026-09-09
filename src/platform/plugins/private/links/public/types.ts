@@ -33,15 +33,17 @@ import type {
 } from '../common';
 import type { Link } from '../server';
 
-export type LinksParentApi = PresentationContainer &
-  HasType<typeof DASHBOARD_API_TYPE> &
-  HasSerializedChildState<LinksEmbeddableState> &
+export type LinksParentApi = HasSerializedChildState<LinksEmbeddableState> &
   PublishesSavedObjectId &
   PublishesTitle &
   PublishesDescription &
   PublishesUnifiedSearch & {
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
   };
+
+export type LinksDashboardParentApi = LinksParentApi &
+  PresentationContainer &
+  HasType<typeof DASHBOARD_API_TYPE>;
 
 export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<LinksEmbeddableState> &

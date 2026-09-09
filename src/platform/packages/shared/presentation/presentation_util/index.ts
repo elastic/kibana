@@ -8,5 +8,6 @@
  */
 
 export { openLazyFlyout } from './src/open_lazy_flyout';
+export { openLazySystemFlyout } from './src/open_lazy_system_flyout';
 export { getPanelContextMenuTriggerId } from './src/focus_helpers';
 export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';

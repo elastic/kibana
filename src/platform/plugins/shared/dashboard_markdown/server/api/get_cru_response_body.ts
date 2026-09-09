@@ -8,6 +8,7 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { StoredMarkdownState } from '../markdown_saved_object';
 import { markdownLibraryItemSchema } from './schema';
@@ -20,7 +21,10 @@ export function getMarkdownCRUResponseBody(
     id: savedObject.id,
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
-    data: markdownLibraryItemSchema.parse(savedObject.attributes),
+    data: markdownLibraryItemSchema.parse({
+      ...savedObject.attributes,
+      ...toAsCodeTags(savedObject.references ?? []),
+    }),
     meta: getMeta(savedObject),
   };
 }

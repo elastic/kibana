@@ -9,6 +9,8 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
+import { findWithTagFilter } from '@kbn/as-code-utils';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './types';
 import type { StoredMarkdownState } from '../../markdown_saved_object';
@@ -18,15 +20,19 @@ export async function search(
   searchQuery: MarkdownSearchRequestQuery
 ): Promise<MarkdownSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const soResponse = await core.savedObjects.client.find<StoredMarkdownState>({
-    type: MARKDOWN_SAVED_OBJECT_TYPE,
-    searchFields: ['title^3', 'description'],
-    fields: ['description', 'title'],
-    search: searchQuery.query,
-    perPage: searchQuery.per_page,
-    page: searchQuery.page ? +searchQuery.page : undefined,
-    defaultSearchOperator: 'AND',
-  });
+  const soResponse = await findWithTagFilter<StoredMarkdownState>(
+    core.savedObjects.client,
+    {
+      type: MARKDOWN_SAVED_OBJECT_TYPE,
+      searchFields: ['title^3', 'description'],
+      fields: ['description', 'title'],
+      search: searchQuery.query,
+      perPage: searchQuery.per_page,
+      page: searchQuery.page ? +searchQuery.page : undefined,
+      defaultSearchOperator: 'AND',
+    },
+    searchQuery
+  );
 
   return {
     data: soResponse.saved_objects.map((so) => {
@@ -37,6 +43,7 @@ export async function search(
         data: {
           ...(description && { description }),
           title: title ?? '',
+          ...toAsCodeTags(so.references ?? []),
         },
         meta: getMeta(so),
       };

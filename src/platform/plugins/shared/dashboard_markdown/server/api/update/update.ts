@@ -10,6 +10,7 @@
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
 
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { StoredMarkdownState } from '../../markdown_saved_object';
 import type { MarkdownCreateResponseBody } from '../create';
@@ -46,12 +47,14 @@ export async function update(
   }
 
   // Update path (existing library item)
+  const { state, references } = toStoredTags(updateBody);
   const savedObject = await core.savedObjects.client.update<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
     id,
-    updateBody,
+    state,
     {
-      upsert: updateBody,
+      upsert: state,
+      references,
       /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
       mergeAttributes: false,
     }

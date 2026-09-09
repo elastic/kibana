@@ -10,6 +10,8 @@
 import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
+import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
+import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 
 import type {
   MarkdownSearchRequestQuery,
@@ -28,6 +30,7 @@ import type {
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
 import type { MarkdownCreateRequestBody } from '../../server';
+import type { StoredMarkdownState } from '../../server';
 
 export const markdownClient = {
   create: async (markdownState: MarkdownCreateRequestBody) => {
@@ -75,3 +78,59 @@ export const markdownClient = {
     return updateResponse;
   },
 };
+
+export const getMarkdownClient = (): VisualizationClient<
+  typeof MARKDOWN_EMBEDDABLE_TYPE,
+  StoredMarkdownState
+> => ({
+  get: async (id) => {
+    const result = await markdownClient.get(id);
+    const { state: attributes, references } = toStoredTags(result.data);
+    return {
+      item: {
+        id,
+        type: MARKDOWN_EMBEDDABLE_TYPE,
+        ...result.meta,
+        attributes,
+        references,
+      },
+      meta: { outcome: 'exactMatch' },
+    };
+  },
+  create: async ({ data, options }) => {
+    const result = await markdownClient.create({
+      ...data,
+      ...toAsCodeTags(options?.references ?? []),
+    } as MarkdownCreateRequestBody);
+    return {
+      item: {
+        id: result.id,
+        type: MARKDOWN_EMBEDDABLE_TYPE,
+        attributes: data,
+        references: options?.references ?? [],
+      },
+    };
+  },
+  update: async ({ id, data, options }) => {
+    const original = await markdownClient.get(id);
+    const result = await markdownClient.update(id, {
+      ...original.data,
+      ...data,
+      ...toAsCodeTags(options?.references ?? []),
+    });
+    const { state: attributes, references } = toStoredTags(result.data);
+    return {
+      item: {
+        id: result.id,
+        type: MARKDOWN_EMBEDDABLE_TYPE,
+        attributes,
+        references,
+      },
+    };
+  },
+  delete: markdownClient.delete,
+  search: async ({ text: query }) => {
+    const result = await markdownClient.search({ query });
+    return { hits: [], pagination: { total: result.meta.total } };
+  },
+});
