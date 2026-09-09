@@ -116,7 +116,7 @@ export const DiscoverDocumentFlyout = memo(
       }
 
       const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkLabel', {
-        defaultMessage: 'Share direct link',
+        defaultMessage: 'Copy link',
       });
 
       return [
@@ -124,7 +124,7 @@ export const DiscoverDocumentFlyout = memo(
           iconType: 'share',
           'aria-label': copyLinkDisabledReason
             ? i18n.translate('discover.docViews.flyout.copyLinkUnavailableAriaLabel', {
-                defaultMessage: 'Cannot share direct link: {reason}',
+                defaultMessage: 'Cannot copy link: {reason}',
                 values: { reason: copyLinkDisabledReason },
               })
             : copyLinkLabel,
@@ -150,7 +150,7 @@ export const DiscoverDocumentFlyout = memo(
 
               toastNotifications.addWarning({
                 title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
-                  defaultMessage: 'Direct link not copied',
+                  defaultMessage: 'Link not copied',
                 }),
                 text: metadataExample
                   ? toMountPoint(

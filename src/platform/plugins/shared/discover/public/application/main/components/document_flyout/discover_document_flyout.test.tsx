@@ -173,7 +173,7 @@ describe('DiscoverDocumentFlyout', () => {
     const { services } = await setup({ hits: esHitsMock });
 
     const shareButton = await screen.findByRole('button', {
-      name: 'Share direct link',
+      name: 'Copy link',
     });
     expectShareButtonEbt(shareButton, 'linkable');
 
@@ -221,7 +221,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
 
     expect(shortUrlClient.createWithLocator).toHaveBeenCalledWith({
       locator: services.locator,
@@ -242,7 +242,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
 
     await waitFor(() => {
       expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
@@ -303,7 +303,7 @@ describe('DiscoverDocumentFlyout', () => {
 
       const disabledReason = getExpandedDocLinkDisabledReason(linkability);
       const shareButton = await screen.findByRole('button', {
-        name: `Cannot share direct link: ${disabledReason}`,
+        name: `Cannot copy link: ${disabledReason}`,
       });
 
       expectShareButtonEbt(shareButton, ebtDetail);
@@ -311,7 +311,7 @@ describe('DiscoverDocumentFlyout', () => {
       fireEvent.click(shareButton);
 
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith({
-        title: 'Direct link not copied',
+        title: 'Link not copied',
         text: toastText,
         'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
         toastLifeTimeMs,
@@ -530,7 +530,7 @@ describe('DiscoverDocumentFlyout', () => {
     expect(screen.getByTestId('docViewerFlyoutNotFound')).toHaveTextContent(expandedDocRef.index);
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /copy link/i })).not.toBeInTheDocument();
   });
 
   it('shows an error state when the document cannot be fetched', async () => {
@@ -678,7 +678,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
 
-    expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /copy link/i })).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
