@@ -1586,6 +1586,9 @@ importers:
       '@kbn/data-service-server':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service-server
+      '@kbn/data-source':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-data-source
       '@kbn/data-stream-adapter':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/data-stream-adapter
@@ -2939,6 +2942,9 @@ importers:
       '@kbn/runtime-fields-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/runtime_fields
+      '@kbn/rxjs-history':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-rxjs-history
       '@kbn/safer-lodash-set':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-safer-lodash-set
@@ -4301,6 +4307,9 @@ importers:
       json-schema-to-ts:
         specifier: 3.1.1
         version: 3.1.1
+      jsondiffpatch:
+        specifier: 0.7.6
+        version: 0.7.6
       jsonwebtoken:
         specifier: 9.0.2
         version: 9.0.2
@@ -7436,6 +7445,8 @@ importers:
 
   src/platform/packages/private/kbn-reporting/server: {}
 
+  src/platform/packages/private/kbn-rxjs-history: {}
+
   src/platform/packages/private/kbn-saved-objects-settings: {}
 
   src/platform/packages/private/kbn-scout-info: {}
@@ -7699,6 +7710,8 @@ importers:
   src/platform/packages/shared/kbn-data-service: {}
 
   src/platform/packages/shared/kbn-data-service-server: {}
+
+  src/platform/packages/shared/kbn-data-source: {}
 
   src/platform/packages/shared/kbn-data-view-utils: {}
 
@@ -10542,6 +10555,9 @@ packages:
   '@discoveryjs/natural-compare@1.1.0':
     resolution: {integrity: sha512-yuctPJs5lRXoI8LkpVZGAV6n+DKOuEsfpfcIDQ8ZjWHwazqk1QjBc4jMlof0UlZHyUqv4dwsOTooMiAmtzvwXA==}
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0}
+
+  '@dmsnell/diff-match-patch@1.1.0':
+    resolution: {integrity: sha512-yejLPmM5pjsGvxS9gXablUSbInW7H976c/FJ4iQxWIm7/38xBySRemTPDe34lhg1gVLbJntX0+sH0jYfU+PN9A==}
 
   '@dnd-kit/accessibility@3.1.1':
     resolution: {integrity: sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw==}
@@ -20396,6 +20412,11 @@ packages:
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
 
+  jsondiffpatch@0.7.6:
+    resolution: {integrity: sha512-zE9+AXFq+MkTolDor2Cw1nJzLC0aleqPkYf52Kb4Kn4mJcka/gFHpGI2JBVEJCfWOvBl0OoxZS+wuLdislQcqg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
 
@@ -27304,6 +27325,8 @@ snapshots:
   '@discoveryjs/json-ext@1.1.0': {}
 
   '@discoveryjs/natural-compare@1.1.0': {}
+
+  '@dmsnell/diff-match-patch@1.1.0': {}
 
   '@dnd-kit/accessibility@3.1.1(react@18.2.0)':
     dependencies:
@@ -38951,6 +38974,10 @@ snapshots:
   json5@2.2.3: {}
 
   jsonc-parser@3.3.1: {}
+
+  jsondiffpatch@0.7.6:
+    dependencies:
+      '@dmsnell/diff-match-patch': 1.1.0
 
   jsonfile@6.2.1:
     dependencies:
