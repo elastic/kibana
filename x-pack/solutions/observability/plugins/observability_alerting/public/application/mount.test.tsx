@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 import { mountObservabilityAlertingApp } from './mount';
 
 describe('mountObservabilityAlertingApp', () => {
@@ -22,10 +23,14 @@ describe('mountObservabilityAlertingApp', () => {
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
     };
+    const triggersActionsUi = {
+      getClassicRulesPage: () => <div />,
+    };
 
     const unmount = mountObservabilityAlertingApp({
       coreStart,
       alertingVTwo,
+      triggersActionsUi,
       params,
     });
 

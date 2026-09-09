@@ -21,6 +21,8 @@ import {
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
@@ -83,6 +85,15 @@ export class ObservabilityAlertingPlugin
           keywords: ['alerting', 'episodes', 'inbox'],
         },
         {
+          id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
+          title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
+            defaultMessage: 'Rules (v1)',
+          }),
+          path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+          visibleIn: [],
+          keywords: ['alerting', 'rules', 'classic', 'v1'],
+        },
+        {
           id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV2Title', {
             defaultMessage: 'Rules',
@@ -125,6 +136,7 @@ export class ObservabilityAlertingPlugin
         return mountObservabilityAlertingApp({
           coreStart,
           alertingVTwo: depsStart.alertingVTwo,
+          triggersActionsUi: depsStart.triggersActionsUi,
           params,
         });
       },

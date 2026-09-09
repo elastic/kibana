@@ -6,6 +6,7 @@
  */
 
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface ObservabilityAlertingSetupDependencies {
   alertingVTwo: Record<string, never>;
@@ -13,6 +14,7 @@ export interface ObservabilityAlertingSetupDependencies {
 
 export interface ObservabilityAlertingStartDependencies {
   alertingVTwo: AlertingV2PublicStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

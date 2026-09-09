@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
+import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import {
@@ -16,18 +17,46 @@ import {
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
+  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
+
+const ClassicRulesV1Route = ({
+  coreStart,
+  getClassicRulesPage,
+  history,
+  setBreadcrumbs,
+}: {
+  coreStart: CoreStart;
+  getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
+  history: ScopedHistory;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+}) => {
+  const classicRulesHistory = useMemo(
+    () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
+    [history]
+  );
+
+  return getClassicRulesPage({
+    coreStart,
+    setBreadcrumbs,
+    history: classicRulesHistory,
+  });
+};
 
 export const ObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
+  triggersActionsUi,
+  history,
   setBreadcrumbs,
 }: ObservabilityAlertingAppProps) => {
   const { RulesPage, RuleLibraryPage, EpisodesPage, ActionPoliciesPage, ExecutionHistoryPage } =
@@ -43,6 +72,16 @@ export const ObservabilityAlertingApp = ({
           <EpisodesPage
             basePath={OBSERVABILITY_ALERTING_INBOX_PATH}
             coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+          />
+        </EuiPageSection>
+      </Route>
+      <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
+        <EuiPageSection paddingSize="m">
+          <ClassicRulesV1Route
+            coreStart={coreStart}
+            getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
+            history={history}
             setBreadcrumbs={setBreadcrumbs}
           />
         </EuiPageSection>

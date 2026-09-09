@@ -8,6 +8,7 @@
 import type { App, AppUpdater, AppUpdatableFields } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -59,6 +60,9 @@ describe('ObservabilityAlertingPlugin', () => {
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
         },
+        triggersActionsUi: {
+          getClassicRulesPage: () => <div />,
+        },
       },
       {},
     ]);
@@ -89,6 +93,11 @@ describe('ObservabilityAlertingPlugin', () => {
           expect.objectContaining({
             id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
             path: OBSERVABILITY_ALERTING_INBOX_PATH,
+            visibleIn: [],
+          }),
+          expect.objectContaining({
+            id: 'rules-v1',
+            path: '/rules/v1',
             visibleIn: [],
           }),
           expect.objectContaining({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -16,6 +17,7 @@ import {
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
@@ -30,15 +32,28 @@ const mockAlertingVTwo = {
   CreateRuleOptionsFlyout: () => null,
 };
 
+const createTestHistory = (pathname: string): ScopedHistory => {
+  const history = createMemoryHistory({ initialEntries: [pathname] });
+  return Object.assign(history, {
+    createSubHistory: jest.fn(() => history),
+  }) as unknown as ScopedHistory;
+};
+
+const mockTriggersActionsUi = {
+  getClassicRulesPage: () => <Placeholder name="classicRulesPage" />,
+};
+
 const renderAt = (pathname: string) => {
   const coreStart = coreMock.createStart();
-  const history = createMemoryHistory({ initialEntries: [pathname] });
+  const history = createTestHistory(pathname);
 
   const result = render(
     <Router history={history}>
       <ObservabilityAlertingApp
         coreStart={coreStart}
         alertingVTwo={mockAlertingVTwo}
+        triggersActionsUi={mockTriggersActionsUi}
+        history={history}
         setBreadcrumbs={jest.fn()}
       />
     </Router>
@@ -60,6 +75,15 @@ describe('ObservabilityAlertingApp', () => {
     await waitFor(() => {
       expect(getByTestId('episodesPage')).toBeInTheDocument();
     });
+  });
+
+  it('renders the classic rules page at /rules/v1', async () => {
+    const { getByTestId, history } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    expect(history.createSubHistory).toHaveBeenCalledWith(OBSERVABILITY_ALERTING_RULES_V1_PATH);
   });
 
   it('renders RulesPage at /rules/v2', async () => {
