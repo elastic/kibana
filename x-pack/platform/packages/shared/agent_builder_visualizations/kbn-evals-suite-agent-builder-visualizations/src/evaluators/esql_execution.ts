@@ -128,6 +128,7 @@ export function createEsqlExecutionEvaluator<
   return {
     name,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async (params): Promise<EvaluationResult> => {
       let queries: string[];
 

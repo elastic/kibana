@@ -5,8 +5,19 @@
  * 2.0.
  */
 
+import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { freeFormContextSchema } from '../../common';
+import { MAX_KEYWORD_LENGTH } from '../../common';
+import { fetchAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
+
+const subjectIdAndSummary = {
+  id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+};
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',
@@ -27,21 +38,57 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     },
   },
   params: z.object({
-    body: z.object({
-      subject: z.object({
-        type: z.enum(['significant_event', 'alert']),
-        id: z.string().min(1).max(500),
+    // A union rather than one object with a loose `context`, so that an alert investigation is
+    // always backed by alert data: the alert branch accepts no caller context — the handler loads
+    // the alert server-side (through the RAC alerts client, which enforces alert-index
+    // authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
+    // discriminator at the top level, and ours is nested under `subject`, hence a plain union.
+    body: z.union([
+      z.object({
+        subject: z.object({
+          type: z.literal('alert'),
+          ...subjectIdAndSummary,
+        }),
+        concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
       }),
-      concurrency_key: z.string().max(500).optional(),
-      context: z
-        .record(z.string().max(128), z.unknown())
-        .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' })
-        .optional(),
-    }),
+      z.object({
+        subject: z.object({
+          type: z.literal('significant_event'),
+          ...subjectIdAndSummary,
+        }),
+        concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+        context: freeFormContextSchema.optional(),
+      }),
+    ]),
   }),
-  handler: async ({ request, params, getInvestigationsClient }) => {
+  handler: async ({ request, params, getInvestigationsClient, getAlertsClient }) => {
     const client = getInvestigationsClient(request);
-    const result = await client.start(params.body);
-    return result;
+    const { body } = params;
+
+    // User-initiated starts are always manual.
+    try {
+      switch (body.subject.type) {
+        case 'alert': {
+          const alertsClient = await getAlertsClient(request);
+          if (!alertsClient) {
+            throw serverUnavailable('Alert lookup is unavailable');
+          }
+          const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
+          return await client.start({
+            subject: body.subject,
+            concurrency_key: body.concurrency_key ?? snapshot.id,
+            context: { alerts: [snapshot] },
+            trigger_type: 'manual',
+          });
+        }
+        case 'significant_event':
+          return await client.start({
+            ...body,
+            trigger_type: 'manual',
+          });
+      }
+    } catch (error) {
+      rethrowInvestigationClientError(error);
+    }
   },
 });

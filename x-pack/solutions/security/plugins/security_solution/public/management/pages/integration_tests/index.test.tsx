@@ -69,6 +69,16 @@ describe('when in the Administration tab', () => {
       expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
     });
 
+    it('should display `no permission` if no `canReadTrustedDevices`', async () => {
+      mockedContext.setExperimentalFlag({ trustedDevices: true });
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadTrustedDevices: false },
+      });
+
+      mockedContext.history.push('/administration/trusted_devices');
+      expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
+    });
+
     it('should display `no permission` if no `canReadEventFilters`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadEventFilters: false },
@@ -140,6 +150,16 @@ describe('when in the Administration tab', () => {
 
       mockedContext.history.push('/administration/trusted_apps');
       expect(await render().findByTestId('trustedAppsListPage-container')).toBeTruthy();
+    });
+
+    it('should display trusted devices list page when `canReadTrustedDevices` is TRUE', async () => {
+      mockedContext.setExperimentalFlag({ trustedDevices: true });
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadTrustedDevices: true },
+      });
+
+      mockedContext.history.push('/administration/trusted_devices');
+      expect(await render().findByTestId('trustedDevicesList-container')).toBeTruthy();
     });
 
     it('should display event filters list page when `canReadEventFilters` is TRUE', async () => {

@@ -139,12 +139,14 @@ const discoverSessionTabPresentationSchema = z
       .meta({
         description: 'Time interval for the chart histogram on this tab.',
       }),
-    time_restore: z.boolean().default(false).meta({
+    time_range: timeRangeSchema.optional().meta({
       description:
-        "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
+        'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
     }),
-    time_range: timeRangeSchema.optional(),
-    refresh_interval: refreshIntervalSchema.optional(),
+    refresh_interval: refreshIntervalSchema.optional().meta({
+      description:
+        'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
+    }),
     vis_context: visContextSchema.optional(),
     control_panels: discoverSessionControlPanelsSchema.optional(),
   })
@@ -259,6 +261,13 @@ export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema
   warnings: discoverSessionWarningsSchema.optional(),
 });
 
+export const discoverSessionSanitizeResponseSchema = z
+  .object({
+    data: discoverSessionApiDataSchema,
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+  .strict();
+
 export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
@@ -303,6 +312,9 @@ export const discoverSessionSearchResponseSchema = z
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionSanitizeResponse = z.output<
+  typeof discoverSessionSanitizeResponseSchema
+>;
 export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;

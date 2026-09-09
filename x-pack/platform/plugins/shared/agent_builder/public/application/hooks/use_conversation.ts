@@ -12,7 +12,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { createNewRound } from '../utils/new_conversation';
+import { createNewRound, pendingRoundId } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
@@ -134,7 +134,22 @@ export const useAgentId = () => {
 
 export const useConversationTitle = () => {
   const { conversation, isLoading } = useConversation();
-  return { title: conversation?.title ?? '', isLoading };
+  return {
+    title: conversation?.title ?? '',
+    isLoading,
+  };
+};
+
+export const useConversationReadOnly = () => {
+  const conversationId = useConversationId();
+  const { conversation, isFetching } = useConversation();
+
+  return {
+    isReadOnly: conversation?.read_only ?? false,
+    // Not `isLoading`: v4 reports it for disabled queries too, and this query stays disabled
+    // for the whole stream that creates a conversation.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
+  };
 };
 
 export const useConversationRounds = () => {
@@ -147,7 +162,6 @@ export const useConversationRounds = () => {
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
-        roundId: '',
         steps: errorSteps,
       });
       return [...rounds, pendingRound];
@@ -178,6 +192,18 @@ export const useHasActiveConversation = () => {
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
+};
+
+export const useIsUnpersistedConversation = (conversation?: Conversation) => {
+  const conversationId = useConversationId();
+  const { activeStreams } = useStreamingContext();
+  const { pendingMessage, error } = useStreamRecord(conversationId);
+  const isConversationStreaming = Boolean(conversationId && activeStreams.has(conversationId));
+
+  return Boolean(
+    (isConversationStreaming && conversation?.rounds[0]?.id === pendingRoundId) ||
+      (error && pendingMessage && conversation?.rounds.length === 0)
+  );
 };
 
 export const useIsAwaitingPrompt = () => {

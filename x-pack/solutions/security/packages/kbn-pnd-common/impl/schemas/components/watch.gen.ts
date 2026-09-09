@@ -103,8 +103,6 @@ export const WatchCallableRef = lazySchema(() =>
     name: z.string(),
     kind: z.enum(['skill', 'workflow']),
     summary: z.string(),
-    gated: z.boolean(),
-    enabled: z.boolean(),
     /**
      * ISO 8601 timestamp of last invocation, or null
      */
@@ -143,12 +141,6 @@ export type WatchRecentRun = z.infer<typeof WatchRecentRun>;
 
 export const WatchMetrics = lazySchema(() =>
   z.object({
-    runs7d: z.number().int().nullable(),
-    /**
-     * Acceptance rate as a percentage from 0 to 100
-     */
-    acceptedPct: z.number().nullable(),
-    timeSaved: z.string().nullable(),
     /**
      * ISO 8601 timestamp of most recent run
      */
@@ -177,10 +169,6 @@ export const Watch = lazySchema(() =>
      * Accent color for coverage strip and cards (hex or CSS var)
      */
     color: z.string(),
-    /**
-     * Icon key for UI (EUI icon name)
-     */
-    icon: z.string(),
     enabled: z.boolean(),
     draft: z.boolean(),
     /**
@@ -208,7 +196,7 @@ export const Watch = lazySchema(() =>
     coverage: z.array(z.array(z.number()).min(2).max(2)),
     scopeSummary: z.string(),
     scopes: z.array(WatchScope),
-    callables: z.array(WatchCallableRef),
+    skills: z.array(WatchCallableRef),
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
   })

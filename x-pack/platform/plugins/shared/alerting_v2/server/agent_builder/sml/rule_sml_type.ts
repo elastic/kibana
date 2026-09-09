@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
@@ -21,25 +20,22 @@ import type { RulesClient } from '../../lib/rules_client';
 
 interface CreateRuleSmlTypeOptions {
   getScopedRulesClient: (request: KibanaRequest) => RulesClient;
-  getInternalRepository: () => ISavedObjectsRepository;
   getIsAlertingV2Enabled: () => Promise<boolean>;
 }
 
 export const createRuleSmlType = ({
   getScopedRulesClient,
-  getInternalRepository,
   getIsAlertingV2Enabled,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
   id: RULE_KI_TYPE,
   fetchFrequency: () => '1m',
 
-  async *list() {
+  async *list(context) {
     if (!(await getIsAlertingV2Enabled())) {
       return;
     }
 
-    const repository = getInternalRepository();
-    const finder = repository.createPointInTimeFinder<RuleSavedObjectAttributes>({
+    const finder = context.savedObjectsClient.createPointInTimeFinder<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 1000,
       namespaces: ['*'],
@@ -65,8 +61,10 @@ export const createRuleSmlType = ({
     }
 
     try {
-      const repository = getInternalRepository();
-      const so = await repository.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, originId);
+      const so = await context.savedObjectsClient.get<RuleSavedObjectAttributes>(
+        RULE_SAVED_OBJECT_TYPE,
+        originId
+      );
       const attrs = so.attributes;
       const name = attrs?.metadata?.name ?? originId;
       const description = attrs?.metadata?.description ?? '';
@@ -89,8 +87,10 @@ export const createRuleSmlType = ({
     }
   },
 
+  requiredHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+
   /**
-   * Rules are gated by the dedicated `ai_index:rule/read` action.
+   * Rules are gated by the dedicated `ai_index:alerting_v2_rule/read` action.
    * The Alerting v2 feature grants it by declaring `aiIndex: { read: [RULE_KI_TYPE] }`
    * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step
    * with that declaration.
