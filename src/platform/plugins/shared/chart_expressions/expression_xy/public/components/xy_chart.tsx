@@ -1179,7 +1179,8 @@ export function XYChart({
                             strokeWidth: 1,
                             stroke: pointStroke,
                             fill: pointFill,
-                            radius: 5,
+                            radius: 4,
+                            opacity: 0.6,
                           },
                         }}
                         xScaleType="time"
