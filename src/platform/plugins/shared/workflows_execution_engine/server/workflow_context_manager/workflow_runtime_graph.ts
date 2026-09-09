@@ -15,10 +15,16 @@ import { WorkflowScopeStack } from './workflow_scope_stack';
 
 type ScopeEntry = StackFrame['nestedScopes'][number];
 
+/** Prefix on ids of runtime-created enter nodes (e.g. a loop iteration). */
 export const ENTER_SYNTHETIC_PREFIX = 'enterSynthetic_';
+/** Prefix on ids of runtime-created exit nodes (e.g. a loop iteration). */
 export const EXIT_SYNTHETIC_PREFIX = 'exitSynthetic_';
 const SCOPE_HASH_LENGTH = 16;
 
+/**
+ * Graph lookups a step needs: current node, neighbors, nested steps, timeout.
+ * Use this type on step deps. The engine owns {@link WorkflowRuntimeGraph} itself.
+ */
 export type RuntimeGraphView = Pick<
   WorkflowRuntimeGraph,
   | 'getNode'
@@ -29,6 +35,14 @@ export type RuntimeGraphView = Pick<
   | 'topologicalOrder'
 >;
 
+/**
+ * The graph the execution cursor walks.
+ *
+ * Same nodes as the compiled workflow, plus scopes that only exist once the run
+ * knows them — a foreach iteration, a while iteration. Look them up and land on
+ * them the same way as compiled nodes. Pass `stackFrames` from a resumed
+ * execution so those scopes are present again.
+ */
 export class WorkflowRuntimeGraph {
   private readonly compiledGraph: WorkflowGraph;
   private internalGraph: graphlib.Graph;
@@ -39,10 +53,15 @@ export class WorkflowRuntimeGraph {
     this.init(compiledGraph, stackFrames);
   }
 
+  /** Walk order for the current graph. The execution loop uses this to advance. */
   public get topologicalOrder(): string[] {
     return graphlib.alg.topsort(this.internalGraph);
   }
 
+  /**
+   * Adds a runtime scope under `ownerNodeId` (one loop iteration) and returns the
+   * enter node the cursor should move to.
+   */
   public insertSyntheticScope(ownerNodeId: string, stepId: string, stepType?: string): string {
     const ownerExitNodeId = ownerNodeId.replace(/^enter/, 'exit');
     const ownerExitInEdges = this.internalGraph.inEdges(ownerExitNodeId) ?? [];
@@ -101,15 +120,18 @@ export class WorkflowRuntimeGraph {
     return enterSyntheticId;
   }
 
+  /** Node the cursor or a step should run, by id. */
   public getNode(nodeId: string): GraphNodeUnion {
     return this.internalGraph.node(nodeId) as GraphNodeUnion;
   }
 
+  /** Nodes that run immediately after `nodeId`. */
   public getDirectSuccessors(nodeId: string): GraphNodeUnion[] {
     const successors = this.internalGraph.successors(nodeId) ?? [];
     return successors.map((id) => this.internalGraph.node(id) as GraphNodeUnion);
   }
 
+  /** Nodes that must have run before `nodeId`. */
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
@@ -128,16 +150,19 @@ export class WorkflowRuntimeGraph {
     return Array.from(visited).map((id) => this.internalGraph.node(id) as GraphNodeUnion);
   }
 
+  /** Step ids nested inside a compound step (foreach body, if branch, and so on). */
   public getInnerStepIds(compoundStepId: string): Set<string> {
     return this.compiledGraph.getInnerStepIds(compoundStepId);
   }
 
+  /** Workflow-level timeout step, if the workflow defines one. */
   public getWorkflowLevelTimeout(): string | undefined {
     return this.compiledGraph.getWorkflowLevelTimeout();
   }
 
   /**
-   * Open enter scopes at `nodeId` as stack frames, including live synthetics.
+   * Scopes that are open when execution is on `nodeId`.
+   * Resume and persist use this as the cursor's stack.
    */
   public getNodeStack(nodeId: string): StackFrame[] {
     const currentNode = this.getNode(nodeId);
