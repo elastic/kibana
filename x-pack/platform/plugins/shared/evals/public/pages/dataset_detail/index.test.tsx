@@ -42,6 +42,22 @@ jest.mock('../../components/copy_dataset_flyout', () => ({
     </div>
   ),
 }));
+jest.mock('../../components/import_dataset_flyout', () => ({
+  ImportDatasetFlyout: ({
+    initialDataset,
+    onClose,
+  }: {
+    initialDataset?: { id: string };
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="importDatasetFlyoutMock">
+      <span>{initialDataset?.id}</span>
+      <button type="button" onClick={onClose}>
+        Close import
+      </button>
+    </div>
+  ),
+}));
 jest.mock('../../components/dataset_spaces', () => ({
   DatasetSharedNotice: () => null,
   DatasetSpacesBadge: () => null,
@@ -82,7 +98,7 @@ const renderPage = () => {
   );
 };
 
-describe('DatasetDetailPage copy entry point', () => {
+describe('DatasetDetailPage dataset actions', () => {
   beforeEach(() => {
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseDataset.mockReturnValue({
@@ -137,5 +153,21 @@ describe('DatasetDetailPage copy entry point', () => {
     renderPage();
 
     expect(screen.queryByTestId('copyDatasetButton')).not.toBeInTheDocument();
+  });
+
+  it('opens the import flyout with the current dataset selected', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('importDatasetFileButton'));
+
+    expect(screen.getByTestId('importDatasetFlyoutMock')).toHaveTextContent('dataset-1');
+  });
+
+  it('does not render the import button without manage privilege', () => {
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
+
+    renderPage();
+
+    expect(screen.queryByTestId('importDatasetFileButton')).not.toBeInTheDocument();
   });
 });

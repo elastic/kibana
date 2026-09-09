@@ -18,6 +18,13 @@ export const CREATE_DATASET_BUTTON = i18n.translate(
   }
 );
 
+export const IMPORT_FILE_BUTTON = i18n.translate(
+  'xpack.evals.importDatasetFlyout.datasetsListButtonLabel',
+  {
+    defaultMessage: 'Import file',
+  }
+);
+
 export const CREATE_DATASET_FLYOUT_TITLE = i18n.translate(
   'xpack.evals.datasetsList.createDatasetFlyout.title',
   {

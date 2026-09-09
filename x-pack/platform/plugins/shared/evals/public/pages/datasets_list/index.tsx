@@ -46,6 +46,7 @@ import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../h
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import { CopyDatasetFlyout } from '../../components/copy_dataset_flyout';
+import { ImportDatasetFlyout } from '../../components/import_dataset_flyout';
 import {
   DatasetMaturityBadge,
   DatasetTagBadges,
@@ -81,6 +82,7 @@ export const DatasetsListPage: React.FC = () => {
   const [datasetPendingDelete, setDatasetPendingDelete] = useState<DatasetSummary | null>(null);
   const [datasetPendingCopy, setDatasetPendingCopy] = useState<DatasetSummary | null>(null);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -389,9 +391,22 @@ export const DatasetsListPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
-                    {i18n.CREATE_DATASET_BUTTON}
-                  </EuiButton>
+                  <EuiFlexGroup responsive={false} gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={() => setIsImportFlyoutOpen(true)}
+                        iconType="upload"
+                        data-test-subj="importDatasetFileButton"
+                      >
+                        {i18n.IMPORT_FILE_BUTTON}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
+                        {i18n.CREATE_DATASET_BUTTON}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
@@ -418,6 +433,13 @@ export const DatasetsListPage: React.FC = () => {
             actions={
               canManage
                 ? [
+                    <EuiButton
+                      onClick={() => setIsImportFlyoutOpen(true)}
+                      iconType="upload"
+                      data-test-subj="importDatasetFileButton"
+                    >
+                      {i18n.IMPORT_FILE_BUTTON}
+                    </EuiButton>,
                     <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
                       {i18n.CREATE_DATASET_BUTTON}
                     </EuiButton>,
@@ -475,6 +497,9 @@ export const DatasetsListPage: React.FC = () => {
           onClose={() => setDatasetPendingCopy(null)}
           onCopied={(newDatasetId) => history.push(`/datasets/${newDatasetId}`)}
         />
+      ) : null}
+      {isImportFlyoutOpen ? (
+        <ImportDatasetFlyout onClose={() => setIsImportFlyoutOpen(false)} />
       ) : null}
       {isCreateFlyoutOpen ? (
         <EuiFlyout onClose={closeCreateFlyout} size="s" aria-labelledby="createDatasetFlyoutTitle">

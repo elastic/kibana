@@ -29,6 +29,15 @@ jest.mock('../../components/copy_dataset_flyout', () => ({
     </div>
   ),
 }));
+jest.mock('../../components/import_dataset_flyout', () => ({
+  ImportDatasetFlyout: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="importDatasetFlyoutMock">
+      <button type="button" onClick={onClose}>
+        Close import
+      </button>
+    </div>
+  ),
+}));
 
 const mockedUseKibana = jest.mocked(useKibana);
 const mockedUseDatasets = jest.mocked(useDatasets);
@@ -46,7 +55,7 @@ const renderPage = () => {
   );
 };
 
-describe('DatasetsListPage copy entry point', () => {
+describe('DatasetsListPage dataset actions', () => {
   beforeEach(() => {
     mockedUseKibana.mockReturnValue({ services: {} } as ReturnType<typeof useKibana>);
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
@@ -95,5 +104,21 @@ describe('DatasetsListPage copy entry point', () => {
     renderPage();
 
     expect(screen.queryByTestId('copyDatasetButton')).not.toBeInTheDocument();
+  });
+
+  it('opens the import flyout when the user can manage datasets', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('importDatasetFileButton'));
+
+    expect(screen.getByTestId('importDatasetFlyoutMock')).toBeInTheDocument();
+  });
+
+  it('does not render the import button without manage privilege', () => {
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
+
+    renderPage();
+
+    expect(screen.queryByTestId('importDatasetFileButton')).not.toBeInTheDocument();
   });
 });
