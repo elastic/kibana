@@ -57,16 +57,17 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
-const ServiceVarsEntrySchema = schema.recordOf(schema.string(), schema.any());
+const ServiceVarsEntrySchema = schema.recordOf(schema.string({ maxLength: 256 }), schema.any());
 
 const RequestServiceVarsSchema = schema.recordOf(
-  schema.string({ minLength: 1 }),
+  schema.string({ minLength: 1, maxLength: 256 }),
   ServiceVarsEntrySchema,
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
+    maxLength: 255,
     meta: { description: 'The saved object ID of the cloud onboarding deployment.' },
   }),
 });
@@ -179,6 +180,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     connectorId: schema.maybe(
       schema.string({
         minLength: 1,
+        maxLength: 255,
         meta: {
           description:
             'ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.',
@@ -196,9 +198,14 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     }),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     globalRegion: schema.maybe(
-      schema.string({ meta: { description: 'Global AWS region from the Service Settings step.' } })
+      schema.string({
+        maxLength: 64,
+        meta: { description: 'Global AWS region from the Service Settings step.' },
+      })
     ),
-    dataFormat: schema.maybe(schema.string({ meta: { description: 'Data format: ecs or otel.' } })),
+    dataFormat: schema.maybe(
+      schema.string({ maxLength: 64, meta: { description: 'Data format: ecs or otel.' } })
+    ),
     authMethod: schema.maybe(
       schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
         meta: { description: 'Authentication method for managed integrations.' },
@@ -233,24 +240,30 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
   body: schema.object({
     status: schema.maybe(CloudOnboardingDeploymentStatusSchema),
     statusMessage: schema.maybe(
-      schema.string({ meta: { description: 'Error context; set when transitioning to failed.' } })
+      schema.string({
+        maxLength: 1000,
+        meta: { description: 'Error context; set when transitioning to failed.' },
+      })
     ),
     deploymentId: schema.maybe(
       schema.string({
+        maxLength: 2048,
         meta: {
           description:
             'CFN stack ARN (or equivalent); provided by the client after manual deployment.',
         },
       })
     ),
-    deploymentName: schema.maybe(schema.string()),
+    deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
-    agentPolicyId: schema.maybe(schema.string()),
-    packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-    apiKeyId: schema.maybe(schema.string()),
+    agentPolicyId: schema.maybe(schema.string({ maxLength: 255 })),
+    packagePolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
+    ),
+    apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
     ecfStacks: schema.maybe(
       schema.arrayOf(EcfStackSchema, {
         maxSize: 10,
