@@ -442,6 +442,11 @@ export const ALERTING_LOG_CODES = {
    * The active-group fetch hit its `alerts.max` bound, so the active set may be truncated.
    */
   RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED: 'RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED',
+  /**
+   * The breach, recovery or data-presence ES|QL response exceeded
+   * `rules.run.query.maxResponseSize`; the run failed as a user error.
+   */
+  RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED: 'RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
