@@ -10,10 +10,12 @@
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  StackFrame,
   WorkflowStepTokenUsage,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
+import { getParallelScopes } from './parallel_scope';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -206,8 +208,18 @@ export class WorkflowExecutionState {
     return result;
   }
 
-  public getLatestStepExecution(stepId: string): StepExecutionMetadata | undefined {
-    const allExecutions = this.getStepExecutionsByStepId(stepId);
+  public getLatestStepExecution(
+    stepId: string,
+    stackFrames?: StackFrame[]
+  ): StepExecutionMetadata | undefined {
+    const scopes = stackFrames === undefined ? undefined : getParallelScopes(stackFrames);
+    const allExecutions = this.getStepExecutionsByStepId(stepId).filter(
+      (execution) =>
+        scopes === undefined ||
+        getParallelScopes(execution.scopeStack ?? []).every(
+          (scope, index) => scopes[index] === scope
+        )
+    );
     return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
   }
 

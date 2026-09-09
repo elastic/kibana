@@ -16,6 +16,7 @@ export interface WorkflowExecutionCursorInit {
   nodeId?: string;
   stackFrames?: StackFrame[];
   workflowExecutionGraph: WorkflowRuntimeGraph;
+  navigationOrder?: readonly string[];
 }
 
 /** Public surface of {@link WorkflowExecutionCursor} for typing mocks and loop params. */
@@ -44,6 +45,7 @@ export interface WorkflowExecutionCursorApi {
  */
 export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private readonly runtimeGraph: WorkflowRuntimeGraph;
+  private readonly navigationOrder: readonly string[];
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
@@ -53,7 +55,8 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.runtimeGraph = init.workflowExecutionGraph;
-    this.currentNodeId = init.nodeId || this.runtimeGraph.topologicalOrder[0];
+    this.navigationOrder = init.navigationOrder ?? this.runtimeGraph.topologicalOrder;
+    this.currentNodeId = init.nodeId || this.navigationOrder[0];
     this.stackFrames = init.stackFrames ?? [];
   }
 
@@ -135,6 +138,10 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     return this.runtimeGraph.getNode(this.nextNodeId) ?? null;
   }
 
+  public clearPendingNavigation(): void {
+    this.nextNodeId = undefined;
+  }
+
   public navigateToNode(nodeId: string): void {
     if (!this.runtimeGraph.getNode(nodeId)) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
@@ -144,11 +151,11 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   public navigateToNextNode(): void {
-    this.nextNodeId = this.runtimeGraph.nodeAfter(this.currentNodeId)?.id;
+    this.nextNodeId = this.nodeAfter(this.currentNodeId);
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.nextNodeId = this.runtimeGraph.nodeAfter(nodeId)?.id;
+    this.nextNodeId = this.nodeAfter(nodeId);
   }
 
   /**
@@ -184,6 +191,14 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     }).stackFrames;
   }
 
+  private nodeAfter(nodeId: string | undefined): string | undefined {
+    const topologicalOrder = this.navigationOrder;
+    const index = topologicalOrder.findIndex((id) => id === nodeId);
+    if (index >= 0 && index < topologicalOrder.length - 1) {
+      return topologicalOrder[index + 1];
+    }
+    return undefined;
+  }
   private syncScopeStack(): void {
     if (!this.currentNodeId) {
       return;

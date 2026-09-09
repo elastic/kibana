@@ -88,7 +88,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
     expect(topSort).toEqual(['enterParallel_fanOut', 'first', 'second', 'exitParallel_fanOut']);
   });
 
-  it('rejects nested flow-control inside a branch body', () => {
+  it('compiles nested flow-control inside a branch body', () => {
     expect(() =>
       buildGraph({
         ...baseParallel,
@@ -102,7 +102,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
           } as unknown as ConnectorStep,
         ],
       })
-    ).toThrow(/nested flow-control/);
+    ).not.toThrow();
   });
 
   it('compiles a timer-based wait step inside a branch body', () => {
@@ -161,38 +161,34 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
-  it('compiles a workflow.fail step inside a dynamic branch body', () => {
-    // `workflow.output` / `workflow.fail` are allowed inside a branch body; the
-    // terminator node is compiled into the branch chain like any other step.
-    const executionGraph = buildGraph({
-      ...baseParallel,
-      steps: [
-        {
-          name: 'always_fail',
-          type: 'workflow.fail',
-          with: { message: 'boom' },
-        } as unknown as ConnectorStep,
-      ],
-    });
-    expect(executionGraph.nodes()).toEqual(
-      expect.arrayContaining(['enterParallel_fanOut', 'always_fail', 'exitParallel_fanOut'])
-    );
+  it('rejects a workflow.fail step inside a dynamic branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'always_fail',
+            type: 'workflow.fail',
+            with: { message: 'boom' },
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).toThrow(/workflow.output or workflow.fail/);
   });
 
-  it('compiles a workflow.output step inside a dynamic branch body', () => {
-    const executionGraph = buildGraph({
-      ...baseParallel,
-      steps: [
-        {
-          name: 'emit',
-          type: 'workflow.output',
-          with: { result: 'x' },
-        } as unknown as ConnectorStep,
-      ],
-    });
-    expect(executionGraph.nodes()).toEqual(
-      expect.arrayContaining(['enterParallel_fanOut', 'emit', 'exitParallel_fanOut'])
-    );
+  it('rejects a workflow.output step inside a dynamic branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'emit',
+            type: 'workflow.output',
+            with: { result: 'x' },
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).toThrow(/workflow.output or workflow.fail/);
   });
 
   it('compiles static branches into one chain per branch between enter and exit', () => {
@@ -249,7 +245,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
     expect(topSort).toEqual(['enterParallel_fanOut', 'a', 'b', 'exitParallel_fanOut']);
   });
 
-  it('rejects nested flow-control inside a static branch body', () => {
+  it('compiles nested flow-control inside a static branch body', () => {
     expect(() =>
       buildGraph({
         name: 'fanOut',
@@ -269,10 +265,10 @@ describe('convertToWorkflowGraph - parallel step', () => {
           },
         ],
       } as unknown as ParallelStep)
-    ).toThrow(/nested flow-control/);
+    ).not.toThrow();
   });
 
-  it('rejects an on-failure handler inside a static branch body', () => {
+  it('compiles an on-failure handler inside a static branch body', () => {
     expect(() =>
       buildGraph({
         name: 'fanOut',
@@ -292,7 +288,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
           },
         ],
       } as unknown as ParallelStep)
-    ).toThrow(/unsupported flow-control|on-failure/);
+    ).not.toThrow();
   });
 
   it('rejects a step-level timeout inside a static branch body', () => {
@@ -333,24 +329,23 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
-  it('compiles a workflow.fail step inside a static branch body', () => {
-    const executionGraph = buildGraph({
-      name: 'fanOut',
-      type: 'parallel',
-      branches: [
-        {
-          name: 'vt',
-          steps: [{ name: 'scan', type: 'slack', connectorId: 'slack', with: {} }],
-        },
-        {
-          name: 'boom',
-          steps: [{ name: 'die', type: 'workflow.fail', with: { message: 'x' } }],
-        },
-      ],
-    } as unknown as ParallelStep);
-    expect(executionGraph.nodes()).toEqual(
-      expect.arrayContaining(['enterParallel_fanOut', 'scan', 'die', 'exitParallel_fanOut'])
-    );
+  it('rejects a workflow.fail step inside a static branch body', () => {
+    expect(() =>
+      buildGraph({
+        name: 'fanOut',
+        type: 'parallel',
+        branches: [
+          {
+            name: 'vt',
+            steps: [{ name: 'scan', type: 'slack', connectorId: 'slack', with: {} }],
+          },
+          {
+            name: 'boom',
+            steps: [{ name: 'die', type: 'workflow.fail', with: { message: 'x' } }],
+          },
+        ],
+      } as unknown as ParallelStep)
+    ).toThrow(/workflow.output or workflow.fail/);
   });
 
   it('wraps the parallel block in a timeout zone when timeout is set', () => {
@@ -379,7 +374,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ]);
   });
 
-  it('rejects a step-level `if` inside a dynamic branch body', () => {
+  it('compiles a step-level `if` inside a dynamic branch body', () => {
     expect(() =>
       buildGraph({
         ...baseParallel,
@@ -393,10 +388,10 @@ describe('convertToWorkflowGraph - parallel step', () => {
           } as unknown as ConnectorStep,
         ],
       })
-    ).toThrow(/unsupported flow-control/);
+    ).not.toThrow();
   });
 
-  it('rejects a step-level `if` inside a static branch body', () => {
+  it('compiles a step-level `if` inside a static branch body', () => {
     expect(() =>
       buildGraph({
         name: 'fanOut',
@@ -416,6 +411,6 @@ describe('convertToWorkflowGraph - parallel step', () => {
           },
         ],
       } as unknown as ParallelStep)
-    ).toThrow(/unsupported flow-control/);
+    ).not.toThrow();
   });
 });
