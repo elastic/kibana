@@ -174,8 +174,8 @@ importers:
         specifier: 2.0.11
         version: 2.0.11(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
-        specifier: 73.0.0
-        version: 73.0.0(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
+        specifier: 73.0.1
+        version: 73.0.1(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.30.1)
@@ -389,6 +389,9 @@ importers:
       '@kbn/agent-builder-workflows-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agent_builder_workflows
+      '@kbn/agentic-investigations-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -5226,9 +5229,6 @@ importers:
       '@kbn/evals-suite-ml':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/ml/evals
-      '@kbn/evals-suite-obs-ai-assistant':
-        specifier: workspace:*
-        version: link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
       '@kbn/evals-suite-observability-ai':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai
@@ -8686,6 +8686,8 @@ importers:
 
   x-pack/platform/packages/shared/ingest-pipelines: {}
 
+  x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
+
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
   x-pack/platform/packages/shared/kbn-ai-tools: {}
@@ -9235,8 +9237,6 @@ importers:
   x-pack/solutions/observability/packages/kbn-alerts-grouping: {}
 
   x-pack/solutions/observability/packages/kbn-apm-embeddable-common: {}
-
-  x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant: {}
 
   x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai: {}
 
@@ -10583,8 +10583,8 @@ packages:
   '@elastic/app-search-javascript@8.13.0':
     resolution: {integrity: sha512-E1oV7eqHz0jbSd7mtbFDoP7aeosNORziCr3RLuIt2G2/ex/EnMLnL7Xz7yHzMHa0K9cvdRPW2458BR0JXYmKZQ==}
 
-  '@elastic/charts@73.0.0':
-    resolution: {integrity: sha512-EKciZkUxAIKkrlm2SSNBQ+nVMPlf5HTon9ovgfCte+fd0IZel+SIIRSwhoxMZ9GYA4fttp1c7DJ8Z0uJXarnYw==}
+  '@elastic/charts@73.0.1':
+    resolution: {integrity: sha512-OuCKAmh9UV9UTfsbmxBvo5KRu0IQOfHM0lybh1pYxCQ91trDFZmYqU9Jpldx4WtAiE0fu7a5JBuzSyogjzkg0w==}
     peerDependencies:
       moment: ^2.29.1
       moment-timezone: ^0.5.32
@@ -27351,7 +27351,7 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@73.0.0(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
+  '@elastic/charts@73.0.1(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)

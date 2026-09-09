@@ -20,7 +20,6 @@ import { regeneratePnpmWorkspace } from './regenerate_pnpm_workspace.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
-import { prefetchSharedTarballs } from './prefetch_shared_tarballs.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
 
