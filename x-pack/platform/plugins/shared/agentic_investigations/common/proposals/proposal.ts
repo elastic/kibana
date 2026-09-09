@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ActionMetadata } from '@kbn/workflows';
+import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 /**
@@ -21,7 +23,8 @@ export const proposalStatusSchema = z.enum([
 ]);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
-export const proposalImpactSchema = z.enum(['low', 'medium', 'high', 'critical']);
+/** Same vocabulary an action declares about itself, so the two cannot drift. */
+export const proposalImpactSchema = actionImpactSchema;
 export type ProposalImpact = z.infer<typeof proposalImpactSchema>;
 
 export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
@@ -31,11 +34,11 @@ export const proposalOriginSchema = z.enum(['worker', 'analyst']);
 export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**
- * Grouping axis for the decision queue. Kept as a plain string in storage so a
- * solution can extend the vocabulary without a mapping change; the enum is the
- * shared baseline.
+ * Grouping axis for the decision queue, resolved from the action's own metadata.
+ * Kept as a plain string in storage so a solution can extend the vocabulary
+ * without a mapping change; the enum is the shared baseline.
  */
-export const proposalCategorySchema = z.enum(['contain', 'escalate', 'investigate', 'tune']);
+export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
 
 export const dismissReasonSchema = z.enum([
@@ -50,61 +53,85 @@ export const dismissReasonSchema = z.enum([
 export type DismissReason = z.infer<typeof dismissReasonSchema>;
 
 /**
- * Metadata an action workflow declares about itself under
- * `consts.actionMetadata`, resolved on read rather than copied onto proposals.
+ * Every string and collection reaching the HTTP layer is bounded, so an
+ * unbounded body cannot be used to exhaust memory or the index.
  */
-export const actionMetadataSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  category: proposalCategorySchema,
-  impact: proposalImpactSchema.optional(),
-  reversible: z.boolean().optional(),
-  approvalPolicy: z.enum(['always-gate', 'autonomy-dependent']).optional(),
+const MAX_ID_LENGTH = 256;
+const MAX_NAME_LENGTH = 256;
+/** Markdown shown to a human, so it needs room without being unbounded. */
+const MAX_COMMENT_LENGTH = 8192;
+const MAX_RATIONALE_LENGTH = 4096;
+const MAX_ERROR_LENGTH = 4096;
+/** ISO 8601 timestamps; generous enough for any offset notation. */
+const MAX_TIMESTAMP_LENGTH = 64;
+/** An action's input is opaque to us, so cap its breadth rather than its shape. */
+const MAX_ACTION_INPUT_KEYS = 100;
+
+const boundedActionInput = z
+  .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
+  .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
+    message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
+  });
+
+/**
+ * Who did something, in the shape Cases established. The profile uid is the
+ * stable identity and the one a UI resolves an avatar from, but it is optional
+ * because it is genuinely often absent: security disabled, a `run-as` proxy, a
+ * session with no profile, or an API key whose creator has no activated
+ * profile. The name fields are therefore kept as a durable fallback rather than
+ * something to look up, so attribution survives a missing profile.
+ *
+ * Field names are camelCase to match the rest of this plugin's contract; Cases
+ * uses snake_case because that is its own API convention.
+ */
+export const proposalUserSchema = z.object({
+  username: z.string().max(MAX_ID_LENGTH).nullable(),
+  fullName: z.string().max(MAX_NAME_LENGTH).nullable(),
+  email: z.string().max(MAX_NAME_LENGTH).nullable(),
+  profileUid: z.string().max(MAX_ID_LENGTH).optional(),
 });
-export type ActionMetadata = z.infer<typeof actionMetadataSchema>;
+export type ProposalUser = z.infer<typeof proposalUserSchema>;
 
 export const proposalSchema = z.object({
-  id: z.string(),
-  spaceId: z.string(),
+  id: z.string().max(MAX_ID_LENGTH),
+  spaceId: z.string().max(MAX_ID_LENGTH),
   /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
-  conversationId: z.string(),
-  /** Explains what is being proposed; the only content a non-action proposal carries. */
-  comment: z.string().optional(),
+  conversationId: z.string().max(MAX_ID_LENGTH),
+  /** Markdown explaining what is being proposed. Every proposal carries one. */
+  comment: z.string().max(MAX_COMMENT_LENGTH),
 
   /**
    * Managed action workflow this proposal would execute. Absent for
    * non-action proposals. Immutable: a different action is a different
    * proposal.
    */
-  actionWorkflowId: z.string().optional(),
+  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
   /** Inputs for the action workflow. Frozen once the proposal is decided. */
-  actionInput: z.record(z.string(), z.unknown()).optional(),
+  actionInput: boundedActionInput.optional(),
 
   status: proposalStatusSchema,
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,
   /** Resolved from the action workflow's metadata at creation. */
-  category: z.string(),
-  /** Typed entity references (`host.name:web-01`) used by the queue's entity filter. */
-  targetEntities: z.array(z.string()).default([]),
+  category: z.string().max(MAX_NAME_LENGTH),
   origin: proposalOriginSchema,
   /** Decision deadline, evaluated on read rather than swept into a status. */
-  expiresAt: z.string().optional(),
+  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  decidedBy: z.string().optional(),
-  decidedAt: z.string().optional(),
+  decidedBy: proposalUserSchema.optional(),
+  decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   dismissReason: dismissReasonSchema.optional(),
-  rationale: z.string().optional(),
-  executionError: z.string().optional(),
+  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+  executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
-  workflowExecutionId: z.string().optional(),
+  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
   /** Set when this proposal replaces a dismissed one. */
-  supersedesProposalId: z.string().optional(),
+  supersedesProposalId: z.string().max(MAX_ID_LENGTH).optional(),
 
-  createdAt: z.string(),
-  createdBy: z.string().optional(),
+  createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
+  createdBy: proposalUserSchema.optional(),
 });
 export type Proposal = z.infer<typeof proposalSchema>;
 
@@ -115,17 +142,16 @@ export interface ProposalWithMetadata extends Proposal {
 }
 
 export const createProposalRequestSchema = z.object({
-  conversationId: z.string(),
-  comment: z.string().optional(),
-  actionWorkflowId: z.string().optional(),
-  actionInput: z.record(z.string(), z.unknown()).optional(),
+  conversationId: z.string().max(MAX_ID_LENGTH),
+  comment: z.string().max(MAX_COMMENT_LENGTH),
+  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+  actionInput: boundedActionInput.optional(),
   impact: proposalImpactSchema.default('low'),
   confidence: proposalConfidenceSchema.default('medium'),
-  targetEntities: z.array(z.string()).optional(),
   origin: proposalOriginSchema.default('worker'),
-  expiresAt: z.string().optional(),
-  workflowExecutionId: z.string().optional(),
-  supersedesProposalId: z.string().optional(),
+  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  supersedesProposalId: z.string().max(MAX_ID_LENGTH).optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
@@ -135,22 +161,35 @@ export const approveProposalRequestSchema = z.object({
    * no longer matches the record, so an approval can never apply to values the
    * decider never saw.
    */
-  actionInput: z.record(z.string(), z.unknown()).optional(),
-  rationale: z.string().optional(),
+  actionInput: boundedActionInput.optional(),
+  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
 });
 export type ApproveProposalRequest = z.infer<typeof approveProposalRequestSchema>;
 
 export const dismissProposalRequestSchema = z.object({
   dismissReason: dismissReasonSchema,
-  rationale: z.string().optional(),
+  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
 });
 export type DismissProposalRequest = z.infer<typeof dismissProposalRequestSchema>;
 
+/**
+ * `from + size` must stay within Elasticsearch's default result window of
+ * 10,000. Deep paging past that needs `search_after`, which this list does not
+ * expose yet.
+ */
+export const MAX_PROPOSALS_PAGE_SIZE = 100;
+export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
+
 export const listProposalsQuerySchema = z.object({
   status: proposalStatusSchema.optional(),
-  conversationId: z.string().optional(),
-  targetEntity: z.string().optional(),
-  size: z.coerce.number().int().min(1).max(100).default(50),
+  conversationId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * Drops proposals whose decision deadline has passed. Off by default so the
+   * list stays a faithful view of the index; the decision queue turns it on.
+   */
+  excludeExpired: z.stringbool().default(false),
+  size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
+  from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
 export type ListProposalsQuery = z.infer<typeof listProposalsQuerySchema>;
 

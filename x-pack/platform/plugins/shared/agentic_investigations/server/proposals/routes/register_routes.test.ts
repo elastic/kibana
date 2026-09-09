@@ -29,6 +29,14 @@ interface RegisteredRoute {
   handler: Handler;
 }
 
+/** The resolved actor; the route must never take it from the request body. */
+const ANALYST = {
+  username: 'analyst',
+  fullName: 'An Analyst',
+  email: null,
+  profileUid: 'analyst-uid',
+};
+
 const registerAndCollect = (service: Partial<ProposalsService>) => {
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
@@ -46,7 +54,7 @@ const registerAndCollect = (service: Partial<ProposalsService>) => {
     logger: loggingSystemMock.createLogger(),
     getProposalsService: () => service as ProposalsService,
     getSpaceId: () => 'default',
-    getUsername: async () => 'analyst',
+    resolveUser: async () => ANALYST,
   } as unknown as RouteDependencies);
 
   const byPath = (routes: RegisteredRoute[], suffix: string) =>
@@ -84,14 +92,14 @@ describe('investigation proposals routes', () => {
       logger: loggingSystemMock.createLogger(),
       getProposalsService: () => ({} as ProposalsService),
       getSpaceId: () => 'default',
-      getUsername: async () => 'analyst',
+      resolveUser: async () => ANALYST,
     } as unknown as RouteDependencies);
 
     expect(router.versioned.put).not.toHaveBeenCalled();
     expect(router.versioned.patch).not.toHaveBeenCalled();
   });
 
-  it('should pass the server-derived username to approve rather than trusting the body', async () => {
+  it('should pass the server-derived actor to approve rather than trusting the body', async () => {
     const approve = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'approved' });
     const { posts, byPath } = registerAndCollect({ approve });
     const response = httpServerMock.createResponseFactory();
@@ -108,7 +116,7 @@ describe('investigation proposals routes', () => {
     expect(approve).toHaveBeenCalledWith(
       'proposal-1',
       expect.objectContaining({ actionInput: { name: 'Suspicious PowerShell' } }),
-      expect.objectContaining({ username: 'analyst', spaceId: 'default' })
+      expect.objectContaining({ user: ANALYST, spaceId: 'default' })
     );
     expect(response.ok).toHaveBeenCalled();
   });

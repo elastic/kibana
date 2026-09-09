@@ -6,21 +6,33 @@ description: >
   Solution-agnostic: callers supply the action workflow id and its input.
 enabled: true
 tags:
-  - investigation-proposals
+  - agentic-investigation-proposals
 settings:
   # The parked gate's wake-up is bounded by the workflow timeout, whose default
-  # is 6h. Without this the 72h gate below would expire silently.
+  # is 6h. Without this the gate below would expire silently. This is a static
+  # ceiling, so an `expiresIn` longer than it is cut short by the workflow
+  # timing out rather than by the gate expiring.
   timeout: '80h'
   on-failure:
     # A gate timeout surfaces as a step failure rather than a branch, and HITL
     # steps take no on-failure of their own. Without this a timed-out proposal
     # would stay pending in the queue forever.
     fallback:
+      # An expired gate is a decision that never came, not a malfunction, so it
+      # lands on `dismissed`. `waitForApproval` fails with an ExecutionError of
+      # type `TimeoutError`, which is the only signal that distinguishes it from
+      # a genuine failure.
+      - name: record_expiry
+        type: investigations.updateProposal
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type == 'TimeoutError' }}"
+        with:
+          proposalId: '{{ steps.create_proposal.output.proposalId }}'
+          status: dismissed
       - name: record_failure
-        type: investigations.saveProposalResult
+        type: investigations.updateProposal
         # Skipped when creation itself failed: there is no proposal to mark, and
         # the template would resolve to an empty id.
-        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' }}"
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type != 'TimeoutError' }}"
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId }}'
           status: failed
@@ -34,7 +46,9 @@ triggers:
           description: Conversation this proposal belongs to.
         comment:
           type: string
-          description: Explains what is being proposed.
+          description: >
+            Explains what is being proposed, rendered as markdown. Required:
+            a proposal a human cannot read is not reviewable.
         actionWorkflowId:
           type: string
           description: >
@@ -54,14 +68,12 @@ triggers:
           type: string
           enum: ['low', 'medium', 'high']
           description: Confidence in the recommendation.
-        targetEntities:
-          type: array
-          items:
-            type: string
-          description: Typed entity references, e.g. `host.name:web-01`.
-        expiresAt:
+        expiresIn:
           type: string
-          description: ISO 8601 decision deadline.
+          description: >
+            How long the analyst has to decide, as a duration like `24h`. Drives
+            the gate timeout and is resolved to an absolute deadline on the
+            proposal. Capped by the workflow timeout in `settings` above.
         autoApprove:
           type: boolean
           description: >
@@ -69,6 +81,7 @@ triggers:
             action. Defaults to false so the gate is fail-closed.
       required:
         - conversationId
+        - comment
       additionalProperties: false
 
 # The contract a caller gets back from `workflow.execute`. `workflow.execute`
@@ -90,13 +103,16 @@ steps:
       actionInput: '${{ inputs.actionInput }}'
       impact: "{{ inputs.impact | default: 'low' }}"
       confidence: "{{ inputs.confidence | default: 'medium' }}"
-      targetEntities: '${{ inputs.targetEntities }}'
       origin: worker
-      expiresAt: '{{ inputs.expiresAt }}'
+      expiresIn: '{{ inputs.expiresIn }}'
 
   - name: decision_gate
     type: if
-    condition: '${{ inputs.autoApprove != true }}'
+    # `autoApprove` is only meaningful for an action proposal: autonomy governs
+    # whether an action may run without a human, and a non-action proposal has
+    # no action to govern. Approval is its entire lifecycle, so it is always
+    # gated and the flag is deliberately ignored.
+    condition: "${{ inputs.autoApprove != true or inputs.actionWorkflowId == null or inputs.actionWorkflowId == '' }}"
     steps:
       # The API records the decision before resuming, so this gate only needs
       # the release signal. waitForApproval reconstructs its response as
@@ -104,7 +120,9 @@ steps:
       # fail-closed by construction.
       - name: await_decision
         type: waitForApproval
-        timeout: '72h'
+        # Same duration the proposal records as its deadline, so the queue and
+        # the gate cannot disagree about when the decision expired.
+        timeout: "{{ inputs.expiresIn | default: '72h' }}"
         with:
           message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
           approveLabel: Approve
@@ -128,7 +146,7 @@ steps:
     condition: "${{ inputs.actionWorkflowId != null and inputs.actionWorkflowId != '' }}"
     steps:
       - name: mark_executing
-        type: investigations.saveProposalResult
+        type: investigations.updateProposal
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId }}'
           status: executing
@@ -143,7 +161,7 @@ steps:
             actionInput: '${{ inputs.actionInput }}'
 
       - name: record_success
-        type: investigations.saveProposalResult
+        type: investigations.updateProposal
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId }}'
           status: succeeded

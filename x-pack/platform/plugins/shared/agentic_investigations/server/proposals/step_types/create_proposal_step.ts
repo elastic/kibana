@@ -7,7 +7,9 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createProposalStepCommonDefinition } from '../../../common/proposals/step_types/create_proposal_step';
+import { resolveExpiresAt } from './resolve_expires_at';
 import type { ProposalsService } from '../services/proposals_service';
+import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 
 /**
  * Calls the proposals service in-process. The workflow execution id comes from
@@ -16,8 +18,10 @@ import type { ProposalsService } from '../services/proposals_service';
  */
 export const getCreateProposalStepDefinition = ({
   getProposalsService,
+  resolveUser,
 }: {
   getProposalsService: () => ProposalsService;
+  resolveUser: ResolveProposalUser;
 }) =>
   createServerStepDefinition({
     ...createProposalStepCommonDefinition,
@@ -26,6 +30,9 @@ export const getCreateProposalStepDefinition = ({
         const workflowContext = context.contextManager.getContext();
         const spaceId = workflowContext.workflow.spaceId;
         const workflowExecutionId = workflowContext.execution.id;
+        // The step runs under the execution's own credentials, so the fake
+        // request is what identifies the Worker that is proposing.
+        const user = await resolveUser(context.contextManager.getFakeRequest());
 
         const proposal = await getProposalsService().create(
           {
@@ -35,13 +42,21 @@ export const getCreateProposalStepDefinition = ({
             actionInput: context.input.actionInput,
             impact: context.input.impact ?? 'low',
             confidence: context.input.confidence ?? 'medium',
-            targetEntities: context.input.targetEntities,
             origin: context.input.origin ?? 'worker',
-            expiresAt: context.input.expiresAt,
+            expiresAt: resolveExpiresAt(context.input.expiresIn),
             supersedesProposalId: context.input.supersedesProposalId,
             workflowExecutionId,
           },
-          { spaceId, username: workflowContext.execution.executedBy }
+          {
+            spaceId,
+            // `execution.executedBy` is only ever a username, so it is the last
+            // resort when the request yields no identity at all.
+            user: user ?? {
+              username: workflowContext.execution.executedBy ?? null,
+              fullName: null,
+              email: null,
+            },
+          }
         );
 
         context.logger.debug(

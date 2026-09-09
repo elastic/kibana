@@ -32,11 +32,5 @@ export const PROPOSALS_SUB_FEATURE_PRIVILEGE_READ = 'proposals_read' as const;
 export const PROPOSALS_UI_CAPABILITY_SHOW = 'showProposals' as const;
 export const PROPOSALS_UI_CAPABILITY_DECIDE = 'decideProposals' as const;
 
-/**
- * Tag every action workflow carries so the catalog can be discovered without a
- * hardcoded list. Deliberately solution-agnostic.
- */
-export const ACTION_WORKFLOW_TAG = 'action' as const;
-
 /** Channel recorded on the workflow resume, for audit. */
 export const PROPOSALS_RESUME_CHANNEL = 'investigation_proposals_api' as const;

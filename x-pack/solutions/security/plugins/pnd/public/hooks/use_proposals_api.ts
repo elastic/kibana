@@ -23,7 +23,8 @@ import { retryOnTransientError } from './use_watches_api';
 
 /**
  * Pending proposals, already grouped and ranked by the API (category, then
- * impact, confidence and deadline).
+ * impact, confidence and deadline). Expired ones are dropped: a deadline that
+ * has passed is no longer a decision anyone can make.
  */
 export const usePendingProposals = (conversationId?: string) => {
   const { services } = useKibana();
@@ -33,7 +34,11 @@ export const usePendingProposals = (conversationId?: string) => {
     queryFn: async (): Promise<ListProposalsResponse> =>
       services.http!.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        query: { status: 'pending', ...(conversationId ? { conversationId } : {}) },
+        query: {
+          status: 'pending',
+          excludeExpired: true,
+          ...(conversationId ? { conversationId } : {}),
+        },
       }),
     keepPreviousData: true,
     retry: retryOnTransientError,

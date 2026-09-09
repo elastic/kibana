@@ -27,7 +27,6 @@ export {
   PROPOSAL_APPROVE_URL,
   PROPOSAL_BY_ID_URL,
   PROPOSAL_DISMISS_URL,
-  actionMetadataSchema,
   approveProposalRequestSchema,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
@@ -41,6 +40,7 @@ export {
   proposalOriginSchema,
   proposalSchema,
   proposalStatusSchema,
+  actionMetadataSchema,
 } from './proposals';
 
 export type {

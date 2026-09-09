@@ -16,7 +16,7 @@ import {
   PROPOSALS_SUB_FEATURE_PRIVILEGE_ALL,
   PROPOSALS_SUB_FEATURE_PRIVILEGE_READ,
 } from '../common/proposals/constants';
-import { CreateProposalStepId, SaveProposalResultStepId } from '../common/proposals/step_types';
+import { CreateProposalStepId, UpdateProposalStepId } from '../common/proposals/step_types';
 import { AgenticInvestigationsPlugin } from './plugin';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
 import {
@@ -148,7 +148,7 @@ describe('AgenticInvestigationsPlugin', () => {
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([CreateProposalStepId, SaveProposalResultStepId]);
+      expect(registeredIds).toEqual([CreateProposalStepId, UpdateProposalStepId]);
     });
 
     it('registers the HTTP routes', () => {

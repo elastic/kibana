@@ -16,9 +16,11 @@ export const CreateProposalStepId = 'investigations.createProposal' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
-  comment: optionalStepInput(z.string()).describe(
-    'Explains what is being proposed. The only content a non-action proposal carries.'
-  ),
+  comment: z
+    .string()
+    .describe(
+      'Explains what is being proposed, rendered as markdown. Required: a proposal a human cannot read is not reviewable.'
+    ),
   actionWorkflowId: optionalStepInput(z.string()).describe(
     'Managed action workflow to run once approved. Omit for a non-action proposal.'
   ),
@@ -29,13 +31,12 @@ export const createProposalStepInputSchema = z.object({
   confidence: optionalStepInput(proposalConfidenceSchema).describe(
     'Confidence in the recommendation.'
   ),
-  targetEntities: optionalStepInput(z.array(z.string())).describe(
-    'Typed entity references, e.g. `host.name:web-01`, used by the queue filter.'
-  ),
   origin: optionalStepInput(proposalOriginSchema).describe(
     'Whether a worker or an analyst proposed this.'
   ),
-  expiresAt: optionalStepInput(z.string()).describe('ISO 8601 decision deadline.'),
+  expiresIn: optionalStepInput(z.string()).describe(
+    'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
+  ),
   supersedesProposalId: optionalStepInput(z.string()).describe(
     'Proposal this one replaces, when an action was changed rather than tuned.'
   ),
@@ -45,7 +46,7 @@ export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
   status: z.string(),
   category: z.string(),
-  /** True when autonomy is not consulted here — the caller decides whether to gate. */
+  /** True when the proposal still needs a human decision. */
   requiresDecision: z.boolean(),
 });
 

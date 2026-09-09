@@ -7,11 +7,12 @@
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsService } from './services/proposals_service';
+import type { ResolveProposalUser } from './services/resolve_proposal_user';
 
 export interface RouteDependencies {
   router: IRouter;
   logger: Logger;
   getProposalsService: () => ProposalsService;
   getSpaceId: (request: KibanaRequest) => string;
-  getUsername: (request: KibanaRequest) => Promise<string | undefined>;
+  resolveUser: ResolveProposalUser;
 }

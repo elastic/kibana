@@ -7,23 +7,26 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ProposalsService } from '../services/proposals_service';
+import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
-import { getSaveProposalResultStepDefinition } from './save_proposal_result_step';
+import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
   getProposalsService,
+  resolveUser,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getProposalsService: () => ProposalsService;
+  resolveUser: ResolveProposalUser;
 }) => {
   workflowsExtensions.registerStepDefinition(
-    getCreateProposalStepDefinition({ getProposalsService })
+    getCreateProposalStepDefinition({ getProposalsService, resolveUser })
   );
   workflowsExtensions.registerStepDefinition(
-    getSaveProposalResultStepDefinition({ getProposalsService })
+    getUpdateProposalStepDefinition({ getProposalsService })
   );
 };
 
 export { getCreateProposalStepDefinition } from './create_proposal_step';
-export { getSaveProposalResultStepDefinition } from './save_proposal_result_step';
+export { getUpdateProposalStepDefinition } from './update_proposal_step';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './action_create_rule';
+import { ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './dark_continuous_threat_hunt';
 import { PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
@@ -30,7 +30,7 @@ export {
 export {
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
-} from './action_create_rule';
+} from './actions/action_create_detection_rule';
 export {
   PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,

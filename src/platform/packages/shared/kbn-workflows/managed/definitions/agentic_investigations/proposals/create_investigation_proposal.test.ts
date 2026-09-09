@@ -26,7 +26,10 @@ interface ParsedWorkflow {
     timeout?: string;
     'on-failure'?: { fallback?: WorkflowStep[] };
   };
-  triggers: Array<{ type: string; inputs?: { properties?: Record<string, unknown> } }>;
+  triggers: Array<{
+    type: string;
+    inputs?: { properties?: Record<string, unknown>; required?: string[] };
+  }>;
   outputs?: Array<{ name: string; type: string }>;
   steps: WorkflowStep[];
 }
@@ -92,20 +95,29 @@ describe('create-investigation-proposal workflow', () => {
     expect(gate?.type).toBe('waitForApproval');
   });
 
-  it('sets a workflow timeout longer than the gate timeout, or the parked wait expires early', () => {
+  it('drives the gate timeout from expiresIn, so the deadline and the gate agree', () => {
     const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
 
-    expect(gate.timeout).toBeDefined();
+    expect(gate.timeout).toContain('inputs.expiresIn');
+  });
+
+  it('sets a workflow timeout longer than the default gate timeout, or the parked wait expires early', () => {
+    const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
+    // The timeout is templated, so compare against the fallback it renders to
+    // when a caller supplies no `expiresIn`.
+    const defaultTimeout = /default:\s*'([^']+)'/.exec(gate.timeout ?? '')?.[1];
+
+    expect(defaultTimeout).toBeDefined();
     expect(workflow.settings?.timeout).toBeDefined();
     expect(durationToMs(workflow.settings!.timeout!)).toBeGreaterThanOrEqual(
-      durationToMs(gate.timeout!)
+      durationToMs(defaultTimeout!)
     );
   });
 
   it('records a failure from the workflow-level on-failure, since HITL steps take none', () => {
     const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
 
-    expect(fallback.map(({ type }) => type)).toContain('investigations.saveProposalResult');
+    expect(fallback.map(({ type }) => type)).toContain('investigations.updateProposal');
   });
 
   it('skips the failure handler when creation itself failed and there is no proposal id', () => {
@@ -116,12 +128,39 @@ describe('create-investigation-proposal workflow', () => {
     expect(recordFailure?.if).toContain('steps.create_proposal.output.proposalId');
   });
 
-  it('skips the gate when the caller already resolved autonomy', () => {
+  it('skips the gate when the caller already resolved autonomy for an action', () => {
     const gateBranch = workflow.steps.find(({ name }) => name === 'decision_gate') as {
       condition?: string;
     };
 
     expect(gateBranch.condition).toContain('autoApprove');
+  });
+
+  it('always gates a non-action proposal, since there is no autonomy to resolve', () => {
+    const gateBranch = workflow.steps.find(({ name }) => name === 'decision_gate') as {
+      condition?: string;
+    };
+
+    // Without this the flag would skip the gate and nothing would ever move the
+    // record off `pending`: there is no action run to report a result.
+    expect(gateBranch.condition).toContain('inputs.actionWorkflowId');
+  });
+
+  it('lands an expired gate on dismissed rather than failed', () => {
+    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+    const expiry = fallback.find(({ name }) => name === 'record_expiry');
+    const failure = fallback.find(({ name }) => name === 'record_failure');
+
+    expect(expiry?.with?.status).toBe('dismissed');
+    expect(expiry?.if).toContain("error.type == 'TimeoutError'");
+    // The two branches must be mutually exclusive or both would write.
+    expect(failure?.if).toContain("error.type != 'TimeoutError'");
+  });
+
+  it('requires a comment so every proposal carries something a human can read', () => {
+    const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
+
+    expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment']);
   });
 
   it('branches to dismissed unless the platform boolean is exactly true', () => {
@@ -150,11 +189,7 @@ describe('create-investigation-proposal workflow', () => {
   });
 
   it('records the execution outcome around the action', () => {
-    expect(findStep(workflow.steps, 'mark_executing')?.type).toBe(
-      'investigations.saveProposalResult'
-    );
-    expect(findStep(workflow.steps, 'record_success')?.type).toBe(
-      'investigations.saveProposalResult'
-    );
+    expect(findStep(workflow.steps, 'mark_executing')?.type).toBe('investigations.updateProposal');
+    expect(findStep(workflow.steps, 'record_success')?.type).toBe('investigations.updateProposal');
   });
 });

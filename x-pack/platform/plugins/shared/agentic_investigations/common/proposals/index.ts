@@ -6,7 +6,6 @@
  */
 
 export {
-  ACTION_WORKFLOW_TAG,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
   PROPOSALS_RESUME_CHANNEL,
@@ -19,8 +18,12 @@ export {
   PROPOSAL_DISMISS_URL,
 } from './constants';
 
+// The action-workflow contract is owned by @kbn/workflows, where the action
+// YAML files live; re-exported here so consumers have one import site.
+export { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows';
+export type { ActionMetadata } from '@kbn/workflows';
+
 export {
-  actionMetadataSchema,
   approveProposalRequestSchema,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
@@ -37,7 +40,6 @@ export {
 } from './proposal';
 
 export type {
-  ActionMetadata,
   ApproveProposalRequest,
   CreateProposalRequest,
   DismissProposalRequest,

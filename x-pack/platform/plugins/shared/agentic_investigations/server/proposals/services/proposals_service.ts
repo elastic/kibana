@@ -7,11 +7,18 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { JSONSchema7 } from 'json-schema';
+import {
+  ACTION_WORKFLOW_INPUT,
+  actionMetadataSchema,
+  convertJsonSchemaToZod,
+  ExecutionStatus,
+  isHitlWaitStepType,
+} from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { ActionMetadata } from '@kbn/workflows';
 import { PROPOSALS_RESUME_CHANNEL } from '../../../common/proposals/constants';
 import type {
-  ActionMetadata,
   ApproveProposalRequest,
   CreateProposalRequest,
   DismissProposalRequest,
@@ -19,33 +26,49 @@ import type {
   ListProposalsResponse,
   Proposal,
   ProposalStatus,
+  ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { actionMetadataSchema, isExpired } from '../../../common/proposals/proposal';
+import { isExpired } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
-import { ProposalConflictError, ProposalExpiredError, ProposalNotFoundError } from './errors';
+import { toSortRanks } from '../storage/sort_ranks';
+import {
+  ProposalConflictError,
+  ProposalExpiredError,
+  ProposalInvalidActionInputError,
+  ProposalNotFoundError,
+} from './errors';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
-/** The step type the generic gate workflow parks on. */
-const GATE_STEP_TYPE = 'waitForApproval';
+/** The parts of an action workflow definition this service reads. */
+interface ActionWorkflowDefinition {
+  consts?: { actionMetadata?: unknown };
+  triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
+}
+
+/**
+ * The stored document plus its id. Writers thread this through unchanged so the
+ * sort ranks survive an update; only the public returns strip them.
+ */
+type StoredProposalRecord = { id: string } & ProposalDocument;
 
 interface StoredProposal {
-  proposal: Proposal;
+  proposal: StoredProposalRecord;
   seqNo?: number;
   primaryTerm?: number;
 }
 
-export interface RecordResultParams {
+export interface UpdateProposalParams {
   id: string;
-  status: Extract<ProposalStatus, 'executing' | 'succeeded' | 'failed'>;
+  status: Extract<ProposalStatus, 'executing' | 'succeeded' | 'failed' | 'dismissed'>;
   executionError?: string;
 }
 
 export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
-  getWorkflowsApi: () => WorkflowsManagementApi | undefined;
+  getWorkflowsApi: () => WorkflowsManagementApi;
 }
 
 /**
@@ -58,7 +81,7 @@ export class ProposalsService {
 
   async create(
     params: CreateProposalRequest,
-    { spaceId, username }: { spaceId: string; username?: string }
+    { spaceId, user }: { spaceId: string; user?: ProposalUser }
   ): Promise<Proposal> {
     const id = uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
@@ -67,41 +90,53 @@ export class ProposalsService {
     // proposal look action-bearing when it is not.
     const actionWorkflowId = blankToUndefined(params.actionWorkflowId);
 
-    const category = actionWorkflowId
-      ? (await this.resolveActionMetadata(actionWorkflowId, spaceId))?.category ?? 'investigate'
-      : 'investigate';
+    // A single fetch of the action definition serves three purposes: the queue
+    // grouping, the impact (intrinsic to the action rather than to the situation
+    // that produced it), and rejecting an `actionInput` the action could not
+    // accept — before an analyst is asked to approve something that cannot run.
+    const metadata = actionWorkflowId
+      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
+      : undefined;
+
+    const category = metadata?.category ?? 'investigate';
+    const impact = metadata?.impact ?? params.impact;
 
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
-      comment: blankToUndefined(params.comment),
+      comment: params.comment,
       actionWorkflowId,
       actionInput: params.actionInput,
       status: 'pending',
-      impact: params.impact,
+      impact,
       confidence: params.confidence,
       category,
-      targetEntities: (params.targetEntities ?? []).filter(
-        (entity) => blankToUndefined(entity) !== undefined
-      ),
       origin: params.origin,
+      ...toSortRanks({ category, impact, confidence: params.confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       supersedesProposalId: blankToUndefined(params.supersedesProposalId),
       createdAt: new Date().toISOString(),
-      createdBy: username,
+      createdBy: user,
     };
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
-    return { id, ...document };
+    return toProposal(id, document);
   }
 
   async get(id: string, spaceId: string): Promise<ProposalWithMetadata> {
     const { proposal } = await this.load(id, spaceId);
-    return this.withMetadata(proposal, spaceId);
+    return this.withMetadata(stripRanks(proposal), spaceId);
   }
 
+  /**
+   * Ordering and paging both happen in Elasticsearch. The queue's order is
+   * category, then impact, then confidence, then the nearest deadline — which
+   * the stored rank fields express, because the keyword enums would otherwise
+   * sort alphabetically. Doing it here rather than in memory is what makes the
+   * list pageable instead of capped at a single fetch.
+   */
   async list(query: ListProposalsQuery, spaceId: string): Promise<ListProposalsResponse> {
     const filter: QueryFilterList = [{ term: { spaceId } }];
 
@@ -111,29 +146,46 @@ export class ProposalsService {
     if (query.conversationId) {
       filter.push({ term: { conversationId: query.conversationId } });
     }
-    if (query.targetEntity) {
-      filter.push({ term: { targetEntities: query.targetEntity } });
+    if (query.excludeExpired) {
+      // A proposal with no deadline never expires, so it has to survive the
+      // filter alongside those whose deadline is still ahead.
+      filter.push({
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: 'expiresAt' } } } },
+            { range: { expiresAt: { gt: 'now' } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
     }
 
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: query.size,
+      from: query.from,
       query: { bool: { filter } },
-      // Impact and confidence are keywords, so their natural sort is
-      // alphabetical; the service ranks them after the fetch instead.
-      sort: [{ createdAt: { order: 'desc' } }],
+      sort: [
+        { categoryRank: { order: 'asc' } },
+        { impactRank: { order: 'asc' } },
+        { confidenceRank: { order: 'asc' } },
+        // Soonest deadline first; proposals without one come after those with.
+        { expiresAt: { order: 'asc', missing: '_last' } },
+        // Final tiebreak, so paging over equally-ranked proposals is stable.
+        { createdAt: { order: 'desc' } },
+      ],
     });
 
     const proposals = await Promise.all(
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
         .map((hit) =>
-          this.withMetadata({ id: hit._id, ...(hit._source as ProposalDocument) }, spaceId)
+          this.withMetadata(toProposal(hit._id, hit._source as ProposalDocument), spaceId)
         )
     );
 
     return {
-      proposals: sortForQueue(proposals),
+      proposals,
       total:
         typeof response.hits.total === 'number'
           ? response.hits.total
@@ -149,7 +201,7 @@ export class ProposalsService {
   async approve(
     id: string,
     params: ApproveProposalRequest,
-    { spaceId, request, username }: DecisionContext
+    { spaceId, request, user }: DecisionContext
   ): Promise<Proposal> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
@@ -163,19 +215,19 @@ export class ProposalsService {
 
     const decided = await this.writeDecision(
       { ...proposal, status: 'approved', rationale: params.rationale },
-      { seqNo, primaryTerm, username }
+      { seqNo, primaryTerm, user }
     );
 
     await this.resumeGate(decided, { spaceId, request, approved: true });
 
-    return decided;
+    return stripRanks(decided);
   }
 
   /** Same shape as `approve`, but releases the workflow down its negative branch. */
   async dismiss(
     id: string,
     params: DismissProposalRequest,
-    { spaceId, request, username }: DecisionContext
+    { spaceId, request, user }: DecisionContext
   ): Promise<Proposal> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
@@ -188,22 +240,34 @@ export class ProposalsService {
         dismissReason: params.dismissReason,
         rationale: params.rationale,
       },
-      { seqNo, primaryTerm, username }
+      { seqNo, primaryTerm, user }
     );
 
     await this.resumeGate(decided, { spaceId, request, approved: false });
 
-    return decided;
+    return stripRanks(decided);
   }
 
-  /** Called by the gate workflow once the action workflow has settled. */
-  async recordResult(
-    { id, status, executionError }: RecordResultParams,
+  /**
+   * Called by the gate workflow to advance a proposal it owns. Refuses to move
+   * a proposal that already settled, so a late failure — an `on-failure`
+   * handler firing after the action succeeded, say — cannot rewrite the
+   * outcome. Enforced here rather than in the workflow YAML so it holds for
+   * every caller.
+   */
+  async update(
+    { id, status, executionError }: UpdateProposalParams,
     spaceId: string
   ): Promise<Proposal> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
-    const updated: Proposal = { ...proposal, status, executionError };
+    if (isTerminal(proposal.status)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] already settled as ${proposal.status} and cannot be moved to ${status}`
+      );
+    }
+
+    const updated: StoredProposalRecord = { ...proposal, status, executionError };
     const { id: _id, ...document } = updated;
 
     await this.deps.storage.index({
@@ -214,7 +278,7 @@ export class ProposalsService {
         : {}),
     });
 
-    return updated;
+    return stripRanks(updated);
   }
 
   /**
@@ -226,34 +290,93 @@ export class ProposalsService {
     actionWorkflowId: string,
     spaceId: string
   ): Promise<ActionMetadata | undefined> {
-    const api = this.deps.getWorkflowsApi();
-    if (!api) {
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    return definition && this.readActionMetadata(actionWorkflowId, definition);
+  }
+
+  /**
+   * The creation path: one fetch, then both the metadata and the input check.
+   * An invalid input throws, because a proposal whose action can never run has
+   * no business sitting in a human's queue.
+   */
+  private async resolveAndValidateAction(
+    actionWorkflowId: string,
+    actionInput: Record<string, unknown> | undefined,
+    spaceId: string
+  ): Promise<ActionMetadata | undefined> {
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    if (!definition) {
       return undefined;
     }
 
-    try {
-      const workflow = await api.getWorkflow(actionWorkflowId, spaceId);
-      const candidate = workflow?.definition?.consts?.actionMetadata;
-      if (!candidate) {
-        return undefined;
-      }
+    this.assertActionInputValid(actionWorkflowId, definition, actionInput);
+    return this.readActionMetadata(actionWorkflowId, definition);
+  }
 
-      const parsed = actionMetadataSchema.safeParse(candidate);
-      if (!parsed.success) {
-        this.deps.logger.warn(
-          `Action workflow [${actionWorkflowId}] declares invalid consts.actionMetadata: ${parsed.error.message}`
-        );
-        return undefined;
-      }
-      return parsed.data;
+  /**
+   * Validates `actionInput` against the schema the action declares on its manual
+   * trigger. Best-effort by design: the JSON Schema to zod conversion does not
+   * cover every keyword, so this catches the common mistakes — a missing
+   * required field or the wrong type — and lets anything it cannot express
+   * through rather than rejecting a valid input.
+   */
+  private assertActionInputValid(
+    actionWorkflowId: string,
+    definition: ActionWorkflowDefinition,
+    actionInput: Record<string, unknown> | undefined
+  ): void {
+    const inputSchema = definition.triggers?.find(({ type }) => type === 'manual')?.inputs
+      ?.properties?.[ACTION_WORKFLOW_INPUT];
+
+    if (!inputSchema) {
+      // The action declares no input contract, so there is nothing to check.
+      return;
+    }
+
+    const parsed = convertJsonSchemaToZod(inputSchema as JSONSchema7).safeParse(actionInput ?? {});
+    if (!parsed.success) {
+      throw new ProposalInvalidActionInputError(
+        `actionInput does not satisfy action workflow [${actionWorkflowId}]: ${parsed.error.issues
+          .map(({ path, message }) => `${path.join('.') || '(root)'}: ${message}`)
+          .join('; ')}`
+      );
+    }
+  }
+
+  private async fetchActionDefinition(
+    actionWorkflowId: string,
+    spaceId: string
+  ): Promise<ActionWorkflowDefinition | undefined> {
+    try {
+      const workflow = await this.deps.getWorkflowsApi().getWorkflow(actionWorkflowId, spaceId);
+      return workflow?.definition as ActionWorkflowDefinition | undefined;
     } catch (error) {
       this.deps.logger.warn(
-        `Failed to read metadata for action workflow [${actionWorkflowId}]: ${
+        `Failed to read action workflow [${actionWorkflowId}]: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
       return undefined;
     }
+  }
+
+  private readActionMetadata(
+    actionWorkflowId: string,
+    definition: ActionWorkflowDefinition
+  ): ActionMetadata | undefined {
+    const candidate = definition.consts?.actionMetadata;
+    if (!candidate) {
+      return undefined;
+    }
+
+    const parsed = actionMetadataSchema.safeParse(candidate);
+    if (!parsed.success) {
+      this.deps.logger.warn(
+        `Action workflow [${actionWorkflowId}] declares invalid consts.actionMetadata: ${parsed.error.message}`
+      );
+      return undefined;
+    }
+    return parsed.data;
   }
 
   private async load(id: string, spaceId: string): Promise<StoredProposal> {
@@ -284,7 +407,7 @@ export class ProposalsService {
     };
   }
 
-  private assertDecidable(proposal: Proposal): void {
+  private assertDecidable(proposal: StoredProposalRecord): void {
     if (proposal.status !== 'pending') {
       throw new ProposalConflictError(
         `Proposal [${proposal.id}] was already decided (status: ${proposal.status})`
@@ -296,13 +419,13 @@ export class ProposalsService {
   }
 
   private async writeDecision(
-    proposal: Proposal,
-    { seqNo, primaryTerm, username }: { seqNo?: number; primaryTerm?: number; username?: string }
-  ): Promise<Proposal> {
-    const decided: Proposal = {
+    proposal: StoredProposalRecord,
+    { seqNo, primaryTerm, user }: { seqNo?: number; primaryTerm?: number; user?: ProposalUser }
+  ): Promise<StoredProposalRecord> {
+    const decided: StoredProposalRecord = {
       ...proposal,
       // Server-derived; never accepted from the caller.
-      decidedBy: username,
+      decidedBy: user,
       decidedAt: new Date().toISOString(),
     };
     const { id, ...document } = decided;
@@ -332,7 +455,7 @@ export class ProposalsService {
    * audit envelope.
    */
   private async resumeGate(
-    proposal: Proposal,
+    proposal: StoredProposalRecord,
     { spaceId, request, approved }: { spaceId: string; request: KibanaRequest; approved: boolean }
   ): Promise<void> {
     if (!proposal.workflowExecutionId) {
@@ -341,13 +464,6 @@ export class ProposalsService {
     }
 
     const api = this.deps.getWorkflowsApi();
-    if (!api) {
-      this.deps.logger.warn(
-        `Cannot resume execution [${proposal.workflowExecutionId}]: workflows management API unavailable`
-      );
-      return;
-    }
-
     const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId);
     if (!execution) {
       throw new ProposalConflictError(
@@ -383,7 +499,7 @@ export class ProposalsService {
 interface DecisionContext {
   spaceId: string;
   request: KibanaRequest;
-  username?: string;
+  user?: ProposalUser;
 }
 
 type QueryFilterList = Array<Record<string, unknown>>;
@@ -392,41 +508,31 @@ type QueryFilterList = Array<Record<string, unknown>>;
  * Treats an empty or whitespace-only string as absent. Liquid renders a missing
  * workflow input as `''`, which is not the same thing as a value.
  */
+/**
+ * Drops the storage-only sort ranks, so they never reach the API contract.
+ * Destructuring is the point: adding a rank field forces this to be updated.
+ */
+const stripRanks = ({
+  categoryRank,
+  impactRank,
+  confidenceRank,
+  ...proposal
+}: StoredProposalRecord): Proposal => proposal;
+
+const toProposal = (id: string, document: ProposalDocument): Proposal =>
+  stripRanks({ id, ...document });
+
+/**
+ * A proposal that has settled. `approved` is not terminal: an action proposal
+ * still has to execute and report back.
+ */
+const isTerminal = (status: ProposalStatus): boolean =>
+  status === 'succeeded' || status === 'failed' || status === 'dismissed';
+
 const blankToUndefined = (value: string | undefined): string | undefined => {
   const trimmed = value?.trim();
   return trimmed === undefined || trimmed === '' ? undefined : trimmed;
 };
-
-const IMPACT_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-const CONFIDENCE_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
-const CATEGORY_RANK: Record<string, number> = {
-  contain: 0,
-  escalate: 1,
-  investigate: 2,
-  tune: 3,
-};
-
-const rank = (table: Record<string, number>, value: string | undefined): number =>
-  value !== undefined && value in table ? table[value] : Number.MAX_SAFE_INTEGER;
-
-/**
- * Queue ordering: grouped by category, then by impact and confidence, with the
- * decision deadline as the tiebreak. Done in the service because the stored
- * enums are keywords and would otherwise sort alphabetically.
- */
-export const sortForQueue = (proposals: ProposalWithMetadata[]): ProposalWithMetadata[] =>
-  [...proposals].sort((a, b) => {
-    const byCategory = rank(CATEGORY_RANK, a.category) - rank(CATEGORY_RANK, b.category);
-    if (byCategory !== 0) return byCategory;
-
-    const byImpact = rank(IMPACT_RANK, a.impact) - rank(IMPACT_RANK, b.impact);
-    if (byImpact !== 0) return byImpact;
-
-    const byConfidence = rank(CONFIDENCE_RANK, a.confidence) - rank(CONFIDENCE_RANK, b.confidence);
-    if (byConfidence !== 0) return byConfidence;
-
-    return (a.expiresAt ?? '').localeCompare(b.expiresAt ?? '');
-  });
 
 /**
  * The most recently started gate step that has neither finished nor been
@@ -446,7 +552,7 @@ const findWaitingGateStepId = (
   stepExecutions
     .filter(
       (step) =>
-        step.stepType === GATE_STEP_TYPE &&
+        isHitlWaitStepType(step.stepType) &&
         step.status === ExecutionStatus.WAITING_FOR_INPUT &&
         !step.finishedAt &&
         !step.hitl?.respondedAt

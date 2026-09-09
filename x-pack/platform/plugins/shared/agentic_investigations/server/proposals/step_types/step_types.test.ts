@@ -8,13 +8,23 @@
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { createProposalStepInputSchema } from '../../../common/proposals/step_types/create_proposal_step';
-import { saveProposalResultStepInputSchema } from '../../../common/proposals/step_types/save_proposal_result_step';
+import { updateProposalStepInputSchema } from '../../../common/proposals/step_types/update_proposal_step';
 import type { ProposalsService } from '../services/proposals_service';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
-import { getSaveProposalResultStepDefinition } from './save_proposal_result_step';
+import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
+const FAKE_REQUEST = { fake: true } as never;
+
+/** The step identifies the Worker from the execution's own fake request. */
+const resolvedUser = {
+  username: 'worker-user',
+  fullName: 'Worker User',
+  email: null,
+  profileUid: 'worker-uid',
+};
+const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
 
 const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
   ({
@@ -27,7 +37,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
         workflow: { spaceId: SPACE_ID },
       }),
       getScopedEsClient: jest.fn(),
-      getFakeRequest: jest.fn(),
+      getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
       renderInputTemplate: jest.fn((value) => value),
       callKibanaApi: jest.fn(),
     },
@@ -43,45 +53,56 @@ describe('investigations.createProposal input schema', () => {
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
       actionInput: blank,
-      targetEntities: blank,
-      expiresAt: blank,
+      expiresIn: blank,
     });
 
-    expect(parsed).toEqual({ conversationId: 'conv-1' });
+    expect(parsed).toEqual({ conversationId: 'conv-1', comment: 'Tune the noisy rule' });
   });
 
   it.each(['', null])('should treat %p as absent for the enum inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
       impact: blank,
       confidence: blank,
       origin: blank,
     });
 
-    expect(parsed).toEqual({ conversationId: 'conv-1' });
+    expect(parsed).toEqual({ conversationId: 'conv-1', comment: 'Tune the noisy rule' });
   });
 
   it('should still reject a value the optional input does not allow', () => {
     expect(
-      createProposalStepInputSchema.safeParse({ conversationId: 'conv-1', impact: 'nope' }).success
+      createProposalStepInputSchema.safeParse({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        impact: 'nope',
+      }).success
     ).toBe(false);
+  });
+
+  it('should require a comment, since a proposal a human cannot read is not reviewable', () => {
+    expect(createProposalStepInputSchema.safeParse({ conversationId: 'conv-1' }).success).toBe(
+      false
+    );
   });
 
   it('should still pass real values through', () => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
       actionInput: { name: 'Suspicious PowerShell' },
-      targetEntities: ['host.name:web-01'],
-      expiresAt: '2026-01-01T00:00:00.000Z',
+      expiresIn: '24h',
       impact: 'high',
     });
 
     expect(parsed).toEqual({
       conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
       actionInput: { name: 'Suspicious PowerShell' },
-      targetEntities: ['host.name:web-01'],
-      expiresAt: '2026-01-01T00:00:00.000Z',
+      expiresIn: '24h',
       impact: 'high',
     });
   });
@@ -97,13 +118,13 @@ describe('investigations.createProposal input schema', () => {
     expect(Object.keys(jsonSchema.properties)).toEqual(
       Object.keys(createProposalStepInputSchema.shape)
     );
-    expect(jsonSchema.required).toEqual(['conversationId']);
+    expect(jsonSchema.required).toEqual(['conversationId', 'comment']);
   });
 });
 
-describe('investigations.saveProposalResult input schema', () => {
+describe('investigations.updateProposal input schema', () => {
   it.each(['', null])('should treat %p as an absent executionError', (blank) => {
-    const parsed = saveProposalResultStepInputSchema.parse({
+    const parsed = updateProposalStepInputSchema.parse({
       proposalId: 'proposal-1',
       status: 'succeeded',
       executionError: blank,
@@ -126,11 +147,13 @@ describe('investigations.createProposal step', () => {
     });
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
     });
 
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
         // A caller cannot smuggle in a different execution to resume.
         workflowExecutionId: 'not-my-execution',
@@ -139,8 +162,10 @@ describe('investigations.createProposal step', () => {
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({ workflowExecutionId: EXECUTION_ID }),
-      { spaceId: SPACE_ID, username: 'worker-user' }
+      { spaceId: SPACE_ID, user: resolvedUser }
     );
+    // Identity comes from the execution's credentials, not from `executedBy`.
+    expect(resolveUser).toHaveBeenCalledWith(FAKE_REQUEST);
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
       status: 'pending',
@@ -157,9 +182,12 @@ describe('investigations.createProposal step', () => {
     });
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
     });
 
-    const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
+    const result = await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
 
     expect(result.output?.requiresDecision).toBe(false);
   });
@@ -168,9 +196,12 @@ describe('investigations.createProposal step', () => {
     const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', category: 'tune' });
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
     });
 
-    await definition.handler(createContext({ conversationId: 'conv-1' }));
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({ impact: 'low', confidence: 'medium', origin: 'worker' }),
@@ -182,27 +213,30 @@ describe('investigations.createProposal step', () => {
     const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
     });
 
-    const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
+    const result = await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
 
     expect(result.error?.message).toBe('index unavailable');
     expect(result.output).toBeUndefined();
   });
 });
 
-describe('investigations.saveProposalResult step', () => {
+describe('investigations.updateProposal step', () => {
   it('should record the outcome against the space from the step context', async () => {
-    const recordResult = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
-    const definition = getSaveProposalResultStepDefinition({
-      getProposalsService: () => ({ recordResult } as unknown as ProposalsService),
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+    const definition = getUpdateProposalStepDefinition({
+      getProposalsService: () => ({ update } as unknown as ProposalsService),
     });
 
     const result = await definition.handler(
       createContext({ proposalId: 'proposal-1', status: 'succeeded' })
     );
 
-    expect(recordResult).toHaveBeenCalledWith(
+    expect(update).toHaveBeenCalledWith(
       { id: 'proposal-1', status: 'succeeded', executionError: undefined },
       SPACE_ID
     );
@@ -210,9 +244,9 @@ describe('investigations.saveProposalResult step', () => {
   });
 
   it('should pass the failure detail through', async () => {
-    const recordResult = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
-    const definition = getSaveProposalResultStepDefinition({
-      getProposalsService: () => ({ recordResult } as unknown as ProposalsService),
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
+    const definition = getUpdateProposalStepDefinition({
+      getProposalsService: () => ({ update } as unknown as ProposalsService),
     });
 
     await definition.handler(
@@ -223,7 +257,7 @@ describe('investigations.saveProposalResult step', () => {
       })
     );
 
-    expect(recordResult).toHaveBeenCalledWith(
+    expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ executionError: 'gate timed out' }),
       SPACE_ID
     );

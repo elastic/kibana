@@ -9,7 +9,7 @@ import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { createProposalStepCommonDefinition } from '../../../common/proposals/step_types/create_proposal_step';
-import { saveProposalResultStepCommonDefinition } from '../../../common/proposals/step_types/save_proposal_result_step';
+import { updateProposalStepCommonDefinition } from '../../../common/proposals/step_types/update_proposal_step';
 
 /**
  * The browser registry backs YAML editor validation, autocomplete and icons.
@@ -24,8 +24,8 @@ export const createProposalPublicStepDefinition = createPublicStepDefinition({
   ),
 });
 
-export const saveProposalResultPublicStepDefinition = createPublicStepDefinition({
-  ...saveProposalResultStepCommonDefinition,
+export const updateProposalPublicStepDefinition = createPublicStepDefinition({
+  ...updateProposalStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/check').then(({ icon }) => ({
       default: icon,
@@ -37,5 +37,5 @@ export const registerProposalsPublicStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ) => {
   workflowsExtensions.registerStepDefinition(createProposalPublicStepDefinition);
-  workflowsExtensions.registerStepDefinition(saveProposalResultPublicStepDefinition);
+  workflowsExtensions.registerStepDefinition(updateProposalPublicStepDefinition);
 };

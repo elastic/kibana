@@ -58,7 +58,7 @@ Two consequences worth knowing. `minimal_all` and `minimal_read` grant nothing b
 
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-investigation-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
-- A **non-action proposal** carries only a `comment` — instructions the analyst carries out themselves before approving.
+- A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
 - Proposals are immutable once decided, and are never tuned: changing an action means dismissing and creating a new proposal, optionally linked through `supersedesProposalId`.
 
 ### Architecture
@@ -71,7 +71,7 @@ flowchart TB
     end
 
     subgraph proposals["agenticInvestigations (this plugin)"]
-        steps["investigations.createProposal<br/>investigations.saveProposalResult"]
+        steps["investigations.createProposal<br/>investigations.updateProposal"]
         api["Internal HTTP API<br/>/internal/investigations/proposals"]
         service["ProposalsService<br/><i>the only writer</i>"]
         gate["system-create-investigation-proposal<br/><i>managed gate workflow</i>"]
@@ -125,14 +125,14 @@ sequenceDiagram
     Note over S,I: The decision is written first.<br/>The workflow only ever gets a boolean.
     S->>G: resume(approved: true), as the analyst
 
-    G->>S: investigations.saveProposalResult(executing)
+    G->>S: investigations.updateProposal(executing)
     G->>AW: workflow.execute(actionInput)
     Note over AW: Runs under the analyst's API key,<br/>so the result is attributed to them.
     AW-->>G: output
-    G->>S: investigations.saveProposalResult(succeeded)
+    G->>S: investigations.updateProposal(succeeded)
 ```
 
-Dismissal follows the same shape and releases the gate down its negative branch, so no action runs. A gate timeout surfaces as a step failure, which the workflow-level `on-failure` turns into `failed` rather than leaving the proposal pending forever.
+Dismissal follows the same shape and releases the gate down its negative branch, so no action runs. A gate timeout surfaces as a step failure with an `ExecutionError` of type `TimeoutError`; the workflow-level `on-failure` reads that type and lands the proposal on `dismissed` — a decision that never came, rather than a malfunction — while any other failure becomes `failed`.
 
 ### How a Worker creates a proposal
 
@@ -157,17 +157,16 @@ The input contract:
 | Input | Required | Notes |
 | --- | --- | --- |
 | `conversationId` | yes | The conversation the proposal belongs to. |
-| `comment` | no | What is being proposed. The only content a non-action proposal carries. |
+| `comment` | yes | Markdown explaining what is being proposed. A proposal a human cannot read is not reviewable. |
 | `actionWorkflowId` | no | Omit for a proposal the analyst carries out themselves. |
 | `actionInput` | no | Passed to the action workflow as its single `actionInput` object. |
 | `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. |
-| `targetEntities` | no | Typed references (`host.name:web-01`) the queue's entity filter uses. |
-| `expiresAt` | no | ISO 8601 decision deadline, evaluated on read. |
+| `expiresIn` | no | How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation and used as the gate timeout. |
 | `autoApprove` | no | See below. Defaults to `false`, so the gate is fail-closed. |
 
 You get back `proposalId` and `status`.
 
-**`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true` and the gate is skipped — the proposal is still recorded, and the action still runs. Anything else leaves it unset.
+**`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true` and the gate is skipped — the proposal is still recorded, and the action still runs. Anything else leaves it unset. It applies only to action proposals: a proposal with no `actionWorkflowId` is always gated regardless of the flag.
 
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
@@ -184,14 +183,14 @@ An action workflow is an ordinary managed workflow that:
 
 Rule 3 is the non-obvious one and the easiest to get wrong: the gate passes exactly one key, `actionInput`. An action that declares `name`, `query` and `index` as top-level inputs will receive none of them. Declare them as properties of `actionInput` instead, and mark the ones that define the action's scope `required` — a default that matches everything is a demo shortcut, not a catalog entry.
 
-See `definitions/pnd/action_create_rule.yaml` for a worked example.
+See `definitions/pnd/action_create_detection_rule.yaml` for a worked example.
 
 ### API
 
 All routes are internal and versioned (`/internal/investigations/proposals`, version `1`):
 
 - `POST /internal/investigations/proposals` — create
-- `GET /internal/investigations/proposals` — list (filter by `status`, `conversationId`, `targetEntity`)
+- `GET /internal/investigations/proposals` — list (filter by `status`, `conversationId`, `excludeExpired`; paged with `from` and `size`)
 - `GET /internal/investigations/proposals/{id}` — read one, with action metadata resolved
 - `POST /internal/investigations/proposals/{id}/approve` — approve, then release the gate
 - `POST /internal/investigations/proposals/{id}/dismiss` — dismiss with a structured reason
@@ -202,9 +201,11 @@ Reads need `read_proposals`; both decisions need `manage_proposals`. There is de
 
 - **The decision is written before the workflow is resumed.** The gate only ever receives a boolean, so the record is the durable channel for what was decided.
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
-- **The decision actor is server-derived.** Never accepted from a request body.
+- **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
-- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale.
+- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is intrinsic to the action, so it is snapshotted from the metadata at creation.
+- **`actionInput` is validated at creation**, against the schema the action declares on its manual trigger, so a proposal that could never run never reaches a human. Best-effort: the JSON Schema to zod conversion does not cover every keyword.
+- **The queue's order lives in Elasticsearch.** `category`, `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
 
 ## Managed workflows
 
@@ -245,7 +246,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 ## Known limitations
 
-- **List is capped and unpaginated.** `GET /internal/investigations/proposals` accepts `size` up to 100 and has no cursor. Fine for a decision queue, wrong for an audit trail.
+- **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
 - **Only one entity so far.** The directory convention and the sub-feature pattern are designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.

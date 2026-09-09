@@ -13,8 +13,8 @@ export {
 } from './create_proposal_step';
 
 export {
-  SaveProposalResultStepId,
-  saveProposalResultStepCommonDefinition,
-  saveProposalResultStepInputSchema,
-  saveProposalResultStepOutputSchema,
-} from './save_proposal_result_step';
+  UpdateProposalStepId,
+  updateProposalStepCommonDefinition,
+  updateProposalStepInputSchema,
+  updateProposalStepOutputSchema,
+} from './update_proposal_step';

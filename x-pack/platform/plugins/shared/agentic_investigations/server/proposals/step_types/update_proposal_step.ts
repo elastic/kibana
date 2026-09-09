@@ -6,21 +6,21 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { saveProposalResultStepCommonDefinition } from '../../../common/proposals/step_types/save_proposal_result_step';
+import { updateProposalStepCommonDefinition } from '../../../common/proposals/step_types/update_proposal_step';
 import type { ProposalsService } from '../services/proposals_service';
 
-export const getSaveProposalResultStepDefinition = ({
+export const getUpdateProposalStepDefinition = ({
   getProposalsService,
 }: {
   getProposalsService: () => ProposalsService;
 }) =>
   createServerStepDefinition({
-    ...saveProposalResultStepCommonDefinition,
+    ...updateProposalStepCommonDefinition,
     handler: async (context) => {
       try {
         const spaceId = context.contextManager.getContext().workflow.spaceId;
 
-        const proposal = await getProposalsService().recordResult(
+        const proposal = await getProposalsService().update(
           {
             id: context.input.proposalId,
             status: context.input.status,
@@ -32,7 +32,7 @@ export const getSaveProposalResultStepDefinition = ({
         return { output: { proposalId: proposal.id, status: proposal.status } };
       } catch (error) {
         return {
-          error: error instanceof Error ? error : new Error('Failed to record proposal result'),
+          error: error instanceof Error ? error : new Error('Failed to update proposal'),
         };
       }
     },

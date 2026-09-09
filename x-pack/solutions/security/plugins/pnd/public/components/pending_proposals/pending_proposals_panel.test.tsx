@@ -38,7 +38,6 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
     impact: 'low',
     confidence: 'medium',
     category: 'tune',
-    targetEntities: [],
     origin: 'worker',
     createdAt: '2026-09-01T00:00:00.000Z',
     expired: false,
