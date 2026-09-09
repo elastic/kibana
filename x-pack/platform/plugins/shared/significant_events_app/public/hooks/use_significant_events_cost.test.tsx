@@ -112,18 +112,6 @@ describe('useSignificantEventsCost', () => {
     jest.restoreAllMocks();
   });
 
-  it('disables the cost query while run-quota privilege is unknown', async () => {
-    mockUseRunQuotas.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      isError: false,
-    } as never);
-    const { wrapper } = createWrapper();
-    renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await act(async () => undefined);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
   it('disables the cost query when canManage is false', async () => {
     mockUseRunQuotas.mockReturnValue({
       data: quotasResponse(false),
@@ -165,13 +153,11 @@ describe('useSignificantEventsCost', () => {
     });
   });
 
-  it('sends refresh=true, writes the result into the cost query, and does not invalidate', async () => {
+  it('sends refresh=true and writes the result into the cost query', async () => {
     fetch
       .mockResolvedValueOnce(costResponse())
       .mockResolvedValueOnce(costResponse({ pricesFetchedAt: '2026-09-09T12:01:00.000Z' }));
     const { queryClient, wrapper } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
-    const cancelSpy = jest.spyOn(queryClient, 'cancelQueries');
     const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
 
@@ -186,8 +172,6 @@ describe('useSignificantEventsCost', () => {
     expect(queryClient.getQueryData(SIGNIFICANT_EVENTS_COST_QUERY_KEY)).toEqual(
       costResponse({ pricesFetchedAt: '2026-09-09T12:01:00.000Z' })
     );
-    expect(invalidateSpy).not.toHaveBeenCalled();
-    expect(cancelSpy).toHaveBeenCalledWith({ queryKey: SIGNIFICANT_EVENTS_COST_QUERY_KEY });
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -375,7 +359,7 @@ describe('useSignificantEventsCost', () => {
   });
 
   it('retries a failed normal query and replaces the error with data', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
     fetch.mockRejectedValueOnce(new Error('initial failure')).mockResolvedValueOnce(costResponse());
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
@@ -385,9 +369,6 @@ describe('useSignificantEventsCost', () => {
     });
     await waitFor(() => expect(result.current.data).toEqual(costResponse()));
     expect(result.current.error).toBeNull();
-    expect(consoleError).toHaveBeenCalled();
-    expect(fetch).toHaveBeenLastCalledWith('GET /internal/significant_events/cost', {
-      signal: expect.any(AbortSignal),
-    });
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

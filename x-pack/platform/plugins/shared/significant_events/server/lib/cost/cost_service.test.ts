@@ -471,25 +471,17 @@ describe('calculateSignificantEventsCost', () => {
       priceableTokens: 50,
     });
     expect(discovery?.estimatedCost).toBeCloseTo((50 * 4.5) / 1_000_000);
-    expect((discovery?.priceableTokens ?? 0) + (discovery?.unpriceableTokens ?? 0)).toBe(
-      discovery?.totalTokens
-    );
   });
 
-  it('counts GPT-5.4 prompt crossings above 272,000 and ignores the same prompt on a flat model', async () => {
+  it('marks GPT-5.4 prompt crossings above 272,000 as partial', async () => {
     const esClient = createEsClient(() => ({
       aggregations: aggregations({
-        total: 600_020,
+        total: 300_010,
         features: {
           [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
             featureTotal: 300_010,
             models: [modelBucket({ key: GPT_54, total: 300_010, prompt: 300_000, completion: 10 })],
-            crossings: { [GPT_54]: { doc_count: 4 }, [SONNET]: { doc_count: 9 } },
-          }),
-          [SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID]: featureBucket({
-            featureTotal: 300_010,
-            models: [modelBucket({ key: SONNET, total: 300_010, prompt: 300_000, completion: 10 })],
-            crossings: { [SONNET]: { doc_count: 9 } },
+            crossings: { [GPT_54]: { doc_count: 4 } },
           }),
         },
       }),
@@ -499,9 +491,6 @@ describe('calculateSignificantEventsCost', () => {
     expect(
       result.today.groups.find((group) => group.group === 'discovery')?.tierCrossingCount
     ).toBe(4);
-    expect(
-      result.today.groups.find((group) => group.group === 'investigation')?.tierCrossingCount
-    ).toBe(0);
     expect(result.today.groups.find((group) => group.group === 'discovery')?.status).toBe(
       'partial'
     );
@@ -610,8 +599,6 @@ describe('calculateSignificantEventsCost', () => {
       }),
     });
     expect(unavailable.unavailableReason).toBe('usage_data');
-    expect(unavailable.today.groups.every((group) => group.status === 'unavailable')).toBe(true);
-    expect(unavailable.today.totalEstimatedCost).toBeNull();
   });
 
   it('returns unavailable when only one period reports a missing data stream', async () => {

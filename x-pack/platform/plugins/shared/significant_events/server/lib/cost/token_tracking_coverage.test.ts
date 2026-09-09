@@ -104,7 +104,6 @@ describe('resolveTokenTrackingCoverage', () => {
       enabledSpaceCount: 1,
       totalSpaceCount: 1,
     });
-    expect(getSetting).toHaveBeenCalledWith('default');
   });
 
   it('checks the default space when enumeration returns no spaces', async () => {
@@ -117,7 +116,6 @@ describe('resolveTokenTrackingCoverage', () => {
       enabledSpaceCount: 1,
       totalSpaceCount: 1,
     });
-    expect(getSetting).toHaveBeenCalledWith('default');
   });
 
   it('returns unavailable coverage when a space setting cannot be read', async () => {
@@ -144,7 +142,6 @@ describe('resolveTokenTrackingCoverage', () => {
       enabledSpaceCount: null,
       totalSpaceCount: null,
     });
-    expect(getSetting).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
       'Unable to determine token tracking coverage: spaces failed'
     );

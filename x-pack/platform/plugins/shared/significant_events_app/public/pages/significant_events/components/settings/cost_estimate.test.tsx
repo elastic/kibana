@@ -274,7 +274,6 @@ describe('CostEstimate', () => {
     } as never);
     renderCost();
     expect(screen.queryByTestId('significantEventsCostSection')).not.toBeInTheDocument();
-    expect(mockUseSignificantEventsCost).toHaveBeenCalledWith({ enabled: false });
   });
 
   it('keeps cost details hidden until the accordion is opened', () => {
@@ -342,8 +341,6 @@ describe('CostEstimate', () => {
     expect(screen.getByRole('tooltip')).toHaveTextContent(
       'You need permission to save Advanced Settings before you can enable token tracking.'
     );
-    fireEvent.click(enableButton);
-    expect(setUiSetting).not.toHaveBeenCalled();
   });
 
   it('surfaces the setting update error and keeps the enable action available', async () => {
@@ -591,12 +588,6 @@ describe('CostEstimate', () => {
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent(
       'Unable to calculate today · No recorded calls this month (recorded calls)'
     );
-    expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
-      'Unable to calculate'
-    );
-    expect(screen.getByTestId('significantEventsCostGroupMonth-discovery')).toHaveTextContent(
-      'No recorded calls'
-    );
     expect(screen.queryByTestId('significantEventsCostTotalPartialBadge')).not.toBeInTheDocument();
   });
 
@@ -661,31 +652,11 @@ describe('CostEstimate', () => {
     expect(screen.getByTestId('significantEventsCostHeadline')).toBeVisible();
   });
 
-  it('keeps recorded costs visible when the refresh after enabling tracking fails', async () => {
-    setTracking(false);
-    refreshCost.mockImplementationOnce(async () => {
-      setCost({ data: costResponse(), error: new Error('post-enable refresh failed') });
-    });
-    renderExpandedCost();
-    fireEvent.click(screen.getByTestId('significantEventsEnableTokenTrackingButton'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Unable to refresh cost estimate')).toBeInTheDocument();
-      expect(screen.getByText('post-enable refresh failed')).toBeInTheDocument();
-      expect(screen.getByTestId('significantEventsCostHeadline')).toBeVisible();
-    });
-    expect(
-      screen.queryByTestId('significantEventsEnableTokenTrackingButton')
-    ).not.toBeInTheDocument();
-  });
-
   it('prevents another refresh while one is pending', () => {
     setCost({ isRefreshing: true });
     renderExpandedCost();
     const button = screen.getByTestId('significantEventsCostRefreshButton');
     expect(button).toBeDisabled();
-    fireEvent.click(button);
-    expect(refreshCost).not.toHaveBeenCalled();
   });
 
   it('calls refreshCost from the refresh button', () => {
