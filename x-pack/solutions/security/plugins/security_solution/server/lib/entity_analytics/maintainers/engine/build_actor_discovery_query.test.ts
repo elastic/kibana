@@ -402,6 +402,8 @@ describe('hostScopedUsersOnly configs: Step 1 actor fields agree with Step 2', (
 
   it('covers the shipped host-scoped configs', () => {
     expect(hostScopedConfigs.map((c) => c.id).sort()).toEqual([
+      'crowdstrike_fdr',
+      'crowdstrike_fdr',
       'system_auth',
       'system_auth',
       'system_security',

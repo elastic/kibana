@@ -47,6 +47,12 @@ paths:
                     null asserts that the per-space managed Worker has not been installed yet.
                 autonomyLevel:
                   $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchAutonomyLevel'
+                scheduleInterval:
+                  $ref: '../components/watch_settings.schema.yaml#/components/schemas/WorkerScheduleInterval'
+                  description: >-
+                    New interval for a schedule-driven Worker. Rejected with a 400 for a Worker
+                    that owns no schedule. Changing it rewrites the Worker's workflow YAML and
+                    re-registers its Task Manager schedule.
       responses:
         '200':
           description: Successful response
