@@ -121,6 +121,7 @@ describe('Significant Events run quota routes', () => {
     });
     expect(consumeRoute.security.authz).toEqual({
       requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES] }],
+      extendedPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
     });
   });
 
