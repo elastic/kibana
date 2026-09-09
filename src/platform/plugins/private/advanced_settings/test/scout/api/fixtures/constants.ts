@@ -21,6 +21,10 @@ export const TELEMETRY_HEADERS = {
 export const SETTINGS_API_PATH = '/internal/kibana/settings';
 export const TELEMETRY_OPTIN_API_PATH = '/internal/telemetry/optIn';
 
-// Any registered core advanced setting works for the authorization checks; we reset it to `null`
-// so the suite never leaves persistent state behind.
+// Any registered core advanced setting works for the authorization checks. Posting `null` unsets
+// any existing default-space user value, so the suite captures and restores it in teardown.
 export const ADVANCED_SETTING_KEY = 'dateFormat:tz';
+
+// Telemetry opt-in writes this namespace-agnostic saved object even when the request is
+// space-prefixed, so the suite restores it independently of space cleanup.
+export const TELEMETRY_SAVED_OBJECT = { type: 'telemetry', id: 'telemetry' } as const;
