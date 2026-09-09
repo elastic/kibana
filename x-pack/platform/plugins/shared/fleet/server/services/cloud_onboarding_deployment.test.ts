@@ -21,7 +21,7 @@ function makeAttributes(
   return {
     provider: 'aws',
     connectorId: 'conn-1',
-    mechanisms: ['agentless'],
+    mechanisms: ['managed_integration'],
     services: ['cloudtrail'],
     status: 'pending',
     attemptCount: 1,
@@ -70,7 +70,7 @@ describe('cloudOnboardingDeploymentService', () => {
       const result = await cloudOnboardingDeploymentService.create(soClient, {
         provider: 'aws',
         connectorId: 'conn-1',
-        mechanisms: ['agentless'],
+        mechanisms: ['managed_integration'],
         services: ['cloudtrail'],
         serviceVars: {},
       });
@@ -86,7 +86,7 @@ describe('cloudOnboardingDeploymentService', () => {
       );
       expect(result.id).toBe('deploy-1');
       expect(result.connectorId).toBe('conn-1');
-      expect(result.mechanisms).toEqual(['agentless']);
+      expect(result.mechanisms).toEqual(['managed_integration']);
       expect(result.status).toBe('pending');
       expect(result.attemptCount).toBe(1);
     });
@@ -117,7 +117,7 @@ describe('cloudOnboardingDeploymentService', () => {
         cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
           connectorId: 'conn-1',
-          mechanisms: ['agentless'],
+          mechanisms: ['managed_integration'],
           services: [],
           serviceVars: {},
         })
@@ -151,8 +151,8 @@ describe('cloudOnboardingDeploymentService', () => {
 
   describe('getByConnectorId', () => {
     it('returns all deployments for a connector using soClient PIT finder', async () => {
-      const attrs1 = makeAttributes({ mechanisms: ['agentless'] });
-      const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
+      const attrs1 = makeAttributes({ mechanisms: ['managed_integration'] });
+      const attrs2 = makeAttributes({ mechanisms: ['agent_based'] });
 
       soClient.createPointInTimeFinder.mockReturnValue({
         async *find() {
@@ -366,7 +366,7 @@ describe('cloudOnboardingDeploymentService', () => {
     describe('UC1: agentless + cloudwatch_metrics + agentless', () => {
       it('sets agentless mechanism and packagePolicyIds', async () => {
         const attrs = makeAttributes({
-          mechanisms: ['agentless'],
+          mechanisms: ['managed_integration'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
           packagePolicyIds: ['pkg-aws-001'],
@@ -377,7 +377,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
           connectorId: 'conn-1',
-          mechanisms: ['agentless'],
+          mechanisms: ['managed_integration'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
         });
@@ -388,7 +388,7 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
-        expect(result.mechanisms).toEqual(['agentless']);
+        expect(result.mechanisms).toEqual(['managed_integration']);
       });
     });
 
@@ -424,7 +424,7 @@ describe('cloudOnboardingDeploymentService', () => {
     describe('UC3: static_keys + cloudfront_logs + cloud_forwarder', () => {
       it('sets cloud_forwarder mechanism and no packagePolicyIds', async () => {
         const attrs = makeAttributes({
-          mechanisms: ['cloud_forwarder'],
+          mechanisms: ['ecf'],
           services: ['cloudfront_logs'],
           serviceVars: {
             cloudfront_logs: {
@@ -440,7 +440,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
           connectorId: 'conn-3',
-          mechanisms: ['cloud_forwarder'],
+          mechanisms: ['ecf'],
           services: ['cloudfront_logs'],
           serviceVars: {
             cloudfront_logs: {
@@ -456,14 +456,14 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
-        expect(result.mechanisms).toEqual(['cloud_forwarder']);
+        expect(result.mechanisms).toEqual(['ecf']);
         expect(result.packagePolicyIds).toBeUndefined();
         expect(result.apiKeyId).toBeUndefined();
       });
 
       it('stores apiKeyId after ES API key is created for push service', async () => {
         const updatedAttrs = makeAttributes({
-          mechanisms: ['cloud_forwarder'],
+          mechanisms: ['ecf'],
           services: ['cloudfront_logs'],
           apiKeyId: 'es-key-abc123',
         });
