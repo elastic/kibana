@@ -56,7 +56,6 @@ const closeReader = async (reader: AsyncRecordBatchStreamReader): Promise<void> 
  */
 export const arrowFormat = {
   name: 'arrow' as const,
-  maxRows: undefined,
   async open(
     esClient: ElasticsearchClient,
     request: EsqlFormatRequest,

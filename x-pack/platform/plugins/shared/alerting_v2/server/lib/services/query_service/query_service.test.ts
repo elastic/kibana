@@ -760,6 +760,7 @@ describe('QueryService', () => {
     });
 
     it('stops iterating and reports cancellation when the signal fires between batches', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       const abortController = new AbortController();
 
       mockHelpersEsqlArrowBatches(mockEsClient, [
@@ -775,12 +776,18 @@ describe('QueryService', () => {
           abortSignal: abortController.signal,
         })) {
           batches.push(batch);
-          abortController.abort();
+          // Abort with a `RuleExecutionCancellationError` reason (rather than a
+          // bare `abort()`) so `throwIfAborted` rethrows it as-is between
+          // batches, exercising the same cancellation identity a real
+          // mid-stream cancellation propagates.
+          abortController.abort(new RuleExecutionCancellationError());
         }
-      }).rejects.toThrow();
+      }).rejects.toThrow(RuleExecutionCancellationError);
 
       expect(batches).toEqual([[{ host: 'host-a' }]]);
-      expect(mockLogger.debug).toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'QueryService: Streaming query aborted (arrow)'
+      );
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 

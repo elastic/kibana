@@ -61,7 +61,7 @@ describe('arrowFormat', () => {
 
   it('is named arrow and declares no row cap of its own', () => {
     expect(arrowFormat.name).toBe('arrow');
-    expect(arrowFormat.maxRows).toBeUndefined();
+    expect(arrowFormat).not.toHaveProperty('maxRows');
   });
 
   it('forwards the request and transport options verbatim to the esql helper', async () => {
