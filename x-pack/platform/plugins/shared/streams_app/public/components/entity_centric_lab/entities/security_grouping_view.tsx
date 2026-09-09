@@ -108,6 +108,9 @@ const groupAccordionCss = (borderThin: string) => css`
 
   .euiAccordion__triggerWrapper {
     padding: 0;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: ${borderThin};
   }
 `;
 
