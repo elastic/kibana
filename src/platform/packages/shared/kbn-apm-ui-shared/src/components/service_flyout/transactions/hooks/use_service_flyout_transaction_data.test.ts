@@ -118,6 +118,41 @@ describe('useServiceFlyoutTransactionData', () => {
       );
     });
 
+    it('sends x-project-routing when projectRouting is provided', async () => {
+      const http = makeHttp(EMPTY_MAIN_RESPONSE);
+
+      renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, projectRouting: '_alias:*' })
+      );
+
+      await waitFor(() =>
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/apm/services/my-service/transactions/groups/main_statistics',
+          expect.objectContaining({
+            headers: { 'x-project-routing': '_alias:*' },
+          })
+        )
+      );
+      expect(mockedUsePreferredTransactionDataSource).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:*' })
+      );
+    });
+
+    it('omits x-project-routing when projectRouting is not provided', async () => {
+      const http = makeHttp(EMPTY_MAIN_RESPONSE);
+
+      renderHook(() => useServiceFlyoutTransactionData({ http, ...BASE_PARAMS }));
+
+      await waitFor(() =>
+        expect(http.get).toHaveBeenCalledWith(
+          expect.stringContaining('main_statistics'),
+          expect.anything()
+        )
+      );
+      const options = (http.get as jest.Mock).mock.calls[0][1];
+      expect(options.headers).toBeUndefined();
+    });
+
     it('URL-encodes the service name', async () => {
       const http = makeHttp(EMPTY_MAIN_RESPONSE);
 
@@ -339,6 +374,26 @@ describe('useServiceFlyoutTransactionData', () => {
               useDurationSummary: false,
               transactionNames: JSON.stringify(['GET /api/orders', 'POST /api/checkout']),
             }),
+          })
+        )
+      );
+    });
+
+    it('sends x-project-routing on detailed_statistics when projectRouting is provided', async () => {
+      const http = makeHttp(
+        { ...EMPTY_MAIN_RESPONSE, transactionGroups: TRANSACTION_GROUPS },
+        EMPTY_DETAILED_RESPONSE
+      );
+
+      renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, projectRouting: '_alias:*' })
+      );
+
+      await waitFor(() =>
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/apm/services/my-service/transactions/groups/detailed_statistics',
+          expect.objectContaining({
+            headers: { 'x-project-routing': '_alias:*' },
           })
         )
       );
