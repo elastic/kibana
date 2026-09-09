@@ -1447,7 +1447,6 @@
     "core.euiSelectable.placeholderName": "フィルターオプション",
     "core.euiSelectable.screenReaderInstructions": "オプションのフォーカスを移動するには、上下矢印キーを使用します。選択するには、Enterを押します。オプションを折りたたむには、Escapeを押します。",
     "core.euiSelectable.searchResults": "{resultsLength, plural, one {# result} other {#件の結果}}が利用可能です",
-    "core.euiSelectableListItem.checkedOption": "選択されたオプション。",
     "core.euiSelectableListItem.checkOptionInstructions": "このオプションをオンにするには、Enterを押します。",
     "core.euiSelectableListItem.excludedOption": "除外されたオプション。",
     "core.euiSelectableListItem.excludeOptionInstructions": "このオプションを除外するには、Enterを押します。",

@@ -32,7 +32,7 @@ export class MonitorDetailsPage {
     const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
     await this.page.testSubj.click(`o11yFilterGroupButton-${filterType}`);
     for (const title of itemList) {
-      const item = this.page.locator(`li[title="${title}"]`);
+      const item = this.page.locator(`li span[title="${title}"]`);
       await expect(item).toBeVisible({ timeout: 10_000 });
       await item.click();
       await expect(item).toHaveAttribute('aria-checked', 'true', { timeout: 10_000 });

@@ -134,23 +134,31 @@ describe('BulkAlertAssigneesPanel', () => {
     const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
     const deselectUser = (userName: string, index: number) => {
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).toBeChecked();
+      let option = wrapper.getByText(userName).closest('li');
+
+      expect(option).toBeInTheDocument();
+      expect(option).toBeChecked();
+
       act(() => {
         fireEvent.click(wrapper.getByText(userName));
       });
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).not.toBeChecked();
+
+      expect(option).toBeInTheDocument();
+      expect(option).not.toBeChecked();
     };
 
     const selectUser = (userName: string, index = 0) => {
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).not.toBeChecked();
+      let option = wrapper.getByText(userName).closest('li');
+
+      expect(option).toBeInTheDocument();
+      expect(option).not.toBeChecked();
+
       act(() => {
         fireEvent.click(wrapper.getByText(userName));
       });
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).toBeChecked();
+
+      expect(option).toBeInTheDocument();
+      expect(option).toBeChecked();
     };
 
     deselectUser('user1', 0);
