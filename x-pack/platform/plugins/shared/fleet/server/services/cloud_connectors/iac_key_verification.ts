@@ -11,6 +11,7 @@ import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { parseAwsRegionFromArn } from '../../../common/services/cloud_connectors';
 import {
   IAC_KEY_CHECK_FLOW,
+  type IacKeyCheckReason,
   type IacKeySurface,
   type IacKeyVerificationOutcome,
   type IacProvisionerRenderFlow,
@@ -39,11 +40,9 @@ import {
   type IacIntegrationSelection,
 } from './iac_integrations';
 
-export type IacKeyMismatchReason = 'no_key' | 'key_mismatch';
-
 export interface IacKeyVerification {
   matches: boolean;
-  reason?: IacKeyMismatchReason;
+  reason?: IacKeyCheckReason;
   /** From `iac_deployment_id`; absent for legacy connectors. */
   deploymentId?: string;
   /** Parsed from the deployment id (AWS ARN); absent when the id is absent or malformed. */
@@ -56,7 +55,7 @@ export interface IacKeyVerification {
 export const computeIacKeyMismatch = (
   storedKey: string | undefined,
   currentKey: string
-): IacKeyMismatchReason | undefined => {
+): IacKeyCheckReason | undefined => {
   const stored = storedKey?.trim();
   if (!stored) {
     return 'no_key';

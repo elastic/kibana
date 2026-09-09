@@ -7,6 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common/constants/cloud_connector';
 import { cloudConnectorService, packagePolicyService } from '../../services';
@@ -23,6 +25,7 @@ import type {
   CreateCloudConnectorRequest,
   GetCloudConnectorUsageResponse,
   CloudConnectorUsageItem,
+  VerifyCloudConnectorIacKeyResponse,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -31,8 +34,11 @@ import type {
   UpdateCloudConnectorRequestSchema,
   DeleteCloudConnectorRequestSchema,
   GetCloudConnectorUsageRequestSchema,
+  VerifyCloudConnectorIacKeyRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
 import { FleetError } from '../../errors';
+
+import { verifyCloudConnectorIacKey } from '../../services/cloud_connectors';
 
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
@@ -326,6 +332,45 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
       body: {
         message: error.message || 'Failed to get cloud connector usage',
       },
+    });
+  }
+};
+
+export const verifyCloudConnectorIacKeyHandler: FleetRequestHandler<
+  TypeOf<typeof VerifyCloudConnectorIacKeyRequestSchema.params>,
+  undefined,
+  TypeOf<typeof VerifyCloudConnectorIacKeyRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+  const cloudConnectorId = request.params.cloudConnectorId;
+  const logger = appContextService
+    .getLogger()
+    .get('CloudConnectorService verifyCloudConnectorIacKeyHandler');
+
+  try {
+    logger.info(
+      `Verifying IaC key for cloud connector ${cloudConnectorId}${
+        request.body?.integration ? ` with new integration ${request.body.integration.name}` : ''
+      }`
+    );
+    const body: VerifyCloudConnectorIacKeyResponse = await verifyCloudConnectorIacKey(
+      internalSoClient,
+      cloudConnectorId,
+      request.body?.integration
+    );
+    logger.debug(`IaC key verification result for ${cloudConnectorId}: ${JSON.stringify(body)}`);
+    return response.ok({ body });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud connector ${cloudConnectorId} not found` },
+      });
+    }
+    logger.error(`Failed to verify IaC key for cloud connector ${cloudConnectorId}`, error);
+    return response.customError({
+      statusCode: 500,
+      body: { message: 'An unexpected error occurred while verifying the IaC key' },
     });
   }
 };

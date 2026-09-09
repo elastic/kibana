@@ -293,3 +293,41 @@ export const GetCloudConnectorUsageResponseSchema = schema.object({
   page: schema.number(),
   perPage: schema.number(),
 });
+
+export const VerifyCloudConnectorIacKeyRequestSchema = {
+  params: schema.object({
+    cloudConnectorId: schema.string({
+      maxLength: 255,
+      meta: { description: 'The unique identifier of the cloud connector.' },
+    }),
+  }),
+  body: schema.object({
+    integration: schema.maybe(
+      schema.object({
+        name: schema.string({
+          minLength: 1,
+          maxLength: 255,
+          meta: { description: 'EPR package name being added.' },
+        }),
+        policyTemplates: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Policy templates enabled for the integration being added.' },
+        }),
+      })
+    ),
+  }),
+};
+
+const IacIntegrationSelectionSchema = schema.object({
+  name: schema.string(),
+  policyTemplates: schema.arrayOf(schema.string()),
+});
+
+export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
+  matches: schema.boolean(),
+  reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
+  deploymentId: schema.maybe(schema.string()),
+  region: schema.maybe(schema.string()),
+  integrations: schema.arrayOf(IacIntegrationSelectionSchema),
+});

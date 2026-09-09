@@ -8,6 +8,7 @@
 import {
   CreateCloudConnectorRequestSchema,
   UpdateCloudConnectorRequestSchema,
+  VerifyCloudConnectorIacKeyRequestSchema,
 } from './cloud_connector';
 
 describe('cloud connector request schemas — IaC fields', () => {
@@ -43,5 +44,24 @@ describe('cloud connector request schemas — IaC fields', () => {
     expect(() =>
       UpdateCloudConnectorRequestSchema.body.validate({ name: 'renamed' })
     ).not.toThrow();
+  });
+});
+
+describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
+  it('accepts an empty body (flyout) and a single integration (wizard)', () => {
+    expect(() => VerifyCloudConnectorIacKeyRequestSchema.body.validate({})).not.toThrow();
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({
+        integration: { name: 'aws', policyTemplates: ['guardduty'] },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects an integration with no policy templates', () => {
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({
+        integration: { name: 'aws', policyTemplates: [] },
+      })
+    ).toThrow();
   });
 });

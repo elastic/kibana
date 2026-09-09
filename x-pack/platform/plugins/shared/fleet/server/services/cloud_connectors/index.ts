@@ -28,6 +28,5 @@ export {
   getCurrentIacKey,
   verifyCloudConnectorIacKey,
   type GetCurrentIacKeyOptions,
-  type IacKeyMismatchReason,
   type IacKeyVerification,
 } from './iac_key_verification';
