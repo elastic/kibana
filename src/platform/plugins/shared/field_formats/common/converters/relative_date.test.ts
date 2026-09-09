@@ -29,8 +29,8 @@ describe('Relative Date Format', () => {
   test('decoding a missing value', () => {
     expect(convert(null)).toBe(NULL_LABEL);
     expect(convert(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(convertToReact(null), null);
-    expectReactElementWithNull(convertToReact(undefined), undefined);
+    expectReactElementWithNull(convertToReact(null));
+    expectReactElementWithNull(convertToReact(undefined));
   });
 
   test('decoding invalid date should echo invalid value', () => {

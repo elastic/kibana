@@ -113,8 +113,8 @@ describe('GeoPoint Format', () => {
       );
       expect(geoPointFormat.convertToText(null)).toBe(NULL_LABEL);
       expect(geoPointFormat.convertToText(undefined)).toBe(NULL_LABEL);
-      expectReactElementWithNull(geoPointFormat.convertToReact(null), null);
-      expectReactElementWithNull(geoPointFormat.convertToReact(undefined), undefined);
+      expectReactElementWithNull(geoPointFormat.convertToReact(null));
+      expectReactElementWithNull(geoPointFormat.convertToReact(undefined));
     });
 
     test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

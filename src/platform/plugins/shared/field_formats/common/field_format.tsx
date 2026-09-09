@@ -10,7 +10,12 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
-import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
+import {
+  EMPTY_LABEL,
+  MISSING_TOKEN,
+  NULL_LABEL,
+  NULL_TOOLTIP_LABEL,
+} from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
 import { asPrettyString, formatReactArray, formatTextArray } from './utils';
 import type {
@@ -238,9 +243,15 @@ export abstract class FieldFormat {
       return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      const rawValueLabel = String(val);
+      // `role="img"` lets the dash carry an accessible name; a bare span maps to
+      // `role="generic"`, which ARIA forbids from being named.
       return (
-        <span css={emptyValueStyles} title={rawValueLabel} aria-label={rawValueLabel}>
+        <span
+          css={emptyValueStyles}
+          role="img"
+          title={NULL_TOOLTIP_LABEL}
+          aria-label={NULL_TOOLTIP_LABEL}
+        >
           {NULL_LABEL}
         </span>
       );

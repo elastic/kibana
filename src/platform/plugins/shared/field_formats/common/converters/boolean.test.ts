@@ -72,8 +72,8 @@ describe('Boolean Format', () => {
   test('handles a missing value', () => {
     expect(boolean.convertToText(null)).toBe(NULL_LABEL);
     expect(boolean.convertToText(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(boolean.convertToReact(null), null);
-    expectReactElementWithNull(boolean.convertToReact(undefined), undefined);
+    expectReactElementWithNull(boolean.convertToReact(null));
+    expectReactElementWithNull(boolean.convertToReact(undefined));
   });
 
   test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

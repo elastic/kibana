@@ -52,8 +52,8 @@ describe('UrlFormat', () => {
     expect(url.convertToText(null)).toBe(NULL_LABEL);
     expect(url.convertToText(undefined)).toBe(NULL_LABEL);
     expect(url.convertToText('')).toBe('(blank)');
-    expectReactElementWithNull(url.convertToReact(null), null);
-    expectReactElementWithNull(url.convertToReact(undefined), undefined);
+    expectReactElementWithNull(url.convertToReact(null));
+    expectReactElementWithNull(url.convertToReact(undefined));
     expectReactElementWithBlank(url.convertToReact(''));
   });
 

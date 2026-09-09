@@ -176,12 +176,12 @@ describe('FieldFormat class', () => {
       );
     });
 
-    test('exposes the raw missing value on the React placeholder tooltip', () => {
+    test('describes every missing value with the same label on the React placeholder', () => {
       const f = getTestFormat();
 
-      expectReactElementWithNull(f.convertToReact(null), null);
-      expectReactElementWithNull(f.convertToReact(undefined), undefined);
-      expectReactElementWithNull(f.convertToReact(MISSING_TOKEN), MISSING_TOKEN);
+      expectReactElementWithNull(f.convertToReact(null));
+      expectReactElementWithNull(f.convertToReact(undefined));
+      expectReactElementWithNull(f.convertToReact(MISSING_TOKEN));
     });
 
     describe('default convertToReact highlight support', () => {

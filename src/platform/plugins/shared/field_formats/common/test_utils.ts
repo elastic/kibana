@@ -9,22 +9,22 @@
 
 import { render } from '@testing-library/react';
 import { isValidElement, type ReactNode } from 'react';
-import { NULL_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
+import { NULL_LABEL, NULL_TOOLTIP_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export const renderReactNode = (node: ReactNode) => render(node).container;
 
 /**
- * Asserts that a React element represents a null value display.
- * `rawValue` is the original formatter input (`null`, `undefined`, or `__missing__`).
+ * Asserts that a React element represents a null value display: the dash is shown, and the
+ * translated label describing it is exposed as both a tooltip and an accessible name.
  */
-export const expectReactElementWithNull = (element: React.ReactNode, rawValue: unknown) => {
+export const expectReactElementWithNull = (element: React.ReactNode) => {
   expect(isValidElement(element)).toBe(true);
   const { children } = renderReactNode(element);
   expect(children).toHaveLength(1);
   const node = children[0];
   expect(node).toHaveTextContent(NULL_LABEL);
-  expect(node).toHaveAttribute('title', String(rawValue));
-  expect(node).toHaveAttribute('aria-label', String(rawValue));
+  expect(node).toHaveAttribute('title', NULL_TOOLTIP_LABEL);
+  expect(node).toHaveAttribute('aria-label', NULL_TOOLTIP_LABEL);
 };
 
 /**

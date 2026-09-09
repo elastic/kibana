@@ -37,12 +37,12 @@ describe('StaticLookupFormat', () => {
 
     test('null stays null and shows null label', () => {
       expect(formatter.convertToText(null)).toBe(NULL_LABEL);
-      expectReactElementWithNull(formatter.convertToReact(null), null);
+      expectReactElementWithNull(formatter.convertToReact(null));
     });
 
     test('undefined stays undefined and shows null label', () => {
       expect(formatter.convertToText(undefined)).toBe(NULL_LABEL);
-      expectReactElementWithNull(formatter.convertToReact(undefined), undefined);
+      expectReactElementWithNull(formatter.convertToReact(undefined));
     });
 
     test('maps known key to configured value', () => {
@@ -71,8 +71,8 @@ describe('StaticLookupFormat', () => {
       });
       expect(formatterWithoutUnknown.convertToText(null)).toBe(NULL_LABEL);
       expect(formatterWithoutUnknown.convertToText(undefined)).toBe(NULL_LABEL);
-      expectReactElementWithNull(formatterWithoutUnknown.convertToReact(null), null);
-      expectReactElementWithNull(formatterWithoutUnknown.convertToReact(undefined), undefined);
+      expectReactElementWithNull(formatterWithoutUnknown.convertToReact(null));
+      expectReactElementWithNull(formatterWithoutUnknown.convertToReact(undefined));
     });
 
     test('falls back to unknownKeyValue for an empty string when no mapping exists', () => {
@@ -122,13 +122,10 @@ describe('StaticLookupFormat', () => {
       expectReactElementWithBlank(formatterWithoutCustomMapping.convertToReact(''));
 
       expect(formatterWithoutCustomMapping.convertToText(null)).toBe(NULL_LABEL);
-      expectReactElementWithNull(formatterWithoutCustomMapping.convertToReact(null), null);
+      expectReactElementWithNull(formatterWithoutCustomMapping.convertToReact(null));
 
       expect(formatterWithoutCustomMapping.convertToText(undefined)).toBe(NULL_LABEL);
-      expectReactElementWithNull(
-        formatterWithoutCustomMapping.convertToReact(undefined),
-        undefined
-      );
+      expectReactElementWithNull(formatterWithoutCustomMapping.convertToReact(undefined));
 
       expect(formatterWithoutCustomMapping.convertToText('unknown')).toBe('unknown');
       expect(formatterWithoutCustomMapping.convertToReact('unknown')).toBe('unknown');

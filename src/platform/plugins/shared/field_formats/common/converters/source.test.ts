@@ -42,8 +42,8 @@ describe('Source Format', () => {
 
     expect(source.convertToText(null)).toBe(NULL_LABEL);
     expect(source.convertToText(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(source.convertToReact(null), null);
-    expectReactElementWithNull(source.convertToReact(undefined), undefined);
+    expectReactElementWithNull(source.convertToReact(null));
+    expectReactElementWithNull(source.convertToReact(undefined));
   });
 
   test('returns the single element without brackets for a one-element array', () => {

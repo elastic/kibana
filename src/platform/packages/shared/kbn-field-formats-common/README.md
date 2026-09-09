@@ -9,7 +9,8 @@ This tiny package centralizes a few labels/tokens that are used consistently whe
 The package currently exposes the following constants from `./constants`:
 
 - `EMPTY_LABEL` — i18n label for empty string values. Default: "(blank)"
-- `NULL_LABEL` — i18n label for null values. Default: "-"
+- `NULL_LABEL` — string displayed in place of null values. Value: `"-"`
+- `NULL_TOOLTIP_LABEL` — i18n label describing the dash on hover. Default: "(null)"
 - `NAN_LABEL` — string used to represent Not-a-Number. Value: `"NaN"`
 - `MISSING_TOKEN` — internal token used to mark missing values in aggregations and formatting flows. Value: `"__missing__"`
 
@@ -35,7 +36,8 @@ function normalizeBucketKey(key: string | undefined) {
 
 ## Notes
 
-- `EMPTY_LABEL` and `NULL_LABEL` are i18n-aware strings; they should be used directly in UI output.
+- `EMPTY_LABEL` is an i18n-aware string; it should be used directly in UI output.
+- `NULL_LABEL` is a bare dash and carries no meaning on its own; pair it with `NULL_TOOLTIP_LABEL` so the value is still identifiable as null.
 - `MISSING_TOKEN` is an internal sentinel value, not a user-facing label; prefer mapping it to a label (for example, `EMPTY_LABEL`) before rendering.
 - If you need to customize how special values are displayed, build that logic on top of these shared constants rather than re-defining literals.
 

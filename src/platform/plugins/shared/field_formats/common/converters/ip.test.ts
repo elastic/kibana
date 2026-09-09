@@ -26,8 +26,8 @@ describe('IP Address Format', () => {
   test('missing value', () => {
     expect(ip.convertToText(null)).toBe(NULL_LABEL);
     expect(ip.convertToText(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(ip.convertToReact(null), null);
-    expectReactElementWithNull(ip.convertToReact(undefined), undefined);
+    expectReactElementWithNull(ip.convertToReact(null));
+    expectReactElementWithNull(ip.convertToReact(undefined));
   });
 
   test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

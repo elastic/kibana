@@ -39,8 +39,8 @@ describe('CurrencyFormat', () => {
 
     expect(formatter.convertToText(null)).toBe(NULL_LABEL);
     expect(formatter.convertToText(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(formatter.convertToReact(null), null);
-    expectReactElementWithNull(formatter.convertToReact(undefined), undefined);
+    expectReactElementWithNull(formatter.convertToReact(null));
+    expectReactElementWithNull(formatter.convertToReact(undefined));
   });
 
   test('wraps a multi-value array with bracket notation', () => {

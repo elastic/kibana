@@ -77,7 +77,7 @@ describe('NumberFormat', () => {
   test('null input', () => {
     const formatter = new NumberFormat({}, getConfig);
     expect(formatter.convertToText(null)).toBe(NULL_LABEL);
-    expectReactElementWithNull(formatter.convertToReact(null), null);
+    expectReactElementWithNull(formatter.convertToReact(null));
   });
 
   test('react renders object input containing HTML-like strings', () => {

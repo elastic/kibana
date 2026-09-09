@@ -23,8 +23,8 @@ describe('Duration Format', () => {
     );
     expect(duration.convertToText(null)).toBe(NULL_LABEL);
     expect(duration.convertToText(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(duration.convertToReact(null), null);
-    expectReactElementWithNull(duration.convertToReact(undefined), undefined);
+    expectReactElementWithNull(duration.convertToReact(null));
+    expectReactElementWithNull(duration.convertToReact(undefined));
   });
 
   test('returns a plain string for a numeric duration', () => {
@@ -641,7 +641,7 @@ describe('Duration Format', () => {
         expect(duration.convertToText(input)).toBe(output);
 
         if (output === NULL_LABEL) {
-          expectReactElementWithNull(duration.convertToReact(input), input);
+          expectReactElementWithNull(duration.convertToReact(input));
         } else {
           expect(duration.convertToReact(input)).toBe(output);
         }

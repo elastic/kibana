@@ -77,8 +77,8 @@ describe('Date Nanos Format', () => {
   test('decoding a missing value', () => {
     expect(convert(null)).toBe(NULL_LABEL);
     expect(convert(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(date.convertToReact(null), null);
-    expectReactElementWithNull(date.convertToReact(undefined), undefined);
+    expectReactElementWithNull(date.convertToReact(null));
+    expectReactElementWithNull(date.convertToReact(undefined));
   });
 
   test('should clear the memoization cache after changing the date', () => {

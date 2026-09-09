@@ -58,8 +58,8 @@ describe('String TruncateFormat', () => {
     expect(truncate.convertToText(null)).toBe(NULL_LABEL);
     expect(truncate.convertToText(undefined)).toBe(NULL_LABEL);
     expect(truncate.convertToText('')).toBe('(blank)');
-    expectReactElementWithNull(truncate.convertToReact(null), null);
-    expectReactElementWithNull(truncate.convertToReact(undefined), undefined);
+    expectReactElementWithNull(truncate.convertToReact(null));
+    expectReactElementWithNull(truncate.convertToReact(undefined));
     expectReactElementWithBlank(truncate.convertToReact(''));
   });
 

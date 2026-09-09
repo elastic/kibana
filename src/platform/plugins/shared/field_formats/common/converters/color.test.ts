@@ -39,8 +39,8 @@ describe('Color Format', () => {
     expect(colorer.convertToText(null)).toBe(NULL_LABEL);
     expect(colorer.convertToText(undefined)).toBe(NULL_LABEL);
     expect(colorer.convertToText('')).toBe('(blank)');
-    expectReactElementWithNull(colorer.convertToReact(null), null);
-    expectReactElementWithNull(colorer.convertToReact(undefined), undefined);
+    expectReactElementWithNull(colorer.convertToReact(null));
+    expectReactElementWithNull(colorer.convertToReact(undefined));
     expectReactElementWithBlank(colorer.convertToReact(''));
   };
 
