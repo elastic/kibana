@@ -128,6 +128,38 @@ describe('formatQuerySchedule', () => {
       expect(format('FREQ=YEARLY;INTERVAL=2')).toBe('Every 2 years');
     });
 
+    it('should render a monthly rule with BYMONTHDAY including the day list', () => {
+      expect(format('FREQ=MONTHLY;BYMONTHDAY=15')).toBe('Every month on day 15');
+      expect(format('FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1,15')).toBe('Every 3 months on day 1, 15');
+    });
+
+    it('should sort BYMONTHDAY values so the day list reads in calendar order', () => {
+      expect(format('FREQ=MONTHLY;BYMONTHDAY=15,1,28')).toBe('Every month on day 1, 15, 28');
+    });
+
+    // RFC 5545 permits -31..-1 for the Nth day from the end of the month.
+    // "day -1" would read as a literal day number, so the bare label is the
+    // only honest rendering available here.
+    it('should omit the day list when BYMONTHDAY carries a negative day', () => {
+      expect(format('FREQ=MONTHLY;BYMONTHDAY=-1')).toBe('Every month');
+      expect(format('FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=-1')).toBe('Every 2 months');
+    });
+
+    it('should render a yearly rule with BYMONTH including the month list', () => {
+      expect(format('FREQ=YEARLY;BYMONTH=3')).toBe('Every year in Mar');
+      expect(format('FREQ=YEARLY;INTERVAL=2;BYMONTH=1,7')).toBe('Every 2 years in Jan, Jul');
+    });
+
+    it('should render a yearly rule with both BYMONTH and BYMONTHDAY', () => {
+      expect(format('FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=15')).toBe('Every year in Mar on day 15');
+    });
+
+    // A day-of-month with no BYMONTH omits which month it falls in, so the
+    // bare yearly label is preferred over a partial qualifier.
+    it('should omit a lone BYMONTHDAY qualifier on a yearly rule', () => {
+      expect(format('FREQ=YEARLY;BYMONTHDAY=15')).toBe('Every year');
+    });
+
     it('should render HOURLY as hourly, not daily', () => {
       expect(format('FREQ=HOURLY')).toBe('Hourly');
       expect(format('FREQ=HOURLY;INTERVAL=6')).toBe('Every 6 hours');
