@@ -9,6 +9,7 @@ import { EntityType } from '../definitions/entity_schema';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   getEuidPainlessEvaluation,
+  getEuidPainlessEvaluationForSearch,
   getEuidPainlessRuntimeMapping,
   streamlangConditionToPainlessDoc,
 } from './painless';
@@ -254,5 +255,64 @@ describe('getEuidPainlessRuntimeMapping', () => {
       expect(firstReturn).toBeGreaterThan(-1);
       expect(mapping.script.source).toContain(returnScript.slice(0, firstReturn));
     });
+  });
+
+  it('threads applyPostAggFilter through to the evaluation', () => {
+    const mapping = getEuidPainlessRuntimeMapping(EntityType.enum.user, {
+      applyPostAggFilter: false,
+    });
+
+    expect(mapping.script.source).toContain(
+      getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false })
+    );
+  });
+});
+
+describe('getEuidPainlessEvaluation postAggFilter gate', () => {
+  // Unique to postAggFilter. `event.kind` is no good as a marker: the cloud-provider clause uses it too.
+  const postAggOnlyMarker = `doc.containsKey('entity.id')`;
+
+  it('gates on postAggFilter by default', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+
+    expect(script).toContain(postAggOnlyMarker);
+  });
+
+  it('omits the postAggFilter gate in the search variant', () => {
+    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
+
+    expect(script).not.toContain(postAggOnlyMarker);
+  });
+
+  it('keeps the documentsFilter gate in the search variant', () => {
+    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
+
+    // documentsFilter requires event.outcome != failure and at least one user identifier.
+    expect(script).toContain(`doc.containsKey('event.outcome')`);
+    expect(script).toContain(`doc.containsKey('user.name')`);
+  });
+
+  it('lets a detection alert satisfy the gate', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+
+    // ORed in front, so Painless short-circuits and skips the whole clause for alerts.
+    expect(script).toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
+    const markerAt = script.indexOf(`doc.containsKey('kibana.alert.rule.uuid')`);
+    const postAggAt = script.indexOf(postAggOnlyMarker);
+    expect(markerAt).toBeGreaterThan(-1);
+    expect(markerAt).toBeLessThan(postAggAt);
+  });
+
+  it('omits the alert waiver in the search variant', () => {
+    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
+
+    expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
+  });
+
+  it('does not waive anything for a definition with no postAggFilter', () => {
+    // host has documentsFilter only, so there is nothing to waive.
+    const script = getEuidPainlessEvaluation(EntityType.enum.host);
+
+    expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
   });
 });

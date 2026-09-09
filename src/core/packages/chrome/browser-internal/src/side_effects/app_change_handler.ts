@@ -34,7 +34,8 @@ export function setupAppChangeHandler({
     state.breadcrumbs.legacyBadge.set(undefined);
     state.appMenu.set(undefined);
     state.appHeader.set(undefined);
-    state.inlineAppHeader.set(false);
+    state.inlineAppHeaderOwnerId += 1;
+    state.inlineAppHeader.set(undefined);
 
     // Reset breadcrumbs
     state.breadcrumbs.classic.set([]);
