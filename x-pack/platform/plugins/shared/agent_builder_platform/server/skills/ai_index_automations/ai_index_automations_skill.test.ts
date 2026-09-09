@@ -199,6 +199,27 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/first edit to make on the scaffold/);
     });
 
+    it('treats the scaffold attachment as a handoff rather than a workspace to edit', () => {
+      expect(content).toMatch(/a handoff, not a workspace/);
+      expect(content).toMatch(/do not\s+try to write back to it/);
+    });
+
+    it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
+      expect(content).toMatch(/Anything that is not a string needs `\$\{\{ \}\}`, not `\{\{ \}\}`/);
+      expect(content).toMatch(/`\[object Object\]`/);
+      expect(content).toMatch(/the string `"false"`, which\s+is truthy/);
+    });
+
+    it('points ai.prompt references at output.content rather than the flat path', () => {
+      expect(content).toMatch(/nested under `output\.content`/);
+      expect(content).toMatch(/`steps\.<name>\.output\.content\.<field>`/);
+      expect(content).toMatch(/never\s+`steps\.<name>\.output\.<field>`/);
+    });
+
+    it('explains that both mistakes survive validation, so drafting is the only place to catch them', () => {
+      expect(content).toMatch(/Both of these parse, validate and run/);
+    });
+
     it('requires the pilot to tag its indicators and delete them afterwards', () => {
       expect(content).toContain('ce-pilot-');
       expect(content).toContain('context-engine.deleteKi');

@@ -106,6 +106,30 @@ is worse than a missing one, because retrieval surfaces it as though it worked.
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
 single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry.
 
+## Two shapes that produce the wrong thing without failing
+
+Both of these parse, validate and run. Nothing reports them. They simply write indicators with the
+wrong contents, which is why they are worth knowing before you draft rather than after.
+
+**Anything that is not a string needs `${{ }}`, not `{{ }}`.** A plain `{{ }}` renders its value into
+a string: an object arrives as `[object Object]`, and `false` arrives as the string `"false"`, which
+is truthy and will pass an `if`. `${{ }}` evaluates the expression and preserves the type. Wherever a
+whole object, a number or a boolean is passed — a `foreach.item` handed to a step, a condition, a
+document body — it is `${{ }}`:
+
+```yaml
+- name: write_report
+  type: elasticsearch.index
+  with:
+    document: '${{ foreach.item }}'
+```
+
+**An `ai.prompt` result is nested under `output.content`.** The step outputs `{ content, metadata }`,
+so the model's answer is at `steps.<name>.output.content`, and when the step declares a `schema` every
+field of the structured result is at `steps.<name>.output.content.<field>`. It is never
+`steps.<name>.output.<field>`. Referencing the flat path interpolates nothing, and the run completes
+having written indicators whose fields are empty.
+
 ## Shapes for each strategy
 
 `analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow. Whoever
@@ -220,6 +244,10 @@ what the first one settled.
 Because it is primed with the connectors configured here, it tends to pin a named `connector-id` onto
 `ai.prompt` steps. Deleting those lines is the first edit to make on the scaffold — leaving one in is
 how a workflow ends up running against a connector that happens to be out of quota.
+
+That attachment is a handoff, not a workspace. Read it once and hold the definition as text; do not
+try to write back to it. The automation is created from the YAML you hand back, so an edit made to
+the attachment instead of to your own copy is an edit that never reaches what gets saved.
 
 Work in text from there. `platform.workflows.validate_workflow`, `platform.core.execute_workflow` and
 `platform.workflows.workflow_execute_step` all take a raw `yaml` string, so once the definition is in
