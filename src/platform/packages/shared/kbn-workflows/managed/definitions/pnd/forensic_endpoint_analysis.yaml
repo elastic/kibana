@@ -112,9 +112,9 @@ steps:
               Return this statement in `proposal`.
 
             Allowed actions (use exact actionID, do not invent IDs):
-            - endpoint.isolate_host - isolate the host Use when the host is compromised and no more specific process/path action fits.
-            - endpoint.kill_process - kill a malicious process. Requires pid or entity_id from evidence.
-            - endpoint.suspend_process - suspend a suspected malicious process. Use when the evidence is strong but you want a reversible action.Requires pid or entity_id from evidence.
+            - system-alertzero-action-isolate-host - isolate the host. Use when the host is compromised and no more specific process/path action fits.
+            - system-alertzero-action-kill-process - kill a malicious process. Requires pid or entity_id from evidence.
+            - system-alertzero-action-suspend-process - suspend a suspected malicious process. Use when the evidence is strong but you want a reversible action. Requires pid or entity_id from evidence.
 
             Rules
             - Pick the most specific action the evidence supports. Prefer kill/suspend when a process entity_id or pid is present; isolate when only the host is known.
@@ -122,10 +122,10 @@ steps:
             - Cite hosts, process/path, tactics, and why this action now in rationale.
 
             For each recommended action set actionInput to the exact shape the action workflow expects:
-            - endpoint.isolate_host → { "endpoint_ids": [agentId] }
-            - endpoint.kill_process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
+            - system-alertzero-action-isolate-host → { "endpoint_ids": [agentId] }
+            - system-alertzero-action-kill-process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
               or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
-            - endpoint.suspend_process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
+            - system-alertzero-action-suspend-process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
               or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
             agentId must come from Elastic Defend agent.id in the telemetry.
             For process actions include pid when present in telemetry, otherwise entity_id.
@@ -173,9 +173,9 @@ steps:
                     actionId:
                       type: string
                       enum:
-                        - endpoint.isolate_host
-                        - endpoint.kill_process
-                        - endpoint.suspend_process
+                        - system-alertzero-action-isolate-host
+                        - system-alertzero-action-kill-process
+                        - system-alertzero-action-suspend-process
                     comment:
                       type: string
                       maxLength: 500
@@ -184,8 +184,8 @@ steps:
                       type: object
                       description: >
                         Input for the action workflow. Shape depends on actionId:
-                        endpoint.isolate_host → { endpoint_ids }.
-                        endpoint.kill_process / endpoint.suspend_process → { endpoint_ids, parameters: { pid } or { entity_id } }.
+                        system-alertzero-action-isolate-host → { endpoint_ids }.
+                        system-alertzero-action-kill-process / system-alertzero-action-suspend-process → { endpoint_ids, parameters: { pid } or { entity_id } }.
                       required:
                         - endpoint_ids
                       properties:
@@ -209,7 +209,7 @@ steps:
         type: workflow.output
         status: completed
         with:
-          propose: "${{ steps.forensic_analysis.output.propose }}"
-          rationale: "{{ steps.forensic_analysis.output.rationale }}"
-          proposal: "{{ steps.forensic_analysis.output.proposal }}"
-          recommendedActions: "${{ steps.forensic_analysis.output.recommendedActions }}"
+          propose: "${{ steps.forensic_analysis.output.structured_output.propose }}"
+          rationale: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
+          proposal: "{{ steps.forensic_analysis.output.structured_output.proposal }}"
+          recommendedActions: "${{ steps.forensic_analysis.output.structured_output.recommendedActions }}"
