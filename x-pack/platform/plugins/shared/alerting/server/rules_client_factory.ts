@@ -35,6 +35,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
+import { ApiKeyType } from './task_runner/types';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';
@@ -89,6 +90,7 @@ export interface RulesClientFactoryOpts {
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
   shouldGrantUiam: boolean;
+  apiKeyType: ApiKeyType;
   isServerless: boolean;
   featureFlags: CoreStart['featureFlags'];
   analytics: CoreStart['analytics'];
@@ -120,6 +122,7 @@ export class RulesClientFactory {
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
   private shouldGrantUiam: boolean = false;
+  private apiKeyType: ApiKeyType = ApiKeyType.ES;
   private isServerless: boolean = false;
   private featureFlags!: CoreStart['featureFlags'];
   private analytics!: CoreStart['analytics'];
@@ -153,6 +156,7 @@ export class RulesClientFactory {
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
     this.shouldGrantUiam = options.shouldGrantUiam;
+    this.apiKeyType = options.apiKeyType;
     this.isServerless = options.isServerless;
     this.featureFlags = options.featureFlags;
     this.analytics = options.analytics;
@@ -419,6 +423,7 @@ export class RulesClientFactory {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
       shouldGrantUiam: this.shouldGrantUiam,
+      apiKeyType: this.apiKeyType,
       isServerless: this.isServerless,
       featureFlags: this.featureFlags,
       analytics: this.analytics,
