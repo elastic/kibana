@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_INTERNAL_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { createQueryClientWrapper, createTestQueryClient } from '../../test_utils';
 import { useFetchRuleTags } from './use_fetch_rule_tags';
 import { ruleFormKeys } from './query_key_factory';
@@ -35,7 +35,7 @@ describe('useFetchRuleTags', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+    expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
       query: { search: undefined },
     });
     expect(result.current.data).toEqual(['cpu', 'memory']);
@@ -52,7 +52,7 @@ describe('useFetchRuleTags', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+    expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
       query: { search: 'pro' },
     });
     expect(result.current.data).toEqual(['production']);
@@ -81,7 +81,7 @@ describe('useFetchRuleTags', () => {
     });
 
     expect(http.get).toHaveBeenCalledTimes(1);
-    expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+    expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
       query: { search: undefined },
     });
   });
