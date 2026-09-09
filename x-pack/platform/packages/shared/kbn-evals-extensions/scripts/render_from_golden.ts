@@ -106,16 +106,21 @@ const provenance = {
               e.separablePairs
             } of ${e.totalPairs} model pairs ` +
               `separate by a paired bootstrap over shared examples (95% CI excluding zero) -- against exactly ` +
-              `1 judge-independent rank under any single judge. The ensemble buys real discrimination, but ` +
-              `${e.totalPairs - e.separablePairs} of ${
-                e.totalPairs
-              } pairs remain statistically tied and must not be read as ordered.`,
-            `Of those ${e.separablePairs} separations, ${e.borderlinePairs} sit within 0.005 of the CI boundary ` +
-              `and flip verdict on a different random seed -- swapping one seeded generator for another moved ` +
-              `this count by one. Only ${
+              `1 judge-independent rank under any single judge. ${
+                e.totalPairs - e.separablePairs
+              } of ${e.totalPairs} pairs are tied even by that measure.`,
+            `Do not read any of this as a ranking. The bootstrap resamples cells within a SINGLE run, so it ` +
+              `sees judge and example variance but is structurally blind to run-to-run variance. Seven models ` +
+              `in this golden were run twice (Sep 6 and Sep 7); across those re-run pairs the mean absolute ` +
+              `difference on 0-1 quality evaluators is 0.099 and only 71% of cells reproduce exactly. Every ` +
+              `pairwise gap on this ensemble (median 0.033, max 0.075) is SMALLER than that re-run noise ` +
+              `floor, including all ${e.separablePairs} "separable" and the ${
                 e.separablePairs - e.borderlinePairs
-              } pairs separate robustly; the borderline ones are ` +
-              `reported rather than rounded into the headline, because a coin flip that landed heads is not a result.`,
+              } once called robust. The persona column orders nothing yet.`,
+            `That noise floor is an upper bound, not a clean seed-only estimate: n=7 pairs, and the two runs ` +
+              `differ in more than seed (one pair drew different judges). It is the only re-run evidence in ` +
+              `the dataset and it points the wrong way for a ranking claim, so the claim is withdrawn rather ` +
+              `than the caveat. A seed-only re-run of 2-3 models would tighten it.`,
             `Per-model judge spread is published next to every ensemble score. ${widest.modelId} has the widest ` +
               `at ${widest.judgeSpread.toFixed(
                 3
