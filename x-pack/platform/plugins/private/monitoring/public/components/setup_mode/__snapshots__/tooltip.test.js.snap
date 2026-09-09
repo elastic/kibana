@@ -12,7 +12,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
     <EuiBadge
       color="danger"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring
     </EuiBadge>
@@ -32,7 +32,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
     <EuiBadge
       color="danger"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring
     </EuiBadge>
@@ -52,7 +52,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
     <EuiBadge
       color="danger"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring
     </EuiBadge>
@@ -72,7 +72,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
     <EuiBadge
       color="danger"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring
     </EuiBadge>
@@ -92,7 +92,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
     <EuiBadge
       color="danger"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring
     </EuiBadge>
@@ -112,7 +112,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
     <EuiBadge
       color="success"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -132,7 +132,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
     <EuiBadge
       color="success"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -152,7 +152,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
     <EuiBadge
       color="success"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -172,7 +172,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
     <EuiBadge
       color="success"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -192,7 +192,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
     <EuiBadge
       color="success"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -212,7 +212,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring is on
     </EuiBadge>
@@ -232,7 +232,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring is on
     </EuiBadge>
@@ -252,7 +252,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring is on
     </EuiBadge>
@@ -272,7 +272,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring is on
     </EuiBadge>
@@ -292,7 +292,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       Self monitoring is on
     </EuiBadge>
@@ -312,7 +312,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
     <EuiBadge
       color="hollow"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No usage
     </EuiBadge>
@@ -332,7 +332,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
     <EuiBadge
       color="hollow"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No usage
     </EuiBadge>
@@ -352,7 +352,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
     <EuiBadge
       color="hollow"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No usage
     </EuiBadge>
@@ -372,7 +372,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
     <EuiBadge
       color="hollow"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No usage
     </EuiBadge>
@@ -392,7 +392,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
     <EuiBadge
       color="hollow"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No usage
     </EuiBadge>
@@ -412,7 +412,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No monitoring
     </EuiBadge>
@@ -432,7 +432,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No monitoring
     </EuiBadge>
@@ -452,7 +452,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No monitoring
     </EuiBadge>
@@ -472,7 +472,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No monitoring
     </EuiBadge>
@@ -492,7 +492,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
     <EuiBadge
       color="warning"
       href=""
-      iconType="flag"
+      iconType="pencil"
     >
       No monitoring
     </EuiBadge>
