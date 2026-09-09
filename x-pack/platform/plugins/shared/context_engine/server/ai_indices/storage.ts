@@ -13,6 +13,7 @@ import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
   AiIndexSource,
+  AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
@@ -34,6 +35,7 @@ const storageSettings = {
       sources: types.object({
         properties: { type: types.keyword({}), value: types.keyword({}) },
       }),
+      traces: types.object({ properties: { type: types.keyword({}), value: types.keyword({}) } }),
       feedback_analysis: types.object({
         properties: {
           enabled: types.boolean({}),
@@ -66,6 +68,7 @@ export interface AiIndexDocument {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  traces: AiIndexTrace[];
 }
 
 export type AiIndexStorageSettings = typeof storageSettings;

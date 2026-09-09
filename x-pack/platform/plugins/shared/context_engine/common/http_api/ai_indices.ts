@@ -25,6 +25,18 @@ export interface AiIndexSource {
   value: string;
 }
 
+export type AiIndexTraceType = 'elastic_agent' | 'index' | 'esql';
+
+export interface AiIndexTrace {
+  type: AiIndexTraceType;
+  value: string;
+}
+
+/** A trace entry with its derived ES|QL query. Query is computed at read time, never stored. */
+export interface AiIndexTraceWithQuery extends AiIndexTrace {
+  query: string;
+}
+
 export type AiIndexAutomationType = 'workflow';
 
 export interface AiIndexAutomation {
@@ -78,14 +90,16 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  traces: AiIndexTrace[];
   feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
-export interface AiIndexHttpItem extends AiIndexProperties {
+export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
   id: string;
   managed: boolean;
   date_created: string;
   date_modified: string;
+  traces: AiIndexTraceWithQuery[];
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;

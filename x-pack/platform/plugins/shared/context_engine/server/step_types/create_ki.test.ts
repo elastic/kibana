@@ -49,6 +49,28 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('resolves the AI index with the request space id', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+      getSpaces: async () => ({
+        spacesService: { getSpaceId: () => 'marketing' },
+      }),
+    });
+    await handler(context);
+
+    expect(service.get).toHaveBeenCalledWith('my-ai-index', 'marketing');
+  });
+
   it('uses op_type create for a data stream dest', async () => {
     const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
@@ -162,6 +184,7 @@ describe('getCreateKiStepDefinition', () => {
       dest: { type: 'index', value: 'ai-index-idx-new-ai-index' },
       automations: [],
       sources: [],
+      traces: [],
     });
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'ai-index-idx-new-ai-index' }),

@@ -98,6 +98,7 @@ export class AgentBuilderSmlPlugin
       dest: { type: 'index', value: smlIndexName },
       automations: [],
       sources: [],
+      traces: [],
     });
 
     return {

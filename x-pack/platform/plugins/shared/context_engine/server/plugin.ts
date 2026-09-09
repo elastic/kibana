@@ -132,6 +132,10 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
     });
 
     registerStepDefinitions({
@@ -163,6 +167,10 @@ export class ContextEnginePlugin
             kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
           });
         return hasAllRequested;
+      },
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
       },
     });
 

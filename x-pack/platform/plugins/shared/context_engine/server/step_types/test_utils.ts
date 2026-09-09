@@ -46,6 +46,7 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
 
 /** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
 export const mockKiStepTelemetry = () => ({
+  getSpaces: async () => undefined,
   analyticsService: {
     reportKiWrite: jest.fn(),
     reportKiVerification: jest.fn(),

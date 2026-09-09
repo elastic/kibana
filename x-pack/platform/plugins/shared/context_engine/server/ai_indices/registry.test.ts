@@ -16,6 +16,7 @@ const makeProperties = (overrides: Partial<AiIndexProperties> = {}): AiIndexProp
   dest: { type: 'index', value: 'ai-index-idx-test' },
   automations: [],
   sources: [],
+  traces: [],
   ...overrides,
 });
 

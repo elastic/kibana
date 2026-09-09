@@ -41,6 +41,7 @@ export const useCreateAiIndex = () => {
         dest: getAiIndexDest(storageType, id),
         automations: [],
         sources: toAiIndexSources(sources),
+        traces: [],
       };
 
       await createAiIndexRequest(http, { aiIndexId: id, properties });

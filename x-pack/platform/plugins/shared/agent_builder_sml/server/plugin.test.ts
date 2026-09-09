@@ -30,6 +30,7 @@ describe('AgentBuilderSmlPlugin.setup()', () => {
       dest: { type: 'index', value: 'ai-index-idx-sml-data' },
       automations: [],
       sources: [],
+      traces: [],
     });
   });
 

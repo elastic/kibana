@@ -8,6 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
+import { resolveSpaceId } from '../routes/space';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -22,6 +23,7 @@ export const getUpdateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  getSpaces,
   analyticsService,
   logger,
 }: KiStepDependencies) =>
@@ -30,6 +32,7 @@ export const getUpdateKiStepDefinition = ({
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
+      const spaceId = resolveSpaceId(await getSpaces(), request);
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
       return withKiWriteTelemetry({
@@ -40,7 +43,7 @@ export const getUpdateKiStepDefinition = ({
         run: async (setManaged) => {
           await assertKiWritePrivilege(checkWritePrivilege, request);
 
-          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId);
+          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
           setManaged(managed);
           const esClient = context.contextManager.getScopedEsClient();
 

@@ -31,6 +31,7 @@ const aiIndexBody = {
   dest: { type: 'data_stream', value: DEST_DATA_STREAM },
   automations: [{ type: 'workflow', value: 'scout-automation' }],
   sources: [{ type: 'esql', value: `FROM ${DEST_DATA_STREAM} | LIMIT 1` }],
+  traces: [],
 };
 
 apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
@@ -184,6 +185,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         dest: { type: 'index', value: `${DEST_INDEX}*` },
         automations: [],
         sources: [],
+        traces: [],
       },
     });
     expect(createResponse).toHaveStatusCode(201);

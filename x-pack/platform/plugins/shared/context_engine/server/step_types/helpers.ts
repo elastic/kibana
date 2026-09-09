@@ -17,6 +17,13 @@ import type { KiVerificationSummary } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
 import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
+/** Enough of Spaces to resolve the request's space id. */
+export interface KiStepSpaces {
+  spacesService: {
+    getSpaceId: (request: KibanaRequest) => string;
+  };
+}
+
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
   getAiIndexService: () => AiIndexService;
@@ -24,6 +31,7 @@ export interface KiStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Whether the request has the Context Engine write API privilege. */
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
+  getSpaces: () => Promise<KiStepSpaces | undefined>;
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
 }
@@ -160,10 +168,11 @@ export const assertContextEngineEnabled = async (
 /** Resolves an AI index id to its backing store, failing the step when the id is unknown. */
 export const resolveAiIndex = async (
   getAiIndexService: () => AiIndexService,
-  aiIndexId: string
+  aiIndexId: string,
+  spaceId: string
 ): Promise<ResolvedAiIndex> => {
   try {
-    const { dest, managed } = await getAiIndexService().get(aiIndexId);
+    const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
     return { dest, managed };
   } catch (error) {
     if (error instanceof AiIndexNotFoundError) {
@@ -183,12 +192,13 @@ export const resolveAiIndex = async (
  */
 export const resolveOrCreateAiIndex = async (
   getAiIndexService: () => AiIndexService,
-  aiIndexId: string
+  aiIndexId: string,
+  spaceId: string
 ): Promise<ResolvedAiIndex> => {
   const service = getAiIndexService();
 
   try {
-    const { dest, managed } = await service.get(aiIndexId);
+    const { dest, managed } = await service.get(aiIndexId, spaceId);
     return { dest, managed };
   } catch (error) {
     if (!(error instanceof AiIndexNotFoundError)) {
@@ -205,11 +215,11 @@ export const resolveOrCreateAiIndex = async (
   }
 
   try {
-    await service.create(aiIndexId, { dest, automations: [], sources: [] });
+    await service.create(aiIndexId, { dest, automations: [], sources: [], traces: [] });
   } catch (error) {
     if (error instanceof AiIndexAlreadyExistsError) {
       // Lost a concurrent creation race; the AI index exists now.
-      const { dest: existingDest, managed } = await service.get(aiIndexId);
+      const { dest: existingDest, managed } = await service.get(aiIndexId, spaceId);
       return { dest: existingDest, managed };
     }
     throw error;
