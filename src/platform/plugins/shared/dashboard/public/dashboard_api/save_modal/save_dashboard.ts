@@ -12,14 +12,14 @@ import { getDashboardBackupService } from '../../services/dashboard_api_services
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import { showDashboardSavedToast } from './show_dashboard_saved_toast';
-import type { SaveDashboardProps, SaveDashboardReturn } from './types';
+import type { SaveDashboardProps } from './types';
 
 export const saveDashboard = async ({
   lastSavedId,
   saveOptions,
   dashboardState,
   accessMode,
-}: SaveDashboardProps): Promise<SaveDashboardReturn> => {
+}: SaveDashboardProps): Promise<{ error: string } | { id: string; redirectRequired?: boolean }> => {
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {

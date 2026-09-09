@@ -14,7 +14,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { openLazyModal } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
+import type { DashboardSaveOptions } from './types';
 import {
   coreServices,
   cpsService,
@@ -59,7 +59,11 @@ export function openSaveModal({
   title: string;
   viewMode: ViewMode;
   accessControl?: Partial<SavedObjectAccessControl>;
-  onSave: (result: SaveDashboardReturn & { savedState: DashboardState }) => void;
+  onSave: (saveResult: {
+    id: string;
+    redirectRequired?: boolean;
+    savedState: DashboardState;
+  }) => void;
   onClose: () => void;
 }) {
   if (viewMode === 'edit' && isManaged) {
@@ -127,6 +131,8 @@ export function openSaveModal({
             lastSavedId,
             accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
           });
+
+          if ('error' in saveResult) return;
 
           reportPerformanceMetricEvent(coreServices.analytics, {
             eventName: SAVED_OBJECT_POST_TIME,
