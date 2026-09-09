@@ -10,6 +10,7 @@
 import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { canWriteExecution } from '../workflow_execution_loop/execution_fence';
 
 export interface WorkflowExecutionCursorInit {
   nodeId?: string;
@@ -73,6 +74,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Synchronous so callers may invoke it after `await` without tripping `require-atomic-updates`.
    */
   public captureError(caught: unknown): void {
+    if (!canWriteExecution()) return;
     this.workflowError = caught instanceof Error ? caught : new Error(String(caught));
   }
 
@@ -80,6 +82,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Clears the execution-level error.
    */
   public clearError(): void {
+    if (!canWriteExecution()) return;
     this.workflowError = undefined;
   }
 
@@ -88,6 +91,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Called when the top-level workflow execution loop begins.
    */
   public start(): void {
+    if (!canWriteExecution()) return;
     this.executing = true;
   }
 
@@ -98,6 +102,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * after a run (success or error). Workflow status may still be RUNNING unless callers update it.
    */
   public stop(): void {
+    if (!canWriteExecution()) return;
     this.executing = false;
   }
 
@@ -106,6 +111,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Used after a normal `runNode` cycle and after each error-bubbling step once `navigateToNode` has set `nextNodeId`.
    */
   commitPendingNavigation(): void {
+    if (!canWriteExecution()) return;
     this.currentNodeId = this.nextNodeId;
     this.syncScopeStack();
   }
@@ -126,11 +132,20 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     return this.workflowGraph.getNode(this.nextNodeId);
   }
 
+  public restorePosition(nodeId: string, stackFrames: StackFrame[]): void {
+    if (!canWriteExecution()) return;
+    this.navigateToNode(nodeId);
+    this.stackFrames = stackFrames;
+    this.commitPendingNavigation();
+  }
+
   public clearPendingNavigation(): void {
+    if (!canWriteExecution()) return;
     this.nextNodeId = undefined;
   }
 
   public navigateToNode(nodeId: string): void {
+    if (!canWriteExecution()) return;
     if (!this.navigationOrder.includes(nodeId)) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
     }
@@ -139,10 +154,12 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   public navigateToNextNode(): void {
+    if (!canWriteExecution()) return;
     this.nextNodeId = this.nodeAfter(this.currentNodeId);
   }
 
   public navigateToAfterNode(nodeId: string): void {
+    if (!canWriteExecution()) return;
     this.nextNodeId = this.nodeAfter(nodeId);
   }
 
@@ -151,6 +168,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   public setCurrentScopeId(scopeId?: string): void {
+    if (!canWriteExecution()) return;
     if (!this.currentNode) {
       return;
     }

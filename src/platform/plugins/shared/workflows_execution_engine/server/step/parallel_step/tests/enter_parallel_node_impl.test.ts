@@ -18,7 +18,10 @@ import type { StepExecutionRuntime } from '../../../workflow_context_manager/ste
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionCursor } from '../../../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { WorkflowScopeStack } from '../../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import { BranchExecutor } from '../../../workflow_execution_loop/branch_executor';
+import type { WorkflowExecutionLoopParams } from '../../../workflow_execution_loop/types';
 import type { NodeImplementation } from '../../node_implementation';
 import type { NodesFactory } from '../../nodes_factory';
 import { EnterParallelNodeImpl } from '../enter_parallel_node_impl';
@@ -76,6 +79,8 @@ describe('EnterParallelNodeImpl', () => {
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     stepRuntime = {
+      abortController: new AbortController(),
+      stepExecutionId: 'parallel-owner',
       startStep: jest.fn(),
       finishStep: jest.fn(),
       failStep: jest.fn(),
@@ -94,6 +99,7 @@ describe('EnterParallelNodeImpl', () => {
     logger = {
       logDebug: jest.fn(),
       logError: jest.fn(),
+      logWarn: jest.fn(),
     } as unknown as jest.Mocked<IWorkflowEventLogger>;
 
     // Each branch run returns a runtime whose stepExecution status reflects the
@@ -164,39 +170,77 @@ describe('EnterParallelNodeImpl', () => {
     node = makeNode();
   });
 
-  const build = () =>
-    new EnterParallelNodeImpl(
+  const build = () => {
+    const runtimeFactory = {
+      createStepExecutionRuntime: (params) => {
+        const runtime = factory.createStepExecutionRuntime(params);
+        if (!runtime.abortController)
+          Object.defineProperty(runtime, 'abortController', { value: new AbortController() });
+        runtime.stepExecutionExists = () => false;
+        Object.defineProperty(runtime, 'stepExecutionId', {
+          value: `${params.nodeId}:${JSON.stringify(params.stackFrames)}`,
+        });
+        Object.defineProperty(runtime, 'node', { value: workflowGraph.getNode(params.nodeId) });
+        Object.defineProperty(runtime, 'scopeStack', {
+          value: WorkflowScopeStack.fromStackFrames(params.stackFrames),
+        });
+        runtime.flushEventLogs = jest.fn().mockResolvedValue(undefined);
+        const original = runtime.stepExecution;
+        if (original?.status === ExecutionStatus.WAITING) {
+          Object.defineProperty(runtime, 'stepExecution', {
+            get: () => ({ ...original, state: { resumeAt: '2000-01-01T00:00:00Z' } }),
+          });
+        }
+        return runtime;
+      },
+    } as StepExecutionRuntimeFactory;
+    const implementationFactory = {
+      create: (runtime: StepExecutionRuntime) => {
+        const implementation = nodesFactory.create(runtime);
+        return {
+          ...implementation,
+          run: async () => {
+            await implementation.run();
+            // Atomic nodes normally set navigation/error through the runtime.
+            const cursor = cursors.getStore();
+            if (runtime.stepExecution?.status === ExecutionStatus.FAILED) {
+              cursor?.captureError(new Error('Branch failed'));
+            } else if (runtime.stepExecution?.status === ExecutionStatus.COMPLETED) {
+              cursor?.navigateToNextNode();
+            }
+          },
+        };
+      },
+    } as NodesFactory;
+    workflowRuntime.branchExecutor = new BranchExecutor({
+      workflowRuntime,
+      workflowExecutionGraph: workflowGraph,
+      stepExecutionRuntimeFactory: runtimeFactory,
+      nodesFactory: implementationFactory,
+      workflowLogger: logger,
+      signal: stepRuntime.abortController.signal,
+      workflowExecutionState: {
+        getAllStepExecutions: jest.fn().mockReturnValue([]),
+        getStepExecution: jest.fn(),
+        getWorkflowExecution: jest.fn().mockReturnValue({ status: ExecutionStatus.RUNNING }),
+        upsertStep: jest.fn(),
+        flushWorkflowDoc: jest.fn().mockResolvedValue(undefined),
+      },
+      stepIoService: {
+        flushStepChanges: jest.fn().mockResolvedValue(undefined),
+        holdStepWrites: jest.fn().mockReturnValue(() => {}),
+      },
+    } as unknown as WorkflowExecutionLoopParams);
+    return new EnterParallelNodeImpl(
       node,
       workflowRuntime,
       stepRuntime,
       logger,
-      {
-        createStepExecutionRuntime: (params) => {
-          const runtime = factory.createStepExecutionRuntime(params);
-          runtime.stepExecutionExists = () => false;
-          return runtime;
-        },
-      } as StepExecutionRuntimeFactory,
-      {
-        create: (runtime: StepExecutionRuntime) => {
-          const implementation = nodesFactory.create(runtime);
-          return {
-            ...implementation,
-            run: async () => {
-              await implementation.run();
-              // Atomic nodes normally set navigation/error through the runtime.
-              const cursor = cursors.getStore();
-              if (runtime.stepExecution?.status === ExecutionStatus.FAILED) {
-                cursor?.captureError(new Error('Branch failed'));
-              } else if (runtime.stepExecution?.status === ExecutionStatus.COMPLETED) {
-                cursor?.navigateToNextNode();
-              }
-            },
-          };
-        },
-      } as NodesFactory,
+      runtimeFactory,
+      implementationFactory,
       workflowGraph
     );
+  };
 
   // Re-tick the node until it finishes the step or stops making progress, mimicking
   // the resume-task loop that re-invokes a suspended parallel node across ticks.

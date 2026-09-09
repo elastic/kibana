@@ -245,6 +245,25 @@ export interface EsWorkflowStepExecution {
   output?: JsonValue;
   input?: JsonValue;
 
+  /** Last committed branch transition; persisted with the node result for crash recovery. */
+  executionCheckpoint?: {
+    branchId: string;
+    sequence: number;
+    nodeId: string;
+    currentNodeId: string;
+    stackFrames: StackFrame[];
+    status: 'running' | 'completed' | 'failed' | 'timed_out';
+    waiting: boolean;
+    yielded?: boolean;
+    scopeUpdates?: Array<{
+      id: string;
+      status?: ExecutionStatus;
+      state?: Record<string, unknown>;
+      error?: SerializedError;
+      finishedAt?: string;
+    }>;
+  };
+
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
 

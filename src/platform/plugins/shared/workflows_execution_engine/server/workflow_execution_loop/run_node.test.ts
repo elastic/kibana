@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 
 import * as catchErrorModule from './catch_error';
+import { ExecutionBudget } from './execution_budget';
 import * as handleExecutionDelayModule from './handle_execution_delay';
 import { runNode } from './run_node';
 import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
@@ -189,11 +190,37 @@ describe('runNode', () => {
 
       await runNode(mockParams);
 
-      expect(mockHandleExecutionDelay).toHaveBeenCalled();
+      expect(mockHandleExecutionDelay).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.abortController.signal.aborted).toBe(true);
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
         signal: mockParams.signal,
       });
     });
+  });
+
+  it('retains operation capacity until an abort-ignoring node actually settles', async () => {
+    const budget = new ExecutionBudget(1);
+    let finish: () => void = () => {};
+    const operation = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockNodeImplementation.run.mockImplementation(() => operation);
+    await runNode(
+      { ...mockParams, boundaryNodeId: 'parallel' },
+      { budget, deadline: Date.now() + 10 }
+    );
+    expect(mockStepExecutionRuntime.abortController.signal.aborted).toBe(true);
+    let admitted = false;
+    const queued = budget.acquire(new AbortController().signal).then((release) => {
+      admitted = true;
+      return release;
+    });
+    await Promise.resolve();
+    expect(admitted).toBe(false);
+    finish();
+    const release = await queued;
+    expect(admitted).toBe(true);
+    release();
   });
 
   describe('when workflow is cancelled before step starts', () => {

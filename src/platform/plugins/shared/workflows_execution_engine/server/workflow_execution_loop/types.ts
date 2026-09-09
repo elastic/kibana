@@ -20,6 +20,14 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export interface WorkflowExecutionLoopParams {
+  parallelLimits?: {
+    maxConcurrentOperations: number;
+    maxOutstandingBranches: number;
+    maxTransitionsPerTick: number;
+  };
+  /** Nearest owning parallel node; ancestor monitoring stays with its parent cursor. */
+  boundaryNodeId?: string;
+
   workflowExecutionGraph: WorkflowGraph;
   workflowRuntime: WorkflowExecutionRuntimeManager;
   workflowExecutionCursor: WorkflowExecutionCursorApi;
