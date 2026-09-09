@@ -12,16 +12,16 @@ import {
   validateKIQueries,
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
-import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
-import { createValidateQueriesTool, SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from './tool';
+import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
+import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
+import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import { createValidateQueriesTool } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
+jest.mock('../../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
-jest.mock('@kbn/streams-ai', () => ({
-  ...jest.requireActual('@kbn/streams-ai'),
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
   createQueryValidationContext: jest.fn(),
   validateKIQueries: jest.fn(),
 }));
@@ -111,21 +111,12 @@ describe('ki_queries_validate tool', () => {
       logger,
     });
 
-  it('is a bounded read-only Agent Builder tool', () => {
+  it('bounds its input', () => {
     const tool = createTool();
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.id).toBe(SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID);
-    expect(tool.id).toBe('platform.sig_events.ki_queries_validate');
-    expect(tool.annotations).toEqual(
-      expect.objectContaining({
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-      })
-    );
     expect(tool.schema.safeParse({ stream_name: 'logs.test', queries: [candidate] }).success).toBe(
       true
     );
@@ -148,7 +139,7 @@ describe('ki_queries_validate tool', () => {
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        stream,
+        sources: ['logs.test', 'logs.test.*'],
         esClient: streamDataEsClient,
         existingQueries: [
           expect.objectContaining({

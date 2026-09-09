@@ -17,7 +17,6 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 | Group                | Tools                                                                                                     |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
 | Knowledge indicators | `search_knowledge_indicators`, `create_feature_knowledge_indicator`, `create_query_knowledge_indicator`    |
-| Query generation     | `ki_stream_features_get`, `ki_queries_validate`                                                           |
 | KI identification    | `ki_identification_start`, `ki_identification_cancel`, `ki_identification_status`                          |
 | Events               | `event_search`, `event_create`, `event_write`, `event_status_update`                                      |
 | Discovery            | `discovery_write`                                                                                         |
@@ -29,7 +28,9 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 
 `knowledge_indicators_management`, `ki_identification_management`, `ki_query_generation`,
 `significant_events_management`, `significant_events_ki_grounding`. Memory and investigation skills
-live separately, under `server/memory_and_investigation/skills/`.
+live separately, under `server/memory_and_investigation/skills/`. The `ki_query_generation` skill
+provides its feature retrieval and query validation tools inline rather than registering them
+globally.
 
 ### Agents (`agents/discovery/`)
 

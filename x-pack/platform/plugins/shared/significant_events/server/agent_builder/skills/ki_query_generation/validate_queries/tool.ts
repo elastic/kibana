@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import {
@@ -18,13 +18,12 @@ import {
 import { getSourcesForStream } from '@kbn/streams-schema';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
-import type { GetScopedClients } from '../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { getRequestAbortSignal } from '../../../routes/utils/get_request_abort_signal';
-import { createSignificantEventsAvailability } from '../significant_events_availability';
+import type { GetScopedClients } from '../../../../routes/types';
+import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
+import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
-  platformSignificantEventsTools.validateQueries;
+  'platform.sig_events.ki_queries_validate';
 
 const MAX_QUERIES_PER_CALL = 100;
 const MAX_FEATURE_IDS_PER_QUERY = 100;
@@ -62,22 +61,13 @@ export const createValidateQueriesTool = ({
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}): StaticToolRegistration<typeof validateQueriesSchema> => {
-  const toolDefinition: BuiltinToolDefinition<typeof validateQueriesSchema> = {
+}): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
+  return {
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Validate candidate KI queries against a stream. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. Use the returned errors to repair rejected queries before finalizing.',
-    annotations: {
-      title: 'Validate KI Queries',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    },
     schema: validateQueriesSchema,
-    tags: ['streams', 'significant-events', 'query-generation'],
-    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ stream_name: streamName, queries }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
@@ -150,6 +140,4 @@ export const createValidateQueriesTool = ({
       }
     },
   };
-
-  return toolDefinition;
 };

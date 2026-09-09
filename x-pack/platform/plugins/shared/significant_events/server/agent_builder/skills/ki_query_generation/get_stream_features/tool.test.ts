@@ -7,15 +7,12 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
-import {
-  createGetStreamFeaturesTool,
-  SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID,
-} from './tool';
+import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
+import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
+import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import { createGetStreamFeaturesTool } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
+jest.mock('../../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
@@ -57,21 +54,12 @@ describe('ki_stream_features_get tool', () => {
       logger,
     });
 
-  it('is a bounded read-only Agent Builder tool', () => {
+  it('bounds its input', () => {
     const tool = createTool();
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.id).toBe(SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID);
-    expect(tool.id).toBe('platform.sig_events.ki_stream_features_get');
-    expect(tool.annotations).toEqual(
-      expect.objectContaining({
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-      })
-    );
     expect(tool.schema.safeParse({ stream_name: 'logs.test', limit: 100 }).success).toBe(true);
     expect(tool.schema.safeParse({ stream_name: 'logs.test', limit: 101 }).success).toBe(false);
   });
