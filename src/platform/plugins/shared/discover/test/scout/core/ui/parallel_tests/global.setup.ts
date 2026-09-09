@@ -12,6 +12,7 @@ import { globalSetupHookWithSynthtrace } from '@kbn/scout-synthtrace';
 import { log as synthtraceLog, timerange } from '@kbn/synthtrace-client';
 import {
   DATE_NANOS_MIXED_ES_ARCHIVE,
+  ECOMMERCE_ES_ARCHIVE,
   LONG_WINDOW_LOGSTASH_ES_ARCHIVE,
 } from '../../../common/ui/fixtures/constants';
 
@@ -38,6 +39,20 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
   );
   await esArchiver.loadIfNeeded(DATE_NANOS_MIXED_ES_ARCHIVE);
   log.debug('[setup:date_nanos_mixed] date_nanos_mixed ES data ready');
+
+  log.debug(
+    '[setup:index_pattern_without_timefield] loading index_pattern_without_timefield ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(
+    'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+  );
+  log.debug(
+    '[setup:index_pattern_without_timefield] index_pattern_without_timefield ES data ready'
+  );
+
+  log.debug('[setup:ecommerce] loading ecommerce ES data (only if it does not exist)...');
+  await esArchiver.loadIfNeeded(ECOMMERCE_ES_ARCHIVE);
+  log.debug('[setup:ecommerce] ecommerce ES data ready');
 });
 
 globalSetupHookWithSynthtrace(

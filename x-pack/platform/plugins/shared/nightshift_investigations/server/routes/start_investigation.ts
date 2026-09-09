@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
+import { freeFormContextSchema } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
+import { fetchAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -36,13 +38,11 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     },
   },
   params: z.object({
-    // A union rather than one object with a loose `context`, so that an alert investigation
-    // cannot be started without the alert data it is supposed to reason about. zod's
-    // discriminatedUnion needs the discriminator at the top level, and ours is nested under
-    // `subject`, hence a plain union.
-    //
-    // The context schemas come from `common/schemas`, the same declarations the client validates
-    // against, so an HTTP caller and a workflow step are held to one contract.
+    // A union rather than one object with a loose `context`, so that an alert investigation is
+    // always backed by alert data: the alert branch accepts no caller context — the handler loads
+    // the alert server-side (through the RAC alerts client, which enforces alert-index
+    // authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
+    // discriminator at the top level, and ours is nested under `subject`, hence a plain union.
     body: z.union([
       z.object({
         subject: z.object({
@@ -50,7 +50,6 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           ...subjectIdAndSummary,
         }),
         concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-        context: alertInvestigationContextSchema,
       }),
       z.object({
         subject: z.object({
@@ -62,14 +61,32 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       }),
     ]),
   }),
-  handler: async ({ request, params, getInvestigationsClient }) => {
+  handler: async ({ request, params, getInvestigationsClient, getAlertsClient }) => {
     const client = getInvestigationsClient(request);
+    const { body } = params;
+
     // User-initiated starts are always manual.
     try {
-      return await client.start({
-        ...params.body,
-        trigger_type: 'manual',
-      });
+      switch (body.subject.type) {
+        case 'alert': {
+          const alertsClient = await getAlertsClient(request);
+          if (!alertsClient) {
+            throw serverUnavailable('Alert lookup is unavailable');
+          }
+          const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
+          return await client.start({
+            subject: body.subject,
+            concurrency_key: body.concurrency_key ?? snapshot.id,
+            context: { alerts: [snapshot] },
+            trigger_type: 'manual',
+          });
+        }
+        case 'significant_event':
+          return await client.start({
+            ...body,
+            trigger_type: 'manual',
+          });
+      }
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

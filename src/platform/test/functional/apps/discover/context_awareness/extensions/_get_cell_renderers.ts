@@ -9,6 +9,10 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_cell_renderers.ts
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI. Asserts custom renderers resolved through the grid actually
+ * render — the resolution happens across profile layers, so a component test would not prove it.
+ */
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';

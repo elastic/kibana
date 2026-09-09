@@ -35,6 +35,88 @@ const SORT_FIELD_TO_COLUMN = Object.fromEntries(
   Object.entries(COLUMN_TO_SORT_FIELD).map(([column, sortField]) => [sortField, column])
 );
 
+/**
+ * Decides whether a `MonitorsTable` instance should adopt the server's
+ * paginated result set or fall back to slicing its own `items` locally.
+ *
+ * `MonitorsTable` is rendered twice: once for the single, whole-result-set
+ * table (which should follow the server's page/total), and once per group
+ * inside `GroupGridItem` with only that group's `items` (which must paginate
+ * itself locally — a group is a subset, never the server's page). Callers
+ * that render a subset must pass `enableServerPagination: false`, otherwise
+ * the group's footer shows the *global* page count and its pager writes the
+ * shared Redux page state, corrupting the ungrouped view's position.
+ */
+export function resolveTablePaginationState({
+  enableServerPagination,
+  items,
+  status,
+  total,
+  pageState,
+  localPageOfItems,
+  localPagination,
+}: {
+  enableServerPagination: boolean;
+  items: OverviewStatusMetaData[];
+  status: { configs?: OverviewStatusMetaData[] | null } | null | undefined;
+  total: number | undefined;
+  pageState: Pick<MonitorOverviewPageState, 'page' | 'perPage'>;
+  localPageOfItems: OverviewStatusMetaData[];
+  localPagination: EuiBasicTableProps<OverviewStatusMetaData>['pagination'];
+}): {
+  isPaginated: boolean;
+  pageOfItems: OverviewStatusMetaData[];
+  pagination: EuiBasicTableProps<OverviewStatusMetaData>['pagination'];
+} {
+  const isPaginated = enableServerPagination && status?.configs != null;
+
+  if (!isPaginated) {
+    return { isPaginated: false, pageOfItems: localPageOfItems, pagination: localPagination };
+  }
+
+  return {
+    isPaginated: true,
+    pageOfItems: items,
+    pagination: {
+      pageIndex: (pageState.page ?? 1) - 1,
+      pageSize: pageState.perPage ?? 20,
+      totalItemCount: total ?? items.length,
+      pageSizeOptions: [10, 20, 50, 100],
+    },
+  };
+}
+
+/**
+ * Map an EUI table `onChange` to overview pageState. EUI always includes the
+ * current `page` on sort clicks, which would otherwise bypass the reducer's
+ * "reset to page 1 on non-pagination changes" guard.
+ */
+export function paginatedTableUpdatesFromCriteria(
+  criteria: Criteria<OverviewStatusMetaData>,
+  current: {
+    sortField: MonitorOverviewPageState['sortField'];
+    sortOrder: MonitorOverviewPageState['sortOrder'];
+  }
+): Partial<MonitorOverviewPageState> {
+  const updates: Partial<MonitorOverviewPageState> = {};
+  if (criteria.page) {
+    updates.page = criteria.page.index + 1;
+    updates.perPage = criteria.page.size;
+  }
+  const nextSort = criteria.sort;
+  if (nextSort) {
+    const mappedSortField = COLUMN_TO_SORT_FIELD[nextSort.field as string];
+    if (mappedSortField) {
+      updates.sortField = mappedSortField;
+      updates.sortOrder = nextSort.direction;
+      if (mappedSortField !== current.sortField || nextSort.direction !== current.sortOrder) {
+        updates.page = 1;
+      }
+    }
+  }
+  return updates;
+}
+
 // Module-level stable empty list so passing it to `useOverviewTrendsRequests`
 // while the flyout is open doesn't churn the effect's dependency identity.
 const EMPTY_ITEMS: OverviewStatusMetaData[] = [];
@@ -42,27 +124,39 @@ const EMPTY_ITEMS: OverviewStatusMetaData[] = [];
 export const MonitorsTable = ({
   items,
   setFlyoutConfigCallback,
+  enableServerPagination = true,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  // Set to `false` when `items` is a subset of the overall result set (e.g. a
+  // single group's monitors) — see `resolveTablePaginationState` above.
+  enableServerPagination?: boolean;
 }) => {
-  const { loaded, status, loading } = useOverviewStatusState();
+  const { loaded, status, loading, total } = useOverviewStatusState();
+
   const {
-    pageOfItems,
-    pagination,
-    onTableChange: onPaginationChange,
+    pageOfItems: localPageOfItems,
+    pagination: localPagination,
+    onTableChange: onLocalPaginationChange,
   } = useMonitorsTablePagination({
     totalItems: items,
   });
 
+  const pageState = useSelector(selectOverviewPageState);
   const flyoutConfig = useSelector(selectOverviewFlyoutConfig);
   const isFlyoutOpen = Boolean(flyoutConfig?.configId);
-  const { sortField, sortOrder } = useSelector(selectOverviewPageState);
+  const { sortField, sortOrder } = pageState;
 
-  // While the flyout is open we hide the columns that consume trend stats and
-  // the down-history sparkline, so paying for those fetches just feeds caches
-  // the user can't see. Pass an empty stable list to short-circuit the trends
-  // dispatch; the histogram gate is plumbed via `enabled` below.
+  const { isPaginated, pageOfItems, pagination } = resolveTablePaginationState({
+    enableServerPagination,
+    items,
+    status,
+    total,
+    pageState,
+    localPageOfItems,
+    localPagination,
+  });
+
   useOverviewTrendsRequests(isFlyoutOpen ? EMPTY_ITEMS : pageOfItems);
 
   const { columns } = useMonitorsTableColumns({
@@ -86,20 +180,28 @@ export const MonitorsTable = ({
 
   const onTableChange = useCallback(
     (criteria: Criteria<OverviewStatusMetaData>) => {
-      onPaginationChange(criteria);
-      const nextSort = criteria.sort;
-      if (!nextSort) return;
-      const mappedSortField = COLUMN_TO_SORT_FIELD[nextSort.field as string];
-      if (!mappedSortField) return;
-      if (mappedSortField === sortField && nextSort.direction === sortOrder) return;
-      dispatch(
-        setOverviewPageStateAction({
-          sortField: mappedSortField,
-          sortOrder: nextSort.direction,
-        })
-      );
+      if (isPaginated) {
+        dispatch(
+          setOverviewPageStateAction(
+            paginatedTableUpdatesFromCriteria(criteria, { sortField, sortOrder })
+          )
+        );
+      } else {
+        onLocalPaginationChange(criteria);
+        const nextSort = criteria.sort;
+        if (!nextSort) return;
+        const mappedSortField = COLUMN_TO_SORT_FIELD[nextSort.field as string];
+        if (!mappedSortField) return;
+        if (mappedSortField === sortField && nextSort.direction === sortOrder) return;
+        dispatch(
+          setOverviewPageStateAction({
+            sortField: mappedSortField,
+            sortOrder: nextSort.direction,
+          })
+        );
+      }
     },
-    [dispatch, onPaginationChange, sortField, sortOrder]
+    [dispatch, isPaginated, onLocalPaginationChange, sortField, sortOrder]
   );
 
   const getRowProps = useCallback(

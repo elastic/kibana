@@ -66,6 +66,12 @@ const floorWorkers: Worker[] = [
     id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
     name: 'Attack Discovery',
     watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID],
+    // The only schedule-driven Worker, so the only one whose settings carry an interval.
+    settings: {
+      workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      autonomy: 'manual',
+      scheduleInterval: '24h',
+    },
   }),
 ];
 
@@ -148,6 +154,21 @@ describe('WatchDetailPage', () => {
     }
 
     expect(screen.queryByTestId('pndCandidateLimit')).not.toBeInTheDocument();
+  });
+
+  it('shows the schedule control only for the Worker that owns a schedule', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    const attackDiscovery = screen.getByTestId(
+      `pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    const alertTriage = screen.getByTestId(
+      `pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+    );
+
+    expect(within(attackDiscovery).getByTestId('pndScheduleIntervalValue')).toHaveValue(24);
+    expect(within(attackDiscovery).getByTestId('pndScheduleIntervalUnit')).toHaveValue('h');
+    expect(within(alertTriage).queryByTestId('pndScheduleIntervalField')).not.toBeInTheDocument();
   });
 
   it('shows Dark Watch with one Worker that has enablement and autonomy', () => {

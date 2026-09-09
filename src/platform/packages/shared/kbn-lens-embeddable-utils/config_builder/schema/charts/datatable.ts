@@ -137,7 +137,7 @@ const datatableStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'datatableDensity',
+        id: 'visDatatableDensity',
         description: 'Density configuration for the datatable.',
       }),
     /**
@@ -169,7 +169,7 @@ const datatableStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'datatableStyling',
+    id: 'visDatatableStyling',
     title: 'Datatable styling',
     description: 'Visual chart styling options',
   });
@@ -383,7 +383,7 @@ export const datatableConfigSchemaNoESQL = z
     }
   })
   .meta({
-    id: 'datatableNoESQL',
+    id: 'visDatatableNoESQL',
     title: 'Datatable (DSL)',
     description: 'Datatable state configuration for standard queries',
   });
@@ -401,7 +401,7 @@ export const datatableConfigSchemaESQL = z
     metrics: z
       .array(
         esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
-          id: 'datatableESQLMetric',
+          id: 'visDatatableESQLMetric',
           title: 'Datatable Metric (ES|QL)',
         })
       )
@@ -445,7 +445,7 @@ export const datatableConfigSchemaESQL = z
     }
   })
   .meta({
-    id: 'datatableESQL',
+    id: 'visDatatableESQL',
     title: 'Datatable (ES|QL)',
     description: 'Datatable state configuration for ES|QL queries',
   });
@@ -453,7 +453,7 @@ export const datatableConfigSchemaESQL = z
 export const datatableConfigSchema = z
   .union([datatableConfigSchemaNoESQL, datatableConfigSchemaESQL])
   .meta({
-    id: 'datatableChart',
+    id: 'visDatatableChart',
     title: 'Datatable',
     description: 'Datatable chart configuration: DSL or ES|QL query based',
   });

@@ -15,6 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
@@ -40,6 +41,17 @@ import type {
 export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
+export interface InlineAppHeaderState {
+  title?: AppHeaderTitle;
+}
+
+/** @internal */
+export interface InlineAppHeaderRegistration {
+  update(title?: AppHeaderTitle): void;
+  unregister(): void;
+}
+
+/** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
    * Dependencies used by Chrome-owned React components that live outside
@@ -49,6 +61,7 @@ export interface InternalChromeStart extends ChromeStart {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
     readonly capabilities: Capabilities;
+    readonly docTitleParts$: Observable<readonly string[]>;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -164,8 +177,8 @@ export interface InternalChromeStart extends ChromeStart {
 
   /** Whether the active app currently mounts an inline `AppHeader`. */
   inlineAppHeader: {
-    set(mounted: boolean): void;
-    get$(): Observable<boolean>;
+    get$(): Observable<InlineAppHeaderState | undefined>;
+    register(title?: AppHeaderTitle): InlineAppHeaderRegistration;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

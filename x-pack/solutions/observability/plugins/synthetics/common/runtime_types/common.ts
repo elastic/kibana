@@ -7,9 +7,14 @@
 
 import * as t from 'io-ts';
 import type { Either } from 'fp-ts/Either';
-import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { ConfigKey } from '../constants/monitor_management';
+import {
+  inlineScriptIsFullJourneyMessage,
+  inlineScriptMissingStepMessage,
+  inlineScriptNotAStringMessage,
+  invalidNamespaceMessage,
+  nonEmptyFieldMessage,
+} from './validation_messages';
 
 export const NameSpaceString = new t.Type<string, string, unknown>(
   'NameSpaceString',
@@ -18,14 +23,7 @@ export const NameSpaceString = new t.Type<string, string, unknown>(
     if (typeof input === 'string') {
       const { error, valid } = isValidNamespace(input, true);
       if (!valid) {
-        return t.failure(
-          input,
-          context,
-          i18n.translate('xpack.synthetics.namespaceValidation.error', {
-            defaultMessage: 'Invalid namespace: {error}',
-            values: { error },
-          })
-        );
+        return t.failure(input, context, invalidNamespaceMessage(error));
       }
 
       return t.success(input);
@@ -59,11 +57,7 @@ export const getNonEmptyStringCodec = (fieldName: string) => {
       if (typeof input === 'string' && input.trim() !== '') {
         return t.success(input);
       } else {
-        return t.failure(
-          input,
-          context,
-          `Invalid field "${fieldName}", must be a non-empty string.`
-        );
+        return t.failure(input, context, nonEmptyFieldMessage(fieldName));
       }
     },
     t.identity
@@ -77,27 +71,11 @@ export const InlineScriptString = new t.Type<string, string, unknown>(
     if (typeof input === 'string' && input.trim() !== '') {
       // return false if script contains import or require statement
       if (input.includes('journey(')) {
-        return t.failure(
-          input,
-          context,
-          i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid.type', {
-            defaultMessage:
-              '{keyName}: Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
-            values: { keyName: ConfigKey.SOURCE_INLINE },
-          })
-        );
+        return t.failure(input, context, inlineScriptIsFullJourneyMessage());
       }
       // should contain at least one step definition
       if (!input.includes('step(')) {
-        return t.failure(
-          input,
-          context,
-          i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid.oneStep.type', {
-            defaultMessage:
-              '{keyName}: Monitor script is invalid. Inline scripts must contain at least one step definition.',
-            values: { keyName: ConfigKey.SOURCE_INLINE },
-          })
-        );
+        return t.failure(input, context, inlineScriptMissingStepMessage());
       }
 
       return t.success(input);
@@ -105,11 +83,7 @@ export const InlineScriptString = new t.Type<string, string, unknown>(
       if (typeof input === 'string' && input.trim() === '') {
         return t.success(input);
       }
-      return t.failure(
-        input,
-        context,
-        `${ConfigKey.SOURCE_INLINE}: Inline script must be a non-empty string`
-      );
+      return t.failure(input, context, inlineScriptNotAStringMessage());
     }
   },
   t.identity

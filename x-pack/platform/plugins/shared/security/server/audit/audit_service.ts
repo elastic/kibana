@@ -250,15 +250,9 @@ export const createLoggingConfig =
         ? {
             ...baseAppender,
             transformAttributes: applyAuditOtelFieldMap,
-            // Slim the resource to the configured attributes — the appender's own `attributes` plus
-            // the audit service.name/service.type — dropping the detectors' host/OS/process/env
-            // fields. The allowlist also keeps the promoted keys (AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            // e.g. project.id): they must survive in the resource because log delivery reads them
-            // there, in addition to being copied into per-record attributes below.
-            includeResources: [
-              ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
-              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            ],
+            // Only service identity belongs in the resource. Promotion captures project.id and
+            // other configured keys before filtering, so they remain available on each record.
+            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
             promoteResourceAttributes: [
               ...(baseAppender.promoteResourceAttributes ?? []),
               ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,

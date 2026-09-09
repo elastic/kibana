@@ -76,6 +76,13 @@ export const EDIT_DATASET_BUTTON = i18n.translate('xpack.evals.datasetDetail.edi
   defaultMessage: 'Edit dataset details',
 });
 
+export const COPY_DATASET_BUTTON = i18n.translate(
+  'xpack.evals.datasetDetail.copyDatasetButtonLabel',
+  {
+    defaultMessage: 'Copy dataset',
+  }
+);
+
 export const EDIT_DATASET_MODAL_TITLE = i18n.translate(
   'xpack.evals.datasetDetail.editDatasetModalTitle',
   {
@@ -93,6 +100,13 @@ export const DELETE_DATASET_BUTTON = i18n.translate(
 export const ADD_EXAMPLE_BUTTON = i18n.translate('xpack.evals.datasetDetail.addExampleButton', {
   defaultMessage: 'Add example',
 });
+
+export const IMPORT_FILE_BUTTON = i18n.translate(
+  'xpack.evals.importDatasetFlyout.datasetDetailButtonLabel',
+  {
+    defaultMessage: 'Import file',
+  }
+);
 
 export const COLUMN_EXAMPLE_ID = i18n.translate('xpack.evals.datasetDetail.columns.exampleId', {
   defaultMessage: 'Example ID',

@@ -34,6 +34,10 @@ import {
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
 } from './saved_objects';
 import { SavedObjectInvestigationRepository } from './storage';
+import {
+  registerInvestigationReconciliationTask,
+  scheduleInvestigationReconciliationTask,
+} from './tasks/investigation_reconciliation_task';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -56,6 +60,7 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
+  private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private savedObjects?: CoreStart['savedObjects'];
 
   constructor(ctx: PluginInitializerContext) {
@@ -71,6 +76,13 @@ export class NightshiftInvestigationsPlugin
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+
+    registerInvestigationReconciliationTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('investigation_reconciliation'),
+      getWorkflowsManagement: () => this.workflowsManagement,
+    });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
       createTriggerEmitter({
@@ -108,6 +120,8 @@ export class NightshiftInvestigationsPlugin
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
           getTriggerEmitter,
+          getAlertsClient: (request: KibanaRequest) =>
+            this.ruleRegistry?.getRacClientWithRequest(request),
         },
         core,
         logger: this.logger,
@@ -128,6 +142,7 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -147,6 +162,12 @@ export class NightshiftInvestigationsPlugin
         this.logger.error(
           `Failed to install nightshift investigations managed workflows: ${err.message}`
         );
+      });
+    }
+
+    if (this.workflowsManagement) {
+      scheduleInvestigationReconciliationTask({ taskManager: plugins.taskManager }).catch((err) => {
+        this.logger.error(`Failed to schedule investigation reconciliation task: ${err.message}`);
       });
     }
 

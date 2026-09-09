@@ -38,8 +38,8 @@ import {
   isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
 

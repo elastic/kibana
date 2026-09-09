@@ -9,7 +9,10 @@
 
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_WORKER_MANAGEMENT } from './constants';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
-import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
+import {
+  renderScheduledWorkerYaml,
+  type ScheduledWorkerTemplateValues,
+} from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID =
@@ -20,7 +23,7 @@ export const PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
   id: PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: PND_WORKER_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
+  version: 2,
+  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+    renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;

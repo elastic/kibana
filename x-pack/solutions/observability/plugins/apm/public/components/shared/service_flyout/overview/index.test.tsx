@@ -20,6 +20,7 @@ let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransacti
   null;
 
 const mockUseServiceFlyoutContext = jest.fn();
+const mockUseProjectRouting = jest.fn<string | undefined, []>(() => undefined);
 jest.mock('../service_flyout_context', () => ({
   useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
@@ -30,7 +31,7 @@ jest.mock('../hooks/use_service_has_system_metrics', () => ({
 
 // Avoid pulling the real plugin module (heavy import graph) into this test.
 jest.mock('../hooks/use_project_routing', () => ({
-  useProjectRouting: () => undefined,
+  useProjectRouting: () => mockUseProjectRouting(),
 }));
 
 jest.mock('@kbn/apm-ui-shared', () => ({
@@ -101,6 +102,7 @@ function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseProjectRouting.mockReturnValue(undefined);
   transactionsSectionProps = null;
 });
 
@@ -239,6 +241,21 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     renderOverview({ refreshToken: 42 });
 
     expect(transactionsSectionProps?.refreshToken).toBe(42);
+  });
+
+  it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
+    mockUseProjectRouting.mockReturnValue('_alias:*');
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(transactionsSectionProps?.projectRouting).toBe('_alias:*');
+  });
+
+  it('forwards undefined projectRouting when CPS routing is unset', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(transactionsSectionProps?.projectRouting).toBeUndefined();
   });
 });
 

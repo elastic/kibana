@@ -8,7 +8,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { ExportJSONActionApi } from './export_json_action';
 import { ExportJSONAction } from './export_json_action';
 import * as ExportJsonFlyout from '../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout';
@@ -45,6 +45,7 @@ describe('Export JSON action', () => {
         serializeState: jest.fn().mockReturnValue({ rawState: { key: 'value' } }),
         applySerializedState: jest.fn(),
         anyStateChange$: new BehaviorSubject<void>(undefined),
+        latestState$: of({ key: 'value' }),
       },
     };
   });

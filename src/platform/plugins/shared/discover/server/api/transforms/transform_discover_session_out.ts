@@ -17,7 +17,7 @@ import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
 import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
-import { transformVisContextOut } from './transform_vis_context';
+import { toApiVisContext } from '../../../common/session/vis_context';
 
 export const transformDiscoverSessionOut = (
   attributes: DiscoverSessionAttributes,
@@ -36,7 +36,7 @@ export const transformDiscoverSessionOut = (
         tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
       );
       const apiTab = omitInlineDataViewIdFromFilters(transformedTab, inlineDataViewId);
-      const visContext = transformVisContextOut(tab.attributes.visContext);
+      const visContext = toApiVisContext(tab.attributes.visContext);
       const { panels: controlPanels, warnings: controlPanelWarnings } = transformControlPanelsOut(
         tab.attributes.controlGroupJson,
         tab.id

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI. Asserts the profile default query lands in the Monaco editor
+ * after a query-mode switch and re-navigation — that sequencing needs a real session.
+ */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

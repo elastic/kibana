@@ -16,7 +16,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { WatchAutonomyLevel, Worker } from '../components/watch_settings.gen';
+import {
+  WatchAutonomyLevel,
+  WorkerScheduleInterval,
+  Worker,
+} from '../components/watch_settings.gen';
 
 export const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
@@ -40,6 +44,10 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
      */
     settingsRevision: z.number().int().min(0).nullable().optional(),
     autonomyLevel: WatchAutonomyLevel.optional(),
+    /**
+     * New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule.
+     */
+    scheduleInterval: WorkerScheduleInterval.optional(),
   })
 );
 export type UpdateWorkerRequestBody = z.infer<typeof UpdateWorkerRequestBody>;

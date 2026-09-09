@@ -28,45 +28,70 @@ export interface UseGenAiDataResult {
   isGenAiSpan: boolean;
   /** True while long message values are being fetched from `_source`. */
   loading: boolean;
+  /**
+   * True when message values are absent and cannot be recovered because the
+   * record has no `_id`/`_index` to refetch by — an ES|QL row queried without
+   * `METADATA _id, _index`.
+   */
+  unrecoverableLongFields: boolean;
 }
 
 /**
- * Derives GenAI fields from a doc viewer record.
+ * Derives GenAI fields from a doc viewer record, restoring long message values
+ * that `ignore_above: 1024` dropped from the index but left in `_source`.
  *
- * The `attributes.*` keyword mappings use `ignore_above: 1024`, so long
- * prompt/response values are dropped from the fields API (and flagged in
- * `_ignored`) while surviving in `_source`. This hook restores them in two
- * steps:
- * 1. merge from `hit.raw._source` when the record carries it (e.g. hits built
- *    from the APM span route or the single-doc page), then
- * 2. when `_source` is absent (Discover grid records are fetched with
- *    `_source: false`), run a targeted search for just those fields.
+ * Values are read from `hit.raw._source` when the record carries it, otherwise
+ * refetched by `_id`. Arming that refetch differs by data source: in DSL
+ * `_ignored` is authoritative, while ES|QL rows carry it only with
+ * `METADATA _ignored` — and refetching at all needs `METADATA _id, _index`.
  */
-export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataResult {
+export function useGenAiData({
+  hit,
+  isEsqlMode = false,
+}: {
+  hit: DataTableRecord;
+  isEsqlMode?: boolean;
+}): UseGenAiDataResult {
   const { metadata, missingLongFields } = useMemo(() => {
     const merged: Record<string, unknown> = { ...hit.flattened };
-    const ignored = hit.raw._ignored ?? [];
+    // castArray because ES|QL returns a single-valued `_ignored` column as a
+    // bare string, which would break the `.some()` below.
+    const ignoredList = castArray(hit.raw._ignored ?? []);
     const missing: string[] = [];
 
+    const isIgnored = (fieldName: string) =>
+      ignoredList.includes(fieldName) ||
+      // Container-level entry, e.g. `['attributes']` for `attributes.gen_ai.*`.
+      ignoredList.some((ancestor) => fieldName.startsWith(`${ancestor}.`));
+
+    // ES|QL rows carry every requested column as a key, so a present-but-empty
+    // `_ignored` proves nothing was dropped; only its absence is inconclusive.
+    const ignoredUnknown = isEsqlMode && !('_ignored' in hit.raw);
+
     for (const fieldName of GEN_AI_LONG_MESSAGE_FIELDS) {
-      if (merged[fieldName] == null || ignored.includes(fieldName)) {
+      // `ignoredUnknown` also enters here for a present value: these fields are
+      // multi-valued and `ignore_above` drops only the over-long elements, so
+      // without `_ignored` a non-null array cannot be assumed complete.
+      if (merged[fieldName] == null || isIgnored(fieldName) || ignoredUnknown) {
         const sourceValue = getFieldFromSource(hit.raw._source, fieldName);
         if (sourceValue != null) {
           merged[fieldName] = castArray(sourceValue);
-        } else if (ignored.includes(fieldName)) {
+        } else if (isIgnored(fieldName) || ignoredUnknown) {
           missing.push(fieldName);
         }
       }
     }
 
     return { metadata: merged, missingLongFields: missing };
-  }, [hit]);
+  }, [hit, isEsqlMode]);
 
   const isGenAiSpan = useMemo(() => hasGenAiData(metadata), [metadata]);
 
   const docId = hit.raw._id;
   const docIndex = hit.raw._index;
-  const shouldFetch = isGenAiSpan && missingLongFields.length > 0 && !!docId && !!docIndex;
+  const hasMissing = isGenAiSpan && missingLongFields.length > 0;
+  const shouldFetch = hasMissing && !!docId && !!docIndex;
+  const unrecoverableLongFields = hasMissing && (!docId || !docIndex);
 
   const { value: fetchedSource, loading } = useAbortableAsync(
     async ({ signal }) => {
@@ -108,6 +133,9 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
       for (const fieldName of missingLongFields) {
         const sourceValue = getFieldFromSource(fetchedSource, fieldName);
         if (sourceValue != null) {
+          // Replaces the whole field: synthetic `_source` returns multi-valued
+          // keywords sorted and de-duplicated, so elements cannot be aligned
+          // with the partially-indexed value.
           merged[fieldName] = castArray(sourceValue);
         }
       }
@@ -116,5 +144,5 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
     return getGenAiFields(merged);
   }, [isGenAiSpan, metadata, fetchedSource, missingLongFields]);
 
-  return { genAi, isGenAiSpan, loading: shouldFetch && loading };
+  return { genAi, isGenAiSpan, loading: shouldFetch && loading, unrecoverableLongFields };
 }

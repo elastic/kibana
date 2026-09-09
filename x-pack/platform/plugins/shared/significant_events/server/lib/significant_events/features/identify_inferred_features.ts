@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamType } from '@kbn/streams-schema';
+import type { StreamType, Streams } from '@kbn/streams-schema';
 import {
   type Feature,
   type FeatureUpsert,
@@ -25,7 +25,8 @@ import {
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
-} from '@kbn/streams-ai';
+  type AnalysisTarget,
+} from '@kbn/nightshift-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
@@ -50,6 +51,7 @@ import { createInferenceToolsFromAgentBuilder } from '../../agent_builder/infere
 
 export { findSimilarFeatures } from './feature_similarity_search';
 import { buildFeatureSimilarityInferenceTools } from './feature_similarity_search';
+import { streamToAnalysisTarget } from '../stream_to_analysis_target';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 
@@ -297,6 +299,7 @@ async function tryIdentifyFeatures(
 interface RunInferredIterationOptions {
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
+  target: AnalysisTarget;
   runId: string;
   allFeatures: Feature[];
   discoveredFeatures: Feature[];
@@ -337,6 +340,7 @@ interface InferredIterationResult {
 async function runInferredIteration({
   kiClient,
   streamName,
+  target,
   runId,
   allFeatures,
   discoveredFeatures,
@@ -380,7 +384,7 @@ async function runInferredIteration({
     .map(toFeatureProjection);
 
   const inferResult = await tryIdentifyFeatures({
-    streamName,
+    target,
     sampleDocuments: documents,
     excludedFeatures: excludedSummaries,
     inferenceClient,
@@ -449,6 +453,7 @@ export interface IdentifyInferredFeaturesOptions {
   signal: AbortSignal;
   streamName: string;
   streamType: StreamType;
+  definition: Streams.all.Definition;
   runId: string;
   documents: InferenceDocument[];
   totalFilters: number;
@@ -479,6 +484,7 @@ export async function identifyInferredFeatures({
   signal,
   streamName,
   streamType,
+  definition,
   runId,
   documents,
   totalFilters,
@@ -570,6 +576,7 @@ export async function identifyInferredFeatures({
   const iterationResult = await runInferredIteration({
     kiClient,
     streamName,
+    target: streamToAnalysisTarget(definition),
     runId,
     allFeatures,
     discoveredFeatures,

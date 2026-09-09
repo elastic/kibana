@@ -21,3 +21,20 @@ export const renderCommonWorkerYaml = (
   yaml
     .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
+
+/**
+ * Values for the subset of Workers that own a scheduled trigger. Kept out of
+ * CommonWorkerTemplateValues because alert- and event-driven Workers have no schedule at all.
+ */
+export interface ScheduledWorkerTemplateValues extends CommonWorkerTemplateValues {
+  scheduleInterval: string;
+}
+
+export const renderScheduledWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_SCHEDULE_INTERVAL__',
+    values.scheduleInterval
+  );

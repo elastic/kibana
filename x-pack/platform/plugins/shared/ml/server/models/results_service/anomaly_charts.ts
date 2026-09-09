@@ -1241,13 +1241,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         };
       });
 
-    if (mapData.length) {
-      // push map data in if it's available
-      // @ts-ignore
-      seriesToPlot.push(...mapData);
-    }
-
-    data.seriesToPlot = seriesToPlot;
+    data.seriesToPlot = mapData.length
+      ? [
+          ...seriesToPlot,
+          ...mapData.map((series) => ({
+            ...series,
+            plotEarliest: chartRange.min,
+            plotLatest: chartRange.max,
+          })),
+        ]
+      : seriesToPlot;
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {

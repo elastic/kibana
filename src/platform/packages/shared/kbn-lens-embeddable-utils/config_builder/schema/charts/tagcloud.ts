@@ -66,7 +66,7 @@ const tagcloudStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'tagcloudStyling',
+    id: 'visTagcloudStyling',
     title: 'Tag cloud styling',
     description: 'Visual chart styling options',
   });
@@ -91,7 +91,7 @@ export const tagcloudConfigSchemaNoESQL = z
     ),
   })
   .meta({
-    id: 'tagcloudNoESQL',
+    id: 'visTagcloudNoESQL',
     title: 'Tag Cloud Chart (DSL)',
     description: 'Tag Cloud configuration using a data view.',
   });
@@ -113,7 +113,7 @@ export const tagcloudConfigSchemaESQL = z
     tag_by: esqlColumnWithFormatSchema.extend(tagcloudConfigTagsByOptionsShape),
   })
   .meta({
-    id: 'tagcloudESQL',
+    id: 'visTagcloudESQL',
     title: 'Tag Cloud Chart (ES|QL)',
     description: 'Tag Cloud configuration using an ES|QL query.',
   });
@@ -121,7 +121,7 @@ export const tagcloudConfigSchemaESQL = z
 export const tagcloudConfigSchema = z
   .union([tagcloudConfigSchemaNoESQL, tagcloudConfigSchemaESQL])
   .meta({
-    id: 'tagcloudChart',
+    id: 'visTagcloudChart',
     title: 'Tag Cloud Chart',
     description: 'A word cloud with terms sized by metric value.',
   });

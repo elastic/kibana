@@ -27,6 +27,17 @@ export type WatchAutonomyLevelEnum = typeof WatchAutonomyLevel.enum;
 export const WatchAutonomyLevelEnum = WatchAutonomyLevel.enum;
 
 /**
+ * Interval between runs for a schedule-driven Worker, as a positive count and a unit of minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled` trigger. Seconds are not supported.
+ */
+export const WorkerScheduleInterval = lazySchema(() =>
+  z
+    .string()
+    .max(6)
+    .regex(/^[1-9][0-9]*[mhd]$/)
+);
+export type WorkerScheduleInterval = z.infer<typeof WorkerScheduleInterval>;
+
+/**
  * Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only — a skill is invoked rather than run continuously, so it has no health of its own.
  */
 export const WorkerRunState = lazySchema(() => z.enum(['ok', 'paused', 'degraded', 'unavailable']));
@@ -238,6 +249,10 @@ export const WorkerSettings = lazySchema(() =>
   z.object({
     workerId: z.string(),
     autonomy: WatchAutonomyLevel,
+    /**
+     * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
+     */
+    scheduleInterval: WorkerScheduleInterval.optional(),
   })
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;

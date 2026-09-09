@@ -22,6 +22,7 @@ import {
   MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
+import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -176,17 +177,23 @@ export class AgentBuilderPlugin
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
-    registerConversationWorkflowSteps(
-      setupDeps.workflowsExtensions,
-      async (request) => {
+    registerConversationWorkflowSteps(setupDeps.workflowsExtensions, {
+      getConversationClient: async (request) => {
         const services = this.serviceManager.internalStart;
         if (!services) {
           throw new Error('Conversation service not available — plugin has not started');
         }
         return services.conversations.getScopedClient({ request });
       },
-      this.isExperimentalEnabled
-    );
+      getAgentRegistry: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Agents service not available — plugin has not started');
+        }
+        return services.agents.getRegistry({ request });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -345,6 +352,7 @@ export class AgentBuilderPlugin
       plugins,
       conversations,
       conversationTemplates,
+      attachments,
     } = startServices;
     const runner = runnerFactory.getRunner();
 
@@ -392,6 +400,16 @@ export class AgentBuilderPlugin
           const agentRegistry = await agents.getRegistry({ request });
           return createConversationPublicClient({ client, agentRegistry });
         },
+      },
+      attachments: {
+        getScopedClient: async ({ request }) =>
+          createAttachmentPublicClient({
+            request,
+            conversationsService: conversations,
+            attachmentsService: attachments,
+            coreStart,
+            spaces,
+          }),
       },
       conversationTemplates,
     };

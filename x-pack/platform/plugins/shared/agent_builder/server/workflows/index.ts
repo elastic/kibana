@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { ConversationClient } from '../services/conversation';
-import { conversationStepRegistry } from './registry';
+import { conversationStepRegistry, type ConversationStepDeps } from './registry';
 import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
 
 export function registerConversationWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>,
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
+  deps: ConversationStepDeps
 ) {
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
 
   for (const factory of conversationStepRegistry) {
-    workflowsExtensions.registerStepDefinition(
-      factory(getConversationClient, isExperimentalEnabled)
-    );
+    workflowsExtensions.registerStepDefinition(factory(deps));
   }
 }

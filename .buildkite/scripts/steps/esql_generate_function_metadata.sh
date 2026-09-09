@@ -5,15 +5,43 @@ VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-language"
 EDITOR_PACKAGE_DIR="src/platform/packages/private/kbn-language-documentation"
 SCRIPTS_PACKAGE_DIR="src/platform/packages/private/kbn-esql-scripts"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
+VERSION_BUMPED=false
 
 report_main_step () {
   echo "--- $1"
 }
 
-main () {
-  report_main_step "Bootstrapping Kibana"
+maybe_update_esql_definitions () {
+  local latest
+  local current
 
+  latest=$(npm view @elastic/esql-definitions version 2>/dev/null)
+
+  if [ -z "$latest" ]; then
+    echo "Could not determine latest @elastic/esql-definitions version; skipping version bump."
+    return
+  fi
+
+  current=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql'])")
+
+  if [ "$latest" == "$current" ]; then
+    echo "@elastic/esql-definitions is already up to date ($current). Skipping version bump."
+    return
+  fi
+
+  echo "@elastic/esql-definitions: $current → $latest. Bumping @elastic/esql in package.json."
+  sed -i "s/\"@elastic\/esql\": \"[^\"]*\"/\"@elastic\/esql\": \"$latest\"/" package.json
+  VERSION_BUMPED=true
+}
+
+main () {
   cd "$KIBANA_DIR"
+
+  report_main_step "Check for @elastic/esql-definitions updates"
+
+  maybe_update_esql_definitions
+
+  report_main_step "Bootstrapping Kibana"
 
   .buildkite/scripts/bootstrap.sh
 
@@ -35,12 +63,14 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet $GIT_SCOPE 
-  if [ $? -eq 0 ]; then
+  git diff --exit-code --quiet $GIT_SCOPE
+  DIFF_EXIT=$?
+  set -e
+
+  if [ $DIFF_EXIT -eq 0 ] && [ "$VERSION_BUMPED" == "false" ]; then
     echo "No differences found. Our work is done here."
     exit
   fi
-  set -e
 
   report_main_step "Differences found. Checking for an existing pull request."
 
@@ -67,6 +97,9 @@ main () {
   git checkout -b "$BRANCH_NAME"
 
   git add $GIT_SCOPE
+  if [ "$VERSION_BUMPED" == "true" ]; then
+    git add package.json yarn.lock
+  fi
   git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."
@@ -74,7 +107,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL'
 }
 
 main

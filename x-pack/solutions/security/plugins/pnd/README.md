@@ -17,6 +17,15 @@ Workers install when a user enables one or saves settings on one. There is no Wa
 
 Restart Kibana after changing config, then open `/app/pnd` (or use the Security left rail).
 
+To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
+
+```yaml
+uiSettings.overrides:
+  workflows:ui:showManagedWorkflows: true
+```
+
+This is optional. PND's own Watch pages work without it; it only affects what the Workflows UI lists (default `false`).
+
 ### When disabled (`xpack.pnd.enabled: false`) — no production pollution
 
 | Surface | Behavior |
@@ -151,10 +160,54 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 4. Enablement is lifecycle state: templates start with `enabled: false`, and PND enables the installed per-space document through the request-authorized Workflows update API. After any settings install, PND also calls that CRUD path so Task Manager resyncs.
 5. Treat stored values as untrusted old data. `migrate` validates the shape, returns the complete current value set, and sets `migrated: true` whenever PND must reinstall it. Reads and PATCHes run `migrate()`; startup does not enumerate documents before `ready()`.
 6. Keep `applyPatch` limited to fields already present on `UpdateWorkerRequestBody`. New Worker-specific shapes require agreement before extending the OpenAPI contract.
-7. `toSettings` projects stored values into `WorkerSettings` (`workerId`, `autonomy`).
+7. `toSettings` projects stored values into `WorkerSettings` (`workerId`, `autonomy`, and `scheduleInterval` for schedule-driven Workers).
 8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Imported YAML changes require an explicit managed-definition version decision.
 
 The Workers service owns per-space installation, reading persisted values, enable/disable, and upgrades. Settings responses carry the logical workflow version, and settings patches return HTTP 409 when a fresh read shows that version was already stale. This is best-effort detection rather than an atomic write guard.
+
+### Scheduled Workers
+
+Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
+
+`system-security-floor-attack-discovery` is the only scheduled Worker today.
+
+The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
+
+To give another Worker a schedule:
+
+1. **`<worker>.yaml`** — add a `scheduled` trigger. Keep `manual` alongside it if the Worker should also support on-demand runs; the scheduler reads only scheduled triggers.
+
+   ```yaml
+   triggers:
+     - type: scheduled
+       with:
+         every: "__WORKER_SCHEDULE_INTERVAL__"
+     - type: manual
+   consts:
+     worker_settings:
+       scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+   ```
+
+2. **`<worker>.ts`** — swap the template type and renderer, and bump the definition `version`:
+
+   ```ts
+   import { renderScheduledWorkerYaml, type ScheduledWorkerTemplateValues } from './worker_template_values';
+
+   version: 2,
+   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+     renderScheduledWorkerYaml(WORKER_YAML, values),
+   } as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
+   ```
+
+3. **`server/managed_workflows/workers/worker_settings.ts`** — add one entry to `WORKER_SCHEDULE_DEFAULTS` with the Worker's default interval. Presence in that map is the opt-in: it drives `createDefaultValues`, the `toSettings` projection, and whether an interval PATCH is applied or rejected with a 400.
+
+Nothing changes in the API schema or the UI. `scheduleInterval` is already optional on `WorkerSettings` and `UpdateWorkerRequestBody`, and the interval control renders purely off the field's presence in the payload. `WORKER_SETTINGS_VERSIONS` does not change either — the field is additive with a default, so an install predating it reads correctly with no migration.
+
+Tests to update:
+
+- `managed_workflow_definitions.test.ts` — add `scheduleInterval` to the Worker's `templateRepresentativeValuesById` entry, and update its fingerprint row to `<newVersion>:<newHash>` (the failure message prints the hash).
+- `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry to `triggerType: 'scheduled'` and its `scheduleInterval`. That assertion compares the Worker's full trigger list, so widen it if the Worker keeps `manual` too.
+- `worker_settings.test.ts` — `UNSCHEDULED_WORKER_IDS` excludes only Attack Discovery today; add the new Worker so the "rejects an interval patch" cases stop running against it.
 
 ## Working-group contribution map
 

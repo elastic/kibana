@@ -108,7 +108,7 @@ export function runCli() {
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
-        await Tasks.yarnInstall(context);
+        await Tasks.installDependencies(context);
 
         if (skipArchive !== true) {
           await Tasks.createArchive(context);

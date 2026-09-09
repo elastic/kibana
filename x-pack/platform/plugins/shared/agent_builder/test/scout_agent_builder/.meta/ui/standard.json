@@ -1,5 +1,5 @@
 {
-  "sha1": "593fc7ac82518ac3f5a41bc3e75f616041ed6dda",
+  "sha1": "92f7c2f6abfd417cbfdd0db4b3e7d93284342dd5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -535,7 +535,7 @@
     {
       "id": "4f72c4b1347af9c-dccba25ad811936",
       "title": "Agent Builder — sidebar conversation history embeddable sidebar conversation history",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -545,7 +545,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_history.spec.ts",
         "line": 36,
-        "column": 7
+        "column": 13
       }
     },
     {

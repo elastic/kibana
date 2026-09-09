@@ -81,3 +81,23 @@ export interface InvestigationRepository {
     query: FindInvestigationsQuery<Fields>
   ): Promise<FindInvestigationsResult<Fields>>;
 }
+
+export type FindInvestigationsAcrossSpacesResult<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> = PaginatedResponse<{ investigation: ProjectedInvestigationRecord<Fields>; spaceId: string }>;
+
+/**
+ * Reads and writes investigations in every space at once, for background work that runs without a
+ * request and therefore cannot be scoped to one space the way {@link InvestigationRepository} is.
+ */
+export interface InvestigationSweepRepository {
+  findAcrossSpaces<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsAcrossSpacesResult<Fields>>;
+  updateInSpace(params: {
+    id: string;
+    spaceId: string;
+    patch: InvestigationPatch;
+    version?: string;
+  }): Promise<void>;
+}

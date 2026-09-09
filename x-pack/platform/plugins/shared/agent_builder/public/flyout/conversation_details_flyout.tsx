@@ -128,7 +128,7 @@ export const ConversationDetailsFlyoutContent = ({
         </EuiTab>
       ))}
     >
-      {SelectedTabContent && (
+      {selectedTab && SelectedTabContent && (
         <SelectedTabContent key={selectedTab.id} conversation={conversation} />
       )}
     </FlyoutFrame>

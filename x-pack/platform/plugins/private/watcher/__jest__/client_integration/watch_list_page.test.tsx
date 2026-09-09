@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import * as fixtures from '../../__fixtures__';
 import { getRandomString } from '@kbn/test-jest-helpers';
@@ -133,11 +135,14 @@ describe('<WatchListPage />', () => {
         });
 
         test('should set the correct app title', () => {
-          expect(screen.getByTestId('appTitle')).toHaveTextContent('Watcher');
+          expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Watcher');
         });
 
-        test('should have a link to the documentation', () => {
-          expect(screen.getByTestId('documentationLink')).toHaveTextContent('Watcher docs');
+        test('should have a link to the documentation', async () => {
+          await openAppMenuOverflow();
+          expect(
+            await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+          ).toBeInTheDocument();
         });
 
         test('should list them in the table', async () => {
@@ -153,8 +158,8 @@ describe('<WatchListPage />', () => {
           });
         });
 
-        test('should have a button to create a watch', () => {
-          expect(screen.getByTestId('createWatchButton')).toBeInTheDocument();
+        test('should have a button to create a watch', async () => {
+          expect(await screen.findByTestId('createWatchButton')).toBeInTheDocument();
         });
 
         test('should have a link to view watch details', () => {

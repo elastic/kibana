@@ -13,7 +13,7 @@ import {
   DEFAULT_INFERENCE_DOCUMENT_LIMITS,
   formatRawDocument,
   type InferenceDocument,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 

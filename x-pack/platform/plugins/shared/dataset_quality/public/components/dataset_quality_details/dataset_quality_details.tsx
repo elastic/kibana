@@ -53,12 +53,7 @@ export default function DatasetQualityDetails() {
     <>
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
         <EuiFlexItem grow={false}>
-          {view === 'dataQuality' && (
-            <>
-              <Header />
-              <EuiHorizontalRule />
-            </>
-          )}
+          {view === 'dataQuality' && <Header />}
           <Overview openAlertFlyout={() => setRuleType(DEGRADED_DOCS_RULE_TYPE_ID)} />
           {view === 'dataQuality' && (
             <>

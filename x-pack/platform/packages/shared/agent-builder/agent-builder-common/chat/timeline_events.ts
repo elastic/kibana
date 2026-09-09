@@ -138,6 +138,8 @@ export interface PromptResponseEventData {
   prompt_requested_event_id: string;
   /** The responses, keyed by prompt id. */
   responses: Record<string, PromptResponse>;
+  /** Resume input lives here because a resume has no user_message event. */
+  input?: RoundInput;
 }
 export type PromptResponseEvent = BaseTimelineEvent<
   TimelineEventType.promptResponse,

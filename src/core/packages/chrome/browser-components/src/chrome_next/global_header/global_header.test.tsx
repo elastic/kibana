@@ -125,4 +125,20 @@ describe('ChromeNextGlobalHeader', () => {
     expect(screen.queryByTestId('helpMenuWhatsNewUnreadIndicator')).not.toBeInTheDocument();
     expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
   });
+
+  it('does not announce project breadcrumbs', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'Should not be announced' }]);
+    chrome.project.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    chrome.next.inlineAppHeader.register('Dashboards');
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    const announcer = await screen.findByLabelText('Page change announcements');
+    expect(announcer).not.toHaveTextContent('Should not be announced');
+  });
 });

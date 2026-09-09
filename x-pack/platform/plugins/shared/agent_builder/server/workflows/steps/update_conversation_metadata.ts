@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import {
   updateConversationMetadataStepCommonDefinition,
   type UpdateConversationMetadataStepInput,
 } from '../../../common/workflows/steps/update_conversation_metadata';
-import type { ConversationClient } from '../../services/conversation/client';
+import type { ConversationStepDeps } from '../registry';
 
-export const updateConversationMetadataStepDefinition = (
-  getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>,
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
-) =>
+export const updateConversationMetadataStepDefinition = ({
+  getConversationClient,
+  isExperimentalEnabled,
+}: ConversationStepDeps) =>
   createServerStepDefinition({
     ...updateConversationMetadataStepCommonDefinition,
     handler: async (context: StepHandlerContext) => {

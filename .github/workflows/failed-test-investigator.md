@@ -38,13 +38,30 @@ if: >-
   || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
 concurrency:
-  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  # Keep one investigation lane per issue. Events that can't activate this workflow still
+  # create a run that claims the concurrency group before the `if` above is evaluated, so
+  # with `cancel-in-progress` they would kill an in-flight investigation and then skip
+  # themselves. Give those events their own group suffix:
+  # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
+  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
+  #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'failed-test' &&
         github.event.label.name
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        !(
+          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            contains(github.event.issue.body, '"test.failCount":2,') ||
+            contains(github.event.issue.body, '"test.failCount":2}')
+          )
+        ) &&
+        format('comment-{0}', github.event.comment.id)
       ) ||
       'investigate'
     }}
@@ -123,6 +140,10 @@ safe-outputs:
     # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
     # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+    # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
+    # labels and parks the rest as pending suggestions, so a `medium` verdict added no
+    # labels and `ai:fix-flaky` never fired (https://github.com/github/gh-aw/issues/53654).
+    issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
@@ -144,6 +165,8 @@ safe-outputs:
     target: *issue_number
     required-labels: [failed-test]
     state-reason: not_planned
+    # Same gating as `add-labels`: a `medium` close is parked as a suggestion, not applied.
+    issue-intent: false
 
 strict: false
 timeout-minutes: 35
@@ -233,6 +256,8 @@ Every fix you propose is held to the same guardrails as the fixer and verifier w
 {{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
 
 ## Labels
+
+Label only when `confidence` is `medium` or `high`. A `low`-confidence verdict adds or removes no labels — except `failure:inconclusive` and `failure:insufficient-data`, which exist to record exactly that uncertainty. The comment already surfaces low confidence (see "Comment format").
 
 ### Classification label
 

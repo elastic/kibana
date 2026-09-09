@@ -637,6 +637,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lensPanels: `${ELASTIC_DOCS}explore-analyze/visualize/lens`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,
       vega: `${ELASTIC_DOCS}explore-analyze/visualize/custom-visualizations-with-vega`,
+      customPanels: `${ELASTIC_DOCS}explore-analyze/visualize/custom-panels`,
       tsvbIndexPatternMode: `${ELASTIC_DOCS}explore-analyze/visualize/legacy-editors/tsvb#tsvb-data-view-mode`,
     },
     observability: {
@@ -738,6 +739,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elasticsearchSettings: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings`,
       elasticsearchEnableSecurity: `${ELASTIC_DOCS}deploy-manage/deploy/self-managed/installing-elasticsearch`,
       elasticsearchEnableApiKeys: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings#api-key-service-settings`,
+      esqlDataFederationSecurityPrivileges: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-security#privileges`,
       indicesPrivileges: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#privileges-list-indices`,
       kibanaTLS: `${ELASTIC_DOCS}deploy-manage/security/set-up-basic-security#encrypt-internode-communication`,
       kibanaPrivileges: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges`,

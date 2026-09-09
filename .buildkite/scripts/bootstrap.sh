@@ -21,42 +21,30 @@ if [[ -f pnpm-lock.yaml ]]; then
 fi
 
 # Let's remove the irrelevant cache for the variant:
-if [[ "$USE_PNPM" == true ]]; then
-  echo "--- Removing irrelevant yarn cache"
-  rm -rf "${HOME}/.cache/yarn"
-else
-  echo "--- Removing irrelevant pnpm cache"
-  rm -rf "${PNPM_IMAGE_CACHE}"
-fi
+echo "--- Removing irrelevant yarn cache"
+rm -rf "${HOME}/.cache/yarn"
 
-if [[ "$USE_PNPM" == true ]]; then
-  echo "--- pnpm install and bootstrap"
-  BOOTSTRAP_CMD=(pnpm kbn bootstrap)
-  BOOTSTRAP_LABEL='pnpm kbn bootstrap'
-else
-  echo "--- yarn install and bootstrap"
-  BOOTSTRAP_CMD=(yarn kbn bootstrap)
-  BOOTSTRAP_LABEL='yarn kbn bootstrap'
-fi
+echo "--- pnpm install and bootstrap"
+BOOTSTRAP_CMD=(pnpm kbn bootstrap)
+BOOTSTRAP_LABEL='pnpm kbn bootstrap'
 
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
 
-# Use packages baked into the agent image as a cache, but only when the workspace
-# is not on local ssd or in memory — moving many small files between disks is
-# slower than extracting/linking from the package manager cache.
+# Use the packages that are baked into the agent image, if they exist, as a cache
+# But only for agents not mounting the workspace on a local ssd or in memory
+# It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
-  if [[ "$USE_PNPM" == true ]]; then
-    copy_first_available ./node_modules "${PNPM_IMAGE_CACHE}/node_modules"
-    copy_first_available ./.pnpm-store "${PNPM_IMAGE_CACHE}/.pnpm-store"
-    export npm_config_store_dir="${KIBANA_DIR:-$(pwd)}/.pnpm-store"
-  else
-    copy_first_available ./node_modules "${YARN_IMAGE_CACHE}/node_modules"
-    copy_first_available ./.yarn-local-mirror "${YARN_IMAGE_CACHE}/.yarn-local-mirror"
+  if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
+    echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
+    mv ~/.cache/kibana/pnpm/node_modules ./
   fi
-
+  if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
+    echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
+    mv ~/.cache/kibana/pnpm/.pnpm-store ./.pnpm-store
+  fi
   # Check if there's a cache artifact uploaded from a previous step
   if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
     if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
@@ -78,28 +66,26 @@ elif [[ "$(pwd)" == "/dev/shm"* ]]; then
   fi
 fi
 
-if ! ("${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}"); then
+if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
-  # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
-  # So, we should just delete node_modules in between attempts
+  # Delete node_modules in between attempts to prompt a clean install
   rm -rf node_modules
 
-  echo "--- ${BOOTSTRAP_LABEL}, attempt 2"
-  "${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}" --force-install
+  echo "--- pnpm install and bootstrap, attempt 2"
+  pnpm kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  check_for_changed_files "$BOOTSTRAP_LABEL"
+  check_for_changed_files 'pnpm kbn bootstrap'
 fi
 
-# Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
-# Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
+# Drop caches after install to reclaim disk.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
-  if [[ "$USE_PNPM" != true ]]; then
-    echo "--- Removing yarn cache"
-    rm -rf "${HOME}/.cache/yarn"
-  fi
-  df -h . || echo "Failed to get disk space"
+  echo "--- Clearing cache leftovers"
+  # We no longer use this cache
+  (echo 'Removing ~/.kibana and ./.yarn-local-mirror' "${HOME}/.cache/yarn" && \
+    rm -rf ~/.kibana ./.yarn-local-mirror "${HOME}/.cache/yarn" && \
+    df -h .) &
 fi

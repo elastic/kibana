@@ -39,6 +39,7 @@ export {
   WatchWorkerAttachment,
   Worker,
   WorkerRunState,
+  WorkerScheduleInterval,
   WorkerSettings,
 } from './components/watch_settings.gen';
 

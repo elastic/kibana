@@ -25,13 +25,13 @@ import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { useAlertSnooze } from '@kbn/response-ops-alert-snooze';
 import { paths } from '../../../../common/locators/paths';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
 jest.mock('../hooks/use_alert_snooze_state');
-const mockUseInvestigationAvailability = jest.fn(() => true);
-jest.mock('../../../hooks/use_investigation_availability', () => ({
-  useInvestigationAvailability: () => mockUseInvestigationAvailability(),
+jest.mock('../../../hooks/use_investigate_alert', () => ({
+  useInvestigateAlert: jest.fn(),
 }));
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
@@ -68,6 +68,7 @@ const useKibanaMock = useKibana as jest.Mock;
 const useFetchRuleMock = useFetchRule as jest.Mock;
 const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
 const useAlertSnoozeMock = useAlertSnooze as jest.Mock;
+const useInvestigateAlertMock = useInvestigateAlert as jest.Mock;
 const mockCases = casesPluginMock.createStartContract();
 
 const mockHttp = {
@@ -136,7 +137,12 @@ const snoozeStateWithoutInstance = {
 
 describe('Header Actions', () => {
   beforeEach(() => {
-    mockUseInvestigationAvailability.mockReturnValue(true);
+    useInvestigateAlertMock.mockReturnValue({
+      showInvestigateAction: true,
+      handleInvestigate: jest.fn(),
+      isInvestigating: false,
+      investigateActionLabel: 'Investigate',
+    });
     useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
     useAlertSnoozeMock.mockReturnValue({
       snoozeAlert: jest.fn().mockResolvedValue(true),
@@ -203,7 +209,13 @@ describe('Header Actions', () => {
     });
 
     it('starts an investigation from the alert details menu', async () => {
-      mockHttp.post.mockResolvedValue({ investigation_id: 'investigation-1' });
+      const handleInvestigate = jest.fn();
+      useInvestigateAlertMock.mockReturnValue({
+        showInvestigateAction: true,
+        handleInvestigate,
+        isInvestigating: false,
+        investigateActionLabel: 'Investigate',
+      });
       const { findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
@@ -217,15 +229,16 @@ describe('Header Actions', () => {
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       fireEvent.click(await findByTestId('alertDetailsInvestigate'));
 
-      await waitFor(() => {
-        expect(mockHttp.post).toHaveBeenCalledWith(
-          `/internal/observability/alerts/${mockAlertUuid}/investigate`
-        );
-      });
+      expect(handleInvestigate).toHaveBeenCalled();
     });
 
     it('hides the investigate action when no investigation connector is available', async () => {
-      mockUseInvestigationAvailability.mockReturnValue(false);
+      useInvestigateAlertMock.mockReturnValue({
+        showInvestigateAction: false,
+        handleInvestigate: jest.fn(),
+        isInvestigating: false,
+        investigateActionLabel: 'Investigate',
+      });
       const { findByTestId, queryByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
@@ -241,7 +254,12 @@ describe('Header Actions', () => {
     });
 
     it('disables the investigate action while the request is in flight', async () => {
-      mockHttp.post.mockReturnValue(new Promise(() => {}));
+      useInvestigateAlertMock.mockReturnValue({
+        showInvestigateAction: true,
+        handleInvestigate: jest.fn(),
+        isInvestigating: true,
+        investigateActionLabel: 'Investigating',
+      });
       const { findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
@@ -253,9 +271,6 @@ describe('Header Actions', () => {
       );
 
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
-      fireEvent.click(await findByTestId('alertDetailsInvestigate'));
-      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
-
       expect(await findByTestId('alertDetailsInvestigate')).toBeDisabled();
     });
 

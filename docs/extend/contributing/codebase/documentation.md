@@ -147,4 +147,4 @@ export type foo: string | AnInterface;
 
 ## Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../../key-concepts/ui/building-blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.

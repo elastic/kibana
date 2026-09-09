@@ -443,11 +443,12 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // Verify a filter event was emitted (entity.* + node.id → isOneOf with multiple values)
-      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+      // The mock node id has no EUID prefix, so it resolves to the generic type and filters on
+      // its single entity.* value — a lone value emits a phrase filter, not an isOneOf.
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
         expect.any(String),
-        expect.any(Array),
+        'entity-abc',
         'show'
       );
     });
@@ -636,7 +637,7 @@ describe('useEntityNodeExpandPopover', () => {
       );
     });
 
-    it('should fall back to RELATED_ENTITY with entity.* source field values + node.id when engine_type is not user or host', () => {
+    it('should use RELATED_ENTITY with entity.* source field values, never the calculated EUID', () => {
       const node = createMockNode('single-entity', true);
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
@@ -652,19 +653,15 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // entity.* value ('entity-abc') + node.id ('test-node-id') → emitIsOneOfFilterToggle
-      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+      // Only the entity.* source field value. The node id ('test-node-id') is the calculated EUID,
+      // which appears in no event field — including it produced a filter that matched nothing.
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
-        ['entity-abc', 'test-node-id'],
+        'entity-abc',
         'show'
       );
-      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
-        scopeId,
-        RELATED_ENTITY,
-        expect.anything(),
-        expect.anything()
-      );
+      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {

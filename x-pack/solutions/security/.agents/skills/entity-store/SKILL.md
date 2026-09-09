@@ -42,7 +42,7 @@ require `securitySolution` privileges in this phase.
 
 **Host** (`host.name`), **User** (`user.name`), **Service**, **Generic** (dynamic, Asset Inventory).
 
-User entities use namespace-qualified `entity.id` (`user:id@namespace`). `entity.namespace` from `event.module`. Non-IDP entities have `namespace: 'local'`, confidence `medium`.
+User entities use namespace-qualified `entity.id` (`user:id@namespace`). `entity.namespace` from `event.module`. Non-IDP entities have `namespace: 'local'`, confidence `medium`. IDP user entities are only created from `event.kind: asset` events; other events can enrich one that already exists but never create it.
 
 ## Plugin Location
 
@@ -99,7 +99,7 @@ x-pack/platform/plugins/shared/entity_store/
 - **`?force=true` required** for CRUD updates to fields without `allowAPIUpdate: true`. Resolution fields have it set, so no force needed for resolution operations.
 - **`entity.source` is an array**. Previously was a single string. UI must handle arrays.
 - **`entity.source` ≠ `entity.namespace`** — `entity.source` (array) lists the index names the entity data came from. `entity.namespace` is the identity provider namespace (`active_directory`, `okta`, `entra_id`, `local`). For resolution target selection by IDP priority, use `entity.namespace`.
-- **Document `_id` = MD5 hash of EUID** — not the EUID itself.
+- **Document `_id` = SHA-256 hash of EUID** — not the EUID itself. See `hashEuid` in `common/domain/euid/hash_euid.ts` (`HASH_ALG = 'sha256'`).
 - **v1 endpoints being removed** — v1 routes are deprecated and being removed. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
 - **CCS indices excluded** from extraction queries — cross-cluster data handled by separate `ccsLogsExtractionClient`.
 - **bucket_sort VALUE_NULL** — grouping queries using `bucket_sort` with pagination error if `from` is null. Always coalesce to 0: `from: pageIndex * pageSize || 0`. Manifests as `EsError: [bucket_sort] from doesn't support values of type: VALUE_NULL`.

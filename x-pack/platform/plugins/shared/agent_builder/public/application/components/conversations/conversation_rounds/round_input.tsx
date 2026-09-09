@@ -26,7 +26,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useRoundInputAuthor } from '../../../hooks/use_round_input_author';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
-import { CommandBadgeText } from './command_badge_text';
+import { RoundInputText } from './round_input_text';
 import { RoundInputAvatar } from './round_input_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 
@@ -113,7 +113,7 @@ export const RoundInput = ({
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <CommandBadgeText text={input} />
+                    <RoundInputText text={input} />
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>

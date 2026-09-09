@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { formatRawDocument, identifyFeatures, type InferenceDocument } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import {
+  featuresPrompt,
+  formatRawDocument,
+  identifyFeatures,
+  type AnalysisTarget,
+  type InferenceDocument,
+} from '@kbn/nightshift-ai';
 import {
   createMemoryDiscoveryTools,
   MemoryServiceImpl,
@@ -192,8 +197,14 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
+                const target: AnalysisTarget = {
+                  id: MANAGED_STREAM_NAME,
+                  name: MANAGED_STREAM_NAME,
+                  sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
+                  samplingSource: MANAGED_STREAM_NAME,
+                };
                 const { features, tokensUsed } = await identifyFeatures({
-                  streamName: MANAGED_STREAM_NAME,
+                  target,
                   sampleDocuments: heavy.sampleDocuments,
                   systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}\n${eventSearchTool.promptSnippet}`,
                   inferenceClient,

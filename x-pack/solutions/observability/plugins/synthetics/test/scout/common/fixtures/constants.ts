@@ -21,6 +21,8 @@ export const SYNTHETICS_API_URLS = {
   GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{monitorId}',
   TEST_NOW_MONITOR: '/api/synthetics/monitor/test',
   FILTERS: '/internal/synthetics/monitor/filters',
+  OVERVIEW_STATUS: '/internal/synthetics/overview_status',
+  OVERVIEW_STATUS_STALE: '/internal/synthetics/overview_status/stale',
   SUGGESTIONS: '/internal/synthetics/suggestions',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',
   PRIVATE_LOCATIONS_MONITORS: '/internal/synthetics/private_locations/monitors',

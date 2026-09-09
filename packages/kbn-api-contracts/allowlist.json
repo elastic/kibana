@@ -6,7 +6,7 @@
       "path": "/api/alerting/rule/{id}",
       "method": "post",
       "reason": "Intentional: require exactly two criterion groups for log threshold ratio criteria so API validation matches executor validation and rejects malformed criteria (e.g. a single nested array) that previously saved but broke rule execution and the edit UI.",
-      "approvedBy": "@elastic/actionable-obs-team",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
       "oasdiffId": "request-property-min-items-increased",
       "prUrl": "https://github.com/elastic/kibana/pull/283965"
     },
@@ -236,6 +236,86 @@
       "approvedBy": "@elastic/workchat-eng",
       "oasdiffId": "request-property-max-length-decreased",
       "prUrl": "https://github.com/elastic/kibana/pull/286654"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "delete",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "get",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "patch",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "patch",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "post",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "post",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "put",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "put",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules/_bulk_action",
+      "method": "post",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules/_find",
+      "method": "get",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
     }
   ]
 }

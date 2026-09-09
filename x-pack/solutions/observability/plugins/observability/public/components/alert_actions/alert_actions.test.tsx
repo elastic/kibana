@@ -44,13 +44,9 @@ const mockUseGetRuleTypesPermissions = jest.fn(() => ({
   authorizedToReadRuleForAlert: (): boolean => true,
   authorizedToCreateAnyRules: false,
 }));
-const mockUseInvestigationAvailability = jest.fn(() => true);
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
   useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-}));
-jest.mock('../../hooks/use_investigation_availability', () => ({
-  useInvestigationAvailability: () => mockUseInvestigationAvailability(),
 }));
 
 const refresh = jest.fn();
@@ -129,7 +125,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 describe('ObservabilityActions component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseInvestigationAvailability.mockReturnValue(true);
     getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
     mockTelemetryClient.reportAlertAddedToCase.mockClear();
     mockUseGetRuleTypesPermissions.mockReturnValue({
@@ -139,17 +134,9 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  interface SetupOptions {
-    canWriteAgentBuilder?: boolean;
-    alert?: Alert;
-  }
-
   const setup = async (
     pageId: string,
-    {
-      canWriteAgentBuilder = false,
-      alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] },
-    }: SetupOptions = {}
+    { alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] } }: { alert?: Alert } = {}
   ) => {
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -213,26 +200,17 @@ describe('ObservabilityActions component', () => {
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
-        <KibanaContextProvider
-          services={{
-            ...mockKibana.services,
-            application: {
-              ...mockKibana.services.application,
-              capabilities: {
-                ...mockKibana.services.application.capabilities,
-                agentBuilder: { write: canWriteAgentBuilder },
-              },
-            },
-          }}
-        >
+        <KibanaContextProvider services={mockKibana.services}>
           <AlertsTableContextProvider value={context}>
-            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-              <AlertActions
-                {...(props as unknown as ComponentProps<
-                  GetObservabilityAlertsTableProp<'renderActionsCell'>
-                >)}
-                services={services}
-              />
+            <QueryClientProvider client={queryClient}>
+              <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+                <AlertActions
+                  {...(props as unknown as ComponentProps<
+                    GetObservabilityAlertsTableProp<'renderActionsCell'>
+                  >)}
+                  services={services}
+                />
+              </QueryClientProvider>
             </QueryClientProvider>
           </AlertsTableContextProvider>
         </KibanaContextProvider>
@@ -259,55 +237,6 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-    });
-  });
-
-  it('hides the investigate action without Agent Builder write access', async () => {
-    const wrapper = await setup('nothing');
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
-      0
-    );
-  });
-
-  it('hides the investigate action when no investigation connector is available', async () => {
-    mockUseInvestigationAvailability.mockReturnValue(false);
-    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
-      0
-    );
-  });
-
-  it('starts an investigation for the alert', async () => {
-    mockKibana.services.http.post.mockResolvedValue({ investigation_id: 'investigation-1' });
-    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
-
-    await waitFor(() => {
-      expect(mockKibana.services.http.post).toHaveBeenCalledWith(
-        '/internal/observability/alerts/6d4c6d74-d51a-495c-897d-88ced3b95e30/investigate'
-      );
-      expect(mockKibana.services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Investigation started',
-      });
-    });
-  });
-
-  it('reports an investigation request failure', async () => {
-    mockKibana.services.http.post.mockRejectedValue(new Error('Request failed'));
-    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
-
-    await waitFor(() => {
-      expect(mockKibana.services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Failed to start investigation',
-        text: 'Request failed',
-      });
     });
   });
 

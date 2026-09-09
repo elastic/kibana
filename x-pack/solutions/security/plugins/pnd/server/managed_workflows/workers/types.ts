@@ -8,7 +8,10 @@
 import type { UpdateWorkerRequestBody, WorkerSettings } from '@kbn/pnd-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
-export type WorkerSettingsPatch = Pick<UpdateWorkerRequestBody, 'autonomyLevel'>;
+export type WorkerSettingsPatch = Pick<
+  UpdateWorkerRequestBody,
+  'autonomyLevel' | 'scheduleInterval'
+>;
 
 export interface WorkerSettingsRegistration {
   createDefaultValues(): ManagedWorkflowTemplateValues;

@@ -58,8 +58,6 @@ export const validateFromClause = (query: string): { valid: boolean; error?: str
   return { valid: true };
 };
 
-/** Precision, recall, and F1 for set comparisons. */
-
 /**
  * Parent technique id of a sub-technique id ("T1548.002" -> "T1548"), or null
  * for a plain technique id.
@@ -126,19 +124,6 @@ export const ordinalMitreF1 = (
   const recall = recallSum / expected.size;
   const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
   return { f1, precision, recall, partials };
-};
-
-export const calculateSetMetrics = <T>(
-  predicted: Set<T>,
-  expected: Set<T>
-): { precision: number; recall: number; f1: number } => {
-  if (predicted.size === 0 && expected.size === 0) return { precision: 1, recall: 1, f1: 1 };
-  if (predicted.size === 0 || expected.size === 0) return { precision: 0, recall: 0, f1: 0 };
-  const truePositives = [...predicted].filter((x) => expected.has(x)).length;
-  const precision = truePositives / predicted.size;
-  const recall = truePositives / expected.size;
-  const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
-  return { precision, recall, f1 };
 };
 
 const VALID_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { METRICS_INVENTORY_PATH } from './metrics_header_paths';
+import { METRICS_HOSTS_PATH, METRICS_INVENTORY_PATH } from './metrics_header_paths';
 
 /**
  * Metrics parent paths that already render AppHeader and must not also mount HeaderMenuPortal.
@@ -15,6 +15,7 @@ import { METRICS_INVENTORY_PATH } from './metrics_header_paths';
  */
 export const METRICS_HEADER_PORTAL_EXCLUDED_PATHS: readonly string[] = [
   METRICS_INVENTORY_PATH,
+  METRICS_HOSTS_PATH,
   '/snapshot',
   '/',
 ];

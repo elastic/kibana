@@ -138,4 +138,43 @@ describe('useUpdateWorker', () => {
       settingsRevision: 2,
     });
   });
+
+  const renderUpdateWorker = (worker: Worker, patchImpl: jest.Mock) => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    queryClient.setQueryData(queryKeys.workers.list(), { workers: [worker] });
+    const services = { ...coreMock.createStart(), http: { patch: patchImpl } };
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </KibanaContextProvider>
+    );
+    return { queryClient, ...renderHook(() => useUpdateWorker(), { wrapper }) };
+  };
+
+  const scheduledWorker = createWorker({
+    settingsRevision: 4,
+    settings: { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '24h' },
+  });
+
+  it('treats a schedule-only patch as a settings write and sends the revision', async () => {
+    const patch = jest.fn().mockResolvedValue({
+      worker: createWorker({
+        settingsRevision: 5,
+        settings: { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '15m' },
+      }),
+    });
+    const { result } = renderUpdateWorker(scheduledWorker, patch);
+
+    await act(async () => {
+      result.current.mutate({ workerId: TRIAGE, patch: { scheduleInterval: '15m' } });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
+      scheduleInterval: '15m',
+      settingsRevision: 4,
+    });
+  });
 });
