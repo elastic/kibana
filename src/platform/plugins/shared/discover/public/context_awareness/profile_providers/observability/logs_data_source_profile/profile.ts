@@ -14,7 +14,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
   getRowIndicatorProvider,
-  getRowAdditionalLeadingControls,
+  createGetRowAdditionalLeadingControls,
   createGetDefaultAppState,
   getPaginationConfig,
   getColumnsConfiguration,
@@ -53,7 +53,7 @@ export const createLogsDataSourceProfileProvider = (
     getDefaultAppState: createGetDefaultAppState(),
     getCellRenderers,
     getRowIndicatorProvider,
-    getRowAdditionalLeadingControls,
+    getRowAdditionalLeadingControls: createGetRowAdditionalLeadingControls(services),
     getPaginationConfig,
     getColumnsConfiguration,
     getRecommendedFields: createRecommendedFields({}),
