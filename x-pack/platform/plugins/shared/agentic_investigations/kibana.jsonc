@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/agentic-investigations-plugin",
-  "owner": ["@elastic/security-solution", "@elastic/obs-sig-events-team"],
+  "owner": ["@elastic/security-solution"],
   "group": "platform",
   "visibility": "shared",
   "description": "Solution-agnostic base layer for agentic investigations. Owns the entities an agent and a human collaborate on: proposals today, investigations and incidents next.",
