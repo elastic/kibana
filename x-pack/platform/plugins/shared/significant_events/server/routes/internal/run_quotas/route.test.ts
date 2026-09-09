@@ -14,6 +14,7 @@ import {
   NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
   NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../../types';
 import type {
@@ -56,6 +57,7 @@ const server = {} as SignificantEventsServer;
 const allEngineManageAuthz = {
   [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage]: true,
   [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage]: true,
+  [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage]: true,
 };
 const request = { authzResult: allEngineManageAuthz };
 
@@ -266,6 +268,16 @@ describe('Significant Events run quota routes', () => {
       internalRepository: repository,
       group: body.group,
     });
+  });
+
+  it('allows consume when authzResult is absent (security disabled)', async () => {
+    await expect(
+      consumeRoute.handler({
+        ...handlerParams,
+        request: { authzResult: undefined },
+        params: { body: { group: 'detection' } },
+      } as never)
+    ).resolves.toEqual({ allowed: true });
   });
 
   it('rejects consume when the caller lacks the engine that owns that group', async () => {

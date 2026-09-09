@@ -179,7 +179,7 @@ const consumeRoute = createServerRoute({
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
     const requiredPrivilege = CONSUME_GROUP_PRIVILEGES[params.body.group];
-    if (request.authzResult?.[requiredPrivilege] !== true) {
+    if (request.authzResult && request.authzResult[requiredPrivilege] !== true) {
       throw forbidden(`Consuming ${params.body.group} run quota requires ${requiredPrivilege}`);
     }
     return consumeRunQuota({
