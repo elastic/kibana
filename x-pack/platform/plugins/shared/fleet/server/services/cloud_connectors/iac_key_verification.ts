@@ -136,6 +136,45 @@ export const getCurrentIacKey = async (
   }
 };
 
+/**
+ * The shared comparison both the verify route and the daily upgrade task run: gate the provider,
+ * ask IaCP for today's key, compare it with the stored one. Never throws for IaCP problems
+ * (`key_unavailable` = fail open); SO errors from the caller's own reads propagate before this runs.
+ */
+export const compareIacKey = async (
+  soClient: SavedObjectsClientContract,
+  {
+    cloudProvider,
+    iac_key: storedKey,
+  }: Pick<CloudConnectorSOAttributes, 'cloudProvider' | 'iac_key'>,
+  integrations: IacIntegrationSelection[],
+  { flow, contextForLog }: GetCurrentIacKeyOptions
+): Promise<IacKeyVerificationOutcome> => {
+  // The literal comparison narrows the type for renderKey; the gate adds the "IaCP enabled" half.
+  if (cloudProvider !== AWS_CLOUD_PROVIDER || !isIacProvisionerSupportedFor(cloudProvider)) {
+    return 'unsupported_provider';
+  }
+  if (integrations.length === 0) {
+    return 'no_integrations';
+  }
+  appContextService
+    .getLogger()
+    .get('IacKeyVerification')
+    .debug(
+      `Comparing stored key ${
+        storedKey ?? '<none>'
+      } for ${contextForLog} against integration set ${JSON.stringify(integrations)}`
+    );
+  const currentKey = await getCurrentIacKey(soClient, cloudProvider, integrations, {
+    flow,
+    contextForLog,
+  });
+  if (currentKey === undefined) {
+    return 'key_unavailable';
+  }
+  return computeIacKeyMismatch(storedKey, currentKey) ?? 'matches';
+};
+
 export const verifyCloudConnectorIacKey = async (
   soClient: SavedObjectsClientContract,
   cloudConnectorId: string,
@@ -177,30 +216,10 @@ export const verifyCloudConnectorIacKey = async (
     return { matches: !reason, reason, deploymentId, region, integrations };
   };
 
-  // The literal comparison narrows the type for renderKey; the gate adds the "IaCP enabled" half.
-  if (cloudProvider !== AWS_CLOUD_PROVIDER || !isIacProvisionerSupportedFor(cloudProvider)) {
-    return finish('unsupported_provider');
-  }
-  if (integrations.length === 0) {
-    return finish('no_integrations');
-  }
-
-  logger.debug(
-    `Comparing stored key ${
-      attributes.iac_key ?? '<none>'
-    } for connector ${cloudConnectorId} against integration set ${JSON.stringify(integrations)}`
+  return finish(
+    await compareIacKey(soClient, attributes, integrations, {
+      flow: IAC_KEY_CHECK_FLOW,
+      contextForLog: `connector ${cloudConnectorId}`,
+    })
   );
-  const currentKey = await getCurrentIacKey(soClient, cloudProvider, integrations, {
-    flow: IAC_KEY_CHECK_FLOW,
-    contextForLog: `connector ${cloudConnectorId}`,
-  });
-  if (currentKey === undefined) {
-    return finish('key_unavailable');
-  }
-
-  const mismatch = computeIacKeyMismatch(attributes.iac_key, currentKey);
-  if (!mismatch) {
-    return finish('matches');
-  }
-  return finish(mismatch);
 };

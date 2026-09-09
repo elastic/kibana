@@ -30,6 +30,7 @@ import {
   resolveIacRenderIntegrations,
 } from './iac_integrations';
 import {
+  compareIacKey,
   computeIacKeyMismatch,
   getCurrentIacKey,
   verifyCloudConnectorIacKey,
@@ -317,5 +318,79 @@ describe('verifyCloudConnectorIacKey', () => {
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
     expect(result).toMatchObject({ deploymentId: 'not-an-arn', region: undefined });
+  });
+});
+
+describe('compareIacKey', () => {
+  const awsAttrs = { cloudProvider: 'aws' as const, iac_key: undefined };
+  const selections = [{ name: 'aws', policyTemplates: ['cloudtrail'] }];
+  const opts = { flow: IAC_UPGRADE_TASK_FLOW, contextForLog: 'connector cc-1' } as const;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+    mockedSupported.mockReturnValue(true);
+    mockedResolve.mockResolvedValue({
+      integrations: [
+        {
+          name: 'aws',
+          version: '2.0.0',
+          policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }],
+        },
+      ],
+      skipped: [],
+    });
+  });
+
+  it('returns unsupported_provider when IaCP does not support the provider', async () => {
+    mockedSupported.mockReturnValue(false);
+    const result = await compareIacKey(soClient, awsAttrs, selections, opts);
+    expect(result).toBe('unsupported_provider');
+    expect(mockedRenderKey).not.toHaveBeenCalled();
+  });
+
+  it('returns no_integrations when the selection list is empty', async () => {
+    const result = await compareIacKey(soClient, awsAttrs, [], opts);
+    expect(result).toBe('no_integrations');
+    expect(mockedRenderKey).not.toHaveBeenCalled();
+  });
+
+  it('returns key_unavailable when IaCP cannot render (fail open)', async () => {
+    mockedResolve.mockResolvedValueOnce({ integrations: [], skipped: ['aws'] });
+    const result = await compareIacKey(soClient, awsAttrs, selections, opts);
+    expect(result).toBe('key_unavailable');
+  });
+
+  it('returns no_key when the connector has no stored key', async () => {
+    mockedRenderKey.mockResolvedValueOnce({ key: 'sha256:new' });
+    const result = await compareIacKey(
+      soClient,
+      { cloudProvider: 'aws', iac_key: undefined },
+      selections,
+      opts
+    );
+    expect(result).toBe('no_key');
+  });
+
+  it('returns key_mismatch when the stored key differs from the current render', async () => {
+    mockedRenderKey.mockResolvedValueOnce({ key: 'sha256:new' });
+    const result = await compareIacKey(
+      soClient,
+      { cloudProvider: 'aws', iac_key: 'sha256:old' },
+      selections,
+      opts
+    );
+    expect(result).toBe('key_mismatch');
+  });
+
+  it('returns matches when the stored key equals the current render', async () => {
+    mockedRenderKey.mockResolvedValueOnce({ key: 'sha256:same' });
+    const result = await compareIacKey(
+      soClient,
+      { cloudProvider: 'aws', iac_key: 'sha256:same' },
+      selections,
+      opts
+    );
+    expect(result).toBe('matches');
   });
 });

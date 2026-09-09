@@ -24,6 +24,7 @@ export {
 } from './iac_integrations';
 
 export {
+  compareIacKey,
   computeIacKeyMismatch,
   getCurrentIacKey,
   verifyCloudConnectorIacKey,
