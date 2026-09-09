@@ -69,7 +69,10 @@ describe('ConnectorInvoked evaluator', () => {
   });
 
   it('scores 0 when the workflow points at a different connector', async () => {
-    const wrong = WORKFLOW_WITH_SLACK.replace(SLACK_CONNECTOR_ID, '00000000-dead-beef-0000-000000000000');
+    const wrong = WORKFLOW_WITH_SLACK.replace(
+      SLACK_CONNECTOR_ID,
+      '00000000-dead-beef-0000-000000000000'
+    );
     const result = await run({ messages: [{ message: wrong }] });
     expect(result.score).toBe(0);
     expect(result.metadata).toMatchObject({ connectorPresent: false });
@@ -99,6 +102,16 @@ describe('ConnectorInvoked evaluator', () => {
     };
     const result = await run(inToolResult);
     expect(result.score).toBe(1);
+  });
+
+  it('treats regex metacharacters in the step type literally', async () => {
+    // Unescaped, `a.b` would match `type: axb`. The value comes from dataset
+    // metadata, so it must be escaped before being spliced into a RegExp.
+    const result = await run(
+      { messages: [{ message: 'steps:\n  - type: axb\n' }] },
+      { expectedStepType: 'a.b' }
+    );
+    expect(result.score).toBe(0);
   });
 
   describe('collectProducedText', () => {

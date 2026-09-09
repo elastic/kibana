@@ -10,21 +10,13 @@ import type { Evaluator } from '@kbn/evals';
 export const CONNECTOR_INVOKED_EVALUATOR_NAME = 'ConnectorInvoked';
 
 /**
- * Deterministic check that an authored workflow actually targets the connector
- * the prompt demanded.
+ * Deterministic check that an authored workflow targets the connector the
+ * prompt demanded.
  *
- * Why this exists: `ExpectedToolCalled` only proves the agent CALLED
- * `platform.core.generate_workflow`. It never inspects what came back. A model
- * that calls the tool and emits a workflow with no http step -- or one pointed
- * at the wrong connector -- still scores 1.0. That is a false green: the
- * benchmark reports "posts to Slack" while nothing addresses Slack at all.
- *
- * This evaluator reads the produced workflow text and asserts the required
- * connector id and/or step type is present. It is CODE, not LLM-judged, so a
- * plausible-sounding answer cannot talk its way past it.
- *
- * Scores `null` (N/A) when the example declares no connector expectation, so
- * it never dilutes datasets it does not apply to.
+ * `ExpectedToolCalled` only proves the agent CALLED `generate_workflow`, never
+ * what came back — a workflow with no http step, or one aimed at the wrong
+ * connector, still scores 1.0. Being CODE rather than LLM-judged, a
+ * plausible-sounding answer cannot talk its way past this.
  */
 
 export interface ConnectorExpectation {
@@ -78,10 +70,12 @@ export const createConnectorInvokedEvaluator = (): Evaluator => ({
     // and avoids depending on YAML indentation or quoting style.
     const connectorPresent = expectedConnectorId ? produced.includes(expectedConnectorId) : true;
 
-    // Step type must appear as a YAML key (`type: http`) rather than anywhere
-    // in prose, so a model narrating "I would use an http step" does not pass.
-    const stepPresent = expectedStepType
-      ? new RegExp(`type\\s*:\\s*["']?${expectedStepType}\\b`, 'i').test(produced)
+    // Step type must appear as a YAML key (`type: http`), not merely in prose,
+    // so a model narrating "I would use an http step" does not pass. Escaped:
+    // the value comes from dataset metadata, not a trusted literal.
+    const escapedStepType = expectedStepType?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const stepPresent = escapedStepType
+      ? new RegExp(`type\\s*:\\s*["']?${escapedStepType}\\b`, 'i').test(produced)
       : true;
 
     const passed = connectorPresent && stepPresent;
