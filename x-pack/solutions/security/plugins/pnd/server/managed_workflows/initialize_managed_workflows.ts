@@ -26,8 +26,8 @@ export const initializeManagedWorkflows = async ({
   );
   let canReconcile = true;
 
-  // Install dependencies before their callers so a definition upgrade cannot
-  // activate a parent whose child still has the previous input contract.
+  // Install in dependency order so children land before their callers. A
+  // failure still lets the rest attempt to install; it only skips reconciliation.
   for (const id of PND_RULE_WORKFLOW_IDS) {
     try {
       await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
@@ -38,7 +38,6 @@ export const initializeManagedWorkflows = async ({
           error instanceof Error ? error.message : String(error)
         }`
       );
-      break;
     }
   }
 
