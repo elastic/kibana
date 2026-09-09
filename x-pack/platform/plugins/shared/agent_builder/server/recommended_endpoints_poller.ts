@@ -220,22 +220,28 @@ export class RecommendedEndpointsPoller {
     if (!result) return;
 
     if (result.recommended) {
-      const mainResult = this.features.updateRecommendedEndpoints(
-        AGENT_BUILDER_INFERENCE_FEATURE_ID,
-        result.recommended
-      );
-      if (!mainResult.ok) {
-        this.logger.warn(`Failed to update main recommended endpoints: ${mainResult.error}`);
+      try {
+        this.features.updateRecommendedEndpoints(
+          AGENT_BUILDER_INFERENCE_FEATURE_ID,
+          result.recommended
+        );
+      } catch (e) {
+        this.logger.warn(
+          `Failed to update main recommended endpoints: ${Error.isError(e) ? e.message : String(e)}`
+        );
       }
     }
 
     if (result.fast) {
-      const fastResult = this.features.updateRecommendedEndpoints(
-        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-        result.fast
-      );
-      if (!fastResult.ok) {
-        this.logger.warn(`Failed to update fast recommended endpoints: ${fastResult.error}`);
+      try {
+        this.features.updateRecommendedEndpoints(
+          AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+          result.fast
+        );
+      } catch (e) {
+        this.logger.warn(
+          `Failed to update fast recommended endpoints: ${Error.isError(e) ? e.message : String(e)}`
+        );
       }
     }
   }

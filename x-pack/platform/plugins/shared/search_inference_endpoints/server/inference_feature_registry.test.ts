@@ -145,12 +145,11 @@ describe('InferenceFeatureRegistry', () => {
   });
 
   describe('updateRecommendedEndpoints', () => {
-    it('returns ok and mutates recommendedEndpoints for a registered feature', () => {
+    it('mutates recommendedEndpoints for a registered feature', () => {
       registry.register(createValidFeature({ featureId: 'my_feature' }));
 
-      const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', 'ep-2']);
+      registry.updateRecommendedEndpoints('my_feature', ['ep-1', 'ep-2']);
 
-      expect(result).toEqual({ ok: true });
       expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['ep-1', 'ep-2']);
     });
 
@@ -176,45 +175,37 @@ describe('InferenceFeatureRegistry', () => {
       expect(updated?.featureDescription).toBe(feature.featureDescription);
     });
 
-    it('returns error and does not update for an unknown featureId', () => {
-      const result = registry.updateRecommendedEndpoints('unknown', ['ep-1']);
-
-      expect(result).toEqual({ ok: false, error: expect.stringContaining('"unknown"') });
+    it('throws and does not update for an unknown featureId', () => {
+      expect(() => registry.updateRecommendedEndpoints('unknown', ['ep-1'])).toThrow('"unknown"');
       expect(mockLogger.get().error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update recommended endpoints')
       );
     });
 
-    it('returns error and does not update when endpoints array is empty', () => {
+    it('throws and does not update when endpoints array is empty', () => {
       registry.register(
         createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
       );
 
-      const result = registry.updateRecommendedEndpoints('my_feature', []);
-
-      expect(result).toEqual({ ok: false, error: expect.stringContaining('not be empty') });
+      expect(() => registry.updateRecommendedEndpoints('my_feature', [])).toThrow('not be empty');
       expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
     });
 
-    it('returns error and does not update when endpoints contain an empty string', () => {
+    it('throws and does not update when endpoints contain an empty string', () => {
       registry.register(
         createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
       );
 
-      const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', '']);
-
-      expect(result).toEqual({ ok: false, error: expect.stringContaining('empty strings') });
+      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', ''])).toThrow('empty strings');
       expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
     });
 
-    it('returns error and does not update when endpoints contain a whitespace-only string', () => {
+    it('throws and does not update when endpoints contain a whitespace-only string', () => {
       registry.register(
         createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
       );
 
-      const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   ']);
-
-      expect(result).toEqual({ ok: false, error: expect.stringContaining('empty strings') });
+      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   '])).toThrow('empty strings');
       expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
     });
 
