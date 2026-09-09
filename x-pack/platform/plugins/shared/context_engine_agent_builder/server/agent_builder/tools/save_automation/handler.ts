@@ -293,7 +293,6 @@ const assertWorkflowUpdateAccess = async ({
  */
 interface ResolvedWorkflowSource {
   yaml: string;
-  proposedWorkflowId?: string;
   existingWorkflowId?: string;
   attachmentId?: string;
 }
@@ -310,14 +309,17 @@ const resolveWorkflowSource = (
     throw new Error('Provide either workflowAttachmentId, workflowYaml or workflowId.');
   }
 
-  const { yaml, workflowId, origin } = resolveWorkflowYamlFromAttachments(
+  const { yaml, origin } = resolveWorkflowYamlFromAttachments(
     attachments,
     params.workflowAttachmentId
   );
 
+  // The id a draft proposes for itself is deliberately not carried over to a create. Workflow ids
+  // are unique across every space and over soft-deleted tombstones, and supplying one turns any
+  // clash into a hard conflict that fails the save. Leaving it out lets the server derive an id
+  // from the workflow's name and disambiguate it, which is the same readability for none of the risk.
   return {
     yaml,
-    proposedWorkflowId: workflowId,
     existingWorkflowId: origin,
     attachmentId: params.workflowAttachmentId,
   };
@@ -377,7 +379,6 @@ const linkWorkflowToAttachment = async ({
 
 const persistWorkflow = async ({
   yaml,
-  proposedWorkflowId,
   existingWorkflowId,
   workflowsManagement,
   spaceId,
@@ -385,7 +386,6 @@ const persistWorkflow = async ({
   getSecurityStart,
 }: {
   yaml: string;
-  proposedWorkflowId?: string;
   existingWorkflowId?: string;
   workflowsManagement: WorkflowsManagementApi;
   spaceId: string;
@@ -404,11 +404,7 @@ const persistWorkflow = async ({
   }
 
   await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
-  const created = await workflowsManagement.createWorkflow(
-    { yaml, ...(proposedWorkflowId ? { id: proposedWorkflowId } : {}) },
-    spaceId,
-    request
-  );
+  const created = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
 
   return { workflowId: created.id, newlyCreated: true };
 };
@@ -577,7 +573,6 @@ export const saveAutomationHandler = async ({
 
   const { workflowId, newlyCreated } = await persistWorkflow({
     yaml: source.yaml,
-    proposedWorkflowId: source.proposedWorkflowId,
     existingWorkflowId,
     workflowsManagement,
     spaceId,

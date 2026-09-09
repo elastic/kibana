@@ -215,8 +215,11 @@ describe('saveAutomationHandler', () => {
     });
 
     expect(hasWorkflowCreatePrivilege).toHaveBeenCalled();
+    // The draft names itself 'pilot-workflow', but supplying that id on create turns a clash with
+    // any other space — or a soft-deleted tombstone — into a conflict that fails the save. The
+    // server derives an id from the workflow name and disambiguates it instead.
     expect(workflowsManagement.createWorkflow).toHaveBeenCalledWith(
-      { yaml: WORKFLOW_YAML, id: 'pilot-workflow' },
+      { yaml: WORKFLOW_YAML },
       'default',
       request
     );
