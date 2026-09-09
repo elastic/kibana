@@ -20,6 +20,7 @@ import {
   probeProfiles,
 } from '../../evaluators/evidence/evidence_service';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
+import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerResolveInstrumentationRoute = ({ router }: RouteDependencies) => {
@@ -59,7 +60,7 @@ export const registerResolveInstrumentationRoute = ({ router }: RouteDependencie
         if (!(await hasTraceDocuments(traceAccessor))) {
           return response.notFound({
             body: {
-              message: `Error: Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+              message: `Error: ${getNoTraceDocumentsMessage(traceId)}`,
             },
           });
         }

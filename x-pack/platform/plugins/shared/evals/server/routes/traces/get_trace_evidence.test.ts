@@ -57,6 +57,8 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
   const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as jest.Mock;
   const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as jest.Mock;
   const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as jest.Mock;
+  const toInstrumentationProfileProbesMock =
+    evidenceServiceModule.toInstrumentationProfileProbes as jest.Mock;
   const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
 
   const setup = () => {
@@ -104,6 +106,9 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     hasResolvedEvidenceMock.mockReturnValue(true);
     extractSelectedEvidenceMock.mockResolvedValue({ selected: PROFILE_RESULT });
     extractProfilesEvidenceMock.mockResolvedValue([PROFILE_RESULT]);
+    toInstrumentationProfileProbesMock.mockImplementation((profiles: (typeof PROFILE_RESULT)[]) =>
+      profiles.map(({ profile, evidence }) => ({ profile, evidence }))
+    );
     awaitTraceReadyMock.mockResolvedValue({
       ...PROFILE_RESULT,
       readiness: 'stable',
@@ -222,6 +227,9 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     const result = await handler(context, request(), kibanaResponseFactory);
 
     expect(result.status).toBe(404);
+    expect(result.payload).toEqual({
+      message: `Trace ${TRACE_ID} is not ready: no documents indexed in traces-* or logs-* yet`,
+    });
   });
 
   it('maps waited unresolvable evidence to a typed response', async () => {
@@ -254,6 +262,7 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     const result = await handler(context, request({ wait: 'stable' }), kibanaResponseFactory);
 
     expect(result.status).toBe(404);
+    expect(result.payload).toEqual({ message: 'no documents indexed' });
   });
 
   it('maps an oversized Elasticsearch response to an actionable 400', async () => {

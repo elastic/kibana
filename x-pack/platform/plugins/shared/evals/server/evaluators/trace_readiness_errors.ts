@@ -9,11 +9,14 @@ import type { InstrumentationProfileProbeResult } from './evidence/evidence_serv
 
 export type TraceReadinessErrorKind = 'not_ready' | 'unresolvable';
 
+export const getNoTraceDocumentsMessage = (traceId: string): string =>
+  `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`;
+
 export class TraceReadinessError extends Error {
   constructor(
     message: string,
     public readonly kind: TraceReadinessErrorKind,
-    public readonly profiles?: InstrumentationProfileProbeResult[]
+    public readonly profiles: InstrumentationProfileProbeResult[] = []
   ) {
     super(message);
     this.name = 'TraceReadinessError';

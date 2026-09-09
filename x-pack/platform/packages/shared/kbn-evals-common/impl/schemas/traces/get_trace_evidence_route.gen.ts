@@ -107,10 +107,8 @@ export const UnresolvedTraceEvidenceResponse = lazySchema(() =>
     readiness: z.enum(['immediate', 'best_effort']),
     trace_id: z.string().max(32),
     profile_selection: z.enum(['explicit', 'auto']),
-    profile: z
-      .enum(['elastic-inference', 'otel-genai-events', 'otel-genai-attributes', 'claude-code'])
-      .nullable(),
-    profile_diagnostics: z.array(ProfileDiagnostic).max(4),
+    profile: InstrumentationProfile.nullable(),
+    profile_diagnostics: z.array(ProfileDiagnostic),
   })
 );
 export type UnresolvedTraceEvidenceResponse = z.infer<typeof UnresolvedTraceEvidenceResponse>;

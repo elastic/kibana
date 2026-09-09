@@ -69,6 +69,11 @@ describe('normalizeEvidence', () => {
       },
     });
     expect(searchMock).toHaveBeenCalledTimes(3);
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: [{ '@timestamp': { order: 'asc' } }, { span_id: { order: 'asc' } }],
+      })
+    );
   });
 
   it('uses the shared evidence gate and profile recommendation rules', () => {
@@ -138,7 +143,16 @@ describe('normalizeEvidence', () => {
         }),
       })
     );
-    expect(searchMock).toHaveBeenCalledTimes(12);
+    expect(searchMock).toHaveBeenCalledTimes(11);
+    const executeToolSearches = searchMock.mock.calls.filter(([request]) =>
+      request.query.bool.filter.some(
+        (filter: Record<string, unknown>) =>
+          (filter.term as Record<string, unknown> | undefined)?.[
+            'attributes.gen_ai.operation.name'
+          ] === 'execute_tool'
+      )
+    );
+    expect(executeToolSearches).toHaveLength(1);
   });
 
   it('normalizes elastic-inference docs stored with dotted attribute keys', async () => {

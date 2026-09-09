@@ -14,6 +14,7 @@ import {
   hasResolvedEvidence,
   hasRootSpan,
   hasTraceDocuments,
+  toInstrumentationProfileProbes,
   type EvidenceExtractionResult,
   type InstrumentationProfileEvidenceResult,
   type InstrumentationProfileProbeResult,
@@ -21,7 +22,7 @@ import {
 import { INSTRUMENTATION_PROFILES } from './evidence/profiles';
 import type { EvidenceRound, InstrumentationProfile } from './evidence/types';
 import type { TraceAccessorWithSearch } from './trace_accessor';
-import { TraceReadinessError } from './trace_readiness_errors';
+import { getNoTraceDocumentsMessage, TraceReadinessError } from './trace_readiness_errors';
 
 export { TraceReadinessError } from './trace_readiness_errors';
 
@@ -54,11 +55,6 @@ interface ReadinessBaseline {
   timestamp: number;
 }
 
-const toProbes = (
-  profiles: InstrumentationProfileEvidenceResult[]
-): InstrumentationProfileProbeResult[] =>
-  profiles.map(({ profile, evidence }) => ({ profile, evidence }));
-
 const summarizeProfiles = (profiles: InstrumentationProfileProbeResult[]): string =>
   profiles
     .map(({ profile, evidence }) => {
@@ -73,6 +69,17 @@ const summarizeProfiles = (profiles: InstrumentationProfileProbeResult[]): strin
 
 const profileRequiresStabilityWindow = (profile: InstrumentationProfile): boolean =>
   Object.values(INSTRUMENTATION_PROFILES[profile]).some(({ source }) => source === 'logs');
+
+const abortRetryOnUnexpectedError = async <T>(operation: () => Promise<T>): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof TraceReadinessError) {
+      throw error;
+    }
+    throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
+  }
+};
 
 /** Blocks until normalized trace evidence reaches the requested readiness level. */
 export const awaitTraceReady = async (
@@ -94,88 +101,85 @@ export const awaitTraceReady = async (
   let latestProfiles: InstrumentationProfileEvidenceResult[] | undefined;
   let sawDocuments = false;
 
-  try {
-    return await pRetry(
-      async () => {
-        if (!(await hasTraceDocuments(traceAccessor))) {
-          throw new TraceReadinessError(
-            `Trace ${traceAccessor.traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
-            'not_ready'
-          );
-        }
-        sawDocuments = true;
+  const attemptReadiness = async (): Promise<AwaitTraceReadyResult> => {
+    if (!sawDocuments && !(await hasTraceDocuments(traceAccessor))) {
+      throw new TraceReadinessError(getNoTraceDocumentsMessage(traceAccessor.traceId), 'not_ready');
+    }
+    sawDocuments = true;
 
-        const selection = await extractSelectedEvidence(traceAccessor, request.profile);
-        latestProfiles = selection.profiles ?? latestProfiles;
-        const { selected } = selection;
+    const selection = await extractSelectedEvidence(traceAccessor, request.profile);
+    latestProfiles = selection.profiles ?? latestProfiles;
+    const { selected } = selection;
 
-        if (!selected || !hasResolvedEvidence(selected.round)) {
-          baseline = undefined;
-          throw new TraceReadinessError(
-            `Trace ${
-              traceAccessor.traceId
-            } is not ready: documents indexed but no gradable evidence yet${
-              request.profile ? ` for profile "${request.profile}"` : ''
-            }`,
-            'not_ready'
-          );
-        }
+    if (!selected || !hasResolvedEvidence(selected.round)) {
+      baseline = undefined;
+      lastEvidence = undefined;
+      throw new TraceReadinessError(
+        `Trace ${
+          traceAccessor.traceId
+        } is not ready: documents indexed but no gradable evidence yet${
+          request.profile ? ` for profile "${request.profile}"` : ''
+        }`,
+        'not_ready'
+      );
+    }
 
-        lastEvidence = {
-          ...selected,
-          readiness: 'best_effort',
-        };
+    lastEvidence = {
+      ...selected,
+      readiness: 'best_effort',
+    };
 
-        const now = Date.now();
-        if (
-          !baseline ||
-          baseline.profile !== selected.profile ||
-          !isEqual(baseline.round, selected.round)
-        ) {
-          baseline = { profile: selected.profile, round: selected.round, timestamp: now };
-          throw new TraceReadinessError(
-            `Trace ${traceAccessor.traceId} is not ready: awaiting stable evidence for profile "${selected.profile}"`,
-            'not_ready'
-          );
-        }
+    const now = Date.now();
+    if (
+      !baseline ||
+      baseline.profile !== selected.profile ||
+      !isEqual(baseline.round, selected.round)
+    ) {
+      baseline = { profile: selected.profile, round: selected.round, timestamp: now };
+      throw new TraceReadinessError(
+        `Trace ${traceAccessor.traceId} is not ready: awaiting stable evidence for profile "${selected.profile}"`,
+        'not_ready'
+      );
+    }
 
-        const requiredWindowMs =
-          request.mode === 'stable' || profileRequiresStabilityWindow(selected.profile)
-            ? stabilityWindowMs
-            : 0;
-        if (now - baseline.timestamp < requiredWindowMs) {
-          throw new TraceReadinessError(
-            `Trace ${traceAccessor.traceId} is not ready: evidence has not remained stable for ${requiredWindowMs}ms`,
-            'not_ready'
-          );
-        }
+    const requiredWindowMs =
+      request.mode === 'stable' || profileRequiresStabilityWindow(selected.profile)
+        ? stabilityWindowMs
+        : 0;
+    if (now - baseline.timestamp < requiredWindowMs) {
+      throw new TraceReadinessError(
+        `Trace ${traceAccessor.traceId} is not ready: evidence has not remained stable for ${requiredWindowMs}ms`,
+        'not_ready'
+      );
+    }
 
-        if (request.mode === 'complete') {
-          if (!selected.round.response.message.trim() || !(await hasRootSpan(traceAccessor))) {
-            throw new TraceReadinessError(
-              `Trace ${traceAccessor.traceId} is not ready: awaiting a root span and completed response for profile "${selected.profile}"`,
-              'not_ready'
-            );
-          }
-        }
-
-        return {
-          ...selected,
-          readiness: request.mode,
-        };
-      },
-      {
-        retries,
-        factor,
-        minTimeout,
-        maxTimeout,
-        onFailedAttempt: (error) => {
-          log.debug(
-            `Trace ${traceAccessor.traceId} not ready on attempt ${error.attemptNumber}; retrying`
-          );
-        },
+    if (request.mode === 'complete') {
+      if (!selected.round.response.message.trim() || !(await hasRootSpan(traceAccessor))) {
+        throw new TraceReadinessError(
+          `Trace ${traceAccessor.traceId} is not ready: awaiting a root span and completed response for profile "${selected.profile}"`,
+          'not_ready'
+        );
       }
-    );
+    }
+
+    return {
+      ...selected,
+      readiness: request.mode,
+    };
+  };
+
+  try {
+    return await pRetry(() => abortRetryOnUnexpectedError(attemptReadiness), {
+      retries,
+      factor,
+      minTimeout,
+      maxTimeout,
+      onFailedAttempt: (error) => {
+        log.debug(
+          `Trace ${traceAccessor.traceId} not ready on attempt ${error.attemptNumber}; retrying`
+        );
+      },
+    });
   } catch (error) {
     if (!(error instanceof TraceReadinessError)) {
       throw error;
@@ -190,7 +194,7 @@ export const awaitTraceReady = async (
 
     if (sawDocuments) {
       const profiles = latestProfiles ?? (await extractProfilesEvidence(traceAccessor));
-      const probes = toProbes(profiles);
+      const probes = toInstrumentationProfileProbes(profiles);
       const requestedProfile = request.profile ? ` for profile "${request.profile}"` : '';
       throw new TraceReadinessError(
         `Trace ${

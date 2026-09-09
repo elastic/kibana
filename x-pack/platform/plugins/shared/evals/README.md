@@ -82,7 +82,6 @@ The plugin reads from the following indices:
 | `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators    |
 | `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
 | `logs-*`                       | OTLP / EDOT collector | OpenTelemetry log events   |
-| `logs-*`                       | OTLP / EDOT collector | OpenTelemetry log events   |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -221,9 +220,11 @@ Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/ev
 
 `GET /internal/evals/traces/{traceId}/evidence` returns the normalized single-turn evidence used by evaluators. Omit `profile` to auto-detect the instrumentation or pass one explicitly.
 
-`wait` defaults to `none` for an immediate read. `stable` waits for non-empty evidence to remain unchanged for five seconds. `complete` also requires a response and root span; log-backed profiles use the same stability window. If the wait budget expires after evidence is found, the endpoint returns it as `best_effort`.
+`wait` defaults to `none` for an immediate read. `stable` waits for non-empty evidence to remain unchanged for five seconds. `complete` also requires a response and root span; log-backed profiles normally take at least 7.5 seconds. Waits can run for about 28 seconds, including for a valid but missing trace ID, and return available evidence as `best_effort` on expiry.
 
-The endpoint requires `read_evals` and searches `traces-*` and `logs-*` as the current user. It returns full message and tool content, does not persist it, and supports one turn only.
+`_evaluate` uses the same whole-round `complete` readiness check.
+
+The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`; missing index privileges can appear as `404`. It returns full message and tool content, does not persist it, and supports one turn only.
 
 ## UI pages
 

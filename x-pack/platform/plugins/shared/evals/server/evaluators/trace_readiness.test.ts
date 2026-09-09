@@ -74,6 +74,8 @@ describe('awaitTraceReady', () => {
   const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as jest.Mock;
   const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as jest.Mock;
   const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as jest.Mock;
+  const toInstrumentationProfileProbesMock =
+    evidenceServiceModule.toInstrumentationProfileProbes as jest.Mock;
   const getRecommendedInstrumentationProfileMock =
     evidenceServiceModule.getRecommendedInstrumentationProfile as jest.Mock;
 
@@ -101,6 +103,10 @@ describe('awaitTraceReady', () => {
         profiles.find(({ evidence }) =>
           [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
         )?.profile
+    );
+    toInstrumentationProfileProbesMock.mockImplementation(
+      (profiles: InstrumentationProfileEvidenceResult[]) =>
+        profiles.map(({ profile, evidence }) => ({ profile, evidence }))
     );
     extractSelectedEvidenceMock.mockImplementation(
       async (_traceAccessor: TraceAccessorWithSearch, profile?: InstrumentationProfile) => {
@@ -132,6 +138,17 @@ describe('awaitTraceReady', () => {
     });
     expect(extractEvidenceMock).toHaveBeenCalledTimes(2);
     expect(hasRootSpanMock).toHaveBeenCalledTimes(1);
+    expect(hasTraceDocumentsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not complete an intermediate response before the root span arrives', async () => {
+    hasRootSpanMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    await expect(run()).resolves.toEqual(
+      expect.objectContaining({ round: READY_ROUND, readiness: 'complete' })
+    );
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(3);
+    expect(hasRootSpanMock).toHaveBeenCalledTimes(2);
   });
 
   it('requires stable evidence to span the configured window', async () => {
@@ -271,27 +288,46 @@ describe('awaitTraceReady', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
   });
 
+  it('does not return stale evidence after a later unresolved poll', async () => {
+    extractEvidenceMock
+      .mockResolvedValueOnce(buildExtraction(READY_ROUND))
+      .mockResolvedValue(buildExtraction(EMPTY_ROUND));
+    extractProfilesEvidenceMock.mockResolvedValue([
+      buildProfileExtraction('elastic-inference', EMPTY_ROUND),
+    ]);
+
+    await expect(run()).rejects.toEqual(
+      expect.objectContaining({ kind: 'unresolvable', profiles: expect.any(Array) })
+    );
+  });
+
+  it('does not retry unexpected extraction failures', async () => {
+    const searchFailure = new Error('search failed');
+    extractEvidenceMock.mockRejectedValue(searchFailure);
+
+    await expect(run()).rejects.toBe(searchFailure);
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(1);
+  });
+
   it('returns best-effort after a late baseline reset', async () => {
     const changedRound: EvidenceRound = {
       ...READY_ROUND,
       steps: [{ tool_id: 'late-tool' }],
     };
     extractEvidenceMock
-      .mockResolvedValue(buildExtraction(READY_ROUND))
+      .mockResolvedValue(buildExtraction(changedRound))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
-      .mockResolvedValueOnce(buildExtraction(READY_ROUND))
-      .mockResolvedValueOnce(buildExtraction(READY_ROUND))
-      .mockResolvedValueOnce(buildExtraction(changedRound));
+      .mockResolvedValueOnce(buildExtraction(READY_ROUND));
     jest
       .spyOn(Date, 'now')
       .mockReturnValueOnce(0)
-      .mockReturnValueOnce(1)
-      .mockReturnValueOnce(2)
-      .mockReturnValueOnce(3)
-      .mockReturnValueOnce(4)
-      .mockReturnValueOnce(10);
+      .mockReturnValueOnce(5)
+      .mockReturnValueOnce(10)
+      .mockReturnValueOnce(15)
+      .mockReturnValueOnce(20)
+      .mockReturnValueOnce(25);
 
     await expect(
       run(

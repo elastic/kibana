@@ -21,21 +21,19 @@ import {
   extractSelectedEvidence,
   hasResolvedEvidence,
   hasTraceDocuments,
+  toInstrumentationProfileProbes,
   type InstrumentationProfileProbeResult,
 } from '../../evaluators/evidence/evidence_service';
+import type { InstrumentationProfile } from '../../evaluators/evidence/types';
 import {
   awaitTraceReady,
   TraceReadinessError,
   type AwaitTraceReadyResult,
 } from '../../evaluators/trace_readiness';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
+import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
-
-const toProbes = (
-  profiles: Awaited<ReturnType<typeof extractProfilesEvidence>>
-): InstrumentationProfileProbeResult[] =>
-  profiles.map(({ profile, evidence }) => ({ profile, evidence }));
 
 const toResolvedResponse = ({
   traceId,
@@ -55,6 +53,27 @@ const toResolvedResponse = ({
   profile: result.profile,
   evidence: result.round,
   evidence_status: result.evidence,
+});
+
+const toUnresolvedResponse = ({
+  traceId,
+  profileSelection,
+  profile,
+  readiness,
+  profiles,
+}: {
+  traceId: string;
+  profileSelection: 'explicit' | 'auto';
+  profile: InstrumentationProfile | null;
+  readiness: 'immediate' | 'best_effort';
+  profiles: InstrumentationProfileProbeResult[];
+}): GetTraceEvidenceResponse => ({
+  status: 'unresolved',
+  readiness,
+  trace_id: traceId,
+  profile_selection: profileSelection,
+  profile,
+  profile_diagnostics: profiles,
 });
 
 export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependencies) => {
@@ -104,19 +123,17 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
             } catch (error) {
               if (error instanceof TraceReadinessError) {
                 if (error.kind === 'not_ready') {
-                  return response.notFound({ body: { message: String(error) } });
+                  return response.notFound({ body: { message: error.message } });
                 }
 
                 return response.ok({
-                  body: {
-                    status: 'unresolved',
-                    readiness: 'best_effort',
-                    trace_id: traceId,
-                    profile_selection: profileSelection,
+                  body: toUnresolvedResponse({
+                    traceId,
+                    profileSelection,
                     profile: profile ?? null,
-                    profile_diagnostics:
-                      error.profiles ?? toProbes(await extractProfilesEvidence(traceAccessor)),
-                  } satisfies GetTraceEvidenceResponse,
+                    readiness: 'best_effort',
+                    profiles: error.profiles,
+                  }),
                 });
               }
               throw error;
@@ -126,7 +143,7 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
           if (!(await hasTraceDocuments(traceAccessor))) {
             return response.notFound({
               body: {
-                message: `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+                message: getNoTraceDocumentsMessage(traceId),
               },
             });
           }
@@ -144,14 +161,13 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
 
           const profiles = selection.profiles ?? (await extractProfilesEvidence(traceAccessor));
           return response.ok({
-            body: {
-              status: 'unresolved',
-              readiness: 'immediate',
-              trace_id: traceId,
-              profile_selection: profileSelection,
+            body: toUnresolvedResponse({
+              traceId,
+              profileSelection,
               profile: profile ?? null,
-              profile_diagnostics: toProbes(profiles),
-            } satisfies GetTraceEvidenceResponse,
+              readiness: 'immediate',
+              profiles: toInstrumentationProfileProbes(profiles),
+            }),
           });
         } catch (error) {
           const tooLarge = handleMaximumResponseSizeExceededError({

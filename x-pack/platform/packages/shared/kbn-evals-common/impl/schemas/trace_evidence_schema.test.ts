@@ -43,7 +43,10 @@ describe('GetTraceEvidenceResponse', () => {
       trace_id: '0af7651916cd43dd8448eb211c80319c',
       profile_selection: 'auto',
       profile: null,
-      profile_diagnostics: [{ profile: 'elastic-inference', evidence: evidenceStatus }],
+      profile_diagnostics: Array.from({ length: 5 }, () => ({
+        profile: 'elastic-inference',
+        evidence: evidenceStatus,
+      })),
     });
 
     expect(result.success).toBe(true);

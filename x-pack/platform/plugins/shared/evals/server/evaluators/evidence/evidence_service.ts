@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { type TraceAccessorWithSearch, type TraceFilter } from '../trace_accessor';
+import {
+  type TraceAccessorWithSearch,
+  type TraceFilter,
+  type TraceSearchParams,
+  type TraceSearchResult,
+  type TraceSource,
+} from '../trace_accessor';
 import { INSTRUMENTATION_PROFILES } from './profiles';
 import { getInstrumentationProfile } from './resolve_instrumentation';
 import {
@@ -21,11 +27,16 @@ import {
 
 const MAX_EVIDENCE_DOCS = 200;
 const MESSAGE_CANDIDATE_LIMIT = 20;
-const SAMPLE_LIMIT = 120;
+const SAMPLE_MAX_LENGTH = 123;
+const SAMPLE_ELLIPSIS = '...';
 const hasOwnProperty = (value: unknown, key: string): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, key);
 
 type ProbeStatus = 'found' | 'not_found' | 'content_redacted';
+type EvidenceSearch = (
+  source: TraceSource,
+  params: TraceSearchParams
+) => Promise<TraceSearchResult>;
 
 export interface EvidenceItemProbeResult {
   status: ProbeStatus;
@@ -164,17 +175,17 @@ const getToolCallsSearchParams = (
 ): {
   filter: TraceFilter[];
   fields: string[];
-  sort: { field: string; order: 'asc' | 'desc' };
+  sort: Array<{ field: string; order: 'asc' | 'desc' }>;
   size: number;
 } => {
   const { tool_call_id, tool_id, arguments: toolArguments, result } = spec.fields;
   return {
     filter: toTraceFilters(spec),
     fields: ['@timestamp', tool_call_id, tool_id, toolArguments, result],
-    sort: {
-      field: '@timestamp',
-      order: 'asc',
-    },
+    sort: [
+      { field: '@timestamp', order: 'asc' },
+      { field: 'span_id', order: 'asc' },
+    ],
     size: MAX_EVIDENCE_DOCS,
   };
 };
@@ -338,7 +349,9 @@ const parseToolCallsValue = (
 };
 
 const truncateSample = (sample: string): string =>
-  sample.length > SAMPLE_LIMIT ? `${sample.slice(0, SAMPLE_LIMIT)}...` : sample;
+  sample.length > SAMPLE_MAX_LENGTH
+    ? `${sample.slice(0, SAMPLE_MAX_LENGTH - SAMPLE_ELLIPSIS.length)}${SAMPLE_ELLIPSIS}`
+    : sample;
 
 const stringifySample = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
@@ -387,20 +400,20 @@ const getItemProbe = (
   };
 };
 
-export const extractEvidence = async (
-  traceAccessor: TraceAccessorWithSearch,
+const extractEvidenceWithSearch = async (
+  runSearch: EvidenceSearch,
   mapping: InstrumentationProfileSpec
 ): Promise<EvidenceExtractionResult> => {
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    traceAccessor.runSearch(
+    runSearch(
       mapping[EVIDENCE_ITEM_KEYS.userQuery].source,
       getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.userQuery])
     ),
-    traceAccessor.runSearch(
+    runSearch(
       mapping[EVIDENCE_ITEM_KEYS.agentResponse].source,
       getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.agentResponse])
     ),
-    traceAccessor.runSearch(
+    runSearch(
       mapping[EVIDENCE_ITEM_KEYS.toolCalls].source,
       getToolCallsSearchParams(mapping[EVIDENCE_ITEM_KEYS.toolCalls])
     ),
@@ -452,6 +465,12 @@ export const extractEvidence = async (
   };
 };
 
+export const extractEvidence = async (
+  traceAccessor: TraceAccessorWithSearch,
+  mapping: InstrumentationProfileSpec
+): Promise<EvidenceExtractionResult> =>
+  extractEvidenceWithSearch((source, params) => traceAccessor.runSearch(source, params), mapping);
+
 export const normalizeEvidence = async (
   traceAccessor: TraceAccessorWithSearch,
   mapping: InstrumentationProfileSpec
@@ -469,16 +488,33 @@ export const getRecommendedInstrumentationProfile = (
     [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
   )?.profile;
 
+export const toInstrumentationProfileProbes = (
+  profiles: InstrumentationProfileEvidenceResult[]
+): InstrumentationProfileProbeResult[] =>
+  profiles.map(({ profile, evidence }) => ({ profile, evidence }));
+
 export const extractProfilesEvidence = async (
   traceAccessor: TraceAccessorWithSearch
 ): Promise<InstrumentationProfileEvidenceResult[]> => {
   const profileNames = Object.keys(INSTRUMENTATION_PROFILES) as InstrumentationProfile[];
+  const searchCache = new Map<string, Promise<TraceSearchResult>>();
+  const runSearch: EvidenceSearch = (source, params) => {
+    const cacheKey = `${source}:${JSON.stringify(params)}`;
+    const cached = searchCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const search = traceAccessor.runSearch(source, params);
+    searchCache.set(cacheKey, search);
+    return search;
+  };
 
   return Promise.all(
     profileNames.map(
       async (profile): Promise<InstrumentationProfileEvidenceResult> => ({
         profile,
-        ...(await extractEvidence(traceAccessor, getInstrumentationProfile(profile))),
+        ...(await extractEvidenceWithSearch(runSearch, getInstrumentationProfile(profile))),
       })
     )
   );
@@ -510,7 +546,4 @@ export const extractSelectedEvidence = async (
 export const probeProfiles = async (
   traceAccessor: TraceAccessorWithSearch
 ): Promise<InstrumentationProfileProbeResult[]> =>
-  (await extractProfilesEvidence(traceAccessor)).map(({ profile, evidence }) => ({
-    profile,
-    evidence,
-  }));
+  toInstrumentationProfileProbes(await extractProfilesEvidence(traceAccessor));
