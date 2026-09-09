@@ -2032,7 +2032,13 @@ export const BulkDeleteCaseCommentsRequest = lazySchema(() =>
       * The identifiers of the attachments to delete. Every identifier must belong to an attachment of the case; if any of them does not, the request fails and nothing is deleted.
 
       */
-      ids: z.array(z.string()).min(1).max(100),
+      ids: z
+        .array(z.string())
+        .min(1)
+        .max(100)
+        .describe(
+          'The identifiers of the attachments to delete. Every identifier must belong to an attachment of the case; if any of them does not, the request fails and nothing is deleted.\n'
+        ),
     })
     .strict()
 );
