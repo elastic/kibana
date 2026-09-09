@@ -13,7 +13,7 @@ import type { Services } from '../common/services';
 const DASHBOARDS_APP_ID = 'dashboards';
 const SECURITY_GET_STARTED_PATH = `${APP_PATH}/get_started`;
 
-const landingPaths = new Set(['/', SECURITY_GET_STARTED_PATH]);
+const landingPaths = new Set(['/', APP_PATH, SECURITY_GET_STARTED_PATH]);
 
 const normalizePath = (pathname: string): string =>
   pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
@@ -31,13 +31,13 @@ export const shouldRedirectDashboardOnlyLanding = ({
 
 export const redirectDashboardOnlyLanding = (services: Services): void => {
   const { application, http } = services;
-  const { navLinks } = application.capabilities;
+  const { navLinks, dashboard_v2: dashboardV2 } = application.capabilities;
 
   if (
     shouldRedirectDashboardOnlyLanding({
       pathname: http.basePath.remove(window.location.pathname),
       canAccessGetStarted: Boolean(navLinks?.[SECURITY_UI_APP_ID]),
-      canAccessDashboards: Boolean(navLinks?.[DASHBOARDS_APP_ID]),
+      canAccessDashboards: navLinks?.[DASHBOARDS_APP_ID] === true || Boolean(dashboardV2?.show),
     })
   ) {
     application.navigateToApp(DASHBOARDS_APP_ID, { replace: true });

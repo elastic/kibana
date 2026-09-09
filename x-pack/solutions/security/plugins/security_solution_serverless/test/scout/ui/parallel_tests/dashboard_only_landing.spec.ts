@@ -35,8 +35,9 @@ spaceTest.describe(
       async ({ page, browserAuth }) => {
         await browserAuth.loginWithCustomRole(DASHBOARD_VIEWER_ROLE);
         await page.gotoApp('security/get_started');
-        await page.waitForURL(/\/app\/dashboards/);
-        await expect(page.locator('#dashboardListingHeading')).toBeVisible();
+        // URL is the acceptance signal. Listing chrome/empty-state locators vary
+        // when other Scout suites leave dashboards in the shared space.
+        await expect(page).toHaveURL(/\/app\/dashboards/);
       }
     );
 

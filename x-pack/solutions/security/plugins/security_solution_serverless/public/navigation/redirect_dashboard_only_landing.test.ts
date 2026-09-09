@@ -65,6 +65,16 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
       })
     ).toBe(false);
   });
+
+  it('returns true for the Security app root', () => {
+    expect(
+      shouldRedirectDashboardOnlyLanding({
+        pathname: '/app/security',
+        canAccessGetStarted: false,
+        canAccessDashboards: true,
+      })
+    ).toBe(true);
+  });
 });
 
 describe('redirectDashboardOnlyLanding', () => {
@@ -102,6 +112,21 @@ describe('redirectDashboardOnlyLanding', () => {
     redirectDashboardOnlyLanding(mockServices);
 
     expect(removeBasePath).toHaveBeenCalledWith('/s/default/app/security/get_started');
+    expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
+  });
+
+  it('uses dashboard_v2.show when navLinks.dashboards is unset', () => {
+    mockLocationPathname('/app/security/get_started');
+    setNavLinks({
+      securitySolutionUI: false,
+    });
+    mockServices.application.capabilities = {
+      ...mockServices.application.capabilities,
+      dashboard_v2: { show: true },
+    };
+
+    redirectDashboardOnlyLanding(mockServices);
+
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
   });
 
