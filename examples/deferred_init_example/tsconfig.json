@@ -18,6 +18,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/ui-callout",
     "@kbn/core-plugins-server",
     "@kbn/deferred-init-example-dependency-plugin",
   ]

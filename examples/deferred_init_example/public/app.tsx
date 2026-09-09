@@ -9,16 +9,24 @@
 
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiCallOut, EuiIcon, EuiPageTemplate, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiPageTemplate, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { DATA_ROUTE } from '../common/constants';
+import { DATA_ROUTE, INSTANCE_STATE_ROUTE } from '../common/constants';
 
 interface DocData {
   message: string;
   greeting: string;
   initializedAt: string;
+  initializedBy: string;
+}
+
+interface InstanceState {
+  instanceUuid: string;
+  initializedAt: string;
+  completedPhases: string[];
 }
 
 interface DemoAppProps {
@@ -27,12 +35,18 @@ interface DemoAppProps {
 
 // Because the plugin's manifest sets `enableLazyInitialize`, core has already gated this app
 // behind its own loading screen (`core.deferredInit`) until deferred init succeeded — by the
-// time this component mounts, `DATA_ROUTE` is guaranteed to serve normally on the first hit.
+// time this component mounts, both routes below are guaranteed to serve normally on the first
+// hit, so neither fetch needs a retry loop.
 const DemoApp: React.FC<DemoAppProps> = ({ http }) => {
   const [doc, setDoc] = useState<DocData | null>(null);
+  const [instanceState, setInstanceState] = useState<InstanceState | null>(null);
 
   useEffect(() => {
     http.get<DocData>(DATA_ROUTE).then(setDoc);
+    // Served straight out of the server plugin's memory, warmed by `lazyInitialize` on whichever
+    // instance answers this request. Deferred init runs once per instance, so there is always one
+    // to read.
+    http.get<InstanceState>(INSTANCE_STATE_ROUTE).then(setInstanceState);
   }, [http]);
 
   return (
@@ -97,7 +111,7 @@ const DemoApp: React.FC<DemoAppProps> = ({ http }) => {
         </EuiText>
         <EuiSpacer />
         {doc !== null && (
-          <EuiCallOut
+          <KbnSuccessCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -105,39 +119,75 @@ const DemoApp: React.FC<DemoAppProps> = ({ http }) => {
                 defaultMessage="Initialization complete"
               />
             }
-            color="success"
-            iconType="check"
-          >
-            <EuiText>
-              <p>
-                <strong>
+            text={
+              <>
+                <p>
+                  <strong>
+                    <FormattedMessage
+                      id="deferredInitExample.app.docMessageLabel"
+                      defaultMessage="Message:"
+                    />
+                  </strong>{' '}
+                  {doc.message}
+                </p>
+                <p>
+                  <strong>
+                    <FormattedMessage
+                      id="deferredInitExample.app.docGreetingLabel"
+                      defaultMessage="Greeting from deferredInitExampleDependency:"
+                    />
+                  </strong>{' '}
+                  {doc.greeting}
+                </p>
+                <p>
+                  <strong>
+                    <FormattedMessage
+                      id="deferredInitExample.app.docInitializedAtLabel"
+                      defaultMessage="Initialized at:"
+                    />
+                  </strong>{' '}
+                  {doc.initializedAt}
+                </p>
+                <p>
+                  <strong>
+                    <FormattedMessage
+                      id="deferredInitExample.app.docInitializedByLabel"
+                      defaultMessage="Last written by Kibana instance:"
+                    />
+                  </strong>{' '}
+                  {doc.initializedBy}
+                </p>
+              </>
+            }
+          />
+        )}
+        {instanceState !== null && (
+          <>
+            <EuiSpacer />
+            <KbnInfoCallout
+              announceOnMount={false}
+              title={
+                <FormattedMessage
+                  id="deferredInitExample.app.instanceStateTitle"
+                  defaultMessage="Warmed in this instance's memory"
+                />
+              }
+              text={
+                <p>
                   <FormattedMessage
-                    id="deferredInitExample.app.docMessageLabel"
-                    defaultMessage="Message:"
+                    id="deferredInitExample.app.instanceStateDescription"
+                    defaultMessage="Deferred initialization runs once on every Kibana instance, so it can populate
+                      in-process state. This is read straight from the server plugin's memory on instance
+                      {instanceUuid}, with no lock and nothing persisted: {phases}."
+                    values={{
+                      instanceUuid: <code>{instanceState.instanceUuid}</code>,
+                      phases: <code>{instanceState.completedPhases.join(', ')}</code>,
+                    }}
                   />
-                </strong>{' '}
-                {doc.message}
-              </p>
-              <p>
-                <strong>
-                  <FormattedMessage
-                    id="deferredInitExample.app.docGreetingLabel"
-                    defaultMessage="Greeting from deferredInitExampleDependency:"
-                  />
-                </strong>{' '}
-                {doc.greeting}
-              </p>
-              <p>
-                <strong>
-                  <FormattedMessage
-                    id="deferredInitExample.app.docInitializedAtLabel"
-                    defaultMessage="Initialized at:"
-                  />
-                </strong>{' '}
-                {doc.initializedAt}
-              </p>
-            </EuiText>
-          </EuiCallOut>
+                </p>
+              }
+            />
+          </>
         )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

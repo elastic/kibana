@@ -14,6 +14,9 @@ export const PLUGIN_ID = 'deferredInitExample';
 // is never resolved by the saved-object migration flow, so it cannot destabilize boot.
 export const INDEX_NAME = '.kibana_deferred_init_example';
 export const DATA_ROUTE = '/api/deferred_init_example/doc';
+// Reads the in-memory state `lazyInitialize` warmed on the instance serving the request. Nothing
+// cluster-side backs it: it only exists because deferred init runs once on every instance.
+export const INSTANCE_STATE_ROUTE = '/api/deferred_init_example/instance_state';
 export const DOC_ID = 'default';
 // Fake delay standing in for slow saved-object migrations, so the initializing loader is
 // comfortably observable. Added on top of `initDelayMs` (the default-state init delay).

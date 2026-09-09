@@ -30,11 +30,11 @@ const createPlugin = (
 
 // `lazyInitialize` receives a `LazyInitContext` with no `core`/`plugins` field, so it can only
 // reach `core.plugins.loadPluginContract` for another plugin's start contract because `start()`
-// captured `core: CoreStart` on `this` first. This is the pattern
-// `docs/specs/2026-07-13-fleet-lazy-init-licensing-contract.md` proposes for Fleet's own
-// `lazyInitialize`; this is its first real exercise anywhere in the codebase (the only prior
-// `loadPluginContract` caller, `deferred_init_example_consumer`, calls it from a route handler,
-// not from a plugin's own `lazyInitialize`).
+// captured `core: CoreStart` on `this` first. This is the pattern Fleet will need for its own
+// `lazyInitialize` (which has to resolve `licensing`), and this is its first real exercise
+// anywhere in the codebase — the only other `loadPluginContract` caller,
+// `deferred_init_example_consumer`, calls it from a route handler rather than from a plugin's own
+// `lazyInitialize`.
 describe('DeferredInitExampleServerPlugin', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -65,6 +65,57 @@ describe('DeferredInitExampleServerPlugin', () => {
         document: expect.objectContaining({ greeting: 'hello from the mock dependency' }),
       })
     );
+  });
+
+  // The accessor asserts rather than reporting readiness: no legitimate caller can observe the
+  // state unset, so an unwarmed read is a bug to surface, not a state to poll through.
+  it('refuses to serve instance state before lazyInitialize has run on this instance', () => {
+    const contract = createPlugin().start(coreMock.createStart());
+
+    expect(() => contract.getInstanceState()).toThrow(/lazyInitialize has not completed/);
+  });
+
+  // Deferred init runs once per instance, so `lazyInitialize` can warm in-memory plugin state and
+  // the start contract can expose it synchronously. The previous lock + shared-state-document
+  // design let an instance reach `available` without ever running `lazyInitialize`, which made
+  // exactly this unsafe.
+  it('warms instance-local state that the start contract exposes synchronously', async () => {
+    const plugin = createPlugin();
+    const core = coreMock.createStart();
+    core.plugins.loadPluginContract.mockResolvedValue({
+      getGreeting: () => 'hello from the mock dependency',
+    } as DeferredInitExampleDependencyStartContract);
+
+    const contract = plugin.start(core);
+    const lazyInitializePromise = plugin.lazyInitialize(createLazyInitContext());
+    await jest.runAllTimersAsync();
+    await lazyInitializePromise;
+
+    expect(contract.getInstanceState()).toEqual({
+      instanceUuid: 'instance-uuid',
+      initializedAt: expect.any(String),
+      completedPhases: [
+        'savedObjectMigrations',
+        'defaultState',
+        'loadedDependencyContract',
+        'wroteDefaultDocument',
+      ],
+    });
+  });
+
+  it('leaves the instance state unwarmed when the run fails', async () => {
+    const plugin = createPlugin({ initDelayMs: 0, forceFailure: true });
+    const core = coreMock.createStart();
+
+    const contract = plugin.start(core);
+    const lazyInitializePromise = plugin.lazyInitialize(createLazyInitContext());
+    const rejection = expect(lazyInitializePromise).rejects.toThrow(/forced failure/);
+    await jest.runAllTimersAsync();
+    await rejection;
+
+    // The state is published in one shot at the very end of the run, so a failed attempt leaves
+    // no partially-warmed state behind for core's retry to trip over.
+    expect(() => contract.getInstanceState()).toThrow(/lazyInitialize has not completed/);
   });
 
   it('propagates a loadPluginContract rejection out of lazyInitialize without writing the document', async () => {

@@ -69,8 +69,14 @@ export class DeferredInitExampleConsumerServerPlugin
         // plugin cannot be a required/optional dependency.
         const deferredInitExample =
           await context.loadPluginContract<DeferredInitExampleStartContract>('deferredInitExample');
+        // Two reads with deliberately different guarantees. `getDoc()` hits cluster-side state,
+        // which any instance's run could have written. `getInstanceState()` reads memory warmed
+        // by *this* instance's own `lazyInitialize`, and needs no readiness check here: deferred
+        // init is per instance, so `loadPluginContract` resolving on this instance means this
+        // instance ran the work.
+        const instanceState = deferredInitExample.getInstanceState();
         const doc = await deferredInitExample.getDoc();
-        return response.ok({ body: doc });
+        return response.ok({ body: { doc, instanceState } });
       }
     );
 

@@ -23,6 +23,12 @@ describe('DeferredInitExampleConsumerServerPlugin', () => {
       message: 'hello',
       greeting: 'hi',
       initializedAt: new Date().toISOString(),
+      initializedBy: 'instance-uuid',
+    }),
+    getInstanceState: () => ({
+      instanceUuid: 'instance-uuid',
+      initializedAt: new Date().toISOString(),
+      completedPhases: ['savedObjectMigrations'],
     }),
   };
 
