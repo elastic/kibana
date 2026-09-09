@@ -13,6 +13,10 @@ import { getToolResultId, createErrorResult, formatSchemaForLlm } from '@kbn/age
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { ActionScope } from '@kbn/connector-specs';
+import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
+import type { Tool, ToolAnnotations } from '@kbn/mcp-client';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import { listMcpTools } from '../../tool_types/mcp/tool_type';
 import type { ConnectorToolsOptions } from './types';
 
 const schema = z.object({
@@ -24,6 +28,27 @@ const schema = z.object({
 function formatAnnotationHint(scope: ActionScope | undefined): string {
   if (!scope || scope === 'read') return '';
   return scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
+}
+
+// Mirrors formatAnnotationHint but for MCP's advisory ToolAnnotations. Per the MCP spec, these
+// hints are untrusted/server-supplied — default to '[WRITE]' (confirm) unless the server
+// explicitly declares the tool read-only.
+function formatMcpAnnotationHint(annotations: ToolAnnotations | undefined): string {
+  if (annotations?.destructiveHint === true) return '[DESTROY]';
+  if (annotations?.readOnlyHint === true) return '';
+  return '[WRITE]';
+}
+
+function formatMcpToolParameters(inputSchema: Record<string, unknown>): string {
+  const properties = (inputSchema as { properties?: Record<string, unknown> }).properties;
+  if (!properties || Object.keys(properties).length === 0) return 'No parameters';
+
+  try {
+    const zodSchema = fromJSONSchema(inputSchema);
+    return zodSchema ? formatSchemaForLlm(zodSchema) : 'No parameters';
+  } catch {
+    return 'No parameters';
+  }
 }
 
 /**
@@ -98,6 +123,34 @@ export const createGetConnectorTool = ({
               message: `Failed to resolve connector '${connectorId}': ${(error as Error).message}`,
               metadata: { connectorId },
             }),
+          ],
+        };
+      }
+
+      if (connector.actionTypeId === MCP_CONNECTOR_TYPE_ID) {
+        const { tools } = await listMcpTools({ actions, request: context.request, connectorId });
+
+        const subActions = tools.map((tool: Tool) => ({
+          subAction: tool.name,
+          description: tool.description ?? tool.name,
+          hint: formatMcpAnnotationHint(tool.annotations),
+          parameters: formatMcpToolParameters(tool.inputSchema),
+        }));
+
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                connectorId: connector.id,
+                name: connector.name,
+                connectorType: MCP_CONNECTOR_TYPE_ID,
+                displayName: connector.name,
+                description: 'MCP connector',
+                subActions,
+              },
+            },
           ],
         };
       }

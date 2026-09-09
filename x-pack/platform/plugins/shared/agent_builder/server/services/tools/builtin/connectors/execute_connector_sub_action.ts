@@ -13,6 +13,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -127,33 +128,48 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that we have a known connector spec
-    const spec = getConnectorSpec(connectorType);
-    if (!spec) {
-      return {
-        results: [
-          createErrorResult({
-            message:
-              `No connector spec found for type '${connectorType}' (connector '${connectorId}'). ` +
-              'This connector type does not support sub-action execution via this tool.',
-            metadata: { connectorId, connectorType, subAction },
-          }),
-        ],
-      };
-    }
+    // Build the underlying execute() params. MCP has no static allow-list of tool names — the
+    // MCP server itself is authoritative, and an invalid name surfaces as an error through the
+    // shared, connector-type-agnostic handling below (same as the existing static ToolType.mcp
+    // execution path, which also doesn't pre-validate tool names).
+    let executeSubAction: string;
+    let executeSubActionParams: Record<string, unknown>;
 
-    // Validate that the sub-action is marked as a tool in the connector spec
-    if (!isToolAction(spec, subAction)) {
-      return {
-        results: [
-          createErrorResult({
-            message:
-              `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Call get_connector to find the correct sub-action names.',
-            metadata: { connectorId, connectorType, subAction },
-          }),
-        ],
-      };
+    if (connectorType === MCP_CONNECTOR_TYPE_ID) {
+      executeSubAction = 'callTool';
+      executeSubActionParams = { name: subAction, arguments: params ?? {} };
+    } else {
+      // Validate that we have a known connector spec
+      const spec = getConnectorSpec(connectorType);
+      if (!spec) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `No connector spec found for type '${connectorType}' (connector '${connectorId}'). ` +
+                'This connector type does not support sub-action execution via this tool.',
+              metadata: { connectorId, connectorType, subAction },
+            }),
+          ],
+        };
+      }
+
+      // Validate that the sub-action is marked as a tool in the connector spec
+      if (!isToolAction(spec, subAction)) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
+                'Call get_connector to find the correct sub-action names.',
+              metadata: { connectorId, connectorType, subAction },
+            }),
+          ],
+        };
+      }
+
+      executeSubAction = subAction;
+      executeSubActionParams = params ?? {};
     }
 
     const resolveAuthorizationResult = ({
@@ -202,8 +218,8 @@ export const createExecuteConnectorSubActionTool = ({
       executeResult = await actionsClient.execute({
         actionId: connectorId,
         params: {
-          subAction,
-          subActionParams: params ?? {},
+          subAction: executeSubAction,
+          subActionParams: executeSubActionParams,
         },
       });
     } catch (error) {

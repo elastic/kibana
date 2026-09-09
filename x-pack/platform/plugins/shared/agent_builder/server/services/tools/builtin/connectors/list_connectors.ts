@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ConnectorToolsOptions } from './types';
 
 const schema = z.object({});
@@ -22,11 +23,10 @@ const schema = z.object({});
  * Lists saved connector instances directly from the Actions client — id, name, type, and a
  * short description only, no sub-action details — so an agent can see what's available without
  * paying the token cost of every connector's full sub-action spec up front (use get_connector for
- * that, one connector at a time). Bypasses sml_search/sml_attach entirely. Connector types
- * without a registered @kbn/connector-specs entry (including MCP connectors, which are
- * configured as individual ToolType.mcp tools ahead of time rather than discovered
- * per-conversation) are not returned, since they can't be run via execute_connector_sub_action
- * anyway.
+ * that, one connector at a time). Bypasses sml_search/sml_attach entirely. MCP connectors get a
+ * synthesized entry (no @kbn/connector-specs lookup, no network call); get_connector fetches
+ * their live tool list on demand. Other connector types without a registered
+ * @kbn/connector-specs entry are omitted, since they can't be run via execute_connector_sub_action.
  */
 export const createListConnectorsTool = ({
   getActions,
@@ -44,8 +44,7 @@ export const createListConnectorsTool = ({
     'Lists saved connector instances directly (id, name, type, description) without first ' +
     'attaching a connector via sml_search/sml_attach. Call get_connector with a connectorId ' +
     'from this list to load its full sub-action spec before invoking it via ' +
-    'execute_connector_sub_action. ' +
-    'MCP connectors are not listed here — they are configured as individual tools elsewhere.',
+    'execute_connector_sub_action.',
   schema,
   tags: ['connector'],
   excludeFromMcp: true,
@@ -76,6 +75,19 @@ export const createListConnectorsTool = ({
         : allConnectors;
 
       const connectors = scopedConnectors.flatMap((connector) => {
+        if (connector.actionTypeId === MCP_CONNECTOR_TYPE_ID) {
+          return [
+            {
+              connectorId: connector.id,
+              name: connector.name,
+              connectorType: MCP_CONNECTOR_TYPE_ID,
+              displayName: connector.name,
+              description: 'MCP connector. Call get_connector for its available tools.',
+              isMissingSecrets: connector.isMissingSecrets ?? false,
+            },
+          ];
+        }
+
         const spec = getConnectorSpec(connector.actionTypeId);
         if (!spec) return [];
 

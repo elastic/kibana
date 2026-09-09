@@ -14,6 +14,7 @@ import type {
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools/handler';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { listMcpTools } from '../../tool_types/mcp/tool_type';
 import { createGetConnectorTool } from './get_connector';
 import type { ConnectorToolsOptions } from './types';
 
@@ -22,7 +23,12 @@ jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
 }));
 
+jest.mock('../../tool_types/mcp/tool_type', () => ({
+  listMcpTools: jest.fn(),
+}));
+
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const listMcpToolsMock = listMcpTools as jest.MockedFunction<typeof listMcpTools>;
 
 const mockGet = jest.fn();
 const mockGetActionsClientWithRequest = jest.fn(() => Promise.resolve({ get: mockGet }));
@@ -138,15 +144,111 @@ describe('createGetConnectorTool', () => {
   });
 
   it('returns an error when no connector spec is found for the type', async () => {
-    mockGet.mockResolvedValue({ id: 'conn-mcp', name: 'My MCP', actionTypeId: '.mcp' });
+    mockGet.mockResolvedValue({ id: 'conn-unknown', name: 'Unknown', actionTypeId: '.unknown' });
     getConnectorSpecMock.mockReturnValue(undefined);
 
     const tool = createGetConnectorTool({ getActions, getInference });
-    const result = await tool.handler({ connectorId: 'conn-mcp' }, mockContext);
+    const result = await tool.handler({ connectorId: 'conn-unknown' }, mockContext);
 
     const errorResult = (result as ToolHandlerStandardReturn).results[0] as ErrorResult;
     expect(errorResult.type).toBe(ToolResultType.error);
-    expect(errorResult.data.message).toContain("No connector spec found for type '.mcp'");
+    expect(errorResult.data.message).toContain("No connector spec found for type '.unknown'");
+  });
+
+  describe('MCP connectors', () => {
+    beforeEach(() => {
+      mockGet.mockResolvedValue({ id: 'conn-mcp', name: 'My MCP', actionTypeId: '.mcp' });
+    });
+
+    it('returns synthesized subActions from listMcpTools, without calling getConnectorSpec', async () => {
+      listMcpToolsMock.mockResolvedValue({
+        tools: [
+          {
+            name: 'search_issues',
+            description: 'Search issues',
+            inputSchema: { type: 'object', properties: { query: { type: 'string' } } },
+          },
+          {
+            name: 'no_args_tool',
+            inputSchema: { type: 'object' },
+          },
+        ],
+      } as any);
+
+      const tool = createGetConnectorTool({ getActions, getInference });
+      const result = await tool.handler({ connectorId: 'conn-mcp' }, mockContext);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        connectorId: string;
+        name: string;
+        connectorType: string;
+        subActions: Array<{
+          subAction: string;
+          description: string;
+          hint: string;
+          parameters: string;
+        }>;
+      };
+
+      expect(data).toMatchObject({
+        connectorId: 'conn-mcp',
+        name: 'My MCP',
+        connectorType: '.mcp',
+      });
+      expect(data.subActions).toHaveLength(2);
+      expect(data.subActions[0]).toMatchObject({
+        subAction: 'search_issues',
+        description: 'Search issues',
+      });
+      expect(data.subActions[1]).toMatchObject({
+        subAction: 'no_args_tool',
+        description: 'no_args_tool',
+      });
+      expect(getConnectorSpecMock).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['destructiveHint: true', { destructiveHint: true }, '[DESTROY]'],
+      ['readOnlyHint: true', { readOnlyHint: true }, ''],
+      ['no annotations', undefined, '[WRITE]'],
+    ])('derives hint from MCP annotations (%s)', async (_label, annotations, expectedHint) => {
+      listMcpToolsMock.mockResolvedValue({
+        tools: [{ name: 'a_tool', inputSchema: { type: 'object' }, annotations }],
+      } as any);
+
+      const tool = createGetConnectorTool({ getActions, getInference });
+      const result = await tool.handler({ connectorId: 'conn-mcp' }, mockContext);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        subActions: Array<{ hint: string }>;
+      };
+      expect(data.subActions[0].hint).toBe(expectedHint);
+    });
+
+    it('falls back to "No parameters" when the tool has no meaningful input schema', async () => {
+      listMcpToolsMock.mockResolvedValue({
+        tools: [{ name: 'a_tool', inputSchema: {} }],
+      } as any);
+
+      const tool = createGetConnectorTool({ getActions, getInference });
+      const result = await tool.handler({ connectorId: 'conn-mcp' }, mockContext);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        subActions: Array<{ parameters: string }>;
+      };
+      expect(data.subActions[0].parameters).toBe('No parameters');
+    });
+
+    it('propagates a listMcpTools failure through the generic error result', async () => {
+      listMcpToolsMock.mockRejectedValue(new Error('Failed to list MCP tools'));
+
+      const tool = createGetConnectorTool({ getActions, getInference });
+      const result = await tool.handler({ connectorId: 'conn-mcp' }, mockContext);
+
+      const errorResult = (result as ToolHandlerStandardReturn).results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain('Failed to list MCP tools');
+    });
   });
 
   it('returns an error when connector resolution fails', async () => {

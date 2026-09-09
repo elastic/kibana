@@ -88,9 +88,9 @@ describe('createListConnectorsTool', () => {
     expect(data).toEqual({ total: 0, connectors: [] });
   });
 
-  it('filters out connectors with no registered connector spec (e.g. MCP)', async () => {
+  it('filters out connector types with no registered connector spec', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 'conn-mcp', name: 'My MCP', actionTypeId: '.mcp' },
+      { id: 'conn-unknown', name: 'Unknown', actionTypeId: '.unknown' },
       { id: 'conn-slack', name: 'My Slack', actionTypeId: '.slack2' },
     ]);
 
@@ -104,6 +104,45 @@ describe('createListConnectorsTool', () => {
     expect(data.total).toBe(1);
     expect(data.connectors).toHaveLength(1);
     expect(data.connectors[0].connectorId).toBe('conn-slack');
+  });
+
+  it('returns a synthesized entry for MCP connectors without calling getConnectorSpec', async () => {
+    mockGetAll.mockResolvedValue([{ id: 'conn-mcp', name: 'My MCP', actionTypeId: '.mcp' }]);
+
+    const tool = createListConnectorsTool({ getActions, getInference });
+    const result = await tool.handler({}, mockContext);
+
+    const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+      total: number;
+      connectors: Array<Record<string, unknown>>;
+    };
+    expect(data.total).toBe(1);
+    expect(data.connectors[0]).toEqual({
+      connectorId: 'conn-mcp',
+      name: 'My MCP',
+      connectorType: '.mcp',
+      displayName: 'My MCP',
+      description: 'MCP connector. Call get_connector for its available tools.',
+      isMissingSecrets: false,
+    });
+    expect(getConnectorSpecMock).not.toHaveBeenCalled();
+  });
+
+  it('returns both MCP and spec-based connectors in a mixed list', async () => {
+    mockGetAll.mockResolvedValue([
+      { id: 'conn-mcp', name: 'My MCP', actionTypeId: '.mcp' },
+      { id: 'conn-slack', name: 'My Slack', actionTypeId: '.slack2' },
+    ]);
+
+    const tool = createListConnectorsTool({ getActions, getInference });
+    const result = await tool.handler({}, mockContext);
+
+    const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+      total: number;
+      connectors: Array<{ connectorId: string }>;
+    };
+    expect(data.total).toBe(2);
+    expect(data.connectors.map((c) => c.connectorId)).toEqual(['conn-mcp', 'conn-slack']);
   });
 
   it('returns a lightweight shape with no sub-action details', async () => {
