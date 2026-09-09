@@ -11,49 +11,56 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType, type TextAttachment } from '@kbn/agent-builder-common/attachments';
-import type { ConversationTemplateTabRenderProps } from '@kbn/agent-builder-browser';
-import { AttachmentsService } from '../services/attachments';
-import { ConversationTemplatesService } from '../services/conversation_templates';
+import { AttachmentsService, createPublicAttachmentContract } from '../services/attachments';
+import {
+  ConversationTemplatesService,
+  createPublicConversationTemplatesContract,
+} from '../services/conversation_templates';
 import { ConversationDetailsFlyoutContent } from './conversation_details_flyout';
 
 jest.mock('../application/hooks/use_conversation');
 jest.mock('../application/hooks/use_agent_builder_service');
 
-it('provides the attachment registry as a tab prop without remounting on conversation updates', () => {
+it('provides the live attachment registry at registration without remounting tabs on conversation updates', () => {
   const attachmentsService = new AttachmentsService({
     http: httpServiceMock.createSetupContract(),
   });
+  const conversationTemplatesService = new ConversationTemplatesService();
+  const conversationTemplates = createPublicConversationTemplatesContract({
+    conversationTemplatesService,
+    context: {
+      attachmentsService: createPublicAttachmentContract({ attachmentsService }),
+      openSidebarConversation: jest.fn(),
+      openFullscreenConversation: jest.fn(),
+    },
+  });
+  conversationTemplates.registerTab('test.details', ({ attachmentsService: service }) => ({
+    label: 'Details',
+    content: function TabContent({ conversation }) {
+      const [count, setCount] = useState(0);
+      const definition = service.getAttachmentUiDefinition<TextAttachment>(AttachmentType.text);
+      return (
+        <>
+          <button onClick={() => setCount(count + 1)}>Clicked {count}</button>
+          {definition?.renderConversationDetailsContent?.({
+            attachment: {
+              id: 'attachment',
+              type: AttachmentType.text,
+              data: { content: conversation.title },
+            },
+          })}
+        </>
+      );
+    },
+  }));
+  conversationTemplates.registerTemplateUIDefinition('test', () => ({
+    name: 'Test',
+    tabs: ['test.details'],
+  }));
+  // Attachment types registered after the tab are still available through its captured service.
   attachmentsService.addAttachmentType<TextAttachment>(AttachmentType.text, {
     getLabel: () => 'Text',
     renderConversationDetailsContent: ({ attachment }) => <p>{attachment.data.content}</p>,
-  });
-  const TabContent = ({
-    conversation,
-    attachmentsService: service,
-  }: ConversationTemplateTabRenderProps) => {
-    const [count, setCount] = useState(0);
-    const definition = service.getAttachmentUiDefinition<TextAttachment>(AttachmentType.text);
-    return (
-      <>
-        <button onClick={() => setCount(count + 1)}>Clicked {count}</button>
-        {definition?.renderConversationDetailsContent?.({
-          attachment: {
-            id: 'attachment',
-            type: AttachmentType.text,
-            data: { content: conversation.title },
-          },
-        })}
-      </>
-    );
-  };
-  const conversationTemplatesService = new ConversationTemplatesService();
-  conversationTemplatesService.registerTab('test.details', {
-    label: 'Details',
-    content: TabContent,
-  });
-  conversationTemplatesService.registerTemplateUIDefinition('test', {
-    name: 'Test',
-    tabs: ['test.details'],
   });
   const conversation: Conversation = {
     id: 'conversation',
@@ -65,7 +72,7 @@ it('provides the attachment registry as a tab prop without remounting on convers
     rounds: [],
     template_id: 'test',
   };
-  const props = { conversationTemplatesService, attachmentsService, titleId: 'title' };
+  const props = { conversationTemplatesService, titleId: 'title' };
   const { rerender } = render(
     <ConversationDetailsFlyoutContent {...props} conversation={conversation} />,
     { wrapper: EuiProvider }
