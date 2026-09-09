@@ -110,7 +110,6 @@ packages/kbn-tsconfig/base @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
-packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/cli @elastic/kibana-operations
 src/core @elastic/kibana-core
@@ -437,6 +436,7 @@ src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/respo
 src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
 src/platform/packages/private/kbn-reporting/public @elastic/response-ops
 src/platform/packages/private/kbn-reporting/server @elastic/response-ops
+src/platform/packages/private/kbn-rxjs-history @elastic/kibana-presentation
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
@@ -567,6 +567,7 @@ src/platform/packages/shared/kbn-dag-layout @elastic/workflows-eng
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service-server @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-data-source @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-validation @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
@@ -1060,6 +1061,7 @@ x-pack/platform/packages/shared/file-upload-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
+x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/search-ml-ux
@@ -1145,7 +1147,7 @@ x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/rna-project-team
-x-pack/platform/packages/shared/response-ops/alerting-v2-utils @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-utils @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
@@ -1335,7 +1337,6 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-s
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
-x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
@@ -2027,13 +2028,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-signals-metrics-team
  # streams-ui
 /x-pack/solutions/observability/test/serverless/functional/configs/config.* @elastic/streams-ui
-/x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/kibana-management
 /x-pack/solutions/observability/test/serverless/functional/configs/index* @elastic/streams-ui
 /x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-signals-metrics-team
 /src/platform/test/functional/services/selectable.ts @elastic/streams-ui
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.feature_flags.ts @elastic/streams-ui
-/x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/kibana-management
-/x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality @elastic/kibana-management
 /x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/streams-ui
 
 # Observability-ui
@@ -3720,6 +3718,7 @@ docs/redirects.yml                            @elastic/ski-docs
 docs-dev/docset.yml                           @elastic/kibana-tech-leads
 docs-dev/index.md                             @elastic/kibana-tech-leads
 docs-dev/kbn-ui/                              @elastic/appex-sharedux
+docs-dev/chrome/                              @elastic/appex-sharedux
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/ski-docs
@@ -3831,6 +3830,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Buildkite overrides, and ownership shares
+/.buildkite/scripts/steps/bench/ @elastic/kibana-core
+/.buildkite/scripts/steps/warm_start_memory_bench.sh @elastic/kibana-core
 /.buildkite/scripts/steps/checks/api_contracts.sh @elastic/kibana-core
 /.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
