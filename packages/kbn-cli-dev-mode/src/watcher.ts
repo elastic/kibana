@@ -144,6 +144,7 @@ export class Watcher {
           '**/{.cache,.temp,.tmp,temp,tmp}/**',
           '**/*.{test,spec,story,stories}.*',
           '**/*.{http,md,sh,txt,log,pid,swp,swo}',
+          '**/tsconfig*.type_check.json',
           '**/*~',
           '**/.DS_Store',
           '/data/**',
