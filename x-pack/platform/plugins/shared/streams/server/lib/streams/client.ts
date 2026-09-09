@@ -41,7 +41,7 @@ import { StreamsStatusConflictError } from './errors/streams_status_conflict_err
 import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { checkAccess, checkAccessBulk, getStreamPrivilegeSource } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
 import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
 
@@ -649,6 +649,22 @@ export class StreamsClient {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
+      } else if (Streams.QueryStream.Definition.is(streamDefinition)) {
+        const ancestorsByName = await this.getRawStreamDefinitionsByName(getAncestors(name));
+        const privilegeSource = getStreamPrivilegeSource(streamDefinition, ancestorsByName);
+        // privilegeSource is undefined when the query stream has no ingest ancestor
+        // (e.g. a root-level query stream with a single-segment name). In that case
+        // there is no parent ingest index to authorize against, so no check is needed.
+        if (privilegeSource !== undefined) {
+          const privileges = await checkAccess({
+            name: privilegeSource,
+            esClient: this.dependencies.esClient,
+            isSecurityEnabled: this.dependencies.isSecurityEnabled,
+          });
+          if (!privileges.read) {
+            throw new SecurityError(`Cannot read stream, insufficient privileges`);
+          }
+        }
       }
       return streamDefinition;
     } catch (error) {
@@ -1004,17 +1020,46 @@ export class StreamsClient {
       return streams;
     }
 
+    const streamsByName = new Map(streams.map((stream) => [stream.name, stream]));
+
+    // A name-filtered query (e.g. getStreamSummaries) may return a nested query
+    // stream without its ingest ancestors in the map. Fetch the missing ancestor
+    // definitions so getStreamPrivilegeSource can skip intermediate query-stream
+    // ancestors and resolve the real ingest source. For the unfiltered
+    // listStreams() path every ancestor is already present, so this is a no-op.
+    const missingAncestorIds = Array.from(
+      new Set(
+        streams
+          .filter(Streams.QueryStream.Definition.is)
+          .flatMap((stream) => getAncestors(stream.name))
+          .filter((ancestorId) => !streamsByName.has(ancestorId))
+      )
+    );
+    if (missingAncestorIds.length) {
+      const ancestors = await this.getRawStreamDefinitionsByName(missingAncestorIds);
+      for (const [name, definition] of ancestors) {
+        streamsByName.set(name, definition);
+      }
+    }
+
+    const privilegeSourceByStream = new Map(
+      streams.map((stream) => [stream.name, getStreamPrivilegeSource(stream, streamsByName)])
+    );
+
     const privileges = await checkAccessBulk({
-      names: streams
-        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
-        .map((stream) => stream.name),
+      names: Array.from(
+        new Set(Array.from(privilegeSourceByStream.values()).filter((n): n is string => n != null))
+      ),
       esClient,
       isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {
-      if (Streams.QueryStream.Definition.is(stream)) return true;
-      return privileges[stream.name]?.read === true;
+      const source = privilegeSourceByStream.get(stream.name);
+      // source is undefined when the query stream has no ingest ancestor (e.g. a
+      // root-level query stream). Allow those through — there is no parent ingest
+      // index to authorize against.
+      return source == null || privileges[source]?.read === true;
     });
   }
 
@@ -1073,6 +1118,29 @@ export class StreamsClient {
       id: definition.name,
       document: definition,
     });
+  }
+
+  /**
+   * Fetches stored stream definitions by exact name, WITHOUT running access
+   * checks. Used to build the ancestor-type map for query-stream privilege
+   * resolution: access filtering must not run here, or it would drop the very
+   * ancestor definitions the walk needs to classify as ingest vs. query.
+   */
+  private async getRawStreamDefinitionsByName(
+    names: string[]
+  ): Promise<Map<string, Streams.all.Definition>> {
+    if (!names.length) {
+      return new Map();
+    }
+    const response = await this.dependencies.storageClient.search({
+      size: 10000,
+      track_total_hits: false,
+      query: { bool: { filter: [{ terms: { name: names } }] } },
+    });
+    const definitions = response.hits.hits
+      .filter(({ _source: definition }) => !('group' in definition))
+      .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
+    return new Map(definitions.map((definition) => [definition.name, definition]));
   }
 
   async getAncestors(name: string): Promise<Streams.WiredStream.Definition[]> {
