@@ -129,7 +129,7 @@ export type AiIndexQueryParamValue = string | number | boolean;
 export interface QueryAiIndicesRequest {
   query: string;
   params?: Record<string, AiIndexQueryParamValue>;
-  /** Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
+  /** Defaults to `DEFAULT_AI_INDEX_QUERY_LIMIT`. Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
   limit?: number;
 }
 

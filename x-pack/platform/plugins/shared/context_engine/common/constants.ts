@@ -95,6 +95,7 @@ export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
 /** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
 export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;
 export const MAX_AI_INDEX_QUERY_LIMIT = 1000;
+export const MAX_AI_INDEX_QUERY_RESPONSE_BYTES = 20 * 1024 * 1024;
 
 /** AI-index describe API bounds. */
 export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
