@@ -34,7 +34,10 @@ import {
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import {
+  useCanEditSynthetics,
+  useCanRunTestManually,
+} from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
@@ -186,6 +189,9 @@ export function ActionsPopover({
 
   const canEditSynthetics = useCanEditSynthetics();
 
+  // Manual test runs are allowed for write users OR run-only (`canRunTestManually`) users.
+  const canRunTestManually = useCanRunTestManually();
+
   const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
 
   const { isServiceAllowed } = useEnablement();
@@ -302,15 +308,26 @@ export function ActionsPopover({
       ) : (
         <NoPermissionsTooltip
           canUsePublicLocations={canUsePublicLocations}
-          canEditSynthetics={canEditSynthetics}
+          canEditSynthetics={canRunTestManually}
         >
           {runTestManually}
         </NoPermissionsTooltip>
       ),
       icon: 'flask',
+<<<<<<< HEAD
       disabled: isRemote || testInProgress || !canUsePublicLocations || !isServiceAllowed,
       toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
       onClick: isRemote
+=======
+      disabled:
+        isReadOnly ||
+        testInProgress ||
+        !canUsePublicLocations ||
+        !isServiceAllowed ||
+        !canRunTestManually,
+      toolTipContent: readOnlyActionTooltip,
+      onClick: isReadOnly
+>>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
         ? undefined
         : () => {
             dispatch(
