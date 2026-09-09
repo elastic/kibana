@@ -2785,6 +2785,93 @@ describe('ManifestManager', () => {
       });
     });
 
+    describe('when customYaraSignaturesEnabled feature flag is disabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('should return false for custom YARA signatures', () => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+    });
+
+    describe('when customYaraSignaturesEnabled feature flag is enabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: ['customYaraSignaturesEnabled'],
+        });
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return false when only PLI is enabled (enterprise required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointCustomYaraSignatures;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+      });
+
+      test('should return false when only enterprise license is present (PLI required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true when both PLI and enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointCustomYaraSignatures;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+      });
+
+      test('should return false when neither PLI nor enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+      });
+    });
+
     describe('host isolation exceptions licensing logic', () => {
       beforeEach(() => {
         context = buildManifestManagerContextMock({});
@@ -2834,7 +2921,6 @@ describe('ManifestManager', () => {
         { name: 'trusted apps', id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id },
         { name: 'event filters', id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id },
         { name: 'blocklists', id: ENDPOINT_ARTIFACT_LISTS.blocklists.id },
-        { name: 'custom YARA signatures', id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id },
       ];
 
       test.each(nonLicensedArtifacts)('should return true for $name artifacts', ({ id }) => {
