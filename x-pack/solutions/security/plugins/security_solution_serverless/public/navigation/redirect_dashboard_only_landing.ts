@@ -7,14 +7,17 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
-import { ALERTS_UI_READ, RULES_UI_READ } from '@kbn/security-solution-features/constants';
 import {
   ALERTS_FEATURE_ID,
+  ALERTS_UI_READ,
+  RULES_UI_READ,
+} from '@kbn/security-solution-features/constants';
+import {
   APP_PATH,
   CASES_FEATURE_ID,
   RULES_FEATURE_ID,
   SECURITY_FEATURE_ID,
-} from '@kbn/security-solution-plugin/common/constants';
+} from '@kbn/security-solution-plugin/common';
 import type { Services } from '../common/services';
 
 const DASHBOARDS_APP_ID = 'dashboards';
@@ -40,7 +43,7 @@ export const canAccessSecurityLanding = (capabilities: Capabilities): boolean =>
   );
 
 export const canAccessDashboardsApp = (capabilities: Capabilities): boolean =>
-  Boolean(capabilities.dashboard_v2?.show || capabilities.dashboard?.show);
+  Boolean(capabilities.dashboard_v2?.show);
 
 export const shouldRedirectDashboardOnlyLanding = ({
   pathname,

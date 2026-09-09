@@ -24,6 +24,17 @@ const mockLocationPathname = (pathname: string) => {
   });
 };
 
+const setCapabilities = (overrides: {
+  navLinks?: Record<string, boolean>;
+  siemV5?: Record<string, boolean>;
+  dashboard_v2?: Record<string, boolean>;
+}) => {
+  mockServices.application.capabilities = {
+    ...mockServices.application.capabilities,
+    ...overrides,
+  };
+};
+
 describe('canAccessSecurityLanding', () => {
   it('returns false for a dashboard-only capability set', () => {
     expect(
@@ -108,20 +119,12 @@ describe('redirectDashboardOnlyLanding', () => {
   const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
   const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
 
-  const setCapabilities = (capabilities: Record<string, unknown>) => {
-    mockServices.application.capabilities = {
-      ...mockServices.application.capabilities,
-      ...capabilities,
-    };
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     setCapabilities({
       navLinks: {},
       siemV5: {},
       dashboard_v2: {},
-      dashboard: {},
     });
     removeBasePath.mockImplementation((pathname: string) => pathname);
   });
@@ -187,15 +190,14 @@ describe('subscribeDashboardOnlyLanding', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockServices.application.currentLocation$ = currentLocation$;
-    mockServices.application.capabilities = {
-      ...mockServices.application.capabilities,
+    setCapabilities({
       navLinks: {
         dashboards: true,
         securitySolutionUI: true,
       },
       dashboard_v2: { show: true },
       siemV5: {},
-    };
+    });
     removeBasePath.mockImplementation((pathname: string) => pathname);
   });
 
