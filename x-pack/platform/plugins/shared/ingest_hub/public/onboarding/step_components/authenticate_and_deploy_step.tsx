@@ -54,6 +54,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deploymentMethod,
     setDeploymentMethod,
     detectAndReviewStep,
+    updateDetectAndReviewStep,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
@@ -152,6 +153,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
 
+    const ecfStacksUnchanged =
+      detectAndReviewStep.ecfStacks !== undefined &&
+      JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks);
+
     // ECF-only: handleDeploy never runs, so create the SO here then navigate.
     if (miServiceIds.length === 0 && hasAnyEcf) {
       setIsSavingSO(true);
@@ -178,7 +183,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
       onContinue();
       if (deploymentId) {
-        await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
+        if (!ecfStacksUnchanged) {
+          await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
+          updateDetectAndReviewStep({ ecfStacks });
+        }
         if (!existingId) persistDeploymentId(deploymentId);
       }
       return;
@@ -187,7 +195,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
     if (hasAnyEcf && detectAndReviewStep.onboardingDeploymentId) {
       onContinue();
-      await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
+      if (!ecfStacksUnchanged) {
+        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
+        updateDetectAndReviewStep({ ecfStacks });
+      }
       return;
     }
 
@@ -202,9 +213,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     globalRegion,
     dataFormat,
     detectAndReviewStep.onboardingDeploymentId,
+    detectAndReviewStep.ecfStacks,
     createDeployment,
     updateDeployment,
     persistDeploymentId,
+    updateDetectAndReviewStep,
     onContinue,
   ]);
 

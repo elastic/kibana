@@ -34,6 +34,8 @@ export interface DetectAndReviewStepState {
   deployErrors: Record<string, string>;
   /** SO id of the cloud-onboarding-deployment record created at Deploy time. Used to update the record after allSettled and on retry. */
   onboardingDeploymentId?: string;
+  /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
+  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
@@ -62,6 +64,7 @@ interface PersistedDetectAndReviewStep {
   failedInstances: string[];
   deployErrors: Record<string, string>;
   onboardingDeploymentId?: string;
+  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
