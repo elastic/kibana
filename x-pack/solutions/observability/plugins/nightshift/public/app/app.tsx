@@ -29,6 +29,7 @@ import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
 import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
+import { useFetchSeverityCounts } from '../hooks/use_fetch_severity_counts';
 import {
   INVESTIGATION_LIST_PAGE_SIZE,
   InvestigationList,
@@ -85,8 +86,15 @@ export function NightshiftApp(): React.ReactElement {
     severities,
   });
 
+  // Separate request: the counts are independent of page, sort and the selected severity, so
+  // they resolve on their own and the list does not wait on the aggregation.
+  const { data: countsData } = useFetchSeverityCounts({ query: searchQuery });
+
   const investigations = useMemo(() => data?.results ?? [], [data]);
-  const severityCounts = useMemo(() => data?.severity_counts ?? EMPTY_SEVERITY_COUNTS, [data]);
+  const severityCounts = useMemo(
+    () => countsData?.severity_counts ?? EMPTY_SEVERITY_COUNTS,
+    [countsData]
+  );
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
     [search]
