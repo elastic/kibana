@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,11 +101,24 @@ const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
 
   const isBlocking = data?.matches === false && data.reason === 'key_mismatch';
 
+  // Report validity only when the blocking state itself changes. The wizard's updatePolicy is
+  // re-created on every policy update, so depending on the callback identity here would re-fire
+  // this effect after each update it causes — an infinite render loop (seen as a "page
+  // unresponsive" prompt during the 2026-09-09 walkthrough).
+  const onValidityChangeRef = useRef(onValidityChange);
+  onValidityChangeRef.current = onValidityChange;
+  const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
   useEffect(() => {
-    if (isCheckEnabled) {
-      onValidityChange?.(!isBlocking);
+    if (!isCheckEnabled) {
+      return;
     }
-  }, [isBlocking, isCheckEnabled, onValidityChange]);
+    const isValid = !isBlocking;
+    if (lastReportedValidityRef.current === isValid) {
+      return;
+    }
+    lastReportedValidityRef.current = isValid;
+    onValidityChangeRef.current?.(isValid);
+  }, [isBlocking, isCheckEnabled]);
 
   const reportAction = useCallback(
     (action: IacKeyCheckAction) => {

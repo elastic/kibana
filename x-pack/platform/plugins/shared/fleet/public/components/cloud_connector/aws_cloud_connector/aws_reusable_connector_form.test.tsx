@@ -76,12 +76,12 @@ let queryClient: QueryClient;
 
 // ---------- helpers ----------
 
-const renderWithIntl = (component: React.ReactElement) =>
-  render(
-    <QueryClientProvider client={queryClient}>
-      <I18nProvider>{component}</I18nProvider>
-    </QueryClientProvider>
-  );
+const withProviders = (component: React.ReactElement) => (
+  <QueryClientProvider client={queryClient}>
+    <I18nProvider>{component}</I18nProvider>
+  </QueryClientProvider>
+);
+const renderWithIntl = (component: React.ReactElement) => render(withProviders(component));
 
 const mockCloudConnectors = [
   {
@@ -328,6 +328,60 @@ describe('AWSReusableConnectorForm', () => {
         ).toBeInTheDocument();
       });
       expect(onValidityChange).toHaveBeenCalledWith(false);
+    });
+
+    it('(a2) reports validity only when the blocking state changes, not when the callback identity changes', async () => {
+      // The wizard re-creates updatePolicy (and therefore onValidityChange) after every policy
+      // update; re-firing on identity would loop: report → update → new callback → report …
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: false, reason: 'key_mismatch', integrations: [] },
+        isFetching: false,
+        refetch: mockRefetch,
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      const first = jest.fn();
+      const { rerender } = renderWithIntl(
+        <AWSReusableConnectorForm
+          {...defaultProps}
+          credentials={credentialsWithId}
+          onValidityChange={first}
+        />
+      );
+      await waitFor(() => expect(first).toHaveBeenCalledWith(false));
+      expect(first).toHaveBeenCalledTimes(1);
+
+      // Same blocking state, new callback identity (what the wizard does after each update).
+      const second = jest.fn();
+      rerender(
+        withProviders(
+          <AWSReusableConnectorForm
+            {...defaultProps}
+            credentials={credentialsWithId}
+            onValidityChange={second}
+          />
+        )
+      );
+      expect(second).not.toHaveBeenCalled();
+      expect(first).toHaveBeenCalledTimes(1);
+
+      // Blocking state clears → the latest callback is told once.
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, integrations: [] },
+        isFetching: false,
+        refetch: mockRefetch,
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      rerender(
+        withProviders(
+          <AWSReusableConnectorForm
+            {...defaultProps}
+            credentials={credentialsWithId}
+            onValidityChange={second}
+          />
+        )
+      );
+      await waitFor(() => expect(second).toHaveBeenCalledWith(true));
+      expect(second).toHaveBeenCalledTimes(1);
     });
 
     it('(b) no_key: renders callout and calls onValidityChange(true)', async () => {
