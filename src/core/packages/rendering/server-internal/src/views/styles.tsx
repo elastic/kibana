@@ -90,6 +90,38 @@ const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPa
   };
 };
 
+const bootstrapErrorLayoutRules = `
+          .kbnBootstrapError {
+            text-align: center;
+            padding: 120px 20px;
+            font-family: Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+          }
+
+          .kbnBootstrapErrorTitle {
+            margin: 20px;
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.25;
+          }
+
+          .kbnBootstrapErrorText {
+            margin: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+          }
+
+          .kbnBootstrapErrorButton {
+            cursor: pointer;
+            padding-inline: 12px;
+            block-size: 40px;
+            font-size: 1rem;
+            line-height: 1.4286rem;
+            border-radius: 6px;
+            min-inline-size: 112px;
+            border: none;
+          }
+`;
+
 const bootPageRules = (colors: BootPageColors) => `
           html {
             background-color: ${colors.pageBackground};
@@ -133,11 +165,11 @@ const InlineStyles: FC<{ darkMode: DarkModeValue; themeName: ThemeName }> = ({
   // no flash-of-light before the dark theme is applied.
   const css =
     darkMode === 'system'
-      ? `${bootPageRules(light)}
+      ? `${bootstrapErrorLayoutRules}${bootPageRules(light)}
           @media (prefers-color-scheme: dark) {
             ${bootPageRules(dark)}
           }`
-      : bootPageRules(darkMode ? dark : light);
+      : `${bootstrapErrorLayoutRules}${bootPageRules(darkMode ? dark : light)}`;
 
   /* eslint-disable react/no-danger */
   return <style dangerouslySetInnerHTML={{ __html: css }} />;

@@ -125,6 +125,8 @@ describe('Template (boot splash)', () => {
 
     it('inlines borealis bootstrap error colors for light mode', () => {
       const css = getBootPageCss(render({ ...baseMetadata, darkMode: false }));
+      expect(css).toContain('.kbnBootstrapError {');
+      expect(css).toContain('padding: 120px 20px;');
       expect(css).toContain('.kbnBootstrapErrorTitle');
       expect(css).toContain('color: #07101F;');
       expect(css).toContain('.kbnBootstrapErrorButton');
