@@ -162,6 +162,7 @@ fileGroups:
     - public/**/*
     - test/scout/**/*
     - test/scout_alerting_v2/**/*
+    - jest.setup.ts
     - '!target/**/*'
     - '!.storybook/**/*.js'
   jest-config:
