@@ -436,6 +436,7 @@ src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/respo
 src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
 src/platform/packages/private/kbn-reporting/public @elastic/response-ops
 src/platform/packages/private/kbn-reporting/server @elastic/response-ops
+src/platform/packages/private/kbn-rxjs-history @elastic/kibana-presentation
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
@@ -566,6 +567,7 @@ src/platform/packages/shared/kbn-dag-layout @elastic/workflows-eng
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service-server @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-data-source @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-validation @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
