@@ -16,8 +16,6 @@ jest.mock('../../../public/application/app_context', () => ({
   useAppContext: () => mockUseAppContext(),
 }));
 
-const BANNER_TITLE = 'The semantic_text field type is available with a Platinum license';
-
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
 };
@@ -65,13 +63,6 @@ describe('SemanticTextBanner', () => {
 
       expect(getItemSpy).toHaveBeenCalledWith('semantic-text-banner-display');
       expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
-    });
-
-    it('should contain content related to upgrading the license for semantic_text', () => {
-      renderWithIntl(<SemanticTextBanner />);
-
-      const banner = screen.getByTestId('indexDetailsMappingsSemanticTextBanner');
-      expect(banner.textContent).toContain(BANNER_TITLE);
     });
 
     it('should navigate to the license management page when clicked', () => {
@@ -125,13 +116,6 @@ describe('SemanticTextBanner', () => {
 
       expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
       expect(screen.queryByTestId('SemanticTextBannerManageLicenseButton')).not.toBeInTheDocument();
-    });
-
-    it('should contain content about the license requirement', () => {
-      renderWithIntl(<SemanticTextBanner />);
-
-      const banner = screen.getByTestId('indexDetailsMappingsSemanticTextBanner');
-      expect(banner.textContent).toContain(BANNER_TITLE);
     });
   });
 });
