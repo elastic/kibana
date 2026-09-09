@@ -36,11 +36,21 @@ import { isEsqlChart } from '../../../utils';
 
 export const getDatasourceIdForNewLayer = (
   layerType: Parameters<AddLayerFunction>[0],
-  selectedLayerDatasourceId?: LensDatasourceId
-): LensDatasourceId | undefined =>
-  layerType === LENS_LAYER_TYPES.REFERENCELINE
-    ? LENS_DATASOURCE_ID.FORM_BASED
-    : selectedLayerDatasourceId;
+  selectedLayerDatasourceId: LensDatasourceId | undefined,
+  isEsql: boolean
+): LensDatasourceId | undefined => {
+  if (layerType === LENS_LAYER_TYPES.REFERENCELINE) {
+    return LENS_DATASOURCE_ID.FORM_BASED;
+  }
+  // On ES|QL charts only helper layers (reference lines / annotations) are
+  // form-based; a new data layer must stay text-based even when a form-based
+  // helper layer is currently selected, otherwise the chart ends up with
+  // unsupported mixed ES|QL / non-ES|QL data layers.
+  if (isEsql && layerType === LENS_LAYER_TYPES.DATA) {
+    return LENS_DATASOURCE_ID.TEXT_BASED;
+  }
+  return selectedLayerDatasourceId;
+};
 
 export const useAddLayerButton = (
   framePublicAPI: FramePublicAPI,
@@ -81,7 +91,11 @@ export const useAddLayerButton = (
           ? framePublicAPI.datasourceLayers[visualization.selectedLayerId]?.datasourceId
           : undefined
       ) as LensDatasourceId | undefined;
-      const datasourceId = getDatasourceIdForNewLayer(layerType, selectedLayerDatasourceId);
+      const datasourceId = getDatasourceIdForNewLayer(
+        layerType,
+        selectedLayerDatasourceId,
+        isEsqlChart(framePublicAPI.datasourceLayers)
+      );
 
       dispatchLens(
         addLayerAction({

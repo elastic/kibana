@@ -96,15 +96,25 @@ function renderAddLayerButton(
 
 describe('useAddLayerButton', () => {
   it('uses the selected layer datasource for a new data layer', () => {
-    expect(getDatasourceIdForNewLayer(LENS_LAYER_TYPES.DATA, LENS_DATASOURCE_ID.TEXT_BASED)).toBe(
-      LENS_DATASOURCE_ID.TEXT_BASED
-    );
+    expect(
+      getDatasourceIdForNewLayer(LENS_LAYER_TYPES.DATA, LENS_DATASOURCE_ID.TEXT_BASED, false)
+    ).toBe(LENS_DATASOURCE_ID.TEXT_BASED);
   });
 
   it('uses the form-based datasource for a new reference line', () => {
     expect(
-      getDatasourceIdForNewLayer(LENS_LAYER_TYPES.REFERENCELINE, LENS_DATASOURCE_ID.TEXT_BASED)
+      getDatasourceIdForNewLayer(
+        LENS_LAYER_TYPES.REFERENCELINE,
+        LENS_DATASOURCE_ID.TEXT_BASED,
+        true
+      )
     ).toBe(LENS_DATASOURCE_ID.FORM_BASED);
+  });
+
+  it('forces text-based for a new data layer on an ES|QL chart even when a form-based helper layer is selected', () => {
+    expect(
+      getDatasourceIdForNewLayer(LENS_LAYER_TYPES.DATA, LENS_DATASOURCE_ID.FORM_BASED, true)
+    ).toBe(LENS_DATASOURCE_ID.TEXT_BASED);
   });
 
   // Multi-layer editing is supported for ES|QL charts: the add layer button renders
