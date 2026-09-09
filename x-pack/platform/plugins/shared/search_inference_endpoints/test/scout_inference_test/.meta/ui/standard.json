@@ -1,5 +1,5 @@
 {
-  "sha1": "d0a48b6a5260cd47491cc43f9d3527cc1f15de36",
+  "sha1": "80a9a162084ad61fe72097c248c9b34a57ba5dc1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -901,8 +901,8 @@
       }
     },
     {
-      "id": "e7575b12bba67de-7f99ea879ab1e36",
-      "title": "Manage Region Preferences modal switching to the Regions tab shows zone accordion panels",
+      "id": "e7575b12bba67de-588f634a4a4c3d8",
+      "title": "Manage Region Preferences modal switching to the Regions tab shows zone panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -915,8 +915,8 @@
       }
     },
     {
-      "id": "e7575b12bba67de-06ff792e6d39bc5",
-      "title": "Manage Region Preferences modal Expand all on the Regions tab reveals individual region checkboxes",
+      "id": "e7575b12bba67de-7a977a12f408b38",
+      "title": "Manage Region Preferences modal switching to the Regions tab reveals individual region checkboxes directly",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -924,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 157,
-        "column": 11
+        "line": 152,
+        "column": 21
       }
     },
     {
@@ -938,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 176,
-        "column": 11
+        "line": 172,
+        "column": 21
       }
     },
     {
@@ -952,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 191,
-        "column": 21
+        "line": 188,
+        "column": 67
       }
     },
     {
@@ -966,7 +966,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 223,
+        "line": 217,
         "column": 13
       }
     },
@@ -980,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 251,
-        "column": 5
+        "line": 253,
+        "column": 7
       }
     },
     {
@@ -994,8 +994,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 286,
-        "column": 8
+        "line": 287,
+        "column": 5
       }
     },
     {
@@ -1008,7 +1008,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 306,
+        "line": 311,
         "column": 13
       }
     },
