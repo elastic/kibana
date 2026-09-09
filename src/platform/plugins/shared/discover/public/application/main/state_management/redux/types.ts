@@ -236,6 +236,7 @@ export interface TabState extends TabItem {
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
+  isWarningCalloutDismissed: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   profileAppStateDefaults: ProfileAppStateDefaults;
