@@ -38,16 +38,6 @@ export function useClassicBreadcrumbs(): ChromeBreadcrumb[] {
 }
 
 /**
- * Returns the current project-style breadcrumbs derived from the active
- * navigation tree node.
- */
-export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
-  const chrome = useChromeService();
-  const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
-  return useObservable(breadcrumbs$, []);
-}
-
-/**
  * Returns the project home href derived from the navigation tree.
  * Used by `Logo` (project header).
  */
@@ -273,7 +263,7 @@ export function useProjectPicker(): ReactNode {
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
   const inlineAppHeader$ = useMemo(() => chrome.inlineAppHeader.get$(), [chrome]);
-  return useObservable(inlineAppHeader$, false);
+  return useObservable(inlineAppHeader$, undefined) !== undefined;
 }
 
 export function useInternalLegacyActionMenu(): MountPoint | undefined {
