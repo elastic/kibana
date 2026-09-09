@@ -53,22 +53,14 @@ export interface CreateModelProviderOpts {
 export type CreateModelProviderFactoryFn = (
   opts: Omit<
     CreateModelProviderOpts,
-    | 'request'
-    | 'defaultConnectorId'
-    | 'telemetryMetadata'
-    | 'maxContentLength'
-    | 'reasoningLevel'
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength' | 'reasoningLevel'
   >
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
   opts: Pick<
     CreateModelProviderOpts,
-    | 'request'
-    | 'defaultConnectorId'
-    | 'telemetryMetadata'
-    | 'maxContentLength'
-    | 'reasoningLevel'
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength' | 'reasoningLevel'
   >
 ) => ModelProvider;
 
@@ -174,14 +166,12 @@ export const createModelProvider = ({
   // Cache key encodes (connectorId, applyReasoning) so the same connector can serve both
   // a reasoning-enabled and reasoning-free variant when it is reached through both the default
   // path and the fast path (which happens when no dedicated fast endpoint is configured).
-  const buildScopedModel = memoizeAsyncByKey(
-    async (key: string): Promise<ScopedModel> => {
-      const [connectorId, applyReasoningFlag] = key.split('|');
-      const applyReasoning = applyReasoningFlag === 'true';
-      const reasoning =
-        applyReasoning && reasoningLevel ? { effort: reasoningLevel } : undefined;
+  const buildScopedModel = memoizeAsyncByKey(async (key: string): Promise<ScopedModel> => {
+    const [connectorId, applyReasoningFlag] = key.split('|');
+    const applyReasoning = applyReasoningFlag === 'true';
+    const reasoning = applyReasoning && reasoningLevel ? { effort: reasoningLevel } : undefined;
 
-      const completionCallback: InferenceCompleteCallbackHandler = (event) => {
+    const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
       if (!modelName && connector) {
@@ -243,7 +233,10 @@ export const createModelProvider = ({
     };
   });
 
-  const getModelById = (connectorId: string, applyReasoning: boolean = true): Promise<ScopedModel> =>
+  const getModelById = (
+    connectorId: string,
+    applyReasoning: boolean = true
+  ): Promise<ScopedModel> =>
     buildScopedModel(`${connectorId}|${applyReasoning && reasoningLevel !== undefined}`);
 
   const hasFastModel = memoizeAsync(async () => {
@@ -281,8 +274,7 @@ const wrapBoundInferenceClientWithReasoning = (
 ): BoundInferenceClient => {
   const originalChatComplete = client.chatComplete;
   const wrappedChatComplete = ((options: Parameters<BoundInferenceClient['chatComplete']>[0]) => {
-    const withReasoning =
-      options.reasoning === undefined ? { ...options, reasoning } : options;
+    const withReasoning = options.reasoning === undefined ? { ...options, reasoning } : options;
     return originalChatComplete(withReasoning);
   }) as BoundInferenceClient['chatComplete'];
 
@@ -296,4 +288,3 @@ const wrapBoundInferenceClientWithReasoning = (
     },
   };
 };
-
