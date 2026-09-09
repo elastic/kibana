@@ -32,11 +32,11 @@ spaceTest.describe(
   () => {
     spaceTest(
       'redirects a dashboard-only user from Get started to dashboards',
-      async ({ page, browserAuth }) => {
+      async ({ page, browserAuth, pageObjects }) => {
         await browserAuth.loginWithCustomRole(DASHBOARD_VIEWER_ROLE);
         await page.gotoApp('security/get_started');
         await page.waitForURL(/\/app\/dashboards/);
-        await expect(page.testSubj.locator('emptyListPrompt')).toBeVisible();
+        await expect(pageObjects.chrome.pageTitle).toHaveText('Dashboards');
       }
     );
 
