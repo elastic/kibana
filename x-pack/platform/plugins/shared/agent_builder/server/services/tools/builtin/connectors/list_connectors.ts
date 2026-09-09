@@ -12,7 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
+import { isMcpConnector, MCP_CONNECTOR_TYPE_ID } from './types';
 import type { ConnectorToolsOptions } from './types';
 
 const schema = z.object({});
@@ -75,7 +75,7 @@ export const createListConnectorsTool = ({
         : allConnectors;
 
       const connectors = scopedConnectors.flatMap((connector) => {
-        if (connector.actionTypeId === MCP_CONNECTOR_TYPE_ID) {
+        if (isMcpConnector(connector.actionTypeId)) {
           return [
             {
               connectorId: connector.id,

@@ -131,16 +131,16 @@ describe('createGetConnectorTool', () => {
     expect(subActionNames).toEqual(['searchMessages', 'sendMessage', 'deleteMessage']);
     expect(subActionNames).not.toContain('internalRefresh');
 
-    const searchMessages = data.subActions.find((a) => a.subAction === 'searchMessages')!;
-    expect(searchMessages.hint).toBe('');
-    expect(searchMessages.parameters).not.toBe('No parameters');
+    const searchMessages = data.subActions.find((a) => a.subAction === 'searchMessages');
+    expect(searchMessages?.hint).toBe('');
+    expect(searchMessages?.parameters).not.toBe('No parameters');
 
-    const sendMessage = data.subActions.find((a) => a.subAction === 'sendMessage')!;
-    expect(sendMessage.hint).toBe('[WRITE]');
+    const sendMessage = data.subActions.find((a) => a.subAction === 'sendMessage');
+    expect(sendMessage?.hint).toBe('[WRITE]');
 
-    const deleteMessage = data.subActions.find((a) => a.subAction === 'deleteMessage')!;
-    expect(deleteMessage.hint).toBe('[DESTROY]');
-    expect(deleteMessage.parameters).toBe('No parameters');
+    const deleteMessage = data.subActions.find((a) => a.subAction === 'deleteMessage');
+    expect(deleteMessage?.hint).toBe('[DESTROY]');
+    expect(deleteMessage?.parameters).toBe('No parameters');
   });
 
   it('returns an error when no connector spec is found for the type', async () => {
@@ -265,10 +265,13 @@ describe('createGetConnectorTool', () => {
   describe('agent connector scoping', () => {
     it('rejects a connectorId not in agentConfiguration.connector_ids without resolving it', async () => {
       const tool = createGetConnectorTool({ getActions, getInference });
-      const result = await tool.handler({ connectorId: 'conn-slack' }, {
-        ...mockContext,
-        agentConfiguration: { connector_ids: ['conn-999'], tools: [] },
-      } as any);
+      const result = await tool.handler(
+        { connectorId: 'conn-slack' },
+        {
+          ...mockContext,
+          agentConfiguration: { connector_ids: ['conn-999'], tools: [] },
+        }
+      );
 
       const errorResult = (result as ToolHandlerStandardReturn).results[0] as ErrorResult;
       expect(errorResult.type).toBe(ToolResultType.error);
@@ -278,10 +281,13 @@ describe('createGetConnectorTool', () => {
 
     it('allows a connectorId that is in agentConfiguration.connector_ids', async () => {
       const tool = createGetConnectorTool({ getActions, getInference });
-      const result = await tool.handler({ connectorId: 'conn-slack' }, {
-        ...mockContext,
-        agentConfiguration: { connector_ids: ['conn-slack'], tools: [] },
-      } as any);
+      const result = await tool.handler(
+        { connectorId: 'conn-slack' },
+        {
+          ...mockContext,
+          agentConfiguration: { connector_ids: ['conn-slack'], tools: [] },
+        }
+      );
 
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
       expect(mockGet).toHaveBeenCalled();
@@ -289,10 +295,13 @@ describe('createGetConnectorTool', () => {
 
     it('is unrestricted when agentConfiguration has no connector_ids', async () => {
       const tool = createGetConnectorTool({ getActions, getInference });
-      const result = await tool.handler({ connectorId: 'conn-slack' }, {
-        ...mockContext,
-        agentConfiguration: { tools: [] },
-      } as any);
+      const result = await tool.handler(
+        { connectorId: 'conn-slack' },
+        {
+          ...mockContext,
+          agentConfiguration: { tools: [] },
+        }
+      );
 
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
     });

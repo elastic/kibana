@@ -190,10 +190,13 @@ describe('createListConnectorsTool', () => {
 
     it('filters to agentConfiguration.connector_ids when set', async () => {
       const tool = createListConnectorsTool({ getActions, getInference });
-      const result = await tool.handler({}, {
-        ...mockContext,
-        agentConfiguration: { connector_ids: ['conn-slack'], tools: [] },
-      } as any);
+      const result = await tool.handler(
+        {},
+        {
+          ...mockContext,
+          agentConfiguration: { connector_ids: ['conn-slack'], tools: [] },
+        }
+      );
 
       const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
         total: number;
@@ -205,10 +208,13 @@ describe('createListConnectorsTool', () => {
 
     it('returns no connectors when connector_ids is an empty array', async () => {
       const tool = createListConnectorsTool({ getActions, getInference });
-      const result = await tool.handler({}, {
-        ...mockContext,
-        agentConfiguration: { connector_ids: [], tools: [] },
-      } as any);
+      const result = await tool.handler(
+        {},
+        {
+          ...mockContext,
+          agentConfiguration: { connector_ids: [], tools: [] },
+        }
+      );
 
       const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
         total: number;
@@ -219,10 +225,13 @@ describe('createListConnectorsTool', () => {
 
     it('returns every connector when agentConfiguration has no connector_ids', async () => {
       const tool = createListConnectorsTool({ getActions, getInference });
-      const result = await tool.handler({}, {
-        ...mockContext,
-        agentConfiguration: { tools: [] },
-      } as any);
+      const result = await tool.handler(
+        {},
+        {
+          ...mockContext,
+          agentConfiguration: { tools: [] },
+        }
+      );
 
       const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
         total: number;

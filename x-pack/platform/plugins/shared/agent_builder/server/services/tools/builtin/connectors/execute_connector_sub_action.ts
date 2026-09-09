@@ -13,7 +13,8 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
-import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
+import { buildMcpCallToolExecuteParams } from '../../tool_types/mcp/tool_type';
+import { isMcpConnector } from './types';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -135,9 +136,10 @@ export const createExecuteConnectorSubActionTool = ({
     let executeSubAction: string;
     let executeSubActionParams: Record<string, unknown>;
 
-    if (connectorType === MCP_CONNECTOR_TYPE_ID) {
-      executeSubAction = 'callTool';
-      executeSubActionParams = { name: subAction, arguments: params ?? {} };
+    if (isMcpConnector(connectorType)) {
+      const mcpParams = buildMcpCallToolExecuteParams(subAction, params ?? {});
+      executeSubAction = mcpParams.subAction;
+      executeSubActionParams = mcpParams.subActionParams;
     } else {
       // Validate that we have a known connector spec
       const spec = getConnectorSpec(connectorType);

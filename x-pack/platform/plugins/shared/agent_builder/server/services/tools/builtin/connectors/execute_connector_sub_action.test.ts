@@ -290,7 +290,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
-        { ...mockContext, agentConfiguration: { connector_ids: ['conn-999'], tools: [] } } as any
+        { ...mockContext, agentConfiguration: { connector_ids: ['conn-999'], tools: [] } }
       );
 
       expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
@@ -306,7 +306,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
-        { ...mockContext, agentConfiguration: { connector_ids: ['conn-123'], tools: [] } } as any
+        { ...mockContext, agentConfiguration: { connector_ids: ['conn-123'], tools: [] } }
       );
 
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
@@ -318,7 +318,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
-        { ...mockContext, agentConfiguration: { tools: [] } } as any
+        { ...mockContext, agentConfiguration: { tools: [] } }
       );
 
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
