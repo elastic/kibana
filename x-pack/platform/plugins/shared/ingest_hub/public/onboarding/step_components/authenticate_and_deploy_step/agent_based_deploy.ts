@@ -181,6 +181,35 @@ async function buildInstancePackagePolicy(
   // required vars are missing, so `enabled: false` would not help.
   const inputs = pruneUnsatisfiedInputs(allInputs, service);
   if (Object.keys(inputs).length === 0) {
+    if (Object.keys(allInputs).length === 0) {
+      // No inputs were built at all — the service has no configured data streams (e.g. aws_logs
+      // which has no dataStreams in the matrix). Send all inputs explicitly disabled so Fleet
+      // installs the package with everything off, matching the Fleet UI's default toggle state.
+      // buildDisabledInputsForOtherTemplates already covers the other-template inputs; here we
+      // also disable the service's own policy-template inputs.
+      const selfDisabled: Record<string, { enabled: false }> = {};
+      for (const pt of pkgInfo.policy_templates ?? []) {
+        if (pt.name !== (service.policyTemplate ?? service.id)) continue;
+        for (const input of pt.inputs ?? []) {
+          const inputType = input.id ?? input.type;
+          selfDisabled[`${pt.name}-${inputType}`] = { enabled: false };
+        }
+      }
+      const servicePt = service.policyTemplate ?? service.id;
+      const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePt);
+      const pkgVarNames = getPackageVarNames(pkgInfo);
+      const vars = buildPackageVars(
+        globalRegion,
+        authenticateAndDeployStep.staticKeys,
+        pkgVarNames
+      );
+      return {
+        name: buildPackagePolicyName(instance),
+        package: { name: service.packageName, version: pkgVersion },
+        ...(vars ? { vars } : {}),
+        inputs: { ...disabledOtherInputs, ...selfDisabled },
+      };
+    }
     // Name the fields rather than saying "configure it in step 2" — if the prune bar and step 2
     // ever diverge again, a generic message sends the user to a form that already looks complete.
     const missing = describeMissingRequiredVars(allInputs, service);
@@ -424,28 +453,27 @@ export async function deployNewAgentPolicy(
   const packageNames = [...new Set(targets.map((t) => t.service.packageName))];
   const pkgVersionByPackage: Record<string, string> = {};
   const pkgInfoByPackage: Record<string, PkgInfo> = {};
-  for (const pkgName of packageNames) {
-    const resp = await sendGetPackageInfoByKey(pkgName);
-    const version = resp.data?.item?.version;
-    if (!version) throw new Error(`Package ${pkgName} is not installed`);
-    pkgVersionByPackage[pkgName] = version;
-    pkgInfoByPackage[pkgName] = (resp.data?.item ?? {}) as PkgInfo;
-  }
+  await Promise.all(
+    packageNames.map(async (pkgName) => {
+      const resp = await sendGetPackageInfoByKey(pkgName);
+      const version = resp.item?.version;
+      if (!version) throw new Error(`Package ${pkgName} is not installed`);
+      pkgVersionByPackage[pkgName] = version;
+      pkgInfoByPackage[pkgName] = (resp.item ?? {}) as PkgInfo;
+    })
+  );
 
-  const packagePoliciesWithTargets: Array<{
-    body: Awaited<ReturnType<typeof buildInstancePackagePolicy>>;
-    target: AgentBasedTarget;
-  }> = [];
-
-  for (const target of targets) {
-    const pkgVersion = pkgVersionByPackage[target.service.packageName];
-    const pkgInfo = pkgInfoByPackage[target.service.packageName];
-    const body = await buildInstancePackagePolicy(target, pkgInfo ?? {}, {
-      ...opts,
-      pkgVersion,
-    });
-    packagePoliciesWithTargets.push({ body, target });
-  }
+  const packagePoliciesWithTargets = await Promise.all(
+    targets.map(async (target) => {
+      const pkgVersion = pkgVersionByPackage[target.service.packageName];
+      const pkgInfo = pkgInfoByPackage[target.service.packageName];
+      const body = await buildInstancePackagePolicy(target, pkgInfo ?? {}, {
+        ...opts,
+        pkgVersion,
+      });
+      return { body, target };
+    })
+  );
 
   const response = await sendCreateAgentPolicyWithPackagePolicies({
     name: agentPolicyName,
@@ -503,13 +531,15 @@ export async function deployToExistingAgentPolicies(
   const packageNames = [...new Set(targets.map((t) => t.service.packageName))];
   const pkgVersionByPackage: Record<string, string> = {};
   const pkgInfoByPackage: Record<string, { vars?: Array<{ name: string }> }> = {};
-  for (const pkgName of packageNames) {
-    const resp = await sendGetPackageInfoByKey(pkgName);
-    const version = resp.data?.item?.version;
-    if (!version) throw new Error(`Package ${pkgName} is not installed`);
-    pkgVersionByPackage[pkgName] = version;
-    pkgInfoByPackage[pkgName] = resp.data?.item ?? {};
-  }
+  await Promise.all(
+    packageNames.map(async (pkgName) => {
+      const resp = await sendGetPackageInfoByKey(pkgName);
+      const version = resp.item?.version;
+      if (!version) throw new Error(`Package ${pkgName} is not installed`);
+      pkgVersionByPackage[pkgName] = version;
+      pkgInfoByPackage[pkgName] = resp.item ?? {};
+    })
+  );
 
   const results = await Promise.allSettled(
     targets.map(async (target) => {
