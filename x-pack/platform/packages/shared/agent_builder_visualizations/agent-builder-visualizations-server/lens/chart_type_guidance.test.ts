@@ -16,8 +16,27 @@ import { colorDesignPromptContent } from './color_palettes';
 import { generalChartGuidance } from './general_rules';
 
 describe('chart type guidance', () => {
+  it('includes only the requested chart defaults, once per chart type', () => {
+    const design = getChartDesignPromptContent(['metric', 'metric', 'unknown']);
+
+    expect(design.split('\n').filter((line) => line === 'metric:')).toHaveLength(1);
+    expect(design).toContain('No panel title');
+    expect(design).not.toContain('Gauge bounds and goals');
+    expect(design).not.toContain('xy:');
+    expect(design).not.toContain('unknown:');
+    expect(design).toContain(colorDesignPromptContent);
+  });
+
+  it('does not include chart-specific defaults when no chart types are requested', () => {
+    const design = getChartDesignPromptContent([]);
+
+    for (const chartType of Object.values(SupportedChartType)) {
+      expect(design.split('\n')).not.toContain(`${chartType}:`);
+    }
+  });
+
   it('keeps Lens JSON out of the shared design guidance', () => {
-    const design = getChartDesignPromptContent();
+    const design = getChartDesignPromptContent(Object.values(SupportedChartType));
 
     expect(design).toContain('CHART DESIGN GUIDANCE');
     expect(design).toContain('COLOR GUIDANCE');
@@ -59,7 +78,7 @@ describe('chart type guidance', () => {
   it('captures guidance wording without repeating shared rules for each chart', () => {
     expect({
       selection: getChartTypeSelectionPromptContent(),
-      design: getChartDesignPromptContent(),
+      design: getChartDesignPromptContent(Object.values(SupportedChartType)),
       config: {
         general: generalChartGuidance.config,
         charts: Object.fromEntries(
@@ -108,7 +127,7 @@ describe('chart type guidance', () => {
       General:
       - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Explicit user choices and meaningful business thresholds or goals take precedence over defaults. An existing presentation setting alone is not evidence of user intent; during Prettify, apply the listed defaults unless an exception is supported.
 
       metric:
       - No panel title: the primary metric label already names the panel.
@@ -125,7 +144,7 @@ describe('chart type guidance', () => {
       - No axis titles: the panel title and column labels already convey meaning.
       - Area series use a gradient fill, never a solid fill.
       - Place the legend outside the plot, at the bottom. Hide it when it only repeats what is visible (a single series); show it when it carries legend statistics.
-      - Let Lens assign series colors. Add explicit colors only when the user asks or when the same category must keep one color across charts.
+      - Let Lens assign series colors for every XY layer, including line, area, vertical bar, and horizontal bar series. During Prettify, remove existing static series colors and custom breakdown color overrides unless explicitly requested by the user or justified by clear semantic meaning. Return a concrete correction to reset those overrides to Lens defaults; do not preserve them just because they are already configured.
 
       heatmap:
       - Keep the default \\"Temperature\\" palette that Lens binds to the data; use a custom palette or thresholds only when the user asks.
@@ -140,7 +159,7 @@ describe('chart type guidance', () => {
       - Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and one consistent color for the same category wherever it appears across charts. Neutral data with no useful color meaning stays uncolored.
       - Choose palettes from the Kibana palette catalog, never invented colors or legacy palettes: \\"Status\\" for threshold bands, \\"Temperature\\" for intensity, \\"Complementary\\" for divergence, \\"Negative\\"/\\"Positive\\" for adverse/favorable values, \\"Cool\\"/\\"Warm\\"/\\"Gray\\" for neutral magnitude, and a categorical palette (e.g. \\"default\\", \\"severity\\") for distinct categories.
       - Thresholds are data values in the metric's own unit and scale. When only the colors change, keep the existing thresholds.
-      - Respect explicit user choices and meaningful existing color assignments. An off-palette color is not automatically wrong; do not assume an existing color was invented just because its history is unknown.",
+      - Preserve colors explicitly requested by the user or carrying clear semantic meaning, such as status/severity or the same named category across charts. A saved hex value or custom mapping alone does not establish intent. During Prettify, reset color overrides that do not meet these exceptions according to the chart-specific defaults; do not replace them with another arbitrary color.",
         "selection": "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:
       - metric: Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.
       - gauge: Displays a single metric within a range with optional min/max/goal bounds. Choose when showing progress toward a goal or performance against thresholds (e.g. \\"CPU usage as a gauge\\", \\"sales target progress\\").

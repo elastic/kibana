@@ -71,7 +71,7 @@ export const colorDesignPromptContent = `COLOR GUIDANCE:
 - Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and one consistent color for the same category wherever it appears across charts. Neutral data with no useful color meaning stays uncolored.
 - Choose palettes from the Kibana palette catalog, never invented colors or legacy palettes: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude, and a categorical palette (e.g. "default", "severity") for distinct categories.
 - Thresholds are data values in the metric's own unit and scale. When only the colors change, keep the existing thresholds.
-- Respect explicit user choices and meaningful existing color assignments. An off-palette color is not automatically wrong; do not assume an existing color was invented just because its history is unknown.`;
+- Preserve colors explicitly requested by the user or carrying clear semantic meaning, such as status/severity or the same named category across charts. A saved hex value or custom mapping alone does not establish intent. During Prettify, reset color overrides that do not meet these exceptions according to the chart-specific defaults; do not replace them with another arbitrary color.`;
 
 /**
  * The Kibana palette catalog for agents: names, ids, and color previews drawn

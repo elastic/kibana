@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { groupBy, uniqBy } from 'lodash';
+import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
@@ -21,114 +23,57 @@ export const REVIEW_TOOL_NAME = 'report_dashboard_review';
 
 export interface RunDashboardReviewParams {
   dashboardData: DashboardAttachmentData;
-  /** What the user asked for, in their words, including any constraints they stated. */
-  userRequest: string;
+  userPreferences?: string;
   screenshot?: LoadedScreenshot;
   modelProvider: ModelProvider;
   logger: Logger;
 }
 
-export interface ValidatedReview {
-  review: DashboardReview;
-  unreviewedPanelIds: string[];
-}
-
-/** Ids of every leaf panel (top level and inside sections), in dashboard order. */
-export const listPanelIds = (data: DashboardAttachmentData): string[] =>
-  data.panels.flatMap((widget) =>
-    isSection(widget) ? widget.panels.map((panel) => panel.id) : [widget.id]
-  );
-
-/**
- * Validates the reviewer output against the dashboard: entries for panels or
- * sections that do not exist are dropped so the main agent never targets them,
- * and coverage is reconciled so every panel is either reviewed without
- * findings, has findings, could not be assessed, or is reported as unreviewed.
- */
+/** Validates panel references and identifies gaps without discarding distinct findings. */
 export const validateReview = (
   output: DashboardReviewOutput,
-  dashboardData: DashboardAttachmentData,
-  logger: Logger
-): ValidatedReview => {
-  const panelIds = listPanelIds(dashboardData);
-  const knownPanelIds = new Set(panelIds);
-  const knownSectionIds = new Set(
-    dashboardData.panels.filter(isSection).map((section) => section.id)
+  dashboardData: DashboardAttachmentData
+): DashboardReview => {
+  const panelIds = dashboardData.panels.flatMap((widget) =>
+    isSection(widget) ? widget.panels.map(({ id }) => id) : [widget.id]
   );
-  const newSectionKeys = new Set(output.new_sections.map(({ key }) => key));
-
-  const isKnownPanel = (panelId: string, what: string): boolean => {
-    const known = knownPanelIds.has(panelId);
-    if (!known) {
-      logger.debug(`Dropping ${what} for unknown panel "${panelId}".`);
-    }
-    return known;
-  };
-
-  const panelsWithFindings = new Set<string>();
-  const panelFindings = output.panel_findings.filter(({ panel_id: panelId }) => {
-    if (!isKnownPanel(panelId, 'panel findings') || panelsWithFindings.has(panelId)) {
-      return false;
-    }
-    panelsWithFindings.add(panelId);
-    return true;
-  });
-
-  const notAssessed = new Set<string>();
-  const couldNotAssess = output.could_not_assess.filter(({ panel_id: panelId }) => {
-    if (
-      !isKnownPanel(panelId, 'could_not_assess entry') ||
-      notAssessed.has(panelId) ||
-      panelsWithFindings.has(panelId)
-    ) {
-      return false;
-    }
-    notAssessed.add(panelId);
-    return true;
-  });
-
-  const reviewed = new Set(output.reviewed_panel_ids.filter((id) => knownPanelIds.has(id)));
-  const isCovered = (id: string) => panelsWithFindings.has(id) || notAssessed.has(id);
-  const noIssuesPanelIds = panelIds.filter((id) => reviewed.has(id) && !isCovered(id));
-  const unreviewedPanelIds = panelIds.filter((id) => !reviewed.has(id) && !isCovered(id));
-
-  const layoutChanges = output.layout_changes.filter(({ panel_id: panelId, section }) => {
-    if (!isKnownPanel(panelId, 'layout change')) {
-      return false;
-    }
-    if (section !== null && !knownSectionIds.has(section) && !newSectionKeys.has(section)) {
-      logger.debug(`Dropping layout change for panel "${panelId}": unknown section "${section}".`);
-      return false;
-    }
-    return true;
-  });
+  const knownPanelIds = new Set(panelIds);
+  const panelFindings = Object.entries(
+    groupBy(
+      output.panel_findings.filter(({ panel_id: id }) => knownPanelIds.has(id)),
+      'panel_id'
+    )
+  ).map(([panel_id, entries]) => ({
+    panel_id,
+    findings: entries.flatMap(({ findings }) => findings),
+  }));
+  const couldNotAssess = uniqBy(
+    output.could_not_assess.filter(({ panel_id: id }) => knownPanelIds.has(id)),
+    'panel_id'
+  );
+  const reviewedIds = new Set([
+    ...output.reviewed_panel_ids,
+    ...panelFindings.map(({ panel_id }) => panel_id),
+  ]);
+  const coveredIds = new Set([...reviewedIds, ...couldNotAssess.map(({ panel_id }) => panel_id)]);
 
   return {
-    review: {
-      dashboard_findings: output.dashboard_findings,
-      new_sections: output.new_sections,
-      layout_changes: layoutChanges,
-      panel_findings: panelFindings,
-      no_issues_panel_ids: noIssuesPanelIds,
-      could_not_assess: couldNotAssess,
-      data_questions: output.data_questions,
-    },
-    unreviewedPanelIds,
+    panel_findings: panelFindings,
+    reviewed_panel_ids: panelIds.filter((id) => reviewedIds.has(id)),
+    could_not_assess: couldNotAssess,
+    unreviewed_panel_ids: panelIds.filter((id) => !coveredIds.has(id)),
   };
 };
 
-/**
- * Runs one review in a fresh model context (no conversation history) and
- * validates the answer against the dashboard's real panel set.
- */
+/** Runs one panel presentation review in a fresh model context and validates its coverage. */
 export const runDashboardReview = async ({
   dashboardData,
-  userRequest,
+  userPreferences,
   screenshot,
   modelProvider,
   logger,
-}: RunDashboardReviewParams): Promise<ValidatedReview> => {
-  const prompt = createDashboardReviewPrompt({ dashboardData, userRequest, screenshot });
+}: RunDashboardReviewParams): Promise<DashboardReview> => {
+  const prompt = createDashboardReviewPrompt({ dashboardData, userPreferences, screenshot });
 
   const { chatModel } = await modelProvider.getDefaultModel();
   const reviewer = chatModel.withStructuredOutput(dashboardReviewOutputSchema, {
@@ -138,5 +83,5 @@ export const runDashboardReview = async ({
   logger.debug(`Reviewing dashboard (screenshot: ${screenshot ? 'yes' : 'no'})`);
   const output = await reviewer.invoke(prompt);
 
-  return validateReview(output, dashboardData, logger);
+  return validateReview(output, dashboardData);
 };

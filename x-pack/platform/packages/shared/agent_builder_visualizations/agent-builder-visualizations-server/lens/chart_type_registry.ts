@@ -32,10 +32,7 @@ interface ChartTypeRegistryEntry<T extends z.ZodType> {
      */
     selection: string;
     /**
-     * What a good chart of this type looks like and when a visual choice is
-     * useful. Shared by every role that reasons about charts: the dashboard and
-     * visualization agents review and describe charts with it, and the Lens
-     * config author applies it. State preferences only — no Lens JSON here.
+     * Presentation preferences shared by the panel reviewer and Lens config author, without Lens JSON.
      */
     design?: string[];
     /**
@@ -167,7 +164,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'No axis titles: the panel title and column labels already convey meaning.',
         'Area series use a gradient fill, never a solid fill.',
         'Place the legend outside the plot, at the bottom. Hide it when it only repeats what is visible (a single series); show it when it carries legend statistics.',
-        'Let Lens assign series colors. Add explicit colors only when the user asks or when the same category must keep one color across charts.',
+        'Let Lens assign series colors for every XY layer, including line, area, vertical bar, and horizontal bar series. During Prettify, remove existing static series colors and custom breakdown color overrides unless explicitly requested by the user or justified by clear semantic meaning. Return a concrete correction to reset those overrides to Lens defaults; do not preserve them just because they are already configured.',
       ],
       config: {
         rules: [
@@ -178,7 +175,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           seriesStatisticsLensConfigRule,
         ],
         coloringRules: [
-          'Omit explicit `color` properties unless colors were requested; Lens applies its default palettes.',
+          'Omit explicit `color` properties unless the user requested colors or a clear semantic mapping is required. When an edit requests resetting XY colors to Lens defaults, remove the affected `layers[].y[].color` and `layers[].breakdown_by.color` overrides while retaining the metrics and breakdown bindings. Use Lens defaults, not replacement hex values.',
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         ],
       },

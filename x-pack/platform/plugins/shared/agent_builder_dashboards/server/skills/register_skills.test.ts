@@ -60,10 +60,34 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Improving an Existing Dashboard (Prettify)');
     expect(skill.content).toContain(dashboardTools.reviewDashboard);
     expect(skill.content).toContain('Do not run it on a dashboard you have just generated');
-    expect(skill.content).toContain('Review again');
-    expect(skill.content).toContain('at most one correction pass');
+    expect(skill.content).toContain('exactly once per Prettify request, before applying edits');
+    expect(skill.content).toContain('Do not run another review after applying edits');
+    expect(skill.content).not.toContain('Review again');
+    expect(skill.content).toContain('userPreferences');
+    expect(skill.content).toContain('omit it for plain prettify requests');
+    expect(skill.content).toContain('Do not send your analysis, edit plan, or a dashboard summary');
     expect(skill.content).toContain('appearanceOnly: true');
     expect(skill.content).toContain('never claim the updated dashboard was visually verified');
+  });
+
+  it('assigns semantic correctness and layout to the main agent even with no review findings', () => {
+    expect(skill.content).toContain('Before review, assess semantics and layout only');
+    expect(skill.content).toContain('Do not inspect these settings against defaults yourself');
+    expect(skill.content).toContain('or produce a separate presentation critique');
+    expect(skill.content).toContain('Read the full dashboard attachment');
+    expect(skill.content).toContain(
+      'Check the dashboard title, description, and every panel title'
+    );
+    expect(skill.content).toContain('sample web-log queries with security-related titles');
+    expect(skill.content).toContain(
+      'you remain responsible for meaning and layout even if it returns no findings'
+    );
+    expect(skill.content).toContain(
+      'plan sections, ordering, panel sizes, and packed grid coordinates'
+    );
+    expect(skill.content).toContain('Merge all changes for each panel into one edit instruction');
+    expect(skill.content).not.toContain('new_sections');
+    expect(skill.content).not.toContain('data_questions');
   });
 
   it('leaves chart-specific design details to the chart author and the review tool', () => {
@@ -74,5 +98,15 @@ describe('registerSkills', () => {
     expect(skill.referencedContent ?? []).not.toContainEqual(
       expect.objectContaining({ name: 'color-palettes' })
     );
+  });
+
+  it('requires preserving panel identities when prettifying and reorganizing sections', () => {
+    expect(skill.content).toContain('Prettify is not permission to rebuild');
+    expect(skill.content).toContain('even when every panel needs changes');
+    expect(skill.content).toContain('Create new sections without inline panels');
+    expect(skill.content).toContain('panelAction: "promote"');
+    expect(skill.content).toContain('do not fall back to recreating it');
+    expect(skill.content).not.toContain('Prefer `edit_panels`');
+    expect(skill.content).not.toContain('prefer `edit_panels`');
   });
 });

@@ -21,18 +21,19 @@ const reviewDashboardSchema = z.object({
     .string()
     .max(256)
     .describe('Id of the dashboard attachment to review. The latest version is reviewed.'),
-  userRequest: z
+  userPreferences: z
     .string()
-    .max(4096)
+    .max(2048)
+    .optional()
     .describe(
-      'The user\'s request in their own words, including any constraint they stated (e.g. "prettify this dashboard, keep the gauge bands").'
+      'Only explicit user preferences that override chart defaults, e.g. "keep the existing colors". Omit for plain prettify requests. Do not include your analysis, edit plan, or a summary of the dashboard.'
     ),
   screenshotAttachmentId: z
     .string()
     .max(256)
     .optional()
     .describe(
-      '(optional) Id of an image attachment showing this exact dashboard version. Pass it only when the screenshot matches the current configuration; the initial Prettify screenshot no longer matches after the first edit.'
+      '(optional) Id of an image attachment showing this exact dashboard version. Pass it only when the screenshot matches the current configuration.'
     ),
 });
 
@@ -40,24 +41,16 @@ interface ReviewDashboardToolDeps {
   getFilesStart: GetFilesStart;
 }
 
-/**
- * Read-only dashboard presentation review.
- *
- * Reads the latest version of a dashboard attachment, runs a fresh-context
- * model review against the shared composition, layout, chart design, and color
- * guidance, and returns findings with concrete corrections. It never writes to
- * attachments or queries indices; the main agent applies the corrections with
- * the generation tool.
- */
+/** Reviews panel presentation without modifying the dashboard or querying data. */
 export const reviewDashboardTool = ({
   getFilesStart,
 }: ReviewDashboardToolDeps): BuiltinSkillBoundedTool<typeof reviewDashboardSchema> => ({
   id: dashboardTools.reviewDashboard,
   type: ToolType.builtin,
-  description: `Read-only presentation review of the latest version of a dashboard attachment: composition and sections, panel sizing and packing, titles, number formats, colors and palettes, legends, axes, and other chart-specific defaults. Returns concrete corrections for the dashboard and for each panel that needs edits; apply them with ${dashboardTools.generateDashboard}.`,
+  description: `Read-only check of the listed chart defaults, called once during Prettify: title and label visibility, number formatting, legends, axes, colors, and fills. Returns concise correction strings and panel coverage; apply corrections with ${dashboardTools.generateDashboard}. The main agent owns semantic correctness, dashboard metadata, chart selection, sections, sizing, and grid layout.`,
   schema: reviewDashboardSchema,
   handler: async (
-    { dashboardAttachmentId, userRequest, screenshotAttachmentId },
+    { dashboardAttachmentId, userPreferences, screenshotAttachmentId },
     { attachments, modelProvider, logger }
   ) => {
     try {
@@ -86,9 +79,9 @@ export const reviewDashboardTool = ({
       const screenshot =
         screenshotResult?.status === 'loaded' ? screenshotResult.screenshot : undefined;
 
-      const { review, unreviewedPanelIds } = await runDashboardReview({
+      const review = await runDashboardReview({
         dashboardData: latestVersion.data,
-        userRequest,
+        userPreferences,
         screenshot,
         modelProvider,
         logger,
@@ -101,7 +94,6 @@ export const reviewDashboardTool = ({
         ...(screenshotResult?.status === 'unavailable'
           ? { screenshot_note: screenshotResult.reason }
           : {}),
-        unreviewed_panel_ids: unreviewedPanelIds,
         ...review,
       };
 

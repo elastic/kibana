@@ -62,13 +62,10 @@ const createAttachments = (record: unknown) => ({
 });
 
 const reviewOutput = {
-  dashboard_findings: [],
-  new_sections: [],
-  layout_changes: [],
-  panel_findings: [],
-  no_issues_panel_ids: ['p1'],
+  unreviewed_panel_ids: [],
+  panel_findings: [{ panel_id: 'p1', findings: ['Remove the panel title.'] }],
+  reviewed_panel_ids: ['p1'],
   could_not_assess: [],
-  data_questions: [],
 };
 
 const runHandler = async (
@@ -82,7 +79,7 @@ const runHandler = async (
     params as never,
     {
       attachments: attachments as never,
-      modelProvider: { getDefaultModel: jest.fn() } as never,
+      modelProvider: { selectModel: jest.fn() } as never,
       logger,
     } as never
   )) as { results: Array<{ type: string; data: Record<string, unknown> }> };
@@ -93,28 +90,36 @@ describe('reviewDashboardTool', () => {
   beforeEach(() => {
     mockRunReview.mockReset();
     mockLoadScreenshot.mockReset();
-    mockRunReview.mockResolvedValue({ review: reviewOutput, unreviewedPanelIds: [] });
+    mockRunReview.mockResolvedValue(reviewOutput);
   });
 
-  it('is registered under the review tool id and requires the attachment id and user request', () => {
+  it('is registered under the review tool id and requires only the dashboard attachment id and accepts bounded user preferences', () => {
     const tool = reviewDashboardTool({ getFilesStart: jest.fn() });
     expect(tool.id).toBe(dashboardTools.reviewDashboard);
-    expect(tool.schema.safeParse({ dashboardAttachmentId: 'dash' }).success).toBe(false);
+    expect(tool.schema.safeParse({}).success).toBe(false);
+    expect(tool.schema.safeParse({ dashboardAttachmentId: 'dash' }).success).toBe(true);
     expect(
-      tool.schema.safeParse({ dashboardAttachmentId: 'dash', userRequest: 'prettify' }).success
+      tool.schema.safeParse({
+        dashboardAttachmentId: 'dash',
+        userPreferences: 'Keep the existing colors.',
+      }).success
     ).toBe(true);
+    expect(
+      tool.schema.safeParse({ dashboardAttachmentId: 'dash', userPreferences: 'x'.repeat(2049) })
+        .success
+    ).toBe(false);
   });
 
   it('reviews the latest version of the dashboard attachment without writing to it', async () => {
     const { result, attachments } = await runHandler({
       dashboardAttachmentId: 'dash',
-      userRequest: 'prettify this dashboard, keep the red error series',
+      userPreferences: 'Keep the red error series.',
     });
 
     expect(mockRunReview).toHaveBeenCalledWith(
       expect.objectContaining({
         dashboardData,
-        userRequest: 'prettify this dashboard, keep the red error series',
+        userPreferences: 'Keep the red error series.',
         screenshot: undefined,
       })
     );
@@ -129,11 +134,13 @@ describe('reviewDashboardTool', () => {
     expect(review.version).toBe(2);
     expect(review.visual_assessment).toBe('configuration_only');
     expect(review.unreviewed_panel_ids).toEqual([]);
-    expect(review.no_issues_panel_ids).toEqual(['p1']);
-    expect(review.panel_findings).toEqual([]);
+    expect(review.reviewed_panel_ids).toEqual(['p1']);
+    expect(review.panel_findings).toEqual([
+      { panel_id: 'p1', findings: ['Remove the panel title.'] },
+    ]);
   });
 
-  it('loads a matching screenshot into the review context', async () => {
+  it('loads a matching screenshot without requiring user preferences', async () => {
     mockLoadScreenshot.mockResolvedValue({
       status: 'loaded',
       screenshot: { base64: 'QUJD', mimeType: 'image/png' },
@@ -141,7 +148,6 @@ describe('reviewDashboardTool', () => {
 
     const { result } = await runHandler({
       dashboardAttachmentId: 'dash',
-      userRequest: 'prettify',
       screenshotAttachmentId: 'shot',
     });
 
@@ -159,7 +165,6 @@ describe('reviewDashboardTool', () => {
 
     const { result, logger } = await runHandler({
       dashboardAttachmentId: 'dash',
-      userRequest: 'prettify',
       screenshotAttachmentId: 'shot',
     });
 
@@ -171,18 +176,19 @@ describe('reviewDashboardTool', () => {
 
   it('reports an incomplete review when panels are missing from the reviewer output', async () => {
     mockRunReview.mockResolvedValue({
-      review: { ...reviewOutput, no_issues_panel_ids: [] },
-      unreviewedPanelIds: ['p1'],
+      ...reviewOutput,
+      reviewed_panel_ids: [],
+      unreviewed_panel_ids: ['p1'],
     });
 
-    const { result } = await runHandler({ dashboardAttachmentId: 'dash', userRequest: 'x' });
+    const { result } = await runHandler({ dashboardAttachmentId: 'dash' });
 
     expect(result.results[0].data.unreviewed_panel_ids).toEqual(['p1']);
   });
 
   it('returns an error result for a missing attachment', async () => {
     const { result } = await runHandler(
-      { dashboardAttachmentId: 'missing', userRequest: 'x' },
+      { dashboardAttachmentId: 'missing' },
       createAttachments(undefined)
     );
 
@@ -193,7 +199,7 @@ describe('reviewDashboardTool', () => {
 
   it('returns an error result for a non-dashboard attachment', async () => {
     const { result } = await runHandler(
-      { dashboardAttachmentId: 'dash', userRequest: 'x' },
+      { dashboardAttachmentId: 'dash' },
       createAttachments({ ...dashboardRecord, type: 'image' })
     );
 
@@ -206,7 +212,7 @@ describe('reviewDashboardTool', () => {
   it('returns an error result when the review itself fails', async () => {
     mockRunReview.mockRejectedValue(new Error('model unavailable'));
 
-    const { result } = await runHandler({ dashboardAttachmentId: 'dash', userRequest: 'x' });
+    const { result } = await runHandler({ dashboardAttachmentId: 'dash' });
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(result.results[0].data.message).toContain('model unavailable');

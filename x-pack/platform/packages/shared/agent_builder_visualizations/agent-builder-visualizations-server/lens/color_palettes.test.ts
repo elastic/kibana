@@ -11,6 +11,18 @@ import { getPalettes } from '@kbn/palettes';
 import { getColorConfigPromptContent } from './color_palettes';
 import { createGenerateConfigPrompt } from './prompts';
 
+describe('XY color edits', () => {
+  it('tells the author to remove color overrides without removing column bindings', () => {
+    const prompt = getColorConfigPromptContent(SupportedChartType.XY);
+
+    expect(prompt).toContain(
+      'remove the affected `layers[].y[].color` and `layers[].breakdown_by.color` overrides'
+    );
+    expect(prompt).toContain('while retaining the metrics and breakdown bindings');
+    expect(prompt).toContain('Use Lens defaults, not replacement hex values');
+  });
+});
+
 describe('gauge palette previews', () => {
   const gradientPalettes = getPalettes(false)
     .getAll()

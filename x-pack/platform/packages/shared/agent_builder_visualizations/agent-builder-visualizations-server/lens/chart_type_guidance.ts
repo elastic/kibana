@@ -20,13 +20,8 @@ export const getChartTypeSelectionPromptContent = () =>
     ),
   ].join('\n');
 
-/**
- * Design guidance across all chart types, compiled from the registry's shared
- * `design` parts plus the general and color design guidance. This is what the
- * dashboard and visualization agents receive so they can review charts and
- * describe the wanted changes; it contains no Lens JSON.
- */
-export const getChartDesignPromptContent = (): string =>
+/** Compiles Lens presentation guidance for the panel reviewer without configuration mechanics. */
+export const getChartDesignPromptContent = (chartTypes: readonly string[]): string =>
   [
     'CHART DESIGN GUIDANCE:',
     'The Lens config author follows the same guidance; state the design choices you want and it expresses them in the chart settings.',
@@ -35,7 +30,9 @@ export const getChartDesignPromptContent = (): string =>
     ...toBullets(generalChartGuidance.design),
     '',
     ...Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) =>
-      prompt.design?.length ? [`${chartType}:`, ...toBullets(prompt.design), ''] : []
+      chartTypes.includes(chartType) && prompt.design?.length
+        ? [`${chartType}:`, ...toBullets(prompt.design), '']
+        : []
     ),
     colorDesignPromptContent,
   ].join('\n');

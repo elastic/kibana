@@ -14,7 +14,7 @@ export const generalChartGuidance = {
   design: [
     'Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.',
     'Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. "cpu", "percent", "bytes_in", "disk_used", "latency_ms"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.',
-    'Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.',
+    'Explicit user choices and meaningful business thresholds or goals take precedence over defaults. An existing presentation setting alone is not evidence of user intent; during Prettify, apply the listed defaults unless an exception is supported.',
   ],
   config: [
     'Titles: omit the `title` field when the design guidance calls for no panel title; every other chart needs a `title` string.',
