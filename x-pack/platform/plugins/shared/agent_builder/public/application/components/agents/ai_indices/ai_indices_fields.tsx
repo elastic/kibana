@@ -112,6 +112,19 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
     [aiIndices, inheritedIdSet]
   );
 
+  // Configured but not listed for this user: deleted, unreadable, or hidden in this space.
+  const unavailable = useMemo(() => {
+    if (isLoading || error) {
+      return { inherited: [], assigned: [] };
+    }
+    const availableIds = new Set(aiIndices.map(({ id }) => id));
+    const isMissing = (id: string) => !availableIds.has(id);
+    return {
+      inherited: inheritedIds.filter(isMissing),
+      assigned: selectedOptions.map(({ label }) => label).filter(isMissing),
+    };
+  }, [aiIndices, inheritedIds, selectedOptions, isLoading, error]);
+
   const handleChange = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) =>
       onChange([...hiddenAssignedIds, ...newSelectedOptions.map(({ label }) => label)]),
@@ -141,7 +154,18 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={labels.aiIndices.defaultIndicesLabel}
-            helpText={labels.aiIndices.defaultIndicesHelpText}
+            helpText={
+              <>
+                {labels.aiIndices.defaultIndicesHelpText}
+                {unavailable.inherited.length > 0 && (
+                  <span data-test-subj="agentBuilderUnavailableDefaultAiIndices">
+                    {` ${labels.aiIndices.unavailableIndicesHelpText(
+                      unavailable.inherited.join(', ')
+                    )}`}
+                  </span>
+                )}
+              </>
+            }
             fullWidth
           >
             <EuiBadgeGroup gutterSize="s" role="list" data-test-subj="agentBuilderDefaultAiIndices">
@@ -167,6 +191,13 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
             <EuiText size="xs" color="subdued">
               {labels.aiIndices.optionalLabel}
             </EuiText>
+          }
+          helpText={
+            unavailable.assigned.length > 0 ? (
+              <span data-test-subj="agentBuilderUnavailableAiIndices">
+                {labels.aiIndices.unavailableIndicesHelpText(unavailable.assigned.join(', '))}
+              </span>
+            ) : undefined
           }
           fullWidth
         >

@@ -12,7 +12,7 @@ stream. AI index records are stored in a hidden Kibana system index
 | -------- | --------------------------------------------------------------- | ------------------------------------ |
 | `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
 | `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
-| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
+| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices available to the caller (max 100) |
 | `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI indices        |
 | `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI index for querying    |
 | `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
@@ -44,6 +44,25 @@ Notes:
   are left untouched and must be removed with the Delete index API if desired.
 - `feedback_analysis` configures this index's feedback loop. See
   [Feedback analysis configuration](#feedback-analysis-configuration) below.
+
+## Listing AI indices
+
+`GET /api/context_engine/ai_index` returns the AI indices available to the
+caller, not the whole registry. Two existence probes run per entry as the
+current user, in one `msearch`: any readable documents, and any matching the
+space filter. An entry is listed when it has documents visible in the current
+space, or none the caller can read at all (a still-empty or not-yet-created
+index appears). It is dropped when its readable documents are all hidden from
+this space, or when a probe fails or is incomplete: a 403 for lack of `read`,
+any other error, a timeout, a failed shard. Probes use strict index options;
+`ignore_unavailable` would silently drop unreadable indices and pass them off
+as empty. The agent prompt's AI-index catalog applies the same rule.
+
+Consequences: an entry can be absent from the list yet still be fetched,
+updated or deleted by id (the management page and the agent AI-index picker
+say so); and a wildcard `dest.value` matching no index the caller may read
+resolves to nothing (404, not 403), so it is listed as empty rather than
+dropped.
 
 ## Querying AI indices
 
@@ -148,6 +167,9 @@ target broad enough to exceed it returns 400.
 `contextEngine:read` grants the routes; it grants **no** Elasticsearch index
 privileges. Callers also need, on every backing index (`ai-index-*`):
 
+- `read` to be listed, with one exception: a wildcard `dest.value` matching no
+  index the caller can read is listed as empty. Otherwise an entry whose
+  backing indices the caller cannot read is omitted, not an error;
 - `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without

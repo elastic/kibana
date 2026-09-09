@@ -19,9 +19,8 @@ export interface AiIndexDetail {
 }
 
 /**
- * Resolves AI index ids to details for the requesting user. Implementations must enforce the
- * caller's registry access and omit ids they may not see. Only the registry read privilege is
- * checked — callers gate on whether Context Engine is enabled.
+ * Resolves AI index ids to details for the requesting user. Must omit ids the caller may not see
+ * or cannot read in the request space. Callers gate on whether Context Engine is enabled.
  */
 export type AiIndexResolver = (params: {
   ids: string[];

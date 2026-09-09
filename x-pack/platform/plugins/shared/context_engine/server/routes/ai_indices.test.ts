@@ -167,7 +167,7 @@ describe('ai indices routes', () => {
     };
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     improvementsClients = [];
-    readService = { query: jest.fn(), describe: jest.fn() };
+    readService = { query: jest.fn(), describe: jest.fn(), listVisible: jest.fn() };
     readServiceParams = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
@@ -237,11 +237,11 @@ describe('ai indices routes', () => {
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
-    expect(aiIndexService.list).not.toHaveBeenCalled();
     expect(aiIndexService.delete).not.toHaveBeenCalled();
     expect(aiIndexService.setFeedbackAnalysis).not.toHaveBeenCalled();
     expect(readService.query).not.toHaveBeenCalled();
     expect(readService.describe).not.toHaveBeenCalled();
+    expect(readService.listVisible).not.toHaveBeenCalled();
   });
 
   it('registers routes with the expected access and privileges', () => {
@@ -930,12 +930,29 @@ describe('ai indices routes', () => {
   });
 
   describe('GET /api/context_engine/ai_index', () => {
-    it('returns the list of AI indices', async () => {
-      aiIndexService.list.mockResolvedValue([]);
+    it('lists the AI indices visible to the current user through the read service', async () => {
+      const visible = [{ id: 'a' }];
+      readService.listVisible.mockResolvedValue(visible as never);
+      const request = httpServerMock.createKibanaRequest();
+
+      await getRoute('GET', aiIndexPath).handler(createContext(), request, response);
+
+      expect(readServiceParams).toHaveLength(1);
+      expect(readServiceParams[0].request).toBe(request);
+      expect(readServiceParams[0].esClient).toMatchObject({ search: esSearch, get: esGet });
+      expect(aiIndexService.list).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: visible } });
+    });
+
+    it('passes Elasticsearch 4xx errors through with their status', async () => {
+      readService.listVisible.mockRejectedValue(createEsError(403, 'security_exception'));
 
       await callRoute('GET', aiIndexPath, {});
 
-      expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [] } });
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringContaining('security_exception') },
+      });
     });
   });
 
@@ -1543,40 +1560,6 @@ describe('ai indices routes', () => {
           expect.objectContaining({
             event: expect.objectContaining({ action: 'ai_index_get', outcome: 'failure' }),
             kibana: { saved_object: { type: 'ai_index', id: 'missing' } },
-          })
-        );
-      });
-    });
-
-    describe('GET /api/context_engine/ai_index', () => {
-      it('logs outcome:success with no saved_object after successful list', async () => {
-        aiIndexService.list.mockResolvedValue([]);
-
-        await callRoute('GET', aiIndexPath, {});
-
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
-        expect(auditLogger.log).toHaveBeenCalledWith(
-          expect.objectContaining({
-            event: expect.objectContaining({
-              action: 'ai_index_list',
-              type: ['access'],
-              outcome: 'success',
-            }),
-            kibana: { saved_object: undefined },
-          })
-        );
-      });
-
-      it('logs outcome:failure on error', async () => {
-        aiIndexService.list.mockRejectedValue(new Error('boom'));
-
-        await expect(callRoute('GET', aiIndexPath, {})).rejects.toThrow('boom');
-
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
-        expect(auditLogger.log).toHaveBeenCalledWith(
-          expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),
-            kibana: { saved_object: undefined },
           })
         );
       });
