@@ -11,7 +11,6 @@ import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { DiscoverTabType } from '@kbn/discover-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionTab } from '../../embeddable';
 import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
@@ -45,7 +44,6 @@ export const transformDiscoverSessionOut = (
       );
       warnings.push(...controlPanelWarnings);
 
-      const tabTypeState = transformTabTypeStateOut(tab.attributes.tabTypeState);
       const presentation = {
         id: tab.id,
         label: tab.label,
@@ -76,15 +74,7 @@ export const transformDiscoverSessionOut = (
           }),
       };
 
-      if (tabTypeState.type === DiscoverTabType.Default) {
-        return { ...apiTab, ...presentation, ...tabTypeState };
-      }
-
-      if (!isDiscoverSessionEsqlTab(apiTab)) {
-        throw new Error(`Metrics tab "${tab.id}" requires an ES|QL data source.`);
-      }
-
-      return { ...apiTab, ...presentation, ...tabTypeState };
+      return transformTabTypeStateOut({ ...apiTab, ...presentation }, tab.attributes.tabTypeState);
     }),
   };
 

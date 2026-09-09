@@ -681,7 +681,9 @@ describe('discover session API transforms', () => {
 
     it('preserves saved metrics tab state through an API read and write', () => {
       const [, esqlTab] = discoverSessionAttributes.tabs;
-      const savedTabTypeState: DiscoverSessionTabTypeState = {
+      // Required keeps this test up to date when we add new saved fields, even optional ones.
+      // Give them real values so we catch any fields we forget to map in the transforms.
+      const savedTabTypeState: Required<DiscoverSessionTabTypeState> = {
         type: DiscoverTabType.Metrics,
         dimensions: ['host.name', 'service.name'],
         searchTerm: 'cpu',
@@ -738,7 +740,9 @@ describe('discover session API transforms', () => {
             },
           ],
         })
-      ).toThrow(`Metrics tab "${classicTab.id}" requires an ES|QL data source.`);
+      ).toThrow(
+        `Metrics tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
+      );
     });
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {
