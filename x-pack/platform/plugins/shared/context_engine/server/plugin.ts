@@ -296,6 +296,7 @@ export class ContextEnginePlugin
         ensure: ensureAiIndex,
       },
     });
+    const aiIndexService = this.aiIndexService;
 
     this.signalsService = new SignalsService({
       esClient: this.esClient,
@@ -313,6 +314,7 @@ export class ContextEnginePlugin
         esClient,
         spaceId: resolveSpaceId(startDeps.spaces, request),
         auditLogger: coreStart.security.audit.asScoped(request),
+        aiIndexService,
       });
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
 
