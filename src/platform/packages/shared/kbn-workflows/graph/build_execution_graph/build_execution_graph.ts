@@ -106,6 +106,9 @@ interface GraphBuildContext {
    */
   stack: GraphNodeUnion[];
 
+  /** Loop control cannot leave the current parallel branch. */
+  parallelScopeDepth?: number;
+
   /** Used to construct predictable unique node IDs */
   parentKey: string;
 }
@@ -1077,7 +1080,11 @@ function buildParallelBranchBody(
   steps: BaseStep[],
   context: GraphBuildContext
 ): { bodyGraph: WorkflowGraphType; startNodeId: string } {
-  const bodyGraph = createStepsSequence(steps || [], context);
+  const bodyGraph = createStepsSequence(steps || [], {
+    ...context,
+    stack: [...context.stack],
+    parallelScopeDepth: context.stack.length,
+  });
 
   if (bodyGraph.nodes().some((nodeId) => bodyGraph.node(nodeId).type === 'workflow.output')) {
     throw new GraphBuildError(
@@ -1223,7 +1230,7 @@ function createWhileGraph(
 }
 
 function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
-  for (let i = context.stack.length - 1; i >= 0; i--) {
+  for (let i = context.stack.length - 1; i >= (context.parallelScopeDepth ?? 0); i--) {
     const node = context.stack[i];
     if (isLoopEnterNode(node)) {
       return node;
@@ -1231,7 +1238,7 @@ function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
   }
   throw new Error(
     'loop.break and loop.continue are only valid inside a loop body (foreach or while). ' +
-      'Move the step inside a loop, or remove it.'
+      'Move the step inside a loop in the same parallel branch, or remove it.'
   );
 }
 

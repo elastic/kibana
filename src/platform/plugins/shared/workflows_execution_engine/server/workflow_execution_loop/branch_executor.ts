@@ -47,6 +47,8 @@ const NAVIGATION_ONLY_NODES = new Set([
   'enter-else-branch',
   'exit-then-branch',
   'exit-else-branch',
+  'enter-case-branch',
+  'enter-default-branch',
   'exit-case-branch',
   'exit-default-branch',
   'exit-parallel',

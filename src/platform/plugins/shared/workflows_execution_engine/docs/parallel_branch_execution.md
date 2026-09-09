@@ -17,13 +17,13 @@ The parent variables stay `{"owner":"parent","values":[]}`. Branch writes do not
 
 `EnterParallelNodeImpl` manages branch admission and aggregation. `BranchExecutor` owns branch cursors and runs each node through the same `runNode` lifecycle used by the root cursor: context hydration, tracing, stack monitoring, error handling, event-log flushing, and read-pin release. The nearest parallel node bounds branch error handling and monitoring. Ancestor monitors and cancellation polling remain with the parent cursor.
 
-A node invocation has a revocable write lifetime. Parent abort propagates to the actual child runtime and all descendants. The coordinator registers live instances before invoking them. Cancellation uses their actual abort controllers and hooks; reconstruction is reserved for parked nodes. Node and cleanup writes are rejected after their respective lifetimes end. Cleanup hooks have a one-second bound. Aborting cannot undo a request already accepted by an external service.
+A node invocation has a revocable write lifetime. Parent abort propagates to the actual child runtime and all descendants. The coordinator registers live instances before invoking them. Cancellation uses their actual abort controllers and hooks; reconstruction is reserved for parked nodes. Node and cleanup writes are rejected after their respective lifetimes end. Active and parked node cleanup use the same revocable, one-second cleanup lifetime. Aborting cannot undo a request already accepted by an external service.
 
 ## Concurrency and suspension
 
 There are separate limits for local branch admission and workflow-wide active operations. Joining parallel nodes consume no operation permit, allowing nested joins to complete with a global limit of one. The shared operation queue admits work in FIFO order. A resumed branch reacquires local admission when `count-waiting: false`; rotating admission prevents a frequently waking branch from starving queued work.
 
-A durable timer or external wait sets `waiting: true`. Exhausting the transition budget leaves the branch ready with `waiting: false`, retaining its local admission slot. A nested join with runnable descendants propagates a yield instead of claiming to be durably blocked.
+The next resume is bounded by branch deadlines and enclosing step/workflow timeouts, even when a descendant timer is later. Expired admission-blocked timers retain the re-tick floor. A durable timer or external wait sets `waiting: true`. Exhausting the transition budget leaves the branch ready with `waiting: false`, retaining its local admission slot. A nested join with runnable descendants propagates a yield instead of claiming to be durably blocked.
 
 The following server settings apply to one workflow execution, including every nested parallel scope:
 
@@ -46,7 +46,9 @@ External effects have **at-least-once delivery**, not exactly-once delivery. If 
 
 ## Supported boundary
 
-Branch-local timeout zones, HITL input/approval waits, and workflow-level terminators (`workflow.output` / `workflow.fail`) remain rejected by graph validation. Use the parallel step's overall/branch timeout and its aggregate result. These exclusions are explicit supported-scope limits, not silent changes to workflow-wide behavior.
+Branch-local timeout zones, HITL input/approval waits, and workflow-level terminators (`workflow.output` / `workflow.fail`) remain rejected by graph validation. Use the parallel step's overall/branch timeout and its aggregate result. Loop break/continue must target a loop within the same parallel branch; they cannot escape into an enclosing parent loop. These exclusions are explicit supported-scope limits, not silent changes to workflow-wide behavior.
+
+A parallel step can have its own retry/fallback/continue handler. Retrying the join creates new attempt scopes for every branch. As in the sequential engine, fallback preserves the original failure; `continue: true` is required to proceed after the handler.
 
 ## Validation
 
@@ -56,3 +58,5 @@ The integration tests exercise real graph compilation, node implementations, sco
 node scripts/jest_integration 'src/platform/plugins/shared/workflows_execution_engine/integration_tests/tests/parallel' --runInBand
 node scripts/check.js --scope=local
 ```
+
+See [the edge-case audit](parallel_edge_case_audit.md) for saved-workflow examples, regression coverage, and validation limits.

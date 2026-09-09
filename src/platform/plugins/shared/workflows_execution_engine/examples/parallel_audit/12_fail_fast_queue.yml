@@ -1,0 +1,31 @@
+name: "Audit 12 - Fail-fast drains started work and skips queued work"
+description: "Intentional HTTP 401 fails first branch. Already-started waiting sibling drains. Third branch must be skipped. Workflow fails and after_join must not run."
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: branches
+    type: parallel
+    concurrency: 2
+    branches:
+      - name: failing
+        steps:
+          - name: fail
+            type: http
+            with: { url: 'http://localhost:9228/audit-intentional-unauthorized', method: GET }
+      - name: active
+        steps:
+          - name: pause
+            type: wait
+            with: { duration: 2s }
+          - name: active_result
+            type: console
+            with: { message: drained }
+      - name: queued
+        steps:
+          - name: never_queued
+            type: console
+            with: { message: MUST_NOT_RUN }
+  - name: after_join
+    type: console
+    with: { message: MUST_NOT_RUN }

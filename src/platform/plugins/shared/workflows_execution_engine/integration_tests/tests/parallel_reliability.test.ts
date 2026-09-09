@@ -41,6 +41,54 @@ const drain = async (fixture: WorkflowRunFixture) => {
 afterEach(() => jest.restoreAllMocks());
 
 describe('parallel execution reliability', () => {
+  it('bounds parked-node cleanup and rejects writes after its cleanup deadline', async () => {
+    const fixture = new WorkflowRunFixture();
+    const finishCleanup = deferred();
+    const create = NodesFactory.prototype.create;
+    const runtimes: StepExecutionRuntime[] = [];
+    const onCancel = jest.fn(async (runtime: StepExecutionRuntime) => {
+      runtimes.push(runtime);
+      await finishCleanup.promise;
+      runtime.finishStep('late cleanup');
+      runtime.setCurrentStepState({ late: true });
+    });
+    jest
+      .spyOn(NodesFactory.prototype, 'create')
+      .mockImplementation(function (this: NodesFactory, runtime) {
+        const implementation = create.call(this, runtime);
+        if (runtime.node.stepId !== 'parked') return implementation;
+        return { run: () => implementation.run(), onCancel: () => onCancel(runtime) };
+      });
+    await fixture.runWorkflow({
+      workflowYaml: `
+steps:
+  - name: work
+    type: parallel
+    mode: settled
+    branch-timeout: 1s
+    foreach: [a, b]
+    steps:
+      - name: parked
+        type: wait
+        with: { duration: 1m }
+`,
+    });
+    const date = jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 2000);
+    try {
+      await fixture.resumeWorkflow();
+      expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(onCancel).toHaveBeenCalledTimes(2);
+      const snapshot = structuredClone(steps(fixture, 'parked'));
+      finishCleanup.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      expect(steps(fixture, 'parked')).toEqual(snapshot);
+      for (const runtime of runtimes) expect(runtime.stepExecution?.state?.late).toBeUndefined();
+    } finally {
+      finishCleanup.resolve();
+      date.mockRestore();
+    }
+  });
+
   it('runs nested joins with a workflow-wide operation limit of one', async () => {
     const fixture = new WorkflowRunFixture();
     jest.replaceProperty(fixture.configMock.parallel, 'maxConcurrentOperations', 1);

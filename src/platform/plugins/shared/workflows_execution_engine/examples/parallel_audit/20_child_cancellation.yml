@@ -1,0 +1,20 @@
+name: "Audit 20 - Branch timeout cancels child workflows"
+description: "Both branches start a slow child. Branch deadlines must cancel both child executions, publish timed-out results, and never run result."
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: branches
+    type: parallel
+    mode: settled
+    branch-timeout: 2s
+    foreach: [a, b]
+    steps:
+      - name: child
+        type: workflow.execute
+        with:
+          workflow-id: audit-21-slow-child
+          inputs: { owner: '{{ foreach.item }}' }
+      - name: result
+        type: console
+        with: { message: '{{ steps.child.output | json }}' }
