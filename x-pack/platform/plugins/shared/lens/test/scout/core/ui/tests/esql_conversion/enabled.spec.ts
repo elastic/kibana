@@ -160,42 +160,17 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
   });
 
-  test('converts eligible layers while keeping unsupported data layers form based', async ({
+  test('should disable Convert to ES|QL button when any data layer is unsupported', async ({
     pageObjects,
-    page,
   }) => {
-    const { dashboard, lens } = pageObjects;
-
+    // Partial conversion would leave a form-based data layer alongside text-based
+    // ones, an invalid mixed state, so a single unsupported data layer
+    // (here: "Include empty rows" on the bar layer) disables the conversion.
     await openInlineEditorAndWaitVisible(
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
     );
-    await convertToEsqlViaModal({ pageObjects, page, selectAllLayers: true });
-
-    expect(await lens.layers.getLayerCount()).toBe(2);
-    expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
-
-    await lens.layers.activateLayerTab(1);
-    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
-    await expect
-      .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-      .toBe('Median of bytes');
-
-    const panel = dashboard.getPanelByEmbeddableId(
-      testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
-    );
-    await expect(panel.getByRole('button', { name: /Count of records/ })).toBeVisible();
-    await expect(panel.getByRole('button', { name: /Median of bytes/ })).toBeVisible();
-    await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
-
-    await applyLensInlineEditorAndWaitClosed({ lens });
-    await openInlineEditorAndWaitVisible(
-      pageObjects,
-      testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
-    );
-    expect(await lens.layers.getLayerCount()).toBe(2);
-    await lens.layers.activateLayerTab(1);
-    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
+    await expect(pageObjects.lens.workspace.convertToEsqlButton).toBeDisabled();
   });
 
   test('should correctly cancel the conversion and close the flyout', async ({
