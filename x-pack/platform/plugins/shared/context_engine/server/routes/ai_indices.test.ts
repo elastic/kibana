@@ -27,14 +27,13 @@ import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
-  AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
-import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import type { DeleteWorkflowsApi } from '../types';
 
 interface RegisteredRoute {
   config: {
@@ -97,7 +96,7 @@ describe('ai indices routes', () => {
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
-  let workflowsManagementApi: jest.Mocked<Pick<WorkflowsManagementApi, 'deleteWorkflows'>>;
+  let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -162,7 +161,7 @@ describe('ai indices routes', () => {
     };
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     workflowsManagementApi = {
-      deleteWorkflows: jest.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
+      deleteWorkflows: jest.fn().mockResolvedValue({ failures: [] }),
     };
     improvementsClients = [];
 
@@ -197,7 +196,7 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getActions: async () => actions,
-      getWorkflowsManagementApi: () => workflowsManagementApi as unknown as WorkflowsManagementApi,
+      getWorkflowsManagementApi: async () => workflowsManagementApi,
       getSpaces: async () => undefined,
     });
   });
@@ -887,8 +886,6 @@ describe('ai indices routes', () => {
       it('returns partial-failure errors for each failed workflow deletion', async () => {
         aiIndexService.delete.mockResolvedValue(undefined);
         workflowsManagementApi.deleteWorkflows.mockResolvedValue({
-          total: 1,
-          deleted: 0,
           failures: [{ id: 'nightly-refresh', error: 'not_found' }],
         });
 
@@ -913,7 +910,10 @@ describe('ai indices routes', () => {
               post: jest.fn(() => ({ addVersion: jest.fn() })),
               put: jest.fn(() => ({ addVersion: jest.fn() })),
               delete: jest.fn((config) => ({
-                addVersion: (versionConfig: RegisteredRoute['validate'], handler: RequestHandler) => {
+                addVersion: (
+                  versionConfig: RegisteredRoute['validate'],
+                  handler: RequestHandler
+                ) => {
                   routes[`DELETE:${config.path}`] = { config, handler, validate: versionConfig };
                 },
               })),
@@ -923,7 +923,7 @@ describe('ai indices routes', () => {
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           getActions: async () => actions,
-          getWorkflowsManagementApi: () => undefined,
+          getWorkflowsManagementApi: async () => undefined,
           getSpaces: async () => undefined,
         });
         aiIndexService.delete.mockResolvedValue(undefined);
@@ -970,8 +970,6 @@ describe('ai indices routes', () => {
       aiIndexService.delete.mockResolvedValue(undefined);
       esDeleteDataStream.mockRejectedValue(new Error('es_error'));
       workflowsManagementApi.deleteWorkflows.mockResolvedValue({
-        total: 1,
-        deleted: 0,
         failures: [{ id: 'nightly-refresh', error: 'wf_error' }],
       });
 
@@ -983,10 +981,7 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           acknowledged: true,
-          errors: [
-            expect.stringContaining('es_error'),
-            expect.stringContaining('nightly-refresh'),
-          ],
+          errors: [expect.stringContaining('es_error'), expect.stringContaining('nightly-refresh')],
         },
       });
     });

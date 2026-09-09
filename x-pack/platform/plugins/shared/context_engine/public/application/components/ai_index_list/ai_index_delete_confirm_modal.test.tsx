@@ -34,7 +34,14 @@ const aiIndex: AiIndexHttpItem = {
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
-const createServices = () => coreMock.createStart();
+const createServices = () => {
+  const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    workflowsManagement: { deleteWorkflow: true },
+  };
+  return services;
+};
 
 const renderModal = (
   overrides: Partial<AiIndexHttpItem> = {},
@@ -126,5 +133,32 @@ describe('AiIndexDeleteConfirmModal', () => {
     renderModal({ automations: [{ type: 'workflow', value: 'wf-1' }] });
 
     expect(screen.getByTestId('contextAiIndexDeleteAutomationsCheckbox')).toBeEnabled();
+  });
+
+  it('disables the automations checkbox when user lacks deleteWorkflow capability', () => {
+    const onClose = jest.fn();
+    const services = coreMock.createStart();
+    services.application.capabilities = {
+      ...services.application.capabilities,
+      workflowsManagement: { deleteWorkflow: false },
+    };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider services={services}>
+            <QueryClientProvider client={queryClient}>
+              <AiIndexDeleteConfirmModal
+                aiIndex={{ ...aiIndex, automations: [{ type: 'workflow', value: 'wf-1' }] }}
+                onClose={onClose}
+                onSuccess={jest.fn().mockResolvedValue(undefined)}
+              />
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('contextAiIndexDeleteAutomationsCheckbox')).toBeDisabled();
   });
 });

@@ -17,7 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
@@ -338,7 +338,7 @@ export const registerAiIndexRoutes = ({
   getAiIndexService: () => AiIndexService;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
-  getWorkflowsManagementApi: () => WorkflowsManagementApi | undefined;
+  getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
   // Create an AI index
@@ -690,7 +690,7 @@ export const registerAiIndexRoutes = ({
           if (deleteAutomations) {
             const automationErrors = await deleteAutomationResources({
               automations: aiIndex.automations,
-              workflowsManagementApi: getWorkflowsManagementApi(),
+              workflowsManagementApi: await getWorkflowsManagementApi(),
               spaceId: resolveSpaceId(await getSpaces(), request),
               request,
               logger,

@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexAutomation, AiIndexDest } from '../../common/http_api/ai_indices';
+import type { DeleteWorkflowsApi } from '../types';
 
 /** Best-effort backing-store delete. Returns an error string on failure, null on success or 404. */
 export const deleteBackingStoreResource = async ({
@@ -53,7 +53,7 @@ export const deleteAutomationResources = async ({
   aiIndexId,
 }: {
   automations: AiIndexAutomation[];
-  workflowsManagementApi: WorkflowsManagementApi | undefined;
+  workflowsManagementApi: DeleteWorkflowsApi | undefined;
   spaceId: string;
   request: KibanaRequest;
   logger: Logger;
