@@ -62,6 +62,7 @@ export const ComposableClassicRulesPage = ({
       alerting: pluginsStart.alerting,
       spaces: pluginsStart.spaces,
       unifiedSearch: pluginsStart.unifiedSearch,
+      kql: pluginsStart.kql,
       isCloud: Boolean(internalDeps.cloud?.isCloudEnabled),
       element: document.createElement('div'),
       storage: new Storage(window.localStorage),

@@ -23,6 +23,7 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { Plugin } from './plugin';
 
@@ -40,6 +41,7 @@ const createPluginsStart = () => {
     features: featuresPluginMock.createStart(),
     expressions: expressionsPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     licensing: licensingMock.createStart(),
     fieldFormats: fieldFormatsServiceMock.createStartContract() as FieldFormatsRegistry,
     lens: lensPluginMock.createStartContract(),

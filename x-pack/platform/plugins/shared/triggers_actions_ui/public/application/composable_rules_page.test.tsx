@@ -47,6 +47,7 @@ const createInternalDeps = (getFeatures: jest.Mock): ClassicRulesPageInternalDep
       alerting: services.alerting,
       spaces: services.spaces,
       unifiedSearch: services.unifiedSearch,
+      kql: services.kql,
       licensing: services.licensing,
       expressions: services.expressions,
       fieldFormats: services.fieldFormats,

@@ -29,6 +29,7 @@ export type ClassicRulesPagePluginsStart = Pick<
   | 'alerting'
   | 'spaces'
   | 'unifiedSearch'
+  | 'kql'
   | 'licensing'
   | 'expressions'
   | 'fieldFormats'
