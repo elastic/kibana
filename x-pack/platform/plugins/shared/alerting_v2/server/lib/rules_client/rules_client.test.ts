@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -120,7 +121,7 @@ describe('RulesClient', () => {
         maxScheduledPerMinute: 400,
         run: {
           alerts: { max: 10000 },
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
           maxGroupsPerExecution: 10000,
         },
         ...rulesConfigOverrides,
