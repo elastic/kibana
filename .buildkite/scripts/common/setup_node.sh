@@ -70,3 +70,12 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
+
+echo " -- node: version=$(node --version)"
+
+echo " -- enabling corepack-managed pnpm"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+PNPM_VERSION="$(node -p "require('${KIBANA_DIR}/package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+corepack enable
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
+echo " -- pnpm: version=$(pnpm --version)"
