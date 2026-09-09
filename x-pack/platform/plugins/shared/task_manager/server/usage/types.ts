@@ -17,4 +17,14 @@ export interface TaskManagerUsage {
     adjusted_service_time: number;
   };
   capacity: number;
+  configured_capacity: number;
+  total_task_runs_1d: number;
+  task_runs_by_type_1d: Array<{ name: string; value: number }>;
+  task_runs_other_1d: number;
+  schedule_delay_1d_ms: {
+    p50: number | null;
+    p75: number | null;
+    p95: number | null;
+    p99: number | null;
+  };
 }
