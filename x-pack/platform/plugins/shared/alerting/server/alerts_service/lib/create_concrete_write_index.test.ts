@@ -464,7 +464,7 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.simulateIndexTemplate.mockImplementation(
           async () => SimulateTemplateResponse
         );
-        clusterClient.indices.getMapping.mockResolvedValue({
+        clusterClient.indices.get.mockResolvedValue({
           '.internal.alerts-test.alerts-default-000001': {
             mappings: { _meta: { content_hash: stampedMappingHash() } },
           },
@@ -478,7 +478,13 @@ describe('createConcreteWriteIndex', () => {
           dataStreamAdapter,
         });
 
-        expect(clusterClient.indices.getMapping).toHaveBeenCalled();
+        // Only `_meta` is needed, so the field definitions are left on the ES side.
+        expect(clusterClient.indices.get).toHaveBeenCalledWith(
+          expect.objectContaining({
+            features: ['mappings', 'settings'],
+            filter_path: ['*.settings.index.uuid', '*.mappings._meta'],
+          })
+        );
         expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
       });
 
@@ -488,7 +494,7 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.simulateIndexTemplate.mockImplementation(
           async () => SimulateTemplateResponse
         );
-        clusterClient.indices.getMapping.mockResolvedValue({
+        clusterClient.indices.get.mockResolvedValue({
           '.internal.alerts-test.alerts-default-000001': {
             mappings: { _meta: { content_hash: 'stale-hash' } },
           },
@@ -511,9 +517,10 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.simulateIndexTemplate.mockImplementation(
           async () => SimulateTemplateResponse
         );
-        clusterClient.indices.getMapping.mockResolvedValue({
+        clusterClient.indices.get.mockResolvedValue({
           '.internal.alerts-test.alerts-default-000001': {
-            mappings: { _meta: { kibana: { version: '8.8.0' } }, enabled: false },
+            mappings: { _meta: { kibana: { version: '8.8.0' } } },
+            settings: { index: { uuid: 'Ulp-YTXHSMuu6WQ_Pc1kEg' } },
           },
         });
 
@@ -534,12 +541,14 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.simulateIndexTemplate.mockImplementation(
           async () => SimulateTemplateResponse
         );
-        clusterClient.indices.getMapping.mockResolvedValue({
+        clusterClient.indices.get.mockResolvedValue({
           '.internal.alerts-test.alerts-default-000001': {
             mappings: { _meta: { content_hash: stampedMappingHash() } },
           },
+          // Nothing but the anchor came back for this one, i.e. it has no `_meta` of any
+          // kind, so it is unstamped and the whole update has to go ahead.
           '.internal.alerts-test.alerts-default-000002': {
-            mappings: { _meta: { kibana: { version: '8.8.0' } } },
+            settings: { index: { uuid: 'Ulp-YTXHSMuu6WQ_Pc1kEg' } },
           },
         });
 
@@ -560,7 +569,7 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.simulateIndexTemplate.mockImplementation(
           async () => SimulateTemplateResponse
         );
-        clusterClient.indices.getMapping.mockRejectedValue(new Error('security_exception'));
+        clusterClient.indices.get.mockRejectedValue(new Error('security_exception'));
 
         await createConcreteWriteIndex({
           logger,
@@ -594,7 +603,7 @@ describe('createConcreteWriteIndex', () => {
             },
           },
         });
-        clusterClient.indices.getMapping.mockResolvedValue({
+        clusterClient.indices.get.mockResolvedValue({
           '.internal.alerts-test.alerts-default-000001': {
             mappings: { _meta: { content_hash: stampedMappingHash() } },
           },
@@ -630,7 +639,7 @@ describe('createConcreteWriteIndex', () => {
             },
           ],
         });
-        clusterClient.indices.getMapping.mockResolvedValue({
+        clusterClient.indices.get.mockResolvedValue({
           '.internal.alerts-test.alerts-default-000001': {
             mappings: { _meta: { content_hash: 'stale-hash' } },
           },
@@ -649,7 +658,7 @@ describe('createConcreteWriteIndex', () => {
 
         // The retry after the limit increase must PUT, so the hash is only read once.
         expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
-        expect(clusterClient.indices.getMapping).toHaveBeenCalledTimes(1);
+        expect(clusterClient.indices.get).toHaveBeenCalledTimes(1);
       });
 
       it(`should raise an existing lower total_fields.limit to the configured value`, async () => {

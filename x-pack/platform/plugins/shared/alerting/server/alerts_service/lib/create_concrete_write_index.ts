@@ -112,9 +112,20 @@ const getInstalledMappingHashes = async (
 ): Promise<Array<string | undefined> | undefined> => {
   try {
     // `index` may be a data stream name, which resolves to its backing indices.
-    const response = await retryTransientEsErrors(() => esClient.indices.getMapping({ index }), {
-      logger,
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        esClient.indices.get({
+          index,
+          features: ['mappings', 'settings'],
+          // Only the `_meta` stamp is read, and the field definitions it sits next to run
+          // to several MB per index. `index.uuid` is pulled alongside it purely as an
+          // anchor: Elasticsearch omits an index entirely when the filter leaves nothing
+          // of it, and an index carrying no `_meta` has to read as unstamped rather than
+          // disappear, or its missing stamp would go unnoticed.
+          filter_path: ['*.settings.index.uuid', '*.mappings._meta'],
+        }),
+      { logger }
+    );
     const installed = Object.values(response ?? {});
     if (installed.length === 0) {
       return undefined;
