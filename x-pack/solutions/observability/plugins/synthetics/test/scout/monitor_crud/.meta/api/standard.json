@@ -1,5 +1,5 @@
 {
-  "sha1": "1f53149a010d5050843f6a5f31762bbb11198701",
+  "sha1": "c77e7523fe40a5471a637586b84662afb0fd2153",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -696,6 +696,90 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/list_monitors.spec.ts",
         "line": 108,
         "column": 7
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-eec97b5847d5328",
+      "title": "AddMonitorPublicAPI request validation accepts the base monitor the negative cases mutate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 59,
+        "column": 31
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-9eab933ed97adc6",
+      "title": "AddMonitorPublicAPI request validation rejects an unknown monitor type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-b6be3c541b1ce93",
+      "title": "AddMonitorPublicAPI request validation rejects a monitor with no locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 64,
+        "column": 89
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-a34345f0b08f2bb",
+      "title": "AddMonitorPublicAPI request validation rejects an unknown top-level field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 68,
+        "column": 61
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-8d16f4a7dbf0529",
+      "title": "AddMonitorPublicAPI request validation rejects an invalid namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 71,
+        "column": 77
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-ba9b7864c8537e3",
+      "title": "AddMonitorPublicAPI request validation rejects a schedule outside the allowed set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 75,
+        "column": 13
       }
     },
     {
