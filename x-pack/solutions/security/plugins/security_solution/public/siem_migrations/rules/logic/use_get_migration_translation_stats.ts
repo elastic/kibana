@@ -15,7 +15,7 @@ import * as i18n from './translations';
 import { getRuleMigrationTranslationStats } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-export const useGetMigrationTranslationStats = (migrationId: string) => {
+export const useGetMigrationTranslationStats = (migrationId: string, enabled: boolean = true) => {
   const { addError } = useAppToasts();
 
   const SPECIFIC_MIGRATION_TRANSLATION_PATH = replaceParams(
@@ -31,6 +31,7 @@ export const useGetMigrationTranslationStats = (migrationId: string) => {
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
+      enabled: enabled && !!migrationId,
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_TRANSLATION_STATS_FAILURE });
       },
