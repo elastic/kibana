@@ -17,7 +17,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
-  OverlayFlyoutTemplateChildren,
+  OverlayFlyoutTemplateContent,
   OverlayFlyoutTemplateOpenOptions,
   OverlaySystemFlyoutOpenOptions,
   OverlaySystemFlyoutStart,
@@ -26,7 +26,8 @@ import type {
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { FlyoutTemplate } from '@kbn/flyout-template';
+import { FlyoutTemplateManagedProvider } from '@kbn/flyout-template';
+import type { FlyoutTemplateManaged } from '@kbn/flyout-template';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
 interface SystemFlyoutStartDeps {
@@ -208,7 +209,7 @@ export class SystemFlyoutService {
 
       openTemplate: (
         options: OverlayFlyoutTemplateOpenOptions,
-        children: OverlayFlyoutTemplateChildren
+        Content: OverlayFlyoutTemplateContent
       ): OverlayRef => {
         // `session` is read but not consumed: `FlyoutTemplate` applies its own default and
         // forwards it down, so it stays on the spread.
@@ -220,17 +221,10 @@ export class SystemFlyoutService {
             onClose,
           });
 
-        // Invoked here rather than stored, so the zones it returns are literal children of
-        // the template and are parsed as parts.
-        let zones: React.ReactNode;
-        try {
-          zones = typeof children === 'function' ? children(FlyoutTemplate, flyoutRef) : children;
-        } catch (error) {
-          // Runs outside React, so the template's error boundary cannot take this; the
-          // container and its `activeFlyouts` entry are already live and have to be released.
-          flyoutRef.close();
-          throw error;
-        }
+        const managed: FlyoutTemplateManaged = {
+          props: { ...templateProps, id: flyoutElementId, onClose: onCloseFlyout },
+          close: onCloseFlyout,
+        };
 
         render(
           <KibanaRenderContextProvider
@@ -239,9 +233,9 @@ export class SystemFlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            <FlyoutTemplate {...templateProps} id={flyoutElementId} onClose={onCloseFlyout}>
-              {zones}
-            </FlyoutTemplate>
+            <FlyoutTemplateManagedProvider value={managed}>
+              <Content />
+            </FlyoutTemplateManagedProvider>
           </KibanaRenderContextProvider>,
           flyoutContainer
         );

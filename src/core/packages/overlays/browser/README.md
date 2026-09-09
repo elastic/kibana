@@ -74,34 +74,56 @@ flyoutRef.close();
 
 ### `overlays.openFlyoutTemplate`
 
-Opens a system flyout rendered as a `FlyoutTemplate` — the sanctioned way to build flyout content in Kibana. It takes two arguments, matching the component's own signature: the template's props, then its zones. Like `openSystemFlyout`, it integrates with the EUI Flyout Manager for session, history, and cascade-close support.
+Opens a system flyout rendered as a `FlyoutTemplate` — the sanctioned way to build flyout content in Kibana. It takes the template's props, then a component that renders the template and its zones. Like `openSystemFlyout`, it integrates with the EUI Flyout Manager for session, history, and cascade-close support.
+
+The component is a real React boundary: it may use hooks, load its own data, and re-render as that data arrives.
 
 ```tsx
+const MyFlyout = () => {
+  const details = useDetails();
+  const close = useFlyoutClose();
+
+  return (
+    <FlyoutTemplate>
+      <FlyoutTemplate.Header title="My Flyout" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Section title="Details">
+          {details ? <Details value={details} /> : <EuiSkeletonText />}
+        </FlyoutTemplate.Body.Section>
+      </FlyoutTemplate.Body>
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.SecondaryAction label="Cancel" onClick={close} />
+        <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={save} />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
+  );
+};
+
 const flyoutRef = overlays.openFlyoutTemplate(
   { size: 'm', maxWidth: 600, ownFocus: false },
-  (T, flyout) => (
-    <>
-      <T.Header title="My Flyout" />
-      <T.Body>
-        <T.Body.Section title="Details">
-          <p>This is a system flyout rendered as a FlyoutTemplate.</p>
-        </T.Body.Section>
-      </T.Body>
-      <T.Footer>
-        <T.Footer.SecondaryAction label="Cancel" onClick={() => flyout.close()} />
-        <T.Footer.PrimaryAction label="Save" onClick={() => console.log('Save')} />
-      </T.Footer>
-    </>
-  )
+  MyFlyout
 );
 
 // Close the flyout programmatically
 flyoutRef.close();
 ```
 
-The callback's first argument is the `FlyoutTemplate` namespace, so declaring zones needs no import and no `kbn_references` entry for `@kbn/flyout-template`. Its second argument is the same `OverlayRef` that `open` returns, so content can close the flyout it lives in without threading a ref through.
+**The `FlyoutTemplate` takes no root props here.** Every root prop comes from the options argument, which is also the only place that can vary them per call. Props passed to a managed `FlyoutTemplate` are ignored and warn in development. A flyout whose root props depend on its own data has to own its lifecycle and render `FlyoutTemplate` directly in a React tree.
 
-A plain node is accepted in place of the callback for callers that import `FlyoutTemplate` themselves.
+Content with nothing to load is the same shape, just without the hooks. The second argument is always a component, so nothing inside it is evaluated until the flyout mounts.
+
+```tsx
+const StaticFlyout = () => (
+  <FlyoutTemplate>
+    <FlyoutTemplate.Header title="Static" />
+    <FlyoutTemplate.Body>Nothing to load.</FlyoutTemplate.Body>
+  </FlyoutTemplate>
+);
+
+overlays.openFlyoutTemplate({ size: 'm' }, StaticFlyout);
+```
+
+Callers import `FlyoutTemplate` from `@kbn/flyout-template` and need a `kbn_references` entry for it. `useFlyoutClose`, from the same package, closes the flyout from anywhere inside the content without threading the `OverlayRef` through.
 
 For what each zone accepts — sections, subsections, accordions, tabs, header badges/meta blocks/info blocks, footer actions — see the [`@kbn/flyout-template` README](../../../../platform/packages/shared/shared-ux/flyout/template/README.md).
 
@@ -116,13 +138,13 @@ const details = useFlyoutTemplate(overlays, { returnFocusTo: triggerRef });
 <EuiButton
   buttonRef={triggerRef}
   onClick={() =>
-    details.open({ size: 'm' }, (T) => (
-      <>
-        <T.Header title="Alert details" />
-        <T.Body>
+    details.open({ size: 'm' }, () => (
+      <FlyoutTemplate>
+        <FlyoutTemplate.Header title="Alert details" />
+        <FlyoutTemplate.Body>
           <AlertSummary alertId={alertId} />
-        </T.Body>
-      </>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
     ))
   }
 >
@@ -137,4 +159,4 @@ const details = useFlyoutTemplate(overlays, { returnFocusTo: triggerRef });
 ### Key Differences
 
 - **`openFlyout`**: Traditional method that requires `toMountPoint`. Opens flyouts with `session="never"`. Content should include `EuiFlyoutHeader` and `EuiFlyoutBody`. Optionally include `EuiFlyoutFooter`.
-- **`openFlyoutTemplate`**: The recommended method for session-based flyouts. Opens flyouts with `session="start"` for full EUI Flyout System integration, rendered as a `FlyoutTemplate` from its props and zones — no hand-composed `EuiFlyoutHeader`/`Body`/`Footer`.
+- **`openFlyoutTemplate`**: The recommended method for session-based flyouts. Opens flyouts with `session="start"` for full EUI Flyout System integration, rendered as a `FlyoutTemplate` from its props plus a component that composes its zones — no hand-composed `EuiFlyoutHeader`/`Body`/`Footer`.

@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import type { OverlayRef, OverlayStart } from '@kbn/core/public';
 import { useBooleanUrlState } from '@kbn/shared-url-state';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 
 import {
   createChildFlyoutDescriptionItems,
@@ -170,13 +171,13 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
           returnFocusRef.current?.focus();
         },
       },
-      (T) => (
-        <>
-          <T.Header title={`Child flyout ${label} of ${title}`} collapsed />
-          <T.Body>
+      () => (
+        <FlyoutTemplate>
+          <FlyoutTemplate.Header title={`Child flyout ${label} of ${title}`} collapsed />
+          <FlyoutTemplate.Body>
             <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />
-          </T.Body>
-        </>
+          </FlyoutTemplate.Body>
+        </FlyoutTemplate>
       )
     );
     setIsOpen(true);
@@ -278,9 +279,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           },
           historyKey,
         },
-        (T) => (
-          <>
-            <T.Header
+        () => (
+          <FlyoutTemplate>
+            <FlyoutTemplate.Header
               title={title}
               description={
                 <>
@@ -288,17 +289,17 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 </>
               }
             />
-            <T.Body>
-              <T.Body.Section title="Flyout properties">
+            <FlyoutTemplate.Body>
+              <FlyoutTemplate.Body.Section title="Flyout properties">
                 <FlyoutProperties
                   flyoutType={flyoutType}
                   flyoutOwnFocus={flyoutOwnFocus}
                   mainSize={mainSize}
                   mainMaxWidth={mainMaxWidth}
                 />
-              </T.Body.Section>
+              </FlyoutTemplate.Body.Section>
               <FillerContent />
-              <T.Body.Section title="Child flyouts">
+              <FlyoutTemplate.Body.Section title="Child flyouts">
                 <ChildFlyoutTriggers
                   historyKey={historyKey}
                   title={title}
@@ -306,16 +307,16 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                   childMaxWidth={childMaxWidth}
                   overlays={overlays}
                 />
-              </T.Body.Section>
-            </T.Body>
-            <T.Footer>
-              <T.Footer.SecondaryAction
+              </FlyoutTemplate.Body.Section>
+            </FlyoutTemplate.Body>
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.SecondaryAction
                 label="Close"
                 onClick={handleCloseFlyout}
                 data-test-subj={`closeMainFlyoutOverlaysButton-${title}`}
               />
-            </T.Footer>
-          </>
+            </FlyoutTemplate.Footer>
+          </FlyoutTemplate>
         )
       );
       setIsOpen(true);

@@ -20,7 +20,7 @@ import type {
   OverlayFlyoutTemplateStart,
   OverlaySystemFlyoutStart,
 } from '@kbn/core-overlays-browser';
-import { FlyoutTemplate } from '@kbn/flyout-template';
+import { FlyoutTemplate, useFlyoutClose } from '@kbn/flyout-template';
 import React from 'react';
 
 interface FlyoutManagerEvent {
@@ -380,65 +380,65 @@ describe('SystemFlyoutService', () => {
   });
 
   describe('openTemplate()', () => {
-    /** Minimal header/body zones, as the callback form of the `children` argument. */
-    const zones =
-      (title: string, content: React.ReactNode = 'content') =>
-      (T: typeof FlyoutTemplate) =>
+    /** Minimal content component: a `FlyoutTemplate` with header and body zones. */
+    const content =
+      (title: string, body: React.ReactNode = 'content') =>
+      () =>
         (
-          <>
-            <T.Header title={title} />
-            <T.Body>{content}</T.Body>
-          </>
+          <FlyoutTemplate>
+            <FlyoutTemplate.Header title={title} />
+            <FlyoutTemplate.Body>{body}</FlyoutTemplate.Body>
+          </FlyoutTemplate>
         );
 
-    it('parses zones returned by the callback: the header title is visible', () => {
-      systemFlyouts.openTemplate({ session: 'never' }, zones('My Flyout Title'));
+    /** The contract handed to the content subtree: resolved root props plus `close`. */
+    const managedValue = (call = 0) =>
+      mockReactDomRender.mock.calls[call][0].props.children.props.value;
+
+    it('renders the zones a content component declares: the header title is visible', () => {
+      systemFlyouts.openTemplate({ session: 'never' }, content('My Flyout Title'));
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
       expect(getByRole('heading', { level: 3, name: 'My Flyout Title' })).toBeInTheDocument();
     });
 
-    it('accepts a plain node in place of the callback', () => {
-      systemFlyouts.openTemplate(
-        { session: 'never' },
-        <>
-          <FlyoutTemplate.Header title="Node form" />
-          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
-        </>
-      );
-
-      const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(getByRole('heading', { level: 3, name: 'Node form' })).toBeInTheDocument();
-    });
-
-    it('passes the template namespace and the returned ref to the callback', () => {
-      let received: { template: unknown; flyout: unknown } | undefined;
-      const ref = systemFlyouts.openTemplate({ session: 'never' }, (T, flyout) => {
-        received = { template: T, flyout };
+    it('runs content hooks inside React, so state updates re-render the zones', () => {
+      const Content = () => {
+        const [count, setCount] = React.useState(0);
         return (
-          <>
-            <T.Header title="Injected" />
-            <T.Body>content</T.Body>
-          </>
+          <FlyoutTemplate>
+            <FlyoutTemplate.Header title={`Count ${count}`} />
+            <FlyoutTemplate.Body>
+              <button type="button" onClick={() => setCount(count + 1)}>
+                increment
+              </button>
+            </FlyoutTemplate.Body>
+          </FlyoutTemplate>
         );
-      });
+      };
 
-      expect(received?.template).toBe(FlyoutTemplate);
-      expect(received?.flyout).toBe(ref);
+      systemFlyouts.openTemplate({ session: 'never' }, Content);
+      const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
+
+      expect(getByRole('heading', { level: 3, name: 'Count 0' })).toBeInTheDocument();
+      fireEvent.click(getByRole('button', { name: 'increment' }));
+      expect(getByRole('heading', { level: 3, name: 'Count 1' })).toBeInTheDocument();
     });
 
-    it('lets content close its own flyout through the injected ref', () => {
-      const ref = systemFlyouts.openTemplate({ session: 'never' }, (T, flyout) => (
-        <>
-          <T.Header title="Closes itself" />
-          <T.Body>
-            <button type="button" onClick={() => flyout.close()}>
-              close me
-            </button>
-          </T.Body>
-        </>
-      ));
+    it('lets nested content close the flyout through useFlyoutClose', () => {
+      const CloseButton = () => {
+        const close = useFlyoutClose();
+        return (
+          <button type="button" onClick={close}>
+            close me
+          </button>
+        );
+      };
+      const ref = systemFlyouts.openTemplate(
+        { session: 'never' },
+        content('Closes itself', <CloseButton />)
+      );
 
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
       expect((ref as SystemFlyoutRef).isClosed).toBe(false);
@@ -450,13 +450,11 @@ describe('SystemFlyoutService', () => {
 
     it('invokes onClose from options before closing the ref', () => {
       const onClose = jest.fn();
-      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, zones('Closeable'));
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, content('Closeable'));
 
       expect((ref as SystemFlyoutRef).isClosed).toBe(false);
 
-      const renderedElement = mockReactDomRender.mock.calls[0][0];
-      const templateElement = renderedElement.props.children;
-      templateElement.props.onClose();
+      managedValue().props.onClose();
 
       expect(onClose).toHaveBeenCalledWith(ref);
       expect((ref as SystemFlyoutRef).isClosed).toBe(true);
@@ -473,7 +471,7 @@ describe('SystemFlyoutService', () => {
         targetDomElement: targetElement,
       });
 
-      const ref = flyouts.openTemplate({ session: 'never' }, zones('Container test'));
+      const ref = flyouts.openTemplate({ session: 'never' }, content('Container test'));
       expect(targetElement.children.length).toBe(1);
 
       const firstClose = await ref.close();
@@ -485,34 +483,45 @@ describe('SystemFlyoutService', () => {
       testService.stop();
     });
 
-    it('forwards flyout props such as size and outsideClickCloses', () => {
+    it('resolves flyout props such as size and outsideClickCloses for the template', () => {
       systemFlyouts.openTemplate(
         { session: 'never', size: 'l', outsideClickCloses: false },
-        zones('Forwarded props')
+        content('Forwarded props')
       );
 
-      const renderedElement = mockReactDomRender.mock.calls[0][0];
-      const templateElement = renderedElement.props.children;
-      expect(templateElement.props.size).toBe('l');
-      expect(templateElement.props.outsideClickCloses).toBe(false);
+      expect(managedValue().props.size).toBe('l');
+      expect(managedValue().props.outsideClickCloses).toBe(false);
     });
 
-    it('does not leak the children argument into the template props', () => {
-      systemFlyouts.openTemplate({ session: 'never' }, zones('No leak'));
+    it('applies the resolved props even when the content passes its own to FlyoutTemplate', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      systemFlyouts.openTemplate({ session: 'never', size: 'l' }, () => (
+        <FlyoutTemplate size="s">
+          <FlyoutTemplate.Header title="Overridden" />
+          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      ));
 
-      const renderedElement = mockReactDomRender.mock.calls[0][0];
-      const templateElement = renderedElement.props.children;
-      expect(typeof templateElement.props.children).not.toBe('function');
+      const { container } = render(mockReactDomRender.mock.calls[0][0]);
+
+      expect(container.querySelector('[class*="euiFlyout"]')).toBeInTheDocument();
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('ignores root props'));
+    });
+
+    it('does not leak the children argument into the resolved template props', () => {
+      systemFlyouts.openTemplate({ session: 'never' }, content('No leak'));
+
+      expect(managedValue().props).not.toHaveProperty('children');
     });
 
     it('cascade closes a child flyout (session: "inherit") when the session ends', () => {
       const parentRef = systemFlyouts.openTemplate(
         { id: 'template-parent-flyout', session: 'start' },
-        zones('Parent', 'parent content')
+        content('Parent', 'parent content')
       );
       const childRef = systemFlyouts.openTemplate(
         { id: 'template-child-flyout', session: 'inherit' },
-        zones('Child', 'child content')
+        content('Child', 'child content')
       );
 
       emitEvent({
@@ -531,11 +540,11 @@ describe('SystemFlyoutService', () => {
     it('does not close an unrelated second "start" session', () => {
       const refX = systemFlyouts.openTemplate(
         { id: 'template-session-x', session: 'start' },
-        zones('Session X', 'content x')
+        content('Session X', 'content x')
       );
       const refY = systemFlyouts.openTemplate(
         { id: 'template-session-y', session: 'start' },
-        zones('Session Y', 'content y')
+        content('Session Y', 'content y')
       );
 
       emitEvent({
@@ -549,36 +558,13 @@ describe('SystemFlyoutService', () => {
     });
 
     it('renders a child flyout with the id its cascade subscription matches on', () => {
-      systemFlyouts.openTemplate({ id: 'template-parent-flyout', session: 'start' }, zones('P'));
-      systemFlyouts.openTemplate({ session: 'inherit' }, zones('Child without an id'));
+      systemFlyouts.openTemplate({ id: 'template-parent-flyout', session: 'start' }, content('P'));
+      systemFlyouts.openTemplate({ session: 'inherit' }, content('Child without an id'));
 
       // The subscription falls back to an internal `system-flyout-<uuid>`, but with no `id`
       // reaching EuiFlyout, EUI's useFlyoutId registers the flyout as `flyout-<generated>-<n>`.
       // Unless the id is rendered, no CLOSE_SESSION event can ever match it.
-      const childElement = mockReactDomRender.mock.calls[1][0].props.children;
-      expect(childElement.props.id).toEqual(expect.any(String));
-    });
-
-    it('does not leak the flyout container when the zones callback throws', () => {
-      const targetElement = document.createElement('div');
-      const testService = new SystemFlyoutService();
-      const flyouts = testService.start({
-        analytics: analyticsMock,
-        i18n: i18nMock,
-        theme: themeMock,
-        userProfile: userProfileMock,
-        targetDomElement: targetElement,
-      });
-
-      expect(() =>
-        flyouts.openTemplate({ session: 'never' }, () => {
-          throw new Error('zones blew up');
-        })
-      ).toThrow('zones blew up');
-
-      expect(targetElement.children).toHaveLength(0);
-
-      testService.stop();
+      expect(managedValue(1).props.id).toEqual(expect.any(String));
     });
   });
 

@@ -21,6 +21,7 @@ import {
   FlyoutHeaderCollapseProvider,
   FlyoutTabsProvider,
   FlyoutTemplateConfigProvider,
+  useFlyoutTemplateManaged,
 } from './context';
 import type { FlyoutTabDescriptor, FlyoutTabsState } from './context/tabs_context';
 import { useHeaderCollapse } from './use_header_collapse';
@@ -47,6 +48,8 @@ const pickZone = (items: ParsedItem[], partName: string): ParsedPart | undefined
   return matches[0];
 };
 
+const noop = () => {};
+
 const resolveDefaultSelectedTabId = (
   tabs: FlyoutTabDescriptor[],
   defaultId: string | undefined
@@ -57,8 +60,8 @@ const resolveDefaultSelectedTabId = (
   return tabs[0]?.id;
 };
 
-/** Root component that renders Header, Body, Footer zones in template order. */
-const FlyoutTemplateRoot = ({
+/** Renders Header, Body, Footer zones in template order from fully resolved root props. */
+const FlyoutTemplateResolved = ({
   children,
   onClose,
   size = 'm',
@@ -190,9 +193,16 @@ const FlyoutTemplateRoot = ({
 
   const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
 
+  if (process.env.NODE_ENV !== 'production' && !onClose) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[FlyoutTemplate] No `onClose` was provided and no opener supplied one; the flyout cannot be dismissed.'
+    );
+  }
+
   return (
     <EuiFlyout
-      onClose={onClose}
+      onClose={onClose ?? noop}
       size={size}
       minWidth={minWidth}
       type={type}
@@ -227,6 +237,34 @@ const FlyoutTemplateRoot = ({
         </FlyoutTabsProvider>
       </FlyoutTemplateConfigProvider>
     </EuiFlyout>
+  );
+};
+
+/**
+ * Root component. Under a managing opener the resolved props win outright, so the `id`,
+ * `session`, and `onClose` its bookkeeping matches on cannot be contradicted here.
+ */
+const FlyoutTemplateRoot = (props: FlyoutTemplateProps) => {
+  const managed = useFlyoutTemplateManaged();
+  const ignoredPropNames = managed
+    ? Object.keys(props).filter(
+        (name) => name !== 'children' && props[name as keyof FlyoutTemplateProps] !== undefined
+      )
+    : [];
+  const ignoredPropList = ignoredPropNames.join(', ');
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production' || !ignoredPropList) return;
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[FlyoutTemplate] A managed flyout ignores root props on <FlyoutTemplate>; move ${ignoredPropList} to the options passed to the opener.`
+    );
+  }, [ignoredPropList]);
+
+  return (
+    <FlyoutTemplateResolved {...(managed ? managed.props : props)}>
+      {props.children}
+    </FlyoutTemplateResolved>
   );
 };
 

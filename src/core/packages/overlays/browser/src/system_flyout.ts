@@ -9,7 +9,7 @@
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { EuiFlyoutProps } from '@elastic/eui';
-import type { FlyoutTemplate, FlyoutTemplateProps } from '@kbn/flyout-template';
+import type { FlyoutTemplateProps } from '@kbn/flyout-template';
 import type { OverlayFlyoutOpenOptions } from './flyout';
 
 /**
@@ -69,17 +69,17 @@ export type OverlayFlyoutTemplateOpenOptions = Omit<FlyoutTemplateProps, 'childr
 };
 
 /**
- * The flyout's zones: `FlyoutTemplate.Header`, `.Body`, and `.Footer`.
+ * A component rendering a `FlyoutTemplate` and its zones.
  *
- * The callback form receives the `FlyoutTemplate` namespace, so declaring zones needs no
- * import, and the {@link OverlayRef} for the flyout being opened, so content inside it can
- * close it. A plain node is accepted for callers that import `FlyoutTemplate` themselves.
+ * It is a real React boundary, so it may use hooks, load its own data, and re-render as that
+ * data arrives, and nothing inside it is evaluated until the flyout mounts. The
+ * `FlyoutTemplate` it renders takes no root props — those come from
+ * {@link OverlayFlyoutTemplateOpenOptions} — and `useFlyoutClose` dismisses the flyout from
+ * any depth inside it.
  *
  * @public
  */
-export type OverlayFlyoutTemplateChildren =
-  | React.ReactNode
-  | ((template: typeof FlyoutTemplate, flyout: OverlayRef) => React.ReactNode);
+export type OverlayFlyoutTemplateContent = React.ComponentType;
 
 /**
  * APIs to open and manage `FlyoutTemplate`-based fly-out dialogs.
@@ -93,11 +93,11 @@ export interface OverlayFlyoutTemplateStart {
    * flyout.
    *
    * @param options {@link OverlayFlyoutTemplateOpenOptions} - the template's props
-   * @param children {@link OverlayFlyoutTemplateChildren} - the template's zones
+   * @param content {@link OverlayFlyoutTemplateContent} - the component rendering the template
    * @return {@link OverlayRef} A reference to the opened flyout panel.
    */
   open(
     options: OverlayFlyoutTemplateOpenOptions,
-    children: OverlayFlyoutTemplateChildren
+    content: OverlayFlyoutTemplateContent
   ): OverlayRef;
 }

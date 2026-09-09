@@ -118,21 +118,27 @@ Footer action buttons are not derived; their `data-test-subj` passes through to 
 
 ## Opening a flyout imperatively
 
-`FlyoutTemplate` discovers its zones by parsing its *direct* JSX children, so every part has to be a literal child of the zone that parses it. `core.overlays.openFlyoutTemplate` takes the template's props and a function returning its zones, and calls that function inside its own render, so the zones land as literal children and every rule documented above still applies.
+`core.overlays.openFlyoutTemplate` takes the template's root props and a component that renders `FlyoutTemplate` with its zones. Because the component renders the template itself, the zones are literal children of it and every rule documented above still applies.
 
 ```tsx
-core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, (T) => (
-  <>
-    <T.Header title="Alert details" />
-    <T.Body>
-      <T.Body.Section title="Summary">
-        <AlertSummary alert={alert} />
-      </T.Body.Section>
-    </T.Body>
-  </>
-));
+const AlertDetails = () => {
+  const alert = useAlert();
+
+  return (
+    <FlyoutTemplate>
+      <FlyoutTemplate.Header title="Alert details" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Section title="Summary">
+          <AlertSummary alert={alert} />
+        </FlyoutTemplate.Body.Section>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+};
+
+core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
 ```
 
-The callback's first argument is the `FlyoutTemplate` namespace, so declaring zones needs no import from this package. Its second argument is the flyout's `OverlayRef`, so content can close the flyout it lives in. See `@kbn/core-overlays-browser` for the full signature.
+The component is a real React boundary, so it may use hooks and re-render. The `FlyoutTemplate` it renders takes no root props — those come from the options argument, and props passed here are ignored and warn in development. `useFlyoutClose` dismisses the flyout from any depth inside the content. See `@kbn/core-overlays-browser` for the full signature.
 
 **A part written inside another component does not render.** Parts are identified by parsing direct JSX children, so one returned from inside a component sits behind a boundary the parser cannot see through and silently renders nothing. Keep parts in the JSX of the zone that parses them, and put your own components inside those parts.
