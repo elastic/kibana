@@ -61,7 +61,7 @@ describe('ObservabilityAlertingPlugin', () => {
           CreateRuleOptionsFlyout: () => null,
         },
         triggersActionsUi: {
-          getClassicRulesPage: () => <div />,
+          getClassicRulesPage: () => React.createElement('div'),
         },
       },
       {},
