@@ -123,7 +123,7 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
     (node) => node.type === 'command' && node.name === 'highlight'
   ) as ESQLAstHighlightCommand[];
 
-  for (const command of highlightCommandCandidates) {
+  for (const command of highlightCommands) {
     const optionsMap = isMap(command.namedParameters) ? command.namedParameters : undefined;
 
     const preTag = optionsMap
