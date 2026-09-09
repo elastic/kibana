@@ -19,7 +19,7 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
@@ -80,7 +80,9 @@ export const SourceDocumentJsonMode = ({
           dataViewField: field,
           hideFilteringOnComputedColumns,
           onFilter,
-        })
+        }) ||
+        // Elasticsearch did not index this value, so a filter built from it would never match.
+        (field && getIgnoredReason(field, row.raw._ignored))
       ) {
         return [];
       }
@@ -109,7 +111,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, columnsMeta, onFilter, hideFilteringOnComputedColumns, isPlainRecord]
+    [dataView, columnsMeta, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);
