@@ -15,7 +15,6 @@ const APP_LOAD_TIMEOUT_MS = 60_000;
  * keypad and existing action rows.
  */
 export class RuleResponseActionsFormPage {
-  readonly createNewRuleButton: Locator;
   readonly defineStep: Locator;
   readonly defineContinue: Locator;
   readonly aboutRuleName: Locator;
@@ -28,7 +27,6 @@ export class RuleResponseActionsFormPage {
   readonly endpointActionOption: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.createNewRuleButton = this.page.testSubj.locator('create-new-rule');
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
     this.defineContinue = this.page.testSubj.locator('define-continue');
     this.aboutRuleName = this.page.testSubj
@@ -63,23 +61,21 @@ export class RuleResponseActionsFormPage {
     return this.responseActionItem(index).locator('[data-test-subj="remove-response-action"]');
   }
 
-  async gotoRuleManagement(): Promise<void> {
-    await this.page.gotoApp('security/rules/management');
-    await this.createNewRuleButton.waitFor({
-      state: 'visible',
-      timeout: APP_LOAD_TIMEOUT_MS,
-    });
-  }
-
   async gotoCreateActionsStep(name: string, description: string): Promise<void> {
-    await this.gotoRuleManagement();
-    await this.createNewRuleButton.click();
+    // Open the wizard URL. The rules table swaps `create-new-rule` for
+    // `create-rule-button` when AI rule creation is available.
+    await this.page.gotoApp('security/rules/create');
     await this.defineStep.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
 
     const queryInput = this.page.testSubj
       .locator('defineRuleFormStepQueryEditor')
       .locator('[data-test-subj="queryInput"]')
       .filter({ visible: true });
+    // Stays disabled while user-info / lists init and the ad-hoc data view create.
+    await queryInput.and(this.page.locator(':enabled')).waitFor({
+      state: 'visible',
+      timeout: APP_LOAD_TIMEOUT_MS,
+    });
     await queryInput.click();
     // QueryStringInput ignores fill() — it syncs from React props.
     await queryInput.pressSequentially('_id:*');
@@ -127,8 +123,8 @@ export class RuleResponseActionsFormPage {
   }
 
   /**
-   * Clicks a disabled remove control. Same RBAC contract as the Cypress
-   * `{ force: true }` click: the row must stay.
+   * Clicks a disabled remove control. The row must stay: the control is
+   * intentionally disabled for `rule_author`.
    */
   async dispatchClickOnDisabledRemove(index: number): Promise<void> {
     await this.removeResponseAction(index).dispatchEvent('click');

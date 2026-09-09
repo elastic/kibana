@@ -15,10 +15,6 @@ export interface SeededResponseActionsRule {
   name: string;
 }
 
-/**
- * Mirrors Cypress `loadRule()`: a custom query rule with isolate,
- * suspend-process, and kill-process automated response actions.
- */
 export const createRuleWithAutomatedResponseActions = async (
   kbnClient: KbnClient,
   spaceId: string,
