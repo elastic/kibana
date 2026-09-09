@@ -1,0 +1,59 @@
+version: '1'
+name: Sandbox Seed
+description: >
+  Seeds the Nightshift investigator's sandbox with an orientation note on the
+  first round of a conversation. Subsequent rounds skip the seeding step so
+  they don't overwrite notes the agent wrote in earlier rounds (the workspace
+  is snapshotted after every round and restored at the start of the next).
+enabled: true
+tags:
+  - observability
+  - significant-events
+  - investigation
+  - sandbox
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: >
+            The user message for this round, forwarded by the agent's
+            beforeAgent hook.
+        conversation_id:
+          type: string
+          description: >
+            Conversation id that namespaces the sandbox. Absent for standalone
+            (sub-agent) runs — in that case the seeding step is skipped via the
+            if: guard.
+        is_first_round:
+          type: boolean
+          description: >
+            True only on the first agent round of the conversation. Used to
+            gate seeding so subsequent rounds don't clobber prior notes.
+      additionalProperties: false
+
+steps:
+  - name: seed_orientation_note
+    type: nightshift.sandboxWriteFile
+    if: '${{ inputs.is_first_round and inputs.conversation_id }}'
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+      file_path: 'investigation.md'
+      content: |
+        # Investigation workspace
+
+        conversation_id: {{ inputs.conversation_id }}
+
+        ## Task
+
+        {{ inputs.prompt }}
+
+        ## Working notes
+
+        Use this file as a scratchpad. Append findings, hypotheses, and
+        conclusions as you go — it is snapshotted after every round and
+        restored at the start of the next, so notes survive across turns.
+    on-failure:
+      continue: true

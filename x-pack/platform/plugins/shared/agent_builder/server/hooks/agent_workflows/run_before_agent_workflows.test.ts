@@ -220,6 +220,73 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
+  it('passes conversation_id and is_first_round in workflowParams on first round', async () => {
+    const context = {
+      ...createContext(),
+      conversationId: 'conv-abc',
+      isFirstRound: true,
+    };
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-params',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    });
+
+    await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: {
+          prompt: 'hello',
+          conversation_id: 'conv-abc',
+          is_first_round: true,
+        },
+      })
+    );
+  });
+
+  it('passes is_first_round: false and omits conversation_id when context has none', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-params2',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    });
+
+    await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: {
+          prompt: 'hello',
+          is_first_round: false,
+        },
+      })
+    );
+  });
+
   it('executes each workflow once when global and agent workflows overlap', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices, uiSettingsClient, resolveAgentConfiguration } =

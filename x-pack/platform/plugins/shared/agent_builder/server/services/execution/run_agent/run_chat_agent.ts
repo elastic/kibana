@@ -205,6 +205,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
+    conversationId: conversation?.id,
+    isFirstRound: conversation !== undefined && previousRounds.length === 0,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
