@@ -21,12 +21,7 @@ export const DeleteEvaluationDatasetRequestQuery = lazySchema(() =>
     /**
      * The outcome the caller expects. `unshare` requires the dataset to be assigned to other spaces and removes it from the current one only. `delete` requires the current space to be the last one and removes the dataset with its examples. Returns 409 when the dataset's spaces no longer match the expected outcome. Defaults to whichever outcome the dataset's spaces call for.
      */
-    intent: z
-      .enum(['unshare', 'delete'])
-      .optional()
-      .describe(
-        "The outcome the caller expects. `unshare` requires the dataset to be assigned to other spaces and removes it from the current one only. `delete` requires the current space to be the last one and removes the dataset with its examples. Returns 409 when the dataset's spaces no longer match the expected outcome. Defaults to whichever outcome the dataset's spaces call for."
-      ),
+    intent: z.enum(['unshare', 'delete']).optional(),
   })
 );
 export type DeleteEvaluationDatasetRequestQuery = z.infer<
@@ -54,12 +49,7 @@ export const DeleteEvaluationDatasetResponse = lazySchema(() =>
     /**
      * True when the dataset was removed from the current space and remains in others, false when it was deleted.
      */
-    unshared: z
-      .boolean()
-      .optional()
-      .describe(
-        'True when the dataset was removed from the current space and remains in others, false when it was deleted.'
-      ),
+    unshared: z.boolean().optional(),
   })
 );
 export type DeleteEvaluationDatasetResponse = z.infer<typeof DeleteEvaluationDatasetResponse>;

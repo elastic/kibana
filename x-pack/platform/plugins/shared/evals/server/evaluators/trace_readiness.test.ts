@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   awaitTraceReady,
@@ -19,7 +20,25 @@ import type {
 import type { EvidenceRound, InstrumentationProfile } from './evidence/types';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 
-jest.mock('./evidence/evidence_service');
+jest.mock('./evidence/evidence_service', () => ({
+  ...jest.requireActual('./evidence/evidence_service'),
+  hasTraceDocuments: jest.fn(),
+  hasRootSpan: jest.fn(),
+  extractEvidence: jest.fn(),
+  extractProfilesEvidence: jest.fn(),
+  extractSelectedEvidence: jest.fn(),
+}));
+
+type ResponseErrorArgs = ConstructorParameters<typeof EsErrors.ResponseError>[0];
+
+const buildResponseError = (statusCode: number): EsErrors.ResponseError =>
+  new EsErrors.ResponseError({
+    statusCode,
+    body: {},
+    headers: {},
+    warnings: [],
+    meta: {} as ResponseErrorArgs['meta'],
+  });
 
 const FAST_BUDGET: AwaitTraceReadyOptions = {
   retries: 5,
@@ -73,11 +92,6 @@ describe('awaitTraceReady', () => {
   const extractEvidenceMock = evidenceServiceModule.extractEvidence as jest.Mock;
   const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as jest.Mock;
   const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as jest.Mock;
-  const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as jest.Mock;
-  const toInstrumentationProfileProbesMock =
-    evidenceServiceModule.toInstrumentationProfileProbes as jest.Mock;
-  const getRecommendedInstrumentationProfileMock =
-    evidenceServiceModule.getRecommendedInstrumentationProfile as jest.Mock;
 
   const run = (
     request: AwaitTraceReadyRequest = {
@@ -92,29 +106,14 @@ describe('awaitTraceReady', () => {
     hasTraceDocumentsMock.mockResolvedValue(true);
     hasRootSpanMock.mockResolvedValue(true);
     extractEvidenceMock.mockResolvedValue(buildExtraction(READY_ROUND));
-    hasResolvedEvidenceMock.mockImplementation(
-      (round: EvidenceRound) =>
-        Boolean(round.input.message.trim()) ||
-        Boolean(round.response.message.trim()) ||
-        round.steps.length > 0
-    );
-    getRecommendedInstrumentationProfileMock.mockImplementation(
-      (profiles: InstrumentationProfileEvidenceResult[]) =>
-        profiles.find(({ evidence }) =>
-          [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
-        )?.profile
-    );
-    toInstrumentationProfileProbesMock.mockImplementation(
-      (profiles: InstrumentationProfileEvidenceResult[]) =>
-        profiles.map(({ profile, evidence }) => ({ profile, evidence }))
-    );
     extractSelectedEvidenceMock.mockImplementation(
       async (_traceAccessor: TraceAccessorWithSearch, profile?: InstrumentationProfile) => {
         if (profile) {
           return { selected: { profile, ...(await extractEvidenceMock()) } };
         }
         const profiles = await extractProfilesEvidenceMock();
-        const recommendedProfile = getRecommendedInstrumentationProfileMock(profiles);
+        const recommendedProfile =
+          evidenceServiceModule.getRecommendedInstrumentationProfile(profiles);
         return {
           profiles,
           selected: profiles.find(
@@ -307,6 +306,25 @@ describe('awaitTraceReady', () => {
 
     await expect(run()).rejects.toBe(searchFailure);
     expect(extractEvidenceMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry deterministic Elasticsearch client errors', async () => {
+    const searchFailure = buildResponseError(400);
+    extractEvidenceMock.mockRejectedValue(searchFailure);
+
+    await expect(run()).rejects.toBe(searchFailure);
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([429, 503])('retries a transient Elasticsearch %s response', async (statusCode) => {
+    extractEvidenceMock
+      .mockRejectedValueOnce(buildResponseError(statusCode))
+      .mockResolvedValue(buildExtraction(READY_ROUND));
+
+    await expect(run()).resolves.toEqual(
+      expect.objectContaining({ round: READY_ROUND, readiness: 'complete' })
+    );
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(3);
   });
 
   it('returns best-effort after a late baseline reset', async () => {

@@ -26,18 +26,11 @@ export const EvaluateResultEvaluator = lazySchema(() =>
     /**
      * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
      */
-    direction: z
-      .enum(['maximize', 'minimize', 'neutral'])
-      .optional()
-      .describe(
-        'Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).'
-      ),
+    direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
     /**
      * Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model.
      */
-    model: Model.optional().describe(
-      "Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model."
-    ),
+    model: Model.optional(),
   })
 );
 export type EvaluateResultEvaluator = z.infer<typeof EvaluateResultEvaluator>;
@@ -89,12 +82,9 @@ export const EvaluateRequestBody = lazySchema(() =>
        */
       instrumentation: z
         .object({
-          profile: InstrumentationProfile,
+          profile: InstrumentationProfile.default('elastic-inference'),
         })
-        .optional()
-        .describe(
-          'Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.'
-        ),
+        .optional(),
     }),
     evaluators: z
       .array(

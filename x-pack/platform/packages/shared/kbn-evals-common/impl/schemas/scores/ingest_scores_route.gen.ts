@@ -25,13 +25,7 @@ export const IngestScoresRequestBody = lazySchema(() =>
     /**
      * Spaces to assign these scores to. When omitted, the caller's active space is used (falling back to the default space).
      */
-    space_ids: z
-      .array(z.string().max(256))
-      .max(100)
-      .optional()
-      .describe(
-        "Spaces to assign these scores to. When omitted, the caller's active space is used (falling back to the default space)."
-      ),
+    space_ids: z.array(z.string().max(256)).max(100).optional(),
     task_model: Model,
     evaluator_model: Model,
     metadata: z.object({
@@ -70,13 +64,7 @@ export const IngestScoresRequestBody = lazySchema(() =>
             /**
              * The evaluator version that produced the score, so a run stays reproducible after the definition moves on.
              */
-            version: z
-              .string()
-              .max(64)
-              .optional()
-              .describe(
-                'The evaluator version that produced the score, so a run stays reproducible after the definition moves on.'
-              ),
+            version: z.string().max(64).optional(),
             score: z.number().nullable().optional(),
             label: z.string().max(256).nullable().optional(),
             explanation: z.string().max(4096).nullable().optional(),
@@ -85,27 +73,15 @@ export const IngestScoresRequestBody = lazySchema(() =>
             /**
              * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
              */
-            direction: z
-              .enum(['maximize', 'minimize', 'neutral'])
-              .optional()
-              .describe(
-                'Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).'
-              ),
+            direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
             /**
              * Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.
              */
-            model: Model.optional().describe(
-              'Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.'
-            ),
+            model: Model.optional(),
             /**
              * Whether the evaluator invoked a model. `code` suppresses the top-level `evaluator_model` fallback so deterministic evaluators are not attributed a judge.
              */
-            kind: z
-              .enum(['llm', 'code'])
-              .optional()
-              .describe(
-                'Whether the evaluator invoked a model. `code` suppresses the top-level `evaluator_model` fallback so deterministic evaluators are not attributed a judge.'
-              ),
+            kind: z.enum(['llm', 'code']).optional(),
           }),
         })
       )

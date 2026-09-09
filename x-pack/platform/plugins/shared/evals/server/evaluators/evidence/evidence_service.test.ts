@@ -71,7 +71,18 @@ describe('normalizeEvidence', () => {
     expect(searchMock).toHaveBeenCalledTimes(3);
     expect(searchMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: [{ '@timestamp': { order: 'asc' } }, { span_id: { order: 'asc' } }],
+        sort: [
+          { '@timestamp': { order: 'asc' } },
+          { span_id: { order: 'asc', unmapped_type: 'keyword' } },
+        ],
+      })
+    );
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: [
+          { '@timestamp': { order: 'desc' } },
+          { span_id: { order: 'desc', unmapped_type: 'keyword' } },
+        ],
       })
     );
   });

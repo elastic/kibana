@@ -37,6 +37,7 @@ export type TraceFilter = TraceFilterTerm | TraceFilterExistence;
 export interface TraceSearchSort {
   field: string;
   order: 'asc' | 'desc';
+  unmappedType?: 'keyword';
 }
 
 export interface TraceSearchParams {
@@ -91,8 +92,11 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
       _source: fields,
       size,
       aggs,
-      sort: sortFields?.map(({ field: sortField, order }) => ({
-        [sortField]: { order },
+      sort: sortFields?.map(({ field: sortField, order, unmappedType }) => ({
+        [sortField]: {
+          order,
+          ...(unmappedType ? { unmapped_type: unmappedType } : {}),
+        },
       })),
       query: {
         bool: {

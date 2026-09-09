@@ -46,7 +46,7 @@ export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
     /**
      * Filter datasets by name or description
      */
-    search: z.string().max(256).optional().describe('Filter datasets by name or description'),
+    search: z.string().max(256).optional(),
     /**
      * Only return datasets carrying every one of these tags. Comparison is case-insensitive.
      */
@@ -56,27 +56,18 @@ export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
         .min(1)
         .max(64)
         .regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/)
-    )
-      .optional()
-      .describe(
-        'Only return datasets carrying every one of these tags. Comparison is case-insensitive.'
-      ),
+    ).optional(),
     /**
      * Only return datasets at one of these maturity levels.
      */
-    maturity: ArrayFromString(DatasetMaturity)
-      .optional()
-      .describe('Only return datasets at one of these maturity levels.'),
+    maturity: ArrayFromString(DatasetMaturity).optional(),
     /**
      * Sorting by `maturity` orders the levels alphabetically rather than by how curated they are.
      */
     sort_field: z
       .enum(['name', 'created_at', 'updated_at', 'examples_count', 'maturity'])
       .optional()
-      .default('updated_at')
-      .describe(
-        'Sorting by `maturity` orders the levels alphabetically rather than by how curated they are.'
-      ),
+      .default('updated_at'),
     sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
   })
 );

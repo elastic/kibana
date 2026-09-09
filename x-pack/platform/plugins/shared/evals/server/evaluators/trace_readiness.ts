@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { isResponseError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import { isEqual } from 'lodash';
 import pRetry from 'p-retry';
@@ -70,11 +72,20 @@ const summarizeProfiles = (profiles: InstrumentationProfileProbeResult[]): strin
 const profileRequiresStabilityWindow = (profile: InstrumentationProfile): boolean =>
   Object.values(INSTRUMENTATION_PROFILES[profile]).some(({ source }) => source === 'logs');
 
+const isRetryableSearchError = (error: unknown): error is Error => {
+  if (isResponseError(error)) {
+    const { statusCode } = error;
+    return statusCode === 429 || (statusCode !== undefined && statusCode >= 500);
+  }
+
+  return error instanceof EsErrors.ConnectionError || error instanceof EsErrors.TimeoutError;
+};
+
 const abortRetryOnUnexpectedError = async <T>(operation: () => Promise<T>): Promise<T> => {
   try {
     return await operation();
   } catch (error) {
-    if (error instanceof TraceReadinessError) {
+    if (error instanceof TraceReadinessError || isRetryableSearchError(error)) {
       throw error;
     }
     throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));

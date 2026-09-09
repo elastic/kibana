@@ -26,13 +26,7 @@ export const TracingProject = lazySchema(() =>
     /**
      * Approximate token usage. Only a bounded number of traces per project contribute, so the value under-reports high-volume projects and varies with per_page.
      */
-    total_tokens: z
-      .number()
-      .int()
-      .optional()
-      .describe(
-        'Approximate token usage. Only a bounded number of traces per project contribute, so the value under-reports high-volume projects and varies with per_page.'
-      ),
+    total_tokens: z.number().int().optional(),
     last_trace_time: z.string(),
   })
 );
@@ -43,19 +37,15 @@ export const GetTracingProjectsRequestQuery = lazySchema(() =>
     /**
      * Start of time range (ISO 8601)
      */
-    from: z.string().max(64).optional().describe('Start of time range (ISO 8601)'),
+    from: z.string().max(64).optional(),
     /**
      * End of time range (ISO 8601)
      */
-    to: z.string().max(64).optional().describe('End of time range (ISO 8601)'),
+    to: z.string().max(64).optional(),
     /**
      * Filter projects by name (case-insensitive substring match)
      */
-    name: z
-      .string()
-      .max(256)
-      .optional()
-      .describe('Filter projects by name (case-insensitive substring match)'),
+    name: z.string().max(256).optional(),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })

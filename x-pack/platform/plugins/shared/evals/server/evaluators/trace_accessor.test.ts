@@ -29,7 +29,7 @@ describe('createTraceAccessor', () => {
         fields: ['@timestamp', 'attributes.gen_ai.tool.name'],
         sort: [
           { field: '@timestamp', order: 'asc' },
-          { field: 'span_id', order: 'asc' },
+          { field: 'span_id', order: 'asc', unmappedType: 'keyword' },
         ],
         size: 10,
       });
@@ -41,7 +41,10 @@ describe('createTraceAccessor', () => {
         _source: ['@timestamp', 'attributes.gen_ai.tool.name'],
         size: 10,
         aggs: undefined,
-        sort: [{ '@timestamp': { order: 'asc' } }, { span_id: { order: 'asc' } }],
+        sort: [
+          { '@timestamp': { order: 'asc' } },
+          { span_id: { order: 'asc', unmapped_type: 'keyword' } },
+        ],
         query: {
           bool: {
             filter: [

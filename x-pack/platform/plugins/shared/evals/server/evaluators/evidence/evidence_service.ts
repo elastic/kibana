@@ -155,27 +155,30 @@ const getMessageSearchParams = (
 ): {
   filter: TraceFilter[];
   fields: string[];
-  sort: { field: string; order: 'asc' | 'desc' };
+  sort: Array<{ field: string; order: 'asc' | 'desc'; unmappedType?: 'keyword' }>;
   size: number;
-} => ({
-  // Do not add an `exists` filter on contentField: long values under `flattened`
-  // mappings (e.g. body.structured) are omitted from the index past ignore_above
-  // but remain available in `_source`.
-  filter: toTraceFilters(spec),
-  fields: ['@timestamp', spec.contentField],
-  sort: {
-    field: '@timestamp',
-    order: spec.select === 'last' ? 'desc' : 'asc',
-  },
-  size: MESSAGE_CANDIDATE_LIMIT,
-});
+} => {
+  const order = spec.select === 'last' ? 'desc' : 'asc';
+  return {
+    // Do not add an `exists` filter on contentField: long values under `flattened`
+    // mappings (e.g. body.structured) are omitted from the index past ignore_above
+    // but remain available in `_source`.
+    filter: toTraceFilters(spec),
+    fields: ['@timestamp', spec.contentField],
+    sort: [
+      { field: '@timestamp', order },
+      { field: 'span_id', order, unmappedType: 'keyword' },
+    ],
+    size: MESSAGE_CANDIDATE_LIMIT,
+  };
+};
 
 const getToolCallsSearchParams = (
   spec: EvidenceToolCallsItemSpec
 ): {
   filter: TraceFilter[];
   fields: string[];
-  sort: Array<{ field: string; order: 'asc' | 'desc' }>;
+  sort: Array<{ field: string; order: 'asc' | 'desc'; unmappedType?: 'keyword' }>;
   size: number;
 } => {
   const { tool_call_id, tool_id, arguments: toolArguments, result } = spec.fields;
@@ -184,7 +187,7 @@ const getToolCallsSearchParams = (
     fields: ['@timestamp', tool_call_id, tool_id, toolArguments, result],
     sort: [
       { field: '@timestamp', order: 'asc' },
-      { field: 'span_id', order: 'asc' },
+      { field: 'span_id', order: 'asc', unmappedType: 'keyword' },
     ],
     size: MAX_EVIDENCE_DOCS,
   };
