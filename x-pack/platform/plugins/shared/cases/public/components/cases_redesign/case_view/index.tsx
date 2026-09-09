@@ -11,7 +11,7 @@ import { useGetCase } from '../../../containers/use_get_case';
 import { CasesTimelineIntegrationProvider } from '../../timeline_context';
 import { DoesNotExist } from '../../case_view/does_not_exist';
 // TODO: Replace CaseViewLoading with a proper skeleton placeholder
-import { CaseViewLoading } from '../../case_view';
+import { CaseViewLoading } from '../../case_view/case_view_loading';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../../common/navigation';
