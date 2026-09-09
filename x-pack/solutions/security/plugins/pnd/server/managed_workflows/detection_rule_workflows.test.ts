@@ -359,9 +359,10 @@ describe('detection rule workflows', () => {
         expect(tagSteps.map(({ name }) => name)).toEqual([
           'mark_alerts_dismissed',
           'mark_alerts_applied',
+          'mark_alerts_acknowledged',
         ]);
 
-        const [dismissed, applied] = tagSteps;
+        const [dismissed, applied, acknowledged] = tagSteps;
         expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
         expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -371,6 +372,15 @@ describe('detection rule workflows', () => {
         expect(applied.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.applied_tag }}',
+        ]);
+        // Approving a recommendation the pipeline cannot apply itself acknowledges
+        // the manual follow-up and retires the alerts; the auto-apply path keeps
+        // its alerts untagged on failure so a later sweep can retry.
+        expect(acknowledged.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(acknowledged.if).toContain('steps.record_apply_path.output.auto == false');
+        expect(acknowledged.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ consts.acknowledged_tag }}',
         ]);
         for (const step of tagSteps) {
           expect(step).not.toHaveProperty('on-failure');
@@ -520,6 +530,7 @@ describe('detection rule workflows', () => {
             reviewed_tag: reviewedTag,
             dismissed_tag: 'detection-watch:tuning-dismissed',
             applied_tag: 'detection-watch:tuning-applied',
+            acknowledged_tag: 'detection-watch:tuning-acknowledged',
           })
         );
 

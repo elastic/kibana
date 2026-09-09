@@ -91,6 +91,7 @@ consts:
   reviewed_tag: detection-watch:tuning-reviewed
   dismissed_tag: detection-watch:tuning-dismissed
   applied_tag: detection-watch:tuning-applied
+  acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
 steps:
   # Fetched by saved-object id, which pins the exact rule incarnation that produced
@@ -181,6 +182,17 @@ steps:
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
 
+  # The pipeline auto-applies only on this path; any other recommendation is a
+  # manual analyst action, so approval acknowledges it instead of applying.
+  - name: record_apply_path
+    type: data.set
+    with:
+      auto: >-
+        ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+          and steps.diagnose_rule.output.structured_output.proposed_query != ''
+          and steps.fetch_rule.output.type == 'query'
+          and steps.record_auto_apply_support.output.supported == true }}
+
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
   # slot and a lost resume strands this run in waiting_for_child.
@@ -188,11 +200,7 @@ steps:
   # events analysts judged; anchoring at now can miss those events.
   - name: run_previews
     type: workflow.execute
-    if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-        and steps.diagnose_rule.output.structured_output.proposed_query != ''
-        and steps.fetch_rule.output.type == 'query'
-        and steps.record_auto_apply_support.output.supported == true }}
+    if: "${{ steps.record_apply_path.output.auto == true }}"
     with:
       workflow-id: system-security-rule-preview
       inputs:
@@ -322,8 +330,8 @@ steps:
         {% endif %}
         This {{ steps.diagnose_rule.output.structured_output.change_type }} change
         is not applied automatically; apply it manually in the Detection Rules UI if
-        appropriate. Approving does not tag the alerts, so a later sweep can surface
-        this rule again.
+        appropriate. Approving marks these alerts acknowledged, so sweeps revisit
+        the rule only once new false positives accumulate.
         {% endif %}
 
         {% if steps.diagnose_rule.output.conversation_id %}
@@ -403,6 +411,22 @@ steps:
       tags_to_add:
         - "{{ consts.reviewed_tag }}"
         - "{{ consts.applied_tag }}"
+
+  # An approved change the pipeline does not apply itself is the analyst's to act
+  # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
+  # the rule returns once new false positives accumulate past the watermark. The
+  # auto-apply path stays untagged when its apply fell through (failed backtest,
+  # stale edit), so a later sweep can retry with current data.
+  - name: mark_alerts_acknowledged
+    type: security.setAlertTags
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.record_apply_path.output.auto == false }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.acknowledged_tag }}"
 
   - name: emit_result
     type: workflow.output
