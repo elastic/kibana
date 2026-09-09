@@ -625,6 +625,21 @@ describe('QueryService', () => {
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
+    it('wraps decode failures with a descriptive error (parity with the arrow path)', async () => {
+      // A response missing `columns` cannot be decoded into rows.
+      mockEsClient.esql.query.mockResolvedValue({
+        values: [['host-a']],
+      } as unknown as EsqlQueryResponse);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+
     it('logs debug instead of error when cancelled', async () => {
       const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       mockEsClient.esql.query.mockRejectedValue(
@@ -731,6 +746,61 @@ describe('QueryService', () => {
       expect(batches).toEqual([
         [{ bucket: Date.parse(iso), label: '2026-08-24T14:01:32.000Z', count: 7 }],
       ]);
+    });
+  });
+
+  describe('executeQueryStream (format-agnostic envelope)', () => {
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
+
+    beforeEach(() => {
+      const mocks = createQueryService('arrow');
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      queryService = mocks.queryService;
+    });
+
+    it('stops iterating and reports cancellation when the signal fires between batches', async () => {
+      const abortController = new AbortController();
+
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ host: 'host-a' }] },
+        { numRows: 1, rows: [{ host: 'host-b' }] },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          batches.push(batch);
+          abortController.abort();
+        }
+      }).rejects.toThrow();
+
+      expect(batches).toEqual([[{ host: 'host-a' }]]);
+      expect(mockLogger.debug).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not let a failing format cleanup mask the primary error', async () => {
+      const reader: MockArrowReader = {
+        closed: false,
+        cancel: jest.fn().mockRejectedValue(new Error('cancel blew up')),
+        async *[Symbol.asyncIterator]() {
+          throw new Error('mid-stream failure');
+        },
+      };
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+
+      expect(reader.cancel).toHaveBeenCalledTimes(1);
     });
   });
 });
