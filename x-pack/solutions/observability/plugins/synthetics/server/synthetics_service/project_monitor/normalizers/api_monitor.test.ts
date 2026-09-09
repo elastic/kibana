@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { APIFields, Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import {
   ConfigKey,
@@ -157,5 +158,60 @@ describe('api normalizers', () => {
     });
 
     expect(actual.unsupportedKeys).toEqual([]);
+  });
+
+  it('forwards maintenance window ids onto the saved object', () => {
+    const maintenanceWindows = [
+      { id: 'mw-1', title: 'First maintenance window' },
+    ] as unknown as MaintenanceWindow[];
+    const monitors: ProjectMonitor[] = [
+      {
+        type: MonitorTypeEnum.API,
+        id: 'with-mw',
+        name: 'with maintenance window',
+        schedule: 1,
+        content: 'apiJourney(...)',
+        locations: ['us_central'],
+        maintenanceWindows: ['mw-1'],
+      },
+    ];
+
+    const [actual] = normalizeProjectMonitors({
+      locations,
+      privateLocations,
+      monitors,
+      projectId,
+      namespace: 'test-space',
+      version: '9.5.0',
+      maintenanceWindows,
+    });
+
+    expect(asApi(actual.normalizedFields)[ConfigKey.MAINTENANCE_WINDOWS]).toEqual(['mw-1']);
+  });
+
+  it('throws when a referenced maintenance window is unavailable', () => {
+    const monitors: ProjectMonitor[] = [
+      {
+        type: MonitorTypeEnum.API,
+        id: 'missing-mw',
+        name: 'missing maintenance window',
+        schedule: 1,
+        content: 'apiJourney(...)',
+        locations: ['us_central'],
+        maintenanceWindows: ['mw-1'],
+      },
+    ];
+
+    expect(() =>
+      normalizeProjectMonitors({
+        locations,
+        privateLocations,
+        monitors,
+        projectId,
+        namespace: 'test-space',
+        version: '9.5.0',
+        maintenanceWindows: [],
+      })
+    ).toThrow(/mw-1/);
   });
 });

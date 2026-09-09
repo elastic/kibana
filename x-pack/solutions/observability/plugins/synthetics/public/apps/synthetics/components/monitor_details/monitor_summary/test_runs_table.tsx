@@ -34,7 +34,6 @@ import { THUMBNAIL_SCREENSHOT_SIZE_MOBILE } from '../../common/screenshot/screen
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 
 import { TestRunsTableHeader } from './test_runs_table_header';
-import { MONITOR_TYPES } from '../../../../../../common/constants';
 import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
@@ -284,7 +283,7 @@ export const TestRunsTable = ({
     return {
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
-        if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+        if (!isMultiStepMonitor) {
           toggleDetails(item, expandedRows, setExpandedRows);
         } else {
           history.push(

@@ -31,6 +31,7 @@ export const getNormalizeAPIFields = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: NormalizedProjectProps): NormalizerResult<APIFields> => {
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.API];
 
@@ -41,6 +42,7 @@ export const getNormalizeAPIFields = ({
     projectId,
     namespace,
     version,
+    maintenanceWindows,
   });
 
   const normalizedFields = {
