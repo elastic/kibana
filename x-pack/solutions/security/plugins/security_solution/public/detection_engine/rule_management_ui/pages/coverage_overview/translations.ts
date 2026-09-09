@@ -10,7 +10,49 @@ import { i18n } from '@kbn/i18n';
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE coverage',
+    defaultMessage: 'MITRE frameworks coverage',
+  }
+);
+
+export const ATTACK_FRAMEWORK_TAB = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.attackFrameworkTab',
+  {
+    defaultMessage: 'ATT&CK',
+  }
+);
+
+export const ATLAS_FRAMEWORK_TAB = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasFrameworkTab',
+  {
+    defaultMessage: 'ATLAS',
+  }
+);
+
+export const ATLAS_MATRIX_LOADING = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasMatrixLoading',
+  {
+    defaultMessage: 'Loading ATLAS matrix…',
+  }
+);
+
+export const ATLAS_MATRIX_ERROR = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasMatrixError',
+  {
+    defaultMessage: 'Unable to load the ATLAS matrix. Please try again later.',
+  }
+);
+
+export const ATLAS_FILTER_BY_PLATFORMS = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasFilterByPlatforms',
+  {
+    defaultMessage: 'Filter by Platforms',
+  }
+);
+
+export const ATLAS_NO_TECHNIQUES_MATCH_PLATFORMS = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasNoTechniquesMatchPlatforms',
+  {
+    defaultMessage: 'No techniques match the selected platforms.',
   }
 );
 
@@ -175,6 +217,21 @@ export const CoverageOverviewDashboardInformation = i18n.translate(
   {
     defaultMessage:
       "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
+  }
+);
+
+export const AtlasCoverageDashboardInformation = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasDashboardInformation',
+  {
+    defaultMessage:
+      "Your current coverage of MITRE ATLAS\u2122 tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATLAS\u2122 framework to be displayed.",
+  }
+);
+
+export const ATLAS_LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasLearnMore',
+  {
+    defaultMessage: 'Learn more',
   }
 );
 
