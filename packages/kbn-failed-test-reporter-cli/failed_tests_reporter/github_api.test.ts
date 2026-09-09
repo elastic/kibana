@@ -141,10 +141,33 @@ describe('GithubApi#listIssues()', () => {
       .mockImplementation(async () => jsonResponse([issue(1)]));
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
-    const issues = await api.listIssues({ labels: ['flaky-test-suite'], state: 'all' });
+    const issues = await api.listIssues({ labels: ['failed-test'], state: 'all' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(issues).toHaveLength(1);
+  });
+
+  it('searches issues scoped to the repository and unwraps the items', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () =>
+      jsonResponse({
+        total_count: 2,
+        incomplete_results: false,
+        items: [issue(5), issue(6, { pull_request: {} })],
+      })
+    );
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false, repo: 'elastic/sandbox' });
+    const issues = await api.searchIssues({
+      query: 'label:failed-test in:title "Flaky test suite"',
+    });
+
+    const url = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(url.origin + url.pathname).toBe('https://api.github.com/search/issues');
+    expect(url.searchParams.get('q')).toBe(
+      'repo:elastic/sandbox is:issue label:failed-test in:title "Flaky test suite"'
+    );
+    expect(url.searchParams.get('sort')).toBe('updated');
+    expect(issues.map(({ number }) => number)).toEqual([5]);
   });
 
   it('stops after maxPages and warns', async () => {

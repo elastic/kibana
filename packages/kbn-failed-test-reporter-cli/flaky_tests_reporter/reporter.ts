@@ -11,9 +11,11 @@ import type { FlakyTestReport } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GithubApi, GithubIssue } from '../failed_tests_reporter/github_api';
 import {
-  FLAKY_TEST_SUITE_LABEL,
+  FLAKY_TEST_SUITE_TITLE_PREFIX,
   flakySuiteIssueTitle,
   readReportCount,
+  readReportGeneratedAt,
+  readReportHistory,
   readSuiteFilePath,
   renderFlakySuiteIssueBody,
   renderReopenComment,
@@ -21,8 +23,20 @@ import {
 } from './issue_body';
 import { groupIntoSuites, type FlakySuite } from './suites';
 
-/** Label the failed test reporter puts on the issues it files for individual failures. */
+/**
+ * Label shared with the issues `report_failed_tests` files for individual failures, so flaky
+ * suites flow through the same triage: team labelling, the failed-test investigator, `/skip`
+ * and the stale sweep that closes issues nobody touched for three weeks.
+ */
 export const FAILED_TEST_LABEL = 'failed-test';
+
+/**
+ * Search query for the issues this reporter filed. Listing every `failed-test` issue would page
+ * through tens of thousands of closed ones, so the title prefix narrows it down and the
+ * metadata footer confirms the match.
+ */
+export const suiteIssuesQuery = (): string =>
+  `label:${FAILED_TEST_LABEL} in:title "${FLAKY_TEST_SUITE_TITLE_PREFIX.replace(/:$/, '')}"`;
 
 /**
  * What to do with a suite whose tests already have an open `failed-test` issue: `skip` files
@@ -35,7 +49,7 @@ export interface ReportFlakySuitesOptions {
   report: FlakyTestReport;
   github: GithubApi;
   log: ToolingLog;
-  /** Labels put on new issues; must include {@link FLAKY_TEST_SUITE_LABEL} for them to be found again. */
+  /** Labels put on new issues; must include {@link FAILED_TEST_LABEL} for them to be found again. */
   labels: string[];
   /** Cap on issues created per run; existing issues are always updated. */
   maxNewIssues: number;
@@ -92,15 +106,16 @@ export const indexSuiteIssues = (issues: readonly GithubIssue[]): Map<string, Gi
 };
 
 /**
- * `failed-test` issues whose body mentions the suite file. Their bodies carry the file in a
- * `Location` row, whereas titles mangle it (`alerts·ts`), so the body is what gets matched.
+ * Per-test `failed-test` issues whose body mentions the suite file. Their bodies carry the file
+ * in a `Location` row, whereas titles mangle it (`alerts·ts`), so the body is what gets matched.
+ * Issues filed by this reporter share the label and are excluded.
  */
 export const relatedFailedTestIssues = (
   suite: Pick<FlakySuite, 'filePath'>,
   failedTestIssues: readonly GithubIssue[]
 ): RelatedIssue[] =>
   failedTestIssues
-    .filter((issue) => issue.body.includes(suite.filePath))
+    .filter((issue) => !readSuiteFilePath(issue.body) && issue.body.includes(suite.filePath))
     .map(({ number, html_url, title }) => ({ number, html_url, title }));
 
 /**
@@ -121,12 +136,12 @@ export const reportFlakySuitesToGithub = async ({
   log.info(`${report.flaky.length} flaky tests in ${suites.length} suites`);
 
   const [suiteIssues, failedTestIssues] = await Promise.all([
-    github.listIssues({ labels: [FLAKY_TEST_SUITE_LABEL], state: 'all' }),
+    github.searchIssues({ query: suiteIssuesQuery() }),
     github.listIssues({ labels: [FAILED_TEST_LABEL], state: 'open' }),
   ]);
   const existing = indexSuiteIssues(suiteIssues);
   log.info(
-    `Found ${existing.size} existing ${FLAKY_TEST_SUITE_LABEL} issues and ` +
+    `Found ${existing.size} flaky suite issues filed earlier and ` +
       `${failedTestIssues.length} open ${FAILED_TEST_LABEL} issues`
   );
 
@@ -137,11 +152,15 @@ export const reportFlakySuitesToGithub = async ({
     const { filePath } = suite;
     const issue = existing.get(filePath);
     const relatedIssues = relatedFailedTestIssues(suite, failedTestIssues);
+    // A retried CI step re-applies the same report; that must not count as a new sighting
+    const alreadyApplied =
+      issue !== undefined && readReportGeneratedAt(issue.body) === report.generatedAt.toISOString();
     const context = {
       report,
       reportUrl,
       relatedIssues,
-      reportCount: (issue ? readReportCount(issue.body) : 0) + 1,
+      reportCount: (issue ? readReportCount(issue.body) : 0) + (alreadyApplied ? 0 : 1),
+      history: issue ? readReportHistory(issue.body) : [],
     };
 
     if (issue) {
@@ -161,7 +180,12 @@ export const reportFlakySuitesToGithub = async ({
     if (relatedIssues.length > 0 && failedTestIssuePolicy === 'skip') {
       const numbers = relatedIssues.map((related) => related.number);
       log.info(`Skipping ${filePath}: tracked by failed-test issue(s) #${numbers.join(', #')}`);
-      actions.push({ action: 'skipped', filePath, reason: 'failed-test-issue', relatedIssues: numbers });
+      actions.push({
+        action: 'skipped',
+        filePath,
+        reason: 'failed-test-issue',
+        relatedIssues: numbers,
+      });
       continue;
     }
 

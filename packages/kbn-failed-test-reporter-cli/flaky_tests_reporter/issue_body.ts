@@ -9,8 +9,8 @@
 
 import {
   flakiestBranch,
-  formatAge,
   formatRate,
+  rankTests,
   type FlakyTestEntry,
   type FlakyTestReport,
   type FlakyTestSampleFailure,
@@ -22,22 +22,37 @@ import {
 } from '../failed_tests_reporter/report_failure';
 import type { FlakySuite } from './suites';
 
-/** Label every issue filed by the flaky test reporter carries; also how it finds them again. */
-export const FLAKY_TEST_SUITE_LABEL = 'flaky-test-suite';
+/**
+ * Title prefix of every issue filed by the flaky test reporter. Together with the `failed-test`
+ * label it is how the reporter finds its issues again, so it must stay stable.
+ */
+export const FLAKY_TEST_SUITE_TITLE_PREFIX = 'Flaky test suite:';
 /** Namespace of the hidden `kibanaCiData` block at the end of the issue body. */
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
 const FLAKY_TEST_RUNNER_URL = 'https://buildkite.com/elastic/kibana-flaky';
+const HOW_IT_WORKS_URL =
+  'https://github.com/elastic/kibana/blob/main/packages/kbn-failed-test-reporter-cli/README.md#node-scriptsreport_flaky_tests';
 // Failure samples only for the worst tests, so a suite with many flaky tests stays readable
 const MAX_TESTS_WITH_SAMPLES = 5;
 const MAX_SAMPLE_CHARACTERS = 1500;
 // GitHub rejects bodies over 65536 characters; leave headroom for the metadata footer
 const MAX_BODY_CHARACTERS = 60_000;
+/** Reports remembered in the metadata footer to show how the suite is trending. */
+export const MAX_HISTORY_ENTRIES = 10;
+const MAX_BRANCHES_IN_HEADLINE = 4;
 
 export interface RelatedIssue {
   number: number;
   html_url: string;
   title: string;
+}
+
+/** The worst test's numbers from one report, kept in the metadata footer. */
+export interface FlakySuiteReportSnapshot {
+  generatedAt: string;
+  builds: number;
+  failedBuilds: number;
 }
 
 export interface FlakySuiteIssueContext {
@@ -48,6 +63,8 @@ export interface FlakySuiteIssueContext {
   relatedIssues: RelatedIssue[];
   /** How many reports have flagged the suite so far, including this one. */
   reportCount: number;
+  /** Snapshots recorded by earlier reports, oldest first; this report's is appended. */
+  history: FlakySuiteReportSnapshot[];
 }
 
 export interface FlakySuiteIssueMetadata {
@@ -56,10 +73,11 @@ export interface FlakySuiteIssueMetadata {
   'suite.testIds': string[];
   'report.generatedAt': string;
   'report.count': number;
+  'report.history': FlakySuiteReportSnapshot[];
 }
 
 export const flakySuiteIssueTitle = (suite: Pick<FlakySuite, 'filePath'>): string =>
-  `Flaky test suite: ${suite.filePath}`;
+  `${FLAKY_TEST_SUITE_TITLE_PREFIX} ${suite.filePath}`;
 
 /** Suite file path recorded in an issue body, if the body was written by this reporter. */
 export const readSuiteFilePath = (body: string): string | undefined => {
@@ -73,11 +91,44 @@ export const readSuiteFilePath = (body: string): string | undefined => {
 };
 
 export const readReportCount = (body: string): number => {
-  const count: unknown = getIssueMetadata(body, 'report.count', 0, FLAKY_TEST_SUITE_METADATA_PREFIX);
+  const count: unknown = getIssueMetadata(
+    body,
+    'report.count',
+    0,
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
   return typeof count === 'number' && Number.isFinite(count) ? count : 0;
 };
 
-const formatDate = (date: Date): string => date.toISOString().slice(0, 10);
+/** ISO timestamp of the report that last wrote the issue body, if any. */
+export const readReportGeneratedAt = (body: string): string | undefined => {
+  const generatedAt: unknown = getIssueMetadata(
+    body,
+    'report.generatedAt',
+    undefined,
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
+  return typeof generatedAt === 'string' ? generatedAt : undefined;
+};
+
+const isSnapshot = (value: unknown): value is FlakySuiteReportSnapshot =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as FlakySuiteReportSnapshot).generatedAt === 'string' &&
+  Number.isFinite((value as FlakySuiteReportSnapshot).builds) &&
+  Number.isFinite((value as FlakySuiteReportSnapshot).failedBuilds);
+
+/** Snapshots recorded in an issue body by earlier reports; malformed entries are dropped. */
+export const readReportHistory = (body: string): FlakySuiteReportSnapshot[] => {
+  const history: unknown = getIssueMetadata(
+    body,
+    'report.history',
+    [],
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
+  return Array.isArray(history) ? history.filter(isSnapshot) : [];
+};
+
 const formatDateTime = (date: Date): string =>
   `${date.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 
@@ -100,49 +151,125 @@ const buildLabel = (buildUrl: string | undefined): string => {
   return match ? `${match[1]} #${match[2]}` : 'build';
 };
 
-const summaryLine = (suite: FlakySuite, report: FlakyTestReport): string => {
+/**
+ * Position of the suite's worst test among all flaky tests of the report, e.g. `#3 of 148`. The
+ * report only keeps the worst `maxTests`, so a full list means there were at least that many.
+ */
+const rankLabel = (worst: FlakyTestEntry, report: FlakyTestReport): string | undefined => {
+  const index = rankTests(report.flaky).findIndex((test) => test.testId === worst.testId);
+  if (index === -1) {
+    return undefined;
+  }
+  const { totalFlaky } = report.summary;
+  const total = totalFlaky >= report.thresholds.maxTests ? `${totalFlaky}+` : String(totalFlaky);
+  return `#${index + 1} of ${total}`;
+};
+
+/** Branches the suite failed on, most failed builds first, e.g. `` `main`, `9.1` and 2 more``. */
+const failingBranches = (tests: readonly FlakyTestEntry[]): string => {
+  const failedBuildsByBranch = new Map<string, number>();
+  for (const { byBranch } of tests) {
+    for (const { branch, failedBuilds } of byBranch) {
+      if (failedBuilds > 0) {
+        failedBuildsByBranch.set(branch, (failedBuildsByBranch.get(branch) ?? 0) + failedBuilds);
+      }
+    }
+  }
+  const branches = [...failedBuildsByBranch.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([branch]) => inlineCode(branch));
+  const shown = branches.slice(0, MAX_BRANCHES_IN_HEADLINE).join(', ');
+  const rest = branches.length - MAX_BRANCHES_IN_HEADLINE;
+  return rest > 0 ? `${shown} and ${rest} more` : shown;
+};
+
+/**
+ * One line that says how bad it is: rank among all flaky tests, failed builds, last failure and
+ * affected branches. Everything a reader needs to decide whether to look further.
+ */
+const headline = (suite: FlakySuite, report: FlakyTestReport): string => {
   const [worst] = suite.tests;
   const pipelines = report.scope.pipelines.map(inlineCode).join(', ');
-  const window = `over the last ${plural(report.window.lookbackDays, 'day')} (${formatDate(
-    report.window.from
-  )} to ${formatDate(report.window.to)})`;
+  const window = `on ${pipelines} in the last ${plural(report.window.lookbackDays, 'day')}`;
+  const rank = rankLabel(worst, report);
+  const position = rank ? `**${rank}** flaky tests ${window}` : `Flaky ${window}`;
   const subject =
     suite.tests.length === 1
-      ? 'A test in this suite was flaky'
-      : `${suite.tests.length} tests in this suite were flaky`;
-  const impact =
-    suite.tests.length === 1
-      ? `It failed in **${worst.failedBuilds} of ${worst.builds} builds** (${formatRate(
-          worst.buildFailRate
-        )}) and passed in the others.`
-      : `The worst offender failed in **${worst.failedBuilds} of ${worst.builds} builds** (${formatRate(
-          worst.buildFailRate
-        )}) and passed in the others.`;
-  return `${subject} on ${pipelines} ${window}. ${impact}`;
+      ? position
+      : `**${suite.tests.length} flaky tests** in this file; the worst is ${position}`;
+  const failures =
+    `${suite.tests.length === 1 ? 'Failed' : 'It failed'} **${worst.failedBuilds} of ` +
+    `${worst.builds} builds (${formatRate(worst.buildFailRate)})**, last on ` +
+    `${formatDateTime(worst.lastFailedAt)}.`;
+  const branches = failingBranches(suite.tests);
+  return `> ${subject}. ${failures}${branches ? ` Fails on ${branches}.` : ''}`;
 };
 
-const suiteDetails = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
-  const { report, reportUrl, reportCount } = ctx;
-  const generatedAt = `generated ${formatDateTime(report.generatedAt)}`;
+const rateOf = ({ builds, failedBuilds }: FlakySuiteReportSnapshot): number =>
+  builds > 0 ? failedBuilds / builds : 0;
+
+const currentSnapshot = (suite: FlakySuite, report: FlakyTestReport): FlakySuiteReportSnapshot => {
+  const [worst] = suite.tests;
+  return {
+    generatedAt: report.generatedAt.toISOString(),
+    builds: worst.builds,
+    failedBuilds: worst.failedBuilds,
+  };
+};
+
+/**
+ * Earlier snapshots plus this report's, oldest first, capped so the footer cannot grow forever.
+ * Re-applying the same report (a retried CI step) replaces its snapshot instead of adding one.
+ */
+const reportHistory = (
+  suite: FlakySuite,
+  ctx: FlakySuiteIssueContext
+): FlakySuiteReportSnapshot[] => {
+  const current = currentSnapshot(suite, ctx.report);
+  return [
+    ...ctx.history.filter((snapshot) => snapshot.generatedAt !== current.generatedAt),
+    current,
+  ].slice(-MAX_HISTORY_ENTRIES);
+};
+
+/** How the fail rate moved across the reports that flagged the suite; omitted for the first. */
+const trendLine = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string | undefined => {
+  if (ctx.reportCount < 2) {
+    return undefined;
+  }
+  const snapshots = reportHistory(suite, ctx);
+  const flagged = `Flagged by **${plural(ctx.reportCount, 'report')}** so far`;
+  if (snapshots.length < 2) {
+    return `> ${flagged}.`;
+  }
+  const rates = snapshots.map(rateOf);
+  const [previous, current] = rates.slice(-2);
+  const direction =
+    current > previous + 0.005 ? 'rising' : current < previous - 0.005 ? 'falling' : 'unchanged';
+  const sequence = rates
+    .map((rate, index) =>
+      index === rates.length - 1 ? `**${formatRate(rate)}**` : formatRate(rate)
+    )
+    .join(' → ');
+  return `> ${flagged}, fail rate ${sequence} (${direction}).`;
+};
+
+const suiteDetails = (suite: FlakySuite): string => {
   const rows: string[][] = [
     ['File', inlineCode(suite.filePath)],
+    ...(suite.tests.length === 1 ? [['Test', suite.tests[0].title]] : []),
     ['Framework', suite.framework],
-    ...(suite.configPath ? [['Config path', inlineCode(suite.configPath)]] : []),
+    ...(suite.configPath ? [['Config', inlineCode(suite.configPath)]] : []),
     ['Code owners', suite.owners.length > 0 ? suite.owners.join(', ') : '-'],
-    ['Pipelines', report.scope.pipelines.join(', ')],
-    ['Branches', report.scope.branches.length > 0 ? report.scope.branches.join(', ') : 'all'],
-    ['Report', reportUrl ? `[flaky_tests.json](${reportUrl}) (${generatedAt})` : generatedAt],
-    ['Reports flagging this suite', String(reportCount)],
   ];
-  return `**Suite details**\n\n${table(['Field', 'Value'], rows)}`;
+  return table(['Field', 'Value'], rows);
 };
 
-const latestRunCell = (test: FlakyTestEntry, now: Date, minBuilds: number): string => {
-  const latestRun = flakiestBranch(test.byBranch, minBuilds)?.latestRun ?? test.latestRun;
-  return latestRun ? `${latestRun.status}, ${formatAge(latestRun.timestamp, now)}` : '-';
-};
-
-const impactTable = (suite: FlakySuite, report: FlakyTestReport): string => {
+/** Per-test breakdown; a single test is already fully described by the headline and details. */
+const impactTable = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
+  if (suite.tests.length === 1) {
+    return undefined;
+  }
   const { minBuilds } = report.thresholds;
   const rows = suite.tests.map((test) => {
     const flakiest = flakiestBranch(test.byBranch, minBuilds);
@@ -152,68 +279,85 @@ const impactTable = (suite: FlakySuite, report: FlakyTestReport): string => {
       formatRate(test.buildFailRate),
       String(test.retryFlakes),
       flakiest ? `${flakiest.branch} (${formatRate(flakiest.buildFailRate)})` : '-',
-      latestRunCell(test, report.generatedAt, minBuilds),
     ];
   });
-  return `**Impact per test** (ranked by failed builds)\n\n${table(
-    ['Test', 'Failed builds', 'Fail rate', 'Retry flakes', 'Flakiest branch', 'Latest run'],
+  return `**Flaky tests** (ranked by failed builds)\n\n${table(
+    ['Test', 'Failed builds', 'Fail rate', 'Retry flakes', 'Flakiest branch'],
     rows
   )}`;
 };
 
-const sampleFailure = ({ message, buildUrl, timestamp }: FlakyTestSampleFailure): string => {
+const buildLink = ({ buildUrl }: FlakyTestSampleFailure): string => {
   const label = buildLabel(buildUrl);
-  const heading = `${buildUrl ? `[${label}](${buildUrl})` : label} · ${formatDateTime(timestamp)}`;
-  const text = redactSensitiveGithubFailureText(
-    truncateFailureBody(message.trim(), MAX_SAMPLE_CHARACTERS)
-  );
-  // Four backticks so a message that itself contains a fenced block cannot break out
-  return `${heading}\n\n\`\`\`\`\n${text}\n\`\`\`\``;
+  return buildUrl ? `[${label}](${buildUrl})` : label;
 };
 
-const recentFailures = (tests: readonly FlakyTestEntry[]): string[] =>
-  tests
+/**
+ * One fenced block per distinct error text. A flaky test tends to fail the same way every time,
+ * so the samples usually collapse into a single block listing the builds it was seen in.
+ */
+const distinctFailures = (samples: readonly FlakyTestSampleFailure[]): string[] => {
+  const byText = new Map<string, FlakyTestSampleFailure[]>();
+  for (const sample of samples) {
+    const text = redactSensitiveGithubFailureText(
+      truncateFailureBody(sample.message.trim(), MAX_SAMPLE_CHARACTERS)
+    );
+    byText.set(text, [...(byText.get(text) ?? []), sample]);
+  }
+  return [...byText.entries()].map(([text, occurrences]) => {
+    const links = [...new Set(occurrences.map(buildLink))].join(', ');
+    const latest = occurrences.reduce((a, b) => (a.timestamp > b.timestamp ? a : b)).timestamp;
+    const when = `${occurrences.length > 1 ? 'latest ' : ''}${formatDateTime(latest)}`;
+    // Four backticks so a message that itself contains a fenced block cannot break out
+    return `${links} · ${when}\n\n\`\`\`\`\n${text}\n\`\`\`\``;
+  });
+};
+
+const recentFailures = (suite: FlakySuite, testsWithSamples: number): string[] =>
+  suite.tests
+    .slice(0, testsWithSamples)
     .filter((test) => test.sampleFailures.length > 0)
-    .map((test) =>
-      [
+    .map((test) => {
+      const blocks = distinctFailures(test.sampleFailures);
+      const samples = plural(test.sampleFailures.length, 'sample');
+      const count =
+        blocks.length < test.sampleFailures.length
+          ? `${samples}, ${plural(blocks.length, 'distinct error')}`
+          : samples;
+      const summary =
+        suite.tests.length === 1
+          ? `Recent failures (${count})`
+          : `Recent failures: ${test.title} (${count})`;
+      return [
         '<details>',
-        `<summary>Recent failures: ${test.title}</summary>`,
+        `<summary>${summary}</summary>`,
         '',
-        test.sampleFailures.map(sampleFailure).join('\n\n'),
+        blocks.join('\n\n'),
         '',
         '</details>',
-      ].join('\n')
-    );
+      ].join('\n');
+    });
 
 const relatedIssuesSection = (relatedIssues: readonly RelatedIssue[]): string | undefined => {
   if (relatedIssues.length === 0) {
     return undefined;
   }
-  const items = relatedIssues.map((issue) => `- [#${issue.number}](${issue.html_url}) ${issue.title}`);
+  const items = relatedIssues.map(
+    (issue) => `- [#${issue.number}](${issue.html_url}) ${issue.title}`
+  );
   return `**Related \`failed-test\` issues**\n\n${items.join('\n')}`;
 };
 
-const definitions = (report: FlakyTestReport): string => {
-  const { minBuilds, minFailedBuilds } = report.thresholds;
-  return (
-    '**Definitions**\n\n' +
-    `Flaky: ran in at least ${plural(minBuilds, 'build')} of the window, failed in at least ` +
-    `${plural(minFailedBuilds, 'build')}, and passed at least once (or recovered on an in-run retry). ` +
-    'Tests that never passed in the window are consistently failing rather than flaky and are ' +
-    'not reported here.'
-  );
-};
-
-const nextSteps = (report: FlakyTestReport): string => {
-  const command =
-    `node scripts/scout discover-flaky-tests --pipelines ${report.scope.pipelines.join(',')}` +
-    ` --lookbackDays ${report.window.lookbackDays} --classifications flaky`;
+const footer = ({ report, reportUrl }: FlakySuiteIssueContext): string => {
+  const generatedAt = `generated ${formatDateTime(report.generatedAt)}`;
+  const source = reportUrl
+    ? `Source: [flaky_tests.json](${reportUrl}), ${generatedAt}`
+    : `Source: flaky test report ${generatedAt}`;
   return [
-    '**Next steps**',
-    '',
-    `- Reproduce with the flaky test runner: ${FLAKY_TEST_RUNNER_URL}`,
-    `- Regenerate this report locally: \`${command}\``,
-  ].join('\n');
+    `Reproduce with the [flaky test runner](${FLAKY_TEST_RUNNER_URL})`,
+    source,
+    `[How this issue is generated and kept up to date](${HOW_IT_WORKS_URL})`,
+  ].join(' · ');
 };
 
 export const flakySuiteIssueMetadata = (
@@ -225,6 +369,7 @@ export const flakySuiteIssueMetadata = (
   'suite.testIds': suite.tests.map((test) => test.testId),
   'report.generatedAt': ctx.report.generatedAt.toISOString(),
   'report.count': ctx.reportCount,
+  'report.history': reportHistory(suite, ctx),
 });
 
 const renderBody = (
@@ -233,13 +378,13 @@ const renderBody = (
   testsWithSamples: number
 ): string => {
   const sections = [
-    summaryLine(suite, ctx.report),
-    suiteDetails(suite, ctx),
+    headline(suite, ctx.report),
+    trendLine(suite, ctx),
+    suiteDetails(suite),
     impactTable(suite, ctx.report),
-    ...recentFailures(suite.tests.slice(0, testsWithSamples)),
+    ...recentFailures(suite, testsWithSamples),
     relatedIssuesSection(ctx.relatedIssues),
-    definitions(ctx.report),
-    nextSteps(ctx.report),
+    footer(ctx),
   ];
   return updateIssueMetadata(
     sections.filter((section) => section !== undefined).join('\n\n'),
@@ -252,7 +397,10 @@ const renderBody = (
  * Full issue body for a suite, including the metadata footer. Failure samples are dropped when
  * they would push the body over GitHub's size limit.
  */
-export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
+export const renderFlakySuiteIssueBody = (
+  suite: FlakySuite,
+  ctx: FlakySuiteIssueContext
+): string => {
   const body = renderBody(suite, ctx, MAX_TESTS_WITH_SAMPLES);
   return body.length <= MAX_BODY_CHARACTERS ? body : renderBody(suite, ctx, 0);
 };

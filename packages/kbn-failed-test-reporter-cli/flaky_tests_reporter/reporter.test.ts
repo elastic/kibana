@@ -8,13 +8,14 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import type { GithubIssue, ListIssuesOptions } from '../failed_tests_reporter/github_api';
-import { FLAKY_TEST_SUITE_LABEL, readReportCount, renderFlakySuiteIssueBody } from './issue_body';
+import type { GithubIssue } from '../failed_tests_reporter/github_api';
+import { readReportCount, readReportHistory, renderFlakySuiteIssueBody } from './issue_body';
 import {
   FAILED_TEST_LABEL,
   indexSuiteIssues,
   relatedFailedTestIssues,
   reportFlakySuitesToGithub,
+  suiteIssuesQuery,
   type ReportFlakySuitesOptions,
 } from './reporter';
 import { groupIntoSuites } from './suites';
@@ -27,11 +28,8 @@ const log = new ToolingLog();
 
 const createGithubApi = (issues: { suite?: GithubIssue[]; failedTest?: GithubIssue[] } = {}) => {
   const api = new GithubApi();
-  api.listIssues.mockImplementation(async ({ labels }: ListIssuesOptions) => {
-    if (labels.includes(FLAKY_TEST_SUITE_LABEL)) return issues.suite ?? [];
-    if (labels.includes(FAILED_TEST_LABEL)) return issues.failedTest ?? [];
-    return [];
-  });
+  api.searchIssues.mockResolvedValue(issues.suite ?? []);
+  api.listIssues.mockResolvedValue(issues.failedTest ?? []);
   api.createIssue.mockImplementation(async (title: string) => ({
     number: 900,
     html_url: 'https://github.com/elastic/kibana/issues/900',
@@ -47,6 +45,7 @@ const suiteIssueBody = (tests = [flakyTest()], reportCount = 1) =>
     report: flakyReport(tests),
     relatedIssues: [],
     reportCount,
+    history: [],
   });
 
 const options = (
@@ -56,7 +55,7 @@ const options = (
   report: flakyReport([flakyTest()]),
   github,
   log,
-  labels: [FLAKY_TEST_SUITE_LABEL],
+  labels: [FAILED_TEST_LABEL],
   maxNewIssues: 10,
   failedTestIssuePolicy: 'skip',
   dryRun: false,
@@ -92,14 +91,25 @@ describe('indexSuiteIssues', () => {
 });
 
 describe('relatedFailedTestIssues', () => {
-  it('matches failed-test issues whose body mentions the suite file', () => {
+  it('matches failed-test issues whose body mentions the suite file, ignoring our own', () => {
     const related = relatedFailedTestIssues({ filePath: 'a/b/c.spec.ts' }, [
       githubIssue({ number: 1, body: '| Location | a/b/c.spec.ts |', title: 'Failing test: c' }),
       githubIssue({ number: 2, body: '| Location | a/b/d.spec.ts |' }),
+      githubIssue({ number: 3, body: suiteIssueBody([flakyTest({ filePath: 'a/b/c.spec.ts' })]) }),
     ]);
     expect(related).toEqual([
-      { number: 1, html_url: 'https://github.com/elastic/kibana/issues/1', title: 'Failing test: c' },
+      {
+        number: 1,
+        html_url: 'https://github.com/elastic/kibana/issues/1',
+        title: 'Failing test: c',
+      },
     ]);
+  });
+});
+
+describe('suiteIssuesQuery', () => {
+  it('narrows failed-test issues down by the title prefix', () => {
+    expect(suiteIssuesQuery()).toBe('label:failed-test in:title "Flaky test suite"');
   });
 });
 
@@ -110,11 +120,16 @@ describe('reportFlakySuitesToGithub', () => {
       options(github, { reportUrl: 'https://buildkite.com/elastic/p/builds/1' })
     );
 
+    expect(github.searchIssues).toHaveBeenCalledWith({ query: suiteIssuesQuery() });
+    expect(github.listIssues).toHaveBeenCalledWith({ labels: [FAILED_TEST_LABEL], state: 'open' });
     expect(github.createIssue).toHaveBeenCalledTimes(1);
     const [title, body, labels] = github.createIssue.mock.calls[0];
     expect(title).toBe(`Flaky test suite: ${SUITE_PATH}`);
-    expect(labels).toEqual([FLAKY_TEST_SUITE_LABEL]);
+    expect(labels).toEqual([FAILED_TEST_LABEL]);
     expect(readReportCount(body)).toBe(1);
+    expect(readReportHistory(body)).toEqual([
+      { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
+    ]);
     expect(body).toContain('https://buildkite.com/elastic/p/builds/1');
     expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
     expect(summary.counts).toEqual({ created: 1, updated: 0, reopened: 0, skipped: 0 });
@@ -127,9 +142,17 @@ describe('reportFlakySuitesToGithub', () => {
     ]);
   });
 
-  it('updates the open issue of a known suite in place and bumps the report count', async () => {
-    const existing = githubIssue({ number: 42, body: suiteIssueBody([flakyTest()], 4) });
-    const github = createGithubApi({ suite: [existing] });
+  it('updates the open issue of a known suite in place, bumping the count and history', async () => {
+    const earlier = flakyReport([flakyTest()], {
+      generatedAt: new Date('2026-09-08T09:00:00.000Z'),
+    });
+    const existingBody = renderFlakySuiteIssueBody(groupIntoSuites(earlier.flaky)[0], {
+      report: earlier,
+      relatedIssues: [],
+      reportCount: 4,
+      history: [{ generatedAt: '2026-09-07T09:00:00.000Z', builds: 500, failedBuilds: 20 }],
+    });
+    const github = createGithubApi({ suite: [githubIssue({ number: 42, body: existingBody })] });
     const summary = await reportFlakySuitesToGithub(options(github));
 
     expect(github.createIssue).not.toHaveBeenCalled();
@@ -138,7 +161,29 @@ describe('reportFlakySuitesToGithub', () => {
     const [number, body] = github.editIssueBodyAndEnsureOpen.mock.calls[0];
     expect(number).toBe(42);
     expect(readReportCount(body)).toBe(5);
+    expect(readReportHistory(body).map(({ generatedAt }) => generatedAt)).toEqual([
+      '2026-09-07T09:00:00.000Z',
+      '2026-09-08T09:00:00.000Z',
+      '2026-09-09T09:04:41.000Z',
+    ]);
+    expect(body).toContain(
+      'Flagged by **5 reports** so far, fail rate 4.0% → 9.6% → **9.6%** (unchanged).'
+    );
     expect(summary.counts.updated).toBe(1);
+  });
+
+  it('does not count the same report twice when a run is retried', async () => {
+    const github = createGithubApi();
+    await reportFlakySuitesToGithub(options(github));
+    const [, firstBody] = github.createIssue.mock.calls[0];
+
+    const retry = createGithubApi({ suite: [githubIssue({ number: 42, body: firstBody })] });
+    await reportFlakySuitesToGithub(options(retry));
+    const [, secondBody] = retry.editIssueBodyAndEnsureOpen.mock.calls[0];
+
+    expect(readReportCount(secondBody)).toBe(1);
+    expect(readReportHistory(secondBody)).toHaveLength(1);
+    expect(secondBody).not.toContain('Flagged by');
   });
 
   it('reopens a closed issue with a comment', async () => {

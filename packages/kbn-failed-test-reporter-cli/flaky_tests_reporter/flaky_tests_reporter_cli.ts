@@ -16,8 +16,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutFlakyTests } from '@kbn/scout-reporting';
 
 import { DEFAULT_GITHUB_REPO, GithubApi } from '../failed_tests_reporter/github_api';
-import { FLAKY_TEST_SUITE_LABEL } from './issue_body';
-import { FAILED_TEST_ISSUE_POLICIES, reportFlakySuitesToGithub } from './reporter';
+import {
+  FAILED_TEST_ISSUE_POLICIES,
+  FAILED_TEST_LABEL,
+  reportFlakySuitesToGithub,
+} from './reporter';
 
 const DEFAULT_INPUT = 'target/flaky_tests/flaky_tests.json';
 const DEFAULT_SUMMARY_PATH = 'target/flaky_tests/github_issues.json';
@@ -49,9 +52,9 @@ export function runFlakyTestsReporterCli() {
         throw createFlagError('--max-new-issues must be a non-negative integer');
       }
       const labels = readList(flagsReader, 'labels');
-      if (!labels.includes(FLAKY_TEST_SUITE_LABEL)) {
+      if (!labels.includes(FAILED_TEST_LABEL)) {
         throw createFlagError(
-          `--labels must include ${FLAKY_TEST_SUITE_LABEL}, otherwise issues cannot be found again`
+          `--labels must include ${FAILED_TEST_LABEL}, otherwise issues cannot be found again`
         );
       }
       const failedTestIssuePolicy =
@@ -120,7 +123,7 @@ export function runFlakyTestsReporterCli() {
         boolean: ['dry-run'],
         default: {
           input: DEFAULT_INPUT,
-          labels: FLAKY_TEST_SUITE_LABEL,
+          labels: FAILED_TEST_LABEL,
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
           'failed-test-issues': DEFAULT_FAILED_TEST_ISSUE_POLICY,
           'summary-path': DEFAULT_SUMMARY_PATH,
@@ -130,7 +133,7 @@ export function runFlakyTestsReporterCli() {
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
           --dry-run             Log the GitHub requests instead of sending them; GITHUB_TOKEN becomes optional
-          --labels              Comma-separated labels for new issues [default: ${FLAKY_TEST_SUITE_LABEL}]
+          --labels              Comma-separated labels for new issues [default: ${FAILED_TEST_LABEL}]
           --max-new-issues      Maximum issues created per run; existing ones are always updated [default: ${DEFAULT_MAX_NEW_ISSUES}]
           --failed-test-issues  ${FAILED_TEST_ISSUE_POLICIES.join(
             ' or '

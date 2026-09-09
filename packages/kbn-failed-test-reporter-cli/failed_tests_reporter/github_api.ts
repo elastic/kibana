@@ -47,6 +47,19 @@ export interface ListIssuesOptions {
   maxPages?: number;
 }
 
+export interface SearchIssuesOptions {
+  /** Search qualifiers; the repository and `is:issue` are added automatically. */
+  query: string;
+  /** GitHub caps search results at 1000, i.e. 10 pages of 100. */
+  maxPages?: number;
+}
+
+interface SearchIssuesResponse {
+  total_count: number;
+  incomplete_results: boolean;
+  items: Array<GithubIssue & { pull_request?: unknown }>;
+}
+
 /**
  * Minimal GithubIssue type that can be easily replicated by dry-run helpers
  */
@@ -73,6 +86,7 @@ export class GithubApi {
   private readonly log: ToolingLog;
   private readonly token: string | undefined;
   private readonly dryRun: boolean;
+  private readonly repo: string;
   private readonly baseUrl: string;
   private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
@@ -90,7 +104,8 @@ export class GithubApi {
     this.log = options.log;
     this.token = options.token;
     this.dryRun = options.dryRun;
-    this.baseUrl = `https://api.github.com/repos/${options.repo ?? DEFAULT_GITHUB_REPO}/`;
+    this.repo = options.repo ?? DEFAULT_GITHUB_REPO;
+    this.baseUrl = `https://api.github.com/repos/${this.repo}/`;
 
     if (!this.token && !this.dryRun) {
       throw new TypeError('token parameter is required');
@@ -159,17 +174,60 @@ export class GithubApi {
    * requests share the issues endpoint and are filtered out.
    */
   async listIssues({ labels, state, maxPages = 50 }: ListIssuesOptions): Promise<GithubIssue[]> {
-    const issues: GithubIssue[] = [];
     const query = new URLSearchParams({ labels: labels.join(','), state, per_page: '100' });
-    let url: string | undefined = Url.resolve(this.baseUrl, `issues?${query}`);
+    return await this.collectIssues({
+      firstPageUrl: Url.resolve(this.baseUrl, `issues?${query}`),
+      maxPages,
+      itemsOf: (page: Array<GithubIssue & { pull_request?: unknown }>) => page,
+      emptyPage: [],
+      description: `issues labelled ${labels.join(',')}`,
+    });
+  }
 
-    for (let page = 1; page <= maxPages && url; page++) {
-      const resp = await this.request<Array<GithubIssue & { pull_request?: unknown }>>(
+  /**
+   * Issues of the repository matching a GitHub search query, most recently updated first.
+   * Read-only, so it also runs in dry-run mode. Use it when listing by label would page through
+   * far more issues than the query matches; GitHub caps search results at 1000.
+   */
+  async searchIssues({ query, maxPages = 10 }: SearchIssuesOptions): Promise<GithubIssue[]> {
+    const params = new URLSearchParams({
+      q: `repo:${this.repo} is:issue ${query}`,
+      sort: 'updated',
+      order: 'desc',
+      per_page: '100',
+    });
+    return await this.collectIssues({
+      firstPageUrl: `https://api.github.com/search/issues?${params}`,
+      maxPages,
+      itemsOf: (page: SearchIssuesResponse) => {
+        if (page.incomplete_results) {
+          this.log.warning(`GitHub search timed out for "${query}"; results may be incomplete`);
+        }
+        return page.items;
+      },
+      emptyPage: { total_count: 0, incomplete_results: false, items: [] },
+      description: `issues matching "${query}"`,
+    });
+  }
+
+  /** Follows `Link: rel="next"` headers, dropping pull requests (which share the issue shape). */
+  private async collectIssues<TPage>(options: {
+    firstPageUrl: string;
+    maxPages: number;
+    itemsOf: (page: TPage) => Array<GithubIssue & { pull_request?: unknown }>;
+    emptyPage: TPage;
+    description: string;
+  }): Promise<GithubIssue[]> {
+    const issues: GithubIssue[] = [];
+    let url: string | undefined = options.firstPageUrl;
+
+    for (let page = 1; page <= options.maxPages && url; page++) {
+      const resp = await this.request<TPage>(
         { method: 'GET', url, safeForDryRun: true },
-        []
+        options.emptyPage
       );
 
-      for (const issue of resp.data) {
+      for (const issue of options.itemsOf(resp.data)) {
         if (!issue.pull_request) {
           issues.push({ ...issue, body: issue.body ?? '' });
         }
@@ -179,15 +237,11 @@ export class GithubApi {
       url = nextPageUrl(resp.headers.get('link'));
     }
 
-    if (!url) {
-      return issues;
+    if (url) {
+      this.log.warning(
+        `Stopped listing ${options.description} after ${options.maxPages} pages; results are incomplete`
+      );
     }
-
-    this.log.warning(
-      `Stopped listing issues labelled ${labels.join(
-        ','
-      )} after ${maxPages} pages; results are incomplete`
-    );
     return issues;
   }
 
