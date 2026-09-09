@@ -63,11 +63,11 @@ export function initializeViewModeManager({
   }
 
   const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
-  const disableTriggers = new BehaviorSubject<boolean>(viewMode$.getValue() === 'preview');
+  const disableTriggers$ = new BehaviorSubject<boolean>(viewMode$.getValue() === 'preview');
 
   const disableTriggersSubscription = viewMode$.subscribe((viewMode) => {
     console.log('!!!!!!!!!!', { viewMode });
-    disableTriggers.next(viewMode === 'preview');
+    disableTriggers$.next(viewMode === 'preview');
   });
 
   function setViewMode(viewMode: ViewMode) {
@@ -83,7 +83,7 @@ export function initializeViewModeManager({
     api: {
       viewMode$,
       setViewMode,
-      disableTriggers,
+      disableTriggers$,
       isEditableByUser: canUserEditDashboard,
     },
     cleanup: () => {

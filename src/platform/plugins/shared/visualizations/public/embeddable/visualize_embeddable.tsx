@@ -421,7 +421,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
               vis: vis$.getValue(),
               settings,
               disableTriggers: apiHasDisableTriggers(parentApi)
-                ? parentApi.disableTriggers.getValue()
+                ? parentApi.disableTriggers$.getValue()
                 : undefined,
               searchSessionId,
               parentExecutionContext: executionContext,
@@ -465,7 +465,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
                 }
                 const currentVis = vis$.getValue();
                 const disableTriggers = apiHasDisableTriggers(parentApi)
-                  ? parentApi.disableTriggers.getValue()
+                  ? parentApi.disableTriggers$.getValue()
                   : undefined;
                 console.log({ disableTriggers });
                 if (!disableTriggers) {

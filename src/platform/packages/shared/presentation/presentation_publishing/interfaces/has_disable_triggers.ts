@@ -11,16 +11,16 @@ import { BehaviorSubject } from 'rxjs';
 import { apiHasParentApi } from './has_parent_api';
 
 export interface HasDisableTriggers {
-  disableTriggers: BehaviorSubject<boolean>;
+  disableTriggers$: BehaviorSubject<boolean>;
 }
 
 export const apiHasDisableTriggers = (api: unknown | null): api is HasDisableTriggers => {
-  return Boolean(api && (api as HasDisableTriggers).disableTriggers instanceof BehaviorSubject);
+  return Boolean(api && (api as HasDisableTriggers).disableTriggers$ instanceof BehaviorSubject);
 };
 
 export function areTriggersDisabled(api?: unknown) {
   function getDisabledTriggers(thisApi?: unknown) {
-    return apiHasDisableTriggers(thisApi) ? thisApi.disableTriggers.getValue() : false;
+    return apiHasDisableTriggers(thisApi) ? thisApi.disableTriggers$.getValue() : false;
   }
 
   return (
