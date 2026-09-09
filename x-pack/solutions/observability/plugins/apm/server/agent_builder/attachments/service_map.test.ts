@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentFormatContext,
+  TextAttachmentRepresentation,
+} from '@kbn/agent-builder-server/attachments';
 import { createServiceMapAttachmentType } from './service_map';
 import { SERVICE_MAP_ATTACHMENT_TYPE } from '../../../common/agent_builder/attachments';
 
@@ -128,9 +131,9 @@ describe('createServiceMapAttachmentType', () => {
         { id: 'test', type: attachmentType.id, data },
         mockContext
       );
-      const representation = await formatted.getRepresentation!();
+      const representation = (await formatted.getRepresentation!()) as TextAttachmentRepresentation;
       expect(representation.type).toBe('text');
-      const parsed = JSON.parse(representation.value as string);
+      const parsed = JSON.parse(representation.value);
       expect(parsed.nodeMetadata).toEqual({ frontend: { alertsCount: 1 } });
     });
   });
