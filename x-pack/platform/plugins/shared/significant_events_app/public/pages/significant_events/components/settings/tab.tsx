@@ -303,11 +303,11 @@ export function SettingsTab() {
 
       <StaleEventCleanupSection canManage={canManageStreams} />
 
+      <CostEstimate />
+
       <EuiSpacer />
 
       <RunLimitsSection />
-
-      <CostEstimate />
 
       <EuiSpacer />
 

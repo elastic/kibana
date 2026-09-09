@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type {
   BudgetGroupCost,
   CostCaveat,
@@ -19,20 +19,24 @@ import type {
 } from '@kbn/significant-events-plugin/common';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useGenAiSettingsUrl } from '../../../../hooks/use_gen_ai_settings_url';
 import { useSignificantEventsCost } from '../../../../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../../../../hooks/use_significant_events_run_quotas';
 import { CostEstimate } from './cost_estimate';
 
 jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_gen_ai_settings_url');
 jest.mock('../../../../hooks/use_significant_events_cost');
 jest.mock('../../../../hooks/use_significant_events_run_quotas');
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const MockEuiIconTip = ({ content }: { content: React.ReactNode }) => <>{content}</>;
+
+  return {
+    ...actual,
+    EuiIconTip: MockEuiIconTip,
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseGenAiSettingsUrl = useGenAiSettingsUrl as jest.MockedFunction<
-  typeof useGenAiSettingsUrl
->;
 const mockUseSignificantEventsCost = useSignificantEventsCost as jest.MockedFunction<
   typeof useSignificantEventsCost
 >;
@@ -40,6 +44,10 @@ const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas
 
 const refreshCost = jest.fn();
 const retryCost = jest.fn();
+const setUiSetting = jest.fn();
+const installTokenUsageDashboard = jest.fn();
+const addDanger = jest.fn();
+const addWarning = jest.fn();
 
 const quotasResponse = (canManage: boolean): RunQuotasResponse => ({
   enabled: true,
@@ -105,14 +113,40 @@ const costResponse = (overrides: Partial<CostResponse> = {}): CostResponse => ({
   ...overrides,
 });
 
-const setTracking = (enabled: boolean) => {
+const setTracking = (enabled: boolean, canSaveAdvancedSettings = true) => {
   const tracking$ = new BehaviorSubject(enabled);
+  const updateErrors$ = new Subject<Error>();
+  setUiSetting.mockImplementation(async (key: string, value: boolean) => {
+    if (key === GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING) {
+      tracking$.next(value);
+    }
+    return true;
+  });
+  installTokenUsageDashboard.mockResolvedValue({ installed: true });
   mockUseKibana.mockReturnValue({
     core: {
+      application: {
+        capabilities: {
+          advancedSettings: {
+            save: canSaveAdvancedSettings,
+          },
+        },
+      },
       settings: {
         client: {
           get: jest.fn().mockReturnValue(enabled),
           get$: jest.fn().mockReturnValue(tracking$),
+          getUpdateErrors$: jest.fn().mockReturnValue(updateErrors$),
+          set: setUiSetting,
+        },
+      },
+      http: {
+        post: installTokenUsageDashboard,
+      },
+      notifications: {
+        toasts: {
+          addDanger,
+          addWarning,
         },
       },
     },
@@ -141,7 +175,6 @@ const renderCost = () =>
 describe('CostEstimate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseGenAiSettingsUrl.mockReturnValue('/app/management/ai/genAiSettings');
     mockUseRunQuotas.mockReturnValue({
       data: quotasResponse(true),
       isLoading: false,
@@ -181,17 +214,83 @@ describe('CostEstimate', () => {
     expect(screen.queryByTestId('significantEventsCostSection')).not.toBeInTheDocument();
   });
 
-  it('shows the tracking prompt and Gen AI Settings link when tracking is disabled', () => {
+  it('renders collapsed by default', () => {
+    renderCost();
+    const accordionButton = screen.getByTestId('significantEventsCostAccordionButton');
+    expect(accordionButton).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(accordionButton);
+    expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('shows only an enable button when tracking is disabled and enables it in this space', async () => {
     setTracking(false);
     renderCost();
-    expect(screen.getByTestId('significantEventsCostTrackingPrompt')).toHaveTextContent(
-      'Enable token usage tracking to see cost estimates'
+    expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
+      'Token tracking disabled in this space'
     );
-    expect(screen.getByTestId('significantEventsCostGenAiSettingsLink')).toHaveAttribute(
-      'href',
-      '/app/management/ai/genAiSettings'
-    );
+    expect(screen.queryByTestId('significantEventsCostHeadline')).not.toBeInTheDocument();
+    const enableButton = screen.getByTestId('significantEventsEnableTokenTrackingButton');
+    expect(enableButton).toHaveTextContent('Enable token tracking in this space');
     expect(mockUseSignificantEventsCost).toHaveBeenCalledWith({ enabled: false });
+
+    fireEvent.click(enableButton);
+
+    await waitFor(() => {
+      expect(setUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, true);
+      expect(installTokenUsageDashboard).toHaveBeenCalledWith(
+        '/internal/gen_ai_settings/install_token_usage_dashboard'
+      );
+      expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
+        'Token tracking enabled in this space'
+      );
+    });
+    expect(
+      screen.queryByTestId('significantEventsEnableTokenTrackingButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('disables the enable button without Advanced Settings save permission', () => {
+    setTracking(false, false);
+    renderCost();
+    const enableButton = screen.getByTestId('significantEventsEnableTokenTrackingButton');
+    expect(enableButton).toBeDisabled();
+    fireEvent.click(enableButton);
+    expect(setUiSetting).not.toHaveBeenCalled();
+  });
+
+  it('keeps the enable action available when saving the setting fails', async () => {
+    setTracking(false);
+    setUiSetting.mockResolvedValue(false);
+    renderCost();
+    fireEvent.click(screen.getByTestId('significantEventsEnableTokenTrackingButton'));
+
+    await waitFor(() => {
+      expect(addDanger).toHaveBeenCalled();
+      expect(screen.getByTestId('significantEventsEnableTokenTrackingButton')).toBeEnabled();
+    });
+    expect(installTokenUsageDashboard).not.toHaveBeenCalled();
+  });
+
+  it('keeps tracking enabled when dashboard installation fails', async () => {
+    setTracking(false);
+    installTokenUsageDashboard.mockRejectedValue(new Error('dashboard unavailable'));
+    renderCost();
+    fireEvent.click(screen.getByTestId('significantEventsEnableTokenTrackingButton'));
+
+    await waitFor(() => {
+      expect(addWarning).toHaveBeenCalled();
+      expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
+        'Token tracking enabled in this space'
+      );
+    });
+    expect(addDanger).not.toHaveBeenCalled();
+  });
+
+  it('shows that token tracking is enabled', () => {
+    renderCost();
+    expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
+      'Token tracking enabled in this space'
+    );
     expect(mockUseKibana().core.settings.client.get).toHaveBeenCalledWith(
       GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
       false
@@ -352,9 +451,9 @@ describe('CostEstimate', () => {
       }),
     });
     const { rerender } = renderCost();
-    const caveats = screen.getByTestId('significantEventsCostCaveats');
+    const caveats = screen.getByTestId('significantEventsCostDetails');
     expect(caveats).toHaveTextContent('Prices are based on Elastic Inference Service list rates.');
-    expect(caveats).toHaveTextContent(
+    expect(caveats).not.toHaveTextContent(
       'Pricing is treated as USD because the catalog does not identify a currency.'
     );
     expect(caveats).toHaveTextContent('Embedding and rerank inference is excluded.');
@@ -372,6 +471,10 @@ describe('CostEstimate', () => {
     );
     expect(caveats).toHaveTextContent(
       'Estimate uses lower-tier pricing; 1 call exceeded the tier threshold.'
+    );
+    expect(screen.getByTestId('significantEventsCostPricingLink')).toHaveAttribute(
+      'href',
+      'https://cloud.elastic.co/cloud-pricing-table?productType=serverless&solution=elasticsearch'
     );
 
     setCost({
@@ -392,7 +495,7 @@ describe('CostEstimate', () => {
         <CostEstimate />
       </I18nProvider>
     );
-    expect(screen.getByTestId('significantEventsCostCaveats')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsCostDetails')).toHaveTextContent(
       'Estimate uses lower-tier pricing; 5 calls exceeded the tier threshold.'
     );
   });

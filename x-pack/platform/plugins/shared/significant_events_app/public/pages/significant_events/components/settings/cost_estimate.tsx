@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -23,6 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 import {
   COST_BUDGET_GROUPS,
@@ -33,12 +36,26 @@ import {
   type PeriodCost,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useGenAiSettingsUrl } from '../../../../hooks/use_gen_ai_settings_url';
 import { useSignificantEventsCost } from '../../../../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../../../../hooks/use_significant_events_run_quotas';
 import { getFormattedError } from '../../../../util/errors';
 
-const PRICING_URL = 'https://www.elastic.co/pricing';
+const PRICING_URL =
+  'https://cloud.elastic.co/cloud-pricing-table?productType=serverless&solution=elasticsearch';
+const INSTALL_TOKEN_USAGE_DASHBOARD_URL = '/internal/gen_ai_settings/install_token_usage_dashboard';
+
+type DisplayedCostCaveat = Exclude<CostCaveat, 'usd_assumed'>;
+
+const DEFAULT_DISPLAYED_CAVEATS: readonly DisplayedCostCaveat[] = [
+  'eis_pricing_assumed',
+  'excludes_embeddings',
+  'excludes_failed_calls',
+  'excludes_cache_writes',
+  'tracking_not_all_spaces',
+];
+
+const isDisplayedCostCaveat = (caveat: CostCaveat): caveat is DisplayedCostCaveat =>
+  caveat !== 'usd_assumed';
 
 const GROUP_LABELS: Record<CostBudgetGroup, string> = {
   detection: i18n.translate('xpack.significantEventsApp.settings.costEstimate.detectionRowTitle', {
@@ -74,21 +91,13 @@ const formatCostValue = (totalTokens: number, estimatedCost: number | null): str
   return formatUsd(estimatedCost);
 };
 
-const caveatText = (caveat: CostCaveat, tierCrossingCount: number): string => {
+const caveatText = (caveat: DisplayedCostCaveat, tierCrossingCount: number): string => {
   switch (caveat) {
     case 'eis_pricing_assumed':
       return i18n.translate(
         'xpack.significantEventsApp.settings.costEstimate.eisPricingAssumedDescription',
         {
           defaultMessage: 'Prices are based on Elastic Inference Service list rates.',
-        }
-      );
-    case 'usd_assumed':
-      return i18n.translate(
-        'xpack.significantEventsApp.settings.costEstimate.usdAssumedDescription',
-        {
-          defaultMessage:
-            'Pricing is treated as USD because the catalog does not identify a currency.',
         }
       );
     case 'excludes_embeddings':
@@ -135,6 +144,77 @@ const caveatText = (caveat: CostCaveat, tierCrossingCount: number): string => {
         }
       );
   }
+};
+
+const CostDetailsTooltip = ({ data }: { data?: CostResponse }) => {
+  const caveats = data ? data.caveats.filter(isDisplayedCostCaveat) : DEFAULT_DISPLAYED_CAVEATS;
+  const monthTierCrossings =
+    data?.month.groups.reduce((sum, group) => sum + group.tierCrossingCount, 0) ?? 0;
+  const ariaLabel = i18n.translate(
+    'xpack.significantEventsApp.settings.costEstimate.detailsTooltipAriaLabel',
+    { defaultMessage: 'Cost estimate details' }
+  );
+
+  return (
+    <EuiIconTip
+      aria-label={ariaLabel}
+      type="info"
+      color="subdued"
+      size="s"
+      anchorProps={{
+        'data-test-subj': 'significantEventsCostDetailsTooltip',
+      }}
+      content={
+        <EuiText size="xs">
+          <ul data-test-subj="significantEventsCostDetails">
+            {caveats.map((caveat) => (
+              <li key={caveat}>{caveatText(caveat, monthTierCrossings)}</li>
+            ))}
+          </ul>
+        </EuiText>
+      }
+    />
+  );
+};
+
+const CostHeaderActions = ({
+  data,
+  trackingEnabled,
+  isEnablingTracking,
+}: {
+  data?: CostResponse;
+  trackingEnabled: boolean;
+  isEnablingTracking: boolean;
+}) => {
+  const status = isEnablingTracking
+    ? i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.tokenTrackingEnablingLabel',
+        { defaultMessage: 'Enabling token tracking in this space' }
+      )
+    : trackingEnabled
+    ? i18n.translate('xpack.significantEventsApp.settings.costEstimate.tokenTrackingEnabledLabel', {
+        defaultMessage: 'Token tracking enabled in this space',
+      })
+    : i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.tokenTrackingDisabledLabel',
+        { defaultMessage: 'Token tracking disabled in this space' }
+      );
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <CostDetailsTooltip data={data} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge
+          color={trackingEnabled && !isEnablingTracking ? 'success' : 'hollow'}
+          data-test-subj="significantEventsTokenTrackingStatus"
+        >
+          {status}
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 const CostValue = ({
@@ -189,38 +269,34 @@ const CostData = ({
       values: { today: todayText, month: monthText },
     }
   );
-  const monthTierCrossings = data.month.groups.reduce(
-    (sum, group) => sum + group.tierCrossingCount,
-    0
-  );
-  const tooltipContent = (
-    <span>
-      {i18n.translate('xpack.significantEventsApp.settings.costEstimate.headlineTooltip', {
-        defaultMessage: 'Prices are based on Elastic Inference Service list rates.',
-      })}{' '}
-      <EuiLink href={PRICING_URL} target="_blank" rel="noopener noreferrer" external>
-        {i18n.translate('xpack.significantEventsApp.settings.costEstimate.pricingLinkText', {
-          defaultMessage: 'Elastic pricing',
-        })}
-      </EuiLink>
-    </span>
-  );
 
   return (
     <>
       <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m">
         <EuiFlexItem>
-          <EuiToolTip content={tooltipContent}>
-            <EuiText size="s" tabIndex={0}>
-              <p data-test-subj="significantEventsCostHeadline">{headline}</p>
-            </EuiText>
-          </EuiToolTip>
+          <EuiText size="s">
+            <p data-test-subj="significantEventsCostHeadline">{headline}</p>
+          </EuiText>
           <EuiText size="xs" color="subdued">
             <p data-test-subj="significantEventsCostAsOf">
-              {i18n.translate('xpack.significantEventsApp.settings.costEstimate.asOfLabel', {
-                defaultMessage: 'as of {asOf} at current list prices',
-                values: { asOf: asOfTime },
-              })}
+              <FormattedMessage
+                id="xpack.significantEventsApp.settings.costEstimate.asOfLabel"
+                defaultMessage="as of {asOf} at <pricingLink>current list prices</pricingLink>"
+                values={{
+                  asOf: asOfTime,
+                  pricingLink: (chunks) => (
+                    <EuiLink
+                      href={PRICING_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      external
+                      data-test-subj="significantEventsCostPricingLink"
+                    >
+                      {chunks}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -304,15 +380,6 @@ const CostData = ({
           </EuiFlexGroup>
         );
       })}
-
-      <EuiSpacer />
-      <EuiText size="xs" color="subdued" data-test-subj="significantEventsCostCaveats">
-        <ul>
-          {data.caveats.map((caveat) => (
-            <li key={caveat}>{caveatText(caveat, monthTierCrossings)}</li>
-          ))}
-        </ul>
-      </EuiText>
     </>
   );
 };
@@ -338,7 +405,7 @@ const RetryCallout = ({
 
 export const CostEstimate = () => {
   const quotas = useRunQuotas();
-  const genAiSettingsUrl = useGenAiSettingsUrl();
+  const [isEnablingTracking, setIsEnablingTracking] = useState(false);
   const { core } = useKibana();
   const settingsClient = core.settings.client;
   const tracking$ = useMemo(
@@ -350,36 +417,93 @@ export const CostEstimate = () => {
     settingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false)
   );
   const canManage = quotas.data?.canManage === true;
-  const cost = useSignificantEventsCost({ enabled: canManage && trackingEnabled });
+  const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
+  const cost = useSignificantEventsCost({
+    enabled: canManage && trackingEnabled && !isEnablingTracking,
+  });
+
+  const enableTokenTracking = async (): Promise<void> => {
+    setIsEnablingTracking(true);
+    let updateError: Error | undefined;
+    const updateErrorSubscription = settingsClient.getUpdateErrors$().subscribe((error) => {
+      updateError = error;
+    });
+
+    try {
+      const wasSaved = await settingsClient.set(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, true);
+      if (!wasSaved) {
+        throw (
+          updateError ??
+          new Error(
+            i18n.translate(
+              'xpack.significantEventsApp.settings.costEstimate.enableTrackingFailedErrorMessage',
+              { defaultMessage: 'The token tracking setting could not be saved.' }
+            )
+          )
+        );
+      }
+
+      try {
+        await core.http.post(INSTALL_TOKEN_USAGE_DASHBOARD_URL);
+      } catch (error) {
+        core.notifications.toasts.addWarning({
+          title: i18n.translate(
+            'xpack.significantEventsApp.settings.costEstimate.installDashboardFailedTitle',
+            {
+              defaultMessage:
+                'Token tracking was enabled, but the token usage dashboard could not be installed',
+            }
+          ),
+          text: getFormattedError(error).message,
+        });
+      }
+    } catch (error) {
+      core.notifications.toasts.addDanger({
+        title: i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.enableTrackingFailedTitle',
+          { defaultMessage: 'Unable to enable token tracking' }
+        ),
+        text: getFormattedError(error).message,
+      });
+    } finally {
+      updateErrorSubscription.unsubscribe();
+      setIsEnablingTracking(false);
+    }
+  };
 
   if (quotas.isError || quotas.data == null || !canManage) {
     return null;
   }
 
   const renderBody = () => {
-    if (!trackingEnabled) {
+    if (!trackingEnabled || isEnablingTracking) {
       return (
-        <EuiText size="s" data-test-subj="significantEventsCostTrackingPrompt">
-          <p>
+        <EuiToolTip
+          content={
+            canSaveAdvancedSettings
+              ? undefined
+              : i18n.translate(
+                  'xpack.significantEventsApp.settings.costEstimate.enableTrackingPermissionTooltip',
+                  {
+                    defaultMessage:
+                      'You need permission to save Advanced Settings before you can enable token tracking.',
+                  }
+                )
+          }
+        >
+          <EuiButton
+            fill
+            isLoading={isEnablingTracking}
+            isDisabled={!canSaveAdvancedSettings}
+            onClick={() => void enableTokenTracking()}
+            data-test-subj="significantEventsEnableTokenTrackingButton"
+          >
             {i18n.translate(
-              'xpack.significantEventsApp.settings.costEstimate.enableTrackingDescription',
-              {
-                defaultMessage: 'Enable token usage tracking to see cost estimates',
-              }
+              'xpack.significantEventsApp.settings.costEstimate.enableTrackingButtonLabel',
+              { defaultMessage: 'Enable token tracking in this space' }
             )}
-          </p>
-          {genAiSettingsUrl && (
-            <EuiLink
-              href={genAiSettingsUrl}
-              data-test-subj="significantEventsCostGenAiSettingsLink"
-            >
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.costEstimate.genAiSettingsLinkText',
-                { defaultMessage: 'Go to Gen AI Settings' }
-              )}
-            </EuiLink>
-          )}
-        </EuiText>
+          </EuiButton>
+        </EuiToolTip>
       );
     }
 
@@ -447,16 +571,36 @@ export const CostEstimate = () => {
         grow={false}
         data-test-subj="significantEventsCostSection"
       >
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
-                defaultMessage: 'Approximate inference cost',
-              })}
-            </h3>
-          </EuiTitle>
+        <EuiPanel hasShadow={false} color="subdued" paddingSize="none">
+          <EuiAccordion
+            id="significantEventsCostAccordion"
+            initialIsOpen={false}
+            buttonProps={{
+              paddingSize: 'm',
+              css: { flexGrow: 0, inlineSize: 'auto' },
+              'data-test-subj': 'significantEventsCostAccordionButton',
+            }}
+            buttonContent={
+              <EuiTitle size="s">
+                <h3>
+                  {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
+                    defaultMessage: 'Approximate inference cost',
+                  })}
+                </h3>
+              </EuiTitle>
+            }
+            extraAction={
+              <CostHeaderActions
+                data={cost.data}
+                trackingEnabled={trackingEnabled}
+                isEnablingTracking={isEnablingTracking}
+              />
+            }
+            data-test-subj="significantEventsCostAccordion"
+          >
+            <EuiPanel hasShadow={false}>{renderBody()}</EuiPanel>
+          </EuiAccordion>
         </EuiPanel>
-        <EuiPanel hasShadow={false}>{renderBody()}</EuiPanel>
       </EuiPanel>
     </>
   );
