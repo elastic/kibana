@@ -17,7 +17,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 
-const TEMPLATE_VERSION = 27;
+const TEMPLATE_VERSION = 28;
 
 const TEMPLATE_META = { managed_by: 'threat_intel', version: TEMPLATE_VERSION };
 
@@ -66,6 +66,8 @@ const threatReportsTemplate = {
         // scope reads to the current space plus `'*'`. This is not an Elasticsearch
         // authorization boundary on the hidden reports index while supply is disabled.
         space_id: { type: 'keyword' as const },
+        // Monotonic hunt-relevant revision. Init 1 on create/ingest; bump on enrich.
+        revision: { type: 'integer' as const },
         source: {
           properties: {
             type: { type: 'keyword' as const },
@@ -832,6 +834,60 @@ const migrateExistingIndicatorSourcesMapping = async (
   }
 };
 
+/** `revision` (v28) for clusters created before read-API revision tracking. */
+const migrateExistingRevisionMapping = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('revision-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const props = indexMappings?.mappings?.properties as Record<string, unknown> | undefined;
+
+      if (!props?.revision) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            revision: { type: 'integer' },
+          },
+        });
+        log.info(`Migrated revision mapping on ${indexName} (v28)`);
+      }
+
+      // Existing reports need revision: 1 so the usable bar and Dark consumers
+      // treat them as first-revision docs rather than missing the field.
+      const updateResult = await esClient.updateByQuery({
+        index: indexName,
+        conflicts: 'proceed',
+        refresh: false,
+        query: {
+          bool: {
+            must_not: [{ exists: { field: 'revision' } }],
+          },
+        },
+        script: {
+          lang: 'painless',
+          source: 'ctx._source.revision = 1',
+        },
+      });
+      const updated = updateResult.updated ?? 0;
+      if (updated > 0) {
+        log.info(`Backfilled revision: 1 on ${updated} report(s) in ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate revision on ${indexName}: ${(err as Error).message}. ` +
+          `Reports without revision will fail the usable bar until this succeeds.`
+      );
+    }
+  }
+};
+
 /** `lineage.content_scrubbed_at` (v23) for clusters created before retention existed. */
 const migrateExistingContentScrubbedMapping = async (
   esClient: ElasticsearchClient,
@@ -1540,6 +1596,7 @@ export const installIndexTemplates = async ({
   await migrateExistingReportKeywordBounds(esClient, reportIndices, log);
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
+  await migrateExistingRevisionMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

@@ -516,6 +516,7 @@ export const registerPromoteThreatIndicatorsTask = ({
   taskManager,
   coreSetup,
   logger,
+  getReconcileAttributeWorkflows,
 }: {
   taskManager: TaskManagerSetupContract;
   /**
@@ -529,6 +530,11 @@ export const registerPromoteThreatIndicatorsTask = ({
    */
   coreSetup: CoreSetup;
   logger: Logger;
+  /**
+   * Installs `attribute_alerts_to_reports` into any space missing it. Bound in
+   * setup to a runtime slot that start fills when the supply flag is on.
+   */
+  getReconcileAttributeWorkflows: () => Promise<void>;
 }): void => {
   taskManager.registerTaskDefinitions({
     [PROMOTE_THREAT_INDICATORS_TASK_TYPE]: {
@@ -552,6 +558,15 @@ export const registerPromoteThreatIndicatorsTask = ({
       },
       createTaskRunner: ({ taskInstance, signal }: RunContext) => ({
         run: async () => {
+          // Catch spaces created after boot before scanning reports. Failures
+          // here must not block promotion — install is idempotent and the next
+          // 15m pass will retry.
+          await getReconcileAttributeWorkflows().catch((err: Error) => {
+            logger.warn(
+              `Failed to reconcile per-space attribute workflows before promote: ${err.message}`
+            );
+          });
+
           const previousState = (taskInstance.state ?? {}) as PromoteThreatIndicatorsState;
           const lower = previousState.lastSyncedAt ?? LOOKBACK_ON_FIRST_RUN;
 

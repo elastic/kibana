@@ -31,7 +31,14 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
  * behaviour.
  */
 describe('THREAT_INTEL_INGEST_FEEDS_WORKFLOW yaml', () => {
-  const workflow = parse(THREAT_INTEL_INGEST_FEEDS_WORKFLOW.yaml) as { steps: unknown[] };
+  const workflow = parse(THREAT_INTEL_INGEST_FEEDS_WORKFLOW.yaml) as {
+    enabled?: boolean;
+    steps: unknown[];
+  };
+
+  it('ships disabled so operators must enable in Workflows management', () => {
+    expect(workflow.enabled).toBe(false);
+  });
 
   // Load-bearing invariant: a disabled source must cause no fetch. The only source
   // enumeration the workflow does is `load_sources`, and every fetch runs inside the

@@ -5,44 +5,91 @@
  * 2.0.
  */
 
-import { THREAT_INTEL_WORKFLOW_IDS } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { Logger } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
-  initSecurityManagedWorkflowsClient,
-  type SecurityManagedWorkflowsClient,
-} from '../managed_workflows';
+  THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+  THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+  THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import type { SecurityManagedWorkflowsClient } from '../managed_workflows';
 
+const GLOBAL_THREAT_INTEL_WORKFLOW_IDS = [
+  THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+  THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+] as const;
+
+/**
+ * Hybrid install: ingest + enrich once in the global workflow space (source
+ * catalog and enrichment are content-global), attribute_alerts_to_reports once
+ * per real Kibana space (alerts and hit counts are space-scoped).
+ */
 export const installThreatIntelManagedWorkflows = async ({
   managedWorkflowsClient,
+  spaceIds,
 }: {
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  spaceIds: readonly string[];
 }): Promise<void> => {
-  for (const workflowId of THREAT_INTEL_WORKFLOW_IDS) {
+  for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
     await managedWorkflowsClient.install(workflowId, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+  }
+
+  await reconcileThreatIntelAttributeWorkflows({
+    managedWorkflowsClient,
+    spaceIds,
+  });
+};
+
+/**
+ * Idempotent per-space install of attribute_alerts_to_reports. Used at boot and
+ * by the promote task to catch spaces created after the last install pass.
+ */
+export const reconcileThreatIntelAttributeWorkflows = async ({
+  managedWorkflowsClient,
+  spaceIds,
+}: {
+  managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  spaceIds: readonly string[];
+}): Promise<void> => {
+  for (const spaceId of spaceIds) {
+    await managedWorkflowsClient.install(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+      spaceId,
+      workflowIdSuffix: spaceId,
     });
   }
 };
 
 /**
- * Installs the threat-intel managed workflows in the global space. Called from
- * plugin start after bootstrap so feed ingestion and enrichment can run when the
- * feature flag is on.
+ * Removes the two global TI workflows and every per-space attribute instance.
+ * Tolerates not-found so a partial prior install still cleans up.
  */
-export const installThreatIntelManagedWorkflowsAndMarkReady = async ({
-  workflowsExtensions,
-  logger,
+export const uninstallThreatIntelManagedWorkflows = async ({
+  managedWorkflowsClient,
+  spaceIds,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  logger: Logger;
+  managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  spaceIds: readonly string[];
 }): Promise<void> => {
-  try {
-    const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
-    await installThreatIntelManagedWorkflows({ managedWorkflowsClient });
-    await managedWorkflowsClient.ready();
-  } catch (error) {
-    logger.warn('Failed to install threat intelligence managed workflows', { error });
+  for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
+    try {
+      await managedWorkflowsClient.uninstall(workflowId, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    } catch {
+      // tolerate not-found / already-gone
+    }
+  }
+
+  for (const spaceId of spaceIds) {
+    try {
+      await managedWorkflowsClient.uninstall(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
+    } catch {
+      // tolerate not-found / already-gone
+    }
   }
 };
