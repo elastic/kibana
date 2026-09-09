@@ -38,9 +38,7 @@ export const readAttachmentStepDefinition = ({
         const targetVersion = input.version ?? attachment.current_version;
         const version = attachment.versions.find((v) => v.version === targetVersion);
         if (!version) {
-          throw new Error(
-            `Attachment '${input.attachment_id}' has no version ${targetVersion}`
-          );
+          throw new Error(`Attachment '${input.attachment_id}' has no version ${targetVersion}`);
         }
 
         return {

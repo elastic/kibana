@@ -41,11 +41,9 @@ const InputSchema = z.object({
 const OutputSchema = z.object({
   attachment_id: z.string().meta({ description: 'The ID of the created attachment.' }),
   type: z.string().meta({ description: 'The attachment type.' }),
-  current_version: z
-    .number()
-    .meta({
-      description: 'The version number of the newly created attachment (always 1 on create).',
-    }),
+  current_version: z.number().meta({
+    description: 'The version number of the newly created attachment (always 1 on create).',
+  }),
 });
 
 type AddAttachmentInputSchema = typeof InputSchema;
