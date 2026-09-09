@@ -8,17 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
-import {
-  CLOUD_CONNECTOR_RENDER_FLOW,
-  UNIFIED_ONBOARDING_RENDER_FLOW,
-} from '../../../common/telemetry/iac_provisioner_events';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
-const IacProvisionerFlowSchema = schema.oneOf(
-  [schema.literal(CLOUD_CONNECTOR_RENDER_FLOW), schema.literal(UNIFIED_ONBOARDING_RENDER_FLOW)],
-  {
-    meta: { description: 'The Kibana flow requesting the call; reported in telemetry.' },
-  }
-);
+const IacProvisionerFlowSchema = schema.literal(CLOUD_CONNECTOR_RENDER_FLOW);
 
 const IacPolicyTemplateSelectionSchema = schema.object({
   name: schema.string({
