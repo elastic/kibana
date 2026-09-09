@@ -123,12 +123,9 @@ safe-outputs:
     # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
     # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-    # Apply labels through the REST add-labels endpoint. With issue intents on, the
-    # agent's `confidence` is forwarded to GitHub's `updateIssue` mutation, which at the
-    # repo's default "Cautious" automation level only writes HIGH-confidence labels and
-    # parks MEDIUM/LOW ones as pending suggestions. A `medium` verdict then silently
-    # applied no labels at all, so `ai:fix-flaky` never fired the Flaky Test Fixer
-    # (see https://github.com/github/gh-aw/issues/53654).
+    # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
+    # labels and parks the rest as pending suggestions, so a `medium` verdict added no
+    # labels and `ai:fix-flaky` never fired (https://github.com/github/gh-aw/issues/53654).
     issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
@@ -151,9 +148,7 @@ safe-outputs:
     target: *issue_number
     required-labels: [failed-test]
     state-reason: not_planned
-    # Same confidence gating as `add-labels` above: with issue intents on, a `medium`
-    # `ci-environment` verdict (which this prompt allows to close) is parked as a pending
-    # close suggestion while the handler still logs "closed successfully".
+    # Same gating as `add-labels`: a `medium` close is parked as a suggestion, not applied.
     issue-intent: false
 
 strict: false
