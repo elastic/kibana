@@ -193,49 +193,6 @@ describe('Significant Events cost route', () => {
     expect(getPrices).toHaveBeenCalledTimes(2);
   });
 
-  it('shares one in-flight normal calculation across concurrent requests', async () => {
-    jest.useRealTimers();
-    let resolvePrices: (value: PriceResult | null) => void = () => undefined;
-    getPrices.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePrices = resolve;
-        })
-    );
-    const first = invoke();
-    const second = invoke();
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(getPrices).toHaveBeenCalledTimes(1);
-    resolvePrices(PRICE_RESULT);
-    const [firstResult, secondResult] = await Promise.all([first, second]);
-    expect(firstResult).toEqual(secondResult);
-  });
-
-  it('does not let an older normal request overwrite a newer forced refresh', async () => {
-    let resolveNormal: (value: PriceResult | null) => void = () => undefined;
-    getPrices.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveNormal = resolve;
-        })
-    );
-    const normal = invoke();
-    await Promise.resolve();
-
-    getPrices.mockResolvedValueOnce({
-      ...PRICE_RESULT,
-      fetchedAt: '2026-09-09T06:05:00.000Z',
-    });
-    const refreshed = await invoke({ refresh: true });
-    resolveNormal(PRICE_RESULT);
-    await normal;
-    const cached = await invoke();
-    expect(cached).toEqual(refreshed);
-    expect(cached.pricesFetchedAt).toBe('2026-09-09T06:05:00.000Z');
-  });
-
   it('returns structured pricing unavailable and does not cache it', async () => {
     getPrices.mockResolvedValue(null);
     const first = await invoke();

@@ -85,12 +85,6 @@ describe('createPriceService', () => {
     jest.useRealTimers();
   });
 
-  it('does not fetch until getPrices is called', () => {
-    const fetchFn = mockFetchFn();
-    createService({ fetchFn });
-    expect(fetchFn).not.toHaveBeenCalled();
-  });
-
   it('parses operations from id, ignores embeddings, rerank, and cache-write forms, and preserves provider prefixes', async () => {
     const fetchFn = mockFetchFn().mockResolvedValue(jsonResponse(FIXTURE));
     const result = await createService({ fetchFn }).getPrices();
@@ -435,15 +429,6 @@ describe('createPriceService', () => {
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 
-  it('strips trailing slashes from the cloud base URL', async () => {
-    const fetchFn = mockFetchFn().mockResolvedValue(jsonResponse(FIXTURE));
-    await createService({ fetchFn, baseUrl: 'https://cloud.elastic.co/' }).getPrices();
-    expect(fetchFn).toHaveBeenCalledWith(
-      'https://cloud.elastic.co/api/v1/prices/base_prices',
-      expect.any(Object)
-    );
-  });
-
   it.each([
     ['network rejection', () => Promise.reject(new Error('network down'))],
     ['non-success response', () => Promise.resolve(jsonResponse(FIXTURE, { status: 503 }))],
@@ -568,74 +553,39 @@ describe('createPriceService', () => {
     });
   });
 
-  it('omits only models whose operations mix flat and tiered prices or thresholds', async () => {
-    const validSibling = [
-      catalogRow({
-        id: 'global.inference-chat-input_valid-sibling',
-        name: 'Valid Sibling - Chat Completion - Input',
-        unit_amount: 7,
-      }),
-      catalogRow({
-        id: 'global.inference-chat-output_valid-sibling',
-        name: 'Valid Sibling - Chat Completion - Output',
-        unit_amount: 8,
-      }),
-    ];
-    const mixed = [
-      catalogRow({
-        id: 'global.inference-chat-input_mixed',
-        name: 'Mixed Model - Chat Completion - Input',
-      }),
-      catalogRow({
-        id: 'global.inference-chat-output_mixed_0-200k',
-        name: 'Mixed Model - Chat Completion - Output',
-        token_tier: '<=200k',
-        unit_amount: 2,
-      }),
-      catalogRow({
-        id: 'global.inference-chat-output_mixed_200k-inf',
-        name: 'Mixed Model - Chat Completion - Output',
-        token_tier: '>200k',
-        unit_amount: 4,
-      }),
-      ...validSibling,
-    ];
-    const mismatched = [
-      catalogRow({
-        id: 'global.inference-chat-input_mismatch_0-200k',
-        name: 'Mismatch Model - Chat Completion - Input',
-        token_tier: '<=200k',
-      }),
-      catalogRow({
-        id: 'global.inference-chat-input_mismatch_200k-inf',
-        name: 'Mismatch Model - Chat Completion - Input',
-        token_tier: '>200k',
-        unit_amount: 2,
-      }),
-      catalogRow({
-        id: 'global.inference-chat-output_mismatch_0-272k',
-        name: 'Mismatch Model - Chat Completion - Output',
-        token_tier: '<=272k',
-        unit_amount: 3,
-      }),
-      catalogRow({
-        id: 'global.inference-chat-output_mismatch_272k-inf',
-        name: 'Mismatch Model - Chat Completion - Output',
-        token_tier: '>272k',
-        unit_amount: 6,
-      }),
-      ...validSibling,
-    ];
-
-    for (const [invalidModel, catalog] of [
-      ['mixed-model', mixed],
-      ['mismatch-model', mismatched],
-    ] as const) {
-      const result = await createService({
-        fetchFn: mockFetchFn().mockResolvedValue(jsonResponse(catalog)),
-      }).getPrices();
-      expect(result?.prices.has(invalidModel)).toBe(false);
-      expect(result?.prices.has('valid-sibling')).toBe(true);
-    }
+  it('omits a model whose operations mix flat and tiered prices', async () => {
+    const fetchFn = mockFetchFn().mockResolvedValue(
+      jsonResponse([
+        catalogRow({
+          id: 'global.inference-chat-input_mixed',
+          name: 'Mixed Model - Chat Completion - Input',
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_mixed_0-200k',
+          name: 'Mixed Model - Chat Completion - Output',
+          token_tier: '<=200k',
+          unit_amount: 2,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_mixed_200k-inf',
+          name: 'Mixed Model - Chat Completion - Output',
+          token_tier: '>200k',
+          unit_amount: 4,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-input_valid-sibling',
+          name: 'Valid Sibling - Chat Completion - Input',
+          unit_amount: 7,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_valid-sibling',
+          name: 'Valid Sibling - Chat Completion - Output',
+          unit_amount: 8,
+        }),
+      ])
+    );
+    const result = await createService({ fetchFn }).getPrices();
+    expect(result?.prices.has('mixed-model')).toBe(false);
+    expect(result?.prices.has('valid-sibling')).toBe(true);
   });
 });

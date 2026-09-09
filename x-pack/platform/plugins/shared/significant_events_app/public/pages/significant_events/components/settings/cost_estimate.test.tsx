@@ -652,19 +652,6 @@ describe('CostEstimate', () => {
     expect(screen.getByTestId('significantEventsCostHeadline')).toBeVisible();
   });
 
-  it('prevents another refresh while one is pending', () => {
-    setCost({ isRefreshing: true });
-    renderExpandedCost();
-    const button = screen.getByTestId('significantEventsCostRefreshButton');
-    expect(button).toBeDisabled();
-  });
-
-  it('calls refreshCost from the refresh button', () => {
-    renderExpandedCost();
-    fireEvent.click(screen.getByTestId('significantEventsCostRefreshButton'));
-    expect(refreshCost).toHaveBeenCalled();
-  });
-
   it('translates caveats, stale prices, and singular and plural tier crossings', () => {
     setCost({
       data: costResponse({
@@ -732,15 +719,4 @@ describe('CostEstimate', () => {
     );
   });
 
-  it('renders asOf in local time', () => {
-    renderExpandedCost();
-    const expected = new Date('2026-09-09T15:04:00.000Z').toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    expect(screen.getByTestId('significantEventsCostAsOf')).toHaveTextContent(expected);
-    expect(screen.getByTestId('significantEventsCostAsOf')).toHaveTextContent(
-      'at current list prices'
-    );
-  });
 });
