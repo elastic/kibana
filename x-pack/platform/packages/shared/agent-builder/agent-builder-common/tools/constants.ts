@@ -41,6 +41,7 @@ export const platformCoreTools = {
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
   listInferenceEndpoints: platformCoreTool('list_inference_endpoints'),
   listConnectors: platformCoreTool('list_connectors'),
+  getConnector: platformCoreTool('get_connector'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -169,6 +170,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
   platformCoreTools.listConnectors,
+  platformCoreTools.getConnector,
 ];
 
 /**

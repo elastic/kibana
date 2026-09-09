@@ -152,9 +152,9 @@ describe('createExecuteConnectorSubActionTool', () => {
       });
       expect(emptyConnectorId.success).toBe(false);
       if (!emptyConnectorId.success) {
-        expect(
-          emptyConnectorId.error.issues.some((i) => i.message.includes('connector attachment'))
-        ).toBe(true);
+        expect(emptyConnectorId.error.issues.some((i) => i.message.includes('get_connector'))).toBe(
+          true
+        );
       }
 
       const emptySubAction = executeConnectorSubActionArgsSchema.safeParse({

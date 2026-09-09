@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { OtherResult, ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -50,32 +49,7 @@ const slackSpec = {
     minimumLicense: 'enterprise' as const,
     supportedFeatureIds: [],
   },
-  actions: {
-    searchMessages: {
-      isTool: true,
-      description: 'Search messages',
-      input: z.object({ query: z.string() }),
-      handler: jest.fn(),
-    },
-    sendMessage: {
-      isTool: true,
-      description: 'Send a message',
-      scope: 'write' as const,
-      input: z.object({ text: z.string() }),
-      handler: jest.fn(),
-    },
-    deleteMessage: {
-      isTool: true,
-      description: 'Delete a message',
-      scope: 'destroy' as const,
-      handler: jest.fn(),
-    },
-    internalRefresh: {
-      isTool: false,
-      description: 'Not exposed to agents',
-      handler: jest.fn(),
-    },
-  },
+  actions: {},
   test: { handler: jest.fn(), enabled: false },
 };
 
@@ -132,52 +106,28 @@ describe('createListConnectorsTool', () => {
     expect(data.connectors[0].connectorId).toBe('conn-slack');
   });
 
-  it('only includes sub-actions marked isTool, with scope hints and parameter summaries', async () => {
-    mockGetAll.mockResolvedValue([{ id: 'conn-slack', name: 'My Slack', actionTypeId: '.slack2' }]);
+  it('returns a lightweight shape with no sub-action details', async () => {
+    mockGetAll.mockResolvedValue([
+      { id: 'conn-slack', name: 'My Slack', actionTypeId: '.slack2', isMissingSecrets: false },
+    ]);
 
     const tool = createListConnectorsTool({ getActions, getInference });
     const result = await tool.handler({}, mockContext);
 
     const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
-      connectors: Array<{
-        connectorId: string;
-        name: string;
-        connectorType: string;
-        displayName: string;
-        description: string;
-        subActions: Array<{
-          subAction: string;
-          description: string;
-          hint: string;
-          parameters: string;
-        }>;
-      }>;
+      connectors: Array<Record<string, unknown>>;
     };
 
     expect(data.connectors).toHaveLength(1);
-    const connector = data.connectors[0];
-    expect(connector).toMatchObject({
+    expect(data.connectors[0]).toEqual({
       connectorId: 'conn-slack',
       name: 'My Slack',
       connectorType: '.slack2',
       displayName: 'Slack',
       description: 'Slack connector',
+      isMissingSecrets: false,
     });
-
-    const subActionNames = connector.subActions.map((a) => a.subAction);
-    expect(subActionNames).toEqual(['searchMessages', 'sendMessage', 'deleteMessage']);
-    expect(subActionNames).not.toContain('internalRefresh');
-
-    const searchMessages = connector.subActions.find((a) => a.subAction === 'searchMessages')!;
-    expect(searchMessages.hint).toBe('');
-    expect(searchMessages.parameters).not.toBe('No parameters');
-
-    const sendMessage = connector.subActions.find((a) => a.subAction === 'sendMessage')!;
-    expect(sendMessage.hint).toBe('[WRITE]');
-
-    const deleteMessage = connector.subActions.find((a) => a.subAction === 'deleteMessage')!;
-    expect(deleteMessage.hint).toBe('[DESTROY]');
-    expect(deleteMessage.parameters).toBe('No parameters');
+    expect(data.connectors[0]).not.toHaveProperty('subActions');
   });
 
   it('returns an error result when the actions client rejects', async () => {

@@ -217,12 +217,13 @@ describe('getResearchAgentPrompt', () => {
     expect(system).toContain('`ai-index-idx-custom` — Support tickets');
   });
 
-  it('points connector discovery at list_connectors, not sml_search/sml_attach', async () => {
+  it('points connector discovery at list_connectors/get_connector, not sml_search/sml_attach', async () => {
     const messages = await getResearchAgentPrompt(makeParams());
     const system = asText(messages[0]);
 
     expect(system).toContain('## CONNECTOR DISCOVERY');
     expect(system).toContain('list_connectors');
+    expect(system).toContain('get_connector');
     expect(system).not.toContain('sml_search` with');
     expect(system).toContain('Do not rely on `sml_search`/`sml_attach` to find connectors.');
   });

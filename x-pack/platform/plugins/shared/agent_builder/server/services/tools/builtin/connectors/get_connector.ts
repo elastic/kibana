@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult, formatSchemaForLlm } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { getConnectorSpec } from '@kbn/connector-specs';
+import type { ActionScope } from '@kbn/connector-specs';
+import type { ConnectorToolsOptions } from './types';
+
+const schema = z.object({
+  connectorId: z.string().min(1).describe('Connector instance ID, as returned by list_connectors.'),
+});
+
+// Duplicated from attachment_types/connector.ts (agent_builder_platform plugin) — that helper
+// isn't exported from a shared package, and isn't worth extracting one for a ~5-line PoC.
+function formatAnnotationHint(scope: ActionScope | undefined): string {
+  if (!scope || scope === 'read') return '';
+  return scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
+}
+
+/**
+ * Creates the get_connector tool.
+ *
+ * Loads the full sub-action spec — names, descriptions, scope hints, and parameter schemas —
+ * for one connector instance, so execute_connector_sub_action can be called correctly. Split
+ * out from list_connectors so listing many connectors stays cheap; the full spec is only paid
+ * for on the one connector actually being used.
+ */
+export const createGetConnectorTool = ({
+  getActions,
+}: ConnectorToolsOptions): BuiltinToolDefinition<typeof schema> => ({
+  id: platformCoreTools.getConnector,
+  type: ToolType.builtin,
+  annotations: {
+    title: 'Get Connector',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  description:
+    'Loads the full sub-action spec for one connector instance — sub-action names, descriptions, ' +
+    'scope hints, and parameter schemas — so execute_connector_sub_action can be called with the ' +
+    'correct connectorId, subAction, and params. Call this with a connectorId from list_connectors ' +
+    'before invoking a connector for the first time in a conversation.',
+  schema,
+  tags: ['connector'],
+  excludeFromMcp: true,
+  availability: {
+    cacheMode: 'global',
+    handler: async ({ uiSettings }) => {
+      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      return enabled
+        ? { status: 'available' }
+        : {
+            status: 'unavailable',
+            reason: 'Connector tools require Agent Builder experimental features to be enabled',
+          };
+    },
+  },
+  handler: async ({ connectorId }, context) => {
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration. The LLM has no say in this — it's part of the trust boundary. Checked
+    // before resolving the connector so a non-attached connectorId isn't even confirmed to exist.
+    const connectorIds = context.agentConfiguration?.connector_ids;
+    if (connectorIds !== undefined && !connectorIds.includes(connectorId)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Connector '${connectorId}' is not available to this agent. ` +
+              'Use list_connectors to see the connectors attached to this agent.',
+            metadata: { connectorId },
+          }),
+        ],
+      };
+    }
+
+    try {
+      const actions = await getActions();
+      const actionsClient = await actions.getActionsClientWithRequest(context.request);
+
+      let connector;
+      try {
+        connector = await actionsClient.get({ id: connectorId });
+      } catch (error) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Failed to resolve connector '${connectorId}': ${(error as Error).message}`,
+              metadata: { connectorId },
+            }),
+          ],
+        };
+      }
+
+      const spec = getConnectorSpec(connector.actionTypeId);
+      if (!spec) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `No connector spec found for type '${connector.actionTypeId}' (connector ` +
+                `'${connectorId}'). This connector type does not support sub-action execution ` +
+                'via execute_connector_sub_action.',
+              metadata: { connectorId, connectorType: connector.actionTypeId },
+            }),
+          ],
+        };
+      }
+
+      const subActions = Object.entries(spec.actions)
+        .filter(([, action]) => action.isTool)
+        .map(([subAction, action]) => ({
+          subAction,
+          description: action.description ?? subAction,
+          hint: formatAnnotationHint(action.scope),
+          parameters: action.input ? formatSchemaForLlm(action.input) : 'No parameters',
+        }));
+
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+            data: {
+              connectorId: connector.id,
+              name: connector.name,
+              connectorType: connector.actionTypeId,
+              displayName: spec.metadata.displayName,
+              description: spec.metadata.description,
+              subActions,
+            },
+          },
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      context.logger.error(`get_connector failed: ${message}`);
+      return {
+        results: [createErrorResult({ message: `Failed to get connector: ${message}` })],
+      };
+    }
+  },
+});

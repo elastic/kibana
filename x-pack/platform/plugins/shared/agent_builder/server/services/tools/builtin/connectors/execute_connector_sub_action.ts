@@ -16,11 +16,11 @@ import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
-  'connectorId must be at the root of the arguments (copy the value labeled Connector ID from the connector attachment). ' +
+  'connectorId must be at the root of the arguments (copy the value from the get_connector result). ' +
   'Do not send only sub-action fields at the root; include connectorId and subAction together.';
 
 const subActionValidationMessage =
-  'subAction must be at the root — use the exact name from the connector attachment (for example searchMessages). ' +
+  'subAction must be at the root — use the exact name from the get_connector result (for example searchMessages). ' +
   'It is not inferred from params or other fields.';
 
 export const executeConnectorSubActionArgsSchema = z
@@ -30,13 +30,13 @@ export const executeConnectorSubActionArgsSchema = z
       .min(1, connectorIdValidationMessage)
       .describe(
         'Connector instance ID at the **root** of the arguments object (not inside params). ' +
-          'Must match the Connector ID line on the connector attachment.'
+          'Must match the connectorId returned by get_connector.'
       ),
     subAction: z
       .string()
       .min(1, subActionValidationMessage)
       .describe(
-        'Exact sub-action name at the **root** (must match a name listed under Available sub-actions on the attachment). ' +
+        'Exact sub-action name at the **root** (must match a name listed under subActions in the get_connector result). ' +
           'Do not guess or infer from params.'
       ),
     params: z
@@ -64,7 +64,7 @@ export const createExecuteConnectorSubActionTool = ({
     'Runs one sub-action on a saved connector. ' +
     'Arguments must look like: {"connectorId":"<id>","subAction":"<name>","params":{...}}. ' +
     'Keep connectorId and subAction at the root; put every argument for the sub-action inside params, not at the root. ' +
-    'Use the connector attachment for the Connector ID, allowed sub-action names, and parameter definitions. ' +
+    'Use get_connector to get the Connector ID, allowed sub-action names, and parameter definitions. ' +
     'Do not invent names or parameters. ' +
     'Connectors API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors — ' +
     'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
@@ -149,7 +149,7 @@ export const createExecuteConnectorSubActionTool = ({
           createErrorResult({
             message:
               `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Read the connector attachment to find the correct sub-action names.',
+              'Call get_connector to find the correct sub-action names.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],
@@ -214,7 +214,7 @@ export const createExecuteConnectorSubActionTool = ({
               `Failed to execute sub-action '${subAction}' on connector '${connectorId}': ${
                 (error as Error).message
               }` +
-              ' — Read the connector attachment to find valid sub-action names and their required parameters.',
+              ' — Call get_connector to find valid sub-action names and their required parameters.',
             metadata: { connectorId, subAction },
           }),
         ],
@@ -241,7 +241,7 @@ export const createExecuteConnectorSubActionTool = ({
               `Connector sub-action '${subAction}' returned an error: ${
                 executeResult.message ?? 'Unknown error'
               }` +
-              ' — Check the connector attachment for the correct sub-action names and required parameters.',
+              ' — Call get_connector for the correct sub-action names and required parameters.',
             metadata: {
               connectorId,
               subAction,

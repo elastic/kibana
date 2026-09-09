@@ -9,30 +9,24 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId, createErrorResult, formatSchemaForLlm } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import type { ActionScope } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const schema = z.object({});
 
-// Duplicated from attachment_types/connector.ts (agent_builder_platform plugin) — that helper
-// isn't exported from a shared package, and isn't worth extracting one for a ~5-line PoC.
-function formatAnnotationHint(scope: ActionScope | undefined): string {
-  if (!scope || scope === 'read') return '';
-  return scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
-}
-
 /**
  * Creates the list_connectors tool.
  *
- * Lists saved connector instances directly from the Actions client, with their callable
- * sub-actions, so an agent can call execute_connector_sub_action without first going through
- * sml_search/sml_attach. Connector types without a registered @kbn/connector-specs entry
- * (including MCP connectors, which are configured as individual ToolType.mcp tools ahead of
- * time rather than discovered per-conversation) are not returned, since they can't be run via
- * execute_connector_sub_action anyway.
+ * Lists saved connector instances directly from the Actions client — id, name, type, and a
+ * short description only, no sub-action details — so an agent can see what's available without
+ * paying the token cost of every connector's full sub-action spec up front (use get_connector for
+ * that, one connector at a time). Bypasses sml_search/sml_attach entirely. Connector types
+ * without a registered @kbn/connector-specs entry (including MCP connectors, which are
+ * configured as individual ToolType.mcp tools ahead of time rather than discovered
+ * per-conversation) are not returned, since they can't be run via execute_connector_sub_action
+ * anyway.
  */
 export const createListConnectorsTool = ({
   getActions,
@@ -47,9 +41,10 @@ export const createListConnectorsTool = ({
     openWorldHint: false,
   },
   description:
-    'Lists saved connector instances directly, along with their callable sub-actions, so ' +
-    'execute_connector_sub_action can be called with {connectorId, subAction, params} without ' +
-    'first attaching a connector via sml_search/sml_attach. ' +
+    'Lists saved connector instances directly (id, name, type, description) without first ' +
+    'attaching a connector via sml_search/sml_attach. Call get_connector with a connectorId ' +
+    'from this list to load its full sub-action spec before invoking it via ' +
+    'execute_connector_sub_action. ' +
     'MCP connectors are not listed here — they are configured as individual tools elsewhere.',
   schema,
   tags: ['connector'],
@@ -84,15 +79,6 @@ export const createListConnectorsTool = ({
         const spec = getConnectorSpec(connector.actionTypeId);
         if (!spec) return [];
 
-        const subActions = Object.entries(spec.actions)
-          .filter(([, action]) => action.isTool)
-          .map(([subAction, action]) => ({
-            subAction,
-            description: action.description ?? subAction,
-            hint: formatAnnotationHint(action.scope),
-            parameters: action.input ? formatSchemaForLlm(action.input) : 'No parameters',
-          }));
-
         return [
           {
             connectorId: connector.id,
@@ -101,7 +87,6 @@ export const createListConnectorsTool = ({
             displayName: spec.metadata.displayName,
             description: spec.metadata.description,
             isMissingSecrets: connector.isMissingSecrets ?? false,
-            subActions,
           },
         ];
       });
