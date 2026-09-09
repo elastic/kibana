@@ -106906,7 +106906,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: 'Discover display option: controls row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
                           documents_display_mode:
                             anyOf:
                               - enum:
@@ -106915,7 +106915,7 @@ components:
                               - enum:
                                   - json
                                 type: string
-                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                            description: 'Discover display option: controls whether documents are shown as a formatted summary ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -106931,10 +106931,10 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: 'Discover display option: controls header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
                           json_mode_settings:
                             additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
+                            description: 'Discover display option: controls how the source column is rendered in JSON mode (`documents_display_mode: "json"`).'
                             type: object
                             properties:
                               default_rendered_nodes:
@@ -106958,14 +106958,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
+                            description: 'Discover display option: controls data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
+                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -107040,7 +107040,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: 'Discover display option: controls row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
                           documents_display_mode:
                             anyOf:
                               - enum:
@@ -107049,7 +107049,7 @@ components:
                               - enum:
                                   - json
                                 type: string
-                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                            description: 'Discover display option: controls whether documents are shown as a formatted summary ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -107058,10 +107058,10 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: 'Discover display option: controls header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
                           json_mode_settings:
                             additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
+                            description: 'Discover display option: controls how the source column is rendered in JSON mode (`documents_display_mode: "json"`).'
                             type: object
                             properties:
                               default_rendered_nodes:
@@ -107083,14 +107083,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
+                            description: 'Discover display option: controls data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
+                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -107214,7 +107214,7 @@ components:
                         - enum:
                             - normal
                           type: string
-                      description: 'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: 'Discover display option: controls row spacing (`compact`, `expanded`, or `normal`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
                     documents_display_mode:
                       anyOf:
                         - enum:
@@ -107223,7 +107223,7 @@ components:
                         - enum:
                             - json
                           type: string
-                      description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                      description: 'Discover display option: controls whether documents are shown as a formatted summary ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -107232,10 +107232,10 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: 'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: 'Discover display option: controls header row height (number 1–5 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
                     json_mode_settings:
                       additionalProperties: false
-                      description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
+                      description: 'Discover display option: controls how the source column is rendered in JSON mode (`documents_display_mode: "json"`).'
                       type: object
                       properties:
                         default_rendered_nodes:
@@ -107257,14 +107257,14 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: 'Data row height: number (1–20) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".'
+                      description: 'Discover display option: controls data row height (number 1–20 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".'
                     rows_per_page:
                       description: Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".
                       maximum: 10000
                       minimum: 1
                       type: number
                     sample_size:
-                      description: Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".
+                      description: 'Discover display option: controls how many documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".'
                       maximum: 10000
                       minimum: 10
                       type: number
