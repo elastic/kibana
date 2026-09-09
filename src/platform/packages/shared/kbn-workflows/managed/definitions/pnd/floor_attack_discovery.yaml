@@ -6,11 +6,14 @@ tags:
   - watch
   - watch-floor
 triggers:
-  - type: manual
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
 steps:
   - name: stub
     type: console
