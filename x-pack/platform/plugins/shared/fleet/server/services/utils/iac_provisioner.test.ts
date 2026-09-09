@@ -61,7 +61,7 @@ describe('isIacProvisionerEnabled', () => {
       true,
     ],
     ['LD off', { isCloudEnabled: true, agentlessEnabled: true, launchDarklyEnabled: false }, false],
-    ['LD unset (fallback)', { isCloudEnabled: true, agentlessEnabled: true }, false],
+    ['featureFlags service missing', { isCloudEnabled: true, agentlessEnabled: true }, false],
     [
       'agentless off',
       { isCloudEnabled: true, agentlessEnabled: false, launchDarklyEnabled: true },
