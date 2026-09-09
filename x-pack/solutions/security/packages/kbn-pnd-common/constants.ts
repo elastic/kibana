@@ -196,6 +196,14 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
 
 export type SystemSecurityWorkerCatalogEntry = (typeof SYSTEM_SECURITY_WORKER_CATALOG)[number];
 
+/**
+ * Units offered for a Worker's schedule interval, ordered for display. Seconds are excluded: the
+ * workflow engine only accepts them at 60 or above, and a sub-minute Worker cadence is meaningless.
+ */
+export const WORKER_SCHEDULE_UNITS = ['m', 'h', 'd'] as const;
+
+export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
+
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;

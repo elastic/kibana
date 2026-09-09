@@ -26,7 +26,7 @@ const addInlineSuggestTabKeybindings = () => {
   if (inlineSuggestTabKeybindingsAdded) {
     return;
   }
-  
+
   // Unbind the default suggestion-widget accept on Tab while an inline suggestion is showing.
   monaco.editor.addKeybindingRule({
     keybinding: monaco.KeyCode.Tab,
@@ -39,7 +39,7 @@ const addInlineSuggestTabKeybindings = () => {
     command: 'editor.action.inlineSuggest.commit',
     when: 'inlineSuggestionVisible && textInputFocus',
   });
-  
+
   inlineSuggestTabKeybindingsAdded = true;
 };
 
