@@ -181,6 +181,16 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       metricFields: ['total_bytes'],
     },
     {
+      // original repro from https://github.com/elastic/kibana/issues/282275:
+      // backtick-quoted column names with spaces through branch selection and rewrite
+      description: 'FORK query with backtick-quoted metric and bucket column names',
+      sourceQuery: `FROM ${index} | FORK (STATS \`Total Events\` = COUNT(*)) (STATS \`Event Count\` = COUNT(*) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend))`,
+      expectedQuery: `FROM ${index} | STATS \`Total Events\` = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['Total Events'],
+      metricFields: ['Total Events'],
+    },
+    {
       description: 'FORK query selecting the branch with an existing aliased BUCKET',
       sourceQuery: `FROM ${index} | FORK (STATS total_bytes = SUM(bytes)) (STATS event_count = COUNT(*) BY time_bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend))`,
       expectedQuery: `FROM ${index} | STATS event_count = COUNT(*) BY time_bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
