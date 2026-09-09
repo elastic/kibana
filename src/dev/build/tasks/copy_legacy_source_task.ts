@@ -20,7 +20,7 @@ export const CopyLegacySource: Task = {
 
   async run(config, log) {
     const select = [
-      'yarn.lock',
+      'pnpm-lock.yaml',
       '.npmrc',
       '.puppeteerrc',
       'config/kibana.yml',
