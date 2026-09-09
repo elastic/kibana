@@ -340,7 +340,7 @@ export function getDashboardApi({
         accessMode: accessControlManager.api.accessControl$.value?.accessMode,
       });
 
-      if ('error' in result) return;
+      if ('error' in saveResult) return;
       onSave$.next({
         previousDashboardId,
         dashboardId: saveResult?.id ?? previousDashboardId,
