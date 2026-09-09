@@ -1,0 +1,30 @@
+name: "Audit 29 - workflow.output cancels a child workflow"
+description: "The return completes its enclosing scopes and cancels the sibling child. The child execution must become cancelled and forbidden steps must not run."
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: branches
+    type: parallel
+    branches:
+      - name: child_branch
+        steps:
+          - name: child
+            type: workflow.execute
+            with:
+              workflow-id: audit-21-slow-child
+              inputs: { owner: v5-return }
+          - name: forbidden_after_child
+            type: console
+            with: { message: forbidden }
+      - name: returning
+        steps:
+          - name: let_child_start
+            type: wait
+            with: { duration: 2s }
+          - name: terminate
+            type: workflow.output
+            with: { message: chosen }
+  - name: forbidden_after_join
+    type: console
+    with: { message: forbidden }

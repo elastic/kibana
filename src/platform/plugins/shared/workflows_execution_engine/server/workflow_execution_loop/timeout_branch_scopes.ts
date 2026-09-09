@@ -9,6 +9,7 @@
 
 import type { StackFrame } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
@@ -17,7 +18,8 @@ export const timeoutBranchScopes = (
   factory: StepExecutionRuntimeFactory,
   stackFrames: StackFrame[],
   boundaryNodeId: string,
-  error: Error
+  error: Error,
+  terminalize: (runtime: StepExecutionRuntime) => void = (runtime) => runtime.timeoutStep(error)
 ): void => {
   let scope = WorkflowScopeStack.fromStackFrames(stackFrames);
   const visited = new Set<string>();
@@ -34,7 +36,7 @@ export const timeoutBranchScopes = (
       runtime.stepExecution &&
       !isTerminalStatus(runtime.stepExecution.status)
     ) {
-      runtime.timeoutStep(error);
+      terminalize(runtime);
     }
     visited.add(runtime.stepExecutionId);
   }

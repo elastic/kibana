@@ -252,7 +252,7 @@ export interface EsWorkflowStepExecution {
    * There might be several instances of the same stepId if it's inside loops, retries, etc.
    */
   stepExecutionIndex: number;
-  error?: SerializedError;
+  error?: SerializedError | null;
   output?: JsonValue;
   input?: JsonValue;
 
@@ -270,10 +270,10 @@ export interface EsWorkflowStepExecution {
       id: string;
       status?: ExecutionStatus;
       state?: Record<string, unknown>;
-      error?: SerializedError;
+      error?: SerializedError | null;
       finishedAt?: string;
     }>;
-  };
+  } | null;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;

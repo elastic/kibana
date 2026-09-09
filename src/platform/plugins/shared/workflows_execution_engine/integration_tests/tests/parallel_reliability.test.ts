@@ -11,6 +11,7 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 import { ExecutionStatus } from '@kbn/workflows';
 import { NodesFactory } from '../../server/step/nodes_factory';
 import type { StepExecutionRuntime } from '../../server/workflow_context_manager/step_execution_runtime';
+import { WorkflowContextManager } from '../../server/workflow_context_manager/workflow_context_manager';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
@@ -41,6 +42,97 @@ const drain = async (fixture: WorkflowRunFixture) => {
 afterEach(() => jest.restoreAllMocks());
 
 describe('parallel execution reliability', () => {
+  it('does not replay completed effects or enter fallback when join rehydration fails', async () => {
+    const fixture = new WorkflowRunFixture();
+    const prepare = WorkflowContextManager.prototype.ensureContextReady;
+    jest
+      .spyOn(WorkflowContextManager.prototype, 'ensureContextReady')
+      .mockImplementation(function (this: WorkflowContextManager, ownOutput) {
+        if (ownOutput) return Promise.reject(new Error('Join storage unavailable'));
+        return prepare.call(this, ownOutput);
+      });
+    await fixture.runWorkflow({
+      workflowYaml: `
+steps:
+  - name: branches
+    type: parallel
+    foreach: [a, b]
+    on-failure:
+      retry: { max-attempts: 2 }
+      fallback:
+        - name: forbiddenFallback
+          type: console
+          with: { message: forbidden }
+    steps:
+      - name: effect
+        type: console
+        with: { message: committed }
+`,
+    });
+    expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
+    expect(getWorkflow(fixture)?.error?.message).toContain('rehydrate parallel branch results');
+    expect(steps(fixture, 'effect')).toHaveLength(2);
+    expect(
+      steps(fixture, 'effect').every((step) => step.status === ExecutionStatus.COMPLETED)
+    ).toBe(true);
+    expect(steps(fixture, 'forbiddenFallback')).toHaveLength(0);
+  });
+
+  it.each(['transport', 'partial bulk'])(
+    'fails closed on %s event persistence failure and refreshes the released queue slot',
+    async (failure) => {
+      const fixture = new WorkflowRunFixture();
+      if (failure === 'transport') {
+        fixture.createEventDocuments.mockRejectedValue(new Error('Event storage unavailable'));
+      } else {
+        fixture.createEventDocuments.mockResolvedValue({
+          errors: true,
+          took: 0,
+          items: [
+            {
+              create: {
+                _index: 'logs',
+                status: 400,
+                error: { type: 'mapper_parsing_exception', reason: 'invalid event' },
+              },
+            },
+          ],
+        });
+      }
+      const repository = fixture.workflowExecutionRepositoryMock;
+      const update = jest.spyOn(repository, 'updateWorkflowExecution');
+      const running = fixture.runWorkflow({
+        workflowYaml: `
+settings:
+  concurrency: { key: shared, strategy: queue, max: 1 }
+steps:
+  - name: branches
+    type: parallel
+    foreach: [a, b]
+    on-failure:
+      fallback:
+        - name: forbiddenFallback
+          type: console
+          with: { message: forbidden }
+    steps:
+      - name: effect
+        type: console
+        with: { message: committed }
+`,
+      });
+      const execution = getWorkflow(fixture);
+      if (!execution) throw new Error('Missing execution');
+      execution.concurrencyGroupKey = 'shared';
+      await running;
+      expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
+      expect(steps(fixture, 'forbiddenFallback')).toHaveLength(0);
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.FAILED }),
+        { refresh: 'wait_for' }
+      );
+    }
+  );
+
   it('fails closed when cancellation status cannot be read', async () => {
     const fixture = new WorkflowRunFixture();
     const repository = fixture.workflowExecutionRepositoryMock;

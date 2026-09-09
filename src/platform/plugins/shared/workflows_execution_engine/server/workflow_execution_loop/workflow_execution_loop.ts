@@ -10,12 +10,14 @@
 import apm from 'elastic-apm-node';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
+import { completeTerminationPath } from './complete_termination_path';
 import { ExecutionFailure } from './execution_failure';
 import { outsideExecutionFence } from './execution_fence';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { emitHitlLifecycle } from '../step/wait_for_input_step/hitl_lifecycle_auditor';
+import { getTerminalWorkflowRefreshOptions } from '../workflow_context_manager/workflow_execution_state';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
 const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
@@ -47,6 +49,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const executionFailure = new ExecutionFailure();
   const executionParams = { ...params, executionFailure };
   try {
+    const pending = params.workflowRuntime.getWorkflowExecution().pendingTermination;
+    if (pending) outsideExecutionFence(() => completeTerminationPath(executionParams, pending));
     await runWorkflowExecutionLoop(executionParams);
   } catch (error) {
     executionFailure.fail(
@@ -70,7 +74,10 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     params.workflowExecutionCursor.stop();
     params.workflowExecutionState.updateWorkflowExecution(update);
   });
-  await params.workflowExecutionRepository.updateWorkflowExecution(update);
+  await params.workflowExecutionRepository.updateWorkflowExecution(
+    update,
+    getTerminalWorkflowRefreshOptions(params.workflowRuntime.getWorkflowExecution())
+  );
 }
 
 async function runWorkflowExecutionLoop(params: WorkflowExecutionLoopParams) {
@@ -181,12 +188,7 @@ async function runWorkflowExecutionLoop(params: WorkflowExecutionLoopParams) {
   if (termination && !params.executionFailure?.error) {
     outsideExecutionFence(() => {
       const workflow = workflowRuntime.getWorkflowExecution();
-      const winner = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-        nodeId: termination.nodeId,
-        stackFrames: termination.stackFrames,
-      });
-      if (winner.stepExecution?.status !== ExecutionStatus.COMPLETED)
-        winner.finishStep(termination.output);
+      completeTerminationPath(params, termination);
       params.workflowExecutionState.updateWorkflowExecution({
         status: termination.status,
         pendingTermination: null,
@@ -215,6 +217,27 @@ async function runWorkflowExecutionLoop(params: WorkflowExecutionLoopParams) {
             status: ExecutionStatus.CANCELLED,
             finishedAt: new Date().toISOString(),
           });
+      }
+    });
+  }
+
+  if (
+    params.executionFailure &&
+    workflowRuntime.getWorkflowExecution().status === ExecutionStatus.CANCELLED
+  ) {
+    outsideExecutionFence(() => {
+      for (const step of params.workflowExecutionState.getAllStepExecutions()) {
+        if (!isTerminalStatus(step.status)) {
+          params.workflowExecutionState.upsertStep({
+            id: step.id,
+            status: ExecutionStatus.CANCELLED,
+            finishedAt: new Date().toISOString(),
+          });
+          params.workflowLogger.logInfo('Step cancelled', {
+            workflow: { step_id: step.stepId, step_execution_id: step.id },
+            event: { action: 'step-cancelled', outcome: 'unknown' },
+          });
+        }
       }
     });
   }

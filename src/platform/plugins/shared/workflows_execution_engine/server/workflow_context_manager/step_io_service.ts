@@ -306,7 +306,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   public getStepError(stepExecutionId: string): SerializedError | undefined {
-    return this.state.getStepExecution(stepExecutionId)?.error;
+    return this.state.getStepExecution(stepExecutionId)?.error ?? undefined;
   }
 
   /**
@@ -330,7 +330,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     return {
       input: this.getStepInput(latest.id),
       output: this.getStepOutput(latest.id),
-      error: latest.error,
+      error: latest.error ?? undefined,
     };
   }
 
