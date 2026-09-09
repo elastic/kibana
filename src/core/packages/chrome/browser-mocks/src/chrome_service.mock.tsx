@@ -78,6 +78,22 @@ const createStartContractMock = () => {
   const getFeedbackHandler$ = jest.fn().mockReturnValue(nextFeedbackHandler$);
   const registerNewsfeedHandler = jest.fn().mockReturnValue(() => {});
   const getNewsfeedHandler$ = jest.fn().mockReturnValue(nextNewsfeedHandler$);
+  const inlineAppHeader = lazyObject({
+    get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
+    set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
+  });
+  const appHeader = lazyObject({
+    get$: jest.fn().mockReturnValue(nextAppHeaderState$),
+    set: jest.fn((config: ChromeAppHeaderConfig) => {
+      const registrationId = ++appHeaderRegistrationId;
+      nextAppHeaderState$.next(config);
+      return () => {
+        if (registrationId === appHeaderRegistrationId) {
+          nextAppHeaderState$.next(undefined);
+        }
+      };
+    }),
+  });
 
   const controls = lazyObject({
     aiButton,
@@ -188,28 +204,16 @@ const createStartContractMock = () => {
     }),
     controls,
     help,
+    appHeader,
+    inlineAppHeader,
     next: lazyObject({
       aiButton,
       globalSearch,
       userMenu,
       contextSwitcher,
       projectPicker,
-      inlineAppHeader: lazyObject({
-        get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
-        set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
-      }),
-      appHeader: lazyObject({
-        get$: jest.fn().mockReturnValue(nextAppHeaderState$),
-        set: jest.fn((config: ChromeAppHeaderConfig) => {
-          const registrationId = ++appHeaderRegistrationId;
-          nextAppHeaderState$.next(config);
-          return () => {
-            if (registrationId === appHeaderRegistrationId) {
-              nextAppHeaderState$.next(undefined);
-            }
-          };
-        }),
-      }),
+      inlineAppHeader,
+      appHeader,
       getFeedbackHandler$,
       registerFeedbackHandler,
       getNewsfeedHandler$,
