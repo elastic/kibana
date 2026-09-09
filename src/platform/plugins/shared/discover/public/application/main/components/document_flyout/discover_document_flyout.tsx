@@ -140,42 +140,30 @@ export const DiscoverDocumentFlyout = memo(
             },
           },
           onClick: () => {
-            if (!copyLinkDisabledReason) {
+            if (copyLinkDisabledReason) {
+              const isMissingMetadata =
+                expandedDocLinkability === ExpandedDocLinkability.EsqlMissingMetadata;
+              const metadataExample =
+                isMissingMetadata && isOfAggregateQueryType(query)
+                  ? getEsqlMissingMetadataExample(query.esql)
+                  : undefined;
+
+              toastNotifications.addWarning({
+                title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
+                  defaultMessage: 'Direct link not copied',
+                }),
+                text: metadataExample
+                  ? toMountPoint(
+                      <EsqlMissingMetadataToastText example={metadataExample} />,
+                      services
+                    )
+                  : copyLinkDisabledReason,
+                'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
+                ...(metadataExample && { toastLifeTimeMs: Infinity }),
+              });
+            } else {
               void copyLink();
-              return;
             }
-
-            const isMissingMetadata =
-              expandedDocLinkability === ExpandedDocLinkability.EsqlMissingMetadata;
-            const metadataExample =
-              isMissingMetadata && isOfAggregateQueryType(query)
-                ? getEsqlMissingMetadataExample(query.esql)
-                : undefined;
-
-            if (metadataExample) {
-              toastNotifications.addWarning(
-                {
-                  title: i18n.translate('discover.docViews.flyout.copyLinkMissingMetadataTitle', {
-                    defaultMessage: 'Direct link not copied',
-                  }),
-                  text: toMountPoint(
-                    <EsqlMissingMetadataToastText example={metadataExample} />,
-                    services
-                  ),
-                  'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
-                },
-                { toastLifeTimeMs: Infinity }
-              );
-              return;
-            }
-
-            toastNotifications.addWarning({
-              title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
-                defaultMessage: 'Cannot share direct link',
-              }),
-              text: copyLinkDisabledReason,
-              'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
-            });
           },
         },
       ];
