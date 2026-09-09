@@ -62,10 +62,10 @@ export function shouldClearSession(location: {
  * Clear must happen first so react-use's useSessionStorage does not re-write stale defaults.
  * Best-effort: any fetch or write error leaves the form empty and the user can start over.
  */
-async function hydrateOnboardingSession(
+export async function hydrateOnboardingSession(
   integrationId: string,
   deploymentId: string
-): Promise<void> {
+): Promise<boolean> {
   clearOnboardingSession(integrationId);
   try {
     const { item } = await sendGetCloudOnboardingDeployment(deploymentId);
@@ -107,8 +107,9 @@ async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'stepState'),
       JSON.stringify(stepState)
     );
+    return true;
   } catch {
-    // Non-fatal — user sees empty form
+    return false;
   }
 }
 
@@ -131,8 +132,11 @@ export async function renderOnboardingApp(
     // edits made after resume. The param stays in the URL as an edit-mode indicator.
     const hydratedKey = getOnboardingSessionKey(integrationId, 'hydratedDeploymentId');
     if (sessionStorage.getItem(hydratedKey) !== deploymentId) {
-      await hydrateOnboardingSession(integrationId, deploymentId);
-      sessionStorage.setItem(hydratedKey, deploymentId);
+      const hydrated = await hydrateOnboardingSession(integrationId, deploymentId);
+      // Only mark as hydrated on success — a transient error must allow retry on next reload.
+      if (hydrated) {
+        sessionStorage.setItem(hydratedKey, deploymentId);
+      }
     }
   } else {
     const integrationId = shouldClearSession({ pathname, search, state });
