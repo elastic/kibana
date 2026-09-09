@@ -2,6 +2,80 @@
 
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
 <DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
   <section
     class="emotion-euiPageSection-grow-l-center-transparent"
   >
@@ -11,14 +85,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       <div
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
-        <h1
-          class="euiTitle emotion-euiTitle-m"
-        >
-          Upload your license
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
         <div
           class="euiText emotion-euiText-m"
         >
@@ -118,6 +184,80 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
 <DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
   <section
     class="emotion-euiPageSection-grow-l-center-transparent"
   >
@@ -127,14 +267,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       <div
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
-        <h1
-          class="euiTitle emotion-euiTitle-m"
-        >
-          Upload your license
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
         <div
           class="euiText emotion-euiText-m"
         >
@@ -278,6 +410,80 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
 <DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
   <section
     class="emotion-euiPageSection-grow-l-center-transparent"
   >
@@ -287,14 +493,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       <div
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
-        <h1
-          class="euiTitle emotion-euiTitle-m"
-        >
-          Upload your license
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
         <div
           class="euiText emotion-euiText-m"
         >
@@ -438,6 +636,80 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
 <DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
   <section
     class="emotion-euiPageSection-grow-l-center-transparent"
   >
@@ -447,14 +719,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       <div
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
-        <h1
-          class="euiTitle emotion-euiTitle-m"
-        >
-          Upload your license
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
         <div
           class="euiText emotion-euiText-m"
         >
@@ -598,6 +862,80 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 
 exports[`UploadLicense should display error when ES returns error 1`] = `
 <DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
   <section
     class="emotion-euiPageSection-grow-l-center-transparent"
   >
@@ -607,14 +945,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       <div
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
-        <h1
-          class="euiTitle emotion-euiTitle-m"
-        >
-          Upload your license
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
         <div
           class="euiText emotion-euiText-m"
         >

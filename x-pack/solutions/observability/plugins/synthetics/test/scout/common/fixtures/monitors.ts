@@ -60,7 +60,7 @@ export async function addMonitor(
     body: monitor,
     responseType: 'json',
   });
-  expect(res).toHaveStatusCode(statusCode);
+  expect(res, JSON.stringify(res.body)).toHaveStatusCode(statusCode);
   return res;
 }
 
@@ -250,14 +250,16 @@ export async function listMonitors(
 /**
  * `DELETE /api/synthetics/monitors` with `{ ids }` body. For the 200 path it
  * retries transient gateway failures (mirrors the FTR 60s `retry.tryForTime`).
+ * `ignoreErrors` skips the status assertion so teardown can tolerate 404 /
+ * already-deleted ids without a try/catch in the spec.
  */
 export async function deleteMonitors(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   ids: string[],
-  opts: { spaceId?: string; statusCode?: number } = {}
+  opts: { spaceId?: string; statusCode?: number; ignoreErrors?: boolean } = {}
 ) {
-  const { spaceId, statusCode = 200 } = opts;
+  const { spaceId, statusCode = 200, ignoreErrors = false } = opts;
   const path = monitorsPath(spaceId);
   const send = () =>
     apiClient.delete(path, {
@@ -268,7 +270,9 @@ export async function deleteMonitors(
 
   if (statusCode !== 200) {
     const res = await send();
-    expect(res).toHaveStatusCode(statusCode);
+    if (!ignoreErrors) {
+      expect(res).toHaveStatusCode(statusCode);
+    }
     return res;
   }
 
@@ -278,7 +282,9 @@ export async function deleteMonitors(
     await new Promise((resolve) => setTimeout(resolve, 1000));
     res = await send();
   }
-  expect(res).toHaveStatusCode(statusCode);
+  if (!ignoreErrors) {
+    expect(res).toHaveStatusCode(statusCode);
+  }
   return res;
 }
 
