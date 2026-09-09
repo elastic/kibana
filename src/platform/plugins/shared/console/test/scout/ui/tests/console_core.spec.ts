@@ -45,9 +45,12 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
   }) => {
     await test.step('the editor is preloaded with the welcome request', async () => {
       const editorText = await pageObjects.console.getEditorText();
+      const rendered = stripWhitespace(editorText);
       // Monaco only renders the lines in the viewport, so the editor holds a prefix
-      // of the default value rather than all of it.
-      expect(stripWhitespace(DEFAULT_INPUT_VALUE)).toContain(stripWhitespace(editorText));
+      // of the default value rather than all of it. Assert non-empty first: every
+      // string contains '', so an unread editor would otherwise pass toContain.
+      expect(rendered).not.toBe('');
+      expect(stripWhitespace(DEFAULT_INPUT_VALUE)).toContain(rendered);
     });
 
     await test.step('the output panel starts in its empty state', async () => {
