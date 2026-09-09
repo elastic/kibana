@@ -31,6 +31,7 @@ import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
+export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
 
 const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
 
@@ -124,6 +125,7 @@ const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
         defaultMessage: 'Can manage rules',
       }),
       includeIn: 'none',
+      api: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
       savedObject: {
         all: [],
         read: [],
@@ -136,7 +138,7 @@ const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
           manage_rule_settings: alertingFeatures,
         },
       },
-      ui: [],
+      ui: ['canManageRules'],
     },
   ],
 };
@@ -156,7 +158,7 @@ export const syntheticsFeature = {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
+      api: ['uptime-read', 'uptime-write', WRITE_SYNTHETICS_DEFAULT_RULES_API, 'lists-all', 'rac'],
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
@@ -184,7 +186,7 @@ export const syntheticsFeature = {
       management: {
         insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
-      ui: ['save', 'configureSettings', 'show', 'alerting:save'],
+      ui: ['save', 'configureSettings', 'canManageRules', 'show', 'alerting:save'],
     },
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
