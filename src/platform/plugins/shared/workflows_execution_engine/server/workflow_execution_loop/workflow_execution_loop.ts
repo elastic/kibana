@@ -83,6 +83,12 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
         cancellationReason: 'Task aborted',
         status: ExecutionStatus.CANCELLED,
       });
+      if (wasWaitingForInput) {
+        emitHitlLifecycle({
+          type: 'canceled',
+          executionId: workflowRuntime.getWorkflowExecution().id,
+        });
+      }
     }
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
