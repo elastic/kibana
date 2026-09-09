@@ -12,6 +12,7 @@ import {
   DEFAULT_PARALLEL_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_FAN_OUT,
+  ExecutionStatus,
   isTerminalStatus,
 } from '@kbn/workflows';
 import type { EnterParallelNode, WorkflowGraph } from '@kbn/workflows/graph';
@@ -57,6 +58,7 @@ const TERMINAL_BRANCH_STATUSES = new Set<ParallelBranchState['status']>([
   'failed',
   'skipped',
   'timed_out',
+  'cancelled',
 ]);
 
 type ParallelMode = 'fail-fast' | 'settled';
@@ -401,9 +403,27 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     const nonTerminal = state.branches.filter(
       (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
     );
+    const workflow = this.wfExecutionRuntimeManager.getWorkflowExecution();
     for (const branch of nonTerminal) {
-      branch.status = 'timed_out';
-      branch.timedOut = true;
+      if (
+        workflow.pendingTermination ||
+        workflow.cancelRequested ||
+        workflow.status === ExecutionStatus.CANCELLED
+      ) {
+        const runtime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
+          stackFrames: branch.stackFrames ?? this.buildBranchStackFrames(branch.index),
+        });
+        branch.status = !branch.started
+          ? 'skipped'
+          : this.wfExecutionRuntimeManager.branchExecutor?.isTerminationPath(runtime)
+          ? 'completed'
+          : 'cancelled';
+        delete branch.timedOut;
+      } else {
+        branch.status = 'timed_out';
+        branch.timedOut = true;
+      }
       branch.finishedAt = now;
     }
     this.stepExecutionRuntime.setCurrentStepState(structuredClone(state));
@@ -433,7 +453,8 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
         this.stepExecutionRuntimeFactory,
         branch.stackFrames ?? this.buildBranchStackFrames(branch.index),
         this.node.id,
-        new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE)
+        new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE),
+        (runtime) => this.terminalizeBranchScope(runtime)
       );
       return;
     }
@@ -467,7 +488,12 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       nodeId,
       stackFrames: branchStackFrames,
     });
-    if (!branchRuntime.stepExecution || !isTerminalStatus(branchRuntime.stepExecution.status)) {
+    if (this.wfExecutionRuntimeManager.branchExecutor) {
+      this.wfExecutionRuntimeManager.branchExecutor.cancelBranchRuntime(branchRuntime);
+    } else if (
+      !branchRuntime.stepExecution ||
+      !isTerminalStatus(branchRuntime.stepExecution.status)
+    ) {
       branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
     }
     await this.cancelBranchNode(branchRuntime);
@@ -475,18 +501,17 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       this.stepExecutionRuntimeFactory,
       branchStackFrames,
       this.node.id,
-      new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE)
+      new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE),
+      (runtime) => this.terminalizeBranchScope(runtime)
     );
   }
 
-  /**
-   * Fires the branch runtime's abort signal and invokes the branch node
-   * implementation's `onCancel()` cleanup hook when it is a cancellable node
-   * (e.g. `workflow.execute`, which cancels its child workflow). Mirrors the
-   * teardown `run_node` performs for a normally-cancelled step. Errors are logged
-   * and swallowed so teardown of sibling branches / the parallel step continues;
-   * `onCancel` implementations are required to be idempotent.
-   */
+  private terminalizeBranchScope(runtime: StepExecutionRuntime): void {
+    if (this.wfExecutionRuntimeManager.branchExecutor)
+      this.wfExecutionRuntimeManager.branchExecutor.cancelBranchRuntime(runtime);
+    else runtime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
+  }
+
   private async cancelBranchNode(branchRuntime: StepExecutionRuntime): Promise<void> {
     branchRuntime.abortController.abort();
     const branchImpl = this.nodesFactory.create(branchRuntime);
@@ -618,9 +643,20 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
           stackFrames: branchStackFrames,
         });
-        await branchRuntime.contextManager.ensureContextReady(true);
-        const branchResult = branchRuntime.getCurrentStepResult();
-        branchRuntime.contextManager.releaseReadPins();
+        let branchResult: ReturnType<StepExecutionRuntime['getCurrentStepResult']>;
+        try {
+          await branchRuntime.contextManager.ensureContextReady(true);
+          branchResult = branchRuntime.getCurrentStepResult();
+        } catch (cause) {
+          throw (
+            this.wfExecutionRuntimeManager.branchExecutor?.executionFailure?.fail(
+              'Failed to rehydrate parallel branch results',
+              cause instanceof Error ? cause : new Error(String(cause))
+            ) ?? cause
+          );
+        } finally {
+          branchRuntime.contextManager.releaseReadPins();
+        }
         return {
           ...correlation,
           ...timing,

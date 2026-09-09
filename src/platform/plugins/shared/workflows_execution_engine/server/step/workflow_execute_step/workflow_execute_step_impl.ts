@@ -168,6 +168,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         return;
       }
 
+      if (
+        stepExecutionRuntime.workflowExecution.executionMode === 'parallel_v4' &&
+        stepExecutionRuntime.abortController.signal.aborted
+      )
+        return;
+
       const result = await executor.execute(
         targetWorkflow,
         inputs,
@@ -184,6 +190,10 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   }
 
   async onCancel(): Promise<void> {
+    if (this.init.stepExecutionRuntime.workflowExecution.executionMode === 'parallel_v4') {
+      await this.syncExecutor.cancel(this.init.spaceId, this.init.request);
+      return;
+    }
     const executionId = this.syncExecutor.getExecutionIdForCancel();
     if (!executionId) {
       return;

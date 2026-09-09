@@ -13,7 +13,12 @@ import type { StackFrame } from '@kbn/workflows';
  * The terminal states a branch can settle in. `skipped` is reserved for branches
  * that never started because a prior branch failed under fail-fast mode.
  */
-export type ParallelTerminalBranchStatus = 'completed' | 'failed' | 'skipped' | 'timed_out';
+export type ParallelTerminalBranchStatus =
+  | 'completed'
+  | 'failed'
+  | 'skipped'
+  | 'timed_out'
+  | 'cancelled';
 
 /**
  * Lifecycle of a single parallel branch (one fan-out item): the terminal states

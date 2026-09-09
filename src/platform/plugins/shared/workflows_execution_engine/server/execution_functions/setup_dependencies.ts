@@ -181,12 +181,15 @@ export async function setupDependencies(
     config.logging.console
   );
 
-  const workflowLogger = workflowEventLoggerService.createLogger({
-    workflowId: workflowExecution.workflowId,
-    workflowName: workflowExecution.workflowDefinition.name,
-    executionId: workflowExecution.id,
-    spaceId: workflowExecution.spaceId,
-  });
+  const workflowLogger = workflowEventLoggerService.createLogger(
+    {
+      workflowId: workflowExecution.workflowId,
+      workflowName: workflowExecution.workflowDefinition.name,
+      executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
+    },
+    { throwOnFailure: workflowExecution.executionMode === 'parallel_v4' }
+  );
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,

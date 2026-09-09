@@ -14,6 +14,7 @@ import {
   ExecutionStatus,
   isTerminalStatus,
 } from '@kbn/workflows';
+import { completeTerminationPath, getTerminationPath } from './complete_termination_path';
 import { ExecutionBudget } from './execution_budget';
 import { outsideExecutionFence } from './execution_fence';
 import { runNode } from './run_node';
@@ -80,8 +81,8 @@ export class BranchExecutor {
       ...(error ? { error: { type: error.name, message: error.message } } : {}),
     };
     outsideExecutionFence(() => {
-      runtime.finishStep(output);
       this.params.workflowExecutionState.updateWorkflowExecution({ pendingTermination: decision });
+      completeTerminationPath(this.params, decision);
       this.params.executionFailure?.stopForTermination();
     });
     try {
@@ -104,14 +105,42 @@ export class BranchExecutor {
     for (const { runtime } of this.active.values()) runtime.abortController.abort();
   }
 
+  public isTerminationPath(runtime: StepExecutionRuntime): boolean {
+    const decision = this.params.workflowRuntime.getWorkflowExecution().pendingTermination;
+    return Boolean(
+      decision &&
+        getTerminationPath(this.params, decision).some(
+          (ancestor) => ancestor.stepExecutionId === runtime.stepExecutionId
+        )
+    );
+  }
+
+  public cancelBranchRuntime(runtime: StepExecutionRuntime): void {
+    if (runtime.stepExecution && isTerminalStatus(runtime.stepExecution.status)) return;
+    const workflow = this.params.workflowRuntime.getWorkflowExecution();
+    if (
+      !workflow.pendingTermination &&
+      !workflow.cancelRequested &&
+      workflow.status !== ExecutionStatus.CANCELLED
+    ) {
+      runtime.timeoutStep(new Error('Parallel branch was terminated by a timeout.'));
+      return;
+    }
+    this.params.workflowExecutionState.upsertStep({
+      id: runtime.stepExecutionId,
+      status: ExecutionStatus.CANCELLED,
+      finishedAt: new Date().toISOString(),
+    });
+    this.params.workflowLogger
+      .createStepLogger(runtime.stepExecutionId, runtime.node.stepId)
+      .logInfo('Step cancelled', { event: { action: 'step-cancelled', outcome: 'unknown' } });
+  }
+
   public async cancelActiveBranch(branchId: string): Promise<boolean> {
     const active = this.active.get(branchId);
     if (!active) return false;
     active.runtime.abortController.abort();
-    outsideExecutionFence(() => {
-      if (!active.runtime.stepExecution || !isTerminalStatus(active.runtime.stepExecution.status))
-        active.runtime.timeoutStep(new Error('Parallel branch was terminated by a timeout.'));
-    });
+    outsideExecutionFence(() => this.cancelBranchRuntime(active.runtime));
     await active.done;
     return true;
   }
@@ -330,6 +359,7 @@ export class BranchExecutor {
       stackFrames,
       waiting: false,
     };
+    if (this.isTerminationPath(runtime)) return { ...base, status: 'completed' };
     if (runtime.abortController.signal.aborted) {
       outsideExecutionFence(() =>
         runtime.timeoutStep(new Error('Parallel branch was terminated by a timeout.'))

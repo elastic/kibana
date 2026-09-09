@@ -47,6 +47,39 @@ steps:
     with: { message: forbidden }
 `;
 
+afterEach(() => jest.restoreAllMocks());
+
+const assertTerminationRecords = (fixture: WorkflowRunFixture) => {
+  const steps = [...fixture.stepExecutionRepositoryMock.stepExecutions.values()];
+  const winner = steps.find((step) => step.stepId === 'terminate');
+  expect(winner).toMatchObject({
+    status: ExecutionStatus.COMPLETED,
+    error: null,
+    executionCheckpoint: null,
+  });
+  expect(steps.filter((step) => step.stepId === 'branches').map((step) => step.status)).toEqual(
+    expect.arrayContaining([ExecutionStatus.COMPLETED])
+  );
+  expect(
+    steps
+      .filter((step) => step.stepId === 'branches')
+      .every((step) => step.status === ExecutionStatus.COMPLETED)
+  ).toBe(true);
+  expect(steps.find((step) => step.stepId === 'pause')?.status).toBe(ExecutionStatus.CANCELLED);
+  const events = fixture.createEventDocuments.mock.calls.flatMap(([request]) => request.documents);
+  const completions = events.filter(
+    (event) => event.workflow?.step_id === 'terminate' && event.event?.action === 'step-complete'
+  );
+  expect(completions).toHaveLength(1);
+  expect(completions[0]).toMatchObject({ event: { outcome: 'success' } });
+  expect(completions[0].error).toBeUndefined();
+  expect(
+    events.filter(
+      (event) => event.workflow?.step_id === 'terminate' && event.event?.outcome === 'failure'
+    )
+  ).toEqual([]);
+};
+
 describe('coordinated workflow termination', () => {
   it('recovers an accepted result after a crash before sibling cleanup', async () => {
     const fixture = new WorkflowRunFixture();
@@ -70,14 +103,32 @@ describe('coordinated workflow termination', () => {
     if (!snapshot) throw new Error('Missing termination commit');
     repository.workflowExecutions.set(executionId, snapshot.workflow);
     fixture.stepExecutionRepositoryMock.stepExecutions.clear();
-    for (const [id, step] of snapshot.steps)
+    for (const [id, step] of snapshot.steps) {
+      if (step.stepId === 'terminate') {
+        step.status = ExecutionStatus.TIMED_OUT;
+        step.error = { type: 'TimeoutError', message: 'stale timeout' };
+        const decision = snapshot.workflow.pendingTermination;
+        if (!decision) throw new Error('Missing decision');
+        step.executionCheckpoint = {
+          branchId: 'returning',
+          sequence: 1,
+          nodeId: decision.nodeId,
+          currentNodeId: decision.nodeId,
+          stackFrames: decision.stackFrames,
+          status: 'timed_out',
+          waiting: false,
+        };
+      }
       fixture.stepExecutionRepositoryMock.stepExecutions.set(id, step);
+    }
+    fixture.createEventDocuments.mockClear();
     await fixture.resumeWorkflow();
     const workflow = repository.workflowExecutions.get(executionId);
     expect(workflow?.status).toBe(ExecutionStatus.COMPLETED);
     expect(workflow?.context.output).toEqual({ message: 'chosen' });
     const steps = [...fixture.stepExecutionRepositoryMock.stepExecutions.values()];
     expect(steps.every((step) => isTerminalStatus(step.status))).toBe(true);
+    assertTerminationRecords(fixture);
     expect(steps.filter((step) => step.stepId.startsWith('forbidden'))).toEqual([]);
   });
 
@@ -94,6 +145,7 @@ describe('coordinated workflow termination', () => {
     const steps = [...fixture.stepExecutionRepositoryMock.stepExecutions.values()];
     expect(steps.filter((step) => step.stepId.startsWith('forbidden'))).toEqual([]);
     expect(steps.every((step) => isTerminalStatus(step.status))).toBe(true);
+    assertTerminationRecords(fixture);
     expect(steps.find((step) => step.stepId === 'terminate')?.status).toBe(
       ExecutionStatus.COMPLETED
     );

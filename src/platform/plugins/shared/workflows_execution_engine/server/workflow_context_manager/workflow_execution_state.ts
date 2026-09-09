@@ -20,6 +20,16 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 import { sumTokenUsage } from '../utils';
 import { canWriteExecution } from '../workflow_execution_loop/execution_fence';
 
+/** Makes terminal queue-slot releases visible before the concurrency drainer searches. */
+export const getTerminalWorkflowRefreshOptions = (
+  execution: EsWorkflowExecution
+): { refresh?: 'wait_for' } =>
+  execution.concurrencyGroupKey &&
+  execution.workflowDefinition?.settings?.concurrency?.strategy === 'queue' &&
+  isTerminalStatus(execution.status)
+    ? { refresh: 'wait_for' }
+    : {};
+
 /** Context for the step that failed during this run; used to build workflow_execution_failed event. */
 export interface FailedStepContext {
   stepId: string;
@@ -304,19 +314,12 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    const queueConcurrencyStrategy =
-      this.workflowExecution.workflowDefinition?.settings?.concurrency?.strategy === 'queue';
-    const refreshForQueueDrainAfterTerminal =
-      Boolean(this.workflowExecution.concurrencyGroupKey) &&
-      queueConcurrencyStrategy &&
-      isTerminalStatus(this.workflowExecution.status);
-
     await this.workflowExecutionRepository.updateWorkflowExecution(
       {
         ...changes,
         id: this.workflowExecution.id,
       },
-      refreshForQueueDrainAfterTerminal ? { refresh: 'wait_for' } : {}
+      getTerminalWorkflowRefreshOptions(this.workflowExecution)
     );
   }
 

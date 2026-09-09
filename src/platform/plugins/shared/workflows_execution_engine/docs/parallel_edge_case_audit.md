@@ -38,6 +38,8 @@ This audit compares branch execution with the existing sequential engine and che
 | [27: workflow.output](../examples/parallel_audit/27_workflow_termination.yml) | First return wins, sibling waits are cleaned up, later returns and after_join cannot change the result. |
 | [28: workflow.fail](../examples/parallel_audit/28_workflow_termination.yml) | Explicit workflow failure bypasses the parent's retry/fallback and terminates siblings. |
 
+| [29: return cancels child](../examples/parallel_audit/29_return_cancels_child.yml) | Successful whole-workflow return cancels the sibling child execution; the winning scopes complete and no forbidden steps run. |
+
 ## V4 hardening
 
 V4 adds an execution-wide fatal path for checkpoint, rehydration, event persistence, and cancellation-status read failures. Cleanup failures and operations that ignore abort beyond a five-second grace period stop the workflow and queued admission. The limit-one regression verifies that the queued operation never starts, including after the abandoned operation eventually returns. Cleanup hooks run at most once per step per task.
@@ -45,6 +47,16 @@ V4 adds an execution-wide fatal path for checkpoint, rehydration, event persiste
 Recovery tests now include two sibling fallback checkpoints with disjoint ancestor records, and an accepted workflow termination recovered before sibling cleanup. Rollout tests cover both flag directions while a workflow is parked: the persisted engine selection remains unchanged. The flag defaults off; the dedicated review instance opts in. Sequential workflows continue through the V1 driver.
 
 Dark Watch is intentionally deferred at the user's request.
+
+## V5 hardening
+
+V5 closes join-result rehydration and event-indexing failure paths, checks partial bulk errors, and refreshes direct fatal writes before queued-concurrency draining. Strict root/step loggers share a serialized buffer so reconstructed cleanup events are flushed. Existing best-effort logging remains unchanged for V1 executions.
+
+Termination regression tests inject stale timeout state into the accepted winner before restart, then assert completed winner/ancestor records, cleared error/checkpoint fields, a successful completion event without a timeout error, and cancelled sibling waits. Child-workflow tests cover parked cancellation, branch timeout, whole-workflow return, cancellation during an outstanding child start request, and cleanup failure. Active parent cancellation also terminalizes remaining enclosing records.
+
+Live V5 verification ran workflows 20 and 25–29 against real Elasticsearch/Task Manager. All six parent executions reached their expected status with no active step records; all three child executions were cancelled. The three winning terminators each had one successful persisted completion event without a timeout error. All six execution pages were checked in the browser.
+
+The persisted cursor engine identifier remains `parallel_v4`; V5 upgrades its implementation without changing the rollout flag or requiring a mode migration. Dark Watch and the distributed/soak proof listed below remain deferred.
 
 ## Automated coverage
 
@@ -59,4 +71,4 @@ node scripts/check.js --scope=local
 
 The local checks are regression evidence, not proof that every possible connector or interleaving is safe. Restart testing used persisted parked cursors; exact commit-window failures are injected through repository mocks. A multi-Kibana lease takeover during an Elasticsearch partition, sustained load/soak testing, and every external connector's abort/idempotency behavior were not exercised by this audit. External delivery remains at least once. Child workflows have independent execution budgets. HITL inside branches and branch-local timeout zones remain explicitly unsupported. Whole-workflow terminators are supported by V4.
 
-Cancellation currently records the root workflow as cancelled and interrupted parallel descendants as timed_out; the audit checks that none remain running/waiting. These labels do not imply an external effect can be undone.
+Cancellation records the root workflow and interrupted descendants as cancelled; real deadline expiry still records timed_out. These labels do not imply an external effect can be undone.
