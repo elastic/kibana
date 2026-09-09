@@ -20,15 +20,17 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ObltWorkerFixtures>({
     {
       pageObjects,
       page,
+      kbnUrl,
     }: {
       pageObjects: ExtScoutTestFixtures['pageObjects'];
       page: ExtScoutTestFixtures['page'];
+      kbnUrl: ObltWorkerFixtures['kbnUrl'];
     },
     use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      observabilityAlerting: createLazyPageObject(ObservabilityAlertingPage, page),
+      observabilityAlerting: createLazyPageObject(ObservabilityAlertingPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);

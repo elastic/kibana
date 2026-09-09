@@ -14,12 +14,20 @@ import {
 } from '../fixtures/alerting_v2_setting';
 import { OBSERVABILITY_ALERTING_SURFACES } from '../fixtures/page_objects';
 
+const logSurfaceUrl = (log: { info: (msg: string) => void }, label: string, url: string): void => {
+  const line = `[observability-alerting] ${label} ${url}`;
+  log.info(line);
+  process.stdout.write(`${line}\n`);
+};
+
 /*
  * Lives under the default Scout config (`test/scout/`) so
  * `alerting:v2:enabled` stays unpinned and can be flipped at runtime. Both
  * flag states live in one file so they cannot run on parallel workers against
  * the same global setting. The dedicated `scout_alerting_v2` config pins the
  * setting on and cannot cover the flag-off case.
+ *
+ * One test per URL so a redirect or title mismatch is isolated to that path.
  */
 test.describe(
   'Observability Alerting URLs',
@@ -33,29 +41,42 @@ test.describe(
       await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
-    test('returns app not found when alerting v2 is disabled', async ({
-      kbnClient,
-      pageObjects,
-    }) => {
-      await unsetAlertingV2EnabledSetting(kbnClient);
+    for (const surface of OBSERVABILITY_ALERTING_SURFACES) {
+      test(`returns app not found for ${surface.name} (${surface.path}) when alerting v2 is disabled`, async ({
+        kbnClient,
+        log,
+        pageObjects,
+      }) => {
+        await unsetAlertingV2EnabledSetting(kbnClient);
 
-      for (const surface of OBSERVABILITY_ALERTING_SURFACES) {
-        await test.step(surface.name, async () => {
-          await pageObjects.observabilityAlerting.goto(surface.path);
-          await expect(pageObjects.observabilityAlerting.appNotFoundPageContent).toBeVisible();
+        const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
+        logSurfaceUrl(log, 'requested', requested);
+
+        const landed = await pageObjects.observabilityAlerting.goto(surface.path);
+        logSurfaceUrl(log, 'landed', landed);
+
+        await expect(pageObjects.observabilityAlerting.appNotFoundPageContent).toBeVisible({
+          timeout: 30_000,
         });
-      }
-    });
+      });
 
-    test('loads each surface when alerting v2 is enabled', async ({ kbnClient, pageObjects }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
+      test(`loads ${surface.name} (${surface.path}) when alerting v2 is enabled`, async ({
+        kbnClient,
+        log,
+        pageObjects,
+      }) => {
+        await setAlertingV2EnabledSetting(kbnClient, true);
 
-      for (const surface of OBSERVABILITY_ALERTING_SURFACES) {
-        await test.step(surface.name, async () => {
-          await pageObjects.observabilityAlerting.goto(surface.path);
-          await expect(pageObjects.observabilityAlerting.pageTitle).toHaveText(surface.title);
+        const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
+        logSurfaceUrl(log, 'requested', requested);
+
+        const landed = await pageObjects.observabilityAlerting.goto(surface.path);
+        logSurfaceUrl(log, 'landed', landed);
+
+        await expect(pageObjects.observabilityAlerting.pageTitle).toHaveText(surface.title, {
+          timeout: 30_000,
         });
-      }
-    });
+      });
+    }
   }
 );

@@ -8,7 +8,11 @@
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { KbnClient } from '@kbn/scout-oblt';
 
-const GLOBAL_SETTINGS_PATH = `/api/kibana/global_settings/${encodeURIComponent(
+/**
+ * Internal route: serverless disables the public `/api/kibana/global_settings`
+ * API (`uiSettings.publicApiEnabled` defaults to false).
+ */
+const GLOBAL_SETTINGS_PATH = `/internal/kibana/global_settings/${encodeURIComponent(
   ALERTING_V2_ENABLED_SETTING_ID
 )}`;
 
@@ -21,11 +25,8 @@ export const setAlertingV2EnabledSetting = async (
   kbnClient: KbnClient,
   enabled: boolean
 ): Promise<void> => {
-  await kbnClient.request({
-    description: `set ${ALERTING_V2_ENABLED_SETTING_ID} to ${enabled}`,
-    path: GLOBAL_SETTINGS_PATH,
-    method: 'POST',
-    body: { value: enabled },
+  await kbnClient.uiSettings.updateGlobal({
+    [ALERTING_V2_ENABLED_SETTING_ID]: enabled,
   });
 };
 

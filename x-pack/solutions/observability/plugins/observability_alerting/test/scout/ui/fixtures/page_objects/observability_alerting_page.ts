@@ -6,10 +6,10 @@
  */
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_APP_ROUTE,
+  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
@@ -41,12 +41,27 @@ export class ObservabilityAlertingPage {
   public readonly pageTitle: Locator;
   public readonly appNotFoundPageContent: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
   }
 
-  async goto(path: string): Promise<void> {
-    await this.page.gotoApp(`${OBSERVABILITY_ALERTING_APP_ROUTE}${path}`);
+  urlFor(path: string): string {
+    return this.kbnUrl.get(`${OBSERVABILITY_ALERTING_BASE_PATH}${path}`);
+  }
+
+  async goto(path: string): Promise<string> {
+    const requested = this.urlFor(path);
+    // `gotoApp` waits for `load`, which Kibana's SPA often never reaches
+    // (pending XHRs / "Loading Elastic"). `domcontentloaded` is enough for
+    // both the flag-off app-not-found page and the flag-on chrome title.
+    await this.page.goto(requested, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60_000,
+    });
+    return this.page.url();
   }
 }
