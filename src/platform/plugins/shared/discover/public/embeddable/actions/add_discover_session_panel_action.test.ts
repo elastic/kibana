@@ -27,6 +27,7 @@ const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) 
   type: ESQL_CONTROL,
   anyStateChange$: of(),
   serializeState: () => state,
+  latestState$: of(state),
   applySerializedState: () => undefined,
 });
 
