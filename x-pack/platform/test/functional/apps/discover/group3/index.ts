@@ -12,14 +12,11 @@
  * src/platform/plugins/shared/discover/test/scout) already exist.
  *
  * Audit summary — see each file for the per-test rationale:
- * - saved_queries: shared deletion migrated to Data API tests; update covered by Unified Search
  * - saved_searches: DELETED (both tests were already ported to Scout)
  * - visualize_field: MIXED (12 tests; 2 delete, 2 hand to Lens, rest migrate)
  * - value_suggestions: DELETED (fully ported to Scout)
  * - value_suggestions_non_timebased: DELETED (fully ported to Scout)
  * - saved_search_embeddable: MIXED (1 delete, 1 cover with unit test, 3 migrate)
- * - esql_starred: migrated to Scout and component tests
- * - rule_creation: migrated to rule form component tests
  */
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
