@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -32,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DatasetMappings } from '../../../common';
-import { FieldMappingForm } from './field_mapping_form';
+import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
 
 export enum DataType {
   KEYWORD = 'keyword',
@@ -91,86 +90,46 @@ const typeToDatasetMappingType = (
   return type;
 };
 
-const TYPE_DISPLAY_LABEL_BY_VALUE: Record<DataType, string> = {
-  [DataType.KEYWORD]: 'Keyword',
-  [DataType.TEXT]: 'Text',
-  [DataType.LONG]: 'Long',
-  [DataType.INTEGER]: 'Integer',
-  [DataType.DOUBLE]: 'Double',
-  [DataType.BOOLEAN]: 'Boolean',
-  [DataType.DATETIME]: 'Date',
-  [DataType.UNSIGNED_LONG]: 'Unsigned long',
-  [DataType.IP]: 'IP',
-};
-
 const ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL =
   'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference';
 
-const getFieldTypeDocsUrl = (type: '' | DataType): string | undefined => {
-  if (!type) return;
-
-  const mappingType = typeToDatasetMappingType(type);
-
-  switch (mappingType) {
-    case 'keyword':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/keyword`;
-    case 'text':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/text`;
-    case 'boolean':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/boolean`;
-    case 'ip':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/ip`;
-    case 'date':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/date`;
-    case 'unsigned_long':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`;
-    case 'long':
-    case 'integer':
-    case 'double':
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`;
-    default:
-      return `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/${mappingType}`;
-  }
-};
-
-const getFieldTypeDocsLinkLabel = (type: '' | DataType): string => {
-  if (!type) return '';
-
-  switch (type) {
-    case DataType.LONG:
-    case DataType.INTEGER:
-    case DataType.DOUBLE:
-      return i18n.translate('xpack.dataFederation.mappingEditor.numericFieldTypes', {
-        defaultMessage: 'Numeric types',
-      });
-    case DataType.UNSIGNED_LONG:
-      return i18n.translate('xpack.dataFederation.mappingEditor.unsignedLongFieldType', {
-        defaultMessage: 'Unsigned long type',
-      });
-    case DataType.DATETIME:
-      return i18n.translate('xpack.dataFederation.mappingEditor.dateFieldType', {
-        defaultMessage: 'Date type',
-      });
-    default:
-      return i18n.translate('xpack.dataFederation.mappingEditor.specificFieldType', {
-        defaultMessage: '{type} type',
-        values: { type: TYPE_DISPLAY_LABEL_BY_VALUE[type] },
-      });
-  }
-};
-
-const getFieldTypeDocsHelpText = (type: '' | DataType): React.ReactNode => {
-  const href = getFieldTypeDocsUrl(type);
-  if (!href) return;
-
-  return (
-    <EuiLink href={href} target="_blank" external>
-      {i18n.translate('xpack.dataFederation.mappingEditor.fieldTypeDocsLink', {
-        defaultMessage: 'View documentation for {type}',
-        values: { type: getFieldTypeDocsLinkLabel(type) },
-      })}
-    </EuiLink>
-  );
+const TYPE_INFO_BY_VALUE: Record<DataType, { label: string; docs: string }> = {
+  [DataType.BOOLEAN]: {
+    label: 'Boolean',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/boolean`,
+  },
+  [DataType.DATETIME]: {
+    label: 'Date',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/date`,
+  },
+  [DataType.DOUBLE]: {
+    label: 'Double',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
+  },
+  [DataType.INTEGER]: {
+    label: 'Integer',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
+  },
+  [DataType.IP]: {
+    label: 'IP',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/ip`,
+  },
+  [DataType.KEYWORD]: {
+    label: 'Keyword',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/keyword`,
+  },
+  [DataType.LONG]: {
+    label: 'Long',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
+  },
+  [DataType.TEXT]: {
+    label: 'Text',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/text`,
+  },
+  [DataType.UNSIGNED_LONG]: {
+    label: 'Unsigned long',
+    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`,
+  },
 };
 
 const renderBoldMatches = (text: string, query: string): React.ReactNode => {
@@ -210,15 +169,15 @@ const TYPE_OPTIONS: Array<{ value: '' | DataType; text: string }> = [
       defaultMessage: 'Select type',
     }),
   },
-  { value: DataType.BOOLEAN, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.BOOLEAN] },
-  { value: DataType.DATETIME, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.DATETIME] },
-  { value: DataType.DOUBLE, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.DOUBLE] },
-  { value: DataType.INTEGER, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.INTEGER] },
-  { value: DataType.IP, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.IP] },
-  { value: DataType.KEYWORD, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.KEYWORD] },
-  { value: DataType.LONG, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.LONG] },
-  { value: DataType.TEXT, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.TEXT] },
-  { value: DataType.UNSIGNED_LONG, text: TYPE_DISPLAY_LABEL_BY_VALUE[DataType.UNSIGNED_LONG] },
+  { value: DataType.BOOLEAN, text: TYPE_INFO_BY_VALUE[DataType.BOOLEAN].label },
+  { value: DataType.DATETIME, text: TYPE_INFO_BY_VALUE[DataType.DATETIME].label },
+  { value: DataType.DOUBLE, text: TYPE_INFO_BY_VALUE[DataType.DOUBLE].label },
+  { value: DataType.INTEGER, text: TYPE_INFO_BY_VALUE[DataType.INTEGER].label },
+  { value: DataType.IP, text: TYPE_INFO_BY_VALUE[DataType.IP].label },
+  { value: DataType.KEYWORD, text: TYPE_INFO_BY_VALUE[DataType.KEYWORD].label },
+  { value: DataType.LONG, text: TYPE_INFO_BY_VALUE[DataType.LONG].label },
+  { value: DataType.TEXT, text: TYPE_INFO_BY_VALUE[DataType.TEXT].label },
+  { value: DataType.UNSIGNED_LONG, text: TYPE_INFO_BY_VALUE[DataType.UNSIGNED_LONG].label },
 ];
 
 export const emptyMappingEditorValue = (): MappingEditorValue => ({
@@ -701,7 +660,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               setDraftField((prev) => ({ ...prev, ...patch }))
             }
             typeOptions={TYPE_OPTIONS}
-            typeHelpText={getFieldTypeDocsHelpText(draftField.type)}
+            typeHelpText={getFieldTypeDocsHelpText(draftField.type, TYPE_INFO_BY_VALUE)}
             errors={draftFieldErrors}
             dateTypeValue={DataType.DATETIME}
             actions={
@@ -751,7 +710,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             updateField(f.id, patch);
                           }}
                           typeOptions={TYPE_OPTIONS}
-                          typeHelpText={getFieldTypeDocsHelpText(f.type)}
+                          typeHelpText={getFieldTypeDocsHelpText(f.type, TYPE_INFO_BY_VALUE)}
                           pathHelpText={i18n.translate(
                             'xpack.dataFederation.mappingEditor.physicalPathHelp',
                             {
@@ -814,7 +773,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             <EuiFlexItem grow={false}>
                               {f.type ? (
                                 <EuiBadge color="hollow">
-                                  {TYPE_DISPLAY_LABEL_BY_VALUE[f.type as DataType]}
+                                  {TYPE_INFO_BY_VALUE[f.type as DataType].label}
                                 </EuiBadge>
                               ) : (
                                 <span aria-hidden="true">&nbsp;</span>
