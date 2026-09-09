@@ -681,6 +681,48 @@ describe('API Keys', () => {
     });
 
     describe('with UIAM', () => {
+      it.each(['upstream-shared-secret', undefined])(
+        'preserves client authentication %s in an ES API key grant',
+        async (sharedSecret) => {
+          const mockUiam = uiamServiceMock.create();
+          const apiKeysWithUiam = new APIKeys({
+            clusterClient: mockClusterClient,
+            logger,
+            license: mockLicense,
+            applicationName: 'kibana-.kibana',
+            kibanaFeatures: [],
+            uiam: mockUiam,
+          });
+          mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+            id: '123',
+            name: 'key-name',
+            api_key: 'abc123',
+            encoded: 'utf8',
+          });
+          const request = httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: 'Bearer essu_ephemeral_token',
+              ...(sharedSecret === undefined ? {} : { 'x-client-authentication': sharedSecret }),
+            },
+          });
+
+          await apiKeysWithUiam.grantAsInternalUser(request, {
+            name: 'test-key',
+            role_descriptors: {},
+          });
+
+          expect(mockUiam.getClientAuthentication).not.toHaveBeenCalled();
+          expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+            api_key: { name: 'test-key', role_descriptors: {} },
+            grant_type: 'access_token',
+            access_token: 'essu_ephemeral_token',
+            ...(sharedSecret === undefined
+              ? {}
+              : { client_authentication: { scheme: 'SharedSecret', value: sharedSecret } }),
+          });
+        }
+      );
+
       it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         mockUiam.getClientAuthentication.mockReturnValue({
@@ -704,7 +746,7 @@ describe('API Keys', () => {
         });
 
         const result = await apiKeysWithUiam.grantAsInternalUser(
-          httpServerMock.createKibanaRequest({
+          httpServerMock.createFakeKibanaRequest({
             headers: {
               authorization: `Bearer essu_uiam_access_token`,
             },
@@ -761,7 +803,7 @@ describe('API Keys', () => {
         });
 
         await apiKeysWithUiam.grantAsInternalUser(
-          httpServerMock.createKibanaRequest({
+          httpServerMock.createFakeKibanaRequest({
             headers: {
               authorization: `Bearer essu_uiam_access_token`,
               'es-client-authentication': 'SharedSecret should-be-ignored',

@@ -21,6 +21,7 @@ import type {
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
+import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -81,14 +82,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      // UIAM requires Kibana's client authentication alongside session tokens and internal API keys,
-      // and rejects an external API key that arrives with it. The `internal` flag is absent both
-      // when no API key was involved (a session token) and when the credential cannot be retrieved
-      // from the Core's internal state e.g., for a fake request, carrying a key Kibana granted
-      // itself, and both of those need client authentication.
+      // External API keys must not carry client authentication. For other credentials, preserve
+      // the request's secret and only default to Kibana's for internally created requests.
       const isExternalApiKey = this.getCurrentUser(request)?.api_key?.internal === false;
       const { id, key, description } = await this.uiam?.grantApiKey(authorization, params, {
         includeClientAuthentication: !isExternalApiKey,
+        clientAuthentication: getUiamClientAuthentication(request),
       });
 
       result = {
@@ -134,7 +133,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      await this.uiam?.revokeApiKey(id, authorization.credentials);
+      await this.uiam?.revokeApiKey(
+        id,
+        authorization.credentials,
+        getUiamClientAuthentication(request)
+      );
 
       this.logger.debug(`API key ${id} was invalidated successfully`);
 

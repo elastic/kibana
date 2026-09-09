@@ -411,28 +411,35 @@ describe('HTTPAuthenticationProvider', () => {
       expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
     });
 
-    it('logs a warning when essu_ token is used on a non-tagged route.', async () => {
-      const header = 'Bearer essu_some_token';
-      const user = mockAuthenticatedUser();
+    it.each(['upstream-shared-secret', undefined])(
+      'preserves client authentication %s for an inbound ephemeral token',
+      async (clientAuthentication) => {
+        const authorization = 'Bearer essu_ephemeral_token';
+        const headers = {
+          authorization,
+          ...(clientAuthentication === undefined
+            ? {}
+            : { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }),
+        };
+        const request = httpServerMock.createKibanaRequest({ headers });
+        const user = mockAuthenticatedUser();
+        const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+        scopedClient.asCurrentUser.security.authenticate.mockResponse(user);
+        mockOptionsWithUiam.client.asScoped.mockReturnValue(scopedClient);
+        const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+          supportedSchemes: new Set(['bearer']),
+        });
 
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: header },
-      });
+        const result = await provider.authenticate(request);
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
-      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
-
-      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
-        supportedSchemes: new Set(['bearer']),
-      });
-
-      await provider.authenticate(request);
-
-      expect(mockOptionsWithUiam.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Detected UIAM OAuth token on a non-MCP endpoint')
-      );
-    });
+        expect(result.succeeded()).toBe(true);
+        expect(result.authHeaders).toEqual(headers);
+        expect(mockOptionsWithUiam.client.asScoped).toHaveBeenCalledWith(request);
+        expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+        expect(mockOptionsWithUiam.uiam!.getAuthenticationHeaders).not.toHaveBeenCalled();
+        expect(mockOptionsWithUiam.logger.warn).not.toHaveBeenCalled();
+      }
+    );
 
     it('does not intercept essu_ tokens when UIAM is not enabled.', async () => {
       const header = 'Bearer essu_some_token';

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthHeaders, KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
+import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
@@ -91,6 +92,8 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders: AuthHeaders = { authorization: authorizationHeader.toString() };
+
     if (
       this.options.uiam &&
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
@@ -100,12 +103,10 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
         return this.authenticateViaUiamOAuth(request, authorizationHeader);
       }
 
-      this.logger.warn(
-        `Detected UIAM OAuth token on a non-MCP endpoint: ` +
-          `${request.route.method.toUpperCase()} ${request.route.path}. ` +
-          `OAuth tokens are only accepted on routes tagged with "${ROUTE_TAG_ACCEPT_UIAM_OAUTH}". ` +
-          `This may indicate a misconfigured MCP client or token misuse.`
-      );
+      const clientAuthentication = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
+      if (typeof clientAuthentication === 'string') {
+        authHeaders[ES_CLIENT_AUTHENTICATION_HEADER] = clientAuthentication;
+      }
     }
 
     try {
@@ -135,7 +136,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
         {
           // Even though the `Authorization` header is already present in the HTTP headers of the original request,
           // we still need to expose it to the Core authentication service for consistency.
-          authHeaders: { authorization: authorizationHeader.toString() },
+          authHeaders,
         }
       );
     } catch (err) {

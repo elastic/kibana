@@ -232,7 +232,7 @@ export class ClusterClient implements ICustomClusterClient {
     // provider's post-authentication headers override the one that came in on the wire. If the
     // credential is an internal UIAM credential, it might require client authentication.
     let clientAuthentication: string | undefined | null;
-    if (this.security?.uiam) {
+    if (this.security?.uiam && scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER] === undefined) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
       clientAuthentication =
         credential &&
@@ -255,8 +255,14 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
+    const requestHeaders = isRealRequest(request)
+      ? ensureRawRequest(request).headers ?? {}
+      : undefined;
+    const authHeaders = isRealRequest(request)
+      ? this.authHeaders?.get(request) ?? {}
+      : request.headers;
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
-      headers: isRealRequest(request) ? this.authHeaders?.get(request) ?? {} : request.headers,
+      headers: authHeaders,
     });
     if (!authorizationHeader) {
       throw new Error(
@@ -264,25 +270,29 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // If the credential is an internal UIAM credential, it might require client authentication.
-    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
-    // credential off the wire. For a real request it takes the auth provider's post-authentication
-    // headers (Kibana already vouched for that credential), and for a fake one the credential was
-    // minted by Kibana itself, so neither needs an attestation to be trusted. The exception is a
-    // fake request explicitly marked as carrying a user-created (external) UIAM credential, which
-    // UIAM rejects when presented with client authentication.
+    // Keep the client authentication paired with the authenticated credential, including its
+    // absence on inbound requests. Only trusted loopback or internally created credentials may
+    // fall back to Kibana's own secret.
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
-    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
-      credentialSource: isExternalCredential ? 'external' : 'internal',
-      credential: authorizationHeader,
-    });
+    const clientAuthentication =
+      authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER] ??
+      this.security?.uiam?.getElasticsearchClientAuthentication(
+        requestHeaders
+          ? { credentialSource: 'inbound', credential: authorizationHeader, requestHeaders }
+          : {
+              credentialSource: isExternalCredential ? 'external' : 'internal',
+              credential: authorizationHeader,
+            }
+      );
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
-      ...(clientAuthentication ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication } : {}),
+      ...(clientAuthentication !== undefined
+        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }
+        : {}),
     };
   }
 }

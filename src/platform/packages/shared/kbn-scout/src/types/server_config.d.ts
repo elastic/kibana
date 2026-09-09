@@ -23,6 +23,8 @@ export interface ScoutServerConfig {
    * Elasticsearch Security indexes via SAML authentication.
    */
   prebootOnly?: boolean;
+  /** Whether to warm up Security indexes through SAML login; disable for suites that cannot use SAML. */
+  preCreateSecurityIndexes?: boolean;
   servers: {
     kibana: ServerUrlParts;
     elasticsearch: ServerUrlParts;

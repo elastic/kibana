@@ -72,6 +72,7 @@ export const schema = Joi.object()
      * pre-creating the Elasticsearch Security indexes via SAML authentication.
      */
     prebootOnly: Joi.boolean().default(false),
+    preCreateSecurityIndexes: Joi.boolean().default(true),
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
