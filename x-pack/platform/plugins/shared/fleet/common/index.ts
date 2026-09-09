@@ -79,6 +79,8 @@ export {
   OBLT_DEFAULT_CATEGORIES,
   displayedAssetTypes,
   displayedAssetTypesLookup,
+  // Download source constants
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from './constants';
 export {
   // Route services
