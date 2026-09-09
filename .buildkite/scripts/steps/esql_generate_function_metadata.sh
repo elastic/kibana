@@ -31,6 +31,8 @@ maybe_update_esql_definitions () {
 
   echo "@elastic/esql-definitions: $current → $latest. Bumping @elastic/esql in package.json."
   sed -i "s/\"@elastic\/esql\": \"[^\"]*\"/\"@elastic\/esql\": \"$latest\"/" package.json
+  # CI bootstrap installs with --frozen-lockfile; regenerate the lockfile first so it doesn't bail.
+  pnpm install --lockfile-only
   VERSION_BUMPED=true
 }
 
@@ -98,7 +100,7 @@ main () {
 
   git add $GIT_SCOPE
   if [ "$VERSION_BUMPED" == "true" ]; then
-    git add package.json yarn.lock
+    git add package.json pnpm-lock.yaml
   fi
   git commit -m "Update function metadata"
 
