@@ -33,7 +33,7 @@ export function getRelevantDocs(
 export function dedupeDocs(docs: RetrievedDoc[]): RetrievedDoc[] {
   const seen = new Set<string>();
   return docs.filter((doc) => {
-    const key = `${doc.index}:${doc.id}`;
+const key = JSON.stringify([doc.index, doc.id]);
     if (seen.has(key)) {
       return false;
     }
