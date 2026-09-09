@@ -27,14 +27,10 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   const setup = ({
     aiIndices,
     authorized = true,
-    spaceId = 'default',
-    spacesAvailable = true,
   }: {
     aiIndices: unknown[];
     /** Outcome of the privilege check: granted, denied, or the error it rejects with. */
     authorized?: boolean | Error;
-    spaceId?: string;
-    spacesAvailable?: boolean;
   }) => {
     const checkPrivileges =
       authorized instanceof Error
@@ -47,16 +43,16 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       },
     };
 
-    const list = jest.fn().mockResolvedValue(aiIndices);
-    const getSpaceId = jest.fn().mockReturnValue(spaceId);
-    const spaces = spacesAvailable ? { spacesService: { getSpaceId } } : undefined;
+    const listVisible = jest.fn().mockResolvedValue(aiIndices);
+    const getAiIndexDataReadService = jest.fn().mockReturnValue({ listVisible });
+    const asCurrentUser = {};
+    const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
-        {},
+        { elasticsearch: { client: { asScoped } } },
         {
-          contextEngine: { getAiIndexService: () => ({ list }) },
+          contextEngine: { getAiIndexDataReadService },
           security,
-          spaces,
         },
         {},
       ]),
@@ -83,8 +79,27 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     if (!resolver) {
       throw new Error('Expected an AI index resolver to be registered');
     }
-    return { resolver, list, security, checkPrivileges, getSpaceId };
+    return {
+      resolver,
+      listVisible,
+      getAiIndexDataReadService,
+      asScoped,
+      asCurrentUser,
+      security,
+      checkPrivileges,
+    };
   };
+
+  it('reads visible AI indices as the requesting user through the data read service', async () => {
+    const { resolver, getAiIndexDataReadService, asScoped, asCurrentUser } = setup({
+      aiIndices: [],
+    });
+
+    await resolver({ ids: ['my-custom'], request });
+
+    expect(asScoped).toHaveBeenCalledWith(request);
+    expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
+  });
 
   it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
     const { resolver } = setup({
@@ -102,42 +117,16 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
-  it('filters the registry to the requested ids', async () => {
-    const { resolver, list } = setup({
-      aiIndices: [
-        { id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } },
-        { id: 'other', dest: { type: 'data_stream', value: 'ds-other' } },
-      ],
+  it('asks the service for the requested ids only, so just those are probed', async () => {
+    const { resolver, listVisible } = setup({
+      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
       { id: 'wanted', esqlTarget: 'idx-wanted' },
     ]);
-    expect(list).toHaveBeenCalledTimes(1);
-    expect(list).toHaveBeenCalledWith('default');
-  });
-
-  it('lists AI indices for the request space', async () => {
-    const { resolver, list, getSpaceId } = setup({
-      aiIndices: [{ id: 'my-custom', dest: { type: 'index', value: 'idx-custom' } }],
-      spaceId: 'marketing',
-    });
-
-    await resolver({ ids: ['my-custom'], request });
-
-    expect(getSpaceId).toHaveBeenCalledWith(request);
-    expect(list).toHaveBeenCalledWith('marketing');
-  });
-
-  it('falls back to default space when spaces plugin is unavailable', async () => {
-    const { resolver, list } = setup({
-      aiIndices: [{ id: 'my-custom', dest: { type: 'index', value: 'idx-custom' } }],
-      spacesAvailable: false,
-    });
-
-    await resolver({ ids: ['my-custom'], request });
-
-    expect(list).toHaveBeenCalledWith('default');
+    expect(listVisible).toHaveBeenCalledTimes(1);
+    expect(listVisible).toHaveBeenCalledWith(['wanted', 'unknown']);
   });
 
   it('checks the Context Engine read privilege for the request before disclosing details', async () => {
@@ -152,22 +141,22 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   });
 
   it('returns no details when the user lacks the Context Engine read privilege', async () => {
-    const { resolver, list } = setup({
+    const { resolver, listVisible } = setup({
       aiIndices: [{ id: 'my-custom', dest: { type: 'index', value: 'idx-custom' } }],
       authorized: false,
     });
 
     expect(await resolver({ ids: ['my-custom'], request })).toEqual([]);
-    expect(list).not.toHaveBeenCalled();
+    expect(listVisible).not.toHaveBeenCalled();
   });
 
   it('propagates privilege-check failures so callers fail closed', async () => {
-    const { resolver, list } = setup({
+    const { resolver, listVisible } = setup({
       aiIndices: [{ id: 'my-custom', dest: { type: 'index', value: 'idx-custom' } }],
       authorized: new Error('cluster unreachable'),
     });
 
     await expect(resolver({ ids: ['my-custom'], request })).rejects.toThrow('cluster unreachable');
-    expect(list).not.toHaveBeenCalled();
+    expect(listVisible).not.toHaveBeenCalled();
   });
 });
