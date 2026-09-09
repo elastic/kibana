@@ -622,6 +622,7 @@
     "@kbn/data-search-plugin": "workspace:*",
     "@kbn/data-service": "workspace:*",
     "@kbn/data-service-server": "workspace:*",
+    "@kbn/data-source": "workspace:*",
     "@kbn/data-stream-adapter": "workspace:*",
     "@kbn/data-streams": "workspace:*",
     "@kbn/data-streams-example-plugin": "workspace:*",
