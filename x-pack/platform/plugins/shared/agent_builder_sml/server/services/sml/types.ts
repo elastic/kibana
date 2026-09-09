@@ -194,50 +194,8 @@ export interface SmlTypeDefinition {
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
 /**
- * An SML document as read back and handed to consumers (notably
+ * An SML document, exactly as stored in the index and as handed to consumers (notably
  * {@link SmlTypeDefinition.toAttachment}).
- *
- * Flat by design: `id`, `origin`, `user_id`, `created_at`, `updated_at` and `ingestion_method`
- * are stored under `attributes` (see {@link SmlIndexedDocument}) and lifted back up by
- * `hydrateDocument`, so type writers keep a stable shape regardless of where the index puts them.
- */
-export interface SmlDocument {
-  /** Unique id of the entry */
-  id: string;
-  /** SML type (e.g., 'visualization', 'dashboard') */
-  type: string;
-  /** Display title */
-  title: string;
-  /** Raw origin id (e.g. saved object ID). Not stored in the index — derived at read time from `origin.uri`. */
-  origin_id?: string;
-  /** Self-describing URI for the origin, e.g. `${type}://${origin_id}`. */
-  origin: { uri: string };
-  /** Searchable content (`semantic_text` in the index) */
-  content: string;
-  /** Semantic summary (`semantic_text` in the index) */
-  description?: string;
-  /** Free-form labels */
-  tags?: string[];
-  /** Type-specific structured data, with the SML-owned keys stripped back out. */
-  attributes?: Record<string, unknown>;
-  /** Owner or last-modifier user id */
-  user_id?: string;
-  /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
-  references?: Array<{ uri: string }>;
-  /** Timestamp when first created */
-  created_at: string;
-  /** Timestamp when last updated */
-  updated_at: string;
-  /**
-   * Permissions required to access this entry. See {@link SmlPermissions} for the per-space group shape.
-   */
-  permissions: SmlPermissions;
-  /** How this entry was produced. */
-  ingestion_method: SmlIngestionMethod;
-}
-
-/**
- * An SML document exactly as written to the index.
  *
  * The SML bookkeeping fields live under `attributes` (a `flattened` field) rather than at the
  * top level: the index is `dynamic: strict` and its mappings come from the shared AI index
@@ -247,7 +205,7 @@ export interface SmlDocument {
  * Every `attributes` key is an untyped keyword. Query DSL can address them as `attributes.x`;
  * ES|QL cannot, and needs `FIELD_EXTRACT(attributes, "x")` — see `buildSmlEsqlQuery`.
  */
-export interface SmlIndexedDocument {
+export interface SmlDocument {
   /** SML type (e.g., 'visualization', 'dashboard') */
   type: string;
   /** Display title */
@@ -258,22 +216,21 @@ export interface SmlIndexedDocument {
   description?: string;
   /** Free-form labels */
   tags?: string[];
-  /** Other SML entries this item references. Each entry carries a `uri` field. */
+  /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
   references?: Array<{ uri: string }>;
   /**
-   * Permissions required to access this entry. See {@link SmlPermissions} for the per-space
-   * group shape.
+   * Permissions required to access this entry. See {@link SmlPermissions} for the per-space group shape.
    */
   permissions: SmlPermissions;
-  /** SML bookkeeping fields, merged over the type writer's own `attributes`. */
-  attributes: SmlIndexedAttributes;
+  /** SML bookkeeping keys, written over the type writer's own {@link SmlEntry.attributes}. */
+  attributes: SmlDocumentAttributes;
 }
 
-/** The `attributes` payload of an {@link SmlIndexedDocument}. */
-export interface SmlIndexedAttributes extends Record<string, unknown> {
+/** The `attributes` payload of an {@link SmlDocument}. */
+export interface SmlDocumentAttributes extends Record<string, unknown> {
   /** Unique id of the entry */
   id: string;
-  /** Self-describing URI for the origin, e.g. `${type}://${origin_id}`. */
+  /** Self-describing URI for the origin, e.g. `${type}://${originId}`. `getSmlOriginId` parses the raw origin id back out. */
   origin: { uri: string };
   /** Timestamp when first created */
   created_at: string;

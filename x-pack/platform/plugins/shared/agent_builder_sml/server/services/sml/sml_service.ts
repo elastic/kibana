@@ -16,8 +16,6 @@ import type {
   SmlSearchResult,
   SmlAutocompleteResult,
   SmlDocument,
-  SmlIndexedAttributes,
-  SmlIndexedDocument,
   SmlTypeDefinition,
   SmlSearchFilters,
   SmlSearchConstraints,
@@ -178,14 +176,6 @@ class SmlServiceImpl implements SmlServiceInstance {
 export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
 };
-
-/**
- * Empty-but-fully-shaped permissions object. Used as a fallback when
- * `_source.permissions` is somehow missing (legacy / test docs).
- */
-const emptyPermissions = (): SmlDocument['permissions'] => ({
-  kibana: { privileges: [] },
-});
 
 /**
  * Privilege check for SML entries. Batch-checks which of the given Kibana
@@ -537,7 +527,7 @@ const checkItemsAccess = async ({
   let docAuthz: Map<string, SmlKibanaPrivilegeGroup[]>;
   try {
     const response = await esClient.asInternalUser.search<
-      Pick<SmlIndexedDocument, 'attributes' | 'permissions'>
+      Pick<SmlDocument, 'attributes' | 'permissions'>
     >({
       index: smlIndexName,
       size: ids.length,
@@ -1147,7 +1137,7 @@ const autocompleteSml = async ({
       filterClauses.push(agentClause);
     }
 
-    const response = await esClient.asInternalUser.search<SmlIndexedDocument>({
+    const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
       size,
       allow_no_indices: true,
@@ -1211,7 +1201,7 @@ const getDocumentsByIds = async ({
   if (ids.length === 0) return docMap;
 
   try {
-    const response = await esClient.asInternalUser.search<SmlIndexedDocument>({
+    const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -1223,10 +1213,9 @@ const getDocumentsByIds = async ({
       },
     });
 
-    for (const hit of response.hits.hits) {
-      if (!hit._source) continue;
-      const doc = hydrateDocument(hit._source);
-      docMap.set(doc.id, doc);
+    for (const { _source: doc } of response.hits.hits) {
+      if (!doc) continue;
+      docMap.set(doc.attributes.id, doc);
     }
   } catch (error) {
     if (!isNotFoundError(error)) {
@@ -1235,43 +1224,4 @@ const getDocumentsByIds = async ({
   }
 
   return docMap;
-};
-
-/**
- * Project an ES `_source` payload into the canonical {@link SmlDocument} shape used everywhere
- * downstream, lifting the SML-owned keys out of `attributes` so consumers keep a flat shape.
- * Centralised because `getDocumentsByIds` (and any future reader) applies the same mapping —
- * keeping them in sync by-hand is a footgun.
- */
-const hydrateDocument = (source: SmlIndexedDocument): SmlDocument => {
-  const {
-    id,
-    origin,
-    created_at: createdAt,
-    updated_at: updatedAt,
-    ingestion_method: ingestionMethod,
-    user_id: userId,
-    ...typeAttributes
-  } = source.attributes ?? ({} as SmlIndexedAttributes);
-  const originUri = origin?.uri ?? '';
-
-  const doc: SmlDocument = {
-    id: id ?? '',
-    type: source.type ?? '',
-    title: source.title ?? '',
-    origin_id: originUri.split('://')[1] ?? '',
-    origin: { uri: originUri },
-    content: source.content ?? '',
-    created_at: createdAt ?? '',
-    updated_at: updatedAt ?? '',
-    permissions: source.permissions ?? emptyPermissions(),
-    ingestion_method: ingestionMethod ?? 'crawled',
-  };
-  if (source.description !== undefined) doc.description = source.description;
-  if (source.tags !== undefined) doc.tags = source.tags;
-  // Only the type writer's own keys — the SML-owned ones are destructured out above.
-  if (Object.keys(typeAttributes).length > 0) doc.attributes = typeAttributes;
-  if (userId !== undefined) doc.user_id = userId;
-  if (source.references !== undefined) doc.references = source.references;
-  return doc;
 };

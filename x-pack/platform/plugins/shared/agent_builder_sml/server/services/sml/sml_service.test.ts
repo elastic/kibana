@@ -2190,32 +2190,33 @@ describe('SmlService', () => {
       });
 
       expect(result.size).toBe(2);
+      // Documents come back exactly as stored — no re-shaping on read.
       expect(result.get('doc-1')).toEqual({
-        id: 'doc-1',
         type: 'lens',
         title: 'Doc 1',
-        origin_id: 'ref-1',
-        origin: { uri: 'lens://ref-1' },
         content: 'content 1',
-        created_at: '2024-01-01',
-        updated_at: '2024-01-02',
         permissions: makePermissions(),
-        ingestion_method: 'crawled',
+        attributes: {
+          id: 'doc-1',
+          origin: { uri: 'lens://ref-1' },
+          created_at: '2024-01-01',
+          updated_at: '2024-01-02',
+        },
       });
       expect(result.get('doc-2')).toEqual({
-        id: 'doc-2',
         type: 'dashboard',
         title: 'Doc 2',
-        origin_id: 'ref-2',
-        origin: { uri: 'dashboard://ref-2' },
         content: 'content 2',
         description: 'dash desc',
-        user_id: 'u2',
         references: [{ uri: 'lens:x:y' }],
-        created_at: '2024-01-01',
-        updated_at: '2024-01-02',
         permissions: makePermissions(),
-        ingestion_method: 'crawled',
+        attributes: {
+          id: 'doc-2',
+          origin: { uri: 'dashboard://ref-2' },
+          user_id: 'u2',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-02',
+        },
       });
     });
 
@@ -2260,21 +2261,21 @@ describe('SmlService', () => {
       });
 
       expect(result.get('doc-3')).toEqual({
-        id: 'doc-3',
         type: 'dashboard',
         title: 'Sales Q3',
-        origin_id: 'dash-100',
-        origin: { uri: 'dashboard://dash-100' },
         content: 'sales content',
         description: 'sales summary',
         tags: ['sales', 'executive'],
-        attributes: { owner_team: 'sales-ops' },
-        user_id: 'user-7',
         references: [{ uri: 'category://sales' }],
-        created_at: '2026-04-01T00:00:00.000Z',
-        updated_at: '2026-04-02T00:00:00.000Z',
         permissions: makePermissions([{ space: 'default', name: ['saved_object:dashboard/get'] }]),
-        ingestion_method: 'crawled',
+        attributes: {
+          owner_team: 'sales-ops',
+          id: 'doc-3',
+          origin: { uri: 'dashboard://dash-100' },
+          user_id: 'user-7',
+          created_at: '2026-04-01T00:00:00.000Z',
+          updated_at: '2026-04-02T00:00:00.000Z',
+        },
       });
     });
 

@@ -27,12 +27,12 @@ export type {
   SmlSearchConstraints,
   SmlSearchFilters,
   SmlDocument,
-  SmlIndexedDocument,
-  SmlIndexedAttributes,
+  SmlDocumentAttributes,
   SmlIndexAction,
 } from './services/sml/types';
 
 export { kibanaPermissions } from './services/sml/permissions/kibana';
+export { getSmlOriginId } from './services/sml/sml_origin';
 
 export { smlAiIndexDescription, smlIndexName } from './services/sml/sml_storage';
 export { SmlSearchFilterType } from '../common/http_api/sml';

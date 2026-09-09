@@ -12,7 +12,7 @@ import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from
 import { expect } from '@kbn/scout/api';
 import type { SmlSearchHttpResponse } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
 import { AGENT_BUILDER_SML_FEATURE_ID } from '@kbn/agent-builder-sml-plugin/common/features';
-import type { SmlIndexedDocument } from '@kbn/agent-builder-sml-plugin/server';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
 import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
@@ -97,7 +97,7 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
 // id. Names the gated action so the gated role is a real holder; the indexer never emits `count: 0`
 // with names, so that combination is only reachable by writing it by hand.
 const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<void> => {
-  const document: SmlIndexedDocument = {
+  const document: SmlDocument = {
     type: SML_TEST_MALFORMED_KI_TYPE,
     title: `${SML_TEST_SEARCH_TOKEN} ${SML_TEST_MALFORMED_KI_TYPE}`,
     content: `${SML_TEST_SEARCH_TOKEN} malformed permission element fixture`,

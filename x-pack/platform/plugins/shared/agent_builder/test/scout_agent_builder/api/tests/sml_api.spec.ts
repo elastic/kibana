@@ -15,7 +15,7 @@ import type {
   SmlAutocompleteHttpResponse,
   SmlSearchHttpResponse,
 } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
-import type { SmlIndexedDocument } from '@kbn/agent-builder-sml-plugin/server';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
 import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
@@ -52,7 +52,7 @@ const indexedDocument = ({
   title: string;
   originUri: string;
   content: string;
-}): SmlIndexedDocument => ({
+}): SmlDocument => ({
   type,
   title,
   content,

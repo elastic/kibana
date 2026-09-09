@@ -18,8 +18,8 @@ import type {
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
-  SmlIndexedAttributes,
-  SmlIndexedDocument,
+  SmlDocument,
+  SmlDocumentAttributes,
   SmlTypeDefinition,
 } from './types';
 
@@ -351,7 +351,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // Producer attributes go in first so the SML-owned keys below always win: `origin.uri` and
     // `ingestion_method` gate deletion and manual-entry protection, so a type writer must not be
     // able to forge them.
-    const attributes: SmlIndexedAttributes = {
+    const attributes: SmlDocumentAttributes = {
       ...entry.attributes,
       id: entryId,
       origin: { uri: `${entry.type}://${originId}` },
@@ -363,7 +363,7 @@ class SmlIndexerImpl implements SmlIndexer {
       attributes.user_id = entry.user_id;
     }
 
-    const document: SmlIndexedDocument = {
+    const document: SmlDocument = {
       type: entry.type,
       title: entry.title,
       content: entry.content,
