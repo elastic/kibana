@@ -43,14 +43,23 @@ export const RuntimeFieldMapping = lazySchema(() =>
         /**
          * Painless script source to execute.
          */
-        source: z.string().max(10000),
+        source: z.string().max(10000).describe('Painless script source to execute.'),
       })
       .strict()
-      .optional(),
+      .optional()
+      .describe(
+        'Painless script that Elasticsearch evaluates for each candidate document. Only inline scripts (`source`) are accepted — stored scripts, parameterised scripts (`params`), and non-default `lang` values are not supported. The server rejects any extra properties with a 400 to avoid silently changing runtime field semantics.'
+      ),
     /**
      * Optional format string for date runtime fields (e.g. `strict_date_optional_time`).
      */
-    format: z.string().max(100).optional(),
+    format: z
+      .string()
+      .max(100)
+      .optional()
+      .describe(
+        'Optional format string for date runtime fields (e.g. `strict_date_optional_time`).'
+      ),
   })
 );
 export type RuntimeFieldMapping = z.infer<typeof RuntimeFieldMapping>;
@@ -111,7 +120,13 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
     /**
      * Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.
      */
-    runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
+    runtime_mappings: z
+      .object({})
+      .catchall(RuntimeFieldMapping)
+      .optional()
+      .describe(
+        'Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.'
+      ),
   })
 );
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
@@ -135,7 +150,13 @@ export const CloseAlertsByQuery = lazySchema(() =>
     /**
      * Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.
      */
-    runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
+    runtime_mappings: z
+      .object({})
+      .catchall(RuntimeFieldMapping)
+      .optional()
+      .describe(
+        'Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.'
+      ),
   })
 );
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;
