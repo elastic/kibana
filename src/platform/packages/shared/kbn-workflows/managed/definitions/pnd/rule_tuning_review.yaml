@@ -182,8 +182,13 @@ steps:
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
 
-  # The pipeline auto-applies only on this path; any other recommendation is a
-  # manual analyst action, so approval acknowledges it instead of applying.
+  # Every recommendation goes through the approval gate. "auto" only says who
+  # makes the change once the analyst approves: on this path the workflow patches
+  # the rule query itself (apply_query_tuning), which is possible only for a query
+  # change on a plain query rule the preview can backtest. Anything else (exception,
+  # suppression, threshold, or a query change on a rule mode the preview cannot
+  # model) is left to the analyst to apply in the Rules UI, so approving it just
+  # acknowledges the follow-up.
   - name: record_apply_path
     type: data.set
     with:
