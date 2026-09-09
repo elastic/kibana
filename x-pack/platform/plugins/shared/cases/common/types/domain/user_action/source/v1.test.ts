@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 import {
   ActionSourceRt,
   ActionSourceTypes,
@@ -59,6 +60,16 @@ describe('ActionSource', () => {
     expect(toActionSource({ type: 'rule', id: 'rule-1', name: '', runId: null })).toEqual({
       type: 'rule',
       id: 'rule-1',
+    });
+  });
+
+  it('toActionSource clamps name to MAX_ACTION_SOURCE_NAME_LENGTH', () => {
+    const name = 'x'.repeat(MAX_ACTION_SOURCE_NAME_LENGTH + 8);
+
+    expect(toActionSource({ type: 'rule', id: 'rule-1', name })).toEqual({
+      type: 'rule',
+      id: 'rule-1',
+      name: 'x'.repeat(MAX_ACTION_SOURCE_NAME_LENGTH),
     });
   });
 

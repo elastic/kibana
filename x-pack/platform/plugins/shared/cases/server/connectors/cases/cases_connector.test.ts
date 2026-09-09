@@ -362,6 +362,27 @@ describe('CasesConnector', () => {
     });
   });
 
+  it('maps a pre-upgrade internallyManagedAlerts payload to an attack source', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts: true,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'attack', id: rule.id, name: rule.name },
+    });
+  });
+
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {
     mockExecute.mockRejectedValue(new CasesConnectorError('Bad request', 400));
     try {

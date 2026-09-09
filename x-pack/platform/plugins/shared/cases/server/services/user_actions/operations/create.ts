@@ -568,7 +568,10 @@ export class UserActionPersister {
     }
 
     for (let i = 0; i < userActions.length; i++) {
-      this.auditLogger.log(userActions[i].eventDetails, createdUserActions.saved_objects[i].id);
+      const savedObject = createdUserActions.saved_objects[i];
+      if (savedObject != null && !isSavedObjectErrorResult(savedObject)) {
+        this.auditLogger.log(userActions[i].eventDetails, savedObject.id);
+      }
     }
   }
 

@@ -184,6 +184,22 @@ describe('UserActionPersister', () => {
 
       expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
     });
+
+    it('does not write an audit event for a bulk entry that failed to persist', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(auditMockLocker.log).not.toHaveBeenCalled();
+    });
   });
 
   describe('Decoding requests', () => {

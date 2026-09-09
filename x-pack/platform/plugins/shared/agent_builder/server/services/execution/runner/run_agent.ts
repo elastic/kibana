@@ -6,7 +6,6 @@
  */
 
 import {
-  getAgentFromRunContext,
   type AgentHandlerContext,
   type ScopedRunnerRunAgentParams,
   type RunAgentReturn,
@@ -143,23 +142,18 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
+  const { agentsService, request } = parentManager.deps;
+  const agentRegistry = await agentsService.getRegistry({ request });
+  const agent = await agentRegistry.get(agentId, { access: 'use' });
 
   const forkedContext = forkContextForAgentRun({
     parentContext: parentManager.context,
     agentId,
+    agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
   });
   const manager = parentManager.createChild(forkedContext);
-
-  const { agentsService, request } = manager.deps;
-  const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId, { access: 'use' });
-  const agentEntry = getAgentFromRunContext(manager.context);
-  if (agentEntry != null) {
-    const agentEntryIndex = manager.context.stack.indexOf(agentEntry);
-    manager.context.stack[agentEntryIndex] = { ...agentEntry, agentName: agent.name };
-  }
 
   // Layer runtime overrides onto the agent's own config first, then merge with the type base.
   const agentWithOverrides = {

@@ -7,6 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 import * as rt from 'io-ts';
+import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 
 export const ActionSourceTypes = {
   agent: 'agent',
@@ -62,6 +63,21 @@ export const isActionSource = (value: unknown): value is ActionSource => {
 export const isHeaderActionSource = (value: unknown): value is ActionSource =>
   isActionSource(value) && ACTION_SOURCE_HEADER_TYPES.has(value.type);
 
+const clampActionSourceName = (name?: string | null): string | undefined => {
+  if (name == null) {
+    return undefined;
+  }
+
+  const trimmed = name.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  return trimmed.length > MAX_ACTION_SOURCE_NAME_LENGTH
+    ? trimmed.slice(0, MAX_ACTION_SOURCE_NAME_LENGTH)
+    : trimmed;
+};
+
 export const toActionSource = ({
   type,
   id,
@@ -72,9 +88,13 @@ export const toActionSource = ({
   id: string;
   name?: string | null;
   runId?: string | null;
-}): ActionSource => ({
-  type,
-  id,
-  ...(name ? { name } : {}),
-  ...(runId ? { run_id: runId } : {}),
-});
+}): ActionSource => {
+  const clampedName = clampActionSourceName(name);
+
+  return {
+    type,
+    id,
+    ...(clampedName ? { name: clampedName } : {}),
+    ...(runId ? { run_id: runId } : {}),
+  };
+};

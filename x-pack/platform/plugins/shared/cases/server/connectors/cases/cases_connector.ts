@@ -13,7 +13,7 @@ import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/se
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { ZCasesConnectorRunParamsSchema } from './schema';
+import { resolveCasesConnectorActionSource, ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import type { GetCasesClientFn } from '../../client/types';
@@ -183,10 +183,12 @@ export class CasesConnector extends SubActionConnector<
     const configuredMaxOpenCases = getMaximumOpenCases(
       await uiSettingsClient.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)
     );
+    const source = resolveCasesConnectorActionSource(params);
 
-    if (params.source === 'attack') {
+    if (source === 'attack') {
       return {
         ...params,
+        source,
         maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       };
     }
@@ -198,7 +200,7 @@ export class CasesConnector extends SubActionConnector<
       );
     }
 
-    return params;
+    return { ...params, source };
   }
 
   private handleError(error: Error) {
