@@ -60,8 +60,15 @@ describe('createAiIndexAttachmentType', () => {
     const description = attachmentType.getAgentDescription?.();
 
     expect(description).toContain('ask_user_question');
-    expect(description).toMatch(/pilot limited to 1–3 KIs/);
-    expect(description).toMatch(/render the diff in chat first/);
+    expect(description).toMatch(/Build a new automation through a subagent/);
+    expect(description).toMatch(/Report what the subagent came back with/);
+  });
+
+  it('saves the piloted yaml rather than a regenerated definition', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toContain('`workflowYaml`');
+    expect(description).toMatch(/Never re-generate the definition the subagent returned/);
   });
 
   it('tells the agent to settle the strategy and corpus filter itself', () => {
@@ -75,8 +82,8 @@ describe('createAiIndexAttachmentType', () => {
   it('suppresses the workflow preview, which other attachments ask the agent to render', () => {
     const description = attachmentType.getAgentDescription?.();
 
-    expect(description).toMatch(/Render the diff attachment only/);
     expect(description).toMatch(/Never render the workflow attachment preview/);
+    expect(description).toMatch(/render that and nothing else/);
   });
 
   it('leaves the save decision to the tool confirmation rather than a chat question', () => {

@@ -111,8 +111,32 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('requires hand-written workflow YAML to be validated before it is proposed', () => {
-      expect(content).toContain('Validate before you propose');
+      expect(content).toMatch(/Draft it, and validate what you wrote yourself/);
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
+    });
+
+    it('delegates the build-and-test loop rather than saving an unrun draft', () => {
+      expect(content).toContain('delegate the build-and-test loop to a subagent');
+      expect(content).toMatch(/A workflow that has never run is a guess/);
+      expect(content).toMatch(/complete final YAML must come back verbatim/);
+    });
+
+    it('bounds the iteration, since the subagent shares the run step limit', () => {
+      expect(content).toMatch(/at most three attempts/);
+    });
+
+    it('requires the pilot to tag its indicators and delete them afterwards', () => {
+      expect(content).toContain('ce-pilot-');
+      expect(content).toContain('context-engine.deleteKi');
+      expect(content).toMatch(/cleanup is not optional/);
+    });
+
+    it('notes that a data stream leaves the tag as the only handle on pilot output', () => {
+      expect(content).toMatch(/createKi` refuses `ki_id`/);
+    });
+
+    it('saves the piloted definition rather than a regenerated one', () => {
+      expect(content).toMatch(/Save the YAML exactly as the subagent returned it/);
     });
 
     it('does not ask for a second validation of what generate_workflow already validated', () => {
@@ -125,9 +149,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toContain(platformCoreTools.executeEsql);
     });
 
-    it('does not let validating a workflow be read as licence to run it', () => {
+    it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
-      expect(content).toMatch(/Do not execute a workflow unless\s+the run you are in has told you/);
+      expect(content).toMatch(
+        /Do not execute a saved workflow unless the run you are in has told you/
+      );
     });
 
     it('points at the workflow authoring skill for definition syntax', () => {

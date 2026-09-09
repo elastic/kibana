@@ -23,6 +23,7 @@ import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indice
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import {
   getSaveAutomationErrorMessage,
+  parseWorkflowNameFromYaml,
   saveAutomationHandler,
   tryResolveAiIndexDisplayLabelFromAttachments,
   tryResolveWorkflowDisplayNameById,
@@ -30,6 +31,7 @@ import {
 } from './handler';
 
 const MAX_ATTACHMENT_ID_LENGTH = 256;
+const MAX_WORKFLOW_YAML_LENGTH = 128_000;
 
 const saveAutomationSchema = z
   .object({
@@ -40,6 +42,14 @@ const saveAutomationSchema = z
       .optional()
       .describe(
         'Conversation attachment id of the generated workflow (from generate_workflow attachment_id). Saves the YAML and attaches it to the AI index.'
+      ),
+    workflowYaml: z
+      .string()
+      .min(1)
+      .max(MAX_WORKFLOW_YAML_LENGTH)
+      .optional()
+      .describe(
+        'Complete workflow YAML to save. Use when the definition did not come from generate_workflow — for example when a subagent authored and tested it and returned the YAML.'
       ),
     workflowId: z
       .string()
@@ -58,13 +68,14 @@ const saveAutomationSchema = z
       ),
   })
   .superRefine((value, ctx) => {
-    const hasWorkflowAttachmentId = value.workflowAttachmentId !== undefined;
-    const hasWorkflowId = value.workflowId !== undefined;
+    const sourceCount = [value.workflowAttachmentId, value.workflowYaml, value.workflowId].filter(
+      (source) => source !== undefined
+    ).length;
 
-    if (hasWorkflowAttachmentId === hasWorkflowId) {
+    if (sourceCount !== 1) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Provide exactly one of workflowAttachmentId or workflowId.',
+        message: 'Provide exactly one of workflowAttachmentId, workflowYaml or workflowId.',
         path: ['workflowAttachmentId'],
       });
     }
@@ -108,8 +119,9 @@ export const createSaveAutomationTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Save a generated workflow and/or attach it to a Context Engine AI index as an automation.
+    Save a workflow and/or attach it to a Context Engine AI index as an automation.
     - To persist a draft from generate_workflow, pass workflowAttachmentId.
+    - To persist YAML that did not come from generate_workflow, pass workflowYaml.
     - If the user already saved the workflow manually, pass workflowId instead.
     Requires an ai_index attachment in the conversation unless aiIndexId is provided explicitly.
   `,
@@ -128,6 +140,8 @@ export const createSaveAutomationTool = ({
           : undefined;
       const workflowId =
         typeof toolParams.workflowId === 'string' ? toolParams.workflowId : undefined;
+      const workflowYaml =
+        typeof toolParams.workflowYaml === 'string' ? toolParams.workflowYaml : undefined;
 
       let workflowLabel = 'workflow';
       if (workflowAttachmentId) {
@@ -138,6 +152,9 @@ export const createSaveAutomationTool = ({
         workflowLabel = workflowName
           ? `workflow "${workflowName}"`
           : `draft workflow attachment "${workflowAttachmentId}"`;
+      } else if (workflowYaml) {
+        const workflowName = parseWorkflowNameFromYaml(workflowYaml);
+        workflowLabel = workflowName ? `workflow "${workflowName}"` : 'the drafted workflow';
       } else if (workflowId) {
         let workflowName: string | undefined;
         const security = await getSecurityStart();

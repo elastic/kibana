@@ -61,6 +61,7 @@ const createAttachmentStateManager = ({
     },
   ]),
   updateOrigin: jest.fn().mockResolvedValue(true),
+  add: jest.fn().mockResolvedValue({ id: 'created-attachment' }),
 });
 
 describe('resolveAiIndexIdFromAttachments', () => {
@@ -544,6 +545,135 @@ describe('saveAutomationHandler', () => {
     expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalled();
     expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
     expect(aiIndexService.addAutomation).not.toHaveBeenCalled();
+  });
+
+  it('saves yaml handed in directly and attaches the workflow', async () => {
+    aiIndexService.addAutomation.mockResolvedValue('attached');
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-authored', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+
+    const result = await saveAutomationHandler({
+      params: { workflowYaml: WORKFLOW_YAML },
+      request,
+      spaceId: 'default',
+      attachments: attachments as never,
+      logger,
+      getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+      getCoreStart,
+      getSecurityStart,
+      getWorkflowsManagement: () => workflowsManagement as never,
+    });
+
+    expect(hasWorkflowCreatePrivilege).toHaveBeenCalled();
+    expect(workflowsManagement.createWorkflow).toHaveBeenCalledWith(
+      { yaml: WORKFLOW_YAML },
+      'default',
+      request
+    );
+    expect(result).toEqual({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-authored',
+      status: 'saved_and_attached',
+    });
+  });
+
+  it('creates a workflow attachment linked to the saved workflow so a later edit updates it', async () => {
+    aiIndexService.addAutomation.mockResolvedValue('attached');
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-authored', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+
+    await saveAutomationHandler({
+      params: { workflowYaml: WORKFLOW_YAML },
+      request,
+      spaceId: 'default',
+      attachments: attachments as never,
+      logger,
+      getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+      getCoreStart,
+      getSecurityStart,
+      getWorkflowsManagement: () => workflowsManagement as never,
+    });
+
+    expect(attachments.add).toHaveBeenCalledWith(
+      {
+        type: 'workflow.yaml',
+        data: { yaml: WORKFLOW_YAML, workflowId: 'wf-authored', name: 'pilot' },
+        origin: 'wf-authored',
+      },
+      ATTACHMENT_REF_ACTOR.agent
+    );
+    expect(attachments.updateOrigin).not.toHaveBeenCalled();
+  });
+
+  it('still reports the save when the workflow attachment cannot be created', async () => {
+    aiIndexService.addAutomation.mockResolvedValue('attached');
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-authored', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+    attachments.add.mockRejectedValue(new Error('Unknown attachment type: workflow.yaml'));
+
+    const result = await saveAutomationHandler({
+      params: { workflowYaml: WORKFLOW_YAML },
+      request,
+      spaceId: 'default',
+      attachments: attachments as never,
+      logger,
+      getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+      getCoreStart,
+      getSecurityStart,
+      getWorkflowsManagement: () => workflowsManagement as never,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('no workflow attachment could be created')
+    );
+    expect(result.workflowId).toBe('wf-authored');
+  });
+
+  it('rolls back a workflow created from yaml when attach fails', async () => {
+    aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-authored', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowYaml: WORKFLOW_YAML },
+        request,
+        spaceId: 'default',
+        attachments: attachments as never,
+        logger,
+        getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toBeInstanceOf(AiIndexManagedError);
+
+    expect(workflowsManagement.deleteWorkflows).toHaveBeenCalledWith(
+      ['wf-authored'],
+      'default',
+      request
+    );
+    expect(attachments.add).not.toHaveBeenCalled();
+  });
+
+  it('rejects when no workflow source is provided', async () => {
+    await expect(
+      saveAutomationHandler({
+        params: {},
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager() as never,
+        logger,
+        getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toThrow(/Provide either workflowAttachmentId, workflowYaml or workflowId/);
   });
 
   it('rolls back a newly created workflow when attach fails after pre-check', async () => {

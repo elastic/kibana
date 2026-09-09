@@ -156,6 +156,32 @@ describe('save_automation tool', () => {
     expect(savedConfirmation?.message).toContain('workflow "Existing Pilot"');
   });
 
+  it('names the workflow from the yaml when it was authored outside generate_workflow', async () => {
+    const tool = createTool();
+
+    const confirmation = await tool.confirmation?.getConfirmation?.(
+      createConfirmationContext({
+        workflowYaml: 'name: "Authored Pilot"\nsteps: []',
+        aiIndexId: 'my-ai-index',
+      })
+    );
+
+    expect(confirmation?.message).toContain('workflow "Authored Pilot"');
+  });
+
+  it('falls back to a generic label when the yaml carries no name', async () => {
+    const tool = createTool();
+
+    const confirmation = await tool.confirmation?.getConfirmation?.(
+      createConfirmationContext({
+        workflowYaml: 'steps: []',
+        aiIndexId: 'my-ai-index',
+      })
+    );
+
+    expect(confirmation?.message).toContain('the drafted workflow');
+  });
+
   it('does not resolve workflow names without read privilege', async () => {
     hasWorkflowReadPrivilege.mockResolvedValue(false);
     const tool = createTool();

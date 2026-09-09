@@ -55,9 +55,9 @@ what a finished automation looks like, whether you are drafting one or judging o
 
 ## Shapes for each strategy
 
-`analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow. Describe
-the workflow to `platform.core.generate_workflow` in natural language using these as the spec — do
-not submit YAML to it directly.
+`analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow. Whoever
+drafts it describes it to `platform.core.generate_workflow` in natural language using these as the
+spec — do not submit YAML to it directly.
 
 **Index/Table Metadata** (`type: index_metadata`) — a `foreach` over a list of index names. Per
 iteration: fetch the mapping, sample documents, then an `ai.prompt` producing purpose, what the
@@ -99,51 +99,112 @@ handful of documents, set thresholds above the observed baseline with margin, an
 per signal rather than emitting near-duplicate conditions. Derive `query_type` by parsing the ES|QL
 for a `STATS` command rather than asking the model for it.
 
-## Validate before you propose
+## Authoring: delegate the build-and-test loop to a subagent
 
+A workflow that has never run is a guess. It can parse, name only step types that exist, resolve
+every reference, and still be built on a query that matches nothing — and you would not know until
+someone enabled it. The loop that settles this (draft it, run it, read the indicators it actually
+wrote, fix what is wrong, run it again) is long, and nearly everything it emits is noise the person
+you are talking to has no reason to read.
+
+Run that loop in a subagent. `run_subagent` takes a `description` and a `prompt` and gives you back
+one message, so the conversation keeps the finished workflow and the evidence for it without the
+dozen turns that produced them.
+
+**The brief is the whole job.** A subagent starts with none of this conversation — no attachments,
+no history, no tool results, not even the index id. Anything you leave out it will invent, and it
+will invent it confidently. Put in the prompt:
+
+- the AI index id, and whether its destination is an index or a data stream
+- the sources and the exact corpus filter the automation should apply
+- the strategy from `analyze-and-improve`, and what the indicators are meant to capture
+- an instruction to load `workflow-authoring` and `ai-index-automations` and to build to the rules
+  in this skill, so you do not have to restate them
+- the pilot tag you have chosen for this attempt
+- that the complete final YAML must come back verbatim
+
+That last point is worth stating bluntly in the prompt, because `run_subagent` tells the model its
+job is to summarize. A summary of a workflow is worthless here: the YAML *is* the deliverable. Ask
+for the entire definition in a single fenced `yaml` block with nothing elided, abbreviated or
+replaced by a comment.
+
+Give it a budget, too. A subagent shares this run's step limit, and "keep going until it works" is
+an unbounded instruction — tell it to make at most three attempts and to come back describing what
+is still wrong rather than burning the budget silently.
+
+## The loop a subagent runs
+
+If you are the subagent, this is the work.
+
+**Draft it, and validate what you wrote yourself.**
 `platform.core.generate_workflow` validates its own output: it re-generates against the errors and
 fails the call rather than returning YAML that does not parse. Do not re-validate what it gave you
-— that is a round trip that cannot fail.
-
-Validation is for the YAML it did not produce: a step you wrote out yourself, a query you edited by
-hand, a proposal that quotes YAML in prose. **That must pass
-`platform.workflows.validate_workflow` before you show it.** A proposal that does not parse, or
-that names a step type which does not exist, costs a reviewer the entire round trip and teaches
-them to distrust the next one.
-
-- **Validate the whole definition, not the fragment you changed.** Validation is defined over a
-  complete workflow. A step in isolation cannot tell you whether its references resolve or whether
-  the name it depends on still exists after your edit.
-- **Read the failure rather than working around it.** When validation fails it returns the step
-  definitions for every step type the workflow references. That is usually enough to see whether
-  you misremembered a parameter or the step type is genuinely wrong. Never resolve a failure by
-  swapping in a step type you did not verify.
-- **Say that it validated.** A reviewer has no way to tell a checked proposal from an unchecked
-  one. If you could not validate — the tool was unavailable, or the change is prose rather than
-  YAML — say that instead. Do not imply a check you did not run.
-
-Validation, wherever it happens, establishes that the workflow parses, that its step types exist
-and that its references resolve. It does **not** establish that a query inside it returns anything
-— a generated workflow can be valid and still be built on an ES|QL step that matches no documents.
-That is the check worth running on a draft: try the query with `platform.core.execute_esql`, which
-reads and writes nothing. Where a step's ES|QL needs repairing, `platform.core.generate_esql` will
-rewrite it given the failing query, the reason and the mapping.
-
+— that is a round trip that cannot fail. Validation is for the YAML it did not produce: a step you
+wrote out, a query you edited by hand. That must pass `platform.workflows.validate_workflow`.
+Validate the whole definition rather than the fragment you changed, because a step in isolation
+cannot tell you whether its references still resolve. When validation fails it returns the step
+definitions for every step type the workflow references — read those instead of swapping in a step
+type you have not verified.
 `platform.workflows.get_examples` shows working definitions when you are unsure of a shape.
+
+Validation establishes that the workflow parses, that its step types exist and that its references
+resolve. It does **not** establish that a query inside it returns anything, which is why the rest of
+this loop exists.
+
+**Tag every write.** Give each `context-engine.createKi` a `tags` entry of `ce-pilot-<runId>`, where
+`runId` is unique to this attempt. That tag is the only handle you will have on what the pilot wrote:
+on a data-stream destination `createKi` refuses `ki_id` and Elasticsearch generates the ids, so there
+is nothing else to find them by. Bound the corpus filter to a handful of documents while you are
+iterating.
+
+**Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
+definition ephemerally — nothing is persisted, nothing needs enabling. It waits for completion and
+returns step outputs and the failure message when a step throws.
+
+**Read what it wrote, not whether it ran.** A workflow completes cleanly and still emits indicators
+with empty `content`, absent `attributes`, or titles too alike to tell apart under retrieval. Query
+the tag back with `platform.core.execute_esql`:
+
+```esql
+FROM <destination> METADATA _id
+| WHERE tags == "ce-pilot-<runId>"
+| KEEP _id, title, type, content, attributes
+| LIMIT 100
+```
+
+Judge those against what the brief asked for. Where a step's ES|QL is the problem,
+`platform.core.generate_esql` will rewrite it given the failing query, the reason and the mapping.
+Fix and run again, within your attempt budget.
+
+**Clean up before you return.** The pilot wrote into the user's real index, so the tagged indicators
+are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will
+know to look for. Run a second inline workflow: an `elasticsearch.esql.query` selecting `_id` for the
+tag as above, then a `foreach` over the results calling `context-engine.deleteKi` with `ki_id` set to
+each `_id`. Query the tag once more afterwards and confirm it returns nothing. Do this for every
+`runId` you used, not only the last.
+
+**Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the `createKi` steps and widen
+the corpus filter back to what the brief specified — the pilot's narrow filter is not the automation.
+Return the finished YAML in full, a plain-language account of what the workflow does, and what the
+pilot indicators looked like. The last of those is the evidence the reviewer approves on.
+
+## Saving what comes back
+
+Save the YAML exactly as the subagent returned it. Re-generating it from a description discards the
+definition the pilot proved and saves a different one — one whose queries nobody has run.
+
+Present the subagent's summary and its pilot indicators before you save. The save confirmation names
+the workflow and the index but shows none of its content, so that account is the only thing the user
+has to approve on.
 
 ## Running one is a separate decision
 
-Validating a workflow and running it are different authorities. Running one writes indicators into
-the index and costs model calls on every document it touches.
+Piloting inside the loop above is authorized by the brief that started it, and is bounded to a
+handful of documents that get deleted afterwards. Running the saved automation is not the same act:
+it writes indicators across the whole corpus and costs model calls on every document it touches.
 
-Do not execute a workflow unless the run you are in has told you to. When it has, start with a
-pilot: bound the corpus filter to a handful of documents, run that, and read what it produced
-before widening. `platform.core.execute_workflow` starts a run and
-`platform.core.get_workflow_execution_status` reports on it.
-
-Read the indicators a pilot produced rather than assuming a successful run means a good one. A
-workflow can complete cleanly and emit indicators with empty `content`, missing `attributes`, or
-titles that will never differentiate under retrieval.
+Do not execute a saved workflow unless the run you are in has told you to. `platform.core.execute_workflow`
+starts a run and `platform.core.get_workflow_execution_status` reports on it.
 
 ## Corpora larger than 10,000 documents
 

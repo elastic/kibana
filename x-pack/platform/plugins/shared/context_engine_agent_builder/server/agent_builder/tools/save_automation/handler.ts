@@ -26,6 +26,7 @@ import { assertContextEngineWriteAccess } from '../../assert_context_engine_writ
 
 export interface SaveAutomationParams {
   workflowAttachmentId?: string;
+  workflowYaml?: string;
   workflowId?: string;
   aiIndexId?: string;
 }
@@ -270,7 +271,96 @@ const assertWorkflowUpdateAccess = async ({
   }
 };
 
-const persistWorkflowFromAttachment = async ({
+/**
+ * Where the YAML to save came from. `attachmentId` is set only when it was read out of a
+ * conversation attachment, which is then linked to the saved workflow; YAML handed in directly
+ * has no attachment yet, so one is created after the save.
+ */
+interface ResolvedWorkflowSource {
+  yaml: string;
+  proposedWorkflowId?: string;
+  existingWorkflowId?: string;
+  attachmentId?: string;
+}
+
+const resolveWorkflowSource = (
+  params: SaveAutomationParams,
+  attachments: AttachmentStateManager
+): ResolvedWorkflowSource => {
+  if (params.workflowYaml !== undefined) {
+    return { yaml: params.workflowYaml };
+  }
+
+  if (params.workflowAttachmentId === undefined) {
+    throw new Error('Provide either workflowAttachmentId, workflowYaml or workflowId.');
+  }
+
+  const { yaml, workflowId, origin } = resolveWorkflowYamlFromAttachments(
+    attachments,
+    params.workflowAttachmentId
+  );
+
+  return {
+    yaml,
+    proposedWorkflowId: workflowId,
+    existingWorkflowId: origin,
+    attachmentId: params.workflowAttachmentId,
+  };
+};
+
+/**
+ * Points a conversation attachment at the saved workflow so a later edit updates it rather than
+ * creating a duplicate. Failing to link costs a duplicate on the next save, not this one, so it
+ * never fails a save that has already persisted and attached.
+ */
+const linkWorkflowToAttachment = async ({
+  source,
+  workflowId,
+  attachments,
+  logger,
+}: {
+  source: ResolvedWorkflowSource;
+  workflowId: string;
+  attachments: AttachmentStateManager;
+  logger: Logger;
+}): Promise<void> => {
+  if (source.attachmentId !== undefined) {
+    const originUpdated = await attachments.updateOrigin(
+      source.attachmentId,
+      workflowId,
+      ATTACHMENT_REF_ACTOR.agent
+    );
+    if (!originUpdated) {
+      logger.warn(
+        `Workflow '${workflowId}' was attached but its attachment origin could not be recorded; ` +
+          `a future save for attachment '${source.attachmentId}' may create a duplicate workflow.`
+      );
+    }
+    return;
+  }
+
+  const name = parseWorkflowNameFromYaml(source.yaml);
+
+  try {
+    await attachments.add(
+      {
+        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+        data: { yaml: source.yaml, workflowId, ...(name !== undefined && { name }) },
+        origin: workflowId,
+      },
+      ATTACHMENT_REF_ACTOR.agent
+    );
+  } catch (error) {
+    logger.warn(
+      `Workflow '${workflowId}' was saved and attached but no workflow attachment could be created ` +
+        `for it; editing it in this conversation will require fetching it first. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+    );
+  }
+};
+
+const persistWorkflow = async ({
   yaml,
   proposedWorkflowId,
   existingWorkflowId,
@@ -363,15 +453,8 @@ export const saveAutomationHandler = async ({
     };
   }
 
-  if (!params.workflowAttachmentId) {
-    throw new Error('Provide either workflowAttachmentId or workflowId.');
-  }
-
-  const {
-    yaml,
-    workflowId: proposedWorkflowId,
-    origin: existingWorkflowId,
-  } = resolveWorkflowYamlFromAttachments(attachments, params.workflowAttachmentId);
+  const source = resolveWorkflowSource(params, attachments);
+  const { existingWorkflowId } = source;
   const isUpdate = existingWorkflowId !== undefined;
 
   // Fail-fast: reject before createWorkflow/updateWorkflow when the index cannot accept this automation.
@@ -380,9 +463,9 @@ export const saveAutomationHandler = async ({
     existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
   );
 
-  const { workflowId, newlyCreated } = await persistWorkflowFromAttachment({
-    yaml,
-    proposedWorkflowId,
+  const { workflowId, newlyCreated } = await persistWorkflow({
+    yaml: source.yaml,
+    proposedWorkflowId: source.proposedWorkflowId,
     existingWorkflowId,
     workflowsManagement,
     spaceId,
@@ -397,17 +480,7 @@ export const saveAutomationHandler = async ({
     });
 
     if (newlyCreated) {
-      const originUpdated = await attachments.updateOrigin(
-        params.workflowAttachmentId,
-        workflowId,
-        ATTACHMENT_REF_ACTOR.agent
-      );
-      if (!originUpdated) {
-        logger.warn(
-          `Workflow '${workflowId}' was attached but its attachment origin could not be recorded; ` +
-            `a future save for attachment '${params.workflowAttachmentId}' may create a duplicate workflow.`
-        );
-      }
+      await linkWorkflowToAttachment({ source, workflowId, attachments, logger });
     }
 
     return {
