@@ -48,6 +48,7 @@ export interface UMServerRoute<T> {
    * `['uptime-write', 'monitor-run-manually']` allows either a full-write user or a run-only user.
    */
   anyRequiredPrivileges?: string[];
+  extendedPrivileges?: string[];
   handler: T;
   validation?: VersionedRouteValidation<any, any, any>;
   streamHandler?: (

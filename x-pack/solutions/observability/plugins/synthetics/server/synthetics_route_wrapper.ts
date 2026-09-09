@@ -31,13 +31,18 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       requiredPrivileges: [
         'uptime-read',
         ...(syntheticsRoute.requiredPrivileges ?? []),
-        ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
+        ...(syntheticsRoute.writeAccess && !syntheticsRoute.anyRequiredPrivileges?.length
+          ? ['uptime-write']
+          : []),
         // OR-set: at least one of these privileges must be satisfied. Used to allow a
         // route for either a full-write user or a more granular privilege holder.
         ...(syntheticsRoute.anyRequiredPrivileges?.length
           ? [{ anyRequired: syntheticsRoute.anyRequiredPrivileges }]
           : []),
       ],
+      ...(syntheticsRoute.extendedPrivileges?.length
+        ? { extendedPrivileges: syntheticsRoute.extendedPrivileges }
+        : {}),
     },
   },
   handler: async (context, request, response) => {

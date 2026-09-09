@@ -34,7 +34,6 @@ import {
   getDynamicSettingsAction,
   setDynamicSettingsAction,
 } from '../../../state/settings/actions';
-import type { DynamicSettings } from '../../../../../../common/runtime_types';
 
 export const AdvancedSettingsForm = () => {
   const dispatch = useDispatch();
@@ -49,8 +48,8 @@ export const AdvancedSettingsForm = () => {
     DYNAMIC_SETTINGS_DEFAULTS.rebalancePrivateLocationShardsEnabled ?? true
   );
 
-  const canEdit: boolean =
-    !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  const canEdit = Boolean(capabilities?.configureSettings || capabilities?.canManageSettings);
 
   const isDisabled = !canEdit;
 
@@ -74,10 +73,9 @@ export const AdvancedSettingsForm = () => {
     if (settings) {
       dispatch(
         setDynamicSettingsAction.get({
-          ...settings,
           privateLocationsSyncInterval: syncInterval,
           rebalancePrivateLocationShardsEnabled: rebalanceShardsEnabled,
-        } as DynamicSettings)
+        })
       );
     }
   };

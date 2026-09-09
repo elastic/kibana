@@ -21,6 +21,10 @@ import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
 } from '../../tasks/rebalance_shards_enabled';
+import {
+  WRITE_SYNTHETICS_DEFAULT_RULES_API,
+  WRITE_SYNTHETICS_SETTINGS_API,
+} from '../../constants/privileges';
 
 const buildServer = () =>
   ({
@@ -215,6 +219,111 @@ describe('dynamic settings routes', () => {
         })
       );
       expect(result).toMatchObject({ status: 409 });
+    });
+  });
+
+  describe('createPostDynamicSettingsRoute authorization', () => {
+    it('accepts either legacy write or granular settings access', () => {
+      expect(createPostDynamicSettingsRoute()).toMatchObject({
+        method: 'PUT',
+        writeAccess: true,
+        anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_SETTINGS_API],
+        extendedPrivileges: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
+      });
+    });
+
+    it('lets a settings manager update a certificate threshold without rule management', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      const setSpy = jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+
+      const route = createPostDynamicSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          request: {
+            body: { certExpirationThreshold: 14 },
+            authzResult: { [WRITE_SYNTHETICS_DEFAULT_RULES_API]: false },
+          } as never,
+        })
+      );
+
+      expect(setSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ certExpirationThreshold: 14 })
+      );
+      expect(result).toMatchObject({ certExpirationThreshold: 14 });
+    });
+
+    it('rejects default-rule changes without rule management', async () => {
+      const forbidden = jest.fn().mockReturnValue({ statusCode: 403 });
+      const route = createPostDynamicSettingsRoute();
+
+      const result = await route.handler(
+        buildRouteContext({
+          request: {
+            body: { defaultStatusRuleEnabled: false },
+            authzResult: { [WRITE_SYNTHETICS_DEFAULT_RULES_API]: false },
+          } as never,
+          response: { forbidden } as never,
+        })
+      );
+
+      expect(forbidden).toHaveBeenCalled();
+      expect(result).toEqual({ statusCode: 403 });
+    });
+
+    it('lets a settings manager with rule management update default-rule settings', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      const setSpy = jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          request: {
+            body: { defaultStatusRuleEnabled: false },
+            authzResult: { [WRITE_SYNTHETICS_DEFAULT_RULES_API]: true },
+          } as never,
+        })
+      );
+
+      expect(setSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ defaultStatusRuleEnabled: false })
+      );
+    });
+
+    it('preserves default-rule changes for legacy write access', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      const setSpy = jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          request: {
+            body: { defaultStatusRuleEnabled: false },
+            authzResult: {
+              'uptime-write': true,
+              [WRITE_SYNTHETICS_DEFAULT_RULES_API]: false,
+            },
+          } as never,
+        })
+      );
+
+      expect(setSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ defaultStatusRuleEnabled: false })
+      );
     });
   });
 

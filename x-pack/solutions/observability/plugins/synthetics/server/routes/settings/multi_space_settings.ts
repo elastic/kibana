@@ -10,6 +10,7 @@ import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/run
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { isCCSEnabled } from '../../lib/remote_result_utils';
 import { DefaultSyntheticsMultiSpaceSettingsRepository } from '../../services/synthetics_multi_space_settings_repository';
+import { WRITE_SYNTHETICS_SETTINGS_API } from '../../constants/privileges';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 const MAX_SELECTED_REMOTE_CLUSTERS = 100;
@@ -55,7 +56,8 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
   validate: {
     body: SyntheticsMultiSpaceSettingsSchema,
   },
-  writeAccess: true,
+  writeAccess: false,
+  requiredPrivileges: [WRITE_SYNTHETICS_SETTINGS_API],
   handler: async ({ savedObjectsClient, request, server, response }) => {
     if (!isCCSEnabled(server)) {
       return response.notFound();

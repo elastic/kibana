@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 import { setDynamicSettings } from './api';
 
@@ -21,10 +21,9 @@ describe('setDynamicSettings', () => {
     mockPut.mockResolvedValue({ success: true });
   });
 
-  it('includes rebalancePrivateLocationShardsEnabled in the PUT body', async () => {
+  it('uses PUT for partial settings updates', async () => {
     await setDynamicSettings({
       settings: {
-        ...DYNAMIC_SETTINGS_DEFAULTS,
         rebalancePrivateLocationShardsEnabled: false,
       },
     });

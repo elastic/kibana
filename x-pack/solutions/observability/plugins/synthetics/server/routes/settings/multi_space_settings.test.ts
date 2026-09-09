@@ -13,6 +13,7 @@ import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
 } from './multi_space_settings';
+import { WRITE_SYNTHETICS_SETTINGS_API } from '../../constants/privileges';
 
 const NOT_FOUND_SENTINEL = { status: 404 };
 
@@ -83,6 +84,13 @@ describe('multi space settings routes', () => {
   });
 
   describe('createPutMultiSpaceSettingsRoute', () => {
+    it('requires the granular settings privilege', () => {
+      expect(createPutMultiSpaceSettingsRoute()).toMatchObject({
+        writeAccess: false,
+        requiredPrivileges: [WRITE_SYNTHETICS_SETTINGS_API],
+      });
+    });
+
     it('persists attributes via the repository without spaces when none are provided', async () => {
       const expected: SyntheticsMultiSpaceSettingsWithSpaces = {
         useAllRemoteClusters: true,

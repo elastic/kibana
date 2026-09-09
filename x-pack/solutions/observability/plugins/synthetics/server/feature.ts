@@ -28,6 +28,11 @@ import {
   uptimeSettingsObjectType,
 } from './saved_objects/synthetics_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
+import { SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE } from './saved_objects/synthetics_settings_multi_space';
+import {
+  WRITE_SYNTHETICS_DEFAULT_RULES_API,
+  WRITE_SYNTHETICS_SETTINGS_API,
+} from './constants/privileges';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
@@ -115,6 +120,25 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
+const canManageSettingsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_manage_settings',
+      name: i18n.translate('xpack.synthetics.features.canManageSettings.label', {
+        defaultMessage: 'Can manage',
+      }),
+      includeIn: 'none',
+      api: [WRITE_SYNTHETICS_SETTINGS_API],
+      savedObject: {
+        all: [syntheticsSettingsObjectType, SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE],
+        read: [],
+      },
+      ui: ['canManageSettings'],
+    },
+  ],
+};
+
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -130,7 +154,14 @@ export const syntheticsFeature = {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
+      api: [
+        'uptime-read',
+        'uptime-write',
+        WRITE_SYNTHETICS_SETTINGS_API,
+        WRITE_SYNTHETICS_DEFAULT_RULES_API,
+        'lists-all',
+        'rac',
+      ],
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
@@ -138,6 +169,7 @@ export const syntheticsFeature = {
           syntheticsMonitorSavedObjectType,
           syntheticsApiKeyObjectType,
           syntheticsParamType,
+          SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
 
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
@@ -158,7 +190,14 @@ export const syntheticsFeature = {
       management: {
         insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
-      ui: ['save', 'configureSettings', 'show', 'alerting:save'],
+      ui: [
+        'save',
+        'configureSettings',
+        'canManageSettings',
+        'canManageRules',
+        'show',
+        'alerting:save',
+      ],
     },
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
@@ -231,6 +270,16 @@ export const syntheticsFeature = {
         defaultMessage: 'This feature allows you to read global parameters values',
       }),
       privilegeGroups: [canReadParamsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.settings', {
+        defaultMessage: 'Synthetics settings',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.settings.description', {
+        defaultMessage:
+          'Configure Synthetics alert defaults and operational settings. Global parameters and private locations are managed separately.',
+      }),
+      privilegeGroups: [canManageSettingsPrivilege],
     },
   ],
 };
