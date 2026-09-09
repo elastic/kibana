@@ -18,7 +18,6 @@ import type {
   ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
-  PolicyMatcherAttributes,
   DispatcherStepOutput,
 } from '../types';
 
@@ -58,10 +57,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         name: doc.attributes.name,
         enabled: doc.attributes.enabled,
         destinations: doc.attributes.destinations ?? [],
-        matcher: (doc.attributes.matcher ?? undefined) as
-          | PolicyMatcherAttributes
-          | null
-          | undefined,
+        matcher: doc.attributes.matcher ?? undefined,
         groupBy: doc.attributes.groupBy ?? [],
         tags: doc.attributes.tags ?? [],
         groupingMode: doc.attributes.groupingMode ?? DEFAULT_GROUPING_MODE,
