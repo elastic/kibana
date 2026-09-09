@@ -11,10 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
-import {
-  createMockLocators,
-  ListPageTestProviders,
-} from '../../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
 
 const mockLocators = createMockLocators();
