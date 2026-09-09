@@ -39,7 +39,7 @@ export function findSubquery(
         const candidate = node.child;
 
         // Skip non-ES|QL subqueries (e.g. PromQL nodes) which don't have commands.
-        if (candidate?.commands && candidate.commands.length > 0) {
+        if (candidate?.commands) {
           subQuery = candidate;
         }
       }

@@ -14,6 +14,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   PND_API_PRIVILEGE_READ,
@@ -30,9 +31,11 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { installStatic } from './managed_workflows/install_static';
+import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
+import { WorkersService } from './services/workers/workers_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
+import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -42,12 +45,9 @@ export class PndPlugin
   private spaces?: PndStartDependencies['spaces'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
-  /**
-   * Created during `start` once Workflows management is known. Routes resolve it lazily, so it is
-   * built even without Workflows — store-backed reads and writes still work, and only the
-   * workflow-backed `enabled` write degrades.
-   */
+  /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
+  private workersService?: WorkersService;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -56,7 +56,7 @@ export class PndPlugin
 
   setup(
     coreSetup: CoreSetup<PndStartDependencies, PndPluginStart>,
-    { features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
+    { agentBuilder, features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
   ): PndPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('PND plugin is disabled');
@@ -65,9 +65,10 @@ export class PndPlugin
 
     this.logger.info('Setting up PND plugin');
 
-    this.workflowsManagementApi = workflowsManagement?.management;
+    this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
+    registerAgentType(agentBuilder);
 
     features.registerKibanaFeature({
       id: PND_FEATURE_ID,
@@ -80,7 +81,7 @@ export class PndPlugin
           app: ['kibana', PND_FEATURE_ID],
           api: [PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
-          ui: ['show'],
+          ui: ['show', 'write'],
         },
         read: {
           app: ['kibana', PND_FEATURE_ID],
@@ -99,6 +100,7 @@ export class PndPlugin
       config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
+      getWorkersService: () => this.requireWorkersService(),
     });
 
     return {};
@@ -111,28 +113,40 @@ export class PndPlugin
       return {};
     }
 
-    const installationReady = installStatic({
-      enabled: this.config.enabled,
+    void ensureAgentSafe({
+      agentBuilder: plugins.agentBuilder,
+      spaceId: DEFAULT_SPACE_ID,
+      logger: this.logger,
+    });
+
+    const management = this.workflowsManagementApi
+      ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+      : undefined;
+    const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) => ensureAgent({ agentBuilder: plugins.agentBuilder!, spaceId })
+        : undefined,
     }).catch((error) => {
       this.logger.error(
-        `PND managed watch installation failed: ${
+        `PND managed workflow initialization failed: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return undefined;
     });
 
-    // Built whether or not Workflows management is available: the watch store backs settings either
-    // way, and `enabled` falls back to the store when there is no workflow to write to.
-    this.watchesService = new WatchesService(
-      this.workflowsManagementApi
-        ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+    // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
+    this.watchesService = new WatchesService();
+    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) =>
+            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
         : undefined,
-      this.logger,
-      this.config.ui.useMockData,
-      installationReady
-    );
+      agentBuilder: plugins.agentBuilder,
+      agentTypes: [agentType],
+    });
 
     return {};
   }
@@ -142,6 +156,13 @@ export class PndPlugin
       throw new Error('Watches service is not available until the PND plugin has started');
     }
     return this.watchesService;
+  }
+
+  private requireWorkersService(): WorkersService {
+    if (!this.workersService) {
+      throw new Error('Workers service is not available until the PND plugin has started');
+    }
+    return this.workersService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

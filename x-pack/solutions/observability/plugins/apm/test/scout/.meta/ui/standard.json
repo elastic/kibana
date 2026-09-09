@@ -1,8 +1,7 @@
 {
-  "sha1": "2ed99ae2a8b0bc577473025ae4304af8882c7f86",
+  "sha1": "abbda397a9007ec1bcd3e5a18a1c762027c76157",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -302,7 +301,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
         "line": 12,
-        "column": 14
+        "column": 81
       }
     },
     {
@@ -315,8 +314,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 14,
-        "column": 45
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -329,8 +328,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 23,
+        "column": 8
       }
     }
   ]

@@ -229,6 +229,70 @@ AND \`ip\` != "127.0.0.2/32"`
     );
   });
 
+  it('does not cast a `text` multivalue field for MV_CONTAINS, letting ES|QL coerce the value', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-*',
+        'full_name',
+        ['Pepe', 'Alvarez'],
+        '+',
+        'string',
+        'text'
+      )
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`full_name\`, ["Pepe", "Alvarez"])`
+    );
+  });
+
+  it('casts the value for numeric ES types ES|QL can cast to', () => {
+    expect(
+      appendWhereClauseToESQLQuery('from logstash-*', 'price', [1.5, 2.5], '+', 'number', 'double')
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`price\`, [1.5, 2.5]::double)`
+    );
+
+    expect(
+      appendWhereClauseToESQLQuery('from logstash-*', 'level', [1, 2], '+', 'number', 'long')
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`level\`, [1, 2]::long)`
+    );
+  });
+
+  it('keeps ES types that are already valid ES|QL cast targets', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-*',
+        'host.ip',
+        ['1.1.1.1', '2.2.2.2'],
+        '+',
+        'ip',
+        'ip'
+      )
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`host.ip\`, ["1.1.1.1", "2.2.2.2"]::ip)`
+    );
+  });
+
+  it('does not cast the value for ES types ES|QL cannot cast to', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-*',
+        'range',
+        ['a', 'b'],
+        '+',
+        'string',
+        'double_range'
+      )
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`range\`, ["a", "b"]::double_range)`
+    );
+  });
+
   it('appends AND MATCH clauses for multivalue fields when WHERE clause already exists', () => {
     expect(
       appendWhereClauseToESQLQuery(

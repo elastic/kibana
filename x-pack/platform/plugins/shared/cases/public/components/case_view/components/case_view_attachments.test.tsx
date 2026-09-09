@@ -22,7 +22,6 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import userEvent from '@testing-library/user-event';
-import { KibanaServices } from '../../../common/lib/kibana';
 
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
@@ -739,39 +738,15 @@ describe('Case View Attachments tab', () => {
     ]);
   });
 
-  describe('sidebar toggle button', () => {
-    it('does not render the sidebar toggle button when redesign is disabled', () => {
-      renderWithTestingProviders(
-        <CaseViewAttachments
-          caseData={caseData}
-          onSearch={onSearchMock}
-          onUpdateField={onUpdateFieldMock}
-        />
-      );
+  it('renders the sidebar toggle button', () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />
+    );
 
-      expect(screen.queryByTestId('case-view-sidebar-toggle')).not.toBeInTheDocument();
-    });
-
-    it('renders the sidebar toggle button when redesign is enabled', () => {
-      const spy = jest
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ casesRedesign: { details: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
-
-      try {
-        renderWithTestingProviders(
-          <CaseViewAttachments
-            caseData={caseData}
-            onSearch={onSearchMock}
-            onUpdateField={onUpdateFieldMock}
-          />
-        );
-
-        expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
-      } finally {
-        spy.mockRestore();
-      }
-    });
+    expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
   });
 });

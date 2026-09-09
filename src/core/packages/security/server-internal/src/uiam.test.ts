@@ -50,6 +50,15 @@ describe('createCoreUiamService', () => {
       ).toBe(SHARED_SECRET);
     });
 
+    it('returns undefined for an external (user-created) UIAM credential', () => {
+      expect(
+        uiam.getElasticsearchClientAuthentication({
+          credentialSource: 'external',
+          credential: UIAM_CREDENTIAL,
+        })
+      ).toBeUndefined();
+    });
+
     it('returns the shared secret for an inbound UIAM credential with a valid attestation', () => {
       expect(
         uiam.getElasticsearchClientAuthentication({

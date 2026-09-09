@@ -22,6 +22,7 @@ import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
@@ -94,7 +95,38 @@ export const eventsWriteItemSchema = significantEventSchema
     {
       message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
     }
-  );
+  )
+  .superRefine((item, ctx) => {
+    const signals = item.signals ?? [];
+    const grounded = signals.filter((s) => s.evidence != null);
+    const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+    const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+    const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
+
+    if (hasConfirms && hasNotChecked) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+      });
+    }
+    // Continuations inherit prior severity; this cycle's signals may be
+    // inconclusive (telemetry gap, errored query) without a new confirms.
+    if (
+      item.event_id === undefined &&
+      item.status === 'open' &&
+      (item.severity === '60-high' || item.severity === '80-critical') &&
+      grounded.length > 0 &&
+      !hasConfirms &&
+      !hasOffTopicObservedError
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-open status.',
+      });
+    }
+  });
 
 const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
 
@@ -113,18 +145,25 @@ const eventsWriteItemsSchema = z
       return new Set(ruleUuids).size === ruleUuids.length;
     },
     {
-      message: 'Each detection rule UUID may appear in only one event item per write',
+      message:
+        'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
     }
   )
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id for new events; supply the existing event_id for continuations. Each detection rule_uuid may appear in only one item.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
     })
   );
 
 export const eventsWriteSchema = z
   .object({
+    source: z
+      .literal('discovery')
+      .optional()
+      .describe(
+        'Identifies the caller of this write. Discovery calls must set this to "discovery".'
+      ),
     items: eventsWriteItemsSchema,
   })
   .describe(
@@ -134,6 +173,94 @@ export const eventsWriteSchema = z
   );
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
+
+const enrichCausalFeatures = async (
+  items: EventsWriteParams['items'],
+  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
+  logger: Logger
+): Promise<EventsWriteParams['items']> => {
+  const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
+  const blastRadiusEntries = items.flatMap(({ blast_radius: entries = [] }) => entries);
+  if (causalFeatures.length === 0 && blastRadiusEntries.length === 0) {
+    return items;
+  }
+
+  try {
+    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
+    // references and `featureIds` (feature.slug) matches slug-style ones.
+    const references = [...causalFeatures, ...blastRadiusEntries];
+    const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
+    const streamNames = [
+      ...new Set([
+        ...items.flatMap(({ stream_names: names }) => names),
+        ...references.flatMap(({ stream_name: streamName }) => streamName ?? []),
+      ]),
+    ];
+    const kiClient = await getKnowledgeIndicatorClient();
+    const hits = (
+      await Promise.all([
+        kiClient.getFeatures(streamNames, {
+          featureIds,
+          includeExcluded: true,
+          includeExpired: true,
+        }),
+        kiClient.getFeatures(streamNames, {
+          id: featureIds,
+          includeExcluded: true,
+          includeExpired: true,
+        }),
+      ])
+    ).flatMap(({ hits: featureHits }) => featureHits);
+    // Both lookups can return the same indicator; keep one entry per uuid.
+    const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
+    const featuresByReference = new Map(
+      uniqueHits.flatMap((feature) => [
+        [`${feature.stream_name}:${feature.id}`, feature] as const,
+        [`${feature.stream_name}:${feature.uuid}`, feature] as const,
+      ])
+    );
+
+    const resolveFeature = (
+      featureId: string,
+      explicitStream: string | undefined,
+      itemStreamNames: string[]
+    ) => {
+      if (explicitStream !== undefined) {
+        return featuresByReference.get(`${explicitStream}:${featureId}`);
+      }
+      // Without an explicit stream: an unambiguous match wins; otherwise restrict to the
+      // event's own streams so a shared slug on another stream cannot stamp the wrong
+      // classification.
+      const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
+      const scoped = matches.filter(({ stream_name }) => itemStreamNames.includes(stream_name));
+      return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
+    };
+
+    return items.map((item) => ({
+      ...item,
+      causal_features: item.causal_features?.map((causalFeature) => {
+        const feature = resolveFeature(
+          causalFeature.feature_id,
+          causalFeature.stream_name,
+          item.stream_names
+        );
+        return feature
+          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          : causalFeature;
+      }),
+      // Blast radius rows carry their own row-shape discriminator in `type`; only the
+      // indicator's subtype is enriched.
+      blast_radius: item.blast_radius?.map((entry) => {
+        const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
+        return feature ? { ...entry, subtype: feature.subtype } : entry;
+      }),
+    }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
+    return items;
+  }
+};
 
 export function createEventsWriteTool({
   getScopedClients,
@@ -150,14 +277,20 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Write a batch of significant events. Call once with a populated items array.
+       Write a batch of significant events. Always pass the completed object
+      \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
+      \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
+      already-completed object once. Do not retry a populated payload rejected for
+      ownership or field validation.
+
+      Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are
-      unchanged (written: false, reason: unchanged_outcome). Keep an open continuation at or
-      above the prior severity unless grounding shows reduced impact. When no new rule UUIDs are
-      introduced, title and symptom_hypothesis are frozen to the stored values and
-      narrative_preserved: true is returned.
+      unchanged (written: false, reason: unchanged_outcome). Preserve the prior severity unless
+      the discovery procedure establishes a different impact or applies its known-ongoing
+      severity cap. When no new rule UUIDs are introduced, title and symptom_hypothesis are
+      frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
       set contains the submitted rules and shares at least one stream name. If found, returns it
@@ -177,12 +310,19 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
+        const items = await enrichCausalFeatures(
+          toolParams.items,
+          getKnowledgeIndicatorClient,
+          logger
+        );
 
         const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),
-          inputs: toolParams.items,
+          inputs: items,
         });
 
         data.forEach((result) => {

@@ -27,13 +27,20 @@ export {
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
   connectorAttachmentDataSchema,
+  imageAttachmentDataSchema,
   CONNECTOR_TAG_PREFIX,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGES_PER_ROUND,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type TimeRange,
   screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type ConnectorAttachmentData,
+  type ImageAttachmentData,
+  type SupportedImageMimeType,
 } from './attachment_types';
 
 export type {

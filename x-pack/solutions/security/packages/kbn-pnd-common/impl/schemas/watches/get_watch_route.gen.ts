@@ -17,7 +17,6 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Watch } from '../components/watch.gen';
-import { WatchSettings } from '../components/watch_settings.gen';
 
 export const GetWatchRequestParams = lazySchema(() =>
   z.object({
@@ -33,10 +32,6 @@ export type GetWatchRequestParamsInput = z.input<typeof GetWatchRequestParams>;
 export const GetWatchResponse = lazySchema(() =>
   z.object({
     watch: Watch,
-    /**
-     * Omitted when the watch has no settings to expose, which is the case for live projected watches until settings are applied to the managed workflow definition.
-     */
-    settings: WatchSettings.optional(),
   })
 );
 export type GetWatchResponse = z.infer<typeof GetWatchResponse>;
