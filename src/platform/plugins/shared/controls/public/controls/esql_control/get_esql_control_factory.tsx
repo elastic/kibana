@@ -23,7 +23,7 @@ import {
 import {
   apiHasPinnedPanels,
   apiPublishesChildren,
-  apiPublishesEsqlUsage,
+  apiPublishesEsql,
   initializeRelatedPanels,
   initializeStateApi,
   type StateComparators,
@@ -289,7 +289,7 @@ function getRelatedStaticQuery(
    * For static ??field controls, we need to know which query to pull suggestions from
    */
   const getRelatedQuery = (_api: unknown) => {
-    if (!apiPublishesEsqlUsage(_api)) return undefined;
+    if (!apiPublishesEsql(_api)) return undefined;
     const match = _api.esql$.getValue().find((q) => getESQLQueryVariables(q.esql).includes(variableKey));
     return match?.esql;
   };

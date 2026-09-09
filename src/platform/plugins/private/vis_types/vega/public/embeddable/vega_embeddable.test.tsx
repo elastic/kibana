@@ -16,7 +16,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { apiPublishesEsqlUsage, type ViewMode } from '@kbn/presentation-publishing';
+import { apiPublishesEsql, type ViewMode } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
@@ -461,14 +461,14 @@ describe('vegaEmbeddableFactory', () => {
     });
 
     expect(api.esql$.getValue()).toEqual([{ esql: query }]);
-    expect(apiPublishesEsqlUsage(api)).toBe(true);
+    expect(apiPublishesEsql(api)).toBe(true);
   });
 
   it('publishes an empty esql$ for non-ES|QL specs', async () => {
     const { api } = await buildEmbeddable();
 
     expect(api.esql$.getValue()).toEqual([]);
-    expect(apiPublishesEsqlUsage(api)).toBe(true);
+    expect(apiPublishesEsql(api)).toBe(true);
   });
 
   it('updates esql$ when the spec changes without waiting for a fetch', async () => {

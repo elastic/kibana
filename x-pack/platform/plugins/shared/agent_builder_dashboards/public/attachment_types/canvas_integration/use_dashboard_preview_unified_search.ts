@@ -15,9 +15,9 @@ import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { isOfQueryType, type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
-  apiPublishesEsqlUsage,
+  apiPublishesEsql,
   combineCompatibleChildrenApis,
-  type PublishesEsqlUsage,
+  type PublishesEsql,
 } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
@@ -117,10 +117,10 @@ export const useDashboardPreviewUnifiedSearch = ({
     }
 
     const approximationSubscription = dashboardApi.isApproximate$.subscribe(setIsApproximate);
-    const esqlUsageSubscription = combineCompatibleChildrenApis<PublishesEsqlUsage, AggregateQuery[][]>(
+    const esqlUsageSubscription = combineCompatibleChildrenApis<PublishesEsql, AggregateQuery[][]>(
       dashboardApi,
       'esql$',
-      apiPublishesEsqlUsage,
+      apiPublishesEsql,
       []
     )
       .pipe(

@@ -19,7 +19,7 @@ import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
   ProjectRoutingOverrides,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -120,7 +120,7 @@ export const initializeSearchEmbeddableApi = async ({
     PublishesWritableDataViews &
     Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
     PublishesProjectRoutingOverrides &
-    PublishesEsqlUsage;
+    PublishesEsql;
   internalApi: {
     setApproximationApplied: (approximationApplied?: boolean) => void;
   };

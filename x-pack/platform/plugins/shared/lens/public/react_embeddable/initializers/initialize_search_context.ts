@@ -9,7 +9,7 @@ import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   ProjectRoutingOverrides,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
   StateComparators,
@@ -40,7 +40,7 @@ export interface SearchContextConfig {
   api: PublishesUnifiedSearch &
     PublishesSearchSession &
     PublishesProjectRoutingOverrides &
-    PublishesEsqlUsage;
+    PublishesEsql;
   internalApi: {
     setApproximationApplied: (value: boolean | undefined) => void;
   };

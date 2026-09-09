@@ -31,9 +31,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
-  apiPublishesEsqlUsage,
+  apiPublishesEsql,
   combineCompatibleChildrenApis,
-  type PublishesEsqlUsage,
+  type PublishesEsql,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
@@ -208,10 +208,10 @@ export function InternalDashboardTopNav({
 
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, AggregateQuery[][]>(
+    const subscription = combineCompatibleChildrenApis<PublishesEsql, AggregateQuery[][]>(
       dashboardApi,
       'esql$',
-      apiPublishesEsqlUsage,
+      apiPublishesEsql,
       []
     )
       .pipe(

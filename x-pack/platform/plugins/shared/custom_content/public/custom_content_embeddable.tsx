@@ -14,7 +14,7 @@ import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesDataLoading,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesWritableTimeRange,
 } from '@kbn/presentation-publishing';
 import {
@@ -87,7 +87,7 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
-  PublishesEsqlUsage &
+  PublishesEsql &
   PublishesWritableTimeRange;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<

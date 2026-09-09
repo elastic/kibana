@@ -38,7 +38,7 @@ import {
   type PublishesDataViews,
   type PublishesWritableDescription,
   type PublishesWritableTitle,
-  type PublishesEsqlUsage,
+  type PublishesEsql,
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
@@ -94,7 +94,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesDataLoading &
   PublishesWritableDescription &
   PublishesWritableTitle &
-  PublishesEsqlUsage &
+  PublishesEsql &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
   PublishesRendered;

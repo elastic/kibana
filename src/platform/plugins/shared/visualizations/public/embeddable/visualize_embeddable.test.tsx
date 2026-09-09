@@ -9,7 +9,7 @@
 
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { waitFor } from '@testing-library/react';
-import { apiPublishesEsqlUsage } from '@kbn/presentation-publishing';
+import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { VisualizeApi } from './types';
 import { visualizeEmbeddableFactory } from './visualize_embeddable';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
@@ -216,7 +216,7 @@ describe('visualizeEmbeddable', () => {
 
     test('esql$ is empty when the vis type has no getEsqlQuery', () => {
       expect(embeddableApi.esql$.getValue()).toEqual([]);
-      expect(apiPublishesEsqlUsage(embeddableApi)).toBe(true);
+      expect(apiPublishesEsql(embeddableApi)).toBe(true);
     });
 
     test('esql$ contains the query when the vis type reports one', async () => {
