@@ -5,45 +5,39 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  ALERT_EPISODE_STATUS,
-  type BulkCreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
-import type { EpisodeAction, EpisodeActionContext } from './types';
+import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
+import type { EpisodeAction } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { uniqueByGroup } from './helpers';
+import {
+  createCompositeEpisodeAction,
+  type CompositeActionDeps,
+} from './create_composite_episode_action';
 import * as i18n from './translations';
 
-export interface ResolveActionDeps {
-  http: HttpStart;
-  notifications: NotificationsStart;
-}
-
-export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => ({
-  id: 'ALERTING_V2_RESOLVE_EPISODE',
-  order: 30,
-  displayName: i18n.RESOLVE,
-  iconType: 'check',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE),
-  execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-      reason: i18n.RESOLVE_ACTION_REASON,
-    }));
-    if (!items.length) return;
-
-    try {
-      const response = await bulkCreateAlertActions(deps.http, items);
-      deps.notifications.toasts.add(successOrPartialToast(response));
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
-  },
+export const createResolveAction = (
+  deps: CompositeActionDeps,
+  extension?: EpisodeActionExtension
+): EpisodeAction => ({
+  ...createCompositeEpisodeAction(
+    {
+      id: 'ALERTING_V2_RESOLVE_EPISODE',
+      order: 30,
+      displayName: i18n.RESOLVE,
+      iconType: 'check',
+      isCompatible: (ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE,
+      execute: (episodes, http) =>
+        bulkCreateAlertActions(
+          http,
+          uniqueByGroup(episodes).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            reason: i18n.RESOLVE_ACTION_REASON,
+          }))
+        ),
+    },
+    extension,
+    deps
+  ),
 });

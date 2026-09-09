@@ -13,12 +13,14 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   type BulkCreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { uniqueByGroup } from './helpers';
+import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
+import { executeCompositeAction } from './execute_composite_action';
 import * as i18n from './translations';
 import { openSnoozeExpiryModal } from '../components/snooze_expiry_modal';
-import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 
 export interface SnoozeActionDeps {
   http: HttpStart;
@@ -27,28 +29,40 @@ export interface SnoozeActionDeps {
   rendering: CoreStart['rendering'];
 }
 
-export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
+export const createSnoozeAction = (
+  deps: SnoozeActionDeps,
+  extension?: EpisodeActionExtension<{ expiry: string | null }>
+): EpisodeAction => ({
   id: 'ALERTING_V2_SNOOZE_EPISODE',
   order: 20,
   displayName: i18n.SNOOZE,
   iconType: 'bellSlash',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)),
+    episodes.some((ep) =>
+      ep.source_id == null
+        ? !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+        : extension?.isCompatible(ep) ?? false
+    ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
     if (expiry === undefined) return;
 
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-      ...(expiry === null ? {} : { expiry }),
-    }));
-    if (!items.length) return;
-
     try {
-      const response = await bulkCreateAlertActions(deps.http, items);
-      deps.notifications.toasts.add(successOrPartialToast(response));
+      await executeCompositeAction<{ expiry: string | null }>({
+        episodes,
+        nativeExecute: (eps, http) =>
+          bulkCreateAlertActions(
+            http,
+            uniqueByGroup(eps).map((ep): BulkCreateAlertActionBody[number] => ({
+              group_hash: ep.group_hash,
+              action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+              ...(expiry === null ? {} : { expiry }),
+            }))
+          ),
+        extension,
+        extensionContext: { expiry },
+        deps,
+      });
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

@@ -17,6 +17,7 @@ import { AlertEpisodeTagsFlyout } from './actions/edit_episode_tags_flyout';
 
 interface TagsFlyoutInnerProps {
   currentTags: string[];
+  additionalSuggestions?: string[];
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   onConfirm: (tags: string[]) => void;
   onCancel: () => void;
@@ -26,6 +27,7 @@ interface TagsFlyoutInnerProps {
 // mount the content-only variant here to avoid nesting two flyouts.
 export const TagsFlyoutInner = ({
   currentTags,
+  additionalSuggestions,
   services,
   onConfirm,
   onCancel,
@@ -35,6 +37,7 @@ export const TagsFlyoutInner = ({
       embedded
       onClose={onCancel}
       currentTags={currentTags}
+      additionalSuggestions={additionalSuggestions}
       services={services}
       onSave={onConfirm}
     />
@@ -49,6 +52,7 @@ export const openTagsFlyout = (
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
     queryClient: QueryClient;
+    additionalSuggestions?: string[];
   }
 ): Promise<string[] | undefined> => {
   return new Promise<string[] | undefined>((resolve) => {
@@ -61,6 +65,7 @@ export const openTagsFlyout = (
         <QueryClientProvider client={deps.queryClient}>
           <TagsFlyoutInner
             currentTags={currentTags}
+            additionalSuggestions={deps.additionalSuggestions}
             services={{ expressions: deps.expressions, spaces: deps.spaces }}
             onConfirm={(tags) => {
               ref.close();

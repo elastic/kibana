@@ -40,6 +40,16 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * V2 episodes never set this — they always resolve via the rules cache.
    */
   'rule.name'?: string;
+  /**
+   * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
+   * from the v2 pipeline. Stamped automatically by `fetchEpisodesFromSource`.
+   */
+  source_id?: string;
+  /**
+   * Opaque context attached by the data source, consumed only by that source's
+   * action extensions. The framework never reads this field.
+   */
+  source_action_context?: unknown;
 }
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */

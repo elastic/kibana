@@ -19,6 +19,7 @@ import {
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
+import { episodeSupportsActions } from '../queries/episodes_query';
 import * as i18n from './translations';
 import { openAssigneeFlyout } from '../components/assignee_flyout';
 
@@ -37,7 +38,8 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
   order: 50,
   displayName: i18n.EDIT_ASSIGNEE,
   iconType: 'user',
-  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) =>
+    episodes.filter(episodeSupportsActions).length > 0,
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     // For a single-row invocation, pre-populate the picker with the episode's
     // current assignee. For bulk (>1), leave it blank — there's no shared
@@ -59,7 +61,8 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
     // `undefined` means cancelled; `null` means "clear assignee".
     if (result === undefined) return;
 
-    const items: BulkCreateAlertActionBody = episodes.map((ep) => ({
+    const actionable = episodes.filter(episodeSupportsActions);
+    const items: BulkCreateAlertActionBody = actionable.map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
       episode_id: ep['episode.id'],
