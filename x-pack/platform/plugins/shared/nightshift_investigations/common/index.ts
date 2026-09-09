@@ -147,6 +147,7 @@ export interface InvestigationStatusEvent {
 
 export interface ListInvestigationsRequest {
   statuses?: InvestigationStatus[];
+  concurrency_key?: string;
   created_after?: string;
   created_before?: string;
   started_after?: string;
