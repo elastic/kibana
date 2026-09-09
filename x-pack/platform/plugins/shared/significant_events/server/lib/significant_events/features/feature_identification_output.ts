@@ -6,20 +6,50 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
+
+const equalityConditionSchema = z
+  .object({
+    field: z.string().min(1),
+    eq: z.string(),
+  })
+  .strict();
+
+const featureFilterSchema = z.union([
+  equalityConditionSchema,
+  z
+    .object({
+      and: z.array(equalityConditionSchema).min(1),
+    })
+    .strict(),
+  z
+    .object({
+      or: z.array(equalityConditionSchema).min(1),
+    })
+    .strict(),
+]);
+
+const nonEmptyRecordSchema = z
+  .record(z.string(), z.unknown())
+  .refine((value) => Object.keys(value).length > 0, {
+    message: 'At least one property is required',
+  });
 
 const featureItemSchema = z
   .object({
     id: z.string(),
-    type: z.string(),
+    type: z.enum(INFERRED_FEATURE_TYPES),
     subtype: z.string(),
     description: z.string(),
     title: z.string(),
-    properties: z.record(z.string(), z.unknown()),
-    confidence: z.number(),
+    properties: nonEmptyRecordSchema,
+    confidence: z.number().min(0).max(100),
     evidence: z.array(z.string()),
     evidence_doc_ids: z.array(z.string()).optional(),
     tags: z.array(z.string()),
-    filter: z.unknown().optional(),
+    filter: featureFilterSchema
+      .optional()
+      .describe('Optional single equality filter or one-level and/or list of equality filters.'),
     meta: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();

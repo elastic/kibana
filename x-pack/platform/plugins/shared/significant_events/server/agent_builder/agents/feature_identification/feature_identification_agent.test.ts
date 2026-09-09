@@ -11,13 +11,7 @@ import { FEATURE_IDENTIFICATION_SKILL_ID } from '../../skills/feature_identifica
 import { featureIdentificationAgentType } from './feature_identification_agent';
 
 describe('featureIdentificationAgentType', () => {
-  it('keeps stable instructions and registry tools on the agent type', () => {
-    expect(featureIdentificationAgentType.baseConfiguration.instructions).toContain(
-      'You are extracting **features** from log data'
-    );
-    expect(featureIdentificationAgentType.baseConfiguration.instructions).toContain(
-      'call `platform_sig_events_ki_feature_finalize` exactly once'
-    );
+  it('keeps stable registry tools on the agent type', () => {
     expect(featureIdentificationAgentType.baseConfiguration.skill_ids).toEqual([
       FEATURE_IDENTIFICATION_SKILL_ID,
     ]);

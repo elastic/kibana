@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { AgentExecutionMode, ChatEventType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
 import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
@@ -23,10 +24,35 @@ describe('executeFeatureIdentificationAgent', () => {
           type: ChatEventType.toolCall,
           data: {
             tool_id: FINALIZE_FEATURES_TOOL_ID,
+            tool_call_id: 'failed-finalize',
+            params: {},
+          },
+        },
+        {
+          type: ChatEventType.toolResult,
+          data: {
+            tool_id: FINALIZE_FEATURES_TOOL_ID,
+            tool_call_id: 'failed-finalize',
+            results: [{ type: ToolResultType.error, data: { message: 'Invalid parameters' } }],
+          },
+        },
+        {
+          type: ChatEventType.toolCall,
+          data: {
+            tool_id: FINALIZE_FEATURES_TOOL_ID,
+            tool_call_id: 'successful-finalize',
             params: {
               features: [],
               ignored_features: [],
             },
+          },
+        },
+        {
+          type: ChatEventType.toolResult,
+          data: {
+            tool_id: FINALIZE_FEATURES_TOOL_ID,
+            tool_call_id: 'successful-finalize',
+            results: [{ type: ToolResultType.other, data: { finalized: true } }],
           },
         },
         {
@@ -86,7 +112,6 @@ describe('executeFeatureIdentificationAgent', () => {
           connectorId: 'connector-1',
           conversationId: 'conversation-1',
           storeConversation: true,
-          maxContentLength: 2 * 1024 * 1024,
           nextInput: {
             message: expect.stringContaining('`sample_documents`:'),
           },

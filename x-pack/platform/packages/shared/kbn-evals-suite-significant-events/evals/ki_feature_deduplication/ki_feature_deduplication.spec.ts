@@ -7,7 +7,6 @@
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  formatRawDocument,
   identifyFeatures,
   sumTokens,
   toPreviouslyIdentifiedFeature,
@@ -27,6 +26,7 @@ import {
   type Example,
 } from '@kbn/evals';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -194,8 +194,18 @@ evaluate.describe(
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
-    evaluate.afterAll(async ({ uiSettings }) => {
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
       await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -332,10 +342,7 @@ evaluate.describe(
                       scenario: extractionScenario,
                       log,
                     });
-                    const sampleDocuments = sampledHits.flatMap((hit) => {
-                      const document = formatRawDocument({ hit });
-                      return document ? [document] : [];
-                    });
+                    const sampleDocuments = compactInferenceDocuments(sampledHits);
 
                     const previouslyIdentifiedFeatures = accumulated
                       .getAll()

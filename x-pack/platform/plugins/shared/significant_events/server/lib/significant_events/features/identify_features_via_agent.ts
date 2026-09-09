@@ -16,6 +16,7 @@ import {
   ConversationAccessControlMode,
   isRoundCompleteEvent,
   isToolCallEvent,
+  isToolResultEvent,
 } from '@kbn/agent-builder-common';
 import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -33,8 +34,6 @@ import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature
 import { parseFinalizedFeatures, type RawFinalizeFeaturesParams } from './parse_finalized_features';
 import { buildFeatureIdentificationUserMessage } from './build_user_message';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
-
-const FEATURE_IDENTIFICATION_MAX_CONTENT_LENGTH = 2 * 1024 * 1024;
 
 export interface ExecuteFeatureIdentificationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
@@ -94,7 +93,6 @@ export async function executeFeatureIdentificationAgent({
       conversationId: conversation.id,
       storeConversation: true,
       nextInput: { message: userMessage },
-      maxContentLength: FEATURE_IDENTIFICATION_MAX_CONTENT_LENGTH,
       telemetryMetadata: {
         pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -104,11 +102,30 @@ export async function executeFeatureIdentificationAgent({
 
   const events = await firstValueFrom(events$.pipe(toArray()));
 
-  const finalizeEvent = events.find(
-    (event) => isToolCallEvent(event) && event.data.tool_id === FINALIZE_FEATURES_TOOL_ID
+  const successfulFinalizeCallIds = new Set(
+    events
+      .filter(
+        (event) =>
+          isToolResultEvent(event) &&
+          event.data.tool_id === FINALIZE_FEATURES_TOOL_ID &&
+          event.data.results.some(
+            (result) =>
+              typeof result.data === 'object' &&
+              result.data !== null &&
+              'finalized' in result.data &&
+              result.data.finalized === true
+          )
+      )
+      .map((event) => event.data.tool_call_id)
+  );
+  const finalizeEvent = events.findLast(
+    (event) =>
+      isToolCallEvent(event) &&
+      event.data.tool_id === FINALIZE_FEATURES_TOOL_ID &&
+      successfulFinalizeCallIds.has(event.data.tool_call_id)
   );
   if (!finalizeEvent || !isToolCallEvent(finalizeEvent)) {
-    throw new Error('Feature identification agent did not call finalize_features');
+    throw new Error('Feature identification agent did not successfully call finalize_features');
   }
 
   const roundEvent = events.find(isRoundCompleteEvent);

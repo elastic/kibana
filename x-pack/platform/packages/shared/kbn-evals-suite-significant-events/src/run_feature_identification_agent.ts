@@ -15,7 +15,7 @@ import {
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/nightshift-ai';
-import { createAgentBuilderClient } from '@kbn/evals';
+import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
 import {
   buildFeatureIdentificationUserMessage,
   FEATURE_IDENTIFICATION_AGENT_ID,
@@ -40,6 +40,34 @@ export interface RunFeatureIdentificationAgentResult {
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }
+
+export const getSuccessfulFinalizeFeaturesParams = (
+  steps: ConverseStep[]
+): RawFinalizeFeaturesParams => {
+  const finalizeStep = steps.findLast(
+    (step) =>
+      step.type === 'tool_call' &&
+      step.tool_id === FINALIZE_FEATURES_TOOL_ID &&
+      step.results?.some(
+        (toolResult) =>
+          typeof toolResult === 'object' &&
+          toolResult !== null &&
+          'data' in toolResult &&
+          typeof toolResult.data === 'object' &&
+          toolResult.data !== null &&
+          'finalized' in toolResult.data &&
+          toolResult.data.finalized === true
+      )
+  );
+  if (!finalizeStep?.params) {
+    throw new Error('Feature identification agent did not successfully call its finalization tool');
+  }
+  const rawParams = finalizeStep.params as RawFinalizeFeaturesParams;
+  if (!Array.isArray(rawParams.features)) {
+    throw new Error('Feature identification agent returned invalid finalization output');
+  }
+  return rawParams;
+};
 
 export async function runFeatureIdentificationAgent({
   fetch,
@@ -70,17 +98,9 @@ export async function runFeatureIdentificationAgent({
     conversationId: conversation.id,
     input: userMessage,
   });
-  const finalizeStep = result.steps.find(
-    (step) => step.type === 'tool_call' && step.tool_id === FINALIZE_FEATURES_TOOL_ID
-  );
-  if (!finalizeStep?.params) {
-    throw new Error('Feature identification agent did not call its finalization tool');
-  }
+  const rawParams = getSuccessfulFinalizeFeaturesParams(result.steps);
 
-  const { features, ignoredFeatures } = parseFinalizedFeatures(
-    finalizeStep.params as RawFinalizeFeaturesParams,
-    streamName
-  );
+  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName);
 
   return {
     features,

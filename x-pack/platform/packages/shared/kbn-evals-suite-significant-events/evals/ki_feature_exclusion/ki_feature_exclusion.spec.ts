@@ -68,8 +68,18 @@ evaluate.describe(
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
-    evaluate.afterAll(async ({ uiSettings }) => {
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
       await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {

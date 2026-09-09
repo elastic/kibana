@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { formatRawDocument, sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
+import { sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import {
   getCurrentTraceId,
@@ -66,8 +67,18 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
     snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
   });
 
-  evaluate.afterAll(async ({ uiSettings }) => {
+  evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
     await uiSettings.unset('agentBuilder:experimentalFeatures');
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+        },
+      },
+    });
   });
 
   for (const dataset of activeDatasets) {
@@ -102,10 +113,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             scenario,
             log,
           });
-          const sampleDocuments = sampledHits.flatMap((hit) => {
-            const document = formatRawDocument({ hit });
-            return document ? [document] : [];
-          });
+          const sampleDocuments = compactInferenceDocuments(sampledHits);
           if (sampleDocuments.length === 0) {
             throw new Error(
               `No log documents found after replaying snapshot ${source.snapshotName}`

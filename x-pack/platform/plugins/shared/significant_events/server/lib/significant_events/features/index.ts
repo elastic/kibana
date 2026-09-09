@@ -25,6 +25,7 @@ export {
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
   MAX_INFERENCE_FIELD_NAME_LENGTH,
+  compactInferenceDocuments,
   prepareInferredSampling,
 } from './prepare_inferred_sampling';
 export type { PrepareInferredSamplingResult } from './prepare_inferred_sampling';
