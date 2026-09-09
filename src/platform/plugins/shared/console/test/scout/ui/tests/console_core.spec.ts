@@ -144,18 +144,21 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
     pageObjects,
   }) => {
     await pageObjects.console.clearEditorText();
-    await pageObjects.console.enterText('\nGET /_search?pretty\nGET /_search?pretty');
+    // `size=0` drops the hit documents, so neither response grows with whatever other
+    // suites left behind in the shared CI cluster — a full-sized first response pushes the
+    // second one further below the fold than `scrollOutputToBottom` can reach.
+    await pageObjects.console.enterText('\nGET /_search?size=0\nGET /_search?size=0');
     await pageObjects.console.selectAllRequests();
     await pageObjects.console.sendRequest();
 
     await expect(pageObjects.console.outputEditorContent).toContainText(
-      '# 2: GET /_search?pretty [200 OK]'
+      '# 2: GET /_search?size=0 [200 OK]'
     );
     // The second response starts below the fold of the output panel, and Monaco only
     // renders the lines in the viewport, so bring it into view before asserting on it.
     await pageObjects.console.scrollOutputToBottom();
     await expect(pageObjects.console.outputEditorContent).toContainText(
-      '# 3: GET /_search?pretty [200 OK]'
+      '# 3: GET /_search?size=0 [200 OK]'
     );
   });
 
