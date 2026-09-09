@@ -338,6 +338,30 @@ export const registerEntityRiskScoreHistoryAttachment = ({
 };
 
 /**
+ * Registers the `security.exception` attachment renderer (read-only card showing
+ * a proposed rule exception's description and conditions). Dynamically imports
+ * [./exception](./exception/index.ts) so the exceptions condition components and
+ * the flat-to-API entry mapper stay off the main `securitySolution` page-load
+ * bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
+ * resolves during plugin start well before a user can open a conversation that
+ * carries an exception proposal.
+ */
+export const registerExceptionAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_exception_attachment" */
+    './exception'
+  ).then(({ registerExceptionAttachment: register }) => {
+    register({ attachments });
+  });
+};
+
+/**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
  * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)

@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './exception_item_schemas';
-export * from './to_api_entries';
+export {
+  createExceptionAttachmentDefinition,
+  registerExceptionAttachment,
+} from './exception_attachment';
+export type { ExceptionAttachment, ExceptionAttachmentData } from './types';
