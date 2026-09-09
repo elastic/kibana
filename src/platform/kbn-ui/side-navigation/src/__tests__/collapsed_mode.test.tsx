@@ -288,7 +288,6 @@ describe('Collapsed mode', () => {
        * THEN hovering it shows the label without a New badge
        */
       it('should hide new badge from tooltip after visiting the item and navigating away', async () => {
-        localStorage.clear();
         render(<TestComponent isCollapsed items={observabilityMock.navItems} />);
 
         const alertsLink = screen.getByTestId(primaryItemId('alerts'));
