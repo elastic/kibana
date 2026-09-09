@@ -63,7 +63,10 @@ describe('RunLimitsBanner', () => {
       'Knowledge indicator extraction'
     );
     expect(screen.getByTestId('significantEventsRunLimitsBanner')).toHaveTextContent(
-      'Critical scheduled investigations continue'
+      'New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.'
+    );
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).not.toHaveTextContent(
+      /critical/i
     );
   });
 
