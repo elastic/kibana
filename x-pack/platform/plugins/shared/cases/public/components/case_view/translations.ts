@@ -198,12 +198,6 @@ export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.simil
   defaultMessage: 'Similar cases',
 });
 
-export const SEND_EMAIL_ARIA = (user: string) =>
-  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
-    values: { user },
-    defaultMessage: 'click to send an email to {user}',
-  });
-
 export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.caseView.editAssigneesAriaLabel',
   {

@@ -16949,7 +16949,6 @@
     "xpack.cases.caseView.reopenCase": "重新打开案例",
     "xpack.cases.caseView.reporterLabel": "报告者",
     "xpack.cases.caseView.requiredUpdateToExternalService": "需要更新 { externalService } 事件",
-    "xpack.cases.caseView.sendEmalLinkAria": "单击可向 {user} 发送电子邮件",
     "xpack.cases.caseView.setSeverityTo": "将严重性设置为",
     "xpack.cases.caseView.solution": "解决方案",
     "xpack.cases.caseView.spacedOrText": "或",

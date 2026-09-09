@@ -16897,7 +16897,6 @@
     "xpack.cases.caseView.reopenCase": "Fall erneut öffnen",
     "xpack.cases.caseView.reporterLabel": "Reporter",
     "xpack.cases.caseView.requiredUpdateToExternalService": "Erfordert ein Update für den Vorfall { externalService }",
-    "xpack.cases.caseView.sendEmalLinkAria": "Klicken Sie, um eine E-Mail an {user} zu senden",
     "xpack.cases.caseView.setSeverityTo": "Schweregrad festlegen auf",
     "xpack.cases.caseView.solution": "Lösung",
     "xpack.cases.caseView.spacedOrText": "oder",

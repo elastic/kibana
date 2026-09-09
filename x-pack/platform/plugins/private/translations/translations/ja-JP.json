@@ -16944,7 +16944,6 @@
     "xpack.cases.caseView.reopenCase": "ケースを再開",
     "xpack.cases.caseView.reporterLabel": "報告者",
     "xpack.cases.caseView.requiredUpdateToExternalService": "{ externalService }インシデントの更新が必要です",
-    "xpack.cases.caseView.sendEmalLinkAria": "クリックすると、{user}に電子メールを送信します",
     "xpack.cases.caseView.setSeverityTo": "重要度を設定",
     "xpack.cases.caseView.solution": "ソリューション",
     "xpack.cases.caseView.spacedOrText": "または",
