@@ -23,6 +23,7 @@ import {
   type TestStatsRow,
 } from './queries';
 import {
+  FLAKY_TEST_CLASSIFICATIONS,
   FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
   type FlakyTestBranchStats,
@@ -125,7 +126,9 @@ const buildReport = async (
     throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
   }
   if (options.classifications.length === 0) {
-    throw new Error('classifications must include at least one of: flaky, consistently-failing');
+    throw new Error(
+      `classifications must include at least one of: ${FLAKY_TEST_CLASSIFICATIONS.join(', ')}`
+    );
   }
 
   const { thresholds, frameworks } = options;
