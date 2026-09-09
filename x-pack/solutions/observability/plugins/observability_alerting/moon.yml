@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/scout-oblt'
   - '@kbn/app-header'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod
