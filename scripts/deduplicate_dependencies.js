@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/yarn-install-scripts/cli').cli();
+require('@kbn/dev/deduplicate_dependencies');
