@@ -79,10 +79,22 @@ export class InferenceWorkflowsPlugin
     });
 
     if (this.workflowDrivenEnabled) {
-      const existingSpaceIds = core.savedObjects
-        .createInternalRepository()
-        .find({ type: 'space', perPage: 10_000 })
-        .then(({ saved_objects: spaces }) => ['default', ...spaces.map(({ id }) => id)]);
+      const existingSpaceIds = (async () => {
+        const repo = core.savedObjects.createInternalRepository();
+        const perPage = 1_000;
+        let page = 1;
+        let fetched = 0;
+        let total = 0;
+        const ids: string[] = ['default'];
+        do {
+          const result = await repo.find({ type: 'space', perPage, page });
+          total = result.total;
+          result.saved_objects.forEach(({ id }) => ids.push(id));
+          fetched += result.saved_objects.length;
+          page += 1;
+        } while (fetched < total);
+        return ids;
+      })();
 
       void this.managedWorkflowInstaller.initialize(existingSpaceIds).catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
