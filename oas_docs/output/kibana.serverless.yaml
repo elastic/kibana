@@ -1109,6 +1109,7 @@ paths:
                     post_round_workflow_ids:
                       items:
                         description: Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.
+                        maxLength: 512
                         type: string
                       maxItems: 100
                       type: array
@@ -1633,6 +1634,7 @@ paths:
                     post_round_workflow_ids:
                       items:
                         description: Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.
+                        maxLength: 512
                         type: string
                       maxItems: 100
                       type: array
