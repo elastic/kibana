@@ -25,10 +25,10 @@ const getEventLogStatsMock = getEventLogStats as jest.MockedFunction<typeof getE
 const logger = loggingSystemMock.createLogger();
 
 const stats = {
-  total_task_runs_1d: 150,
-  task_runs_by_type_1d: [{ name: 'alerting:.index-threshold', value: 150 }],
-  task_runs_other_1d: 0,
-  schedule_delay_1d_ms: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
+  total_task_runs_24hr: 150,
+  task_runs_by_type_24hr: [{ name: 'alerting:.index-threshold', value: 150 }],
+  task_runs_other_24hr: 0,
+  schedule_delay_ms_24hr: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
 };
 
 const createCoreStartServices = () => {

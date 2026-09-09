@@ -31,12 +31,12 @@ const stateSchemaV1 = schema.object({
   error_messages: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   runs: schema.number(),
 
-  total_task_runs_1d: schema.maybe(schema.number()),
-  task_runs_by_type_1d: schema.maybe(
+  total_task_runs_24hr: schema.maybe(schema.number()),
+  task_runs_by_type_24hr: schema.maybe(
     schema.arrayOf(nameValuePairSchema, { maxSize: MAX_TASK_TYPE_BUCKETS })
   ),
-  task_runs_other_1d: schema.maybe(schema.number()),
-  schedule_delay_1d_ms: schema.maybe(percentilesSchema),
+  task_runs_other_24hr: schema.maybe(schema.number()),
+  schedule_delay_ms_24hr: schema.maybe(percentilesSchema),
 });
 
 export const stateSchemaByVersion = {
@@ -45,10 +45,10 @@ export const stateSchemaByVersion = {
       has_errors: state.has_errors ?? false,
       error_messages: state.error_messages ?? undefined,
       runs: state.runs ?? 0,
-      total_task_runs_1d: state.total_task_runs_1d ?? undefined,
-      task_runs_by_type_1d: state.task_runs_by_type_1d ?? undefined,
-      task_runs_other_1d: state.task_runs_other_1d ?? undefined,
-      schedule_delay_1d_ms: state.schedule_delay_1d_ms ?? undefined,
+      total_task_runs_24hr: state.total_task_runs_24hr ?? undefined,
+      task_runs_by_type_24hr: state.task_runs_by_type_24hr ?? undefined,
+      task_runs_other_24hr: state.task_runs_other_24hr ?? undefined,
+      schedule_delay_ms_24hr: state.schedule_delay_ms_24hr ?? undefined,
     }),
     schema: stateSchemaV1,
   },

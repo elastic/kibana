@@ -19,5 +19,8 @@ export interface EventLogStatsAggregations {
 
 export type EventLogStatsResults = Pick<
   LatestTaskStateSchema,
-  'total_task_runs_1d' | 'task_runs_by_type_1d' | 'task_runs_other_1d' | 'schedule_delay_1d_ms'
+  | 'total_task_runs_24hr'
+  | 'task_runs_by_type_24hr'
+  | 'task_runs_other_24hr'
+  | 'schedule_delay_ms_24hr'
 >;

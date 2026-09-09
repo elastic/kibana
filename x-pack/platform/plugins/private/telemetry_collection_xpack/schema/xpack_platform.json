@@ -12609,13 +12609,13 @@
             "description": "The number of normal cost tasks this Kibana runs simultaneously"
           }
         },
-        "total_task_runs_1d": {
+        "total_task_runs_24hr": {
           "type": "long",
           "_meta": {
             "description": "Total number of task runs started across the cluster in the last 24 hours, from the event log"
           }
         },
-        "task_runs_by_type_1d": {
+        "task_runs_by_type_24hr": {
           "type": "array",
           "items": {
             "properties": {
@@ -12634,13 +12634,13 @@
             }
           }
         },
-        "task_runs_other_1d": {
+        "task_runs_other_24hr": {
           "type": "long",
           "_meta": {
-            "description": "Number of runs started in the last 24 hours belonging to task types outside the task_runs_by_type_1d breakdown, which is capped to the highest volume task types"
+            "description": "Number of runs started in the last 24 hours belonging to task types outside the task_runs_by_type_24hr breakdown, which is capped to the highest volume task types"
           }
         },
-        "schedule_delay_1d_ms": {
+        "schedule_delay_ms_24hr": {
           "properties": {
             "p50": {
               "type": "long",

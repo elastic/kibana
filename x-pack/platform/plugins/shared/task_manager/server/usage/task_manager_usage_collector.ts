@@ -100,10 +100,10 @@ export function createTaskManagerUsageCollector(
           lastMonitoredHealth?.stats.capacity_estimation?.value.observed
             .max_throughput_per_minute_per_kibana ?? 0,
         configured_capacity: lastMonitoredHealth?.stats.configuration?.value.capacity.config ?? 0,
-        total_task_runs_1d: eventLogState?.total_task_runs_1d ?? 0,
-        task_runs_by_type_1d: eventLogState?.task_runs_by_type_1d ?? [],
-        task_runs_other_1d: eventLogState?.task_runs_other_1d ?? 0,
-        schedule_delay_1d_ms: eventLogState?.schedule_delay_1d_ms ?? EMPTY_PERCENTILES,
+        total_task_runs_24hr: eventLogState?.total_task_runs_24hr ?? 0,
+        task_runs_by_type_24hr: eventLogState?.task_runs_by_type_24hr ?? [],
+        task_runs_other_24hr: eventLogState?.task_runs_other_24hr ?? 0,
+        schedule_delay_ms_24hr: eventLogState?.schedule_delay_ms_24hr ?? EMPTY_PERCENTILES,
       };
     },
     schema: {
@@ -122,14 +122,14 @@ export function createTaskManagerUsageCollector(
         type: 'long',
         _meta: { description: 'The number of normal cost tasks this Kibana runs simultaneously' },
       },
-      total_task_runs_1d: {
+      total_task_runs_24hr: {
         type: 'long',
         _meta: {
           description:
             'Total number of task runs started across the cluster in the last 24 hours, from the event log',
         },
       },
-      task_runs_by_type_1d: {
+      task_runs_by_type_24hr: {
         type: 'array',
         items: {
           name: { type: 'keyword', _meta: { description: 'The task type' } },
@@ -141,14 +141,14 @@ export function createTaskManagerUsageCollector(
           },
         },
       },
-      task_runs_other_1d: {
+      task_runs_other_24hr: {
         type: 'long',
         _meta: {
           description:
-            'Number of runs started in the last 24 hours belonging to task types outside the task_runs_by_type_1d breakdown, which is capped to the highest volume task types',
+            'Number of runs started in the last 24 hours belonging to task types outside the task_runs_by_type_24hr breakdown, which is capped to the highest volume task types',
         },
       },
-      schedule_delay_1d_ms: {
+      schedule_delay_ms_24hr: {
         p50: {
           type: 'long',
           _meta: { description: '50th percentile of task schedule delay in ms over 24 hours' },

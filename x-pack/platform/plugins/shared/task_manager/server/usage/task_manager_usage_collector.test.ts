@@ -27,13 +27,13 @@ import { TASK_ID } from './constants';
 const eventLogState = {
   has_errors: false,
   runs: 1,
-  total_task_runs_1d: 150,
-  task_runs_by_type_1d: [
+  total_task_runs_24hr: 150,
+  task_runs_by_type_24hr: [
     { name: 'alerting:.index-threshold', value: 100 },
     { name: 'actions:.server-log', value: 50 },
   ],
-  task_runs_other_1d: 0,
-  schedule_delay_1d_ms: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
+  task_runs_other_24hr: 0,
+  schedule_delay_ms_24hr: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
 };
 
 const createGetTaskManagerStart = (state: unknown = eventLogState) =>
@@ -176,13 +176,13 @@ describe('registerTaskManagerUsageCollector', () => {
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
 
     expect(taskManager.get).toHaveBeenCalledWith(TASK_ID);
-    expect(telemetry.total_task_runs_1d).toEqual(150);
-    expect(telemetry.task_runs_by_type_1d).toEqual([
+    expect(telemetry.total_task_runs_24hr).toEqual(150);
+    expect(telemetry.task_runs_by_type_24hr).toEqual([
       { name: 'alerting:.index-threshold', value: 100 },
       { name: 'actions:.server-log', value: 50 },
     ]);
-    expect(telemetry.task_runs_other_1d).toEqual(0);
-    expect(telemetry.schedule_delay_1d_ms).toEqual({ p50: 100, p75: 250, p95: 1200, p99: 5000 });
+    expect(telemetry.task_runs_other_24hr).toEqual(0);
+    expect(telemetry.schedule_delay_ms_24hr).toEqual({ p50: 100, p75: 250, p95: 1200, p99: 5000 });
   });
 
   it('should report defaults when the snapshot telemetry task has not run yet', async () => {
@@ -214,10 +214,10 @@ describe('registerTaskManagerUsageCollector', () => {
 
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
 
-    expect(telemetry.total_task_runs_1d).toEqual(0);
-    expect(telemetry.task_runs_by_type_1d).toEqual([]);
-    expect(telemetry.task_runs_other_1d).toEqual(0);
-    expect(telemetry.schedule_delay_1d_ms).toEqual({
+    expect(telemetry.total_task_runs_24hr).toEqual(0);
+    expect(telemetry.task_runs_by_type_24hr).toEqual([]);
+    expect(telemetry.task_runs_other_24hr).toEqual(0);
+    expect(telemetry.schedule_delay_ms_24hr).toEqual({
       p50: null,
       p75: null,
       p95: null,
@@ -256,7 +256,7 @@ describe('registerTaskManagerUsageCollector', () => {
 
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
 
-    expect(telemetry.total_task_runs_1d).toEqual(0);
+    expect(telemetry.total_task_runs_24hr).toEqual(0);
     expect(telemetry.capacity).toEqual(10);
   });
 });

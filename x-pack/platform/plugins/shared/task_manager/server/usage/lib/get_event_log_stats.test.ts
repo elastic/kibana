@@ -141,13 +141,13 @@ describe('getEventLogStats', () => {
     const result = await getEventLogStats(esClient, signal);
 
     expect(result).toEqual({
-      total_task_runs_1d: 150,
-      task_runs_by_type_1d: [
+      total_task_runs_24hr: 150,
+      task_runs_by_type_24hr: [
         { name: 'alerting:.index-threshold', value: 100 },
         { name: 'actions:.server-log', value: 50 },
       ],
-      task_runs_other_1d: 0,
-      schedule_delay_1d_ms: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
+      task_runs_other_24hr: 0,
+      schedule_delay_ms_24hr: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
     });
   });
 
@@ -167,10 +167,13 @@ describe('getEventLogStats', () => {
 
     const result = await getEventLogStats(esClient, signal);
 
-    expect(result.task_runs_other_1d).toBe(200);
+    expect(result.task_runs_other_24hr).toBe(200);
     // The breakdown plus the remainder must always reconcile against the reported total.
-    const breakdownTotal = result.task_runs_by_type_1d!.reduce((sum, { value }) => sum + value, 0);
-    expect(breakdownTotal + result.task_runs_other_1d!).toBe(result.total_task_runs_1d);
+    const breakdownTotal = result.task_runs_by_type_24hr!.reduce(
+      (sum, { value }) => sum + value,
+      0
+    );
+    expect(breakdownTotal + result.task_runs_other_24hr!).toBe(result.total_task_runs_24hr);
   });
 
   it('returns defaults when aggregations are undefined', async () => {
@@ -179,10 +182,10 @@ describe('getEventLogStats', () => {
     const result = await getEventLogStats(esClient, signal);
 
     expect(result).toEqual({
-      total_task_runs_1d: 0,
-      task_runs_by_type_1d: [],
-      task_runs_other_1d: 0,
-      schedule_delay_1d_ms: { p50: null, p75: null, p95: null, p99: null },
+      total_task_runs_24hr: 0,
+      task_runs_by_type_24hr: [],
+      task_runs_other_24hr: 0,
+      schedule_delay_ms_24hr: { p50: null, p75: null, p95: null, p99: null },
     });
   });
 
@@ -204,8 +207,8 @@ describe('getEventLogStats', () => {
 
     const result = await getEventLogStats(esClient, signal);
 
-    expect(result.total_task_runs_1d).toBe(3);
-    expect(result.schedule_delay_1d_ms).toEqual({ p50: null, p75: null, p95: null, p99: null });
+    expect(result.total_task_runs_24hr).toBe(3);
+    expect(result.schedule_delay_ms_24hr).toEqual({ p50: null, p75: null, p95: null, p99: null });
   });
 
   it('handles the numeric hits.total format', async () => {
@@ -218,7 +221,7 @@ describe('getEventLogStats', () => {
 
     const result = await getEventLogStats(esClient, signal);
 
-    expect(result.total_task_runs_1d).toBe(5);
+    expect(result.total_task_runs_24hr).toBe(5);
   });
 
   it('propagates elasticsearch errors to the caller', async () => {

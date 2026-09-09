@@ -18,10 +18,10 @@ export interface TaskManagerUsage {
   };
   capacity: number;
   configured_capacity: number;
-  total_task_runs_1d: number;
-  task_runs_by_type_1d: Array<{ name: string; value: number }>;
-  task_runs_other_1d: number;
-  schedule_delay_1d_ms: {
+  total_task_runs_24hr: number;
+  task_runs_by_type_24hr: Array<{ name: string; value: number }>;
+  task_runs_other_24hr: number;
+  schedule_delay_ms_24hr: {
     p50: number | null;
     p75: number | null;
     p95: number | null;

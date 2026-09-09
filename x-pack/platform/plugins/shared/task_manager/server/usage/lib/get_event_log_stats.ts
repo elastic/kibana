@@ -66,12 +66,12 @@ export async function getEventLogStats(
   const percentiles = aggregations?.delay_percentiles.values;
 
   return {
-    total_task_runs_1d: total,
-    task_runs_by_type_1d: bucketsToArray(aggregations?.by_task_type.buckets),
+    total_task_runs_24hr: total,
+    task_runs_by_type_24hr: bucketsToArray(aggregations?.by_task_type.buckets),
     // Kibana registers far more task types than MAX_TASK_TYPE_BUCKETS, so the breakdown can be
-    // truncated. Reporting the remainder keeps it reconcilable against total_task_runs_1d.
-    task_runs_other_1d: aggregations?.by_task_type.sum_other_doc_count ?? 0,
-    schedule_delay_1d_ms: {
+    // truncated. Reporting the remainder keeps it reconcilable against total_task_runs_24hr.
+    task_runs_other_24hr: aggregations?.by_task_type.sum_other_doc_count ?? 0,
+    schedule_delay_ms_24hr: {
       p50: nanosToMillis(percentiles?.['50.0']),
       p75: nanosToMillis(percentiles?.['75.0']),
       p95: nanosToMillis(percentiles?.['95.0']),
