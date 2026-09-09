@@ -15,7 +15,7 @@ import type {
   SmlAutocompleteHttpResponse,
   SmlSearchHttpResponse,
 } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
-import { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
+import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
@@ -60,12 +60,10 @@ apiTest.describe.skip(
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;
       sysEsClient = await createSystemIndicesEsClient(esClient, config);
+      // Created bare — the Elasticsearch-managed `ai-index-idx-sml` template owns the mappings.
       const exists = await sysEsClient.indices.exists({ index: smlIndexName });
       if (!exists) {
-        await sysEsClient.indices.create({
-          index: smlIndexName,
-          mappings: smlElasticsearchIndexMappings,
-        });
+        await sysEsClient.indices.create({ index: smlIndexName });
       }
 
       const now = '2024-06-01T12:00:00.000Z';

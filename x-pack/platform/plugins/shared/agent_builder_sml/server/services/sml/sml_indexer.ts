@@ -22,7 +22,7 @@ import type {
   SmlTypeDefinition,
 } from './types';
 
-import { createSmlStorage, smlIndexName } from './sml_storage';
+import { smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -363,8 +363,8 @@ class SmlIndexerImpl implements SmlIndexer {
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
     }
-    if (entry.extended_attrs !== undefined) {
-      document.extended_attrs = entry.extended_attrs;
+    if (entry.attributes !== undefined) {
+      document.attributes = entry.attributes;
     }
     if (entry.user_id !== undefined) {
       document.user_id = entry.user_id;
@@ -389,16 +389,14 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
-    const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
-
     this.logger.debug(
       `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
     );
     try {
-      const response = await smlClient.bulk({
+      const response = await esClient.bulk({
+        index: smlIndexName,
         refresh: 'wait_for',
-        operations: [indexOp],
+        operations: [{ index: { _id: indexOp.index._id } }, indexOp.index.document],
       });
 
       if (response.errors) {

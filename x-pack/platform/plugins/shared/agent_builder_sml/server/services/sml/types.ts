@@ -74,7 +74,7 @@ export interface SmlEntry {
    * keyword-searchable for sub-path filtering. SML treats this opaquely;
    * type writers own its shape.
    */
-  extended_attrs?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   /** Owner or last-modifier user id when known */
   user_id?: string;
   /** Other SML entries this item references. Each entry carries a `uri` field. */
@@ -214,7 +214,7 @@ export interface SmlDocument {
   /** Free-form labels */
   tags?: string[];
   /** Type-specific structured data (`flattened` mapping) */
-  extended_attrs?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   /** Owner or last-modifier user id */
   user_id?: string;
   /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
@@ -233,7 +233,7 @@ export interface SmlDocument {
 
 /**
  * Compact SML search result — LLM-shaped. Drops the full `content` blob, the
- * full `extended_attrs`, and bookkeeping fields. Callers fetch full content via the
+ * full `attributes`, and bookkeeping fields. Callers fetch full content via the
  * lookup tool (`sml_read`) when they need it.
  *
  * `permissions` is retained here so callers (route / tool wrapper) can apply
@@ -258,7 +258,7 @@ export interface SmlSearchResult {
 /**
  * An SML autocomplete result — narrower than {@link SmlSearchResult}, tuned for
  * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
- * `extended_attrs`, etc.).
+ * `attributes`, etc.).
  */
 export interface SmlAutocompleteResult {
   id: string;

@@ -20,7 +20,6 @@ jest.mock('./sml_storage', () => {
   const actual = jest.requireActual('./sml_storage');
   return {
     ...actual,
-    createSmlStorage: jest.fn(),
   };
 });
 
@@ -2180,7 +2179,7 @@ describe('SmlService', () => {
       });
     });
 
-    it('round-trips all new schema fields (origin, tags, extended_attrs)', async () => {
+    it('round-trips all new schema fields (origin, tags, attributes)', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -2198,7 +2197,7 @@ describe('SmlService', () => {
                 content: 'sales content',
                 description: 'sales summary',
                 tags: ['sales', 'executive'],
-                extended_attrs: { owner_team: 'sales-ops' },
+                attributes: { owner_team: 'sales-ops' },
                 user_id: 'user-7',
                 references: [{ uri: 'category://sales' }],
                 created_at: '2026-04-01T00:00:00.000Z',
@@ -2227,7 +2226,7 @@ describe('SmlService', () => {
         content: 'sales content',
         description: 'sales summary',
         tags: ['sales', 'executive'],
-        extended_attrs: { owner_team: 'sales-ops' },
+        attributes: { owner_team: 'sales-ops' },
         user_id: 'user-7',
         references: [{ uri: 'category://sales' }],
         created_at: '2026-04-01T00:00:00.000Z',

@@ -1244,7 +1244,7 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
   };
   if (source.description !== undefined) doc.description = source.description;
   if (source.tags !== undefined) doc.tags = source.tags;
-  if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
+  if (source.attributes !== undefined) doc.attributes = source.attributes;
   if (source.user_id !== undefined) doc.user_id = source.user_id;
   if (source.references !== undefined) doc.references = source.references;
   return doc;
