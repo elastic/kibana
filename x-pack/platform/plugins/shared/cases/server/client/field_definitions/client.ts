@@ -118,7 +118,10 @@ export const createFieldDefinitionsSubClient = (
       await authorization.ensureAuthorized({ operation: Operations.manageTemplate, entities });
     } catch (manageError) {
       try {
-        await authorization.ensureAuthorized({ operation: Operations.getFieldDefinitions, entities });
+        await authorization.ensureAuthorized({
+          operation: Operations.getFieldDefinitions,
+          entities,
+        });
       } catch {
         throw Boom.notFound(`Field definition with id ${fieldDefinitionId} not found`);
       }
