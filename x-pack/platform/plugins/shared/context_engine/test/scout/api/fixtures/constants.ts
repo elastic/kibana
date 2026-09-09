@@ -10,3 +10,6 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
+
+export const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
+export const AI_INDEX_QUERY_PATH = `${AI_INDEX_COLLECTION_PATH}/_query`;

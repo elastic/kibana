@@ -9,9 +9,9 @@ import { randomUUID } from 'crypto';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const QUERY_PATH = 'api/context_engine/ai_index/_query';
+const QUERY_PATH = testData.AI_INDEX_QUERY_PATH;
 const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
@@ -41,10 +41,6 @@ const NO_INDEX_READ_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
-const spaceScoped = (space: string) => ({
-  permissions: { kibana: { privileges: [{ space }] } },
-});
-
 const spacedDocs = [
   { id: 'public', title: 'No privileges element' },
   { id: 'global', title: 'Wildcard space', ...spaceScoped('*') },
@@ -57,10 +53,7 @@ const plainDocs = [
   { id: 'plain_b', title: 'Plain B' },
 ];
 
-const idsOf = (body: { columns: Array<{ name: string }>; values: unknown[][] }): string[] => {
-  const idColumn = body.columns.findIndex((column) => column.name === 'id');
-  return body.values.map((row) => String(row[idColumn]));
-};
+const idsOf = (body: EsqlResponse): string[] => columnValues(body, 'id').map(String);
 
 const messageOf = (body: { message: string }): string => body.message;
 
