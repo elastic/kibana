@@ -15591,14 +15591,21 @@ if (sourceFilePath === 'authorization.ts') {
         `);
       });
 
-      it('registers Dashboard and Discover privileges', async () => {
+      it('registers Dashboard, Discover, Visualize, and Maps privileges', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(adminCredentials)
           .expect(200);
 
-        for (const featureId of ['dashboard', 'dashboard_v2', 'discover', 'discover_v2']) {
+        for (const featureId of [
+          'dashboard',
+          'dashboard_v2',
+          'discover',
+          'discover_v2',
+          'visualize',
+          'maps',
+        ]) {
           expect(body.features[featureId]).not.to.be(undefined);
         }
       });

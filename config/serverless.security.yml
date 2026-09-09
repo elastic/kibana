@@ -14,9 +14,9 @@ xpack.features.overrides:
   ### Dashboards and Discover features are moved from Analytics category to the Security one.
   dashboard_v2.category: 'security'
   discover_v2.category: 'security'
-  ### Keep deprecated Visualize/Maps v1 out of Security role management (v2 variants are hidden via serverless.yml).
-  visualize.hidden: true
-  maps.hidden: true
+  ### Visualize v2 and Maps v2 stay hidden; they are granted through Dashboard.
+  visualize_v2.hidden: true
+  maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
