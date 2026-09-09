@@ -31,6 +31,7 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { buildAiIndexDocId, createAiIndexStorageClient } from './storage';
+import { buildTraceQueries } from './trace_queries';
 
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
@@ -42,6 +43,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
+  traces: buildTraceQueries(document.traces ?? [], document.space),
   date_created: document.date_created,
   date_modified: document.date_modified,
 });

@@ -16,17 +16,13 @@ import {
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { toHashedId } from '@kbn/agent-builder-server';
+import { toCustomHashedId, toHashedId } from '@kbn/agent-builder-server/telemetry';
 
 const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
 const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 
-const CUSTOM = 'custom';
-const CUSTOM_HASH_PREFIX = `${CUSTOM}-`;
 const PLUGIN_HASH_PREFIX = 'plugin-';
-export function toCustomHashedId(value: string): string {
-  return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
-}
+export { toCustomHashedId };
 
 function toPluginHashedId(value: string): string {
   return `${PLUGIN_HASH_PREFIX}${toHashedId(value)}`;

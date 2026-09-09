@@ -9,8 +9,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
@@ -24,6 +24,8 @@ import {
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_TRACES,
+  MAX_AI_INDEX_TRACE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
@@ -55,6 +57,7 @@ import { apiPrivileges } from '../../common/features';
 import {
   validateAbsoluteSignalWindow,
   validateAiIndexId,
+  validateAiIndexTraceIndexName,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
   validateSignalWindowCoversInterval,
@@ -193,6 +196,34 @@ const kiIdParamsSchema = schema.object({
   }),
 });
 
+const aiIndexTraceSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('elastic_agent'),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      meta: { description: 'The Agent Builder agent id.' },
+    }),
+  }),
+  schema.object({
+    type: schema.literal('index'),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      validate: validateAiIndexTraceIndexName,
+      meta: { description: 'An index or data stream name or pattern to read traces from.' },
+    }),
+  }),
+  schema.object({
+    type: schema.literal('esql'),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      meta: { description: 'An ES|QL query to select traces.' },
+    }),
+  }),
+]);
+
 const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
@@ -251,10 +282,21 @@ const aiIndexPropertiesSchema = {
       meta: { description: 'Additional sources that provide context for the AI index.' },
     }
   ),
+  traces: schema.arrayOf(aiIndexTraceSchema, {
+    maxSize: MAX_AI_INDEX_TRACES,
+    meta: {
+      description: 'Trace sources linked to this AI index. A write replaces the whole array.',
+    },
+  }),
 };
 
-const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
-const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
+const createAiIndexBodySchema = schema.object({
+  id: aiIndexIdSchema,
+  ...aiIndexPropertiesSchema,
+});
+const putAiIndexBodySchema = schema.object({
+  ...aiIndexPropertiesSchema,
+});
 
 const listKisQuerySchema = schema.object({
   size: schema.number({
@@ -279,7 +321,7 @@ const getKiQuerySchema = schema.object({
   }),
 });
 
-const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
+const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
   if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
     return response.badRequest({ body: { message: error.message } });
   }
@@ -294,7 +336,9 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   ) {
     return response.conflict({ body: { message: error.message } });
   }
-  throw error;
+  const message = error instanceof Error ? error.message : String(error);
+  logger.error(error instanceof Error ? error.stack ?? error.message : message);
+  return response.customError({ statusCode: 500, body: { message } });
 };
 
 export const registerAiIndexRoutes = ({
@@ -354,7 +398,7 @@ export const registerAiIndexRoutes = ({
           return response.created({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -403,7 +447,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -442,7 +486,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -476,7 +520,7 @@ export const registerAiIndexRoutes = ({
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -520,7 +564,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -564,7 +608,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -606,7 +650,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -666,7 +710,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
