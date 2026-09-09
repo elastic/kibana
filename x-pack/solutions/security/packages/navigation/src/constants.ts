@@ -7,8 +7,8 @@
 
 export const SECURITY_UI_APP_ID = 'securitySolutionUI' as const;
 
-/** PND ships as its own app, so its deep links are namespaced separately from the Security UI. */
-export const PND_APP_ID = 'pnd' as const;
+/** Alert Zero ships as its own app, so its deep links are namespaced separately from the Security UI. */
+export const ALERT_ZERO_APP_ID = 'alertzero' as const;
 
 export { SecurityPageName } from '@kbn/deeplinks-security';
 

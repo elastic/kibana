@@ -443,6 +443,12 @@ importers:
       '@kbn/aiops-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-aiops-utils
+      '@kbn/alert-zero-common':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-alert-zero-common
+      '@kbn/alert-zero-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/plugins/alert_zero
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
@@ -2702,12 +2708,6 @@ importers:
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
-      '@kbn/pnd-common':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-pnd-common
-      '@kbn/pnd-plugin':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/plugins/pnd
       '@kbn/portable-dashboards-example':
         specifier: workspace:*
         version: link:examples/portable_dashboards_example
@@ -9361,6 +9361,8 @@ importers:
 
   x-pack/solutions/security/packages/index-adapter: {}
 
+  x-pack/solutions/security/packages/kbn-alert-zero-common: {}
+
   x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common: {}
 
   x-pack/solutions/security/packages/kbn-cloud-security-posture/common: {}
@@ -9402,8 +9404,6 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness: {}
-
-  x-pack/solutions/security/packages/kbn-pnd-common: {}
 
   x-pack/solutions/security/packages/kbn-scout-security: {}
 
@@ -9457,6 +9457,8 @@ importers:
 
   x-pack/solutions/security/packages/upselling: {}
 
+  x-pack/solutions/security/plugins/alert_zero: {}
+
   x-pack/solutions/security/plugins/cloud_defend: {}
 
   x-pack/solutions/security/plugins/cloud_security_posture: {}
@@ -9474,8 +9476,6 @@ importers:
   x-pack/solutions/security/plugins/lists: {}
 
   x-pack/solutions/security/plugins/mitre_attack: {}
-
-  x-pack/solutions/security/plugins/pnd: {}
 
   x-pack/solutions/security/plugins/security_solution: {}
 
