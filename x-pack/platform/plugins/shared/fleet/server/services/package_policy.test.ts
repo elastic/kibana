@@ -1026,7 +1026,6 @@ describe('Package policy service', () => {
           templateSha: 'sha256:661cb7def1c7101f',
           blueprintId: 'federated-identity',
           blueprintVersion: '1.0.0',
-          staticTemplate: false,
         },
         inputs: [
           {
@@ -1082,7 +1081,6 @@ describe('Package policy service', () => {
             templateSha: 'sha256:661cb7def1c7101f',
             blueprintId: 'federated-identity',
             blueprintVersion: '1.0.0',
-            staticTemplate: false,
           })
         );
       } finally {

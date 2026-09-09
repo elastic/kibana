@@ -221,7 +221,6 @@ describe('CloudConnectorService', () => {
           templateSha: 'sha256:661cb7def1c7101f',
           blueprintId: 'federated-identity',
           blueprintVersion: '1.0.0',
-          staticTemplate: false,
         },
       });
 
@@ -230,7 +229,6 @@ describe('CloudConnectorService', () => {
         templateSha: 'sha256:661cb7def1c7101f',
         blueprintId: 'federated-identity',
         blueprintVersion: '1.0.0',
-        staticTemplate: false,
       });
 
       expect(mockSoClient.create).toHaveBeenCalledWith(
@@ -239,12 +237,11 @@ describe('CloudConnectorService', () => {
           templateSha: 'sha256:661cb7def1c7101f',
           blueprintId: 'federated-identity',
           blueprintVersion: '1.0.0',
-          staticTemplate: false,
         })
       );
     });
 
-    it('stores staticTemplate and clears templateSha after a static fallback', async () => {
+    it('stores no templateSha when confirm clears the digest', async () => {
       mockSoClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -255,21 +252,18 @@ describe('CloudConnectorService', () => {
         ...mockSavedObject,
         attributes: {
           ...mockSavedObject.attributes,
-          staticTemplate: true,
           templateSha: null,
         },
       });
 
       await service.create(mockSoClient, {
         ...mockCreateRequest,
-        staticTemplate: true,
-        templateSha: 'sha256:should-be-cleared',
+        templateSha: null,
       });
 
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          staticTemplate: true,
           templateSha: null,
         })
       );
@@ -1138,34 +1132,31 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('clears templateSha when confirm records a static-template fallback', async () => {
+    it('clears templateSha when confirm sends a null digest', async () => {
       mockSoClient.get.mockResolvedValue({
         ...mockExistingSavedObject,
         attributes: {
           ...mockExistingSavedObject.attributes,
           templateSha: 'sha256:old',
-          staticTemplate: false,
         },
       });
       mockSoClient.update.mockResolvedValue({
         ...mockExistingSavedObject,
         attributes: {
           ...mockExistingSavedObject.attributes,
-          staticTemplate: true,
           templateSha: null,
         },
       });
       mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
 
       await service.update(mockSoClient, 'cloud-connector-123', {
-        staticTemplate: true,
+        templateSha: null,
       });
 
       expect(mockSoClient.update).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         'cloud-connector-123',
         expect.objectContaining({
-          staticTemplate: true,
           templateSha: null,
         })
       );

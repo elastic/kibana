@@ -192,7 +192,6 @@ describe('useCloudConnectorTemplate', () => {
         templateSha: 'sha256:661cb7def1c7101f',
         blueprintId: 'federated-identity',
         blueprintVersion: 'v1',
-        staticTemplate: false,
       });
     });
 
@@ -296,7 +295,6 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       expect(cloudFormationTab.location.href).toContain('static.example');
       expect(result.current.iacConfirm).toEqual({
-        staticTemplate: true,
         templateSha: null,
       });
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
