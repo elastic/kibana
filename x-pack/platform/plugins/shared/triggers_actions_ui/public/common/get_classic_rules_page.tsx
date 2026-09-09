@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
-import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import React from 'react';
 import type {
   ClassicRulesPageInternalDeps,
-  ClassicRulesPagePluginsStart,
   ClassicRulesPageProps,
 } from '../application/classic_rules_page';
-import type {
-  ActionTypeRegistryContract,
-  ConnectorServices,
-  RuleTypeRegistryContract,
-} from '../types';
 
 const LazyComposableClassicRulesPage = React.lazy(() =>
   import('../application/composable_rules_page').then((m) => ({
@@ -26,51 +17,10 @@ const LazyComposableClassicRulesPage = React.lazy(() =>
   }))
 );
 
-export interface GetClassicRulesPageParams {
-  actions?: ActionsPublicPluginSetup;
-  connectorServices?: ConnectorServices;
-  security: SecurityPluginStart;
-  cloud?: CloudSetup;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  ruleTypeRegistry: RuleTypeRegistryContract;
-  isServerless: boolean;
-  pluginsStart: ClassicRulesPagePluginsStart;
-}
-
-/**
- * Builds a stable Classic Rules page component. Call once per plugin start and
- * reuse the returned type — a new type per render remounts the page.
- */
-export const getClassicRulesPageLazy = ({
-  actions,
-  connectorServices,
-  security,
-  cloud,
-  actionTypeRegistry,
-  ruleTypeRegistry,
-  isServerless,
-  pluginsStart,
-}: GetClassicRulesPageParams): ComponentType<ClassicRulesPageProps> => {
-  const internalDeps: ClassicRulesPageInternalDeps = {
-    actions:
-      actions ??
-      ({
-        validateEmailAddresses: connectorServices?.validateEmailAddresses ?? (() => []),
-        enabledEmailServices: connectorServices?.enabledEmailServices ?? [],
-      } as ActionsPublicPluginSetup),
-    security,
-    cloud,
-    actionTypeRegistry,
-    ruleTypeRegistry,
-    isServerless,
-    pluginsStart,
-  };
-
-  return function ClassicRulesPage(props: ClassicRulesPageProps) {
-    return (
-      <React.Suspense fallback={null}>
-        <LazyComposableClassicRulesPage {...props} internalDeps={internalDeps} />
-      </React.Suspense>
-    );
-  };
-};
+export const getClassicRulesPageLazy = (
+  props: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }
+) => (
+  <React.Suspense fallback={null}>
+    <LazyComposableClassicRulesPage {...props} />
+  </React.Suspense>
+);

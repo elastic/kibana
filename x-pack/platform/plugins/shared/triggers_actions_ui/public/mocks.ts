@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
@@ -152,7 +153,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       }
       return ruleTypeRegistry.get(ruleTypeId).format;
     },
-    getClassicRulesPage: () => ClassicRulesPageStub,
+    getClassicRulesPage: (props) => React.createElement(ClassicRulesPageStub, props),
   };
 }
 

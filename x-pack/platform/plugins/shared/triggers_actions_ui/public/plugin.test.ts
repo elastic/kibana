@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -49,7 +50,7 @@ const createPluginsStart = () => {
 };
 
 describe('Plugin getClassicRulesPage', () => {
-  it('returns a stable component identity across calls', () => {
+  it('returns a React element for the given page props', () => {
     const plugin = new Plugin(
       coreMock.createPluginInitializerContext({
         enableExperimental: [],
@@ -69,7 +70,11 @@ describe('Plugin getClassicRulesPage', () => {
     });
 
     const start = plugin.start(coreMock.createStart(), createPluginsStart());
+    const element = start.getClassicRulesPage({
+      coreStart: coreMock.createStart(),
+      setBreadcrumbs: jest.fn(),
+    });
 
-    expect(start.getClassicRulesPage()).toBe(start.getClassicRulesPage());
+    expect(React.isValidElement(element)).toBe(true);
   });
 });

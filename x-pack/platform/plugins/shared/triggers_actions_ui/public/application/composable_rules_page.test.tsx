@@ -159,8 +159,12 @@ describe('ComposableClassicRulesPage', () => {
 });
 
 describe('getClassicRulesPage start contract', () => {
-  it('returns a stable component identity across calls', () => {
+  it('returns a React element for the given page props', () => {
     const start = triggersActionsUiMock.createStart();
-    expect(start.getClassicRulesPage()).toBe(start.getClassicRulesPage());
+    const element = start.getClassicRulesPage({
+      coreStart: coreMock.createStart(),
+      setBreadcrumbs: jest.fn(),
+    });
+    expect(React.isValidElement(element)).toBe(true);
   });
 });
