@@ -19,6 +19,7 @@ import type {
   PhraseFilterMetaParams,
   PhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
+import { omit } from 'lodash';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidNamespaceSourceFields,
@@ -301,56 +302,41 @@ describe('search_filters', () => {
         });
       });
 
-      it('should leave an uncontrolled filter intact and add the new one alongside it', () => {
-        // A filter with no `controlledBy` was added by the user in the search bar. Absorbing it
-        // into the graph's OR chip would drop its AND relationship with the rest of the filter bar,
-        // so every event matching the new filter would bypass the user's constraint — and which
-        // chip that happens to be depends on filter order.
+      it('should add a new filter to an existing list with uncontrolled filter', () => {
         const filters: Filter[] = [buildFilterMock(key, 'another-value')];
 
         // Act
         const newFilters = addFilter(dataViewId, filters, key, value);
 
         // Assert
-        expect(newFilters).toHaveLength(2);
+        expect(newFilters).toHaveLength(1);
         expect(newFilters[0]).toEqual({
           $state: { store: 'appState' },
           meta: expect.objectContaining({
-            key,
-            field: key,
-            params: { query: value },
+            params: [
+              { ...filters[0], meta: { ...omit(filters[0].meta, 'disabled') } },
+              {
+                meta: expect.objectContaining({
+                  key,
+                  field: key,
+                  params: { query: value },
+                  index: dataViewId,
+                  controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+                  type: 'phrase',
+                }),
+                query: {
+                  match_phrase: {
+                    [key]: value,
+                  },
+                },
+              },
+            ],
             index: dataViewId,
             controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-            type: 'phrase',
+            relation: 'OR',
+            type: 'combined',
           }),
-          query: {
-            match_phrase: {
-              [key]: value,
-            },
-          },
         });
-        // The user's filter is untouched — still uncontrolled, still its own chip.
-        expect(newFilters[1]).toEqual(filters[0]);
-        expect(newFilters[1].meta.controlledBy).toBeUndefined();
-      });
-
-      it('should OR with an uncontrolled filter when combineWithUserFilters is set', () => {
-        // The investigate-in-timeline handoff folds the origin event ids in with whatever is in
-        // the filter bar, and means "the filtered events *or* the event I opened". ANDing there
-        // would exclude the origin event, since it matches none of the user's filters — the
-        // timeline would open empty.
-        const filters: Filter[] = [buildFilterMock(key, 'another-value')];
-
-        // Act
-        const newFilters = addFilter(dataViewId, filters, key, value, true);
-
-        // Assert
-        expect(newFilters).toHaveLength(1);
-        expect(newFilters[0].meta).toMatchObject({
-          type: FILTERS.COMBINED,
-          relation: BooleanRelation.OR,
-        });
-        expect((newFilters[0].meta as CombinedFilterMeta).params).toHaveLength(2);
       });
 
       it('should combine with an existing filter', () => {
@@ -862,25 +848,6 @@ describe('search_filters', () => {
         const readded = addEntityFilter(dataViewId, filters, targetId, targetDsl);
 
         expect(readded[0].meta.params).toHaveLength(2);
-      });
-
-      it("does not absorb the user's own leading filter into the OR", () => {
-        // A filter the user typed has no `controlledBy`. ORing the entity clause into it would let
-        // any event matching the entity bypass the user's constraint — the AND is silently lost —
-        // turning a refinement action ("show *this* entity's actions") into a widening one.
-        const userFilter = buildFilterMock('event.category', 'iam');
-        const filters = addEntityFilter(dataViewId, [userFilter], entityId, GCP_DSL, {
-          'data_stream.dataset': 'gcp.audit',
-        });
-
-        // Two sibling chips, ANDed by the filter bar, rather than one OR chip.
-        expect(filters).toHaveLength(2);
-        expect(containsEntityFilter(filters, entityId)).toBe(true);
-        // The entity filter is itself an AND of its clauses, but never an OR with the user's chip.
-        expect((filters[0].meta as CombinedFilterMeta).relation).not.toBe(BooleanRelation.OR);
-        // Untouched: same chip, still uncontrolled.
-        expect(filters[1]).toEqual(userFilter);
-        expect(filters[1].meta.controlledBy).toBeUndefined();
       });
     });
 

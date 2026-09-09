@@ -281,11 +281,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       if (originEventIds && originEventIds.length > 0) {
         if (!hasKqlQuery || searchFilters.length > 0) {
           filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-            // OR the origin event in even when the leading chip is the user's own. The graph gets
-            // this from the server, which OR's originEventIds against esQuery; the timeline has no
-            // equivalent, so without the opt-out the origin event — matching none of the user's
-            // filters — would be ANDed out and the timeline would open empty.
-            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id, true);
+            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
           }, searchFilters);
         }
 

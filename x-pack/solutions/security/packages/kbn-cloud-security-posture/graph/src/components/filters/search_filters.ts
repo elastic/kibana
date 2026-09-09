@@ -299,18 +299,6 @@ const isGraphEntityFilter = (filter: Filter, entityId: string): boolean =>
   filter.meta?.controlledBy === entityFilterControlledBy(entityId);
 
 /**
- * True when the graph owns this filter, i.e. it added the filter itself (`graph-investigation`, or
- * the `graph-investigation:<euid>|<role>` form an entity filter carries).
- *
- * Only graph-owned filters may be absorbed into the graph's OR chip. A filter the user typed into
- * the search bar has no `controlledBy`, and folding it into an OR would silently drop its AND
- * relationship with the rest of the filter bar — every event matching the entity would bypass the
- * user's own constraint — as well as hand the graph ownership of a chip it may later clear.
- */
-const isGraphOwnedFilter = (filter: Filter | undefined): boolean =>
-  filter?.meta?.controlledBy?.startsWith(CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER) ?? false;
-
-/**
  * True when the entity filter for this entity id is present and enabled, whether it sits at the
  * top level or nested inside the graph's OR combined filter.
  */
@@ -373,8 +361,7 @@ export const addEntityFilter = (
   if (
     isCombinedFilter(firstFilter) &&
     !firstFilter.meta.disabled &&
-    firstFilter.meta.relation === BooleanRelation.OR &&
-    isGraphOwnedFilter(firstFilter)
+    firstFilter.meta.relation === BooleanRelation.OR
   ) {
     return [
       {
@@ -388,12 +375,7 @@ export const addEntityFilter = (
     ];
   }
 
-  if (
-    isFilter(firstFilter) &&
-    !firstFilter.meta.disabled &&
-    firstFilter.meta.type !== 'custom' &&
-    isGraphOwnedFilter(firstFilter)
-  ) {
+  if (isFilter(firstFilter) && !firstFilter.meta.disabled && firstFilter.meta.type !== 'custom') {
     const combined = buildCombinedFilter(BooleanRelation.OR, [firstFilter, built], {
       id: dataViewId,
     });
@@ -406,8 +388,7 @@ export const addEntityFilter = (
     ];
   }
 
-  // Nothing graph-owned to combine with (empty list, a disabled/custom leading filter, or one the
-  // user added themselves): add the entity filter as its own top-level chip, ANDed with the rest.
+  // No filter to combine with (empty list, or a disabled/custom leading filter).
   return [
     { $state: { store: FilterStateStore.APP_STATE }, ...built },
     ...(firstFilter ? [firstFilter, ...otherFilters] : otherFilters),
@@ -534,44 +515,27 @@ export const buildFieldsDsl = (fields: Record<string, string | string[]>): objec
 });
 
 /**
- * Adds a filter to the existing list, OR'ing it with the filter at position 0 when that filter is
- * one the graph owns.
- *
- * A chip the user typed into the search bar is left alone and the new filter becomes its own
- * top-level chip. The graph's popover actions refine ("show *this* entity's actions"), so they
- * belong inside the user's scope: `iam AND <entity>` answers the question being asked, where
- * `iam OR <entity>` pulls in every unrelated event the entity ever produced. Which chip sits at
- * position 0 is also incidental, so absorbing it makes the result depend on chip order.
- * Graph-owned filters are still OR'd with each other — actor / target / related are facets of one
- * entity, and chaining them is additive by design.
- *
- * `combineWithUserFilters` opts out, for the investigate-in-timeline handoff. The graph itself
- * never needs it: the server OR's `originEventIds` against `esQuery` (see `fetch_events_graph`),
- * so the origin event survives any filter. The timeline is a separate consumer with no such
- * server-side OR, so that guarantee has to be rebuilt here or the origin event — which matches
- * none of the user's filters — would be excluded by the conjunction.
+ * Adds a filter to the existing list of filters based on the provided key and value.
+ * It will always use the first filter in the list to build a combined filter with the new filter.
  *
  * @param dataViewId - The ID of the data view to which the filter belongs.
  * @param prev - The previous list of filters.
  * @param key - The key for the filter.
  * @param value - The value for the filter.
- * @param combineWithUserFilters - OR with the leading filter even if the user owns it.
  * @returns A new list of filters with the added filter.
  */
 export const addFilter = (
   dataViewId: string,
   prev: Filter[],
   key: string,
-  value: string | string[],
-  combineWithUserFilters: boolean = false
+  value: string | string[]
 ) => {
   const [firstFilter, ...otherFilters] = prev;
-  const mayCombine = combineWithUserFilters || isGraphOwnedFilter(firstFilter);
+
   if (
     isCombinedFilter(firstFilter) &&
     !firstFilter?.meta?.disabled &&
-    firstFilter?.meta?.relation === BooleanRelation.OR &&
-    mayCombine
+    firstFilter?.meta?.relation === BooleanRelation.OR
   ) {
     return [
       {
@@ -590,8 +554,7 @@ export const addFilter = (
   } else if (
     isFilter(firstFilter) &&
     !firstFilter?.meta?.disabled &&
-    firstFilter.meta?.type !== 'custom' &&
-    mayCombine
+    firstFilter.meta?.type !== 'custom'
   ) {
     const combinedFilter = buildCombinedFilter(
       BooleanRelation.OR,
@@ -611,8 +574,7 @@ export const addFilter = (
       ...otherFilters,
     ];
   } else {
-    // Nothing graph-owned to combine with (the leading filter is disabled, custom, or the user's
-    // own): add the new filter as its own top-level chip, ANDed with the rest.
+    // When the first filter is disabled or a custom filter, we just add the new filter to the list.
     return [
       {
         $state: {
