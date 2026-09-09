@@ -43,7 +43,7 @@ const collectStructuredStrings = (
   }
 
   const objectValue = value as Record<string, unknown>;
-  if (objectValue.type === 'image') {
+  if (objectValue.type === 'image' && objectValue.source !== null && typeof objectValue.source === 'object') {
     return;
   }
 
@@ -79,7 +79,7 @@ const replaceStructuredStrings = <T>(
   }
 
   const objectValue = value as Record<string, unknown>;
-  if (objectValue.type === 'image') {
+  if (objectValue.type === 'image' && objectValue.source !== null && typeof objectValue.source === 'object') {
     return value;
   }
 
