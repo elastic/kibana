@@ -30,7 +30,7 @@ import {
   scheduleScrubReportContentTask,
 } from './tasks';
 import { registerThreatIntelWorkflowSteps } from './workflows/step_types';
-import { installThreatIntelManagedWorkflowsAndMarkReady } from '../workflows/threat_intel_workflow/install';
+import { reconcileThreatIntelAttributeWorkflowsForSpaces } from '../workflows/security_managed_workflows';
 
 /**
  * Cross-lifecycle state the pipeline needs. Setup registers routes that only
@@ -43,6 +43,11 @@ export interface ThreatIntelRuntime {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   taskManager?: TaskManagerStartContract;
   bootstrapReady: Promise<void>;
+  /**
+   * Set in start when the flag is on. The promote task calls this every run to
+   * install `attribute_alerts_to_reports` into spaces created since boot.
+   */
+  reconcileAttributeWorkflows?: () => Promise<void>;
 }
 
 export const createThreatIntelRuntime = (): ThreatIntelRuntime => ({
@@ -121,6 +126,8 @@ export const setupThreatIntel = ({
       taskManager: plugins.taskManager,
       coreSetup: core,
       logger: logger.get('threatIntel', 'iocIndicatorSync'),
+      getReconcileAttributeWorkflows: () =>
+        runtime.reconcileAttributeWorkflows?.() ?? Promise.resolve(),
     });
     registerScrubReportContentTask({
       taskManager: plugins.taskManager,
@@ -185,6 +192,19 @@ export const startThreatIntel = ({
     tiLogger.error(`Failed to ensure threat intel bootstrap on start: ${(err as Error).message}`);
   });
 
+  // Managed-workflow install moved to `installSecurityManagedWorkflowsAndMarkReady`
+  // in plugin start so alert_analysis and TI share one `ready()` call. This
+  // callback is what the promote task uses to catch spaces created after boot.
+  if (plugins.workflowsExtensions) {
+    const workflowsExtensions = plugins.workflowsExtensions;
+    runtime.reconcileAttributeWorkflows = () =>
+      reconcileThreatIntelAttributeWorkflowsForSpaces({
+        workflowsExtensions,
+        core,
+        logger: tiLogger,
+      });
+  }
+
   if (plugins.taskManager) {
     const taskManager = plugins.taskManager;
     // Scheduling waits on bootstrap: the promote and retention tasks read and
@@ -193,13 +213,6 @@ export const startThreatIntel = ({
     // pipeline has no schema to work against, so the tasks stay unscheduled.
     void runtime.bootstrapReady
       .then(async () => {
-        if (plugins.workflowsExtensions) {
-          await installThreatIntelManagedWorkflowsAndMarkReady({
-            workflowsExtensions: plugins.workflowsExtensions,
-            logger: tiLogger,
-          });
-        }
-
         await ensureIndicatorAliasForSpace({
           esClient,
           spaceId: 'default',

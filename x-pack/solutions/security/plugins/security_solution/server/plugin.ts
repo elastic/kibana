@@ -181,7 +181,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
-import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
 import { SecuritySolutionEventBus } from './events/event_bus';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
@@ -906,15 +906,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.start(core, plugins);
 
-    if (plugins.workflowsExtensions) {
-      // Install once in the global space, then mark ready (install is awaited before ready inside
-      // the helper). Fire-and-forget: startup must not block on it.
-      void installSecurityAlertAnalysisWorkflowAndMarkReady({
-        workflowsExtensions: plugins.workflowsExtensions,
-        logger,
-      });
-    }
-
     if (this.securityEventBus && plugins.workflowsExtensions) {
       registerSecurityWorkflowEventBridge(
         this.securityEventBus,
@@ -930,6 +921,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     }
 
+    // Start TI first so `bootstrapReady` is the real promise before the managed
+    // workflow installer awaits it. The installer is fire-and-forget: startup
+    // must not block on install or ready().
     startThreatIntel({
       experimentalFeatures: this.config.experimentalFeatures,
       plugins,
@@ -937,6 +931,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       runtime: this.threatIntelRuntime,
     });
+
+    if (plugins.workflowsExtensions) {
+      void installSecurityManagedWorkflowsAndMarkReady({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger,
+        threatIntelSupplyEnabled: this.config.experimentalFeatures.threatIntelSupplyEnabled,
+        bootstrapReady: this.threatIntelRuntime.bootstrapReady,
+        core,
+      });
+    }
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([

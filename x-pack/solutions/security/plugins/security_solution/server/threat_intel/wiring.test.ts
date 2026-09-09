@@ -13,7 +13,6 @@ import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
 import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
-import { installThreatIntelManagedWorkflowsAndMarkReady } from '../workflows/threat_intel_workflow/install';
 import {
   registerPromoteThreatIndicatorsTask,
   registerScrubReportContentTask,
@@ -39,18 +38,19 @@ jest.mock('./tasks', () => ({
   scheduleScrubReportContentTask: jest.fn(),
 }));
 jest.mock('./workflows/step_types', () => ({ registerThreatIntelWorkflowSteps: jest.fn() }));
-jest.mock('../workflows/threat_intel_workflow/install', () => ({
-  installThreatIntelManagedWorkflowsAndMarkReady: jest.fn().mockResolvedValue(undefined),
-}));
 jest.mock('./setup/indicator_alias', () => ({
   ensureIndicatorAliasForSpace: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('../workflows/security_managed_workflows', () => ({
+  reconcileThreatIntelAttributeWorkflowsForSpaces: jest.fn().mockResolvedValue(undefined),
 }));
 
 /**
  * Everything the pipeline registers. The flag-off case asserts every one of these is
  * untouched, which is the guarantee that makes the whole feature safe to ship
  * disabled: no routes, no workflow step, no inference feature, no index template, no
- * task definition, and no schedule.
+ * task definition, and no schedule. Managed-workflow install lives in plugin.ts
+ * via `installSecurityManagedWorkflowsAndMarkReady`, not here.
  */
 const ALL_REGISTRATIONS = [
   ['inference features', registerThreatIntelInferenceFeatures],
@@ -60,7 +60,6 @@ const ALL_REGISTRATIONS = [
   ['scrub task definition', registerScrubReportContentTask],
   ['bootstrap', ensureThreatIntelBootstrap],
   ['indicator alias', ensureIndicatorAliasForSpace],
-  ['managed workflows', installThreatIntelManagedWorkflowsAndMarkReady],
   ['promote task schedule', schedulePromoteThreatIndicatorsTask],
   ['scrub task schedule', scheduleScrubReportContentTask],
 ] as const;
@@ -209,17 +208,34 @@ describe('threat intel wiring', () => {
       const runtime = createThreatIntelRuntime();
       startThreatIntel({
         experimentalFeatures: features(true),
-        plugins: startDeps(),
+        plugins: { taskManager: taskManager(), workflowsExtensions: {} } as never,
         core: coreMock.createStart() as never,
         logger: loggingSystemMock.createLogger(),
         runtime,
       });
 
       expect(ensureThreatIntelBootstrap).toHaveBeenCalled();
+      expect(runtime.reconcileAttributeWorkflows).toEqual(expect.any(Function));
       await runtime.bootstrapReady;
       await new Promise(process.nextTick);
       expect(schedulePromoteThreatIndicatorsTask).toHaveBeenCalled();
       expect(scheduleScrubReportContentTask).toHaveBeenCalled();
+    });
+
+    it('passes a reconcile callback into the promote task registration', () => {
+      const runtime = createThreatIntelRuntime();
+      setupThreatIntel({
+        experimentalFeatures: features(true),
+        plugins: setupDeps(),
+        core: coreMock.createSetup() as never,
+        logger: loggingSystemMock.createLogger(),
+        runtime,
+      });
+      expect(registerPromoteThreatIndicatorsTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          getReconcileAttributeWorkflows: expect.any(Function),
+        })
+      );
     });
 
     // Scheduling is gated on bootstrap: the tasks read and write the same indices, so

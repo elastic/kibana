@@ -1,14 +1,16 @@
 version: "1"
 # Every 4h: fetch enabled sources, skip known fingerprints (90d), write new reports.
-# Scoped to `workflow.spaceId` plus global (`*`) catalog rows via `space_id`.
+# Installed once globally: the source catalog is entirely global (`space_id: '*'`),
+# so every space would otherwise re-fetch the same feeds. Adapters stamp each
+# report with its source's `space_id`.
 name: Ingest threat feeds
 description: Fetch enabled sources and write new reports to .kibana-threat-reports
 tags:
   - threat-intel
-enabled: true
+enabled: false
 settings:
   concurrency:
-    key: "threat-intel-ingest-{{ workflow.spaceId }}"
+    key: "threat-intel-ingest-global"
     strategy: drop
     max: 1
 triggers:
@@ -19,6 +21,7 @@ steps:
   - name: set_space_context
     type: data.set
     with:
+      # Global install: workflow.spaceId is `*`, which matches the seeded catalog.
       spaceId: "{{ workflow.spaceId }}"
 
   - name: load_sources

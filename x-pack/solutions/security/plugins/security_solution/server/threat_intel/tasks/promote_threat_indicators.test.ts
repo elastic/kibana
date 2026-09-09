@@ -452,6 +452,7 @@ describe('promote task runner', () => {
       taskManager,
       coreSetup,
       logger: loggingSystemMock.createLogger(),
+      getReconcileAttributeWorkflows: jest.fn().mockResolvedValue(undefined),
     });
 
     const definition = definitions[PROMOTE_THREAT_INDICATORS_TASK_TYPE];
