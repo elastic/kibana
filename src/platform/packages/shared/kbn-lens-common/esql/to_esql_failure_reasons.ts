@@ -88,8 +88,7 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
   terms_other_bucket_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: "Group other values as Other" is not supported. Disable it to convert.',
+      defaultMessage: 'Cannot convert to ES|QL: "Group other values as Other" is not supported.',
     }
   ),
   terms_order_by_not_supported: i18n.translate(

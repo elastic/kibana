@@ -7,33 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IndexPattern } from '../types';
-import type {
-  DateHistogramIndexPatternColumn,
-  TermsIndexPatternColumn,
-} from '../datasources/operations';
+import type { DateHistogramIndexPatternColumn } from '../datasources/operations';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
-import { mockDateRange } from './__mocks__/esql_query_mocks';
-
-const createTermsColumn = (
-  params: Partial<TermsIndexPatternColumn['params']> = {}
-): TermsIndexPatternColumn => ({
-  label: 'Top 5 values of host.keyword',
-  dataType: 'string',
-  operationType: 'terms',
-  sourceField: 'host.keyword',
-  isBucketed: true,
-  params: {
-    size: 5,
-    orderBy: { type: 'alphabetical' },
-    orderDirection: 'asc',
-    otherBucket: false,
-    ...params,
-  },
-});
+import { createTermsColumn, mockDateRange, mockLayer } from './__mocks__/esql_query_mocks';
 
 const createAverageColumn = (): GenericIndexPatternColumn => ({
   label: 'Average of bytes',
@@ -43,7 +23,7 @@ const createAverageColumn = (): GenericIndexPatternColumn => ({
   isBucketed: false,
 });
 
-const mockIndexPattern = {
+const mockSampleLogsIndexPattern = {
   title: 'kibana_sample_data_logs',
   timeFieldName: 'timestamp',
   getFieldByName: (field: string) => {
@@ -53,7 +33,8 @@ const mockIndexPattern = {
   getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
 } as unknown as IndexPattern;
 
-const buildLayer = (terms: TermsIndexPatternColumn): FormBasedLayer => ({
+const buildTermsAverageLayer = (terms: ReturnType<typeof createTermsColumn>): FormBasedLayer => ({
+  ...mockLayer,
   columns: {
     '1': terms,
     '2': createAverageColumn(),
@@ -61,7 +42,7 @@ const buildLayer = (terms: TermsIndexPatternColumn): FormBasedLayer => ({
   columnOrder: ['1', '2'],
   incompleteColumns: {},
   sampling: 1,
-  indexPatternId: mockIndexPattern.id,
+  indexPatternId: mockSampleLogsIndexPattern.id,
 });
 
 describe('generateEsqlQuery top N', () => {
@@ -77,8 +58,8 @@ describe('generateEsqlQuery top N', () => {
         ['1', terms],
         ['2', createAverageColumn()],
       ],
-      buildLayer(terms),
-      mockIndexPattern,
+      buildTermsAverageLayer(terms),
+      mockSampleLogsIndexPattern,
       uiSettings,
       mockDateRange,
       new Date()
@@ -97,8 +78,8 @@ describe('generateEsqlQuery top N', () => {
         ['1', terms],
         ['2', createAverageColumn()],
       ],
-      buildLayer(terms),
-      mockIndexPattern,
+      buildTermsAverageLayer(terms),
+      mockSampleLogsIndexPattern,
       uiSettings,
       mockDateRange,
       new Date()
@@ -117,8 +98,8 @@ describe('generateEsqlQuery top N', () => {
         ['1', terms],
         ['2', createAverageColumn()],
       ],
-      buildLayer(terms),
-      mockIndexPattern,
+      buildTermsAverageLayer(terms),
+      mockSampleLogsIndexPattern,
       uiSettings,
       mockDateRange,
       new Date()
@@ -141,15 +122,13 @@ describe('generateEsqlQuery top N', () => {
       params: { interval: 'auto' },
     };
     const layer: FormBasedLayer = {
+      ...buildTermsAverageLayer(terms),
       columns: {
         '1': dateHistogram,
         '2': terms,
         '3': createAverageColumn(),
       },
       columnOrder: ['1', '2', '3'],
-      incompleteColumns: {},
-      sampling: 1,
-      indexPatternId: mockIndexPattern.id,
     };
 
     const result = generateEsqlQuery(
@@ -159,7 +138,7 @@ describe('generateEsqlQuery top N', () => {
         ['3', createAverageColumn()],
       ],
       layer,
-      mockIndexPattern,
+      mockSampleLogsIndexPattern,
       uiSettings,
       mockDateRange,
       new Date()

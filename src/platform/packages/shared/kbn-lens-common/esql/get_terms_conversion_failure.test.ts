@@ -7,25 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '../datasources/operations';
 import { getTermsConversionFailure } from './get_terms_conversion_failure';
-
-const createTermsColumn = (
-  params: Partial<TermsIndexPatternColumn['params']> = {}
-): TermsIndexPatternColumn => ({
-  label: 'Top values of host.keyword',
-  dataType: 'string',
-  operationType: 'terms',
-  sourceField: 'host.keyword',
-  isBucketed: true,
-  params: {
-    size: 5,
-    orderBy: { type: 'alphabetical' },
-    orderDirection: 'asc',
-    otherBucket: false,
-    ...params,
-  },
-});
+import { createTermsColumn } from './__mocks__/esql_query_mocks';
 
 describe('getTermsConversionFailure', () => {
   it('returns undefined for an eligible terms column', () => {
