@@ -44,28 +44,27 @@ jest.mock('@kbn/unified-data-table', () => {
   return {
     DataLoadingState: { loading: 'loading', loaded: 'loaded' },
     ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-    UnifiedDataTable: jest.fn(
-      ({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
-        ReactActual.createElement(
-          'div',
-          { 'data-test-subj': 'unifiedDataTable' },
-          rows.map((row: any) =>
-            ReactActual.createElement(
-              'div',
-              { key: row.id, role: 'row' },
-              columns.map((columnId: string) => {
-                const Renderer = externalCustomRenderers?.[columnId];
-                return ReactActual.createElement(
-                  'div',
-                  { key: columnId, role: 'cell' },
-                  Renderer
-                    ? ReactActual.createElement(Renderer, { row, columnId })
-                    : String(row.flattened?.[columnId] ?? '')
-                );
-              })
-            )
+    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+      ReactActual.createElement(
+        'div',
+        { 'data-test-subj': 'unifiedDataTable' },
+        rows.map((row: any) =>
+          ReactActual.createElement(
+            'div',
+            { key: row.id, role: 'row' },
+            columns.map((columnId: string) => {
+              const Renderer = externalCustomRenderers?.[columnId];
+              return ReactActual.createElement(
+                'div',
+                { key: columnId, role: 'cell' },
+                Renderer
+                  ? ReactActual.createElement(Renderer, { row, columnId })
+                  : String(row.flattened?.[columnId] ?? '')
+              );
+            })
           )
         )
+      )
     ),
   };
 });

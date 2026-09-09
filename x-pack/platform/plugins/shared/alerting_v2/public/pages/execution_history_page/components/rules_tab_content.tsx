@@ -235,8 +235,14 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   const { euiTheme } = useEuiTheme();
   const services = useUnifiedDataTableServices();
   const { dataView, error: dataViewError } = useRuleExecutionsDataView();
-  const { visibleColumns, setVisibleColumns, settings: tableSettings, onColumnResize, rowHeight, setRowHeight } =
-    useExecutionHistoryTableConfig({ defaultVisibleColumns: RULES_DEFAULT_VISIBLE_COLUMNS });
+  const {
+    visibleColumns,
+    setVisibleColumns,
+    settings: tableSettings,
+    onColumnResize,
+    rowHeight,
+    setRowHeight,
+  } = useExecutionHistoryTableConfig({ defaultVisibleColumns: RULES_DEFAULT_VISIBLE_COLUMNS });
 
   const items = useMemo(() => data?.items ?? [], [data?.items]);
   const rows = useMemo(() => items.map(ruleExecutionToDataTableRecord), [items]);
@@ -266,10 +272,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     [dateTimeFormat, rulesCache, onRuleClick]
   );
 
-  const sort = useMemo<SortOrder[]>(
-    () => [[sortField, sortDirection]],
-    [sortField, sortDirection]
-  );
+  const sort = useMemo<SortOrder[]>(() => [[sortField, sortDirection]], [sortField, sortDirection]);
 
   const onSort = (nextSort: string[][]) => {
     const last = nextSort[nextSort.length - 1];
