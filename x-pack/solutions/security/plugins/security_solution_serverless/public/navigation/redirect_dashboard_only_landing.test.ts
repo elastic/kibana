@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import {
   redirectDashboardOnlyLanding,
   shouldRedirectDashboardOnlyLanding,
+  subscribeDashboardOnlyLanding,
 } from './redirect_dashboard_only_landing';
 
 const originalLocation = window.location;
@@ -113,5 +115,43 @@ describe('redirectDashboardOnlyLanding', () => {
     redirectDashboardOnlyLanding(mockServices);
 
     expect(navigateToApp).not.toHaveBeenCalled();
+  });
+});
+
+describe('subscribeDashboardOnlyLanding', () => {
+  const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
+  const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
+  const currentAppId$ = new Subject<string | undefined>();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockServices.application.currentAppId$ = currentAppId$;
+    mockServices.application.capabilities = {
+      ...mockServices.application.capabilities,
+      navLinks: {
+        dashboards: true,
+        securitySolutionUI: false,
+      },
+    };
+    removeBasePath.mockImplementation((pathname: string) => pathname);
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
+  });
+
+  it('redirects again when the user navigates back to Get started', () => {
+    mockLocationPathname('/app/dashboards');
+    const subscription = subscribeDashboardOnlyLanding(mockServices);
+    expect(navigateToApp).not.toHaveBeenCalled();
+
+    mockLocationPathname('/app/security/get_started');
+    currentAppId$.next('securitySolutionUI');
+
+    expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
+    subscription.unsubscribe();
   });
 });

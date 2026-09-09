@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
 import type { Services } from '../common/services';
@@ -41,4 +42,10 @@ export const redirectDashboardOnlyLanding = (services: Services): void => {
   ) {
     application.navigateToApp(DASHBOARDS_APP_ID, { replace: true });
   }
+};
+
+export const subscribeDashboardOnlyLanding = (services: Services): Subscription => {
+  const run = () => redirectDashboardOnlyLanding(services);
+  run();
+  return services.application.currentAppId$.subscribe(run);
 };
