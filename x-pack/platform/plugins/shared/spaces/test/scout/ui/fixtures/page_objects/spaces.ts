@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ScoutPage } from '@kbn/scout';
 
 export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
@@ -433,11 +434,29 @@ export class SpacesPage {
     await this.spacesMenuPanelLocator().waitFor({ state: 'visible' });
   }
 
+  /**
+   * Selects a space in the nav menu and waits for the resulting navigation to commit.
+   *
+   * Selecting a space `await`s an analytics flush before it calls `navigateToUrl`
+   * (`nav_control/components/spaces_menu.tsx`), so the click resolves long before the
+   * browser starts navigating — regularly longer than the default 10s expect timeout on a
+   * stack where the telemetry endpoint is unreachable. Settling here rather than in each
+   * spec also means callers are never left with an in-flight navigation for a subsequent
+   * `page.goto` to collide with.
+   */
   async switchToSpaceFromNav(spaceId: string) {
-    await this.page.testSubj
-      .locator(`space-${spaceId}`)
-      .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
-      .click();
+    const landedInSpace = (url: URL) =>
+      spaceId === DEFAULT_SPACE_ID
+        ? !url.pathname.startsWith('/s/')
+        : url.pathname.startsWith(`/s/${spaceId}/`);
+
+    await Promise.all([
+      this.page.waitForURL(landedInSpace, { waitUntil: 'commit', timeout: 30_000 }),
+      this.page.testSubj
+        .locator(`space-${spaceId}`)
+        .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
+        .click(),
+    ]);
   }
 
   navSearchInputLocator() {
