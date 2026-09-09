@@ -14,54 +14,61 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../common_attributes.gen';
 import { AttackDiscoverySchedule } from '../../../common/schedules/schedule_types.gen';
 
+export const FindAttackDiscoverySchedulesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Page number to return. Defaults to 1.
+     */
+    page: z.coerce.number().optional().describe('Page number to return. Defaults to 1.'),
+    /**
+     * Number of schedules to return per page. Defaults to 10.
+     */
+    per_page: z.coerce
+      .number()
+      .optional()
+      .describe('Number of schedules to return per page. Defaults to 10.'),
+    /**
+     * Field used to sort results.
+     */
+    sort_field: NonEmptyString.optional().describe('Field used to sort results.'),
+    /**
+     * Sort order direction.
+     */
+    sort_direction: z.enum(['asc', 'desc']).optional().describe('Sort order direction.'),
+  })
+);
 export type FindAttackDiscoverySchedulesRequestQuery = z.infer<
   typeof FindAttackDiscoverySchedulesRequestQuery
 >;
-export const FindAttackDiscoverySchedulesRequestQuery = z.object({
-  /**
-   * Page number to return. Defaults to 1.
-   */
-  page: z.coerce.number().optional(),
-  /**
-   * Number of schedules to return per page. Defaults to 10.
-   */
-  per_page: z.coerce.number().optional(),
-  /**
-   * Field used to sort results.
-   */
-  sort_field: NonEmptyString.optional(),
-  /**
-   * Sort order direction.
-   */
-  sort_direction: z.enum(['asc', 'desc']).optional(),
-});
 export type FindAttackDiscoverySchedulesRequestQueryInput = z.input<
   typeof FindAttackDiscoverySchedulesRequestQuery
 >;
 
+export const FindAttackDiscoverySchedulesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Current page number
+     */
+    page: z.number().describe('Current page number'),
+    /**
+     * Number of items per page
+     */
+    per_page: z.number().describe('Number of items per page'),
+    /**
+     * Total number of matching schedules
+     */
+    total: z.number().describe('Total number of matching schedules'),
+    /**
+     * Array of matched schedules
+     */
+    data: z.array(AttackDiscoverySchedule).describe('Array of matched schedules'),
+  })
+);
 export type FindAttackDiscoverySchedulesResponse = z.infer<
   typeof FindAttackDiscoverySchedulesResponse
 >;
-export const FindAttackDiscoverySchedulesResponse = z.object({
-  /**
-   * Current page number
-   */
-  page: z.number(),
-  /**
-   * Number of items per page
-   */
-  per_page: z.number(),
-  /**
-   * Total number of matching schedules
-   */
-  total: z.number(),
-  /**
-   * Array of matched schedules
-   */
-  data: z.array(AttackDiscoverySchedule),
-});
