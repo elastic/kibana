@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
 import { existsSync } from 'fs';
 import path from 'path';
 import { getKibanaDir } from '../utils';
+import { listChangedFiles } from './strategy_git';
 
 const REPO_ROOT = getKibanaDir();
 
@@ -24,29 +25,28 @@ function getMoonBinPath(): string {
   return execSync('yarn --silent which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
 }
 
+/**
+ * Affected Moon project IDs for the changes between `mergeBase` and `HEAD`.
+ *
+ * `changedFiles` goes to Moon on stdin rather than letting `--affected` derive it:
+ * Moon unions the base diff with the local working tree, so files written by earlier
+ * CI steps would count as changes and fan out through `--downstream deep`. Sharing the
+ * git strategy's list keeps any remaining difference a real dependency-graph difference.
+ */
 export function getAffectedProjectsMoon(
   mergeBase: string,
-  includeDownstream: boolean
+  includeDownstream: boolean,
+  changedFiles: readonly string[] = listChangedFiles({ mergeBase, commit: 'HEAD' })
 ): Set<string> {
-  const execOptions = {
-    cwd: REPO_ROOT,
-    encoding: 'utf8' as const,
-    maxBuffer: 30 * 1024 * 1024, // 30MB buffer
-  };
-
-  // Mirror the git strategy: recompute the actual merge base instead of trusting `mergeBase` as-is.
-  const actualBase = execSync(`git merge-base ${mergeBase} HEAD`, execOptions).trim();
-
   const downstreamFlag = includeDownstream ? '--downstream deep' : '';
   const command = `"${getMoonBinPath()}" query projects --affected ${downstreamFlag}`;
 
   const output = execSync(command, {
-    ...execOptions,
+    cwd: REPO_ROOT,
+    encoding: 'utf8' as const,
+    maxBuffer: 30 * 1024 * 1024, // 30MB buffer
     timeout: 30000, // 30 seconds
-    env: {
-      ...process.env,
-      MOON_BASE: actualBase,
-    },
+    input: JSON.stringify({ files: [...changedFiles] }),
   });
 
   const result = JSON.parse(output);

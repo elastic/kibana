@@ -75,6 +75,20 @@ describe('computeMoonShadow', () => {
     expect(log.warning).toHaveBeenCalled();
   });
 
+  it('queries moon with the same changed-file list git used', () => {
+    mockGetAffectedProjectsMoon.mockReturnValue(new Set(['@kbn/foo']));
+    const gitChangedFiles = ['x-pack/solutions/observability/plugins/slo/server/index.ts'];
+
+    computeMoonShadow({
+      mergeBase: 'main',
+      gitChangedFiles,
+      gitAffectedModules: new Set(['@kbn/foo']),
+      log: createMockLog(),
+    });
+
+    expect(mockGetAffectedProjectsMoon).toHaveBeenCalledWith('main', true, gitChangedFiles);
+  });
+
   it('overlays implicit consumers from the changed-files list', () => {
     mockGetAffectedProjectsMoon.mockReturnValue(new Set(['@kbn/ml-plugin']));
 

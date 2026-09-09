@@ -125,10 +125,16 @@ const filteredFiles = filterFilesByPackages(
 **Performance**: ~500ms (first call, includes module discovery); subsequent calls use cache
 
 ### Moon Strategy
-1. Query Moon with `--affected [--downstream deep]`
-2. Return affected project IDs
+1. Collect changed files exactly as the git strategy does (steps 1–2 above)
+2. Pipe that list to `moon query projects --affected [--downstream deep]` on stdin
+3. Return affected project IDs
 
 **Performance**: ~5-7 seconds
+
+Moon does not derive its own touched files: `--affected` also picks up local working-tree
+state, so files written by earlier CI steps would count as changes. Sharing the git list
+keeps both strategies on identical input. `--ignore` / `AFFECTED_IGNORE` still applies to
+the git strategy only.
 
 ## PR Jest selective testing
 
