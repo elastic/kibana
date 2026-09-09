@@ -430,7 +430,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
         entries: [{ yara_rule_data: yaraRuleText }],
@@ -470,10 +470,42 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
         entries: [{ yara_rule_data: firstRule }, { yara_rule_data: secondRule }],
+      });
+    });
+
+    test('it should flatten a Custom YARA Signature with multiple rules into one entry per rule', async () => {
+      const yaraRuleText = `import "pe"
+
+rule First { condition: true }
+rule Second { condition: true }`;
+      const exceptionMock = getFoundExceptionListItemSchemaMock();
+      exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
+      exceptionMock.data[0].entries = [
+        {
+          field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+          operator: 'included',
+          type: 'match',
+          value: yaraRuleText,
+        },
+      ];
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [
+          { yara_rule_data: 'import "pe"\n\nrule First { condition: true }' },
+          { yara_rule_data: 'import "pe"\n\nrule Second { condition: true }' },
+        ],
       });
     });
 
@@ -511,7 +543,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
         entries: [{ yara_rule_data: enabledRule }],
@@ -535,17 +567,19 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({ entries: [] });
     });
 
-    test('it should convert an empty Custom YARA Signature list', () => {
-      expect(convertYaraRulesToEndpointFormat([], 'v1')).toEqual({ entries: [] });
+    test('it should convert an empty Custom YARA Signature list', async () => {
+      await expect(convertYaraRulesToEndpointFormat([], 'v1')).resolves.toEqual({ entries: [] });
     });
 
-    test('it should throw for an unsupported Custom YARA Signature schema version', () => {
-      expect(() => convertYaraRulesToEndpointFormat([], 'v2')).toThrow('unsupported schemaVersion');
+    test('it should throw for an unsupported Custom YARA Signature schema version', async () => {
+      await expect(convertYaraRulesToEndpointFormat([], 'v2')).rejects.toThrow(
+        'unsupported schemaVersion'
+      );
     });
 
     test('it should return a stable hash regardless of order of entries', async () => {
@@ -1318,7 +1352,7 @@ describe('artifacts lists', () => {
         os: 'linux',
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
         entries: [{ yara_rule_data: yaraRuleText }],

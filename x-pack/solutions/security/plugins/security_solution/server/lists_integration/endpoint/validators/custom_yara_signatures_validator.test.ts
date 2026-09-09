@@ -25,7 +25,8 @@ jest.mock('../../../endpoint/lib/libyara', () => ({
     warnings: [],
     errorCount: 0,
     warningCount: 0,
-    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+    imports: [],
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [], sourceStart: 0, sourceEnd: 1 }],
   })),
   getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
 }));
@@ -51,7 +52,8 @@ describe('YARA Signatures API validations', () => {
       warnings: [],
       errorCount: 0,
       warningCount: 0,
-      rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      imports: [],
+      rules: [{ identifier: 'test', meta: {}, duplicateMeta: [], sourceStart: 0, sourceEnd: 1 }],
     });
   });
 
@@ -286,6 +288,7 @@ describe('YARA Signatures API validations', () => {
         warnings: [],
         errorCount: 1,
         warningCount: 0,
+        imports: [],
         rules: [],
       });
 
@@ -303,7 +306,8 @@ describe('YARA Signatures API validations', () => {
         warnings: [{ severity: 'warning', message: 'may slow down scanning', line: 1 }],
         errorCount: 0,
         warningCount: 1,
-        rules: [{ identifier: 'T', meta: {}, duplicateMeta: [] }],
+        imports: [],
+        rules: [{ identifier: 'T', meta: {}, duplicateMeta: [], sourceStart: 0, sourceEnd: 1 }],
       });
 
       await expect(

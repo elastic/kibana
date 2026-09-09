@@ -41,6 +41,7 @@ export const validateCustomYaraRule = async (
       errorCount: 1,
       warningCount: 0,
       rules: [],
+      imports: [],
     };
   }
 

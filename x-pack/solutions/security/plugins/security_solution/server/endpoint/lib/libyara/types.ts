@@ -26,6 +26,10 @@ export interface YaraCompiledRule {
   meta: YaraCompiledRuleMeta;
   /** Meta keys that appeared more than once. Values are omitted from `meta`. */
   duplicateMeta: YaraMetaKeyOfInterest[];
+  /** Inclusive UTF-8 byte offset into the original source, or -1 if unknown. */
+  sourceStart: number;
+  /** Exclusive UTF-8 byte offset into the original source, or -1 if unknown. */
+  sourceEnd: number;
 }
 
 export interface YaraValidateResult {
@@ -37,6 +41,8 @@ export interface YaraValidateResult {
   errorCount: number;
   /** Total warnings seen by libyara. */
   warningCount: number;
+  /** File-level `import "..."` module names, in source order. */
+  imports: string[];
   /** Rules compiled by libyara. Empty when compile fails or the source has no rules. */
   rules: YaraCompiledRule[];
 }

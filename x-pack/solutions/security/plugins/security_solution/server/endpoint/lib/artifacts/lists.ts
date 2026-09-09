@@ -49,6 +49,7 @@ import {
   wrappedTranslatedExceptionList,
   wrappedTranslatedYaraRulesList,
 } from '../../schemas';
+import { sliceYaraRulesFromSource, validateYaraRule } from '../libyara';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList | WrappedTranslatedYaraRulesList,
@@ -97,12 +98,12 @@ export function convertExceptionsToEndpointFormat(
   return validated as WrappedTranslatedExceptionList;
 }
 
-export function convertYaraRulesToEndpointFormat(
+export async function convertYaraRulesToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
   schemaVersion: string
-): WrappedTranslatedYaraRulesList {
+): Promise<WrappedTranslatedYaraRulesList> {
   const translatedYaraRules = {
-    entries: translateToYaraRules(exceptions, schemaVersion),
+    entries: await translateToYaraRules(exceptions, schemaVersion),
   };
   const [validated, errors] = validate(translatedYaraRules, wrappedTranslatedYaraRulesList);
   if (errors != null) {
@@ -170,30 +171,33 @@ export async function getAllItemsFromEndpointExceptionList({
 
 /**
  * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
+ * Each exception value is compiled and split into one artifact entry per rule.
  * @param exceptions
  * @param schemaVersion
  */
-function translateToYaraRules(
+async function translateToYaraRules(
   exceptions: ExceptionListItemSchema[],
   schemaVersion: string
-): TranslatedYaraRule[] {
-  if (schemaVersion === 'v1') {
-    const translatedItems: TranslatedYaraRule[] = [];
-
-    for (const exception of exceptions) {
-      if (!(exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
-        const [entry] = exception.entries;
-
-        if (entry?.type === 'match' && typeof entry.value === 'string') {
-          translatedItems.push({ yara_rule_data: entry.value });
-        }
-      }
-    }
-
-    return translatedItems;
-  } else {
+): Promise<TranslatedYaraRule[]> {
+  if (schemaVersion !== 'v1') {
     throw new Error('unsupported schemaVersion');
   }
+
+  const translatedItems: TranslatedYaraRule[] = [];
+
+  for (const exception of exceptions) {
+    if (!(exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
+      const [entry] = exception.entries;
+
+      if (entry?.type === 'match' && typeof entry.value === 'string') {
+        const compiled = await validateYaraRule(entry.value);
+        const slices = sliceYaraRulesFromSource(entry.value, compiled);
+        translatedItems.push(...slices.map((yara_rule_data) => ({ yara_rule_data })));
+      }
+    }
+  }
+
+  return translatedItems;
 }
 
 /**

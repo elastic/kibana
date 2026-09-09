@@ -47,3 +47,4 @@ export type {
   YaraValidateResult,
 } from './types';
 export { getYaraEngineVersion, setYaraLogger, validateYaraRule } from './validate_yara_rule';
+export { sliceYaraRulesFromSource } from './slice_yara_rules';

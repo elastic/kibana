@@ -9,7 +9,8 @@
  * Compile-only libyara wrapper for Kibana Custom YARA validation.
  *
  * Exposes:
- *   - validate_yara(source) -> JSON string { errors, warnings, rules, errorCount, warningCount }
+ *   - validate_yara(source) -> JSON string
+ *       { errors, warnings, imports, rules, errorCount, warningCount }
  *   - validate_yara_free(ptr)
  *   - yara_engine_version() -> version string (from -DYARA_ENGINE_VERSION)
  *
@@ -22,6 +23,8 @@
 #include <string.h>
 
 #include <yara.h>
+
+#include "source_spans.h"
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
@@ -38,14 +41,16 @@
 #define MAX_META_VALUE_LEN 32
 /* Escaped messages can be ~2x source length; budget both error and warning arrays. */
 #define MAX_JSON_ITEM_LEN (MAX_MESSAGE_LEN * 2 + 80)
-#define MAX_RULE_JSON_LEN (MAX_RULE_IDENTIFIER_LEN * 2 + MAX_META_VALUE_LEN * 2 * 3 + 104)
-#define MAX_JSON_LEN \
-  (MAX_DIAGNOSTICS * MAX_JSON_ITEM_LEN * 2 + MAX_RULES * MAX_RULE_JSON_LEN + 128)
+#define MAX_RULE_JSON_LEN (MAX_RULE_IDENTIFIER_LEN * 2 + MAX_META_VALUE_LEN * 2 * 3 + 200)
+#define MAX_IMPORT_JSON_LEN (YARA_MAX_IMPORT_NAME_LEN * 2 + 4)
+#define MAX_JSON_LEN                                     \
+  (MAX_DIAGNOSTICS * MAX_JSON_ITEM_LEN * 2 + MAX_RULES * \
+   MAX_RULE_JSON_LEN + YARA_MAX_IMPORTS * MAX_IMPORT_JSON_LEN + 160)
 /* Bytes reserved so errorCount/warningCount always fit after the arrays. */
 #define JSON_COUNTS_MAX 64
 
 static const char EMPTY_JSON[] =
-    "{\"errors\":[],\"warnings\":[],\"rules\":[],\"errorCount\":0,\"warningCount\":0}";
+    "{\"errors\":[],\"warnings\":[],\"imports\":[],\"rules\":[],\"errorCount\":0,\"warningCount\":0}";
 
 typedef struct {
   char severity[16];
@@ -62,6 +67,9 @@ typedef struct {
   int os_count;
   int arch_count;
   int scan_type_count;
+  /* UTF-8 byte offsets into the original source; -1 if unknown. */
+  int source_start;
+  int source_end;
 } yara_compiled_rule_t;
 
 typedef struct {
@@ -71,6 +79,8 @@ typedef struct {
   int warning_count;
   yara_compiled_rule_t rules[MAX_RULES];
   int rule_count;
+  char imports[YARA_MAX_IMPORTS][YARA_MAX_IMPORT_NAME_LEN];
+  int import_count;
 } yara_validate_ctx_t;
 
 static int g_yara_initialized = 0;
@@ -233,6 +243,8 @@ static void collect_compiled_rules(yara_validate_ctx_t* ctx, YR_RULES* rules) {
 
     yara_compiled_rule_t* out = &ctx->rules[ctx->rule_count];
     memset(out, 0, sizeof(*out));
+    out->source_start = -1;
+    out->source_end = -1;
     copy_bounded(out->identifier, sizeof(out->identifier), rule->identifier);
 
     YR_META* meta;
@@ -251,6 +263,23 @@ static void collect_compiled_rules(yara_validate_ctx_t* ctx, YR_RULES* rules) {
     }
 
     ctx->rule_count++;
+  }
+}
+
+static void apply_source_layout(yara_validate_ctx_t* ctx, const yara_source_layout_t* layout) {
+  ctx->import_count = layout->import_count;
+  for (int i = 0; i < layout->import_count; i++) {
+    copy_bounded(ctx->imports[i], YARA_MAX_IMPORT_NAME_LEN, layout->imports[i]);
+  }
+
+  for (int i = 0; i < ctx->rule_count; i++) {
+    for (int j = 0; j < layout->span_count; j++) {
+      if (strcmp(ctx->rules[i].identifier, layout->spans[j].identifier) == 0) {
+        ctx->rules[i].source_start = layout->spans[j].start;
+        ctx->rules[i].source_end = layout->spans[j].end;
+        break;
+      }
+    }
   }
 }
 
@@ -336,7 +365,13 @@ static int append_compiled_rule(
     }
   }
 
-  return append_fmt(out, cap, offset, "]}");
+  return append_fmt(
+      out,
+      cap,
+      offset,
+      "],\"sourceStart\":%d,\"sourceEnd\":%d}",
+      rule->source_start,
+      rule->source_end);
 }
 
 static char* build_json(const yara_validate_ctx_t* ctx) {
@@ -383,6 +418,16 @@ static char* build_json(const yara_validate_ctx_t* ctx) {
               i > 0 ? "," : "",
               escaped,
               ctx->warnings[i].line) <= 0) {
+        break;
+      }
+    }
+  }
+
+  if (append_fmt(out, content_cap, &offset, "],\"imports\":[") > 0) {
+    for (int i = 0; i < ctx->import_count; i++) {
+      char escaped[YARA_MAX_IMPORT_NAME_LEN * 2];
+      json_escape(ctx->imports[i], escaped, sizeof(escaped));
+      if (append_fmt(out, content_cap, &offset, "%s\"%s\"", i > 0 ? "," : "", escaped) <= 0) {
         break;
       }
     }
@@ -480,6 +525,11 @@ static char* validate_yara_impl(yara_validate_ctx_t* ctx, const char* source) {
     append_diagnostic(ctx->errors, &ctx->error_count, "error", message, 0);
   } else {
     collect_compiled_rules(ctx, rules);
+
+    yara_source_layout_t layout;
+    if (yara_extract_source_layout(source, &layout)) {
+      apply_source_layout(ctx, &layout);
+    }
   }
 
   yr_rules_destroy(rules);
