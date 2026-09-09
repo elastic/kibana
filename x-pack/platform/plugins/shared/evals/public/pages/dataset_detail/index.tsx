@@ -69,6 +69,7 @@ import {
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import { ImportDatasetFlyout } from '../../components/import_dataset_flyout';
 import { DatasetTagsFields, DatasetTagsSummary } from '../../components/dataset_tags';
 import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import {
@@ -162,6 +163,7 @@ export const DatasetDetailPage: React.FC = () => {
   const [editOutput, setEditOutput] = useState('');
   const [editMetadata, setEditMetadata] = useState('');
   const [isCreateExampleOpen, setIsCreateExampleOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
   const [createInput, setCreateInput] = useState('{}');
   const [createOutput, setCreateOutput] = useState('{}');
   const [createMetadata, setCreateMetadata] = useState('{}');
@@ -861,9 +863,22 @@ export const DatasetDetailPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="plusCircle" onClick={openCreateExampleFlyout} fill>
-                    {i18n.ADD_EXAMPLE_BUTTON}
-                  </EuiButton>
+                  <EuiFlexGroup responsive={false} gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        iconType="upload"
+                        onClick={() => setIsImportFlyoutOpen(true)}
+                        data-test-subj="importDatasetFileButton"
+                      >
+                        {i18n.IMPORT_FILE_BUTTON}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton iconType="plusCircle" onClick={openCreateExampleFlyout} fill>
+                        {i18n.ADD_EXAMPLE_BUTTON}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
@@ -908,6 +923,17 @@ export const DatasetDetailPage: React.FC = () => {
           </>
         ) : null}
       </EuiPageSection>
+
+      {isImportFlyoutOpen ? (
+        <ImportDatasetFlyout
+          initialDataset={
+            dataset
+              ? { id: dataset.id, name: dataset.name, examplesCount: dataset.examples.length }
+              : undefined
+          }
+          onClose={() => setIsImportFlyoutOpen(false)}
+        />
+      ) : null}
 
       {/* Example detail flyout (read-only / edit mode) */}
       {selectedExample ? (
