@@ -718,5 +718,4 @@ describe('CostEstimate', () => {
       'Estimate uses lower-tier pricing; 5 calls exceeded the tier threshold.'
     );
   });
-
 });
