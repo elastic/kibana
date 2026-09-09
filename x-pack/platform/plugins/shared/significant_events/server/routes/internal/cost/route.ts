@@ -15,6 +15,7 @@ import {
   calculateSignificantEventsCost,
   createUnavailableCostResponse,
 } from '../../../lib/cost/cost_service';
+import { resolveTokenTrackingCoverage } from '../../../lib/cost/token_tracking_coverage';
 
 const ROUTE_CACHE_TTL_MS = 60_000;
 
@@ -129,13 +130,17 @@ const getCostRoute = createServerRoute({
       const now = new Date();
       const logger = server.logger.get('cost');
       try {
-        const priceResult = await priceService.getPrices();
+        const [priceResult, trackingCoverage] = await Promise.all([
+          priceService.getPrices(),
+          resolveTokenTrackingCoverage({ request, server, logger }),
+        ]);
         if (priceResult === null) {
           return createUnavailableCostResponse({
             now,
             reason: 'pricing',
             pricesFetchedAt: null,
             pricesStale: false,
+            trackingCoverage,
           });
         }
         const response = await calculateSignificantEventsCost({
@@ -143,6 +148,7 @@ const getCostRoute = createServerRoute({
           prices: priceResult.prices,
           pricesFetchedAt: priceResult.fetchedAt,
           pricesStale: priceResult.stale,
+          trackingCoverage,
           now,
           logger,
         });

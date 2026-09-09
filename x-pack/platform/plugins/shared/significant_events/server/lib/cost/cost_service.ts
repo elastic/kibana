@@ -17,6 +17,7 @@ import {
   type CostStatus,
   type CostUnavailableReason,
   type PeriodCost,
+  type TokenTrackingCoverage,
 } from '../../../common/cost';
 import { resolveDailyWindow } from '../run_quotas';
 import type { PriceMap } from './price_service';
@@ -31,7 +32,6 @@ const ALWAYS_PRESENT_CAVEATS: readonly CostCaveat[] = [
   'excludes_embeddings',
   'excludes_failed_calls',
   'excludes_cache_writes',
-  'tracking_not_all_spaces',
 ];
 
 const STATUS_RANK: Record<CostStatus, number> = {
@@ -56,11 +56,13 @@ export const createUnavailableCostResponse = ({
   reason,
   pricesFetchedAt,
   pricesStale,
+  trackingCoverage,
 }: {
   now: Date;
   reason: CostUnavailableReason;
   pricesFetchedAt: string | null;
   pricesStale: boolean;
+  trackingCoverage: TokenTrackingCoverage;
 }): CostResponse => {
   const todayWindow = resolveDailyWindow(now);
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
@@ -99,7 +101,12 @@ export const createUnavailableCostResponse = ({
     pricesFetchedAt,
     pricesStale,
     unavailableReason: reason,
-    caveats: [...ALWAYS_PRESENT_CAVEATS, ...(pricesStale ? (['prices_stale'] as const) : [])],
+    caveats: [
+      ...ALWAYS_PRESENT_CAVEATS,
+      ...(trackingCoverage.status === 'full' ? [] : (['tracking_not_all_spaces'] as const)),
+      ...(pricesStale ? (['prices_stale'] as const) : []),
+    ],
+    trackingCoverage,
   };
 };
 
@@ -214,11 +221,16 @@ const readDocCount = (value: unknown): number => {
 const buildCaveats = ({
   pricesStale,
   groups,
+  trackingCoverage,
 }: {
   pricesStale: boolean;
   groups: BudgetGroupCost[];
+  trackingCoverage: TokenTrackingCoverage;
 }): CostCaveat[] => {
   const caveats: CostCaveat[] = [...ALWAYS_PRESENT_CAVEATS];
+  if (trackingCoverage.status !== 'full') {
+    caveats.push('tracking_not_all_spaces');
+  }
   if (pricesStale) {
     caveats.push('prices_stale');
   }
@@ -598,6 +610,7 @@ export const calculateSignificantEventsCost = async ({
   prices,
   pricesFetchedAt,
   pricesStale,
+  trackingCoverage,
   now,
   logger,
 }: {
@@ -605,6 +618,7 @@ export const calculateSignificantEventsCost = async ({
   prices: PriceMap;
   pricesFetchedAt: string;
   pricesStale: boolean;
+  trackingCoverage: TokenTrackingCoverage;
   now: Date;
   logger: Logger;
 }): Promise<CostResponse> => {
@@ -652,7 +666,12 @@ export const calculateSignificantEventsCost = async ({
       pricesFetchedAt,
       pricesStale,
       unavailableReason: null,
-      caveats: buildCaveats({ pricesStale, groups: [...today.groups, ...month.groups] }),
+      caveats: buildCaveats({
+        pricesStale,
+        groups: [...today.groups, ...month.groups],
+        trackingCoverage,
+      }),
+      trackingCoverage,
     };
   } catch (error) {
     if (isMissingTokenUsageIndex(error)) {
@@ -663,7 +682,8 @@ export const calculateSignificantEventsCost = async ({
         pricesFetchedAt,
         pricesStale,
         unavailableReason: null,
-        caveats: buildCaveats({ pricesStale, groups: [] }),
+        caveats: buildCaveats({ pricesStale, groups: [], trackingCoverage }),
+        trackingCoverage,
       };
     }
     logger.error(
@@ -676,6 +696,7 @@ export const calculateSignificantEventsCost = async ({
       reason: 'usage_data',
       pricesFetchedAt,
       pricesStale,
+      trackingCoverage,
     });
   }
 };

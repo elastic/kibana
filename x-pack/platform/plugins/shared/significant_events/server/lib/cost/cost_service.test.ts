@@ -21,7 +21,7 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { FEATURE_ID_TO_COST_BUDGET_GROUP } from '../../../common/cost';
+import { FEATURE_ID_TO_COST_BUDGET_GROUP, type TokenTrackingCoverage } from '../../../common/cost';
 import { calculateSignificantEventsCost, createUnavailableCostResponse } from './cost_service';
 import type { PriceMap } from './price_service';
 
@@ -29,6 +29,11 @@ const NOW = new Date('2026-09-09T08:30:00.000Z');
 const TODAY_START = '2026-09-09T00:00:00.000Z';
 const MONTH_START = '2026-09-01T00:00:00.000Z';
 const PERIOD_END = NOW.toISOString();
+const TRACKING_COVERAGE = {
+  status: 'partial',
+  enabledSpaceCount: 1,
+  totalSpaceCount: 2,
+} as const;
 
 const GPT_54 = 'openai-gpt-5.4';
 const SONNET = 'anthropic-claude-4.6-sonnet';
@@ -123,11 +128,13 @@ const calculate = async ({
   esClient,
   prices = PRICES,
   pricesStale = false,
+  trackingCoverage = TRACKING_COVERAGE,
   logger = loggerMock.create() as unknown as Logger,
 }: {
   esClient: ElasticsearchClient;
   prices?: PriceMap;
   pricesStale?: boolean;
+  trackingCoverage?: TokenTrackingCoverage;
   logger?: Logger;
 }) =>
   calculateSignificantEventsCost({
@@ -135,6 +142,7 @@ const calculate = async ({
     prices,
     pricesFetchedAt: '2026-09-09T06:00:00.000Z',
     pricesStale,
+    trackingCoverage,
     now: NOW,
     logger,
   });
@@ -505,16 +513,32 @@ describe('calculateSignificantEventsCost', () => {
     ]);
   });
 
+  it('omits the incomplete-tracking caveat when every space is tracked', async () => {
+    const result = await calculate({
+      esClient: createEsClient(() => ({
+        aggregations: aggregations({ total: 0 }),
+      })),
+      trackingCoverage: {
+        status: 'full',
+        enabledSpaceCount: 2,
+        totalSpaceCount: 2,
+      },
+    });
+    expect(result.caveats).not.toContain('tracking_not_all_spaces');
+  });
+
   it('builds structured unavailable responses for missing prices', () => {
     const response = createUnavailableCostResponse({
       now: NOW,
       reason: 'pricing',
       pricesFetchedAt: null,
       pricesStale: false,
+      trackingCoverage: TRACKING_COVERAGE,
     });
     expect(response.unavailableReason).toBe('pricing');
     expect(response.pricesFetchedAt).toBeNull();
     expect(response.today.groups.every((group) => group.status === 'unavailable')).toBe(true);
     expect(response.today.totalTokens).toBe(0);
+    expect(response.trackingCoverage).toEqual(TRACKING_COVERAGE);
   });
 });

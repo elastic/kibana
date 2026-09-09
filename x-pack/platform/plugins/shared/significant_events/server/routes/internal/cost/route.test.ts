@@ -12,6 +12,7 @@ import type { PriceResult, PriceService } from '../../../lib/cost/price_service'
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertCanManageRunQuotas } from '../../../lib/run_quotas';
 import { internalRunQuotaRoutes } from '../run_quotas/route';
+import { resolveTokenTrackingCoverage } from '../../../lib/cost/token_tracking_coverage';
 import { internalCostRoutes, resetCostRouteCache } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -21,6 +22,10 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
 jest.mock('../../../lib/run_quotas', () => ({
   ...jest.requireActual('../../../lib/run_quotas'),
   assertCanManageRunQuotas: jest.fn(),
+}));
+
+jest.mock('../../../lib/cost/token_tracking_coverage', () => ({
+  resolveTokenTrackingCoverage: jest.fn(),
 }));
 
 const route = internalCostRoutes['GET /internal/significant_events/cost'];
@@ -84,6 +89,11 @@ describe('Significant Events cost route', () => {
     getScopedClients.mockClear();
     jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
     jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
+    jest.mocked(resolveTokenTrackingCoverage).mockReset().mockResolvedValue({
+      status: 'partial',
+      enabledSpaceCount: 1,
+      totalSpaceCount: 2,
+    });
   });
 
   afterEach(() => {
@@ -128,6 +138,11 @@ describe('Significant Events cost route', () => {
     expect(response.pricesFetchedAt).toBe(PRICE_RESULT.fetchedAt);
     expect(response.pricesStale).toBe(false);
     expect(response.today.groups).toHaveLength(4);
+    expect(response.trackingCoverage).toEqual({
+      status: 'partial',
+      enabledSpaceCount: 1,
+      totalSpaceCount: 2,
+    });
   });
 
   it('returns the cached object within 60 seconds and recalculates after expiry', async () => {

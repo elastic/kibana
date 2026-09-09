@@ -14,4 +14,5 @@ export type {
   CostStatus,
   CostUnavailableReason,
   PeriodCost,
+  TokenTrackingCoverage,
 } from './types';

@@ -110,6 +110,11 @@ const costResponse = (overrides: Partial<CostResponse> = {}): CostResponse => ({
   pricesStale: false,
   unavailableReason: null,
   caveats: ALWAYS_CAVEATS,
+  trackingCoverage: {
+    status: 'partial',
+    enabledSpaceCount: 1,
+    totalSpaceCount: 2,
+  },
   ...overrides,
 });
 
@@ -222,16 +227,16 @@ describe('CostEstimate', () => {
     expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('shows only an enable button when tracking is disabled and enables it in this space', async () => {
+  it('shows deployment-wide partial costs and an enable action when this space is disabled', async () => {
     setTracking(false);
     renderCost();
-    expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
-      'Token tracking disabled in this space'
+    expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
+      '1 of 2 spaces tracked'
     );
-    expect(screen.queryByTestId('significantEventsCostHeadline')).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsCostHeadline')).toBeInTheDocument();
     const enableButton = screen.getByTestId('significantEventsEnableTokenTrackingButton');
     expect(enableButton).toHaveTextContent('Enable token tracking in this space');
-    expect(mockUseSignificantEventsCost).toHaveBeenCalledWith({ enabled: false });
+    expect(mockUseSignificantEventsCost).toHaveBeenCalledWith({ enabled: true });
 
     fireEvent.click(enableButton);
 
@@ -240,9 +245,7 @@ describe('CostEstimate', () => {
       expect(installTokenUsageDashboard).toHaveBeenCalledWith(
         '/internal/gen_ai_settings/install_token_usage_dashboard'
       );
-      expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
-        'Token tracking enabled in this space'
-      );
+      expect(refreshCost).toHaveBeenCalled();
     });
     expect(
       screen.queryByTestId('significantEventsEnableTokenTrackingButton')
@@ -279,22 +282,89 @@ describe('CostEstimate', () => {
 
     await waitFor(() => {
       expect(addWarning).toHaveBeenCalled();
-      expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
-        'Token tracking enabled in this space'
-      );
+      expect(refreshCost).toHaveBeenCalled();
+      expect(
+        screen.queryByTestId('significantEventsEnableTokenTrackingButton')
+      ).not.toBeInTheDocument();
     });
     expect(addDanger).not.toHaveBeenCalled();
   });
 
-  it('shows that token tracking is enabled', () => {
+  it('shows cross-space token tracking coverage', () => {
     renderCost();
-    expect(screen.getByTestId('significantEventsTokenTrackingStatus')).toHaveTextContent(
-      'Token tracking enabled in this space'
+    expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
+      '1 of 2 spaces tracked'
+    );
+    expect(screen.getByTestId('significantEventsTrackingCoverageCallout')).toHaveTextContent(
+      'Token tracking is enabled in 1 of 2 spaces'
+    );
+    expect(screen.getByTestId('significantEventsTrackingCoverageCallout')).toHaveTextContent(
+      'This deployment-wide estimate includes all Significant Events calls recorded during the selected period.'
     );
     expect(mockUseKibana().core.settings.client.get).toHaveBeenCalledWith(
       GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
       false
     );
+  });
+
+  it('shows full coverage without a coverage callout', () => {
+    setCost({
+      data: costResponse({
+        caveats: ALWAYS_CAVEATS.filter((caveat) => caveat !== 'tracking_not_all_spaces'),
+        trackingCoverage: {
+          status: 'full',
+          enabledSpaceCount: 2,
+          totalSpaceCount: 2,
+        },
+      }),
+    });
+    renderCost();
+    expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
+      '2 of 2 spaces tracked'
+    );
+    expect(
+      screen.queryByTestId('significantEventsTrackingCoverageCallout')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsCostHeadline')).toBeInTheDocument();
+  });
+
+  it('shows only the current-space enable action when no spaces are tracked', () => {
+    setTracking(false);
+    setCost({
+      data: costResponse({
+        trackingCoverage: {
+          status: 'none',
+          enabledSpaceCount: 0,
+          totalSpaceCount: 2,
+        },
+      }),
+    });
+    renderCost();
+    expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
+      '0 of 2 spaces tracked'
+    );
+    expect(screen.getByTestId('significantEventsEnableTokenTrackingButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('significantEventsCostHeadline')).not.toBeInTheDocument();
+  });
+
+  it('shows recorded global costs when coverage cannot be determined', () => {
+    setCost({
+      data: costResponse({
+        trackingCoverage: {
+          status: 'unavailable',
+          enabledSpaceCount: null,
+          totalSpaceCount: null,
+        },
+      }),
+    });
+    renderCost();
+    expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
+      'Tracking coverage unavailable'
+    );
+    expect(screen.getByTestId('significantEventsTrackingCoverageCallout')).toHaveTextContent(
+      'Unable to determine token tracking coverage'
+    );
+    expect(screen.getByTestId('significantEventsCostHeadline')).toBeInTheDocument();
   });
 
   it('shows a loading spinner on the initial query', () => {
@@ -464,7 +534,7 @@ describe('CostEstimate', () => {
       'Cache-write tokens are excluded because Kibana does not record them.'
     );
     expect(caveats).toHaveTextContent(
-      'Based on recorded calls in spaces where token usage tracking is enabled. Not all spaces may be tracked.'
+      'Token tracking is not enabled in every space. Calls made while tracking was disabled are not included.'
     );
     expect(caveats).toHaveTextContent(
       'Price data is outdated; estimates may not reflect current rates.'

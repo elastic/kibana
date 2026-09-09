@@ -69,6 +69,11 @@ const costResponse = (overrides: Partial<CostResponse> = {}): CostResponse => ({
   pricesStale: false,
   unavailableReason: null,
   caveats: [],
+  trackingCoverage: {
+    status: 'full',
+    enabledSpaceCount: 1,
+    totalSpaceCount: 1,
+  },
   ...overrides,
 });
 

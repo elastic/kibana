@@ -54,6 +54,18 @@ export interface PeriodCost {
 
 export type CostUnavailableReason = 'pricing' | 'usage_data';
 
+export type TokenTrackingCoverage =
+  | {
+      status: 'none' | 'partial' | 'full';
+      enabledSpaceCount: number;
+      totalSpaceCount: number;
+    }
+  | {
+      status: 'unavailable';
+      enabledSpaceCount: null;
+      totalSpaceCount: null;
+    };
+
 export type CostCaveat =
   | 'eis_pricing_assumed'
   | 'usd_assumed'
@@ -72,6 +84,7 @@ export interface CostResponse {
   pricesStale: boolean;
   unavailableReason: CostUnavailableReason | null;
   caveats: CostCaveat[];
+  trackingCoverage: TokenTrackingCoverage;
 }
 
 export const FEATURE_ID_TO_COST_BUDGET_GROUP: Readonly<Record<string, CostBudgetGroup>> = {

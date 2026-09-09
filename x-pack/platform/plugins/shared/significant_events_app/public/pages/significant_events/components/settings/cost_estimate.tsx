@@ -34,6 +34,7 @@ import {
   type CostCaveat,
   type CostResponse,
   type PeriodCost,
+  type TokenTrackingCoverage,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsCost } from '../../../../hooks/use_significant_events_cost';
@@ -124,7 +125,7 @@ const caveatText = (caveat: DisplayedCostCaveat, tierCrossingCount: number): str
         'xpack.significantEventsApp.settings.costEstimate.trackingNotAllSpacesDescription',
         {
           defaultMessage:
-            'Based on recorded calls in spaces where token usage tracking is enabled. Not all spaces may be tracked.',
+            'Token tracking is not enabled in every space. Calls made while tracking was disabled are not included.',
         }
       );
     case 'prices_stale':
@@ -177,42 +178,52 @@ const CostDetailsTooltip = ({ data }: { data?: CostResponse }) => {
   );
 };
 
-const CostHeaderActions = ({
-  data,
-  trackingEnabled,
-  isEnablingTracking,
-}: {
-  data?: CostResponse;
-  trackingEnabled: boolean;
-  isEnablingTracking: boolean;
-}) => {
-  const status = isEnablingTracking
-    ? i18n.translate(
-        'xpack.significantEventsApp.settings.costEstimate.tokenTrackingEnablingLabel',
-        { defaultMessage: 'Enabling token tracking in this space' }
-      )
-    : trackingEnabled
-    ? i18n.translate('xpack.significantEventsApp.settings.costEstimate.tokenTrackingEnabledLabel', {
-        defaultMessage: 'Token tracking enabled in this space',
-      })
-    : i18n.translate(
-        'xpack.significantEventsApp.settings.costEstimate.tokenTrackingDisabledLabel',
-        { defaultMessage: 'Token tracking disabled in this space' }
-      );
+const CoverageBadge = ({ coverage }: { coverage: TokenTrackingCoverage }) => {
+  const label =
+    coverage.status === 'unavailable'
+      ? i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.trackingCoverageUnavailableLabel',
+          { defaultMessage: 'Tracking coverage unavailable' }
+        )
+      : i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.trackingCoverageBadgeLabel',
+          {
+            defaultMessage:
+              '{enabled} of {total} {total, plural, one {space} other {spaces}} tracked',
+            values: {
+              enabled: coverage.enabledSpaceCount,
+              total: coverage.totalSpaceCount,
+            },
+          }
+        );
 
+  return (
+    <EuiBadge
+      color={
+        coverage.status === 'full'
+          ? 'success'
+          : coverage.status === 'partial'
+          ? 'warning'
+          : 'hollow'
+      }
+      data-test-subj="significantEventsTokenTrackingCoverage"
+    >
+      {label}
+    </EuiBadge>
+  );
+};
+
+const CostHeaderActions = ({ data }: { data?: CostResponse }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <CostDetailsTooltip data={data} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge
-          color={trackingEnabled && !isEnablingTracking ? 'success' : 'hollow'}
-          data-test-subj="significantEventsTokenTrackingStatus"
-        >
-          {status}
-        </EuiBadge>
-      </EuiFlexItem>
+      {data ? (
+        <EuiFlexItem grow={false}>
+          <CoverageBadge coverage={data.trackingCoverage} />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
@@ -384,6 +395,86 @@ const CostData = ({
   );
 };
 
+const TrackingCoverageCallout = ({ coverage }: { coverage: TokenTrackingCoverage }) => {
+  if (coverage.status === 'full' || coverage.status === 'none') {
+    return null;
+  }
+
+  const title =
+    coverage.status === 'unavailable'
+      ? i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.trackingCoverageUnavailableTitle',
+          { defaultMessage: 'Unable to determine token tracking coverage' }
+        )
+      : i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.trackingCoveragePartialTitle',
+          {
+            defaultMessage:
+              'Token tracking is enabled in {enabled} of {total} {total, plural, one {space} other {spaces}}',
+            values: {
+              enabled: coverage.enabledSpaceCount,
+              total: coverage.totalSpaceCount,
+            },
+          }
+        );
+
+  return (
+    <EuiCallOut
+      color="warning"
+      iconType="info"
+      title={title}
+      data-test-subj="significantEventsTrackingCoverageCallout"
+    >
+      <p>
+        {i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.trackingCoverageDescription',
+          {
+            defaultMessage:
+              'This deployment-wide estimate includes all Significant Events calls recorded during the selected period. Calls made while tracking was disabled are not included.',
+          }
+        )}
+      </p>
+    </EuiCallOut>
+  );
+};
+
+const EnableTrackingButton = ({
+  canSaveAdvancedSettings,
+  isEnablingTracking,
+  onEnable,
+}: {
+  canSaveAdvancedSettings: boolean;
+  isEnablingTracking: boolean;
+  onEnable: () => void;
+}) => (
+  <EuiToolTip
+    content={
+      canSaveAdvancedSettings
+        ? undefined
+        : i18n.translate(
+            'xpack.significantEventsApp.settings.costEstimate.enableTrackingPermissionTooltip',
+            {
+              defaultMessage:
+                'You need permission to save Advanced Settings before you can enable token tracking.',
+            }
+          )
+    }
+  >
+    <EuiButton
+      fill
+      isLoading={isEnablingTracking}
+      isDisabled={!canSaveAdvancedSettings}
+      onClick={onEnable}
+      data-test-subj="significantEventsEnableTokenTrackingButton"
+    >
+      {i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.enableTrackingButtonLabel',
+        { defaultMessage: 'Enable token tracking in this space' }
+      )}
+    </EuiButton>
+  </EuiToolTip>
+);
+
 const RetryCallout = ({
   title,
   body,
@@ -419,7 +510,7 @@ export const CostEstimate = () => {
   const canManage = quotas.data?.canManage === true;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const cost = useSignificantEventsCost({
-    enabled: canManage && trackingEnabled && !isEnablingTracking,
+    enabled: canManage,
   });
 
   const enableTokenTracking = async (): Promise<void> => {
@@ -457,6 +548,7 @@ export const CostEstimate = () => {
           text: getFormattedError(error).message,
         });
       }
+      await cost.refreshCost();
     } catch (error) {
       core.notifications.toasts.addDanger({
         title: i18n.translate(
@@ -475,44 +567,32 @@ export const CostEstimate = () => {
     return null;
   }
 
+  const enableAction =
+    !trackingEnabled || isEnablingTracking ? (
+      <EnableTrackingButton
+        canSaveAdvancedSettings={canSaveAdvancedSettings}
+        isEnablingTracking={isEnablingTracking}
+        onEnable={() => void enableTokenTracking()}
+      />
+    ) : null;
+
+  const renderWithEnableAction = (content?: React.ReactNode) => (
+    <>
+      {enableAction}
+      {enableAction && content ? <EuiSpacer size="m" /> : null}
+      {content}
+    </>
+  );
+
   const renderBody = () => {
-    if (!trackingEnabled || isEnablingTracking) {
-      return (
-        <EuiToolTip
-          content={
-            canSaveAdvancedSettings
-              ? undefined
-              : i18n.translate(
-                  'xpack.significantEventsApp.settings.costEstimate.enableTrackingPermissionTooltip',
-                  {
-                    defaultMessage:
-                      'You need permission to save Advanced Settings before you can enable token tracking.',
-                  }
-                )
-          }
-        >
-          <EuiButton
-            fill
-            isLoading={isEnablingTracking}
-            isDisabled={!canSaveAdvancedSettings}
-            onClick={() => void enableTokenTracking()}
-            data-test-subj="significantEventsEnableTokenTrackingButton"
-          >
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.costEstimate.enableTrackingButtonLabel',
-              { defaultMessage: 'Enable token tracking in this space' }
-            )}
-          </EuiButton>
-        </EuiToolTip>
+    if (cost.isLoading && !cost.data) {
+      return renderWithEnableAction(
+        <EuiLoadingSpinner size="m" data-test-subj="significantEventsCostLoading" />
       );
     }
 
-    if (cost.isLoading && !cost.data) {
-      return <EuiLoadingSpinner size="m" data-test-subj="significantEventsCostLoading" />;
-    }
-
     if (cost.error) {
-      return (
+      return renderWithEnableAction(
         <RetryCallout
           title={i18n.translate(
             'xpack.significantEventsApp.settings.costEstimate.unavailableErrorTitle',
@@ -525,7 +605,7 @@ export const CostEstimate = () => {
     }
 
     if (cost.data?.unavailableReason === 'pricing') {
-      return (
+      return renderWithEnableAction(
         <RetryCallout
           title={i18n.translate(
             'xpack.significantEventsApp.settings.costEstimate.pricingUnavailableTitle',
@@ -537,7 +617,7 @@ export const CostEstimate = () => {
     }
 
     if (cost.data?.unavailableReason === 'usage_data') {
-      return (
+      return renderWithEnableAction(
         <RetryCallout
           title={i18n.translate(
             'xpack.significantEventsApp.settings.costEstimate.usageDataUnavailableTitle',
@@ -549,15 +629,28 @@ export const CostEstimate = () => {
     }
 
     if (!cost.data) {
-      return null;
+      return enableAction;
+    }
+
+    if (cost.data.trackingCoverage.status === 'none') {
+      return enableAction;
     }
 
     return (
-      <CostData
-        data={cost.data}
-        isRefreshing={cost.isRefreshing}
-        onRefresh={() => void cost.refreshCost()}
-      />
+      <>
+        <TrackingCoverageCallout coverage={cost.data.trackingCoverage} />
+        {cost.data.trackingCoverage.status === 'partial' ||
+        cost.data.trackingCoverage.status === 'unavailable' ? (
+          <EuiSpacer size="m" />
+        ) : null}
+        {renderWithEnableAction(
+          <CostData
+            data={cost.data}
+            isRefreshing={cost.isRefreshing}
+            onRefresh={() => void cost.refreshCost()}
+          />
+        )}
+      </>
     );
   };
 
@@ -584,18 +677,12 @@ export const CostEstimate = () => {
               <EuiTitle size="s">
                 <h3>
                   {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
-                    defaultMessage: 'Approximate inference cost',
+                    defaultMessage: 'Approximate inference cost across all spaces',
                   })}
                 </h3>
               </EuiTitle>
             }
-            extraAction={
-              <CostHeaderActions
-                data={cost.data}
-                trackingEnabled={trackingEnabled}
-                isEnablingTracking={isEnablingTracking}
-              />
-            }
+            extraAction={<CostHeaderActions data={cost.data} />}
             data-test-subj="significantEventsCostAccordion"
           >
             <EuiPanel hasShadow={false}>{renderBody()}</EuiPanel>
