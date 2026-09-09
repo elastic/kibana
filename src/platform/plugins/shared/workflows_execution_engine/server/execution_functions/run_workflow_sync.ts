@@ -51,6 +51,11 @@ export const runWorkflowSync = async ({
   const startTime = performance.now();
   let outcome: 'success' | 'error' | 'aborted' = 'success';
 
+  const resolveAbortOutcome = (signal: AbortSignal): 'aborted' | 'error' => {
+    const reason = signal.reason;
+    return reason instanceof Error && reason.name !== 'AbortError' ? 'error' : 'aborted';
+  };
+
   try {
     const setup = await setupDependencies({
       workflowRunId: workflowExecution.id,
@@ -80,11 +85,13 @@ export const runWorkflowSync = async ({
     });
 
     if (abortController.signal.aborted) {
-      outcome = 'aborted';
+      outcome = resolveAbortOutcome(abortController.signal);
     }
     return setup.workflowExecutionState.getWorkflowExecution();
   } catch (error) {
-    outcome = abortController.signal.aborted ? 'aborted' : 'error';
+    outcome = abortController.signal.aborted
+      ? resolveAbortOutcome(abortController.signal)
+      : 'error';
     throw error;
   } finally {
     syncExecutionDurationHistogram.record(performance.now() - startTime, { outcome });
