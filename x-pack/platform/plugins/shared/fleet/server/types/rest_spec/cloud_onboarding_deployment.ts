@@ -117,14 +117,14 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume.',
+          'Global AWS region from the Service Settings step.',
       },
     })
   ),
   dataFormat: schema.maybe(
     schema.string({
       meta: {
-        description: 'Data format: ecs or otel. Used to hydrate the services step on resume.',
+        description: 'Data format: ecs or otel.',
       },
     })
   ),

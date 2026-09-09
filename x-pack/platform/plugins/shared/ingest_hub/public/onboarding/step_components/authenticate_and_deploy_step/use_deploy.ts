@@ -8,6 +8,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useHistory, useParams } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
 
 import {
   sendCreateCloudOnboardingDeployment,
@@ -48,6 +51,7 @@ export interface UseDeployResult {
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
   const history = useHistory();
   const { integrationId } = useParams<{ integrationId: string }>();
+  const { services } = useKibana<CoreStart>();
   const {
     servicesStep,
     authenticateAndDeployStep,
@@ -198,7 +202,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           globalRegion,
           dataFormat,
           authMethod: connectorId ? 'identity_federation' : 'static_keys',
-        }).catch(() => null);
+        }).catch(() => {
+          services.notifications.toasts.addDanger(
+            i18n.translate(
+              'xpack.ingestHub.authenticateAndDeployStep.soCreateError',
+              { defaultMessage: 'Could not save deployment record. Deploy will proceed, but resume may not be available.' }
+            )
+          );
+          return null;
+        });
         onboardingDeploymentId = createResp?.item?.id;
         if (onboardingDeploymentId) {
           updateDetectAndReviewStep({ onboardingDeploymentId });
@@ -249,7 +261,14 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             ...policyIdsByInstance,
           }),
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
-        }).catch(() => {});
+        }).catch(() => {
+          services.notifications.toasts.addDanger(
+            i18n.translate(
+              'xpack.ingestHub.authenticateAndDeployStep.soUpdateError',
+              { defaultMessage: 'Could not update deployment record. Deploy outcome may not be reflected on resume.' }
+            )
+          );
+        });
       }
 
       setIsDeploying(false);
@@ -276,6 +295,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.failedInstances,
       detectAndReviewStep.onboardingDeploymentId,
       detectAndReviewStep.policyIdsByInstance,
+      services,
       selectedServiceIds,
       dataFormat,
       servicesMap,

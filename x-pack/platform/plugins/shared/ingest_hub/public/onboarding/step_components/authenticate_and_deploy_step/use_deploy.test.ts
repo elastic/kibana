@@ -31,6 +31,10 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
+
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
@@ -147,6 +151,7 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useHistory, useParams } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
@@ -156,6 +161,7 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockUseHistory = useHistory as jest.Mock;
 const mockUseParams = useParams as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -704,6 +710,9 @@ function setupMocks({
 } = {}) {
   mockUseHistory.mockReturnValue({ location: { search: '', hash: '' }, replace: jest.fn() });
   mockUseParams.mockReturnValue({ integrationId: 'aws' });
+  mockUseKibana.mockReturnValue({
+    services: { notifications: { toasts: { addDanger: jest.fn() } } },
+  });
 
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
