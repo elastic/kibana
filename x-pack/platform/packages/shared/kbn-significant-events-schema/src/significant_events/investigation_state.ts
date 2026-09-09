@@ -240,7 +240,14 @@ export type TriggerFeedback = z.infer<typeof triggerFeedbackSchema>;
 export const MAX_HYPOTHESES = 50;
 
 /**
- * Full investigation state shared by agent output, persistence, and consumers.
+ * Full state of an investigation at a point in time. This is the ONE schema shared by:
+ * - every `investigation_progress` `tool_ui` event emitted while the investigation runs (always
+ *   the complete current state, never a delta — so the latest event alone is enough to render), and
+ * - the `investigate` step's final structured output in `investigation_workflow.yaml` (kept in
+ *   sync with this schema by hand — cross-reference the comment there).
+ *
+ * Because both paths share this shape, a consumer renders identically whether it's following the
+ * live stream or reading the persisted final result.
  */
 export const investigationStateSchema = z.object({
   /** Current ("what's happening now") or final narrative summary of the investigation. */
