@@ -60,6 +60,12 @@ const ERROR_TITLE = i18n.translate('xpack.evals.copyDatasetFlyout.copyErrorTitle
   defaultMessage: 'Unable to copy dataset',
 });
 
+const getDefaultCopiedName = (name: string) =>
+  i18n.translate('xpack.evals.copyDatasetFlyout.defaultCopiedNameLabel', {
+    defaultMessage: '{name} (copy)',
+    values: { name },
+  });
+
 export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
   datasetId,
   datasetName,
@@ -67,10 +73,16 @@ export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
   onClose,
   onCopied,
 }) => {
-  const [name, setName] = useState(`${datasetName} (copy)`);
+  const [name, setName] = useState(getDefaultCopiedName(datasetName));
   const [description, setDescription] = useState(datasetDescription);
   const [error, setError] = useState<string | null>(null);
   const copyDataset = useCopyDataset();
+
+  const clearError = () => {
+    if (error) {
+      setError(null);
+    }
+  };
 
   const onConfirm = async () => {
     try {
@@ -114,7 +126,10 @@ export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
               required
               value={name}
               maxLength={MAX_DATASET_NAME_LENGTH}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => {
+                setName(event.target.value);
+                clearError();
+              }}
               data-test-subj="copyDatasetNameInput"
               fullWidth
             />
@@ -125,7 +140,10 @@ export const CopyDatasetFlyout: React.FC<CopyDatasetFlyoutProps> = ({
               value={description}
               rows={3}
               maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                clearError();
+              }}
               data-test-subj="copyDatasetDescriptionInput"
               fullWidth
             />

@@ -112,4 +112,30 @@ describe('CopyDatasetFlyout', () => {
     expect(screen.getByText('Unable to copy dataset')).toBeInTheDocument();
     expect(onCopied).not.toHaveBeenCalled();
   });
+
+  it('clears the copy error when the name or description changes', async () => {
+    const conflictError = Object.assign(new Error('Conflict'), {
+      request: {},
+      response: { status: 409 } as Response,
+      body: {
+        statusCode: 409,
+        message: 'A dataset named "Golden set (copy)" already exists',
+      },
+    });
+    mutateAsync.mockRejectedValue(conflictError);
+    renderFlyout();
+
+    const conflictMessage = 'A dataset named "Golden set (copy)" already exists';
+    await userEvent.click(screen.getByRole('button', { name: 'Copy dataset' }));
+    expect(await screen.findByText(conflictMessage)).toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('copyDatasetNameInput'), ' 2');
+    expect(screen.queryByText(conflictMessage)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Copy dataset' }));
+    expect(await screen.findByText(conflictMessage)).toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('copyDatasetDescriptionInput'), ' updated');
+    expect(screen.queryByText(conflictMessage)).not.toBeInTheDocument();
+  });
 });
