@@ -32,7 +32,8 @@ echo "--- Bootstrap Kibana"
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
-echo "--- Discover flaky tests"
+# `+++` expands this group by default so the log opens on the summary table
+echo "+++ Discover flaky tests"
 echo "    Pipelines       : $FLAKY_TESTS_PIPELINES"
 echo "    Lookback (days) : $FLAKY_TESTS_LOOKBACK_DAYS"
 echo "    Classifications : $FLAKY_TESTS_CLASSIFICATIONS"
