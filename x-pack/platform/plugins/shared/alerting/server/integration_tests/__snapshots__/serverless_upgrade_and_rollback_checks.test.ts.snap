@@ -5958,6 +5958,50 @@ Object {
       "minimum": 0,
       "type": "integer",
     },
+    "__schema10": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
+      "type": "string",
+    },
     "__schema2": Object {
       "enum": Array [
         "low",
@@ -5968,6 +6012,61 @@ Object {
       "type": "string",
     },
     "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -5995,26 +6094,19 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema4": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema5": Object {
+    "__schema6": Object {
+      "maxLength": 256,
       "type": "string",
+    },
+    "__schema7": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema8": Object {
+      "type": "boolean",
+    },
+    "__schema9": Object {
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -6037,14 +6129,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -6167,13 +6262,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -6199,7 +6297,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -6209,9 +6307,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -6220,6 +6319,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -6230,8 +6330,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -6293,24 +6393,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -6329,21 +6433,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -6367,19 +6474,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -6410,6 +6517,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -6497,6 +6605,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -6524,17 +6633,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -6546,48 +6659,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -6667,7 +6740,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "$ref": "#/$defs/__schema5",
+                "$ref": "#/$defs/__schema17",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -6743,73 +6816,59 @@ Object {
       "minimum": 0,
       "type": "integer",
     },
-    "__schema2": Object {
-      "enum": Array [
-        "low",
-        "medium",
-        "high",
-        "critical",
-      ],
+    "__schema10": Object {
+      "maxLength": 30000,
       "type": "string",
     },
-    "__schema3": Object {
-      "additionalProperties": Object {
-        "properties": Object {
-          "field": Object {
-            "maxLength": 2000,
-            "type": "string",
-          },
-          "value": Object {
-            "anyOf": Array [
-              Object {
-                "maxLength": 30000,
-                "type": "string",
-              },
-              Object {
-                "items": Object {
-                  "maxLength": 30000,
-                  "type": "string",
-                },
-                "type": "array",
-              },
-            ],
-          },
-        },
-        "type": "object",
-      },
-      "properties": Object {},
-      "type": "object",
+    "__schema11": Object {
+      "type": "boolean",
     },
-    "__schema4": Object {
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
       "properties": Object {
         "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
         },
         "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
         },
         "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
         },
       },
       "type": "object",
     },
-    "__schema5": Object {
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
       "enum": Array [
         "kuery",
         "lucene",
       ],
       "type": "string",
     },
-    "__schema6": Object {
+    "__schema18": Object {
       "items": Object {},
       "type": "array",
     },
-    "__schema7": Object {
+    "__schema19": Object {
       "properties": Object {
         "entries": Object {
           "items": Object {
@@ -6843,8 +6902,114 @@ Object {
       ],
       "type": "object",
     },
-    "__schema8": Object {
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
       "type": "string",
+    },
+    "__schema20": Object {
+      "type": "string",
+    },
+    "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "maxLength": 2000,
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "maxLength": 30000,
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "maxLength": 30000,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema6": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema7": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema8": Object {
+      "type": "boolean",
+    },
+    "__schema9": Object {
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -6867,14 +7032,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -6997,13 +7165,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -7029,7 +7200,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -7039,9 +7210,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -7050,6 +7222,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -7060,8 +7233,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -7123,24 +7296,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -7159,21 +7336,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -7197,19 +7377,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -7240,6 +7420,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -7327,6 +7508,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -7354,17 +7536,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -7376,48 +7562,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -7497,7 +7643,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "$ref": "#/$defs/__schema8",
+                "$ref": "#/$defs/__schema20",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -7525,7 +7671,7 @@ Object {
           "type": "string",
         },
         "filters": Object {
-          "$ref": "#/$defs/__schema6",
+          "$ref": "#/$defs/__schema18",
         },
         "index": Object {
           "items": Object {
@@ -7539,7 +7685,7 @@ Object {
           "type": "integer",
         },
         "language": Object {
-          "$ref": "#/$defs/__schema5",
+          "$ref": "#/$defs/__schema17",
         },
         "query": Object {
           "type": "string",
@@ -7548,7 +7694,7 @@ Object {
           "type": "string",
         },
         "threatFilters": Object {
-          "$ref": "#/$defs/__schema6",
+          "$ref": "#/$defs/__schema18",
         },
         "threatIndex": Object {
           "items": Object {
@@ -7560,11 +7706,11 @@ Object {
           "type": "string",
         },
         "threatLanguage": Object {
-          "$ref": "#/$defs/__schema5",
+          "$ref": "#/$defs/__schema17",
         },
         "threatMapping": Object {
           "items": Object {
-            "$ref": "#/$defs/__schema7",
+            "$ref": "#/$defs/__schema19",
           },
           "minItems": 1,
           "type": "array",
@@ -7603,6 +7749,50 @@ Object {
       "minimum": 0,
       "type": "integer",
     },
+    "__schema10": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
+      "type": "string",
+    },
     "__schema2": Object {
       "enum": Array [
         "low",
@@ -7613,6 +7803,61 @@ Object {
       "type": "string",
     },
     "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -7640,26 +7885,19 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema4": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema5": Object {
+    "__schema6": Object {
+      "maxLength": 256,
       "type": "string",
+    },
+    "__schema7": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema8": Object {
+      "type": "boolean",
+    },
+    "__schema9": Object {
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -7682,14 +7920,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -7812,13 +8053,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -7844,7 +8088,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -7854,9 +8098,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -7865,6 +8110,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -7875,8 +8121,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -7938,24 +8184,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -7974,21 +8224,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -8012,19 +8265,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -8055,6 +8308,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -8142,6 +8396,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -8169,17 +8424,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -8191,48 +8450,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -8312,7 +8531,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "$ref": "#/$defs/__schema5",
+                "$ref": "#/$defs/__schema17",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -8370,6 +8589,53 @@ Object {
       "minimum": 0,
       "type": "integer",
     },
+    "__schema10": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
+      "type": "string",
+    },
+    "__schema18": Object {
+      "type": "string",
+    },
     "__schema2": Object {
       "enum": Array [
         "low",
@@ -8380,6 +8646,61 @@ Object {
       "type": "string",
     },
     "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -8407,29 +8728,19 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema4": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema5": Object {
-      "type": "string",
-    },
     "__schema6": Object {
+      "maxLength": 256,
       "type": "string",
+    },
+    "__schema7": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema8": Object {
+      "type": "boolean",
+    },
+    "__schema9": Object {
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -8452,14 +8763,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -8582,13 +8896,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -8614,7 +8931,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -8624,9 +8941,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -8635,6 +8953,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -8645,8 +8964,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -8708,24 +9027,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -8744,21 +9067,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -8782,19 +9108,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -8825,6 +9151,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -8912,6 +9239,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -8939,17 +9267,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -8961,48 +9293,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -9082,7 +9374,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "$ref": "#/$defs/__schema6",
+                "$ref": "#/$defs/__schema18",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -9127,7 +9419,7 @@ Object {
         },
         "newTermsFields": Object {
           "items": Object {
-            "$ref": "#/$defs/__schema5",
+            "$ref": "#/$defs/__schema17",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -9196,9 +9488,82 @@ Object {
       "type": "integer",
     },
     "__schema10": Object {
+      "maxLength": 30000,
       "type": "string",
     },
     "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema18": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "__schema19": Object {
+      "type": "string",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema20": Object {
+      "items": Object {},
+      "type": "array",
+    },
+    "__schema21": Object {
+      "type": "string",
+    },
+    "__schema22": Object {
+      "type": "string",
+    },
+    "__schema23": Object {
       "properties": Object {
         "duration": Object {
           "properties": Object {
@@ -9224,7 +9589,7 @@ Object {
         },
         "groupBy": Object {
           "items": Object {
-            "$ref": "#/$defs/__schema12",
+            "$ref": "#/$defs/__schema24",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -9243,19 +9608,65 @@ Object {
       ],
       "type": "object",
     },
-    "__schema12": Object {
-      "type": "string",
-    },
-    "__schema2": Object {
-      "enum": Array [
-        "low",
-        "medium",
-        "high",
-        "critical",
-      ],
+    "__schema24": Object {
       "type": "string",
     },
     "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -9283,46 +9694,19 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema4": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema5": Object {
-      "enum": Array [
-        "kuery",
-        "lucene",
-      ],
+    "__schema6": Object {
+      "maxLength": 256,
       "type": "string",
     },
-    "__schema6": Object {
-      "items": Object {
-        "type": "string",
-      },
-      "type": "array",
-    },
     "__schema7": Object {
+      "maxLength": 30000,
       "type": "string",
     },
     "__schema8": Object {
-      "items": Object {},
-      "type": "array",
+      "type": "boolean",
     },
     "__schema9": Object {
-      "type": "string",
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -9345,14 +9729,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -9475,13 +9862,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -9507,7 +9897,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -9517,9 +9907,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -9528,6 +9919,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -9538,8 +9930,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -9601,24 +9993,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -9637,21 +10033,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -9675,19 +10074,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -9718,6 +10117,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -9805,6 +10205,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -9832,17 +10233,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -9854,48 +10259,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -9952,25 +10317,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema11",
+              "$ref": "#/$defs/__schema23",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema22",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema20",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema18",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema17",
             },
             "query": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema19",
             },
             "savedId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema21",
             },
             "type": Object {
               "const": "query",
@@ -9987,25 +10352,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema11",
+              "$ref": "#/$defs/__schema23",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema22",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema20",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema18",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema17",
             },
             "query": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema19",
             },
             "savedId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema21",
             },
             "type": Object {
               "const": "saved_query",
@@ -10038,9 +10403,82 @@ Object {
       "type": "integer",
     },
     "__schema10": Object {
+      "maxLength": 30000,
       "type": "string",
     },
     "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema18": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "__schema19": Object {
+      "type": "string",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema20": Object {
+      "items": Object {},
+      "type": "array",
+    },
+    "__schema21": Object {
+      "type": "string",
+    },
+    "__schema22": Object {
+      "type": "string",
+    },
+    "__schema23": Object {
       "properties": Object {
         "duration": Object {
           "properties": Object {
@@ -10066,7 +10504,7 @@ Object {
         },
         "groupBy": Object {
           "items": Object {
-            "$ref": "#/$defs/__schema12",
+            "$ref": "#/$defs/__schema24",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -10085,19 +10523,65 @@ Object {
       ],
       "type": "object",
     },
-    "__schema12": Object {
-      "type": "string",
-    },
-    "__schema2": Object {
-      "enum": Array [
-        "low",
-        "medium",
-        "high",
-        "critical",
-      ],
+    "__schema24": Object {
       "type": "string",
     },
     "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -10125,46 +10609,19 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema4": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema5": Object {
-      "enum": Array [
-        "kuery",
-        "lucene",
-      ],
+    "__schema6": Object {
+      "maxLength": 256,
       "type": "string",
     },
-    "__schema6": Object {
-      "items": Object {
-        "type": "string",
-      },
-      "type": "array",
-    },
     "__schema7": Object {
+      "maxLength": 30000,
       "type": "string",
     },
     "__schema8": Object {
-      "items": Object {},
-      "type": "array",
+      "type": "boolean",
     },
     "__schema9": Object {
-      "type": "string",
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -10187,14 +10644,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -10317,13 +10777,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -10349,7 +10812,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -10359,9 +10822,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -10370,6 +10834,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -10380,8 +10845,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -10443,24 +10908,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -10479,21 +10948,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -10517,19 +10989,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -10560,6 +11032,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -10647,6 +11120,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -10674,17 +11148,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -10696,48 +11174,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -10794,25 +11232,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema11",
+              "$ref": "#/$defs/__schema23",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema22",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema20",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema18",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema17",
             },
             "query": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema19",
             },
             "savedId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema21",
             },
             "type": Object {
               "const": "query",
@@ -10829,25 +11267,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema11",
+              "$ref": "#/$defs/__schema23",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema22",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema20",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema18",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema17",
             },
             "query": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema19",
             },
             "savedId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema21",
             },
             "type": Object {
               "const": "saved_query",
@@ -10879,6 +11317,47 @@ Object {
       "minimum": 0,
       "type": "integer",
     },
+    "__schema10": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
     "__schema2": Object {
       "enum": Array [
         "low",
@@ -10889,6 +11368,61 @@ Object {
       "type": "string",
     },
     "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -10916,23 +11450,19 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema4": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "maxLength": 256,
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "maxLength": 8192,
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
+    "__schema6": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema7": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema8": Object {
+      "type": "boolean",
+    },
+    "__schema9": Object {
+      "type": "boolean",
     },
   },
   "allOf": Array [
@@ -10955,14 +11485,17 @@ Object {
           "items": Object {
             "properties": Object {
               "id": Object {
+                "description": "ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "list_id": Object {
+                "description": "List ID of the exception container",
                 "minLength": 1,
                 "type": "string",
               },
               "namespace_type": Object {
+                "description": "Determines the exceptions validity in rule's Kibana space",
                 "enum": Array [
                   "agnostic",
                   "single",
@@ -11085,13 +11618,16 @@ Object {
           "items": Object {
             "properties": Object {
               "ecs": Object {
+                "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
                 "type": "boolean",
               },
               "name": Object {
+                "description": "Name of an Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
               "type": Object {
+                "description": "Type of the Elasticsearch field",
                 "minLength": 1,
                 "type": "string",
               },
@@ -11117,7 +11653,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema3",
+                        "$ref": "#/$defs/__schema5",
                       },
                       "packId": Object {
                         "maxLength": 256,
@@ -11127,9 +11663,10 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema3",
+                              "$ref": "#/$defs/__schema5",
                             },
                             "id": Object {
+                              "description": "Query ID",
                               "maxLength": 256,
                               "type": "string",
                             },
@@ -11138,6 +11675,7 @@ Object {
                               "type": "string",
                             },
                             "query": Object {
+                              "description": "Query to run",
                               "maxLength": 30000,
                               "type": "string",
                             },
@@ -11148,8 +11686,8 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
-                              "maxLength": 256,
-                              "type": "string",
+                              "$ref": "#/$defs/__schema6",
+                              "description": "Query version",
                             },
                           },
                           "required": Array [
@@ -11211,24 +11749,28 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "kill-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema7",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of \`process.pid\`",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "kill_descendants": Object {
-                                    "type": "boolean",
+                                    "$ref": "#/$defs/__schema9",
+                                    "description": "Whether to also terminate the descendant processes of the targeted process.",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema8",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with \`process.pid\`",
                                   },
                                 },
                                 "required": Array [
@@ -11247,21 +11789,24 @@ Object {
                             "properties": Object {
                               "command": Object {
                                 "const": "suspend-process",
+                                "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
                                 "type": "string",
                               },
                               "comment": Object {
-                                "maxLength": 30000,
-                                "type": "string",
+                                "$ref": "#/$defs/__schema10",
+                                "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
                               },
                               "config": Object {
                                 "properties": Object {
                                   "field": Object {
+                                    "description": "Field to use instead of process.pid",
                                     "maxLength": 2000,
                                     "type": "string",
                                   },
                                   "overwrite": Object {
+                                    "$ref": "#/$defs/__schema11",
                                     "default": true,
-                                    "type": "boolean",
+                                    "description": "Whether to overwrite field with process.pid",
                                   },
                                 },
                                 "required": Array [
@@ -11285,19 +11830,19 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
-                            "maxLength": 30000,
-                            "type": "string",
+                            "$ref": "#/$defs/__schema12",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
                           },
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema4",
+                                "$ref": "#/$defs/__schema13",
                               },
                             },
                             "type": "object",
@@ -11328,6 +11873,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`risk_score\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -11415,6 +11961,7 @@ Object {
           "items": Object {
             "properties": Object {
               "field": Object {
+                "description": "Source event field used to override the default \`severity\`.",
                 "type": "string",
               },
               "operator": Object {
@@ -11442,17 +11989,21 @@ Object {
           "items": Object {
             "properties": Object {
               "framework": Object {
+                "description": "Relevant attack framework",
                 "type": "string",
               },
               "tactic": Object {
                 "properties": Object {
                   "id": Object {
+                    "description": "Tactic ID",
                     "type": "string",
                   },
                   "name": Object {
+                    "description": "Tactic name",
                     "type": "string",
                   },
                   "reference": Object {
+                    "description": "Tactic reference",
                     "type": "string",
                   },
                 },
@@ -11464,48 +12015,8 @@ Object {
                 "type": "object",
               },
               "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
+                "$ref": "#/$defs/__schema3",
+                "description": "Array containing information on the attack techniques (optional)",
               },
             },
             "required": Array [
@@ -11621,9 +12132,11 @@ Object {
               "items": Object {
                 "properties": Object {
                   "field": Object {
+                    "description": "The field on which to calculate and compare the cardinality.",
                     "type": "string",
                   },
                   "value": Object {
+                    "description": "The threshold value from which an alert is generated based on unique number of values of cardinality.field.",
                     "maximum": 9007199254740991,
                     "minimum": 0,
                     "type": "integer",
