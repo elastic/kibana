@@ -25,10 +25,20 @@ export interface AppInitializingGateProps {
   status: AppInitializingState;
   /** The plugin whose deferred init this gate is waiting on. Shown in the failed-state message. */
   pluginId: string;
-  /** Present when `status === 'failed'`: the plugin's most recent lazyInitialize() error. */
+  /**
+   * Present when `status === 'failed'`: the underlying error, from the plugin's `lazyInitialize()`
+   * or from the application's own `mount()` -- see {@link AppInitializingGateProps.failureStage}.
+   */
   error?: AppInitializingError;
   /** Present when `status === 'failed'`: how many consecutive attempts have failed so far. */
   attempts?: number;
+  /**
+   * Which step failed, when `status === 'failed'`. `initialization` (the default) means the
+   * plugin's deferred init threw; `mount` means deferred init succeeded but the application's own
+   * `mount()` rejected afterwards. Only the wording differs -- both offer a page reload, which is
+   * the right remediation for either.
+   */
+  failureStage?: 'initialization' | 'mount';
   /** Invoked when the user clicks "Reload page" in the failed state. */
   onRetry?: () => void;
   children: React.ReactNode;
@@ -39,6 +49,7 @@ export const AppInitializingGate: React.FC<AppInitializingGateProps> = ({
   pluginId,
   error,
   attempts,
+  failureStage = 'initialization',
   onRetry,
   children,
 }) => {
@@ -116,20 +127,35 @@ export const AppInitializingGate: React.FC<AppInitializingGateProps> = ({
           iconColor="danger"
           title={
             <h2>
-              <FormattedMessage
-                id="core.application.appInitializingGate.errorTitle"
-                defaultMessage='"{pluginId}" failed to initialize'
-                values={{ pluginId }}
-              />
+              {failureStage === 'mount' ? (
+                <FormattedMessage
+                  id="core.application.appInitializingGate.mountErrorTitle"
+                  defaultMessage='"{pluginId}" failed to load'
+                  values={{ pluginId }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="core.application.appInitializingGate.errorTitle"
+                  defaultMessage='"{pluginId}" failed to initialize'
+                  values={{ pluginId }}
+                />
+              )}
             </h2>
           }
           body={
             <>
               <p>
-                <FormattedMessage
-                  id="core.application.appInitializingGate.errorBody"
-                  defaultMessage="An error occurred while initializing this application."
-                />
+                {failureStage === 'mount' ? (
+                  <FormattedMessage
+                    id="core.application.appInitializingGate.mountErrorBody"
+                    defaultMessage="This application finished initializing but could not be loaded."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="core.application.appInitializingGate.errorBody"
+                    defaultMessage="An error occurred while initializing this application."
+                  />
+                )}
               </p>
               {error && (
                 <p data-test-subj="appInitializingGate-errorMessage">

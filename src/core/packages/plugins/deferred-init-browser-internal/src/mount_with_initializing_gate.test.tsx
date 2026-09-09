@@ -20,12 +20,14 @@ jest.mock('@kbn/core-application-browser', () => ({
     pluginId,
     error,
     attempts,
+    failureStage,
     onRetry,
   }: {
     status: string;
     pluginId: string;
     error?: { message: string };
     attempts?: number;
+    failureStage?: string;
     onRetry?: () => void;
   }) => (
     <div
@@ -34,6 +36,7 @@ jest.mock('@kbn/core-application-browser', () => ({
       data-plugin-id={pluginId}
       data-error={error?.message}
       data-attempts={attempts}
+      data-failure-stage={failureStage}
     >
       <button data-test-subj="mock-retry" onClick={onRetry}>
         retry
@@ -50,6 +53,7 @@ describe('mountWithInitializingGate', () => {
   let realMount: jest.Mock;
   let realUnmount: jest.Mock;
   let onRetry: jest.Mock;
+  let consoleError: jest.SpyInstance;
 
   const getStartServices = async () =>
     [{ rendering: { addContext: (el: React.ReactElement) => el } }, {}, undefined] as any;
@@ -60,6 +64,11 @@ describe('mountWithInitializingGate', () => {
     realUnmount = jest.fn();
     realMount = jest.fn().mockResolvedValue(realUnmount);
     onRetry = jest.fn();
+    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleError.mockRestore();
   });
 
   const mountGate = async () => {
@@ -101,6 +110,88 @@ describe('mountWithInitializingGate', () => {
 
     unmount();
     expect(realUnmount).toHaveBeenCalledTimes(1);
+  });
+
+  // Regression guard: the wrapper's own mount promise has already resolved by the time the real
+  // mount runs, so `AppContainer` has recorded the app as mounted and will not route a rejection
+  // to its error boundary. Swallowing it here would leave the user on a blank element.
+  describe('when the real mount rejects', () => {
+    const mountError = new Error('chunk load failed');
+
+    beforeEach(() => {
+      realMount = jest.fn().mockRejectedValue(mountError);
+    });
+
+    it('renders the failure gate, tagged as a mount failure rather than an init failure', async () => {
+      const unmount = await mountGate();
+
+      await act(async () => {
+        status$.next({ status: 'available' });
+        await Promise.resolve();
+      });
+
+      const gate = element.querySelector('[data-test-subj="mock-gate"]');
+      expect(gate).not.toBeNull();
+      expect(gate?.getAttribute('data-status')).toBe('failed');
+      expect(gate?.getAttribute('data-error')).toBe('chunk load failed');
+      expect(gate?.getAttribute('data-failure-stage')).toBe('mount');
+
+      unmount();
+    });
+
+    it('logs the error, preserving the stack the gate itself cannot show', async () => {
+      const unmount = await mountGate();
+
+      await act(async () => {
+        status$.next({ status: 'available' });
+        await Promise.resolve();
+      });
+
+      expect(consoleError).toHaveBeenCalledWith(mountError);
+
+      unmount();
+    });
+
+    it('stringifies a non-Error rejection', async () => {
+      realMount = jest.fn().mockRejectedValue('just a string');
+      const unmount = await mountGate();
+
+      await act(async () => {
+        status$.next({ status: 'available' });
+        await Promise.resolve();
+      });
+
+      expect(
+        element.querySelector('[data-test-subj="mock-gate"]')?.getAttribute('data-error')
+      ).toBe('just a string');
+
+      unmount();
+    });
+
+    it('tears the failure gate back down on unmount', async () => {
+      const unmount = await mountGate();
+
+      await act(async () => {
+        status$.next({ status: 'available' });
+        await Promise.resolve();
+      });
+      act(() => unmount());
+
+      expect(element.querySelector('[data-test-subj="mock-gate"]')).toBeNull();
+      expect(realUnmount).not.toHaveBeenCalled();
+    });
+
+    it('leaves the element alone if unmounted before the rejection lands', async () => {
+      const unmount = await mountGate();
+
+      await act(async () => {
+        status$.next({ status: 'available' });
+        unmount();
+        await Promise.resolve();
+      });
+
+      expect(element.querySelector('[data-test-subj="mock-gate"]')).toBeNull();
+    });
   });
 
   it('passes the error message and attempt count through to the gate', async () => {

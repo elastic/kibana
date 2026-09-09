@@ -46,8 +46,12 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
     let cancelled = false;
     let mounted = false;
     let realUnmount: AppUnmount | undefined;
+    let gateRendered = false;
 
-    const renderGate = ({ status, error, attempts }: DeferredInitStatus) => {
+    const renderGate = (
+      { status, error, attempts }: DeferredInitStatus,
+      failureStage: 'initialization' | 'mount' = 'initialization'
+    ) => {
       ReactDOM.render(
         rendering.addContext(
           <AppInitializingGate
@@ -55,6 +59,7 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
             pluginId={pluginId}
             error={error}
             attempts={attempts}
+            failureStage={failureStage}
             onRetry={onRetry}
           >
             {null}
@@ -62,7 +67,16 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
         ),
         params.element
       );
+      gateRendered = true;
     };
+
+    const clearGate = () => {
+      if (gateRendered) {
+        ReactDOM.unmountComponentAtNode(params.element);
+        gateRendered = false;
+      }
+    };
+
     renderGate({ status: 'idle' });
 
     const subscription = status$.subscribe((current) => {
@@ -74,14 +88,40 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
         return;
       }
       mounted = true;
-      ReactDOM.unmountComponentAtNode(params.element);
-      Promise.resolve(mount(params)).then((unmountFn) => {
-        if (cancelled) {
-          unmountFn();
-        } else {
-          realUnmount = unmountFn;
+      clearGate();
+      Promise.resolve(mount(params)).then(
+        (unmountFn) => {
+          if (cancelled) {
+            unmountFn();
+          } else {
+            realUnmount = unmountFn;
+          }
+        },
+        (mountError: unknown) => {
+          if (cancelled) {
+            return;
+          }
+          // This wrapper's own mount promise resolved back in `AppContainer` as soon as the gate
+          // went up, so core already recorded the app as mounted and will not route this rejection
+          // to its error boundary the way it does for a non-lazy app. Without handling it here the
+          // user is left on the blank element `clearGate` just emptied.
+          //
+          // Logged as well as rendered: the gate only shows `error.message`, and attaching this
+          // handler is what stops the rejection reaching the global `unhandledrejection` listener
+          // in `fatalErrors` that would otherwise have dumped the stack to the console.
+          // eslint-disable-next-line no-console
+          console.error(mountError);
+          renderGate(
+            {
+              status: 'failed',
+              error: {
+                message: mountError instanceof Error ? mountError.message : String(mountError),
+              },
+            },
+            'mount'
+          );
         }
-      });
+      );
     });
 
     return () => {
@@ -89,8 +129,9 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
       subscription.unsubscribe();
       if (realUnmount) {
         realUnmount();
-      } else if (!mounted) {
-        ReactDOM.unmountComponentAtNode(params.element);
+      } else {
+        // Either still waiting on init, or the real mount rejected and left the failure gate up.
+        clearGate();
       }
     };
   };

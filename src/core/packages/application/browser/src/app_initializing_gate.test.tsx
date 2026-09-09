@@ -60,6 +60,39 @@ describe('AppInitializingGate', () => {
     expect(result.getByTestId('appInitializingGate-attempts').textContent).toContain('3 times');
   });
 
+  it('distinguishes a mount failure from an initialization failure', () => {
+    const result = renderWithI18n(
+      <AppInitializingGate
+        status="failed"
+        pluginId={PLUGIN_ID}
+        failureStage="mount"
+        error={{ message: 'Loading chunk 42 failed' }}
+      >
+        <div>real app content</div>
+      </AppInitializingGate>
+    );
+
+    // Deferred init succeeded here; it was the app's own mount() that rejected, so the copy must
+    // not blame initialization.
+    expect(result.getByText(`"${PLUGIN_ID}" failed to load`)).toBeTruthy();
+    expect(result.queryByText(`"${PLUGIN_ID}" failed to initialize`)).toBeNull();
+    expect(result.getByTestId('appInitializingGate-errorMessage').textContent).toContain(
+      'Loading chunk 42 failed'
+    );
+    // The reload action is still the right remediation, so the failed layout is otherwise shared.
+    expect(result.queryByTestId('appInitializingGate-errorPage')).toBeTruthy();
+  });
+
+  it('blames initialization by default, with no failureStage given', () => {
+    const result = renderWithI18n(
+      <AppInitializingGate status="failed" pluginId={PLUGIN_ID}>
+        <div>real app content</div>
+      </AppInitializingGate>
+    );
+
+    expect(result.getByText(`"${PLUGIN_ID}" failed to initialize`)).toBeTruthy();
+  });
+
   it('omits the error message and attempts blocks when not provided', () => {
     const result = renderWithI18n(
       <AppInitializingGate status="failed" pluginId={PLUGIN_ID}>
