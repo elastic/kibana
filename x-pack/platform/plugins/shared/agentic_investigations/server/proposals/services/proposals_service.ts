@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { JSONSchema7 } from 'json-schema';
@@ -218,7 +219,14 @@ export class ProposalsService {
       { seqNo, primaryTerm, user }
     );
 
-    await this.resumeGate(decided, { spaceId, request, approved: true });
+    try {
+      await this.resumeGate(decided, { spaceId, request, approved: true });
+    } catch (error) {
+      // The decision is durable but the gate is still parked, so record why
+      // before surfacing the failure rather than reporting a clean approval.
+      await this.markResumeFailed(id, spaceId, error);
+      throw error;
+    }
 
     return stripRanks(decided);
   }
@@ -243,7 +251,19 @@ export class ProposalsService {
       { seqNo, primaryTerm, user }
     );
 
-    await this.resumeGate(decided, { spaceId, request, approved: false });
+    try {
+      await this.resumeGate(decided, { spaceId, request, approved: false });
+    } catch (error) {
+      // A dismissal cannot be recorded as failed — `dismissed` is already
+      // terminal — so the parked gate only survives in the log. The workflow's
+      // own HITL timeout is what eventually releases it.
+      this.deps.logger.error(
+        `Proposal [${id}] was dismissed but its gate could not be released: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
 
     return stripRanks(decided);
   }
@@ -487,6 +507,26 @@ export class ProposalsService {
     );
   }
 
+  /**
+   * Records why an approved proposal never reached its action. Deliberately
+   * swallows its own failure: the resume error is the one worth propagating,
+   * and this write can legitimately lose — a gate released elsewhere may have
+   * already settled the proposal, which `update` refuses to move.
+   */
+  private async markResumeFailed(id: string, spaceId: string, cause: unknown): Promise<void> {
+    const message = cause instanceof Error ? cause.message : String(cause);
+
+    try {
+      await this.update({ id, status: 'failed', executionError: message }, spaceId);
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to record the resume failure for proposal [${id}]: ${
+          error instanceof Error ? error.message : String(error)
+        } (original failure: ${message})`
+      );
+    }
+  }
+
   private async withMetadata(proposal: Proposal, spaceId: string): Promise<ProposalWithMetadata> {
     const action = proposal.actionWorkflowId
       ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId)
@@ -504,10 +544,6 @@ interface DecisionContext {
 
 type QueryFilterList = Array<Record<string, unknown>>;
 
-/**
- * Treats an empty or whitespace-only string as absent. Liquid renders a missing
- * workflow input as `''`, which is not the same thing as a value.
- */
 /**
  * Drops the storage-only sort ranks, so they never reach the API contract.
  * Destructuring is the point: adding a rank field forces this to be updated.
@@ -529,6 +565,10 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
 const isTerminal = (status: ProposalStatus): boolean =>
   status === 'succeeded' || status === 'failed' || status === 'dismissed';
 
+/**
+ * Treats an empty or whitespace-only string as absent. Liquid renders a missing
+ * workflow input as `''`, which is not the same thing as a value.
+ */
 const blankToUndefined = (value: string | undefined): string | undefined => {
   const trimmed = value?.trim();
   return trimmed === undefined || trimmed === '' ? undefined : trimmed;
@@ -559,10 +599,15 @@ const findWaitingGateStepId = (
     )
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0]?.id;
 
+/**
+ * Deep equality rather than a serialized comparison: the submitted input is
+ * parsed from the request body and the stored one from `_source`, so their key
+ * order need not match even when the values do.
+ */
 const sameInput = (
   submitted: Record<string, unknown>,
   stored: Record<string, unknown> | undefined
-): boolean => JSON.stringify(submitted ?? {}) === JSON.stringify(stored ?? {});
+): boolean => isEqual(submitted ?? {}, stored ?? {});
 
 const isVersionConflict = (error: unknown): boolean => {
   const status = (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;

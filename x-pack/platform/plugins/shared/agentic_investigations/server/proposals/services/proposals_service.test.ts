@@ -110,14 +110,18 @@ const createWorkflowsApi = () => ({
 const createService = (
   storage: ReturnType<typeof createStorage>,
   workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi()
-) => ({
-  service: new ProposalsService({
-    storage,
-    logger: loggerMock.create(),
-    getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
-  }),
-  workflowsApi: workflowsApi ?? createWorkflowsApi(),
-});
+) => {
+  const logger = loggerMock.create();
+  return {
+    service: new ProposalsService({
+      storage,
+      logger,
+      getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
+    }),
+    workflowsApi: workflowsApi ?? createWorkflowsApi(),
+    logger,
+  };
+};
 
 const decisionContext = () => ({
   spaceId: SPACE_ID,
@@ -506,6 +510,52 @@ describe('ProposalsService', () => {
         ProposalNotFoundError
       );
     });
+
+    it('should accept an approval whose action input matches under a different key order', async () => {
+      const storage = createStorage(
+        baseDocument({ actionInput: { name: 'PowerShell', tag: 'a' } })
+      );
+      const { service, workflowsApi } = createService(storage);
+
+      const proposal = await service.approve(
+        'proposal-1',
+        { actionInput: { tag: 'a', name: 'PowerShell' } },
+        decisionContext()
+      );
+
+      expect(proposal.status).toBe('approved');
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('should record the resume failure on the proposal when the gate cannot be released', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('resume exploded'));
+
+      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toThrow(
+        'resume exploded'
+      );
+
+      expect(storage.index).toHaveBeenCalledTimes(2);
+      expect(storage.index.mock.calls[1][0].document).toEqual(
+        expect.objectContaining({ status: 'failed', executionError: 'resume exploded' })
+      );
+    });
+
+    it('should keep the resume failure when recording it also fails', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi, logger } = createService(storage);
+      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('resume exploded'));
+      storage.index
+        .mockResolvedValueOnce({ _id: 'proposal-1' })
+        .mockRejectedValueOnce(new Error('index unavailable'));
+
+      await expect(service.approve('proposal-1', {}, decisionContext())).rejects.toThrow(
+        'resume exploded'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
+    });
   });
 
   describe('dismiss', () => {
@@ -529,6 +579,20 @@ describe('ProposalsService', () => {
         expect.anything(),
         expect.anything()
       );
+    });
+
+    it('should log and surface a gate that could not be released', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi, logger } = createService(storage);
+      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('resume exploded'));
+
+      await expect(
+        service.dismiss('proposal-1', { dismissReason: 'low_value' }, decisionContext())
+      ).rejects.toThrow('resume exploded');
+
+      // Terminal already, so the only trace of the parked gate is the log.
+      expect(storage.index).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('resume exploded'));
     });
   });
 
