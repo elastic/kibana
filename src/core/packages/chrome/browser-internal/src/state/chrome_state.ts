@@ -24,9 +24,9 @@ import type {
   GlobalSearchConfig,
   ChromeNavLink,
   ChromeUserBanner,
-  AppHeaderTitle,
   ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
+import type { InlineAppHeaderState } from '@kbn/core-chrome-browser-internal-types';
 import type { AppMenuConfig } from '@kbn/app-menu';
 
 import {
@@ -74,7 +74,7 @@ export interface ChromeState {
   appMenu: State<AppMenuConfig | undefined>;
   contextSwitcher: State<ReactNode>;
   projectPicker: State<ReactNode>;
-  inlineAppHeader: State<{ title?: AppHeaderTitle } | undefined>;
+  inlineAppHeader: State<InlineAppHeaderState | undefined>;
   inlineAppHeaderOwnerId: number;
   appHeader: State<ChromeAppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
@@ -133,7 +133,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
   const projectPicker = createState<ReactNode>(null);
-  const inlineAppHeader = createState<{ title?: AppHeaderTitle } | undefined>(undefined);
+  const inlineAppHeader = createState<InlineAppHeaderState | undefined>(undefined);
   const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
 
