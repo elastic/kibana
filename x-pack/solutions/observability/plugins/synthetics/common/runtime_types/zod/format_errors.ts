@@ -16,6 +16,8 @@ import type { z } from '@kbn/zod';
  * otherwise render `Invalid value "…" supplied to "…"`. Zod v4 issues do not
  * carry the failing value, so callers pass the original `input` to recover it.
  * Empty paths use `rootName` (e.g. decoding `MonitorTypeCodec` alone → `"type"`).
+ * Messages are sorted so multi-error `details` strings stay stable (zod issue
+ * order follows object key order; io-ts/`formatErrors` ordered differently).
  */
 export function formatZodErrors(
   error: z.ZodError,
@@ -37,7 +39,7 @@ export function formatZodErrors(
     return `Invalid value "${value}" supplied to "${suppliedValue}"`;
   });
 
-  return [...new Set(messages)];
+  return [...new Set(messages)].sort();
 }
 
 /** Zod's built-in copy — keep those out of API details; prefer the Invalid value form. */
