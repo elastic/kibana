@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isRight } from 'fp-ts/Either';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { isZod } from '@kbn/zod';
 import type { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import type { AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
@@ -50,7 +52,11 @@ class ApiService {
   }
 
   private parseResponse<T>(response: Awaited<T>, apiUrl: string, decodeType?: any): T {
-    if (decodeType && isZod(decodeType)) {
+    if (!decodeType) {
+      return response;
+    }
+
+    if (isZod(decodeType)) {
       const decoded = decodeType.safeParse(response);
       if (decoded.success) {
         return decoded.data as T;
@@ -63,7 +69,22 @@ class ApiService {
         apiUrl,
         response
       );
+      return response;
     }
+
+    // io-ts path kept until remaining callers migrate (Phase 5).
+    const decoded = decodeType.decode(response);
+    if (isRight(decoded)) {
+      return decoded.right as T;
+    }
+    // eslint-disable-next-line no-console
+    console.error(
+      'API %s is not returning expected response, %s for response',
+      apiUrl,
+      formatErrors(decoded.left).toString(),
+      apiUrl,
+      response
+    );
     return response;
   }
 
