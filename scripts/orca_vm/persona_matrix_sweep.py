@@ -364,6 +364,23 @@ SHARD_REMOTE = (
     "Projects/kibana/x-pack/solutions/security/packages/"
     "kbn-evals-suite-security-persona-matrix/src/datasets/select_shard.ts"
 )
+# AD golden-path replay join key (PR #285833): the frozen orca-eval-base
+# image predates the fix that gives every golden-path scenario a
+# `metadata.scenarioKey`. Without it the five golden-path slices record
+# `example.id == "0"` and no join key, so their scores can never be
+# replayed/rejudged -- exactly the defect this run exists to clear. The VM
+# has no git checkout (it boots a baked image), so the fix can only reach it
+# as an overlay.
+PATCHED_AD_DATASET = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/"
+    "src/dataset.ts"
+)
+AD_DATASET_REMOTE = (
+    "Projects/kibana/x-pack/solutions/security/packages/"
+    "kbn-evals-suite-attack-discovery-agent-builder/src/dataset.ts"
+)
 PATCHED_SCOUT_CONFIG = (
     KIBANA_MAIN.parent
     / "kibana.worktrees/persona-matrix-maxpayload"
@@ -560,6 +577,33 @@ def ssh(ip: str, cmd: str, timeout: int = 30) -> str:
          "-o", f"ConnectTimeout={timeout}", "-i", SSH_KEY, f"{SSH_USER}@{ip}", cmd],
         capture_output=True, text=True, timeout=timeout + 15)
     return r.stdout.strip() + (("\n" + r.stderr.strip()) if r.stderr.strip() else "")
+
+
+# ssh() returns 255 with empty output when the transport itself fails (host not
+# accepting keys yet, connection reset mid-deploy). A caller that greps the
+# result then cannot tell "the check ran and failed" from "the check never
+# ran", and reports a content failure for a transport problem -- which is how
+# a 2026-09-09 AD sweep skipped 6/6 units whose overlays were in fact correct
+# (verified by hand on the same VMs minutes later).
+def ssh_checked(ip: str, cmd: str, timeout: int = 30, attempts: int = 3) -> str:
+    last = ""
+    for attempt in range(attempts):
+        r = subprocess.run(
+            ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
+             "-o", "LogLevel=ERROR",
+             "-o", f"ConnectTimeout={timeout}", "-i", SSH_KEY, f"{SSH_USER}@{ip}", cmd],
+            capture_output=True, text=True, timeout=timeout + 15)
+        out = r.stdout.strip() + (("\n" + r.stderr.strip()) if r.stderr.strip() else "")
+        # 255 is ssh's own transport failure; any other code is the remote
+        # command's verdict and must be reported as-is.
+        if r.returncode != 255:
+            return out
+        last = out
+        time.sleep(5 * (attempt + 1))
+    raise RuntimeError(
+        f"ssh transport to {ip} failed {attempts}x (last: {last!r}); "
+        "refusing to report this as a content check result"
+    )
 
 
 def az(*args: str) -> str:
@@ -761,12 +805,22 @@ def provision(model: str, shard: Optional[str] = None) -> str:
 
 
 def wait_ssh(ip: str) -> bool:
+    # A single successful `echo ok` is not readiness: cloud-init restarts sshd
+    # after first accepting connections, so the very next scp/ssh can be reset
+    # mid-deploy. Require consecutive successes so the deploy that follows runs
+    # against a stably reachable host.
+    streak = 0
     for _ in range(30):
         try:
             if "ok" in ssh(ip, "echo ok", timeout=10):
-                return True
+                streak += 1
+                if streak >= 2:
+                    return True
+                time.sleep(3)
+                continue
         except Exception:
             pass
+        streak = 0
         time.sleep(10)
     return False
 
@@ -867,6 +921,24 @@ def deploy(ip: str) -> None:
                 raise FileNotFoundError(f"overlay source missing: {_src}")
         scp(str(PATCHED_DATASET), ip, DATASET_REMOTE)
         scp(str(PATCHED_SHARD), ip, SHARD_REMOTE)
+    if SUITE == "attack-discovery-agent-builder":
+        # See PATCHED_AD_DATASET: without this the run produces another
+        # generation of unreplayable golden-path scores.
+        if not Path(PATCHED_AD_DATASET).is_file():
+            raise FileNotFoundError(f"overlay source missing: {PATCHED_AD_DATASET}")
+        if "scenarioKey" not in Path(PATCHED_AD_DATASET).read_text():
+            raise RuntimeError(
+                f"{PATCHED_AD_DATASET} has no scenarioKey; overlaying it would "
+                "produce unreplayable golden-path scores"
+            )
+        scp(str(PATCHED_AD_DATASET), ip, AD_DATASET_REMOTE)
+        _ad_seen = ssh_checked(ip, f"grep -c scenarioKey ~/{AD_DATASET_REMOTE} || true").strip()
+        if _ad_seen in ("", "0"):
+            raise RuntimeError(
+                f"AD dataset overlay did not land on {ip} (scenarioKey absent "
+                f"from {AD_DATASET_REMOTE}); the run would emit golden-path "
+                "scores that cannot be rejudged"
+            )
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
         "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
@@ -938,9 +1010,23 @@ def deploy(ip: str) -> None:
         f"grep -q 'NEVER finish the turn' ~/{PATCHED_RULE_SKILL_REMOTE}",
     ]
     checks = infra_checks + (persona_checks if persona_only else [])
-    out = ssh(ip, " && ".join(checks) + " && echo OVERLAY_OK")
+    out = ssh_checked(ip, " && ".join(checks) + " && echo OVERLAY_OK")
     if "OVERLAY_OK" not in out:
-        raise RuntimeError(f"patched overlay verification failed on {ip}: {out}")
+        # A bare `&&` chain reports nothing about WHICH clause failed, so the
+        # error used to read "verification failed on <ip>: " with an empty
+        # tail -- indistinguishable from a transport problem. Re-run the
+        # clauses individually to name the actual offender.
+        failed = []
+        for _c in checks:
+            try:
+                if "CLAUSE_OK" not in ssh_checked(ip, _c + " && echo CLAUSE_OK"):
+                    failed.append(_c)
+            except RuntimeError as exc:  # transport died mid-diagnosis
+                failed.append(f"{_c} (transport: {exc})")
+        raise RuntimeError(
+            f"patched overlay verification failed on {ip}: "
+            f"{len(failed)}/{len(checks)} clause(s) failed: {failed or out!r}"
+        )
     print(f"[deploy] assets + patched evaluator/config on {ip}", flush=True)
 
 
@@ -975,6 +1061,34 @@ def self_test() -> int:
     def check(name, got, want):
         if got != want:
             failures.append(f"{name}: expected {want!r}, got {got!r}")
+
+    # ssh_checked must distinguish a transport failure from a content verdict.
+    # Reporting exit-255-with-empty-output as "checks failed" skipped 6/6 units
+    # of an AD sweep whose overlays were correct (2026-09-09).
+    import unittest.mock as _mock
+
+    def _fake_run(rc, out=""):
+        return lambda *a, **k: subprocess.CompletedProcess([], rc, out, "")
+
+    with _mock.patch.object(subprocess, "run", _fake_run(0, "OVERLAY_OK")):
+        check("content pass returned", ssh_checked("1.2.3.4", "true"), "OVERLAY_OK")
+    with _mock.patch.object(subprocess, "run", _fake_run(1, "")):
+        check("content failure returned, not raised", ssh_checked("1.2.3.4", "false"), "")
+    with _mock.patch.object(subprocess, "run", _fake_run(255, "")), \
+            _mock.patch.object(time, "sleep", lambda *_: None):
+        _raised = False
+        try:
+            ssh_checked("1.2.3.4", "true", attempts=2)
+        except RuntimeError:
+            _raised = True
+        check("transport failure raises", _raised, True)
+
+    # wait_ssh must not return on a single lucky echo: cloud-init bounces sshd.
+    _seq = ["ok", "", "ok", "ok"]
+    with _mock.patch.object(sys.modules[__name__], "ssh", lambda *a, **k: _seq.pop(0)), \
+            _mock.patch.object(time, "sleep", lambda *_: None):
+        check("wait_ssh needs a streak", wait_ssh("1.2.3.4"), True)
+        check("wait_ssh consumed the flap", _seq, [])
 
     m = "eis-anthropic-claude-4-7-opus"
     env = {"EVAL_REPETITIONS": "3", "EVAL_CONNECTOR_ID": "eis-google-gemini-3-1-pro"}
