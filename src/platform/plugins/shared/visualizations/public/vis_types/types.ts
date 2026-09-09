@@ -136,13 +136,6 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
     visParams: VisParams
   ) => Promise<Array<{ name?: string; value: string }> | undefined>;
 
-  /**
-   * Some visualizations (e.g. Vega) can use ES|QL internally without exposing it as
-   * their top-level query. This method should report whether the current vis params
-   * make use of ES|QL, so dashboards can react to it (e.g. enabling ES|QL-only controls).
-   */
-  readonly usesEsql?: (visParams: VisParams) => boolean;
-
   readonly getEsqlQuery?: (visParams: VisParams) => AggregateQuery | undefined;
 
   readonly isAccessible?: boolean;

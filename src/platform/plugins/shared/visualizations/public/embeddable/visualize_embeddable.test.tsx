@@ -30,19 +30,17 @@ const mockVisTypeRegistry: Record<
   string,
   {
     name: string;
-    usesEsql?: () => boolean;
     getEsqlQuery?: (visParams?: { spec?: string }) => { esql: string } | undefined;
   }
 > = {
   metric: { name: 'metric' },
   'vega-esql': {
     name: 'vega',
-    usesEsql: () => true,
     getEsqlQuery: (visParams) => ({
       esql: visParams?.spec ?? 'FROM logs-* | WHERE os == ?fizzbuzz',
     }),
   },
-  'vega-no-esql': { name: 'vega', usesEsql: () => false },
+  'vega-no-esql': { name: 'vega' },
 };
 
 jest.mock('./create_vis_instance', () => {
