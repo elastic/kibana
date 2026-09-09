@@ -11,7 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
-import { useAlertingLocators } from '../../../../application/locator_context';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
+
+const mockLocators = createMockLocators();
 
 const mockUseLinkedActionPolicies = jest.fn();
 
@@ -58,11 +60,13 @@ const baseRule: RuleApiResponse = {
 
 const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
-    <I18nProvider>
-      <RuleProvider rule={rule}>
-        <ActionPoliciesArtifactsSubsection />
-      </RuleProvider>
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <RuleProvider rule={rule}>
+          <ActionPoliciesArtifactsSubsection />
+        </RuleProvider>
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 
 describe('ActionPoliciesArtifactsSubsection', () => {
@@ -135,7 +139,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     renderSubsection();
 
-    const { actionPolicyLocators } = useAlertingLocators();
+    const { actionPolicyLocators } = mockLocators;
     expect(actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
     expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('2');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(

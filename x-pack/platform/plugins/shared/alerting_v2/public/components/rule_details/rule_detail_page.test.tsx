@@ -17,7 +17,9 @@ import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
-import { useAlertingLocators } from '../../application/locator_context';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+
+const mockLocators = createMockLocators();
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -160,9 +162,11 @@ const renderPage = (rule: RuleApiResponse) =>
     <MemoryRouter>
       <I18nProvider>
         <MockChromeContextProvider>
-          <RuleProvider rule={rule}>
-            <RuleDetailPage />
-          </RuleProvider>
+          <MockLocatorProvider locators={mockLocators}>
+            <RuleProvider rule={rule}>
+              <RuleDetailPage />
+            </RuleProvider>
+          </MockLocatorProvider>
         </MockChromeContextProvider>
       </I18nProvider>
     </MemoryRouter>
@@ -225,7 +229,7 @@ describe('RuleDetailPage', () => {
   });
 
   it('renders a back link to the rules list', () => {
-    const { rulesLocators } = useAlertingLocators();
+    const { rulesLocators } = mockLocators;
     renderPage(baseRule);
     const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
     expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
@@ -446,9 +450,11 @@ describe('RuleDetailPage', () => {
         <MemoryRouter>
           <I18nProvider>
             <MockChromeContextProvider>
-              <RuleProvider rule={baseRule}>
-                <RuleDetailPage />
-              </RuleProvider>
+              <MockLocatorProvider locators={mockLocators}>
+                <RuleProvider rule={baseRule}>
+                  <RuleDetailPage />
+                </RuleProvider>
+              </MockLocatorProvider>
             </MockChromeContextProvider>
           </I18nProvider>
         </MemoryRouter>
@@ -464,9 +470,11 @@ describe('RuleDetailPage', () => {
         <MemoryRouter>
           <I18nProvider>
             <MockChromeContextProvider>
-              <RuleProvider rule={nextRule}>
-                <RuleDetailPage />
-              </RuleProvider>
+              <MockLocatorProvider locators={mockLocators}>
+                <RuleProvider rule={nextRule}>
+                  <RuleDetailPage />
+                </RuleProvider>
+              </MockLocatorProvider>
             </MockChromeContextProvider>
           </I18nProvider>
         </MemoryRouter>

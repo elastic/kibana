@@ -11,7 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
-import { useAlertingLocators } from '../../../application/locator_context';
+import { createMockLocators, MockLocatorProvider } from '../../../test_utils/test_providers';
+
+const mockLocators = createMockLocators();
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
@@ -71,9 +73,11 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
   };
 
   const utils = render(
-    <I18nProvider>
-      <RuleSummaryFlyout {...props} />
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <RuleSummaryFlyout {...props} />
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 
   return { ...utils, props };
@@ -124,7 +128,7 @@ describe('RuleSummaryFlyout', () => {
     const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
     it('opens the View details item with a locator-built rule details href', () => {
-      const { rulesLocators } = useAlertingLocators();
+      const { rulesLocators } = mockLocators;
       renderFlyout();
       openMenu();
 
@@ -136,7 +140,7 @@ describe('RuleSummaryFlyout', () => {
     });
 
     it('forwards the raw rule id to the details locator', () => {
-      const { rulesLocators } = useAlertingLocators();
+      const { rulesLocators } = mockLocators;
       renderFlyout({
         rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
       });

@@ -218,7 +218,7 @@ export const ActionPoliciesTable = () => {
     <ActionPolicyCreateOptionsPanel options={createOptions} />
   ) : (
     <EuiEmptyPrompt
-      iconType="documents"
+      iconType="document"
       data-test-subj="actionPoliciesListReadOnlyEmpty"
       title={
         <h2>

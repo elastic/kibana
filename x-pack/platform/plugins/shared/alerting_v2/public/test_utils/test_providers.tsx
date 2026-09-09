@@ -38,6 +38,13 @@ export const createMockLocators = (): AlertingV2Locators => ({
     createMockLocator() as unknown as AlertingV2Locators['executionHistoryLocators'],
 });
 
+export function MockLocatorProvider({
+  children,
+  locators = createMockLocators(),
+}: PropsWithChildren<{ locators?: AlertingV2Locators }>) {
+  return <LocatorProvider locators={locators}>{children}</LocatorProvider>;
+}
+
 export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {
   return {
     ...coreMock.createStart(),

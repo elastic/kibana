@@ -8,8 +8,10 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useAlertingLocators } from '../../../../application/locator_context';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertTimelineSection } from './alert_timeline_section';
+
+const mockLocators = createMockLocators();
 
 const mockUseFetchRuleEvents = jest.fn();
 let capturedOnRefresh: (() => void) | undefined;
@@ -76,9 +78,11 @@ const successResult = {
 
 const renderSection = () =>
   render(
-    <I18nProvider>
-      <AlertTimelineSection />
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <AlertTimelineSection />
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 
 describe('AlertTimelineSection', () => {
@@ -131,7 +135,7 @@ describe('AlertTimelineSection', () => {
 
     const windowStartMs = Date.parse('2026-08-13T12:00:00.000Z');
     const windowEndMs = Date.parse('2026-08-14T12:00:00.000Z');
-    const { episodesLocators } = useAlertingLocators();
+    const { episodesLocators } = mockLocators;
 
     expect(episodesLocators.useUrl).toHaveBeenCalledWith(
       {

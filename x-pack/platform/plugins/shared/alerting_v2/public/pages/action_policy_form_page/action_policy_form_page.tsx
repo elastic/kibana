@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -16,6 +15,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -107,7 +107,7 @@ export const ActionPolicyFormPage = () => {
           }
         />
         <EuiSpacer size="m" />
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={
             <FormattedMessage
@@ -115,12 +115,10 @@ export const ActionPolicyFormPage = () => {
               defaultMessage="Failed to load action policy"
             />
           }
-          color="danger"
-          iconType="error"
           data-test-subj="fetchErrorCallout"
         >
           {fetchError?.message}
-        </EuiCallOut>
+        </KbnDangerCallout>
       </>
     );
   }

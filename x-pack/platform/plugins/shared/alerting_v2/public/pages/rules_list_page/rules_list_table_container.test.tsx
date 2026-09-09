@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListTableContainer } from './rules_list_table_container';
+import { MockLocatorProvider } from '../../test_utils/test_providers';
 
 const mockNavigateToUrl = jest.fn();
 
@@ -119,29 +120,31 @@ const mockOnCloneInFlyout = jest.fn();
 
 const renderContainer = ({ total = mockRules.length }: { total?: number } = {}) => {
   return render(
-    <I18nProvider>
-      <ContentListProvider
-        id="rules-list-table-container-test"
-        labels={{ entity: 'rule', entityPlural: 'rules' }}
-        dataSource={{
-          findItems: async () => ({
-            items: mockRules.map(toListItem),
-            total,
-          }),
-        }}
-        features={{
-          sorting: { initialSort: { field: 'name', direction: 'asc' } },
-          pagination: { initialPageSize: 20 },
-          search: true,
-          selection: false,
-        }}
-      >
-        <RulesListTableContainer
-          onEditInFlyout={mockOnEditInFlyout}
-          onCloneInFlyout={mockOnCloneInFlyout}
-        />
-      </ContentListProvider>
-    </I18nProvider>
+    <MockLocatorProvider>
+      <I18nProvider>
+        <ContentListProvider
+          id="rules-list-table-container-test"
+          labels={{ entity: 'rule', entityPlural: 'rules' }}
+          dataSource={{
+            findItems: async () => ({
+              items: mockRules.map(toListItem),
+              total,
+            }),
+          }}
+          features={{
+            sorting: { initialSort: { field: 'name', direction: 'asc' } },
+            pagination: { initialPageSize: 20 },
+            search: true,
+            selection: false,
+          }}
+        >
+          <RulesListTableContainer
+            onEditInFlyout={mockOnEditInFlyout}
+            onCloneInFlyout={mockOnCloneInFlyout}
+          />
+        </ContentListProvider>
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 };
 
@@ -869,29 +872,31 @@ describe('RulesListTableContainer', () => {
       ] as RuleApiResponse[];
 
       render(
-        <I18nProvider>
-          <ContentListProvider
-            id="rules-list-selection-page-test"
-            labels={{ entity: 'rule', entityPlural: 'rules' }}
-            dataSource={{
-              findItems: async ({ page }) => ({
-                items: (page.index === 0 ? page1 : page2).map(toListItem),
-                total: 40,
-              }),
-            }}
-            features={{
-              sorting: { initialSort: { field: 'name', direction: 'asc' } },
-              pagination: { initialPageSize: 2 },
-              search: true,
-              selection: false,
-            }}
-          >
-            <RulesListTableContainer
-              onEditInFlyout={mockOnEditInFlyout}
-              onCloneInFlyout={mockOnCloneInFlyout}
-            />
-          </ContentListProvider>
-        </I18nProvider>
+        <MockLocatorProvider>
+          <I18nProvider>
+            <ContentListProvider
+              id="rules-list-selection-page-test"
+              labels={{ entity: 'rule', entityPlural: 'rules' }}
+              dataSource={{
+                findItems: async ({ page }) => ({
+                  items: (page.index === 0 ? page1 : page2).map(toListItem),
+                  total: 40,
+                }),
+              }}
+              features={{
+                sorting: { initialSort: { field: 'name', direction: 'asc' } },
+                pagination: { initialPageSize: 2 },
+                search: true,
+                selection: false,
+              }}
+            >
+              <RulesListTableContainer
+                onEditInFlyout={mockOnEditInFlyout}
+                onCloneInFlyout={mockOnCloneInFlyout}
+              />
+            </ContentListProvider>
+          </I18nProvider>
+        </MockLocatorProvider>
       );
 
       await waitFor(() => {

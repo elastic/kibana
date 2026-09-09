@@ -20,12 +20,13 @@ import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fet
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
-import { TestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, TestProviders } from '../../test_utils/test_providers';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
-import { useAlertingLocators } from '../../application/locator_context';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+
+const mockLocators = createMockLocators();
 
 const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
@@ -196,7 +197,7 @@ const episodeId = 'ep-1';
 const renderPage = () =>
   render(
     <MockChromeContextProvider>
-      <TestProviders>
+      <TestProviders locators={mockLocators}>
         <MemoryRouter>
           <EpisodeDetailsPage />
         </MemoryRouter>
@@ -273,7 +274,7 @@ describe('EpisodeDetailsPage', () => {
   });
 
   it('renders the app header title, tabs, back link, and badges', () => {
-    const { episodesLocators } = useAlertingLocators();
+    const { episodesLocators } = mockLocators;
     renderPage();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule A');
@@ -522,7 +523,7 @@ describe('EpisodeDetailsPage', () => {
     it('passes the next episode when the episode id changes', () => {
       const { rerender } = render(
         <MockChromeContextProvider>
-          <TestProviders>
+          <TestProviders locators={mockLocators}>
             <MemoryRouter>
               <EpisodeDetailsPage />
             </MemoryRouter>
@@ -539,7 +540,7 @@ describe('EpisodeDetailsPage', () => {
 
       rerender(
         <MockChromeContextProvider>
-          <TestProviders>
+          <TestProviders locators={mockLocators}>
             <MemoryRouter>
               <EpisodeDetailsPage />
             </MemoryRouter>

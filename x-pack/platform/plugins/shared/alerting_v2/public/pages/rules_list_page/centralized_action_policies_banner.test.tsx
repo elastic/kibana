@@ -12,9 +12,9 @@ import {
   CentralizedActionPoliciesBanner,
   CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
 } from './centralized_action_policies_banner';
-import { useAlertingLocators } from '../../application/locator_context';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 
-const mockLocators = useAlertingLocators();
+const mockLocators = createMockLocators();
 const mockNavigateToUrl = jest.fn();
 const mockToursIsEnabled = jest.fn(() => true);
 const MOCK_ACTION_POLICIES_DOCS_URL = 'https://docs.test/action-policies';
@@ -54,9 +54,11 @@ jest.mock('@kbn/core-di-browser', () => {
 
 const renderBanner = () =>
   render(
-    <IntlProvider locale="en">
-      <CentralizedActionPoliciesBanner />
-    </IntlProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <IntlProvider locale="en">
+        <CentralizedActionPoliciesBanner />
+      </IntlProvider>
+    </MockLocatorProvider>
   );
 
 describe('CentralizedActionPoliciesBanner', () => {

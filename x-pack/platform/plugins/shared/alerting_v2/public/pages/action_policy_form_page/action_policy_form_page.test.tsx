@@ -12,9 +12,9 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
-import { useAlertingLocators } from '../../application/locator_context';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 
-const mockLocators = useAlertingLocators();
+const mockLocators = createMockLocators();
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
@@ -222,9 +222,11 @@ const EXISTING_POLICY: ActionPolicyResponse = {
 
 const renderPage = () => {
   return render(
-    <I18nProvider>
-      <ActionPolicyFormPage />
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <ActionPolicyFormPage />
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 };
 

@@ -159,11 +159,11 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const share = container.get(PluginSetup('share')) as SharePluginSetup;
-    share.url.locators.create(new AlertingV2RulesLocatorDefinition());
-    share.url.locators.create(new AlertingV2RuleLibraryLocatorDefinition());
-    share.url.locators.create(new AlertingV2EpisodesLocatorDefinition());
-    share.url.locators.create(new AlertingV2ActionPoliciesLocatorDefinition());
-    share.url.locators.create(new AlertingV2ExecutionHistoryLocatorDefinition());
+    share.url.locators.create(AlertingV2RulesLocatorDefinition);
+    share.url.locators.create(AlertingV2RuleLibraryLocatorDefinition);
+    share.url.locators.create(AlertingV2EpisodesLocatorDefinition);
+    share.url.locators.create(AlertingV2ActionPoliciesLocatorDefinition);
+    share.url.locators.create(AlertingV2ExecutionHistoryLocatorDefinition);
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
       title: 'Alerting V2 Preview',

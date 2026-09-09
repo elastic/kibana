@@ -38,16 +38,13 @@ const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
   executionHistory: '/alerting/execution-history',
 });
 
-const createLocator = <D extends new () => any>(Definition: D) => new Definition();
-
 describe('AlertingV2RulesLocatorDefinition', () => {
   it('has the correct id', () => {
-    const locator = createLocator(AlertingV2RulesLocatorDefinition);
-    expect(locator.id).toBe(ALERTING_V2_RULES_LOCATOR);
+    expect(AlertingV2RulesLocatorDefinition.id).toBe(ALERTING_V2_RULES_LOCATOR);
   });
 
   describe('management host', () => {
-    const locator = createLocator(AlertingV2RulesLocatorDefinition);
+    const locator = AlertingV2RulesLocatorDefinition;
 
     it('resolves list', async () => {
       expect(await locator.getLocation({})).toMatchObject({
@@ -81,7 +78,7 @@ describe('AlertingV2RulesLocatorDefinition', () => {
   });
 
   describe('observability host', () => {
-    const locator = createLocator(AlertingV2RulesLocatorDefinition);
+    const locator = AlertingV2RulesLocatorDefinition;
 
     it('resolves list', async () => {
       expect(await locator.getLocation({ host: OBSERVABILITY_HOST.rules })).toMatchObject({
@@ -112,12 +109,11 @@ describe('AlertingV2RulesLocatorDefinition', () => {
 
 describe('AlertingV2RuleLibraryLocatorDefinition', () => {
   it('has the correct id', () => {
-    const locator = createLocator(AlertingV2RuleLibraryLocatorDefinition);
-    expect(locator.id).toBe(ALERTING_V2_RULE_LIBRARY_LOCATOR);
+    expect(AlertingV2RuleLibraryLocatorDefinition.id).toBe(ALERTING_V2_RULE_LIBRARY_LOCATOR);
   });
 
   it('resolves list for management', async () => {
-    const locator = createLocator(AlertingV2RuleLibraryLocatorDefinition);
+    const locator = AlertingV2RuleLibraryLocatorDefinition;
     expect(await locator.getLocation({})).toMatchObject({
       app: 'management',
       path: '/alertingV2/rule_library',
@@ -125,13 +121,13 @@ describe('AlertingV2RuleLibraryLocatorDefinition', () => {
   });
 
   it('appends templateId', async () => {
-    const locator = createLocator(AlertingV2RuleLibraryLocatorDefinition);
+    const locator = AlertingV2RuleLibraryLocatorDefinition;
     const loc = await locator.getLocation({ templateId: 'tmpl-1' });
     expect(loc.path).toBe('/alertingV2/rule_library?templateId=tmpl-1');
   });
 
   it('resolves for observability host', async () => {
-    const locator = createLocator(AlertingV2RuleLibraryLocatorDefinition);
+    const locator = AlertingV2RuleLibraryLocatorDefinition;
     expect(await locator.getLocation({ host: OBSERVABILITY_HOST.ruleLibrary })).toMatchObject({
       app: 'observabilityAlerting',
       path: '/rule-library',
@@ -141,12 +137,11 @@ describe('AlertingV2RuleLibraryLocatorDefinition', () => {
 
 describe('AlertingV2EpisodesLocatorDefinition', () => {
   it('has the correct id', () => {
-    const locator = createLocator(AlertingV2EpisodesLocatorDefinition);
-    expect(locator.id).toBe(ALERTING_V2_EPISODES_LOCATOR);
+    expect(AlertingV2EpisodesLocatorDefinition.id).toBe(ALERTING_V2_EPISODES_LOCATOR);
   });
 
   describe('management host', () => {
-    const locator = createLocator(AlertingV2EpisodesLocatorDefinition);
+    const locator = AlertingV2EpisodesLocatorDefinition;
 
     it('resolves list', async () => {
       expect(await locator.getLocation({})).toMatchObject({
@@ -191,7 +186,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
   });
 
   describe('observability host', () => {
-    const locator = createLocator(AlertingV2EpisodesLocatorDefinition);
+    const locator = AlertingV2EpisodesLocatorDefinition;
 
     it('resolves list', async () => {
       expect(await locator.getLocation({ host: OBSERVABILITY_HOST.episodes })).toMatchObject({
@@ -213,12 +208,11 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
 
 describe('AlertingV2ActionPoliciesLocatorDefinition', () => {
   it('has the correct id', () => {
-    const locator = createLocator(AlertingV2ActionPoliciesLocatorDefinition);
-    expect(locator.id).toBe(ALERTING_V2_ACTION_POLICIES_LOCATOR);
+    expect(AlertingV2ActionPoliciesLocatorDefinition.id).toBe(ALERTING_V2_ACTION_POLICIES_LOCATOR);
   });
 
   describe('management host', () => {
-    const locator = createLocator(AlertingV2ActionPoliciesLocatorDefinition);
+    const locator = AlertingV2ActionPoliciesLocatorDefinition;
 
     it('resolves list', async () => {
       expect(await locator.getLocation({})).toMatchObject({
@@ -255,7 +249,7 @@ describe('AlertingV2ActionPoliciesLocatorDefinition', () => {
   });
 
   describe('observability host', () => {
-    const locator = createLocator(AlertingV2ActionPoliciesLocatorDefinition);
+    const locator = AlertingV2ActionPoliciesLocatorDefinition;
 
     it('resolves list', async () => {
       expect(await locator.getLocation({ host: OBSERVABILITY_HOST.actionPolicies })).toMatchObject({
@@ -277,12 +271,13 @@ describe('AlertingV2ActionPoliciesLocatorDefinition', () => {
 
 describe('AlertingV2ExecutionHistoryLocatorDefinition', () => {
   it('has the correct id', () => {
-    const locator = createLocator(AlertingV2ExecutionHistoryLocatorDefinition);
-    expect(locator.id).toBe(ALERTING_V2_EXECUTION_HISTORY_LOCATOR);
+    expect(AlertingV2ExecutionHistoryLocatorDefinition.id).toBe(
+      ALERTING_V2_EXECUTION_HISTORY_LOCATOR
+    );
   });
 
   it('resolves for management', async () => {
-    const locator = createLocator(AlertingV2ExecutionHistoryLocatorDefinition);
+    const locator = AlertingV2ExecutionHistoryLocatorDefinition;
     expect(await locator.getLocation({})).toMatchObject({
       app: 'management',
       path: '/alertingV2/execution_history',
@@ -290,7 +285,7 @@ describe('AlertingV2ExecutionHistoryLocatorDefinition', () => {
   });
 
   it('resolves for observability host', async () => {
-    const locator = createLocator(AlertingV2ExecutionHistoryLocatorDefinition);
+    const locator = AlertingV2ExecutionHistoryLocatorDefinition;
     expect(await locator.getLocation({ host: OBSERVABILITY_HOST.executionHistory })).toMatchObject({
       app: 'observabilityAlerting',
       path: '/execution-history',
@@ -315,7 +310,7 @@ describe('createAlertingV2HostApp', () => {
 
 describe('per-call host (classic coexistence)', () => {
   it('same rules locator resolves management, observability, and search without shared state', async () => {
-    const locator = createLocator(AlertingV2RulesLocatorDefinition);
+    const locator = AlertingV2RulesLocatorDefinition;
 
     expect(await locator.getLocation({ ruleId: 'r-1' })).toMatchObject({
       app: 'management',

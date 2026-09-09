@@ -9,9 +9,8 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
-import { useAlertingLocators } from '../../application/locator_context';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
@@ -230,6 +229,8 @@ mockHttp.post.mockResolvedValue({ rules: [] });
 
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
+const mockLocators = createMockLocators();
+
 const getCapturedBulkActions = (): CustomBulkActions => {
   const calls = mockUnifiedDataTable.mock.calls;
   const lastCall = calls[calls.length - 1][0];
@@ -238,7 +239,7 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 
 const renderPage = () => {
   return render(
-    <ListPageTestProviders>
+    <ListPageTestProviders locators={mockLocators}>
       <AlertEpisodesListPage />
     </ListPageTestProviders>
   );
@@ -267,7 +268,7 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the manage rules link in the app header menu', async () => {
-    const { rulesLocators } = useAlertingLocators();
+    const { rulesLocators } = mockLocators;
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
     expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
     expect(manageRulesLink).toHaveAttribute('href', '/mock-locator-url');

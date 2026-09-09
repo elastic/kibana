@@ -12,9 +12,10 @@ import { useCreateRule } from './use_create_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { useAlertingLocators } from '../application/locator_context';
+import { LocatorProvider } from '../application/locator_context';
+import { createMockLocators } from '../test_utils/test_providers';
 
-const mockLocators = useAlertingLocators();
+const mockLocators = createMockLocators();
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
@@ -57,7 +58,11 @@ const createWrapper = () => {
     },
   });
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
+    React.createElement(
+      LocatorProvider,
+      { locators: mockLocators },
+      React.createElement(QueryClientProvider, { client: queryClient }, children)
+    );
 };
 
 describe('useCreateRule', () => {

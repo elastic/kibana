@@ -12,8 +12,7 @@
     "server/**/*.json",
     "public/**/*",
     "test/scout/**/*",
-    "test/scout_alerting_v2/**/*",
-    "jest.setup.ts"
+    "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
     "@kbn/agent-builder-elastic-ai-index-ki-types",
@@ -49,6 +48,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-di-internal",
     "@kbn/i18n",
+    "@kbn/ui-callout",
     "@kbn/zod-helpers",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/apm-utils",

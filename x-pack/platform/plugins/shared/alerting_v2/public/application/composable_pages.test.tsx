@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
