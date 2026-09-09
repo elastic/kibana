@@ -6,37 +6,37 @@
  */
 
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { defaultAiIndices } from '../../../../agents/default_ai_indices';
+import type { AiIndexCatalogEntry } from '../../types';
 
 const PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const SPACE_FIELD = `${PRIVILEGES_PATH}.space`;
 
 /**
- * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
- * limit results to the current space. Returns an empty string when disabled or the agent has none.
+ * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled or when
+ * the catalog has no entries.
  */
 export const getAiIndicesInstructions = ({
   enabled,
-  aiIndices,
+  catalog,
   spaceId,
 }: {
   enabled: boolean;
-  aiIndices: string[];
+  catalog: AiIndexCatalogEntry[];
   spaceId: string;
 }): string => {
-  if (!enabled || aiIndices.length === 0) {
+  if (!enabled || catalog.length === 0) {
     return '';
   }
 
-  const described = aiIndices.flatMap((id) => defaultAiIndices[id] ?? []);
-  const catalog: string[] = [];
-
-  if (described.length > 0) {
-    const entries = described.map(({ name, description, guidance }) =>
-      [`- \`${name}\` — ${description}`, guidance].filter(Boolean).join(' ')
+  // Unresolved entries are omitted: the id is not a valid `FROM` target.
+  const entries = catalog
+    .filter(({ esqlTarget }) => esqlTarget !== undefined)
+    .map(
+      ({ esqlTarget, description }) =>
+        `- \`${esqlTarget}\`${description ? ` — ${description}` : ''}`
     );
-    catalog.push('Available to this agent:', entries.join('\n'));
-  }
+  const catalogSection =
+    entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
 
   // Mirrors `buildVisibilityFilter` in the SML service, minus its `terms_set` privilege check —
   // the agent only scopes by space.
@@ -82,7 +82,7 @@ An AI index stores Knowledge Indicators (KIs): context prepared for agents, such
 
 Search relevant AI indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools. Fields differ between AI indices, so check what an index holds before filtering on one.
 
-${catalog.join('\n\n')}
+${catalogSection}
 
 ### Space scoping
 

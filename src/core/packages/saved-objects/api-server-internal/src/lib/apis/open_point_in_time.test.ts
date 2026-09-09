@@ -129,7 +129,7 @@ describe('SavedObjectsRepository', () => {
 
     describe('errors', () => {
       const expectNotFoundError = async (types: string | string[]) => {
-        await expect(repository.openPointInTimeForType(types)).rejects.toThrowError(
+        await expect(repository.openPointInTimeForType(types)).rejects.toThrow(
           createGenericNotFoundErrorPayload()
         );
       };

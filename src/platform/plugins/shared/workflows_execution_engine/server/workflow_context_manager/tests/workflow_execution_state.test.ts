@@ -112,7 +112,7 @@ describe('WorkflowExecutionState', () => {
   });
 
   it('should throw error from upsertStep if id is not provided', () => {
-    expect(() => underTest.upsertStep({})).toThrowError(
+    expect(() => underTest.upsertStep({})).toThrow(
       'WorkflowExecutionState: Step execution must have an ID to be upserted'
     );
   });

@@ -165,6 +165,8 @@ export interface WorkflowExecutionLogsResponse {
 
 export interface ResumeExecutionParams {
   input: Record<string, unknown>;
+  /** HITL step execution to claim. When omitted, the server looks up the waiting step. */
+  stepExecutionId?: string;
 }
 
 export interface WorkflowsConfig {
