@@ -44,20 +44,26 @@ jobs:
         with:
           node-version-file: '.node-version'
 
-      # Cache node_modules keyed on yarn.lock — shared across all matrix jobs
+      # Cache node_modules keyed on pnpm-lock.yaml — shared across all matrix jobs
       # on the same runner pool. First run after a dep bump takes a few minutes;
       # cache-hit runs take ~30 s.
-      - name: Restore yarn cache
+      - name: Restore node_modules cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: node_modules
-          key: dep-usage-node-modules-${{ hashFiles('yarn.lock') }}
+          key: dep-usage-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: dep-usage-node-modules-
 
       - name: Install dependencies
         # --ignore-scripts skips lifecycle hooks, package manifests, and symlink
-        # setup — faster than `yarn kbn bootstrap` for this read-only scan job.
-        run: yarn install --frozen-lockfile --ignore-scripts
+        # setup — faster than `pnpm kbn bootstrap` for this read-only scan job.
+        # Pin via engines.pnpm (no package.json "packageManager" field).
+        run: |
+          export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+          PNPM_VERSION="$(node -p "require('./package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+          corepack enable
+          corepack prepare "pnpm@${PNPM_VERSION}" --activate
+          pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Index ${{ matrix.group }}
         env:
