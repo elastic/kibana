@@ -1887,6 +1887,51 @@ describe('convertSOQueriesToPackConfig — V5 execution defaults fan-out', () =>
       expect(queries.q1.snapshot).toBe(false);
       expect(queries.q1.removed).toBe(true);
     });
+
+    // Regression: the query flyout used to seed `snapshot: true, removed: false`
+    // into every newly created query, and the old serializer never stripped it,
+    // so effectively every pack query already on disk carries that pair. Reading
+    // it as an explicit override meant a pack-level result type applied to no
+    // pre-existing query at all — the pack default was silently inert.
+    it('should apply the pack default over a seeded snapshot:true/removed:false pair', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ snapshot: true, removed: false }),
+        { ...baseOpts, packExecutionDefaults: { result_type: 'differential' } }
+      );
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('should apply the pack default over a lone stored snapshot:true', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ snapshot: true }), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'differential' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    // The seeded pair must not become a licence to ignore a real per-query
+    // choice: `result_type` is still the canonical field and outranks it.
+    it('should let an explicit result_type win over a seeded boolean pair', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ snapshot: true, removed: false, result_type: 'differential_added_only' }),
+        { ...baseOpts, packExecutionDefaults: { result_type: 'snapshot' } }
+      );
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(false);
+    });
+
+    // With no pack default there is nothing to inherit, so a stored
+    // `snapshot: true` still has to survive to the wire unchanged.
+    it('should preserve a stored snapshot pair when the pack sets no result type', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ snapshot: false, removed: true }),
+        { ...baseOpts, packExecutionDefaults: {} }
+      );
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
   });
 
   // Regression: `DEFAULT_PLATFORM` is what the flyout seeds when a query has no

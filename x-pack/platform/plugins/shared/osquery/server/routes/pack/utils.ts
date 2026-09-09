@@ -35,7 +35,7 @@ import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import type { ResultType } from '../../../common/result_type';
-import { mapResultTypeToWire, mapWireToResultType } from '../../../common/result_type';
+import { mapResultTypeToWire, mapWireToExplicitResultType } from '../../../common/result_type';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import { parseRRule } from '../../../common/utils/rrule_parser';
@@ -484,14 +484,20 @@ export const convertSOQueriesToPackConfig = (
       // or pack default).
       //
       // A pre-V5 query records its result type only as the stored
-      // `snapshot`/`removed` pair. That pair is an explicit per-query value, so
-      // it outranks the pack default exactly as `result_type` does. Reading the
-      // pack default first would silently rewrite every legacy differential
-      // query to snapshot the moment a curator set any pack-level result type —
-      // an unannounced data change on the agent wire.
+      // `snapshot`/`removed` pair, and a *deliberate* pair outranks the pack
+      // default exactly as `result_type` does: reading the pack default first
+      // would silently rewrite a legacy differential query to snapshot the
+      // moment a curator set any pack-level result type — an unannounced change
+      // on the agent wire.
+      //
+      // Only `snapshot === false` counts as deliberate, which is why this uses
+      // `mapWireToExplicitResultType` rather than the plain inverse. The flyout
+      // used to seed `snapshot: true, removed: false` into every new query, so
+      // honouring that pair as an override would leave a pack-level result type
+      // applying to no pre-existing query at all.
       const packDefaultResultType = packExecutionDefaults?.result_type ?? undefined;
       const storedResultType: ResultType | undefined =
-        queryResultType ?? mapWireToResultType({ snapshot, removed });
+        queryResultType ?? mapWireToExplicitResultType({ snapshot, removed });
       const effectiveResultType: ResultType | undefined =
         storedResultType ?? packDefaultResultType ?? undefined;
       const wireResultType: Record<string, unknown> = effectiveResultType

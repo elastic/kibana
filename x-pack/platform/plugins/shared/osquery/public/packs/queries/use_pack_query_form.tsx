@@ -14,7 +14,11 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 import type { ResultType } from '../../../common/result_type';
-import { mapResultTypeToWire, mapWireToResultType } from '../../../common/result_type';
+import {
+  mapResultTypeToWire,
+  mapWireToResultType,
+  mapWireToExplicitResultType,
+} from '../../../common/result_type';
 import type { Shard } from '../../../common/utils/converters';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { DeserializeScheduleInput } from '../form/schedule_serializer';
@@ -207,14 +211,29 @@ const deserializer = (
   // `result_type` is read alongside the legacy `snapshot`/`removed` pair so a
   // pre-V5 query that only ever stored the booleans is still recognised as
   // holding its own result type.
-  // A pre-V5 query stores its result type only as the `snapshot`/`removed`
-  // pair, so decode that into a canonical value before comparing.
+  //
+  // Two different decoders are needed here, because "what should the control
+  // display" and "does this query hold an override" are different questions:
+  //
+  //  - display uses the faithful inverse, so a query storing `snapshot: true`
+  //    still renders as Snapshot;
+  //  - the override predicate uses the explicit-only decoder, because the
+  //    flyout used to seed `snapshot: true, removed: false` into every new
+  //    query. Counting that pair as an override would force the toggle ON for
+  //    virtually every pre-existing query in every pack.
   const storedResultType =
     payload.result_type ??
     mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
-  const hasStoredResultType = storedResultType !== undefined;
+  const hasStoredResultType =
+    (payload.result_type ??
+      mapWireToExplicitResultType({ snapshot: payload.snapshot, removed: payload.removed })) !==
+    undefined;
   const hasVersionOverride = payload.version !== undefined;
-  const hasResultTypeOverride = !!packResultType && hasStoredResultType;
+  // Not gated on `packResultType`, matching the two predicates around it. The
+  // toggle governs all three fields at once, so gating this one alone rendered
+  // the toggle OFF while the enabled Result type control displayed the query's
+  // own stored value — the state shown did not match the state stored.
+  const hasResultTypeOverride = hasStoredResultType;
   const hasPlatformOverride = !!payload.platform;
   const hasAnyOverride = hasVersionOverride || hasResultTypeOverride || hasPlatformOverride;
 
@@ -348,8 +367,18 @@ const serializer = (
           delete draft.version;
         }
 
+        // Drop the companion booleans alongside `result_type`, not just
+        // `result_type` itself. The deserializer seeds `snapshot`/`removed`
+        // from the effective result type so the control can display it, so a
+        // query that overrides only (say) the OS still carries a seeded pair
+        // here. Deleting `result_type` while leaving that pair behind sends the
+        // pack default's own value back as a per-query field, where the server
+        // decodes it as an explicit override — and a later pack-level change
+        // would then never reach this query, the exact opposite of inheriting.
         if (packDefaults.packResultType && draft.result_type === packDefaults.packResultType) {
           delete draft.result_type;
+          delete draft.snapshot;
+          delete draft.removed;
         }
 
         if (packDefaults.packPlatform && draft.platform === packDefaults.packPlatform) {

@@ -69,3 +69,41 @@ export const mapWireToResultType = (wire: {
 
   return removed ? 'differential' : 'differential_added_only';
 };
+
+/**
+ * Decodes a stored `{ snapshot, removed }` pair into a result type *only* when
+ * that pair represents a deliberate per-query choice, and returns `undefined`
+ * otherwise so the caller falls back to the pack-level default.
+ *
+ * This is deliberately narrower than {@link mapWireToResultType}, which is the
+ * faithful inverse of the wire encoding and is what the *display* path wants: a
+ * query storing `snapshot: true` should still render as Snapshot.
+ *
+ * The distinction exists because `snapshot: true, removed: false` is not
+ * evidence of a choice. Before pack-level defaults, the query flyout seeded
+ * exactly that pair into every newly created query and the serializer never
+ * stripped it, so effectively every pack query already on disk carries it.
+ * Treating it as an explicit override would mean a curator setting a pack-level
+ * result type saw it apply to nothing — the pack default would be outranked on
+ * every pre-existing query, with no way to tell from the UI why.
+ *
+ * `snapshot === false` is the opposite case: nothing ever wrote it implicitly,
+ * so it is a genuine differential query and must keep winning over the pack
+ * default (otherwise introducing a pack-level Snapshot default would silently
+ * convert real differential queries, changing what ships on the agent wire).
+ *
+ * Trade-off: a query a user deliberately set to Snapshot before V5 is
+ * indistinguishable from the seed, so it will follow a pack-level Differential
+ * default. That is accepted — the pack default is an explicit, visible action,
+ * and the per-query override toggle can restore Snapshot for that query.
+ */
+export const mapWireToExplicitResultType = (wire: {
+  snapshot?: boolean;
+  removed?: boolean;
+}): ResultType | undefined => {
+  if (wire.snapshot !== false) {
+    return undefined;
+  }
+
+  return mapWireToResultType(wire);
+};

@@ -29,13 +29,6 @@ const PackVersionFieldComponent = ({ euiFieldProps = {} }: PackVersionFieldProps
     defaultValue: [],
   });
 
-  const onCreateComboOption = useCallback(
-    (newValue: string) => {
-      onChange([newValue]);
-    },
-    [onChange]
-  );
-
   const onComboChange = useCallback(
     (options: EuiComboBoxOptionOption[]) => {
       onChange(options.map((option) => option.label));
@@ -79,7 +72,13 @@ const PackVersionFieldComponent = ({ euiFieldProps = {} }: PackVersionFieldProps
         })}
         options={ALL_OSQUERY_VERSIONS_OPTIONS}
         selectedOptions={selectedOptions}
-        onCreateOption={onCreateComboOption}
+        // No free-text entry, matching the per-query version field (which the
+        // query flyout deliberately passes `onCreateOption: undefined` for).
+        // The API schema is a bare string with no semver validation, so an
+        // arbitrary value like `latest` would persist here and then fan out
+        // onto every inheriting query's `version` on the Fleet wire, where
+        // osquery's version comparison cannot interpret it.
+        onCreateOption={undefined}
         onChange={onComboChange}
         fullWidth
         data-test-subj="pack-version-field"

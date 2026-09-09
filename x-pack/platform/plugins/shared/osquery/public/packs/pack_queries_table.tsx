@@ -31,6 +31,12 @@ export interface PackQueriesTableProps {
   selectedItems?: PackQueryFormData[];
   setSelectedItems?: (selection: PackQueryFormData[]) => void;
   packSchedule?: UsePackQueryFormProps['packSchedule'];
+  /**
+   * Pack-level min osquery version default. A query with no `version` of its
+   * own is gated at this floor on the agent, so the column has to fall back to
+   * it rather than claiming "All".
+   */
+  packMinOsqueryVersion?: string;
 }
 
 const DISABLED_ROW_STYLE: React.CSSProperties = { opacity: 0.6 };
@@ -74,6 +80,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   selectedItems,
   setSelectedItems,
   packSchedule,
+  packMinOsqueryVersion,
 }) => {
   const renderScheduleColumn = useCallback(
     (_: unknown, item: PackQueryFormData) => {
@@ -174,14 +181,29 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
     );
   }, []);
 
+  // A query with no `version` of its own inherits the pack-level floor, so
+  // rendering "All" for it would misreport what actually runs on the agent —
+  // the same class of display dishonesty this table's Schedule column fixes.
+  // The inherited value is marked as such so it stays distinguishable from a
+  // version the query sets itself.
   const renderVersionColumn = useCallback(
-    (version: string) =>
-      version
-        ? `${version}`
-        : i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionAllLabel', {
-            defaultMessage: 'All',
-          }),
-    []
+    (version: string) => {
+      if (version) {
+        return `${version}`;
+      }
+
+      if (packMinOsqueryVersion) {
+        return i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionInheritedLabel', {
+          defaultMessage: '{version} (pack default)',
+          values: { version: packMinOsqueryVersion },
+        });
+      }
+
+      return i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionAllLabel', {
+        defaultMessage: 'All',
+      });
+    },
+    [packMinOsqueryVersion]
   );
 
   const renderEnabledColumn = useCallback(

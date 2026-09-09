@@ -28,8 +28,11 @@ export const templatePacks = (packsData: PackSavedObject[]) => {
   const nonEmptyQueryPacks = filter(packsData, (pack) => !isEmpty(pack.queries));
 
   return nonEmptyQueryPacks.map((item) => {
-    const queries = item.queries ?? [];
-    const disabledQueryCount = queries.filter((q) => q.enabled === false).length;
+    // lodash `filter` rather than `Array.prototype.filter`: `queries` is typed
+    // as an array, but `packSchemaV1` still admits a record and `hasQueries()`
+    // branches on both shapes, so record-shaped packs exist in older data. A
+    // native `.filter` would throw and take the whole telemetry task down.
+    const disabledQueryCount = filter(item.queries ?? [], (q) => q.enabled === false).length;
 
     return pick(
       {

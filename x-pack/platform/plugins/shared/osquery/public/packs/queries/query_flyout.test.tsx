@@ -755,6 +755,44 @@ describe('QueryFlyout', () => {
       expect(saved.platform).toBe('windows');
     });
 
+    // Regression: with the toggle ON, the serializer deleted `result_type` when
+    // it matched the pack default but left the seeded `snapshot`/`removed` pair
+    // behind. The server decodes that pair as an explicit per-query override, so
+    // a later pack-level result-type change would never reach this query — the
+    // opposite of the inheritance this branch is supposed to preserve.
+    it('does not leak seeded snapshot/removed when overriding only another field', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q4'],
+        packResultType: 'differential',
+        packPlatform: 'linux',
+        defaultValue: {
+          id: 'q4',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          // Overrides the OS only, so the toggle is ON while the result type
+          // is still inherited from the pack.
+          platform: 'windows',
+        },
+      });
+
+      const toggle = screen.getByTestId('osquery-query-override-pack-defaults');
+      expect(toggle).toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      // The real override survives.
+      expect(saved.platform).toBe('windows');
+      // The inherited result type leaves nothing behind, in any encoding.
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+
     // Seeding the inherited result type also writes the `snapshot`/`removed`
     // booleans the field reads. Those must not leak to the wire for an
     // inheriting query — the pack default already fans out server-side.
