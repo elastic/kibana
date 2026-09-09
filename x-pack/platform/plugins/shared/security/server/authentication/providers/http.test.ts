@@ -22,6 +22,7 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
+import { ServiceAccountFakeRequests } from '../../service_accounts/fake_requests';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -471,6 +472,57 @@ describe('HTTPAuthenticationProvider', () => {
         expect.objectContaining({ credentials: 'essu_service_account_token' })
       );
       expectAuthenticateCall(client, request);
+    });
+
+    it('authenticates service-account loopback credentials before and after refresh', async () => {
+      const { uiam, client, logger } = mockOptionsWithUiam;
+      if (!uiam) throw new Error('Expected UIAM');
+      uiam.getInternalCallerAttestationHeaders.mockImplementation((credential) => ({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          'shared-secret',
+          credential
+        ),
+      }));
+      const mintToken = jest
+        .fn()
+        .mockResolvedValueOnce('essu_service_account_initial')
+        .mockResolvedValueOnce('essu_service_account_replacement');
+      const registry = new ServiceAccountFakeRequests(logger, mintToken, 600_000);
+      const fakeRequest = await registry.create({ serviceAccountId: 'service-account' });
+      const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClient.asCurrentUser.security.authenticate.mockResponse(mockAuthenticatedUser());
+      client.asScoped.mockReturnValue(scopedClient);
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+      });
+      const attestations: string[] = [];
+
+      for (const token of ['essu_service_account_initial', 'essu_service_account_replacement']) {
+        const credential = HTTPAuthorizationHeader.parseFromRequest(fakeRequest);
+        if (!credential) throw new Error('Expected service-account credential');
+        expect(credential.credentials).toBe(token);
+        // Loopback consumers derive these headers at send time, separately from authorization.
+        const headers = uiam.getInternalCallerAttestationHeaders(credential);
+        attestations.push(headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]);
+        const { authorization } = fakeRequest.headers;
+        if (typeof authorization !== 'string') throw new Error('Expected authorization header');
+        const request = httpServerMock.createKibanaRequest({
+          headers: { authorization, ...headers },
+          routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+        });
+        const result = await provider.authenticate(request);
+        expect(result.succeeded()).toBe(true);
+        expect(result.authHeaders).toEqual({ authorization: `Bearer ${token}` });
+        expect(client.asScoped).toHaveBeenLastCalledWith(request);
+        if (token === 'essu_service_account_initial') {
+          await registry.ensureFreshToken(fakeRequest, 0);
+        }
+      }
+
+      expect(attestations[0]).not.toBe(attestations[1]);
+      expect(mintToken).toHaveBeenCalledTimes(2);
+      expect(uiam.exchangeOAuthToken).not.toHaveBeenCalled();
+      expect(scopedClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(2);
     });
 
     it.each([undefined, '', 'short', 'false-attestation', ['valid-attestation']])(
