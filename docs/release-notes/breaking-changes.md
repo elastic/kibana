@@ -41,17 +41,6 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.6.0 [kibana-9.6.0-breaking-changes]
 
-$$$kibana-275716$$$
-::::{dropdown} Detection Engine rule response-action payloads now enforce nested size limits
-**Details**<br> Create, update, patch, preview, and import for Detection Engine rules now validate nested `response_actions` fields through one shared generated schema. New bounds include Osquery SQL and ECS mapping values at 30,000 characters, Osquery and run-script IDs at 256 characters, Osquery query metadata at 256 characters, run-script input at 8,192 characters, ECS mapping fields at 2,000 characters, and Endpoint action comments at 30,000 characters. The top-level `response_actions` array is not capped.
-
-**Impact**<br> Requests that exceed these nested string limits are rejected. Stored-rule execution and validated response reads use the same bounded schema, so stored values over these limits can fail those conversions. Legacy Detection Engine find and export helpers that bypass response-action parsing are not covered by this validation.
-
-**Action**<br> Keep rule response-action string values within the documented limits before create, update, patch, preview, or import. If a stored rule exceeds a limit, reduce the stored values before using paths that validate response actions.
-
-View [#275716]({{kib-pull}}275716).
-::::
-
 $$$kibana-285645$$$
 ::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
 **Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
