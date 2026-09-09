@@ -10,15 +10,12 @@
 export class SetMap<Key, Value> {
   private readonly map = new Map<Key, Set<Value>>();
 
-  add(key: Key, value: Value): boolean {
+  add(key: Key, value: Value) {
     const group = this.map.get(key);
     if (!group) {
       this.map.set(key, new Set([value]));
-      return true;
     } else {
-      const size = group.size;
       group.add(value);
-      return group.size !== size;
     }
   }
 
