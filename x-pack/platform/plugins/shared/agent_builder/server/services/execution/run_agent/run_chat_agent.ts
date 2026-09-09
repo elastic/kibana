@@ -504,6 +504,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger.error(`After-round hooks failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
+  await context.hooks.run(HookLifecycle.afterAgent, {
+    request,
+    abortSignal,
+    agentId,
+    conversationId: conversationId ?? undefined,
+  });
+
   return {
     round,
   };

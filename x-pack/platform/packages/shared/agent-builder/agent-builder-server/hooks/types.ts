@@ -44,11 +44,16 @@ export interface AfterRoundHookContext extends AgentHookContextBase {
   agentConfiguration: AgentConfiguration;
 }
 
+export interface AfterAgentHookContext extends AgentHookContextBase {
+  conversationId?: string;
+}
+
 export interface HookContextByLifecycle {
   [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
   [HookLifecycle.afterRound]: AfterRoundHookContext;
+  [HookLifecycle.afterAgent]: AfterAgentHookContext;
 }
 
 export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextByLifecycle[E];
@@ -67,6 +72,7 @@ export interface HookHandlerResultByLifecycle {
     toolReturn?: RunToolReturn;
   };
   [HookLifecycle.afterRound]: Record<string, never>;
+  [HookLifecycle.afterAgent]: Record<string, never>;
 }
 
 export type HookHandlerResult<E extends HookLifecycle = HookLifecycle> =

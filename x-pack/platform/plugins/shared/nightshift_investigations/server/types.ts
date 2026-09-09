@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -37,6 +38,7 @@ export interface NightshiftInvestigationsSetupDeps {
 }
 
 export interface NightshiftInvestigationsStartDeps {
+  actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
