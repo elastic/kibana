@@ -23,7 +23,10 @@ import type {
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -53,6 +56,11 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning effort level forwarded to the LLM (`reasoning.effort`).
+   * Ignored when the fast model is selected (see {@link ModelProvider#selectModel}).
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
 }
 

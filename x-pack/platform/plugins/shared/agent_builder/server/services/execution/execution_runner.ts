@@ -180,6 +180,7 @@ const handleConversationExecution = async ({
     action,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     accessControl,
     subagentCreation,
     readOnly,
@@ -252,6 +253,7 @@ const handleConversationExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     browserApiTools,
     configurationOverrides,
@@ -586,7 +588,8 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
+    execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -606,6 +609,7 @@ const handleStandaloneExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,

@@ -6,7 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 import type {
   ChatAgentEvent,
   AgentExecutionMode,
@@ -73,6 +76,11 @@ export interface RunAgentParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning effort level forwarded to the LLM (`reasoning.effort`).
+   * Ignored when the fast model is selected.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
   /**
    * Optional CPS project routing expression to scope this run's search tools to a specific projects
    */

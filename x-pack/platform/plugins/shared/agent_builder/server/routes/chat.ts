@@ -288,6 +288,25 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
+  reasoning_level: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('none'),
+        schema.literal('minimal'),
+        schema.literal('low'),
+        schema.literal('medium'),
+        schema.literal('high'),
+        schema.literal('xhigh'),
+      ],
+      {
+        meta: {
+          availability: { stability: 'tech_preview', since: '9.6.0' },
+          description:
+            'Reasoning effort level forwarded to the LLM as `reasoning.effort`. Ignored when the fast model is selected. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model.',
+        },
+      }
+    )
+  ),
   _execution_mode: schema.maybe(
     schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
       meta: {

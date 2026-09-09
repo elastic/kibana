@@ -367,6 +367,113 @@ describe('createModelProvider', () => {
     });
   });
 
+  describe('reasoningLevel', () => {
+    it('omits reasoning from chatModelOptions when reasoningLevel is not set', async () => {
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: expect.not.objectContaining({ reasoning: expect.anything() }),
+        })
+      );
+    });
+
+    it('bakes reasoning.effort into the chat model when reasoningLevel is set', async () => {
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: expect.objectContaining({ reasoning: { effort: 'high' } }),
+        })
+      );
+    });
+
+    it('does not apply reasoning when the fast connector is resolved', async () => {
+      const deps = setupDeps({
+        fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
+      });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: 'fast-connector',
+          chatModelOptions: expect.not.objectContaining({ reasoning: expect.anything() }),
+        })
+      );
+    });
+
+    it('does not apply reasoning when the fast model falls back to the default connector', async () => {
+      // No dedicated fast endpoint → fastConnectorId === defaultConnectorId, so the fast path
+      // must still skip reasoning even though the connector id matches the default.
+      const deps = setupDeps({ fastEndpoints: [] });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: 'default-connector',
+          chatModelOptions: expect.not.objectContaining({ reasoning: expect.anything() }),
+        })
+      );
+    });
+
+    it('wraps chatComplete on the inference client to inject reasoning by default', async () => {
+      const deps = setupDeps();
+      const chatCompleteMock = jest.fn().mockResolvedValue(undefined);
+      const boundClient = {
+        chatComplete: chatCompleteMock,
+        bindTo: jest.fn(),
+        getConnectorById: jest.fn().mockResolvedValue(createConnectorMock()),
+      };
+      deps.inference.getChatModel.mockResolvedValue({} as any);
+      deps.inference.getClient.mockReturnValue(boundClient as any);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'medium' });
+      const model = await provider.getDefaultModel();
+      await model.inferenceClient.chatComplete({ messages: [] } as any);
+
+      expect(chatCompleteMock).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'medium' } })
+      );
+    });
+
+    it('lets a caller-supplied reasoning override the injected default', async () => {
+      const deps = setupDeps();
+      const chatCompleteMock = jest.fn().mockResolvedValue(undefined);
+      const boundClient = {
+        chatComplete: chatCompleteMock,
+        bindTo: jest.fn(),
+        getConnectorById: jest.fn().mockResolvedValue(createConnectorMock()),
+      };
+      deps.inference.getChatModel.mockResolvedValue({} as any);
+      deps.inference.getClient.mockReturnValue(boundClient as any);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'medium' });
+      const model = await provider.getDefaultModel();
+      await model.inferenceClient.chatComplete({
+        messages: [],
+        reasoning: { effort: 'none' },
+      } as any);
+
+      expect(chatCompleteMock).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'none' } })
+      );
+    });
+  });
+
   describe('getUsageStats', () => {
     it('returns no calls before any completion event', () => {
       const deps = setupDeps();

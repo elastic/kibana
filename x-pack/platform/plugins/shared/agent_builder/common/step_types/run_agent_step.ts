@@ -310,6 +310,16 @@ export const ConfigSchema = z
       .max(32)
       .optional()
       .describe('Maximum response size for this workflow step.'),
+    /**
+     * Reasoning effort level forwarded to the LLM as `reasoning.effort` for this step's calls.
+     * Ignored when the fast model is selected. Support depends on the underlying model.
+     */
+    'reasoning-level': z
+      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+      .optional()
+      .describe(
+        "Reasoning effort level forwarded to the LLM for this step's calls. Ignored when the fast model is selected. Support depends on the underlying model."
+      ),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
