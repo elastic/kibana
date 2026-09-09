@@ -225,20 +225,24 @@ export class InferencePlugin
       effectiveWorkerConfig,
       this.logger.get('regex_worker')
     );
-    this.piiRegexWorker = new PiiRegexWorkerService(
-      effectiveWorkerConfig,
-      this.logger.get('pii_regex_worker')
-    );
+    if (this.config.anonymization.workflowDriven) {
+      this.piiRegexWorker = new PiiRegexWorkerService(
+        effectiveWorkerConfig,
+        this.logger.get('pii_regex_worker')
+      );
+    }
 
-    const workflowAnonymization = resolveWorkflowAnonymizationOptions({
-      enabled: this.config.anonymization.workflowDriven,
-      failureMode: this.config.anonymization.failureMode,
-      preLLMTimeoutMs: this.config.anonymization.preLLMTimeoutMs,
-      encryptionKey: this.config.anonymization.encryptionKey,
-      provider: this.workflowAnonymizationProvider,
-      piiRegexWorker: this.piiRegexWorker,
-      logger: this.logger,
-    });
+    const workflowAnonymization = this.piiRegexWorker
+      ? resolveWorkflowAnonymizationOptions({
+          enabled: this.config.anonymization.workflowDriven,
+          failureMode: this.config.anonymization.failureMode,
+          preLLMTimeoutMs: this.config.anonymization.preLLMTimeoutMs,
+          encryptionKey: this.config.anonymization.encryptionKey,
+          provider: this.workflowAnonymizationProvider,
+          piiRegexWorker: this.piiRegexWorker,
+          logger: this.logger,
+        })
+      : undefined;
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const namespace =
