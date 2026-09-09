@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/dev/yarn/extract_version_dependencies').runCli();
+require('@kbn/dev/shared_deps_fingerprint/shared_deps_fingerprint').runCli();
