@@ -1,0 +1,113 @@
+version: "1"
+name: Detection pickup coverage KIs
+description: >
+  POC Detection Watch adapter. Polls pending security.coverage KIs, opens an
+  investigation-templated conversation (same pattern as Detection rule tuning),
+  then fans out to the existing rule-creation worker. Marks the KI processed so
+  the next sweep does not re-dispatch.
+enabled: true
+tags:
+  - security
+  - coverage-ki-poc
+settings:
+  concurrency:
+    key: detection-pickup-coverage-kis
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        ai_index_id:
+          type: string
+          default: security-investigations
+          description: Context Engine AI index id whose backing index is polled.
+        max_kis:
+          type: number
+          default: 10
+          description: Max pending coverage KIs to dispatch in one sweep.
+      additionalProperties: false
+outputs:
+  - name: dispatched
+    type: number
+consts:
+  no_rows: []
+steps:
+  - name: find_pending_coverage_kis
+    type: elasticsearch.search
+    with:
+      index: "ai-index-idx-{{ inputs.ai_index_id }}"
+      size: "${{ inputs.max_kis }}"
+      query:
+        bool:
+          filter:
+            - term:
+                type: security.coverage
+            - term:
+                tags: status:pending
+    on-failure:
+      continue: true
+
+  - name: dispatch_each_ki
+    type: foreach
+    foreach: "${{ steps.find_pending_coverage_kis.output.hits.hits | default: consts.no_rows }}"
+    steps:
+      - name: create_investigation
+        type: ai.conversation.create
+        with:
+          title: "Detection coverage: {{ foreach.item._source.title }}"
+          access_control:
+            access_mode: public
+          template_id: investigation
+          metadata:
+            status: open
+            description: "Pickup of coverage KI {{ foreach.item._id }} from Hunt."
+            summary: "{{ foreach.item._source.content }}"
+            investigation_workflow_id: "{{ execution.id }}"
+        on-failure:
+          continue: true
+
+      - name: start_rule_creation
+        type: workflow.executeAsync
+        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        with:
+          workflow-id: system-security-rule-creation
+          inputs:
+            technique: "{{ foreach.item._source.attributes.technique }}"
+            gap_description: "{{ foreach.item._source.title }}"
+            evidence: "{{ foreach.item._source.content }}"
+        on-failure:
+          continue: true
+
+      - name: mark_ki_processed
+        type: context-engine.updateKi
+        if: "${{ steps.create_investigation.output.conversation_id != null }}"
+        with:
+          ai_index_id: "{{ inputs.ai_index_id }}"
+          ki_id: "{{ foreach.item._id }}"
+          ki:
+            tags:
+              - consumer:detection
+              - status:processed
+              - watch:hunt
+            attributes:
+              status: processed
+              subject: "{{ foreach.item._source.attributes.subject }}"
+              technique: "{{ foreach.item._source.attributes.technique }}"
+              investigation_id: "{{ foreach.item._source.attributes.investigation_id }}"
+              detection_investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              watch_id: hunt
+              producer: hunt.write_coverage_ki.v1
+        on-failure:
+          continue: true
+
+  - name: count_dispatched
+    type: data.set
+    with:
+      dispatched: "${{ steps.find_pending_coverage_kis.output.hits.total.value | default: 0 }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      dispatched: "${{ steps.count_dispatched.output.dispatched }}"
