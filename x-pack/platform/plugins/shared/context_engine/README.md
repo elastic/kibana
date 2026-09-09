@@ -14,6 +14,7 @@ stream. AI index records are stored in a hidden Kibana system index
 | `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
 | `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
 | `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI indices        |
+| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI index for querying    |
 | `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
@@ -64,11 +65,51 @@ The query is otherwise a pass-through: it decides which indices it reads
 Elasticsearch index privileges bound what it can reach. Elasticsearch 4xx
 errors (bad ES|QL, missing index privilege) are returned with their status.
 
+## Describing AI indices
+
+`GET /api/context_engine/ai_index/{id}/_describe` is the step before writing a
+query. It returns `{ response: string }`: a free-form text context block meant
+to be handed to an agent as-is, not parsed.
+
+```
+AI index: sales-knowledge
+Curated sales knowledge.
+Query with ES|QL against: ai-index-idx-sales-knowledge
+
+Fields
+@timestamp: date, searchable, aggregatable
+content.semantic: semantic_text, searchable
+title: text, searchable
+type: keyword, searchable, aggregatable
+
+Semantic fields
+content.semantic
+```
+
+- The `Query with ES|QL against` line is `dest.value`, the string to put after
+  `FROM`.
+- `Fields` lists every mapped field, mapping-defined runtime fields included
+  (`path: type`, then `searchable` and/or `aggregatable` when true), one per
+  line, sorted by path and capped at 500;
+  the heading becomes `Fields (showing 500 of N)` when capped. Types come from
+  `_mapping`; `searchable`/`aggregatable` from `_field_caps`. A path mapped to
+  different types across the matched indices is reported as `conflict`.
+- `Semantic fields` lists the searchable `semantic_text` fields among those
+  shown, detected from the mapping type. Omitted when there are none.
+
+Field metadata is read as the current user. 404 when the AI index is not
+registered; Elasticsearch 4xx (missing index privilege) is returned with its
+status. Each `_mapping` / `_field_caps` response is capped at 20 MB before the
+field cap applies; a target broad enough to exceed it returns 400.
+
 ### Privileges
 
-`contextEngine:read` grants the route; it grants **no** Elasticsearch index
-privileges. Callers also need `read` on every backing index they query
-(`ai-index-*`), or Elasticsearch returns 403.
+`contextEngine:read` grants the routes; it grants **no** Elasticsearch index
+privileges. Callers also need, on every backing index (`ai-index-*`):
+
+- `read` to query, or Elasticsearch returns 403;
+- `view_index_metadata` to describe, which `_mapping` and `_field_caps`
+  require.
 
 Kibana adds only the space filter. For the built-in SML index
 (`ai-index-idx-sml-data`), Elasticsearch additionally applies implicit
