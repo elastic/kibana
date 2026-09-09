@@ -43,7 +43,7 @@ export class WorkflowRuntimeGraph {
     return graphlib.alg.topsort(this.internalGraph);
   }
 
-  public insertSyntheticScope(ownerNodeId: string, stepId: string, nodeType?: string): string {
+  public insertSyntheticScope(ownerNodeId: string, stepId: string, stepType?: string): string {
     const ownerExitNodeId = ownerNodeId.replace(/^enter/, 'exit');
     const ownerExitInEdges = this.internalGraph.inEdges(ownerExitNodeId) ?? [];
     const lastBeforeOwnerExit = ownerExitInEdges[0];
@@ -60,7 +60,7 @@ export class WorkflowRuntimeGraph {
       throw new Error(`Synthetic scope ${stepId} is already in the graph`);
     }
 
-    const { enterType, exitType } = syntheticPairTypes(nodeType, stepId);
+    const { enterType, exitType } = syntheticPairTypes(stepType, stepId);
 
     const enterSyntheticNode = {
       id: enterSyntheticId,

@@ -56,7 +56,9 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private executing = true;
   private stackFrames: StackFrame[];
   private workflowError: Error | undefined;
-  private synthetic: { currentNodeId: string; stepId: string; nodeType: string } | undefined;
+  private pendingSynthetic:
+    | { currentNodeId: string; stepId: string; stepType?: string }
+    | undefined;
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.workflowGraph = init.workflowExecutionGraph;
@@ -113,13 +115,13 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Used after a normal `runNode` cycle and after each error-bubbling step once `navigateToNode` has set `nextNodeId`.
    */
   commitPendingNavigation(): void {
-    if (this.synthetic) {
+    if (this.pendingSynthetic) {
       this.nextNodeId = this.workflowGraph.insertSyntheticScope(
-        this.synthetic.currentNodeId,
-        this.synthetic.stepId,
-        this.synthetic.nodeType
+        this.pendingSynthetic.currentNodeId,
+        this.pendingSynthetic.stepId,
+        this.pendingSynthetic.stepType
       );
-      this.synthetic = undefined;
+      this.pendingSynthetic = undefined;
     }
 
     this.currentNodeId = this.nextNodeId;
@@ -158,22 +160,15 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     this.nextNodeId = this.nodeAfter(nodeId);
   }
 
-  public navigateToSynthetic(params: {
-    stepId: string;
-    nodeType: string;
-    nodeId: string;
-    scopeId?: string;
-    exitNodeId?: string;
-    stepType?: string;
-  }): void {
+  public navigateToSynthetic(params: { stepId: string; stepType?: string }): void {
     if (!this.currentNodeId) {
       throw new Error('Cannot insert a synthetic scope without a current node');
     }
 
-    this.synthetic = {
+    this.pendingSynthetic = {
       currentNodeId: this.currentNodeId,
       stepId: params.stepId,
-      nodeType: params.nodeType,
+      stepType: params.stepType,
     };
   }
 
