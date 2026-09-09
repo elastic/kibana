@@ -219,9 +219,11 @@ describe('visualizeEmbeddable', () => {
 
     test('esql$ contains the query when the vis type reports one', async () => {
       const api = await buildEmbeddableWithVisType('vega-esql');
-      expect(api.esql$.getValue()).toEqual([{
-        esql: 'FROM logs-* | WHERE os == ?fizzbuzz',
-      }]);
+      expect(api.esql$.getValue()).toEqual([
+        {
+          esql: 'FROM logs-* | WHERE os == ?fizzbuzz',
+        },
+      ]);
     });
 
     test('esql$ is empty when the vis type reports no ES|QL query', async () => {
@@ -234,16 +236,20 @@ describe('visualizeEmbeddable', () => {
         'vega-esql',
         'FROM logs-* | WHERE os == ?fizzbuzz'
       );
-      expect(api.esql$.getValue()).toEqual([{
-        esql: 'FROM logs-* | WHERE os == ?fizzbuzz',
-      }]);
+      expect(api.esql$.getValue()).toEqual([
+        {
+          esql: 'FROM logs-* | WHERE os == ?fizzbuzz',
+        },
+      ]);
 
       api.updateVis({ params: { spec: 'FROM logs-* | WHERE color == ?color' } });
 
       await waitFor(() => {
-        expect(api.esql$.getValue()).toEqual([{
-          esql: 'FROM logs-* | WHERE color == ?color',
-        }]);
+        expect(api.esql$.getValue()).toEqual([
+          {
+            esql: 'FROM logs-* | WHERE color == ?color',
+          },
+        ]);
       });
     });
   });

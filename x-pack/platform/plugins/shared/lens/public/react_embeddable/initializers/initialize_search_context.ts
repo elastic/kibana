@@ -84,9 +84,7 @@ export function initializeSearchContext(
 
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
-  const esql$ = new BehaviorSubject<AggregateQuery[]>(
-    getTextBasedLayerQueries(attributes)
-  );
+  const esql$ = new BehaviorSubject<AggregateQuery[]>(getTextBasedLayerQueries(attributes));
 
   const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
     getProjectRoutingOverrides(esql$.getValue()[0])

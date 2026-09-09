@@ -28,7 +28,7 @@ export const panelIsRelatedByEsqlVariable = ({
     siblingDependentObservableNames: ['esql$'],
     isRelated: (sibling, [selfESQLVariable], [siblingEsql]) => {
       if (!apiPublishesEsql(sibling)) return false;
-      return (siblingEsql as AggregateQuery[] ?? []).some((q) =>
+      return ((siblingEsql as AggregateQuery[]) ?? []).some((q) =>
         getESQLQueryVariables(q.esql).includes(selfESQLVariable.key)
       );
     },

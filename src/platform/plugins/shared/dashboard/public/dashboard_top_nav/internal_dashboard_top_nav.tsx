@@ -29,10 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import {
-  useHasEsqlPanel,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useHasEsqlPanel, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';

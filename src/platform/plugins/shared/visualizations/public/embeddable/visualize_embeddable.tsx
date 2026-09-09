@@ -98,9 +98,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
     );
 
     const initialEsqlQuery = initialVisInstance.type.getEsqlQuery?.(initialVisInstance.params);
-    const esql$ = new BehaviorSubject<AggregateQuery[]>(
-      initialEsqlQuery ? [initialEsqlQuery] : []
-    );
+    const esql$ = new BehaviorSubject<AggregateQuery[]>(initialEsqlQuery ? [initialEsqlQuery] : []);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
     const getUsedDataViews = async (visInstance: Vis) => {
