@@ -163,6 +163,25 @@ describe('AuthenticationService', () => {
       ).toHaveBeenCalledWith(expect.any(Function));
     });
 
+    it('does not refresh a fake request before authentication is initialized', async () => {
+      service.setup(mockSetupAuthenticationParams);
+      const [handler] =
+        mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0];
+      const serviceAccounts = serviceAccountsServiceMock.createStart();
+      mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+      const toolkit = { notHandled: jest.fn(), retry: jest.fn() };
+      const error = new errors.ResponseError(
+        securityMock.createApiResponse({
+          statusCode: 401,
+          body: { error: { reason: 'token expired' } },
+        })
+      ) as UnauthorizedError;
+      await handler({ error, request: httpServerMock.createFakeKibanaRequest({}) }, toolkit);
+      expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+      expect(toolkit.retry).not.toHaveBeenCalled();
+      expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+    });
+
     it('properly registers onPreResponse handler', () => {
       service.setup(mockSetupAuthenticationParams);
 
@@ -426,7 +445,10 @@ describe('AuthenticationService', () => {
       describe('service-account-bound fake requests', () => {
         let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart>;
         const fakeRequestError = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { caused_by: { authentication_error_code: '0x7E0116' } } },
+          })
         ) as UnauthorizedError;
 
         beforeEach(() => {
@@ -500,7 +522,7 @@ describe('AuthenticationService', () => {
           expect(reauthenticate).not.toHaveBeenCalled();
         });
 
-        it('attempts the replacement for any 401, not just expired-token errors', async () => {
+        it('does not attempt replacement for non-expiry 401 errors', async () => {
           serviceAccounts.reauthenticateFakeRequest.mockResolvedValue({
             authorization: 'Bearer essu_fresh_token',
           });
@@ -517,9 +539,61 @@ describe('AuthenticationService', () => {
             mockUnauthorizedErrorToolkit
           );
 
-          expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
-            authHeaders: { authorization: 'Bearer essu_fresh_token' },
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        });
+
+        it.each(['isLicenseAvailable', 'isEnabled'] as const)(
+          'does not refresh when %s is false',
+          async (method) => {
+            mockSetupAuthenticationParams.license[method].mockReturnValue(false);
+            await unauthorizedErrorHandler(
+              { error: fakeRequestError, request: httpServerMock.createFakeKibanaRequest({}) },
+              mockUnauthorizedErrorToolkit
+            );
+            expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+            expect(reauthenticate).not.toHaveBeenCalled();
+            expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+            expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+          }
+        );
+
+        it('recognizes the native Elasticsearch token expiry reason', async () => {
+          serviceAccounts.reauthenticateFakeRequest.mockResolvedValue({
+            authorization: 'Bearer replacement',
           });
+          const error = new errors.ResponseError(
+            securityMock.createApiResponse({
+              statusCode: 401,
+              body: { error: { reason: 'token expired' } },
+            })
+          ) as UnauthorizedError;
+          await unauthorizedErrorHandler(
+            { error, request: httpServerMock.createFakeKibanaRequest({}) },
+            mockUnauthorizedErrorToolkit
+          );
+          expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+            authHeaders: { authorization: 'Bearer replacement' },
+          });
+          expect(reauthenticate).not.toHaveBeenCalled();
+        });
+
+        it.each([
+          {},
+          { error: { caused_by: { authentication_error_code: '0x3B8626' } } },
+          { error: { caused_by: { authentication_error_code: '0xEDF789' } } },
+        ])('does not mint for an unrecognized or rejected credential: %j', async (body) => {
+          const error = new errors.ResponseError(
+            securityMock.createApiResponse({ statusCode: 401, body })
+          ) as UnauthorizedError;
+          await unauthorizedErrorHandler(
+            { error, request: httpServerMock.createFakeKibanaRequest({}) },
+            mockUnauthorizedErrorToolkit
+          );
+          expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          expect(reauthenticate).not.toHaveBeenCalled();
         });
       });
 

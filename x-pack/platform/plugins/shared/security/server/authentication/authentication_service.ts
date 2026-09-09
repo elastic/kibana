@@ -307,18 +307,6 @@ export class AuthenticationService {
     });
 
     elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
-      // Fake requests never carry a session, so the re-authentication machinery below cannot help
-      // them (and its BWC header-scrubbing must never touch them). The one recoverable case is a
-      // request bound to a service account, whose credential Kibana minted and can mint again;
-      // everything else — API-key fakes from task manager/alerting, external user-created
-      // credentials — is deliberately left to its owner.
-      if (request.isFakeRequest) {
-        const authHeaders = await getServiceAccounts()
-          ?.reauthenticateFakeRequest(request)
-          .catch(() => null);
-        return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
-      }
-
       if (!this.authenticator) {
         this.logger.error('Authentication sub-system is not fully initialized yet.');
         return toolkit.notHandled();
@@ -344,6 +332,18 @@ export class AuthenticationService {
       this.logger.debug(
         `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
       );
+
+      // Fake requests never carry a session, so the re-authentication machinery below cannot help
+      // them (and its BWC header-scrubbing must never touch them). The one recoverable case is a
+      // request bound to a service account, whose credential Kibana minted and can mint again;
+      // everything else — API-key fakes from task manager/alerting, external user-created
+      // credentials — is deliberately left to its owner.
+      if (request.isFakeRequest) {
+        const authHeaders = await getServiceAccounts()
+          ?.reauthenticateFakeRequest(request)
+          .catch(() => null);
+        return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+      }
 
       let authenticationResult;
       const originalHeaders = request.headers;

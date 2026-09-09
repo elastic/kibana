@@ -1227,7 +1227,32 @@ describe('UiamService', () => {
   });
 
   describe('#exchangeServiceAccountToken', () => {
-    it('authenticates with client authentication only, without a user credential', async () => {
+    const exchangeLogger = loggingSystemMock.createLogger();
+
+    beforeEach(() => {
+      jest.mocked(exchangeLogger.debug).mockClear();
+      jest.mocked(exchangeLogger.error).mockClear();
+      uiamService = new UiamService(
+        exchangeLogger,
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        {
+          kibanaServerResourceURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+          kibanaVersion: '9.0.0',
+        }
+      );
+    });
+
+    it('authenticates with mTLS without a shared secret or user credential', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ token: 'essu_token' }) });
 
       await expect(uiamService.exchangeServiceAccountToken('service-account-id')).resolves.toEqual({
@@ -1241,13 +1266,24 @@ describe('UiamService', () => {
           method: 'POST',
           headers: {
             'User-Agent': 'Kibana/9.0.0',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           },
           dispatcher: AGENT_MOCK,
         }
       );
 
+      expect(agentSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          connect: expect.objectContaining({
+            cert: 'mocked file content for /path/to/cert.pem',
+            key: 'mocked file content for /path/to/key.pem',
+          }),
+        })
+      );
+      expect(exchangeLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('service-account-id')
+      );
       const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
       expect(headers).not.toHaveProperty('Authorization');
       expect(headers).not.toHaveProperty('authorization');
     });
@@ -1285,11 +1321,17 @@ describe('UiamService', () => {
     });
 
     it('logs and rethrows transport errors', async () => {
-      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+      fetchSpy.mockRejectedValue(new Error('secret-credential'));
 
       await expect(
         uiamService.exchangeServiceAccountToken('service-account-id')
-      ).rejects.toThrowError('socket hang up');
+      ).rejects.toThrowError('secret-credential');
+      expect(exchangeLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('service-account-id')
+      );
+      for (const call of jest.mocked(exchangeLogger.error).mock.calls) {
+        expect(String(call[0])).not.toContain('secret-credential');
+      }
     });
   });
 

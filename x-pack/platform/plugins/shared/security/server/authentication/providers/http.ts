@@ -100,25 +100,11 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     if (
       this.options.uiam &&
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
-      isUiamCredential(authorizationHeader)
+      isUiamCredential(authorizationHeader) &&
+      request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH) &&
+      !this.hasVerifiedInternalCallerAttestation(request, authorizationHeader)
     ) {
-      if (request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)) {
-        return this.authenticateViaUiamOAuth(request, authorizationHeader);
-      }
-
-      // Trusted loopback callers (e.g. workloads running as a service account) legitimately
-      // present internal UIAM credentials on ordinary routes, and identify themselves with a
-      // verifiable internal-caller attestation. Only warn when that attestation is absent or
-      // fails verification — this gates log noise only; the security-relevant verification
-      // happens in the ES cluster client, which withholds the shared secret without it.
-      if (!this.hasVerifiedInternalCallerAttestation(request, authorizationHeader)) {
-        this.logger.warn(
-          `Detected UIAM OAuth token on a non-MCP endpoint: ` +
-            `${request.route.method.toUpperCase()} ${request.route.path}. ` +
-            `OAuth tokens are only accepted on routes tagged with "${ROUTE_TAG_ACCEPT_UIAM_OAUTH}". ` +
-            `This may indicate a misconfigured MCP client or token misuse.`
-        );
-      }
+      return this.authenticateViaUiamOAuth(request, authorizationHeader);
     }
 
     try {
@@ -180,27 +166,23 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     return null;
   }
 
-  /**
-   * Exchanges a UIAM OAuth access token for an ephemeral token via the UIAM service, verifies
-   * the audience, and resolves the user via Elasticsearch using the ephemeral token.
-   */
-  /**
-   * Whether the request carries an internal-caller attestation that verifies against the presented
-   * credential, marking it as coming from a trusted in-process loopback caller rather than an
-   * external client. Used to suppress log noise only: mere presence of the header is not enough,
-   * since anything else would let an external caller silence the misuse warning.
-   */
   private hasVerifiedInternalCallerAttestation(
     request: KibanaRequest,
     authorizationHeader: HTTPAuthorizationHeader
   ): boolean {
+    const { uiam } = this.options;
+    if (!uiam) {
+      return false;
+    }
+
+    // Verify the attestation against this credential before bypassing OAuth exchange.
     const presented = request.headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
     if (typeof presented !== 'string' || presented.length === 0) {
       return false;
     }
 
     const expected =
-      this.options.uiam!.getInternalCallerAttestationHeaders(authorizationHeader)[
+      uiam.getInternalCallerAttestationHeaders(authorizationHeader)[
         UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
       ];
     const presentedBuffer = Buffer.from(presented);
@@ -212,6 +194,10 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     );
   }
 
+  /**
+   * Exchanges a UIAM OAuth access token for an ephemeral token via the UIAM service, verifies
+   * the audience, and resolves the user via Elasticsearch using the ephemeral token.
+   */
   private async authenticateViaUiamOAuth(
     request: KibanaRequest,
     authorizationHeader: HTTPAuthorizationHeader

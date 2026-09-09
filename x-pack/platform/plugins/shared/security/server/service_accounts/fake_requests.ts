@@ -9,6 +9,8 @@ import type { FakeRawRequest, Headers, KibanaRequest, Logger } from '@kbn/core/s
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+import { ServiceAccountTokenExchangeError } from './token_exchange_error';
+
 /**
  * When the ES client reports a 401 for a service-account-bound fake request, a token minted within
  * this window is retried as-is instead of minting again: the failure most likely came from a
@@ -18,46 +20,27 @@ import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 export const SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS = 10_000;
 
 /**
- * After a mint fails (e.g. the service account was revoked), further mint attempts are suppressed
+ * After a transient mint failure, further mint attempts are suppressed
  * for this long so a hot caller loop cannot hammer UIAM with doomed exchange requests.
  */
 export const SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS = 5_000;
-
-/**
- * Default lease on a service account bound fake request: how long transparent credential
- * replacement stays available after minting the request. Without a lease, reactive re-minting
- * would turn UIAM's five-minute ephemeral token into a permanent credential — a request that
- * leaks out of its workload (stored on a singleton, captured in a closure) would keep working
- * until the service account itself is revoked. Once the lease expires, refresh fails closed and
- * a leaked request degrades to the remainder of its current token. Generous by design: it must
- * outlive a workload execution (task-timeout order of magnitude), not a token.
- *
- * This cap is the forward-compatible interim for the operation-binding model, where the lease
- * becomes an explicit execution bracket plus a binding-existence re-check on every mint.
- */
-export const SERVICE_ACCOUNT_REQUEST_MAX_LIFETIME_MS = 60 * 60 * 1000;
 
 export interface CreateServiceAccountFakeRequestParams {
   /** The ID of the service account the request should be bound to. */
   serviceAccountId: string;
   /** The space the request is scoped to. Defaults to the default space. */
   spaceId?: string;
-  /**
-   * How long transparent credential replacement stays available for this request. Defaults to
-   * {@link SERVICE_ACCOUNT_REQUEST_MAX_LIFETIME_MS}; size it to the expected workload duration.
-   */
-  maxLifetimeMs?: number;
 }
 
 interface ServiceAccountFakeRequestEntry {
   serviceAccountId: string;
   token: string;
   createdAt: number;
-  maxLifetimeMs: number;
   mintedAt: number;
   /** Single-flight mint: concurrent refreshes await the same exchange instead of stampeding UIAM. */
   inflight?: Promise<string>;
-  lastFailedMintAt?: number;
+  retryAt?: number;
+  nonRetryableError?: Error;
 }
 
 /**
@@ -87,13 +70,13 @@ export class ServiceAccountFakeRequests {
 
   constructor(
     private readonly logger: Logger,
-    private readonly mintToken: (serviceAccountId: string) => Promise<string>
+    private readonly mintToken: (serviceAccountId: string) => Promise<string>,
+    private readonly requestLifetimeMs: number
   ) {}
 
   async create({
     serviceAccountId,
     spaceId,
-    maxLifetimeMs = SERVICE_ACCOUNT_REQUEST_MAX_LIFETIME_MS,
   }: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
     const token = await this.mintToken(serviceAccountId);
 
@@ -115,11 +98,10 @@ export class ServiceAccountFakeRequests {
       serviceAccountId,
       token,
       createdAt: now,
-      maxLifetimeMs,
       mintedAt: now,
     });
 
-    this.logger.debug('Created a service account bound fake request');
+    this.logger.debug(`Created a fake request bound to service account ${serviceAccountId}`);
     return request;
   }
 
@@ -140,42 +122,56 @@ export class ServiceAccountFakeRequests {
       throw new Error('The provided request is not bound to a service account.');
     }
 
-    // The lease fails closed: past it, the request rides out its current token and nothing more.
-    if (Date.now() - entry.createdAt > entry.maxLifetimeMs) {
-      throw new Error(
-        'The lease on this service account bound request has expired; refusing to mint a replacement credential.'
-      );
+    if (entry.nonRetryableError) {
+      throw entry.nonRetryableError;
     }
+
+    this.ensureWithinLifetime(entry);
 
     if (entry.inflight) {
       return await entry.inflight;
     }
 
     const now = Date.now();
-    if (now - entry.mintedAt < maxAgeMs) {
-      return entry.token;
-    }
-
-    if (
-      entry.lastFailedMintAt !== undefined &&
-      now - entry.lastFailedMintAt < SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS
-    ) {
+    if (entry.retryAt !== undefined && now < entry.retryAt) {
       throw new Error(
         'A recent attempt to mint a service account token failed; refusing to retry yet.'
       );
     }
 
+    if (now - entry.mintedAt < maxAgeMs) {
+      return entry.token;
+    }
+
     entry.inflight = this.mintToken(entry.serviceAccountId)
       .then((token) => {
+        this.ensureWithinLifetime(entry);
+        // Registry-owned fake requests share mutable raw headers, so subsequent scoped clients
+        // observe this replacement despite KibanaRequest exposing the headers as readonly.
         (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
         entry.token = token;
         entry.mintedAt = Date.now();
-        entry.lastFailedMintAt = undefined;
-        this.logger.debug('Replaced the token of a service account bound fake request');
+        entry.retryAt = undefined;
+        this.logger.debug(
+          `Replaced the token of a fake request bound to service account ${entry.serviceAccountId}`
+        );
         return token;
       })
       .catch((err) => {
-        entry.lastFailedMintAt = Date.now();
+        if (err instanceof ServiceAccountTokenExchangeError && err.retryable) {
+          entry.retryAt =
+            Date.now() + Math.max(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS, err.retryAfterMs);
+        } else {
+          entry.nonRetryableError =
+            err instanceof Error
+              ? err
+              : new Error('Service account token exchange failed.', { cause: err });
+        }
+        this.logger.warn(
+          `Failed to replace the token of a fake request bound to service account ${
+            entry.serviceAccountId
+          } (${entry.nonRetryableError ? 'terminal' : 'retryable'} failure)`
+        );
         throw err;
       })
       .finally(() => {
@@ -183,5 +179,18 @@ export class ServiceAccountFakeRequests {
       });
 
     return await entry.inflight;
+  }
+
+  private ensureWithinLifetime(entry: ServiceAccountFakeRequestEntry): void {
+    // Expiry stops replacement; an already-issued token retains its upstream expiration.
+    if (Date.now() - entry.createdAt >= this.requestLifetimeMs) {
+      this.logger.debug(
+        `Refresh lifetime expired for a fake request bound to service account ${entry.serviceAccountId}`
+      );
+      entry.nonRetryableError = new Error(
+        'The lease on this service account bound request has expired; refusing to mint a replacement credential.'
+      );
+      throw entry.nonRetryableError;
+    }
   }
 }

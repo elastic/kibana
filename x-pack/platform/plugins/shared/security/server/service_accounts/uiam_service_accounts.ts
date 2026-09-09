@@ -16,6 +16,7 @@ import { buildAssumableBy } from './assumable_by';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
+import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { CloudProjectContext, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import {
@@ -66,8 +67,13 @@ const exchangeTokenResponseSchema = z.object({
   token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
 });
 
+const exchangeErrorResponseSchema = z.object({
+  error: z.object({ code: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH) }),
+});
+
 export interface UiamServiceAccountsOptions {
   logger: Logger;
+  requestLifetimeMs: number;
   license: SecurityLicense;
   uiam: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
@@ -86,6 +92,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   constructor({
     logger,
+    requestLifetimeMs,
     license,
     uiam,
     checkPrivilegesWithRequest,
@@ -98,10 +105,14 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.cloudProjectContext = cloudProjectContext;
     this.getCurrentUser = getCurrentUser;
-    this.fakeRequests = new ServiceAccountFakeRequests(logger, async (serviceAccountId) => {
-      const { token } = await this.exchangeToken(serviceAccountId);
-      return token;
-    });
+    this.fakeRequests = new ServiceAccountFakeRequests(
+      logger,
+      async (serviceAccountId) => {
+        const { token } = await this.exchangeToken(serviceAccountId);
+        return token;
+      },
+      requestLifetimeMs
+    );
   }
 
   async create(
@@ -170,24 +181,34 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    this.logger.debug('Attempting to exchange a service account for an ephemeral token');
-
+    this.logger.debug(
+      `Attempting to exchange service account ${serviceAccountId} for an ephemeral token`
+    );
+    let result: { token: string };
     try {
-      const result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
-
-      const parsed = exchangeTokenResponseSchema.safeParse(result);
-      if (!parsed.success) {
-        this.logger.error(
-          `Token exchange payload from UIAM failed validation: ${parsed.error.message}`
-        );
-        throw new Error(`Error occured during service account token exchange.`);
-      }
-
-      return parsed.data;
+      result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
     } catch (e) {
-      this.logger.error(`Failed to exchange service account token: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      const cause =
+        e instanceof Error ? e : new Error('Unknown token exchange failure.', { cause: e });
+      const retryDelay = getExchangeRetryDelay(cause);
+      // Upstream messages can contain credentials; retain the cause without logging its contents.
+      this.logger.error(
+        `Failed to exchange token for service account ${serviceAccountId} (${
+          retryDelay === null ? 'not retryable' : 'retryable'
+        } failure): ${getDetailedErrorMessage(e)}`
+      );
+      throw new ServiceAccountTokenExchangeError(cause, retryDelay !== null, retryDelay ?? 0);
     }
+
+    const parsed = exchangeTokenResponseSchema.safeParse(result);
+    if (!parsed.success) {
+      this.logger.error(
+        `Token exchange payload from UIAM failed validation for service account ${serviceAccountId}`
+      );
+      throw new ServiceAccountTokenExchangeError(parsed.error, false);
+    }
+
+    return parsed.data;
   }
 
   async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
@@ -208,13 +229,64 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
       );
       return { authorization: `Bearer ${token}` };
-    } catch (e) {
-      this.logger.warn(
-        `Failed to replace the token of a service account bound fake request: ${getDetailedErrorMessage(
-          e
-        )}`
-      );
+    } catch {
       return null;
     }
   }
 }
+
+const TERMINAL_EXCHANGE_CODES = new Set([
+  '0xEDF789', // ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
+  '0x3B8626', // ORGANIZATION_SERVICE_ACCOUNT_REVOKED
+  '0x93B121', // AUTHZ_DENY
+]);
+const RETRYABLE_EXCHANGE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const RETRYABLE_TRANSPORT_CODES = new Set([
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'ECONNABORTED',
+  'EPIPE',
+  'EAI_AGAIN',
+  'ETIMEDOUT',
+  'ENETUNREACH',
+  'EHOSTUNREACH',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+  'UND_ERR_SOCKET',
+]);
+
+const getExchangeRetryDelay = (error: Error): number | null => {
+  if (Boom.isBoom(error)) {
+    const { statusCode, payload, headers } = error.output;
+    const parsed = exchangeErrorResponseSchema.safeParse(payload);
+    if (
+      (parsed.success && TERMINAL_EXCHANGE_CODES.has(parsed.data.error.code)) ||
+      !RETRYABLE_EXCHANGE_STATUSES.has(statusCode)
+    ) {
+      return null;
+    }
+
+    const retryAfter = headers['retry-after'];
+    if (typeof retryAfter !== 'string' || retryAfter.trim() === '') {
+      return 0;
+    }
+
+    const delay = /^\d+$/.test(retryAfter.trim())
+      ? Number(retryAfter) * 1000
+      : Date.parse(retryAfter) - Date.now();
+    return Number.isFinite(delay) && delay > 0 ? delay : 0;
+  }
+
+  // Native fetch wraps transport failures in a TypeError with the socket error as its cause.
+  return [error, error.cause].some(
+    (cause) =>
+      typeof cause === 'object' &&
+      cause !== null &&
+      'code' in cause &&
+      typeof cause.code === 'string' &&
+      RETRYABLE_TRANSPORT_CODES.has(cause.code)
+  )
+    ? 0
+    : null;
+};
