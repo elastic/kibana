@@ -43,4 +43,12 @@ describe('ES|QL response format registry', () => {
       'Unknown ES|QL response format: csv'
     );
   });
+
+  it('infers the format name union from the registry rather than widening to string', () => {
+    // Compile-time guard: a format declared `: EsqlResponseFormat` instead of
+    // `satisfies` would widen this union to `string` and fail to assign here.
+    const asNarrowName = (name: EsqlResponseFormatName): 'json' | 'arrow' => name;
+
+    expect(ESQL_RESPONSE_FORMAT_NAMES.map(asNarrowName)).toEqual(['json', 'arrow']);
+  });
 });

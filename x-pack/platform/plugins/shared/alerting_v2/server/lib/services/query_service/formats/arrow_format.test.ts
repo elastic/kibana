@@ -16,14 +16,7 @@ import {
   type MockArrowReader,
 } from '../../../test_utils';
 import { arrowFormat, decodeArrowBatch } from './arrow_format';
-
-const collect = async (batches: AsyncIterable<EsqlRow[]>): Promise<EsqlRow[][]> => {
-  const collected: EsqlRow[][] = [];
-  for await (const batch of batches) {
-    collected.push(batch);
-  }
-  return collected;
-};
+import { collectBatches } from './test_utils';
 
 describe('decodeArrowBatch', () => {
   const batchOf = (rows: EsqlRow[], timestampColumns: string[] = []) => ({
@@ -75,7 +68,7 @@ describe('arrowFormat', () => {
     mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ host: 'host-a' }] }]);
 
     const source = await arrowFormat.open(mockEsClient, request, options);
-    await collect(source.batches);
+    await collectBatches(source.batches);
 
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(request, options);
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
@@ -89,7 +82,18 @@ describe('arrowFormat', () => {
 
     const source = await arrowFormat.open(mockEsClient, request, options);
 
-    expect(await collect(source.batches)).toEqual([[{ host: 'host-a' }], [{ host: 'host-b' }]]);
+    expect(await collectBatches(source.batches)).toEqual([
+      [{ host: 'host-a' }],
+      [{ host: 'host-b' }],
+    ]);
+  });
+
+  it('yields one empty batch when the result set is empty, matching jsonFormat', async () => {
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 0, rows: [] }]);
+
+    const source = await arrowFormat.open(mockEsClient, request, options);
+
+    expect(await collectBatches(source.batches)).toEqual([[]]);
   });
 
   it('throws when the helper resolves without a reader', async () => {

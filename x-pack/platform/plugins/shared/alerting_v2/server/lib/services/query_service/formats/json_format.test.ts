@@ -7,18 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { EsqlRow } from '../row_coercion';
 import { NON_STREAMING_MAX_ROWS } from '../../../../config';
 import { createMockEsClient } from '../../../test_utils';
 import { jsonFormat } from './json_format';
-
-const collect = async (batches: AsyncIterable<EsqlRow[]>): Promise<EsqlRow[][]> => {
-  const collected: EsqlRow[][] = [];
-  for await (const batch of batches) {
-    collected.push(batch);
-  }
-  return collected;
-};
+import { collectBatches } from './test_utils';
 
 describe('jsonFormat', () => {
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
@@ -39,7 +31,7 @@ describe('jsonFormat', () => {
     mockEsClient.esql.query.mockResolvedValue({ columns: [], values: [] });
 
     const source = await jsonFormat.open(mockEsClient, request, options);
-    await collect(source.batches);
+    await collectBatches(source.batches);
 
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(request, options);
@@ -60,7 +52,7 @@ describe('jsonFormat', () => {
 
     const source = await jsonFormat.open(mockEsClient, request, options);
 
-    expect(await collect(source.batches)).toEqual([
+    expect(await collectBatches(source.batches)).toEqual([
       [
         { host: 'host-a', count: 1 },
         { host: 'host-b', count: 2 },
@@ -77,7 +69,7 @@ describe('jsonFormat', () => {
 
     const source = await jsonFormat.open(mockEsClient, request, options);
 
-    expect(await collect(source.batches)).toEqual([[{ bucket: Date.parse(iso) }]]);
+    expect(await collectBatches(source.batches)).toEqual([[{ bucket: Date.parse(iso) }]]);
   });
 
   it('yields one empty batch when the result set is empty', async () => {
@@ -88,7 +80,7 @@ describe('jsonFormat', () => {
 
     const source = await jsonFormat.open(mockEsClient, request, options);
 
-    expect(await collect(source.batches)).toEqual([[]]);
+    expect(await collectBatches(source.batches)).toEqual([[]]);
   });
 
   it('does not expose a close hook, since it holds no resources', async () => {
