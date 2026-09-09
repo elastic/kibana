@@ -38,7 +38,9 @@ export const aiIndexAutomationsSkill = defineSkillType({
     `${internalNamespaces.workflows}.validate_workflow`,
     `${internalNamespaces.workflows}.get_workflow`,
     `${internalNamespaces.workflows}.get_step_definitions`,
+    `${internalNamespaces.workflows}.get_trigger_definitions`,
     `${internalNamespaces.workflows}.get_examples`,
     `${internalNamespaces.workflows}.get_connectors`,
+    `${internalNamespaces.workflows}.workflow_execute_step`,
   ],
 });

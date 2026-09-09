@@ -26,8 +26,9 @@ automations write to the same index, attribute an indicator to one by reading th
 seeing which writes to that destination and id pattern. If that does not settle it, say attribution
 was not established rather than guessing.
 
-For the semantics of a step type, Liquid templating, trigger schemas or `on-failure` handling, load
-`workflow-authoring` rather than inferring them from the YAML.
+For Liquid templating, `on-failure` handling and the semantics of a built-in step type, load
+`workflow-authoring` rather than inferring them from the YAML. The `context-engine` steps are the
+exception: no other skill or tool describes them, so their contracts are written out below.
 
 ## What every automation must do
 
@@ -52,6 +53,54 @@ Whatever the strategy, a generated workflow has to:
 A complete worked example — grounding steps, prompt, verified sink — is in the
 `index-selection-reference-workflow` resource attached to this skill. Read it as the reference for
 what a finished automation looks like, whether you are drafting one or judging one.
+
+## The `context-engine` step contracts
+
+These four steps come from the Context Engine plugin rather than the workflow engine's own catalog,
+and no discovery tool can see them: `platform.workflows.get_step_definitions` reads the built-in and
+connector registries only, and the definitions that validation attaches to a failure come from those
+same registries. Nothing will correct a mistake in one of these except a failing run, so they are
+written out here — this skill is the only place they exist.
+
+**`context-engine.createKi`** writes a new indicator and outputs `id`, the document id it wrote.
+
+```yaml
+- name: write_ki
+  type: context-engine.createKi
+  with:
+    ai_index_id: 'my-ai-index' # required
+    ki_id: 'logs-index-profile' # optional, index-backed destinations only
+    ki: # required
+      type: 'index_metadata' # required
+      title: 'logs-* index profile' # required
+      description: '...' # optional, <= 2048 chars
+      content: '...' # optional, <= 65536 chars
+      tags: ['logs'] # optional, <= 100 entries
+      attributes: # optional, <= 100 keys
+        esql: 'FROM logs-* | LIMIT 10'
+```
+
+Passing the same `ki_id` again replaces the indicator, which is the whole of what makes a re-run
+idempotent rather than duplicative. On a data-stream destination `ki_id` is rejected outright and
+Elasticsearch generates the ids.
+
+**`context-engine.updateKi`** takes `ai_index_id` and `ki_id` plus a `ki` carrying only the fields to
+change, and outputs `id` and `result` (`updated` or `noop`). It fails when the indicator does not
+exist, so it belongs to the cumulative strategy that reads before it merges — it is not a substitute
+for `createKi`.
+
+**`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. It fails when the
+indicator does not exist. This is what pilot cleanup runs.
+
+**`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
+and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
+verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without touching
+the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a single row.
+An unknown id fails the step. Gate every write on this: an indicator carrying ES|QL that does not run
+is worse than a missing one, because retrieval surfaces it as though it worked.
+
+`attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
+single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry.
 
 ## Shapes for each strategy
 
@@ -118,8 +167,11 @@ will invent it confidently. Put in the prompt:
 - the AI index id, and whether its destination is an index or a data stream
 - the sources and the exact corpus filter the automation should apply
 - the strategy from `analyze-and-improve`, and what the indicators are meant to capture
-- an instruction to load `workflow-authoring` and `ai-index-automations` and to build to the rules
-  in this skill, so you do not have to restate them
+- an instruction to load `ai-index-automations` and to build to the rules in this skill, so you do
+  not have to restate them
+- an instruction to load `workflow-authoring` too, and why: it describes Liquid templating and
+  `on-failure` handling, which the loop below needs and which that skill's own description — it
+  claims not to be required for creating or running workflows — will otherwise talk it out of loading
 - the pilot tag you have chosen for this attempt
 - that the complete final YAML must come back verbatim
 
@@ -136,16 +188,30 @@ is still wrong rather than burning the budget silently.
 
 If you are the subagent, this is the work.
 
-**Draft it, and validate what you wrote yourself.**
-`platform.core.generate_workflow` validates its own output: it re-generates against the errors and
-fails the call rather than returning YAML that does not parse. Do not re-validate what it gave you
-— that is a round trip that cannot fail. Validation is for the YAML it did not produce: a step you
-wrote out, a query you edited by hand. That must pass `platform.workflows.validate_workflow`.
-Validate the whole definition rather than the fragment you changed, because a step in isolation
-cannot tell you whether its references still resolve. When validation fails it returns the step
-definitions for every step type the workflow references — read those instead of swapping in a step
-type you have not verified.
-`platform.workflows.get_examples` shows working definitions when you are unsure of a shape.
+**Scaffold it once, then take the YAML into text.**
+`platform.core.generate_workflow` is the quickest route to a draft that parses: it is primed with
+every built-in step type and every connector configured here, and it validates its own output,
+re-generating against the errors rather than returning YAML that does not parse. It hands back an
+attachment id rather than a definition, so call `attachments.read` on that id to get the YAML itself.
+
+Work in text from there. `platform.workflows.validate_workflow`, `platform.core.execute_workflow` and
+`platform.workflows.workflow_execute_step` all take a raw `yaml` string, so once the definition is in
+front of you it can be edited, checked and run without another generation pass. Going back through
+`generate_workflow` to change a threshold or a field name re-rolls parts of the workflow you had
+already settled, and each re-roll is a chance to lose something the last pilot proved.
+
+Do not re-validate the scaffold as it came back — that is a round trip that cannot fail. Validation is
+for the YAML you changed: a step you wrote out, a query you edited by hand. Validate the whole
+definition rather than the fragment you touched, because a step in isolation cannot tell you whether
+its references still resolve.
+
+**Look things up rather than guessing at them.** When validation fails it returns the definitions for
+every built-in and connector step type the workflow references, which is usually enough to repair it
+in place — read those instead of swapping in a step type you have not verified.
+`platform.workflows.get_step_definitions` answers the same question ahead of time,
+`platform.workflows.get_trigger_definitions` gives the event context a trigger provides, and
+`platform.workflows.get_examples` shows working definitions when you are unsure of a shape. None of
+them can see the `context-engine` steps; those are in this skill and nowhere a tool can reach.
 
 Validation establishes that the workflow parses, that its step types exist and that its references
 resolve. It does **not** establish that a query inside it returns anything, which is why the rest of
@@ -172,9 +238,11 @@ FROM <destination> METADATA _id
 | LIMIT 100
 ```
 
-Judge those against what the brief asked for. Where a step's ES|QL is the problem,
-`platform.core.generate_esql` will rewrite it given the failing query, the reason and the mapping.
-Fix and run again, within your attempt budget.
+Judge those against what the brief asked for. When one step is what is wrong,
+`platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can
+iterate on it without paying for the whole workflow and without writing more indicators to clean up.
+Where a step's ES|QL is the problem, `platform.core.generate_esql` will rewrite it given the failing
+query, the reason and the mapping. Fix and run again, within your attempt budget.
 
 **Clean up before you return.** The pilot wrote into the user's real index, so the tagged indicators
 are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will

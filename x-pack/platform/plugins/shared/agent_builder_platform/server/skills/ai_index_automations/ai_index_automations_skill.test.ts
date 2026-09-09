@@ -56,8 +56,10 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.validate_workflow`,
       `${internalNamespaces.workflows}.get_workflow`,
       `${internalNamespaces.workflows}.get_step_definitions`,
+      `${internalNamespaces.workflows}.get_trigger_definitions`,
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
+      `${internalNamespaces.workflows}.workflow_execute_step`,
     ]);
   });
 
@@ -110,9 +112,30 @@ describe('aiIndexAutomationsSkill', () => {
       }
     });
 
-    it('requires hand-written workflow YAML to be validated before it is proposed', () => {
-      expect(content).toMatch(/Draft it, and validate what you wrote yourself/);
+    it('requires hand-edited workflow YAML to be validated before it is proposed', () => {
+      expect(content).toMatch(/Validation is\s+for the YAML you changed/);
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
+    });
+
+    it('scaffolds through generation once, then edits the definition as text', () => {
+      expect(content).toMatch(/Scaffold it once, then take the YAML into text/);
+      expect(content).toContain('attachments.read');
+      expect(content).toMatch(/all take a raw `yaml` string/);
+    });
+
+    it('warns that re-generating to make an edit re-rolls what was already settled', () => {
+      expect(content).toMatch(/re-rolls parts of the workflow you had\s+already settled/);
+    });
+
+    it('points at the lookup tools that cover built-in and connector step types', () => {
+      expect(content).toContain(`${internalNamespaces.workflows}.get_step_definitions`);
+      expect(content).toContain(`${internalNamespaces.workflows}.get_trigger_definitions`);
+      expect(content).toContain(`${internalNamespaces.workflows}.get_examples`);
+    });
+
+    it('offers single-step execution for isolating a failing step', () => {
+      expect(content).toContain(`${internalNamespaces.workflows}.workflow_execute_step`);
+      expect(content).toMatch(/runs that step alone out of the inline YAML/);
     });
 
     it('delegates the build-and-test loop rather than saving an unrun draft', () => {
@@ -123,6 +146,10 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('bounds the iteration, since the subagent shares the run step limit', () => {
       expect(content).toMatch(/at most three attempts/);
+    });
+
+    it('tells the brief to say why workflow-authoring is needed, which its own description denies', () => {
+      expect(content).toMatch(/an instruction to load `workflow-authoring` too, and why/);
     });
 
     it('requires the pilot to tag its indicators and delete them afterwards', () => {
@@ -140,8 +167,42 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('does not ask for a second validation of what generate_workflow already validated', () => {
-      expect(content).toMatch(/generate_workflow` validates its own output/);
-      expect(content).toMatch(/Do not re-validate what it gave you/);
+      expect(content).toMatch(/it validates its own output/);
+      expect(content).toMatch(/Do not re-validate the scaffold as it came back/);
+    });
+
+    it('writes out the context-engine step contracts, which no discovery tool can return', () => {
+      expect(content).toContain('The `context-engine` step contracts');
+      expect(content).toMatch(/no discovery tool can see them/);
+
+      for (const stepType of [
+        'context-engine.createKi',
+        'context-engine.updateKi',
+        'context-engine.deleteKi',
+        'context-engine.verifyKi',
+      ]) {
+        expect(content).toContain(stepType);
+      }
+    });
+
+    it('names both verifier ids, since an unknown id fails the step', () => {
+      expect(content).toContain('esql-valid-syntax');
+      expect(content).toContain('esql-valid-runtime');
+    });
+
+    it('states the createKi id rules that make a re-run idempotent', () => {
+      expect(content).toMatch(/Passing the same `ki_id` again replaces the indicator/);
+      expect(content).toMatch(/On a data-stream destination `ki_id` is rejected/);
+    });
+
+    it('bounds what a KI attribute can hold, since indicators carry ES|QL in one', () => {
+      expect(content).toMatch(/never nested objects/);
+      expect(content).toContain('10,000 characters');
+    });
+
+    it('says why updateKi is not interchangeable with createKi', () => {
+      expect(content).toMatch(/It fails when the indicator does not\s+exist/);
+      expect(content).toMatch(/not a substitute\s+for `createKi`/);
     });
 
     it('names the check validation does not cover, since a valid draft can still match nothing', () => {
