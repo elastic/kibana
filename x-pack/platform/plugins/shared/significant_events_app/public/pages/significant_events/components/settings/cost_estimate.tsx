@@ -1,0 +1,463 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
+import {
+  COST_BUDGET_GROUPS,
+  type BudgetGroupCost,
+  type CostBudgetGroup,
+  type CostCaveat,
+  type CostResponse,
+  type PeriodCost,
+} from '@kbn/significant-events-plugin/common';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useGenAiSettingsUrl } from '../../../../hooks/use_gen_ai_settings_url';
+import { useSignificantEventsCost } from '../../../../hooks/use_significant_events_cost';
+import { useRunQuotas } from '../../../../hooks/use_significant_events_run_quotas';
+import { getFormattedError } from '../../../../util/errors';
+
+const PRICING_URL = 'https://www.elastic.co/pricing';
+
+const GROUP_LABELS: Record<CostBudgetGroup, string> = {
+  detection: i18n.translate('xpack.significantEventsApp.settings.costEstimate.detectionRowTitle', {
+    defaultMessage: 'Detection',
+  }),
+  investigation: i18n.translate(
+    'xpack.significantEventsApp.settings.costEstimate.investigationRowTitle',
+    { defaultMessage: 'Investigation' }
+  ),
+  ki_extraction: i18n.translate(
+    'xpack.significantEventsApp.settings.costEstimate.kiExtractionRowTitle',
+    { defaultMessage: 'KI extraction' }
+  ),
+  memory: i18n.translate('xpack.significantEventsApp.settings.costEstimate.memoryRowTitle', {
+    defaultMessage: 'Memory',
+  }),
+};
+
+const formatUsd = (value: number): string => `~$${value.toFixed(2)}`;
+
+const formatCostValue = (totalTokens: number, estimatedCost: number | null): string => {
+  if (totalTokens === 0) {
+    return i18n.translate('xpack.significantEventsApp.settings.costEstimate.noRecordedCallsLabel', {
+      defaultMessage: 'No recorded calls',
+    });
+  }
+  if (estimatedCost === null) {
+    return i18n.translate(
+      'xpack.significantEventsApp.settings.costEstimate.unableToCalculateLabel',
+      { defaultMessage: 'Unable to calculate' }
+    );
+  }
+  return formatUsd(estimatedCost);
+};
+
+const caveatText = (caveat: CostCaveat, tierCrossingCount: number): string => {
+  switch (caveat) {
+    case 'eis_pricing_assumed':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.eisPricingAssumedDescription',
+        {
+          defaultMessage: 'Prices are based on Elastic Inference Service list rates.',
+        }
+      );
+    case 'usd_assumed':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.usdAssumedDescription',
+        {
+          defaultMessage:
+            'Pricing is treated as USD because the catalog does not identify a currency.',
+        }
+      );
+    case 'excludes_embeddings':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.excludesEmbeddingsDescription',
+        { defaultMessage: 'Embedding and rerank inference is excluded.' }
+      );
+    case 'excludes_failed_calls':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.excludesFailedCallsDescription',
+        {
+          defaultMessage: 'Calls that fail before token usage is recorded are excluded.',
+        }
+      );
+    case 'excludes_cache_writes':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.excludesCacheWritesDescription',
+        {
+          defaultMessage: 'Cache-write tokens are excluded because Kibana does not record them.',
+        }
+      );
+    case 'tracking_not_all_spaces':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.trackingNotAllSpacesDescription',
+        {
+          defaultMessage:
+            'Based on recorded calls in spaces where token usage tracking is enabled. Not all spaces may be tracked.',
+        }
+      );
+    case 'prices_stale':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.pricesStaleDescription',
+        {
+          defaultMessage: 'Price data is outdated; estimates may not reflect current rates.',
+        }
+      );
+    case 'tier_crossings_detected':
+      return i18n.translate(
+        'xpack.significantEventsApp.settings.costEstimate.tierCrossingsDetectedDescription',
+        {
+          defaultMessage:
+            'Estimate uses lower-tier pricing; {count, plural, one {# call exceeded} other {# calls exceeded}} the tier threshold.',
+          values: { count: tierCrossingCount },
+        }
+      );
+  }
+};
+
+const CostValue = ({
+  period,
+  group,
+  testSubj,
+}: {
+  period: PeriodCost;
+  group: BudgetGroupCost;
+  testSubj: string;
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <span data-test-subj={testSubj}>
+        {formatCostValue(group.totalTokens, group.estimatedCost)}
+      </span>
+    </EuiFlexItem>
+    {group.status === 'partial' && group.estimatedCost !== null && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge
+          color="warning"
+          data-test-subj={`significantEventsCostPartialBadge-${group.group}-${period.label}`}
+        >
+          {i18n.translate('xpack.significantEventsApp.settings.costEstimate.partialFloorBadge', {
+            defaultMessage: 'Partial floor',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
+
+const CostData = ({
+  data,
+  isRefreshing,
+  onRefresh,
+}: {
+  data: CostResponse;
+  isRefreshing: boolean;
+  onRefresh: () => void;
+}) => {
+  const asOfTime = new Date(data.asOf).toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const todayText = formatCostValue(data.today.totalTokens, data.today.totalEstimatedCost);
+  const monthText = formatCostValue(data.month.totalTokens, data.month.totalEstimatedCost);
+  const headline = i18n.translate(
+    'xpack.significantEventsApp.settings.costEstimate.headlineLabel',
+    {
+      defaultMessage: '{today} today · {month} this month (recorded calls)',
+      values: { today: todayText, month: monthText },
+    }
+  );
+  const monthTierCrossings = data.month.groups.reduce(
+    (sum, group) => sum + group.tierCrossingCount,
+    0
+  );
+  const tooltipContent = (
+    <span>
+      {i18n.translate('xpack.significantEventsApp.settings.costEstimate.headlineTooltip', {
+        defaultMessage: 'Prices are based on Elastic Inference Service list rates.',
+      })}{' '}
+      <EuiLink href={PRICING_URL} target="_blank" rel="noopener noreferrer" external>
+        {i18n.translate('xpack.significantEventsApp.settings.costEstimate.pricingLinkText', {
+          defaultMessage: 'Elastic pricing',
+        })}
+      </EuiLink>
+    </span>
+  );
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem>
+          <EuiToolTip content={tooltipContent}>
+            <EuiText size="s" tabIndex={0}>
+              <p data-test-subj="significantEventsCostHeadline">{headline}</p>
+            </EuiText>
+          </EuiToolTip>
+          <EuiText size="xs" color="subdued">
+            <p data-test-subj="significantEventsCostAsOf">
+              {i18n.translate('xpack.significantEventsApp.settings.costEstimate.asOfLabel', {
+                defaultMessage: 'as of {asOf} at current list prices',
+                values: { asOf: asOfTime },
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="refresh"
+            isLoading={isRefreshing}
+            isDisabled={isRefreshing}
+            onClick={onRefresh}
+            data-test-subj="significantEventsCostRefreshButton"
+          >
+            {i18n.translate('xpack.significantEventsApp.settings.costEstimate.refreshButtonLabel', {
+              defaultMessage: 'Refresh',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <strong>
+              {i18n.translate('xpack.significantEventsApp.settings.costEstimate.groupColumnTitle', {
+                defaultMessage: 'Group',
+              })}
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <strong>
+              {i18n.translate('xpack.significantEventsApp.settings.costEstimate.todayColumnTitle', {
+                defaultMessage: 'Today',
+              })}
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <strong>
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.costEstimate.thisMonthColumnTitle',
+                { defaultMessage: 'This month' }
+              )}
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {COST_BUDGET_GROUPS.map((groupName) => {
+        const todayGroup = data.today.groups.find((group) => group.group === groupName);
+        const monthGroup = data.month.groups.find((group) => group.group === groupName);
+        if (!todayGroup || !monthGroup) {
+          return null;
+        }
+        return (
+          <EuiFlexGroup
+            key={groupName}
+            alignItems="center"
+            data-test-subj={`significantEventsCostGroup-${groupName}`}
+          >
+            <EuiFlexItem>
+              <EuiText size="s">{GROUP_LABELS[groupName]}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CostValue
+                period={data.today}
+                group={todayGroup}
+                testSubj={`significantEventsCostGroupToday-${groupName}`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CostValue
+                period={data.month}
+                group={monthGroup}
+                testSubj={`significantEventsCostGroupMonth-${groupName}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      })}
+
+      <EuiSpacer />
+      <EuiText size="xs" color="subdued" data-test-subj="significantEventsCostCaveats">
+        <ul>
+          {data.caveats.map((caveat) => (
+            <li key={caveat}>{caveatText(caveat, monthTierCrossings)}</li>
+          ))}
+        </ul>
+      </EuiText>
+    </>
+  );
+};
+
+const RetryCallout = ({
+  title,
+  body,
+  onRetry,
+}: {
+  title: string;
+  body?: string;
+  onRetry: () => void;
+}) => (
+  <EuiCallOut announceOnMount color="danger" iconType="error" title={title}>
+    {body ? <p>{body}</p> : null}
+    <EuiButton size="s" onClick={onRetry} data-test-subj="significantEventsCostRetryButton">
+      {i18n.translate('xpack.significantEventsApp.settings.costEstimate.retryButtonLabel', {
+        defaultMessage: 'Retry',
+      })}
+    </EuiButton>
+  </EuiCallOut>
+);
+
+export const CostEstimate = () => {
+  const quotas = useRunQuotas();
+  const genAiSettingsUrl = useGenAiSettingsUrl();
+  const { core } = useKibana();
+  const settingsClient = core.settings.client;
+  const tracking$ = useMemo(
+    () => settingsClient.get$<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false),
+    [settingsClient]
+  );
+  const trackingEnabled = useObservable(
+    tracking$,
+    settingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false)
+  );
+  const canManage = quotas.data?.canManage === true;
+  const cost = useSignificantEventsCost({ enabled: canManage && trackingEnabled });
+
+  if (quotas.isError || quotas.data == null || !canManage) {
+    return null;
+  }
+
+  const renderBody = () => {
+    if (!trackingEnabled) {
+      return (
+        <EuiText size="s" data-test-subj="significantEventsCostTrackingPrompt">
+          <p>
+            {i18n.translate(
+              'xpack.significantEventsApp.settings.costEstimate.enableTrackingDescription',
+              {
+                defaultMessage: 'Enable token usage tracking to see cost estimates',
+              }
+            )}
+          </p>
+          {genAiSettingsUrl && (
+            <EuiLink
+              href={genAiSettingsUrl}
+              data-test-subj="significantEventsCostGenAiSettingsLink"
+            >
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.costEstimate.genAiSettingsLinkText',
+                { defaultMessage: 'Go to Gen AI Settings' }
+              )}
+            </EuiLink>
+          )}
+        </EuiText>
+      );
+    }
+
+    if (cost.isLoading && !cost.data) {
+      return <EuiLoadingSpinner size="m" data-test-subj="significantEventsCostLoading" />;
+    }
+
+    if (cost.error) {
+      return (
+        <RetryCallout
+          title={i18n.translate(
+            'xpack.significantEventsApp.settings.costEstimate.unavailableErrorTitle',
+            { defaultMessage: 'Cost estimate unavailable' }
+          )}
+          body={getFormattedError(cost.error).message}
+          onRetry={() => void cost.retryCost()}
+        />
+      );
+    }
+
+    if (cost.data?.unavailableReason === 'pricing') {
+      return (
+        <RetryCallout
+          title={i18n.translate(
+            'xpack.significantEventsApp.settings.costEstimate.pricingUnavailableTitle',
+            { defaultMessage: 'Unable to fetch pricing data' }
+          )}
+          onRetry={() => void cost.retryCost()}
+        />
+      );
+    }
+
+    if (cost.data?.unavailableReason === 'usage_data') {
+      return (
+        <RetryCallout
+          title={i18n.translate(
+            'xpack.significantEventsApp.settings.costEstimate.usageDataUnavailableTitle',
+            { defaultMessage: 'Unable to read token usage data' }
+          )}
+          onRetry={() => void cost.retryCost()}
+        />
+      );
+    }
+
+    if (!cost.data) {
+      return null;
+    }
+
+    return (
+      <CostData
+        data={cost.data}
+        isRefreshing={cost.isRefreshing}
+        onRefresh={() => void cost.refreshCost()}
+      />
+    );
+  };
+
+  return (
+    <>
+      <EuiSpacer />
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="none"
+        grow={false}
+        data-test-subj="significantEventsCostSection"
+      >
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
+                defaultMessage: 'Approximate inference cost',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiPanel>
+        <EuiPanel hasShadow={false}>{renderBody()}</EuiPanel>
+      </EuiPanel>
+    </>
+  );
+};
