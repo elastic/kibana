@@ -39,6 +39,7 @@ const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
 const mockContext = {
   request: { id: 'test-request' },
   logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() },
+  uiSettings: { get: jest.fn().mockResolvedValue(true) },
 } as unknown as ToolHandlerContext;
 
 const slackSpec = {
@@ -190,9 +191,21 @@ describe('createListConnectorsTool', () => {
     expect(errorResult.data.message).toContain('boom');
   });
 
-  it('is always available, independent of the Agent Builder experimental features flag', () => {
-    const tool = createListConnectorsTool({ getActions, getInference });
-    expect(tool.availability).toBeUndefined();
-    expect(tool.experimental).toBeFalsy();
+  describe('availability', () => {
+    it('is unavailable when the experimental features flag is off', async () => {
+      const tool = createListConnectorsTool({ getActions, getInference });
+      const result = await tool.availability!.handler({
+        uiSettings: { get: jest.fn().mockResolvedValue(false) },
+      } as any);
+      expect(result.status).toBe('unavailable');
+    });
+
+    it('is available when the experimental features flag is on', async () => {
+      const tool = createListConnectorsTool({ getActions, getInference });
+      const result = await tool.availability!.handler({
+        uiSettings: { get: jest.fn().mockResolvedValue(true) },
+      } as any);
+      expect(result.status).toBe('available');
+    });
   });
 });

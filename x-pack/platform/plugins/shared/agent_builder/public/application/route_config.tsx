@@ -116,6 +116,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentConnectors,
     sidebarView: 'conversation',
     navLabel: navLabels.connectors,
+    isExperimental: true,
     element: <AgentBuilderAgentConnectorsPage />,
   },
   {
@@ -193,6 +194,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageConnectors,
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
+    isExperimental: true,
     element: <AgentBuilderConnectorsPage />,
   },
   {
