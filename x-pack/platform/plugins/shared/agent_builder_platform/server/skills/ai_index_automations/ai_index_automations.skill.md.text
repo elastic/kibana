@@ -181,7 +181,7 @@ for the entire definition in a single fenced `yaml` block with nothing elided, a
 replaced by a comment.
 
 Give it a budget, too. A subagent shares this run's step limit, and "keep going until it works" is
-an unbounded instruction — tell it to make at most three attempts and to come back describing what
+an unbounded instruction — tell it to make at most five attempts and to come back describing what
 is still wrong rather than burning the budget silently.
 
 ## The loop a subagent runs
@@ -200,15 +200,25 @@ front of you it can be edited, checked and run without another generation pass. 
 `generate_workflow` to change a threshold or a field name re-rolls parts of the workflow you had
 already settled, and each re-roll is a chance to lose something the last pilot proved.
 
-Do not re-validate the scaffold as it came back — that is a round trip that cannot fail. Validation is
-for the YAML you changed: a step you wrote out, a query you edited by hand. Validate the whole
-definition rather than the fragment you touched, because a step in isolation cannot tell you whether
-its references still resolve.
+**Do not validate and then run.** Running a definition validates it first: given inline `yaml`,
+`platform.core.execute_workflow` parses and validates before a single step executes, and throws when
+that fails. So does `platform.workflows.workflow_execute_step`. A draft that cannot parse costs you
+the run and nothing else — there are no side effects to guard against, and a validate call ahead of
+each run is two round trips for one answer.
 
-**Look things up rather than guessing at them.** When validation fails it returns the definitions for
-every built-in and connector step type the workflow references, which is usually enough to repair it
-in place — read those instead of swapping in a step type you have not verified.
-`platform.workflows.get_step_definitions` answers the same question ahead of time,
+Call `platform.workflows.validate_workflow` when it tells you something the run did not. Its failures
+carry the definitions of every built-in and connector step type the workflow references, and the
+warnings the execution path drops — that path reports errors only, as formatted messages. When a run
+fails on something you cannot place, validating the same YAML is how you get the material to repair
+it.
+
+Validate outright in one place: the last edit. Stripping the pilot tag and widening the corpus filter
+happens after the final run, so the YAML you hand back is never executed in the form you hand it back
+in. Validation is the only check it gets. Validate the whole definition rather than the part you
+touched, because a step in isolation cannot tell you whether its references still resolve.
+
+**Look things up rather than guessing at them.** `platform.workflows.get_step_definitions` gives a
+step type's inputs, outputs and examples ahead of time,
 `platform.workflows.get_trigger_definitions` gives the event context a trigger provides, and
 `platform.workflows.get_examples` shows working definitions when you are unsure of a shape. None of
 them can see the `context-engine` steps; those are in this skill and nowhere a tool can reach.

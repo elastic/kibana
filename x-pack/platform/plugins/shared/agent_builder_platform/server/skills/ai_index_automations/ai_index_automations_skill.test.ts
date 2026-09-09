@@ -112,8 +112,8 @@ describe('aiIndexAutomationsSkill', () => {
       }
     });
 
-    it('requires hand-edited workflow YAML to be validated before it is proposed', () => {
-      expect(content).toMatch(/Validation is\s+for the YAML you changed/);
+    it('requires the final untested edit to be validated, since no run covers it', () => {
+      expect(content).toMatch(/Validate outright in one place: the last edit/);
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
     });
 
@@ -145,7 +145,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('bounds the iteration, since the subagent shares the run step limit', () => {
-      expect(content).toMatch(/at most three attempts/);
+      expect(content).toMatch(/at most five attempts/);
     });
 
     it('tells the brief to say why workflow-authoring is needed, which its own description denies', () => {
@@ -168,7 +168,16 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('does not ask for a second validation of what generate_workflow already validated', () => {
       expect(content).toMatch(/it validates its own output/);
-      expect(content).toMatch(/Do not re-validate the scaffold as it came back/);
+    });
+
+    it('does not pay for a validate call before a run that validates anyway', () => {
+      expect(content).toMatch(/Do not validate and then run/);
+      expect(content).toMatch(/parses and validates before a single step executes/);
+    });
+
+    it('says what a separate validate call adds over a failed run', () => {
+      expect(content).toMatch(/warnings the execution path drops/);
+      expect(content).toMatch(/definitions of every built-in and connector step type/);
     });
 
     it('writes out the context-engine step contracts, which no discovery tool can return', () => {
