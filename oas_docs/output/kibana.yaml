@@ -2668,6 +2668,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Whether to include deleted attachments in the list.
           in: query
@@ -2746,6 +2747,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -2785,18 +2787,22 @@ paths:
                   nullable: true
                 description:
                   description: Human-readable description of the attachment.
+                  maxLength: 2048
                   type: string
                 hidden:
                   description: Whether the attachment should be hidden from the user.
                   type: boolean
                 id:
                   description: Optional custom ID for the attachment.
+                  maxLength: 256
                   type: string
                 origin:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  maxLength: 2048
                   type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
+                  maxLength: 256
                   type: string
               required:
                 - type
@@ -2853,12 +2859,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to delete.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: If true, permanently removes the attachment (only for unreferenced attachments).
           in: query
@@ -2889,6 +2897,59 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a single attachment by ID for a conversation.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-conversations-conversation-id-attachments-attachment-id
+      parameters:
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The unique identifier of the attachment.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAttachmentResponseExample:
+                  description: Example response containing a single attachment
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: My text file
+                      id: attachment-1
+                      type: text
+                      versions:
+                        - content_hash: abc123
+                          created_at: '2025-01-01T10:00:00.000Z'
+                          data: File content
+                          estimated_tokens: 2
+                          version: 1
+          description: Indicates a successful response
+      summary: Get conversation attachment
+      tags:
+        - agent builder
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     patch:
       description: |-
         **Spaces method and path for this operation:**
@@ -2912,12 +2973,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to rename.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -2933,6 +2996,7 @@ paths:
               properties:
                 description:
                   description: The new description/name for the attachment.
+                  maxLength: 2048
                   type: string
               required:
                 - description
@@ -2988,12 +3052,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to update.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -3017,6 +3083,7 @@ paths:
                   nullable: true
                 description:
                   description: Optional new description for the attachment.
+                  maxLength: 2048
                   type: string
               required:
                 - data
@@ -3078,12 +3145,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to restore.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -3138,12 +3207,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to update.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -3159,6 +3230,7 @@ paths:
               properties:
                 origin:
                   description: The origin string (e.g., saved object ID for visualizations and dashboards).
+                  maxLength: 2048
                   type: string
               required:
                 - origin
@@ -3213,6 +3285,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
