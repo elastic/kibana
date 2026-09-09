@@ -20,6 +20,9 @@ FLAKY_TESTS_CLASSIFICATIONS="${FLAKY_TESTS_CLASSIFICATIONS:-flaky}"
 # Optional; no filter when empty
 FLAKY_TESTS_BRANCHES="${FLAKY_TESTS_BRANCHES:-}"
 FLAKY_TESTS_FRAMEWORKS="${FLAKY_TESTS_FRAMEWORKS:-}"
+# The agent PTY is 160 columns wide, but the build page log pane fits fewer once line numbers and
+# timestamps are shown (about 130 on a laptop), so size the summary table explicitly.
+FLAKY_TESTS_SUMMARY_WIDTH="${FLAKY_TESTS_SUMMARY_WIDTH:-140}"
 
 REPORT_DIR="target/flaky_tests"
 REPORT_PATH="$REPORT_DIR/flaky_tests.json"
@@ -41,6 +44,7 @@ args=(
   --lookbackDays "$FLAKY_TESTS_LOOKBACK_DAYS"
   --classifications "$FLAKY_TESTS_CLASSIFICATIONS"
   --outputPath "$REPORT_PATH"
+  --summaryWidth "$FLAKY_TESTS_SUMMARY_WIDTH"
 )
 if [[ -n "$FLAKY_TESTS_BRANCHES" ]]; then
   args+=(--branches "$FLAKY_TESTS_BRANCHES")

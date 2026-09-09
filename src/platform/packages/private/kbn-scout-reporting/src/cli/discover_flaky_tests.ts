@@ -26,7 +26,7 @@ import {
   type FlakyTestClassification,
   type TestFramework,
 } from '../reporting/flaky_tests';
-import { displaySummary } from './flaky_tests_summary';
+import { DEFAULT_TERMINAL_WIDTH, displaySummary, terminalWidth } from './flaky_tests_summary';
 
 // The per-framework aggregations scan hundreds of millions of documents; the client default of
 // 60s is not enough for them.
@@ -119,6 +119,7 @@ export const discoverFlakyTests: Command<void> = {
       'samplesPerTest',
       'outputPath',
       'summaryLimit',
+      'summaryWidth',
     ],
     boolean: ['verifyTLSCerts'],
     default: {
@@ -152,6 +153,7 @@ export const discoverFlakyTests: Command<void> = {
     --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
     --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
     --summaryLimit     (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
+    --summaryWidth     (optional)  Columns the summary table may use [default: terminal width, or ${DEFAULT_TERMINAL_WIDTH} when not a terminal]
     `,
   },
   run: async ({ flagsReader, log }) => {
@@ -173,6 +175,10 @@ export const discoverFlakyTests: Command<void> = {
     const summaryLimit = flagsReader.requiredNumber('summaryLimit');
     if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
       throw createFlagError('--summaryLimit must be a non-negative integer');
+    }
+    const summaryWidth = flagsReader.number('summaryWidth') ?? terminalWidth();
+    if (!Number.isInteger(summaryWidth) || summaryWidth < 1) {
+      throw createFlagError('--summaryWidth must be a positive integer');
     }
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
@@ -215,7 +221,7 @@ export const discoverFlakyTests: Command<void> = {
 
     // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
     if (!flagsReader.boolean('quiet')) {
-      displaySummary(report, summaryLimit, log);
+      displaySummary(report, summaryLimit, log, summaryWidth);
     }
 
     log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
