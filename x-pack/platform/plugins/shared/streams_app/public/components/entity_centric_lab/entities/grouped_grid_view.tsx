@@ -2005,8 +2005,8 @@ const CategoryHeader = ({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
-          <h4>{label ?? descriptor?.label ?? category}</h4>
+        <EuiTitle size="s">
+          <h3>{label ?? descriptor?.label ?? category}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -2116,9 +2116,9 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>{label}</strong>
-              </EuiText>
+              <EuiTitle size="xxs">
+                <h4>{label}</h4>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">{entities.length.toLocaleString()}</EuiBadge>
@@ -2206,8 +2206,13 @@ const KubernetesCard = ({
   const hideHeader = useContext(HideCategoryHeaderContext);
   const { euiTheme } = useEuiTheme();
   const subRowClass = css`
-    padding: ${euiTheme.size.s} 0;
-    border-top: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.m} 0;
+    border-top: 1px solid ${euiTheme.colors.lightShade};
+  `;
+  const nestedContentClass = css`
+    margin-left: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.l};
+    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   // Cluster filter state — transient (not persisted) so it behaves
@@ -2277,8 +2282,9 @@ const KubernetesCard = ({
   if (hideHeader) {
     return (
       <>
-        {orderedSubTypes.map((group) => (
-          <EuiFlexItem key={group.label} grow={false}>
+        {orderedSubTypes.map((group, index) => (
+          <React.Fragment key={group.label}>
+            {index > 0 ? <EuiSpacer size="m" /> : null}
             <EuiPanel hasBorder hasShadow={false} paddingSize="m">
               <SubTypeRow
                 bucketKey={bucketKeyFor('kubernetes', group.label)}
@@ -2287,7 +2293,7 @@ const KubernetesCard = ({
                 onSelectEntity={onSelectEntity}
               />
             </EuiPanel>
-          </EuiFlexItem>
+          </React.Fragment>
         ))}
       </>
     );
@@ -2311,7 +2317,7 @@ const KubernetesCard = ({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {subTypeContent}
+      <div className={nestedContentClass}>{subTypeContent}</div>
     </EuiPanel>
   );
 };
@@ -2342,8 +2348,13 @@ const MultiTypeCategoryCard = ({
   const { euiTheme } = useEuiTheme();
   const hideHeader = useContext(HideCategoryHeaderContext);
   const subRowClass = css`
-    padding: ${euiTheme.size.s} 0;
-    border-top: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.m} 0;
+    border-top: 1px solid ${euiTheme.colors.lightShade};
+  `;
+  const nestedContentClass = css`
+    margin-left: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.l};
+    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   const orderedTypes = useMemo(() => groupEntitiesByType(entities), [entities]);
@@ -2351,8 +2362,9 @@ const MultiTypeCategoryCard = ({
   if (hideHeader) {
     return (
       <>
-        {orderedTypes.map((group) => (
-          <EuiFlexItem key={group.label} grow={false}>
+        {orderedTypes.map((group, index) => (
+          <React.Fragment key={group.label}>
+            {index > 0 ? <EuiSpacer size="m" /> : null}
             <EuiPanel hasBorder hasShadow={false} paddingSize="m">
               <SubTypeRow
                 bucketKey={bucketKeyFor(category, group.label)}
@@ -2361,7 +2373,7 @@ const MultiTypeCategoryCard = ({
                 onSelectEntity={onSelectEntity}
               />
             </EuiPanel>
-          </EuiFlexItem>
+          </React.Fragment>
         ))}
       </>
     );
@@ -2371,17 +2383,19 @@ const MultiTypeCategoryCard = ({
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <CategoryHeader category={category} total={entities.length} />
       <EuiSpacer size="m" />
-      {orderedTypes.map((group, index) => (
-        <div key={group.label} className={index === 0 ? undefined : subRowClass}>
-          <SubTypeRow
-            bucketKey={bucketKeyFor(category, group.label)}
-            label={group.label}
-            entities={group.rows}
-            onSelectEntity={onSelectEntity}
-          />
-          {index === 0 ? <EuiSpacer size="s" /> : null}
-        </div>
-      ))}
+      <div className={nestedContentClass}>
+        {orderedTypes.map((group, index) => (
+          <div key={group.label} className={index === 0 ? undefined : subRowClass}>
+            <SubTypeRow
+              bucketKey={bucketKeyFor(category, group.label)}
+              label={group.label}
+              entities={group.rows}
+              onSelectEntity={onSelectEntity}
+            />
+            {index === 0 ? <EuiSpacer size="s" /> : null}
+          </div>
+        ))}
+      </div>
     </EuiPanel>
   );
 };
@@ -2430,8 +2444,13 @@ const CloudProviderCard = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const subRowClass = css`
-    padding: ${euiTheme.size.s} 0;
-    border-top: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.m} 0;
+    border-top: 1px solid ${euiTheme.colors.lightShade};
+  `;
+  const nestedContentClass = css`
+    margin-left: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.l};
+    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   const serviceGroups = useMemo(
@@ -2453,17 +2472,19 @@ const CloudProviderCard = ({
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <CloudProviderHeader provider={provider} total={entities.length} />
       <EuiSpacer size="m" />
-      {serviceGroups.map((group, index) => (
-        <div key={group.service.id} className={index === 0 ? undefined : subRowClass}>
-          <SubTypeRow
-            bucketKey={bucketKeyFor('cloud', group.service.entityType)}
-            label={group.service.label}
-            entities={group.rows}
-            onSelectEntity={onSelectEntity}
-          />
-          {index === 0 ? <EuiSpacer size="s" /> : null}
-        </div>
-      ))}
+      <div className={nestedContentClass}>
+        {serviceGroups.map((group, index) => (
+          <div key={group.service.id} className={index === 0 ? undefined : subRowClass}>
+            <SubTypeRow
+              bucketKey={bucketKeyFor('cloud', group.service.entityType)}
+              label={group.service.label}
+              entities={group.rows}
+              onSelectEntity={onSelectEntity}
+            />
+            {index === 0 ? <EuiSpacer size="s" /> : null}
+          </div>
+        ))}
+      </div>
     </EuiPanel>
   );
 };
@@ -2715,8 +2736,8 @@ const CustomGroupTiles = ({
 const GroupBucketHeader = ({ label, total }: { label: string; total: number }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="xxs">
-        <h4>{label}</h4>
+      <EuiTitle size="s">
+        <h3>{label}</h3>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -2894,33 +2915,49 @@ const CustomGroupCard = ({
   node: EntityGroupNode;
   hasSubLevel: boolean;
   onSelectEntity: (entityName: string) => void;
-}) => (
-  <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-    {hasSubLevel && node.children.length > 0 ? (
-      <>
-        <GroupBucketHeader label={node.label} total={node.entities.length} />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {node.children.map((child) => (
-            <EuiFlexItem key={child.key} grow={false}>
-              <CustomGroupBucketContent
-                entities={child.entities}
-                label={child.label}
-                onSelectEntity={onSelectEntity}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </>
-    ) : (
-      <CustomGroupBucketContent
-        entities={node.entities}
-        label={node.label}
-        onSelectEntity={onSelectEntity}
-      />
-    )}
-  </EuiPanel>
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const nestedChildClass = css`
+    margin-left: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.l};
+    border-left: 1px solid ${euiTheme.colors.lightShade};
+  `;
+  const childDividerClass = css`
+    padding-top: ${euiTheme.size.m};
+    border-top: 1px solid ${euiTheme.colors.lightShade};
+  `;
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+      {hasSubLevel && node.children.length > 0 ? (
+        <>
+          <GroupBucketHeader label={node.label} total={node.entities.length} />
+          <EuiSpacer size="m" />
+          <div className={nestedChildClass}>
+            {node.children.map((child, index) => (
+              <div
+                key={child.key}
+                className={index === 0 ? undefined : childDividerClass}
+              >
+                <CustomGroupBucketContent
+                  entities={child.entities}
+                  label={child.label}
+                  onSelectEntity={onSelectEntity}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <CustomGroupBucketContent
+          entities={node.entities}
+          label={node.label}
+          onSelectEntity={onSelectEntity}
+        />
+      )}
+    </EuiPanel>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Public entry

@@ -255,8 +255,8 @@ const CategorySectionHeader = ({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
-          <h4>{descriptor?.label ?? category}</h4>
+        <EuiTitle size="s">
+          <h3>{descriptor?.label ?? category}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -439,8 +439,8 @@ type ListItem =
 const GroupSectionHeader = ({ label, total }: { label: string; total: number }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="xxs">
-        <h4>{label}</h4>
+      <EuiTitle size="s">
+        <h3>{label}</h3>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -471,8 +471,8 @@ const KubernetesSectionHeader = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>{descriptor?.label ?? 'Kubernetes'}</h4>
+            <EuiTitle size="s">
+              <h3>{descriptor?.label ?? 'Kubernetes'}</h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -730,9 +730,6 @@ export const EntitiesListView = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {items.map((item, index) => {
-        // Extra top margin before group headers (except the very first
-        // item) so new categories are visually distinct from the panels
-        // of the previous group.
         const groupGap = index > 0 ? { marginTop: 16 } : undefined;
 
         if (item.kind === 'kubernetes-header') {

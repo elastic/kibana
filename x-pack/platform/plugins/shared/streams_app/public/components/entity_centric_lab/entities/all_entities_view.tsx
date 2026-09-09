@@ -129,7 +129,8 @@ import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
-import type { DataVariation, DetailVariation } from './variation_registry';
+import type { DataVariation, DetailVariation, TableStyleVariation } from './variation_registry';
+import { SecurityGroupingView } from './security_grouping_view';
 import {
   DEFAULT_GROUP_BY,
   getGroupByFields,
@@ -511,6 +512,7 @@ const AllEntitiesViewInner = ({
   const detailVariation = useVariation('detail') as DetailVariation;
   const phaseVariation = useVariation('phase');
   const isPhase1 = phaseVariation === 'phase1';
+  const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
 
   const flyoutSize = detailVariation === 'largeFlyout' ? 'l' : 'm';
   const dataset = useMemo(() => buildFakeEntities(dataVariation), [dataVariation]);
@@ -1620,6 +1622,14 @@ const AllEntitiesViewInner = ({
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
                     hideCategoryHeader={!!categoryScope}
+                  />
+                ) : tableStyleVariation === 'security' ? (
+                  <SecurityGroupingView
+                    entities={filteredEntities}
+                    onSelectEntity={openEntity}
+                    groupByFields={groupByFields}
+                    activeGroupBy={groupBy}
+                    refreshTick={refreshTick}
                   />
                 ) : (
                   <EntitiesListView

@@ -97,9 +97,26 @@ export const PHASE_DIMENSION: VariationDimension = {
   ],
 };
 
+export type TableStyleVariation = 'default' | 'security';
+
+export const TABLE_STYLE_DIMENSION: VariationDimension = {
+  id: 'tableStyle',
+  label: 'Table style',
+  defaultOption: 'default',
+  options: [
+    { id: 'default', label: 'Default', description: 'Current panel-based table layout' },
+    {
+      id: 'security',
+      label: 'Security approach',
+      description: 'Accordion-style grouping (à la Security Entity Analytics)',
+    },
+  ],
+};
+
 /** All registered dimensions, in display order. */
 export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   PHASE_DIMENSION,
   DATA_DIMENSION,
   DETAIL_DIMENSION,
+  TABLE_STYLE_DIMENSION,
 ];

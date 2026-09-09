@@ -26,10 +26,12 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiText,
+  EuiTitle,
   useEuiTheme,
   type EuiDataGridColumn,
   type EuiDataGridSorting,
@@ -436,6 +438,8 @@ interface Props {
   readonly onSelectEntity: (entityName: string) => void;
   /** Bumped by the auto-refresh tick so live metric cells re-roll. */
   readonly refreshTick?: number;
+  /** When true, renders without the surrounding EuiPanel border. */
+  readonly borderless?: boolean;
 }
 
 /**
@@ -456,9 +460,16 @@ const GridSectionHeader = ({
   const descriptor = getCategoryDescriptor(category);
   const heading = nested && subTypeLabel ? subTypeLabel : descriptor?.label ?? category;
   return (
-    <EuiText size="s">
-      <strong>{heading}</strong> <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
-    </EuiText>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h4>{heading}</h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -472,6 +483,7 @@ export const EntityDataGridSection = ({
   rows,
   onSelectEntity,
   refreshTick,
+  borderless = false,
 }: Props) => {
   const phase = useVariation('phase') as PhaseVariation;
   const isPhase1 = phase === 'phase1';
@@ -654,8 +666,11 @@ export const EntityDataGridSection = ({
   // rendered outside the panel — skip the in-panel duplicate.
   const showInPanelHeader = !nested || Boolean(subTypeLabel);
 
+  const Wrapper = borderless ? React.Fragment : EuiPanel;
+  const wrapperProps = borderless ? {} : { hasBorder: true, hasShadow: false, paddingSize: 'm' as const };
+
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <Wrapper {...wrapperProps}>
       {showInPanelHeader && (
         <>
           <GridSectionHeader
@@ -715,6 +730,6 @@ export const EntityDataGridSection = ({
             : `entityCentricLabEntitiesGrid-${category}`
         }
       />
-    </EuiPanel>
+    </Wrapper>
   );
 };
