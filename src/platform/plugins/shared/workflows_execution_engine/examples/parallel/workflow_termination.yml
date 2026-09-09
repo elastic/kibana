@@ -1,4 +1,4 @@
-name: "Audit 27 - workflow.output terminates parallel siblings"
+name: "workflow.output terminates parallel siblings"
 description: "The terminator determines the workflow result. Sibling waits and queued work are cancelled; parent retry/fallback and after_join must not run."
 enabled: true
 triggers:

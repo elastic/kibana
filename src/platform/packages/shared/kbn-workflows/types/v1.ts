@@ -146,6 +146,7 @@ export interface EsWorkflowExecution {
     status: ExecutionStatus;
     output: Record<string, unknown>;
     error?: SerializedError;
+    stepError?: SerializedError;
   } | null;
   spaceId: string;
   id: string;

@@ -1,4 +1,4 @@
-name: "Audit 08 - Parallel inside sequential foreach"
+name: "Parallel inside sequential foreach"
 description: "Two outer iterations each run two parallel branches. No previous-iteration state or output may leak into the next join."
 enabled: true
 triggers:

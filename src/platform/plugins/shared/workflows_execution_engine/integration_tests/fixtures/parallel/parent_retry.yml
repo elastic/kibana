@@ -1,5 +1,5 @@
-name: "Audit 19 - Parent retry and fallback with continue"
-description: "Intentional branch failure retries the whole parallel step once. Each attempt has separate branch state. Parent fallback executes and continue handles the failure, so parent_after runs."
+name: "Retry and fallback around an entire parallel step"
+description: "Intentional branch failure retries the whole parallel step once. Each attempt has separate branch state. Parent fallback executes and preserves failure; parent_after must not run. Add continue: true to resume after the handler."
 enabled: true
 triggers:
   - type: manual
@@ -12,7 +12,6 @@ steps:
         type: http
         with: { url: 'http://localhost:9228/audit-intentional-unauthorized', method: GET }
     on-failure:
-      continue: true
       retry: { max-attempts: 1, delay: 1s }
       fallback:
         - name: recovery

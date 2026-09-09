@@ -1,4 +1,4 @@
-name: "Audit 26 - Timeout enclosing loops and handlers"
+name: "Timeout enclosing loops and handlers"
 description: "A branch deadline unwinds foreach, while and retry scopes without running its fallback."
 enabled: true
 triggers:

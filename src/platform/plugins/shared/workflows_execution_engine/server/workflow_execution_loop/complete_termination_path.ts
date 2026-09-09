@@ -46,17 +46,31 @@ export const completeTerminationPath = (
   decision: Termination
 ): void => {
   for (const runtime of getTerminationPath(params, decision).filter(
-    (candidate) => candidate.stepExecution
+    (candidate) => candidate.stepExecution || candidate.stepExecutionId === decision.stepExecutionId
   )) {
-    params.workflowExecutionState.upsertStep({
-      id: runtime.stepExecutionId,
-      error: null,
-      executionCheckpoint: null,
-    });
-    if (runtime.stepExecution?.status !== ExecutionStatus.COMPLETED) {
-      runtime.finishStep(
-        runtime.stepExecutionId === decision.stepExecutionId ? decision.output : undefined
-      );
+    // A root terminator may commit its decision before its first step document is flushed.
+    if (!runtime.stepExecution) runtime.startStep();
+    if (runtime.stepExecutionId === decision.stepExecutionId && decision.stepError) {
+      params.workflowExecutionState.upsertStep({
+        id: runtime.stepExecutionId,
+        executionCheckpoint: null,
+      });
+      if (runtime.stepExecution?.status !== ExecutionStatus.FAILED) {
+        const error = new Error(decision.stepError.message);
+        error.name = decision.stepError.type;
+        runtime.failStep(error);
+      }
+    } else {
+      params.workflowExecutionState.upsertStep({
+        id: runtime.stepExecutionId,
+        error: null,
+        executionCheckpoint: null,
+      });
+      if (runtime.stepExecution?.status !== ExecutionStatus.COMPLETED) {
+        runtime.finishStep(
+          runtime.stepExecutionId === decision.stepExecutionId ? decision.output : undefined
+        );
+      }
     }
   }
 };

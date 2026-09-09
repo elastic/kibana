@@ -1,4 +1,4 @@
-name: "Audit 11 - Waiting branches release and reacquire admission"
+name: "Waiting branches release and reacquire admission"
 description: "Local concurrency one with count-waiting false. Three branches suspend twice and all finish once, with their own identity."
 enabled: true
 triggers:

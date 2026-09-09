@@ -14,7 +14,7 @@ import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 const example = (name: string) =>
-  readFileSync(join(__dirname, '../../examples/parallel_audit', `${name}.yml`), 'utf8');
+  readFileSync(join(__dirname, '../fixtures/parallel', `${name}.yml`), 'utf8');
 const workflow = (fixture: WorkflowRunFixture) =>
   fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 const executions = (fixture: WorkflowRunFixture, stepId: string) =>
@@ -41,7 +41,7 @@ const drain = async (fixture: WorkflowRunFixture, advanceMs = 2000) => {
 describe('parallel edge-case review workflows', () => {
   it('resumes unequal waits independently and joins only after the later deadline', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: example('25_unequal_waits') });
+    await fixture.runWorkflow({ workflowYaml: example('unequal_waits') });
     const deadlines = [...executions(fixture, 'short_pause'), ...executions(fixture, 'long_pause')]
       .map((step) => new Date(String(step.state?.resumeAt)).getTime())
       .sort();
@@ -73,7 +73,7 @@ describe('parallel edge-case review workflows', () => {
 
   it('unwinds timed-out foreach, while and retry scopes without invoking their handlers', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: example('26_timeout_scopes') });
+    await fixture.runWorkflow({ workflowYaml: example('timeout_scopes') });
     const date = jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 2500);
     try {
       await fixture.resumeWorkflow();
@@ -95,7 +95,7 @@ describe('parallel edge-case review workflows', () => {
 
   it('keeps foreach/while break and continue scoped to each branch and selects switch paths', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: example('07_loop_control') });
+    await fixture.runWorkflow({ workflowYaml: example('loop_control') });
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     expect(outputs(fixture, 'item_result')).toEqual(['left:0', 'left:2', 'right:0', 'right:2']);
     expect(outputs(fixture, 'iteration_result')).toEqual([
@@ -116,7 +116,7 @@ describe('parallel edge-case review workflows', () => {
 
   it('does not reuse branch positions or results across enclosing foreach iterations', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: example('08_parallel_in_foreach') });
+    await fixture.runWorkflow({ workflowYaml: example('parallel_in_foreach') });
     await drain(fixture);
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     expect(outputs(fixture, 'task_result')).toEqual(['A:1', 'A:2', 'B:1', 'B:2']);
@@ -126,7 +126,7 @@ describe('parallel edge-case review workflows', () => {
 
   it('joins empty fan-out, empty loops, and skipped terminal conditions', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: example('09_empty_and_skipped') });
+    await fixture.runWorkflow({ workflowYaml: example('empty_and_skipped') });
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     expect(executions(fixture, 'never_empty')).toHaveLength(0);
     expect(executions(fixture, 'never_loop')).toHaveLength(0);
@@ -136,7 +136,7 @@ describe('parallel edge-case review workflows', () => {
 
   it('releases and reacquires local admission across repeated durable waits', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: example('11_wait_admission') });
+    await fixture.runWorkflow({ workflowYaml: example('wait_admission') });
     await drain(fixture);
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     for (const stepId of ['started', 'middle', 'result']) {
@@ -147,7 +147,7 @@ describe('parallel edge-case review workflows', () => {
   it('schedules the enclosing step timeout before descendant wait timers', async () => {
     const fixture = new WorkflowRunFixture();
     const started = Date.now();
-    await fixture.runWorkflow({ workflowYaml: example('22_overall_timeout') });
+    await fixture.runWorkflow({ workflowYaml: example('overall_timeout') });
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.WAITING);
     const tasks = fixture.taskManagerMock.schedule.mock.calls.map(([task]) => task);
     expect(tasks.some((task) => task.runAt && task.runAt.getTime() <= started + 2500)).toBe(true);
@@ -164,7 +164,7 @@ describe('parallel edge-case review workflows', () => {
   it('wakes at the outer branch deadline and terminates all parked descendants', async () => {
     const fixture = new WorkflowRunFixture();
     const started = Date.now();
-    await fixture.runWorkflow({ workflowYaml: example('10_deadline_before_wait') });
+    await fixture.runWorkflow({ workflowYaml: example('deadline_before_wait') });
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.WAITING);
     const parent = executions(fixture, 'branches')[0];
     expect(new Date(String(parent.state?.resumeAt)).getTime()).toBeLessThanOrEqual(started + 2500);
@@ -192,7 +192,7 @@ describe('parallel failure handling at the join', () => {
 
   it('retries the whole parallel with distinct attempt scopes before parent fallback', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: failingExample('17_parent_retry') });
+    await fixture.runWorkflow({ workflowYaml: failingExample('parent_retry') });
     await drain(fixture);
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
     expect(executions(fixture, 'fail')).toHaveLength(4);
@@ -202,7 +202,7 @@ describe('parallel failure handling at the join', () => {
 
   it('continues after parent retry/fallback only when continue is explicitly enabled', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: failingExample('19_parent_retry_continue') });
+    await fixture.runWorkflow({ workflowYaml: failingExample('parent_retry_continue') });
     await drain(fixture);
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     expect(executions(fixture, 'fail')).toHaveLength(4);
@@ -212,7 +212,7 @@ describe('parallel failure handling at the join', () => {
 
   it('does not re-tick for pending branches that fail-fast will never admit', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: failingExample('24_fail_fast_long_wait') });
+    await fixture.runWorkflow({ workflowYaml: failingExample('fail_fast_long_wait') });
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.WAITING);
     expect(
       new Date(String(executions(fixture, 'branches')[0].state?.resumeAt)).getTime() - Date.now()
@@ -222,7 +222,7 @@ describe('parallel failure handling at the join', () => {
 
   it('drains already-started siblings but never admits queued branches after fail-fast', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: failingExample('24_fail_fast_long_wait') });
+    await fixture.runWorkflow({ workflowYaml: failingExample('fail_fast_long_wait') });
     await drain(fixture, 61_000);
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
     expect(outputs(fixture, 'active_result')).toEqual(['drained']);

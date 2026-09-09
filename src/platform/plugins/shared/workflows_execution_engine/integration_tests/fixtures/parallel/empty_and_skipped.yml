@@ -1,4 +1,4 @@
-name: "Audit 09 - Empty fan-out and skipped branch bodies"
+name: "Empty fan-out and skipped branch bodies"
 description: "An empty fan-out launches nothing. An empty foreach and skipped final condition in each outer branch must still join successfully."
 enabled: true
 triggers:

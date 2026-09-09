@@ -305,6 +305,21 @@ export class WorkflowExecutionState {
     return this.workflowFlushQueue;
   }
 
+  /** Publishes a termination decision only after its serialized workflow write succeeds. */
+  public persistTermination(
+    decision: NonNullable<EsWorkflowExecution['pendingTermination']>
+  ): Promise<void> {
+    this.workflowFlushQueue = this.workflowFlushQueue.then(async () => {
+      await this.persistWorkflowDoc();
+      await this.workflowExecutionRepository.updateWorkflowExecution({
+        id: this.workflowExecution.id,
+        pendingTermination: decision,
+      });
+      this.workflowExecution = { ...this.workflowExecution, pendingTermination: decision };
+    });
+    return this.workflowFlushQueue;
+  }
+
   private async persistWorkflowDoc(): Promise<void> {
     if (!this.workflowDocumentChanges) {
       return;
