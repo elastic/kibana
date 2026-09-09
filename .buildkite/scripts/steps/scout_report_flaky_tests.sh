@@ -62,9 +62,12 @@ echo "--- Upload flaky test report"
 buildkite-agent artifact upload "$REPORT_PATH"
 
 echo "--- Annotate build"
-counts="**$(jq -r '.summary.totalFlaky' "$REPORT_PATH")** flaky"
+# `summary.total*` are capped at `thresholds.maxTests` (applied to each classification separately),
+# so show the cap next to each count to avoid reading a full list as the true total.
+max_tests="$(jq -r '.thresholds.maxTests' "$REPORT_PATH")"
+counts="**$(jq -r '.summary.totalFlaky' "$REPORT_PATH")** flaky (max ${max_tests})"
 if [[ "$FLAKY_TESTS_CLASSIFICATIONS" == *consistently-failing* ]]; then
-  counts+=" and **$(jq -r '.summary.totalConsistentlyFailing' "$REPORT_PATH")** consistently failing"
+  counts+=" and **$(jq -r '.summary.totalConsistentlyFailing' "$REPORT_PATH")** consistently failing (max ${max_tests})"
 fi
 
 {
