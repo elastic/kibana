@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiSpacer,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiFieldText,
+  EuiFormRow,
+} from '@elastic/eui';
 
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
   CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
   getCredentialKeyFromVarName,
+  parseAwsRegionFromArn,
 } from '../../../../common/services/cloud_connectors';
 import { getEnabledPolicyTemplates } from '../../../../common/services/policy_template';
 import { type CloudConnectorFormProps } from '../types';
@@ -29,6 +40,11 @@ import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
+
+const STACK_ARN_ERROR = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnInvalid', {
+  defaultMessage:
+    'Enter a CloudFormation stack ARN, for example arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/…',
+});
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
@@ -45,15 +61,35 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const inputs = newPolicy?.inputs;
   const enabledPolicyTemplates = useMemo(() => getEnabledPolicyTemplates({ inputs }), [inputs]);
 
-  const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
-    useCloudConnectorTemplate({
-      provider: AWS_PROVIDER,
-      cloud,
-      accountType,
-      iacTemplateUrl,
-      packageName: packageInfo?.name,
-      policyTemplates: enabledPolicyTemplates,
-    });
+  // Always keep a ref to the latest credentials and setCredentials so that
+  // onTemplateRendered (called after an async render) never closes over a
+  // stale snapshot. Without this, a name edit made while the render is in
+  // flight would be silently reverted when the callback fires.
+  const latestRef = useRef({ credentials, setCredentials });
+  latestRef.current = { credentials, setCredentials };
+
+  const onTemplateRendered = useCallback(({ key }: { key?: string }) => {
+    const { credentials: current, setCredentials: set } = latestRef.current;
+    if (key && current && isAwsCredentials(current) && set) {
+      set({ ...current, iacKey: key });
+    }
+  }, []);
+
+  const {
+    launchButtonProps,
+    isDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+    isIacProvisionerEnabled,
+  } = useCloudConnectorTemplate({
+    provider: AWS_PROVIDER,
+    cloud,
+    accountType,
+    iacTemplateUrl,
+    packageName: packageInfo?.name,
+    policyTemplates: enabledPolicyTemplates,
+    onTemplateRendered,
+  });
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -64,6 +100,11 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     : inputVars;
 
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);
+
+  // Derive the stack ARN field state from the credentials object.
+  const stackArn =
+    credentials && isAwsCredentials(credentials) ? credentials.iacDeploymentId ?? '' : '';
+  const stackArnInvalid = stackArn !== '' && parseAwsRegionFromArn(stackArn) === undefined;
 
   return (
     <>
@@ -113,6 +154,37 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             iconType="error"
             size="s"
           />
+        </>
+      )}
+      {isIacProvisionerEnabled && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.fleet.cloudConnector.aws.stackArnLabel', {
+              defaultMessage: 'CloudFormation stack ARN',
+            })}
+            helpText={i18n.translate('xpack.fleet.cloudConnector.aws.stackArnHelp', {
+              defaultMessage:
+                'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
+            })}
+            isInvalid={stackArnInvalid}
+            error={stackArnInvalid ? STACK_ARN_ERROR : undefined}
+          >
+            <EuiFieldText
+              fullWidth
+              value={stackArn}
+              isInvalid={stackArnInvalid}
+              onChange={(e) => {
+                if (!credentials || !isAwsCredentials(credentials) || !setCredentials) return;
+                setCredentials({
+                  ...credentials,
+                  iacDeploymentId: e.target.value.trim() || undefined,
+                });
+              }}
+              data-test-subj={CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ}
+            />
+          </EuiFormRow>
         </>
       )}
       <EuiSpacer size="m" />

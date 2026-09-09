@@ -42,6 +42,8 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CLOUD_CONNECTOR_ID: 'gcpCredentialsCloudConnectorIdInput',
 };
 
+export const CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ = 'cloudConnectorStackArnInput';
+
 export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FLYOUT: 'cloudConnectorPoliciesFlyout',
   CLOSE_BUTTON: 'cloudConnectorPoliciesFlyoutCloseButton',
