@@ -13,10 +13,9 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AppDetails, FeedbackRegistryEntry } from '@kbn/ui-feedback';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
-import { firstValueFrom, type Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { FeedbackContext, FeedbackFormData, SetFeedbackContext } from '../common';
 import { getAppDetails } from './src/utils';
 
@@ -37,12 +36,6 @@ interface FeedbackDeps {
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, color: 'success' | 'error') => void;
 }
-
-const LazyFeedbackTriggerButton = lazy(() =>
-  import('@kbn/ui-feedback').then(({ FeedbackTriggerButton }) => ({
-    default: FeedbackTriggerButton,
-  }))
-);
 
 const LazyFeedbackContainer = lazy(() =>
   import('@kbn/ui-feedback').then(({ FeedbackContainer }) => ({
@@ -225,30 +218,18 @@ export class FeedbackPlugin implements Plugin {
       spaces
     );
     const { isOptedIn$ } = telemetry.telemetryService;
-    const checkTelemetryOptIn = () => firstValueFrom(isOptedIn$);
 
-    if (isNextChrome(core.featureFlags)) {
-      let unregisterFeedbackHandler: (() => void) | undefined;
+    let unregisterFeedbackHandler: (() => void) | undefined;
 
-      this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
-        unregisterFeedbackHandler?.();
-        unregisterFeedbackHandler = undefined;
+    this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
+      unregisterFeedbackHandler?.();
+      unregisterFeedbackHandler = undefined;
 
-        if (optIn) {
-          unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
-            openFeedbackModal(core, deps);
-          });
-        }
-      });
-    }
-
-    core.chrome.navControls.registerRight({
-      order: 1001,
-      content: (
-        <Suspense fallback={null}>
-          <LazyFeedbackTriggerButton {...deps} checkTelemetryOptIn={checkTelemetryOptIn} />
-        </Suspense>
-      ),
+      if (optIn) {
+        unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
+          openFeedbackModal(core, deps);
+        });
+      }
     });
 
     return { setContext };

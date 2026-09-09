@@ -69,14 +69,14 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       return forkJoin({
         authz: from(endpointContext.service.getEndpointAuthz(deps.request)),
         ccsEnabled: endpointContext.service.isCcsEnabled(),
+        scoped: from(endpointContext.service.asScoped(deps.request)),
       }).pipe(
-        mergeMap(({ authz, ccsEnabled }) => {
+        mergeMap(({ authz, ccsEnabled, scoped }) => {
           if (!authz.canAccessEndpointActionsLogManagement) {
             throw new KbnServerError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
           }
 
           const { service } = endpointContext;
-          const scoped = service.asScoped(deps.request);
           const cpsRead = scoped.isCpsRead();
           const spaceId = cpsRead ? scoped.getSpaceId() : undefined;
           const actionId = 'actionId' in request ? request.actionId : undefined;
@@ -164,7 +164,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       // Async search ids belong to whoever issued them, and there is no DSL here to re-derive the
       // routing from. No factory query currently resolves to a Fleet index, so with CPS on the
       // search this id belongs to went out on the scoped client.
-      const scoped = endpointContext.service.asScoped(deps.request);
+      const scoped = await endpointContext.service.asScoped(deps.request);
       if (scoped.isCpsRead()) {
         // `options.strategy` names this strategy; forwarding it unchanged would cause the scoped
         // client to dispatch straight back into this cancel, producing infinite recursion. Override

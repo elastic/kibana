@@ -5,6 +5,7 @@
  * 2.0.
  */
 export { getSloApmLabels } from './get_slo_apm_labels';
+export { getSloProjectRouting } from './get_slo_project_routing';
 import { get } from 'lodash';
 import type { Groupings } from '../../domain/models';
 

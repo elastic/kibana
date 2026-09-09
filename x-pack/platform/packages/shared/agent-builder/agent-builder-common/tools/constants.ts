@@ -55,7 +55,10 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
+  /** @deprecated Use `getAttachments` (read) and `manageAttachments` (write) instead. */
   attachments: casesTool('attachments'),
+  getAttachments: casesTool('get_attachments'),
+  manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
 } as const;
 
@@ -69,6 +72,7 @@ export const platformCoreCasesTools = {
  */
 export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
+  searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
@@ -102,6 +106,7 @@ export const internalTools = {
   setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
+  describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
 };
 
@@ -130,6 +135,7 @@ export const isInternalTool = (toolName: string) =>
 const filestoreAllowedInternalToolIds = new Set<string>([
   internalTools.discoverApis,
   internalTools.describeApi,
+  internalTools.describeApiType,
   internalTools.executeApi,
 ]);
 

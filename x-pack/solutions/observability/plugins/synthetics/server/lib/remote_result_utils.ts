@@ -15,6 +15,15 @@ export const isCCSEnabled = (server: Pick<SyntheticsServerSetup, 'isElasticsearc
   !server.isElasticsearchServerless;
 
 /**
+ * Collect `_index` (and optional `kibanaUrl`) so overview can synthesize
+ * read-only remotes. CCS prefixes `_index` with the remote cluster; CPS
+ * prefixes it with the linked project alias.
+ */
+export const isRemoteIndexMetadataEnabled = (
+  server: Pick<SyntheticsServerSetup, 'isElasticsearchServerless' | 'isCpsEnabled'>
+) => isCCSEnabled(server) || Boolean(server.isCpsEnabled);
+
+/**
  * Extracts the remote cluster name from an ES `_index` field.
  * Returns undefined if the index is local.
  *

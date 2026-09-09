@@ -7,10 +7,23 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { DEFAULT_GROUPING_MODE } from '../constants';
+import {
+  DispatchOutcome,
+  DispatchPlan,
+  EpisodeScan,
+  EpisodeTriage,
+  PolicyCatalog,
+  RuleCatalog,
+  SuppressionIndex,
+  type SuppressedEpisode,
+} from '../state';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
+  ActionGroupId,
   ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatchFailure,
@@ -20,6 +33,7 @@ import type {
   DispatcherStepOutput,
   MatchedPair,
   Rule,
+  RuleId,
 } from '../types';
 
 export function createStepLogger(): LoggerServiceContract {
@@ -42,13 +56,78 @@ export function createDispatcherPipelineInput(
   };
 }
 
+/**
+ * Flat overrides for building a pipeline state: value-object fields are given
+ * through their raw source data (`episodes`, `rules`, `policies`) and folded
+ * into the value objects here.
+ */
+export interface DispatcherPipelineStateOverrides
+  extends Omit<
+    Partial<DispatcherPipelineState>,
+    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
+  > {
+  input?: DispatcherPipelineInput;
+  episodes?: AlertEpisode[];
+  suppressions?: AlertEpisodeSuppression[];
+  dispatchable?: AlertEpisode[];
+  suppressed?: SuppressedEpisode[];
+  rules?: Map<RuleId, Rule>;
+  policies?: Map<ActionPolicyId, ActionPolicy>;
+  dispatch?: ActionGroup[];
+  throttled?: ActionGroup[];
+  dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  dispatchFailures?: DispatchFailure[];
+}
+
 export function createDispatcherPipelineState(
-  state: Partial<DispatcherPipelineState> = {}
+  state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const input = state.input ?? createDispatcherPipelineInput();
-  return {
-    ...state,
+  const {
+    episodes,
+    suppressions,
+    dispatchable,
+    suppressed,
+    rules,
+    policies,
+    dispatch,
+    throttled,
+    dispatchedExecutions,
+    dispatchFailures,
     input,
+    ...rest
+  } = state;
+  return {
+    ...rest,
+    ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
+    ...(suppressions ? { suppressions: SuppressionIndex.of(suppressions) } : {}),
+    ...(dispatchable || suppressed
+      ? {
+          triage: EpisodeTriage.of({
+            dispatchable: dispatchable ?? [],
+            suppressed: suppressed ?? [],
+          }),
+        }
+      : {}),
+    ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
+    ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    ...(dispatch || throttled || dispatchable
+      ? {
+          plan: DispatchPlan.of({
+            toDispatch: dispatch ?? [],
+            throttled: throttled ?? [],
+            dispatchable: dispatchable ?? [],
+          }),
+        }
+      : {}),
+    ...(dispatchedExecutions || dispatchFailures
+      ? {
+          outcome: DispatchOutcome.of({
+            executionsByGroup: dispatchedExecutions ?? new Map(),
+            failures: dispatchFailures ?? [],
+          }),
+        }
+      : {}),
+    input: input ?? createDispatcherPipelineInput(),
   };
 }
 
@@ -98,6 +177,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],
+    groupingMode: DEFAULT_GROUPING_MODE,
     ...overrides,
   };
 }

@@ -1,9 +1,93 @@
 {
-  "sha1": "8f18fe5ab4e205f0d201f3e11cdc852bed03e2f7",
+  "sha1": "2b3d9c8c65acb650e2488a4a3d662134d8ab1768",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "a002a5dadd7e00b-8a982de270c8a77",
+      "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-917d88b3f6969ed",
+      "title": "Onboarding ECF Deployment Section pre-launch: ECF section is visible with launch button; no stack name field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-7e7ee2a63c9223c",
+      "title": "Onboarding ECF Deployment Section post-launch: accordion stays expanded with Done badge; stack name field is pre-filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-a180c0cddbd1be7",
+      "title": "Onboarding ECF Deployment Section post-launch: ECF version is displayed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-bdc703b93b9178b",
+      "title": "Onboarding ECF Deployment Section post-launch: editing the stack name persists across a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-16c68e10f90f8d8",
+      "title": "Onboarding ECF Deployment Section post-launch: invalid stack name shows inline error; Next button stays enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
     {
       "id": "8b1c88bbca05585-cc5ebedbcad32a7",
       "title": "Onboarding app — FF enabled renders the onboarding shell and navigates between steps",
@@ -14,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
-        "line": 35,
-        "column": 23
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -28,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 286,
-        "column": 5
+        "line": 191,
+        "column": 7
       }
     },
     {
@@ -42,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 306,
-        "column": 92
+        "line": 211,
+        "column": 7
       }
     },
     {
@@ -56,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 319,
-        "column": 11
+        "line": 218,
+        "column": 7
       }
     },
     {
@@ -70,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 331,
-        "column": 36
+        "line": 229,
+        "column": 7
       }
     },
     {
@@ -84,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 342,
-        "column": 5
+        "line": 243,
+        "column": 7
       }
     },
     {
@@ -98,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 371,
-        "column": 44
+        "line": 275,
+        "column": 7
       }
     },
     {
@@ -112,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 381,
+        "line": 284,
         "column": 7
       }
     },
@@ -126,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 393,
-        "column": 9
+        "line": 302,
+        "column": 7
       }
     },
     {
@@ -140,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 411,
-        "column": 24
+        "line": 321,
+        "column": 7
       }
     },
     {
@@ -154,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 419,
-        "column": 11
+        "line": 335,
+        "column": 7
       }
     },
     {
@@ -168,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 433,
-        "column": 74
+        "line": 349,
+        "column": 7
       }
     },
     {
@@ -182,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 441,
-        "column": 11
+        "line": 358,
+        "column": 7
       }
     },
     {
@@ -196,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 476,
+        "line": 396,
         "column": 7
       }
     },
@@ -210,22 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 483,
-        "column": 24
-      }
-    },
-    {
-      "id": "f11cb343b6e8637-26047a727d2a7c0",
-      "title": "Onboarding Service Settings step ⋮ actions menu is visible on every row and contains Duplicate service",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 512,
-        "column": 8
+        "line": 407,
+        "column": 7
       }
     },
     {
@@ -238,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 529,
-        "column": 100
+        "line": 435,
+        "column": 7
       }
     },
     {
@@ -252,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 547,
+        "line": 452,
         "column": 7
       }
     },
@@ -266,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 559,
-        "column": 5
+        "line": 465,
+        "column": 7
       }
     },
     {
@@ -280,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 567,
-        "column": 83
+        "line": 484,
+        "column": 7
       }
     },
     {
@@ -294,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 592,
-        "column": 81
+        "line": 514,
+        "column": 7
       }
     },
     {
@@ -308,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 621,
-        "column": 36
+        "line": 544,
+        "column": 7
       }
     },
     {
@@ -322,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 668,
-        "column": 24
+        "line": 596,
+        "column": 7
       }
     },
     {
@@ -336,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 723,
-        "column": 16
+        "line": 652,
+        "column": 7
       }
     },
     {
@@ -350,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 741,
-        "column": 23
+        "line": 678,
+        "column": 7
       }
     },
     {
@@ -364,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 38,
-        "column": 52
+        "line": 49,
+        "column": 7
       }
     },
     {
@@ -378,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 49,
-        "column": 79
+        "line": 65,
+        "column": 7
       }
     },
     {
@@ -392,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 61,
-        "column": 11
+        "line": 80,
+        "column": 7
       }
     },
     {
@@ -406,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 77,
-        "column": 11
+        "line": 103,
+        "column": 7
       }
     },
     {
@@ -420,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 85,
-        "column": 5
+        "line": 116,
+        "column": 7
       }
     },
     {
@@ -434,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
-        "line": 62,
-        "column": 8
+        "line": 76,
+        "column": 7
       }
     },
     {
@@ -448,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding.spec.ts",
-        "line": 12,
-        "column": 14
+        "line": 13,
+        "column": 7
       }
     }
   ]

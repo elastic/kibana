@@ -17,11 +17,14 @@ import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
+  createBadRequestError,
   createInternalError,
+  createNonInteractiveConfig,
   isAgentBuilderError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
+import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
   ExperimentalFeatures,
@@ -29,6 +32,7 @@ import type {
   ModelProvider,
   RunAgentReturn,
   RunContext,
+  RunApprovals,
   Runner,
   RunToolReturn,
   ScopedRunner,
@@ -39,6 +43,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import type {
   ConversationStateManager,
@@ -158,6 +163,18 @@ export type CreateRunnerDeps = Omit<
   getExecutionService: () => AgentExecutionService;
 };
 
+const toToolRunInteractivity = (approvals?: RunApprovals): InteractivityConfig => {
+  const unknownApis = findUnknownApis(approvals?.autoApprovedApis ?? []);
+  if (unknownApis.length > 0) {
+    throw createBadRequestError(
+      `Unknown auto_approved_apis: ${formatUnknownApis(
+        unknownApis
+      )}. Each entry must name an API that exists on its target.`
+    );
+  }
+  return createNonInteractiveConfig(approvals?.autoApprovedApis);
+};
+
 export class RunnerManager {
   public readonly deps: CreateScopedRunnerDeps;
   public readonly context: RunContext;
@@ -274,19 +291,22 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       request,
       getExecutionService,
       projectRouting,
+      interactivity,
     });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
       runnerDeps.savedObjects.getScopedClient(request)
     );
-    const [experimentalEnabled, bashEnabled] = await Promise.all([
+    const [experimentalEnabled, bashEnabled, contextEngineEnabled] = await Promise.all([
       uiSettingsClient
         .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
         .catch(() => false),
       uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+      uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID).catch(() => false),
     ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
+      aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
@@ -322,7 +342,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   return {
     runTool: async (runToolParams) => {
-      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+      const { request, defaultConnectorId, promptState, abortSignal, approvals, ...otherParams } =
         runToolParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -331,12 +351,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
-        interactivity: { enabled: false },
+        interactivity: toToolRunInteractivity(approvals),
       });
       return runner.runTool(otherParams);
     },
     runInternalTool: async (runToolParams) => {
-      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+      const { request, defaultConnectorId, promptState, abortSignal, approvals, ...otherParams } =
         runToolParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -345,7 +365,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
-        interactivity: { enabled: false },
+        interactivity: toToolRunInteractivity(approvals),
       });
       return runner.runInternalTool(otherParams);
     },
