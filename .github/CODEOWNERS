@@ -1002,7 +1002,7 @@ x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-engineering
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
-x-pack/platform/packages/shared/kbn-data-forge @elastic/nightshift-sre-agent-team
+x-pack/platform/packages/shared/kbn-data-forge @elastic/nightshift-sre-agent-team @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
