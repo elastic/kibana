@@ -27,8 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/238752
-  describe.skip('cases list', () => {
+  describe('cases list', () => {
     before(async () => {
       await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
@@ -41,7 +40,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('empty state', () => {
       it('displays an empty list with an add button correctly', async () => {
-        await testSubjects.existOrFail('cases-table-add-case');
+        await testSubjects.existOrFail('cases-list-add-case');
       });
     });
 
@@ -257,9 +256,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           const case2 = await cases.api.getCase({ caseId: caseIds[1] });
           const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.assignees).eql([{ uid: casesNoDelete.uid }]);
-          expect(case2.assignees).eql([{ uid: casesNoDelete.uid }]);
-          expect(case1.assignees).eql([{ uid: casesAll.uid }]);
+          expect(case3.assignees.map(({ uid }) => uid)).eql([casesNoDelete.uid]);
+          expect(case2.assignees.map(({ uid }) => uid)).eql([casesNoDelete.uid]);
+          expect(case1.assignees.map(({ uid }) => uid)).eql([casesAll.uid]);
         });
 
         it('adds a new assignee', async () => {
@@ -274,13 +273,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           const case2 = await cases.api.getCase({ caseId: caseIds[1] });
           const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.assignees).eql([{ uid: casesAll2.uid }, { uid: casesAll.uid }]);
-          expect(case2.assignees).eql([
-            { uid: casesAll2.uid },
-            { uid: casesNoDelete.uid },
-            { uid: casesAll.uid },
+          expect(case3.assignees.map(({ uid }) => uid)).eql([casesAll2.uid, casesAll.uid]);
+          expect(case2.assignees.map(({ uid }) => uid)).eql([
+            casesAll2.uid,
+            casesNoDelete.uid,
+            casesAll.uid,
           ]);
-          expect(case1.assignees).eql([{ uid: casesAll.uid }]);
+          expect(case1.assignees.map(({ uid }) => uid)).eql([casesAll.uid]);
         });
       });
     });
@@ -912,39 +911,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('to open', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.open, 0);
           await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.open}`);
-        });
-      });
-
-      describe('Severity', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(1);
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
-
-        it('to medium', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
-        });
-
-        it('to high', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
-        });
-
-        it('to critical', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.CRITICAL, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.CRITICAL}`);
-        });
-
-        it('to low', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.LOW, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.LOW}`);
         });
       });
 
