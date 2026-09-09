@@ -162,6 +162,7 @@ const ebtAction = {
     DELETE: 'delete',
     RENAME_SAVE: 'rename_save',
     RENAME_CANCEL: 'rename_cancel',
+    OPEN_SHARE: 'open_share',
     OPEN_MORE_ACTIONS: 'open_more_actions',
     AGENT_DETAILS: 'agent_details',
     GENAI_SETTINGS: 'genai_settings',

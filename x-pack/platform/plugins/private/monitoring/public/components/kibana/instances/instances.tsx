@@ -278,7 +278,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
                     }
                   )}
                   color="warning"
-                  iconType="flag"
+                  iconType="pencil"
                 >
                   <p>
                     {i18n.translate(

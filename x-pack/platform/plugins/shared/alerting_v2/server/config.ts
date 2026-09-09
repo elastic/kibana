@@ -36,6 +36,12 @@ const rulesRunSchema = schema.object({
   alerts: schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
+  /** Distinct groups per run can never exceed rows per run, so the ceiling is tied to `alerts.max`. */
+  maxGroupsPerExecution: schema.number({
+    defaultValue: MAX_ALERTS_PER_RUN,
+    min: 1,
+    max: MAX_ALERTS_PER_RUN,
+  }),
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
   query: schema.object({
     /**

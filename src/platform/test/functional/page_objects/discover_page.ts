@@ -675,7 +675,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('doc table to finish rendering', async () => {
       const renderComplete = await this.testSubjects.getAttribute(
         'discoverDocTable',
-        'data-render-complete'
+        'data-table-loaded'
       );
       return renderComplete === 'true';
     });
@@ -905,7 +905,7 @@ export class DiscoverPageObject extends FtrService {
   public async waitForDocTableLoadingComplete() {
     await this.testSubjects.waitForAttributeToChange(
       'discoverDocTable',
-      'data-render-complete',
+      'data-table-loaded',
       'true'
     );
   }

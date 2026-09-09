@@ -8,6 +8,7 @@
 import { of } from 'rxjs';
 import { assign, fromCallback, fromObservable, fromPromise, setup } from 'xstate';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { NotificationChannel } from '@kbn/xstate-utils';
 import type { LogView, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
 import type { ILogViewsClient } from '../../../services/log_views';
@@ -308,6 +309,11 @@ export const logViewStateMachine = setup({
 
 export interface LogViewStateMachineImplementationDependencies {
   logViews: ILogViewsClient;
+  /**
+   * Scopes the log view status query to the given CPS projects. When omitted, the query falls back
+   * to the global project routing or remains undefined in non CPS contexts.
+   */
+  projectRouting?: ProjectRouting;
   notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
   initializeFromUrl?: InitializeFromUrl;
   updateContextInUrl?: UpdateContextInUrl;
@@ -316,6 +322,7 @@ export interface LogViewStateMachineImplementationDependencies {
 
 export const createLogViewStateMachineImplementations = ({
   logViews,
+  projectRouting,
   notificationChannel,
   initializeFromUrl,
   updateContextInUrl,
@@ -375,7 +382,7 @@ export const createLogViewStateMachineImplementations = ({
       if (!('resolvedLogView' in input)) {
         throw new Error('Failed to resolve log view: No log view found in context.');
       }
-      return await logViews.getResolvedLogViewStatus(input.resolvedLogView);
+      return await logViews.getResolvedLogViewStatus(input.resolvedLogView, { projectRouting });
     }),
   },
 });
