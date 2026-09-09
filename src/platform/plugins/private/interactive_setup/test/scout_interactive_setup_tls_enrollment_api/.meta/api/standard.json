@@ -1,0 +1,60 @@
+{
+  "sha1": "0640a9904d53c5d516bcc45441a2172a4f43bebe",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b8f8665edfdad0d-c3fa04398f3c96e",
+      "title": "Interactive setup - enrollment flow rejects enrollment with an invalid verification code",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
+        "line": 50,
+        "column": 33
+      }
+    },
+    {
+      "id": "b8f8665edfdad0d-55153aef540d38a",
+      "title": "Interactive setup - enrollment flow rejects enrollment with a mismatched CA fingerprint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
+        "line": 62,
+        "column": 15
+      }
+    },
+    {
+      "id": "b8f8665edfdad0d-2e5902c55077439",
+      "title": "Interactive setup - enrollment flow rejects enrollment with an invalidated API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
+        "line": 84,
+        "column": 26
+      }
+    },
+    {
+      "id": "b8f8665edfdad0d-e6622a3cd9de391",
+      "title": "Interactive setup - enrollment flow enrolls Kibana, then refuses further requests and boots",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
+        "line": 110,
+        "column": 19
+      }
+    }
+  ]
+}
