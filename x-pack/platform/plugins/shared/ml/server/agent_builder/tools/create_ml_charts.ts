@@ -16,6 +16,7 @@ import type { MlLicense } from '../../../common/license';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
+import type { BuildMlClientFn } from '../ml_client_factory';
 import {
   ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ANOMALY_CHARTS_ATTACHMENT_TYPE,
@@ -121,7 +122,8 @@ export const createMlChartsTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
-  enabledFeatures?: MlFeatures
+  enabledFeatures?: MlFeatures,
+  buildMlClient?: BuildMlClientFn
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: CREATE_ML_CHARTS_TOOL_ID,
   type: ToolType.builtin,
@@ -144,7 +146,7 @@ After the tool succeeds, render the chart inline by emitting:
 The returned \`config\` in the result can also be forwarded to \`platform.dashboard.generate_dashboard\` if the user asks to add the chart to a dashboard (use \`source: "config"\` with the appropriate panel type).`,
   experimental: true,
   schema,
-  handler: async (params, { esClient, request, logger, attachments }) => {
+  handler: async (params, { esClient, savedObjectsClient, request, logger, attachments }) => {
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       request,
@@ -235,7 +237,9 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
         // in selected_entities — otherwise the embeddable shows an empty callout instead of a chart.
         const detectorIndex = params.selected_detector_index ?? 0;
         try {
-          const jobResponse = await esClient.asInternalUser.ml.getJobs({
+          const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
+          const jobsApi = mlClient ?? esClient.asCurrentUser.ml;
+          const jobResponse = await jobsApi.getJobs({
             job_id: params.job_ids[0],
           });
           const job = jobResponse.jobs?.[0];

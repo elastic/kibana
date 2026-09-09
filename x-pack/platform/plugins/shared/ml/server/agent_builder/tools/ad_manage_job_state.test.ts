@@ -21,6 +21,9 @@ const createMlMock = () => ({
   stopDatafeed: jest.fn().mockResolvedValue({ stopped: true }),
   revertModelSnapshot: jest.fn().mockResolvedValue({ model: {} }),
   previewDatafeed: jest.fn().mockResolvedValue([]),
+  getJobs: jest.fn().mockResolvedValue({ jobs: [{ groups: ['ml-agent-scratch'] }] }),
+  deleteDatafeed: jest.fn().mockResolvedValue({ acknowledged: true }),
+  deleteJob: jest.fn().mockResolvedValue({ acknowledged: true }),
   getDatafeedStats: jest.fn().mockResolvedValue({ datafeeds: [{ state: 'stopped' }] }),
   getJobStats: jest.fn().mockResolvedValue({
     jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 100 } }],
@@ -255,6 +258,70 @@ describe('adManageJobStateTool', () => {
         status: 'failed',
         job_state: 'failed',
       });
+    });
+
+    it('operation=delete_job uses the current-user ML client when mlClient is unavailable', async () => {
+      const ml = createMlMock();
+      await adManageJobStateTool.handler(
+        { operation: 'delete_job', job_id: 'scratch-job' },
+        createContext(ml)
+      );
+
+      expect(ml.getJobs).toHaveBeenCalledWith({ job_id: 'scratch-job' });
+      expect(ml.stopDatafeed).toHaveBeenCalledWith({
+        datafeed_id: 'datafeed-scratch-job',
+        body: { force: true },
+      });
+      expect(ml.deleteDatafeed).toHaveBeenCalledWith({ datafeed_id: 'datafeed-scratch-job' });
+      expect(ml.deleteJob).toHaveBeenCalledWith({
+        job_id: 'scratch-job',
+        delete_user_annotations: true,
+      });
+    });
+
+    it('operation=delete_job refuses jobs that are not in the scratch group', async () => {
+      const ml = createMlMock();
+      ml.getJobs.mockResolvedValue({ jobs: [{ groups: ['production'] }] });
+      const result = await adManageJobStateTool.handler(
+        { operation: 'delete_job', job_id: 'prod-job' },
+        createContext(ml)
+      );
+
+      expect(ml.deleteJob).not.toHaveBeenCalled();
+      expect(getResultData(result).type).toBe(ToolResultType.error);
+      expect(String(getResultData(result).data.message)).toMatch('ml-agent-scratch');
+    });
+
+    it('operation=delete_job routes through mlClient when the factory is provided', async () => {
+      const currentUserMl = createMlMock();
+      const mlClient = createMlMock();
+      const tool = createAdManageJobStateTool(
+        resolveMlCapabilities,
+        undefined,
+        undefined,
+        undefined,
+        () => mlClient as any
+      );
+
+      await tool.handler(
+        { operation: 'delete_job', job_id: 'scratch-job' },
+        createContext(currentUserMl)
+      );
+
+      expect(mlClient.getJobs).toHaveBeenCalledWith({ job_id: 'scratch-job' });
+      expect(mlClient.stopDatafeed).toHaveBeenCalledWith({
+        datafeed_id: 'datafeed-scratch-job',
+        body: { force: true },
+      });
+      expect(mlClient.deleteDatafeed).toHaveBeenCalledWith({
+        datafeed_id: 'datafeed-scratch-job',
+      });
+      expect(mlClient.deleteJob).toHaveBeenCalledWith({
+        job_id: 'scratch-job',
+        delete_user_annotations: true,
+      });
+      expect(currentUserMl.getJobs).not.toHaveBeenCalled();
+      expect(currentUserMl.deleteJob).not.toHaveBeenCalled();
     });
   });
 });

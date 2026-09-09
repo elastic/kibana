@@ -51,9 +51,9 @@ describe('createMlChartsTool', () => {
     mlLicense
   );
 
-  const createContext = (attachmentsAdd = jest.fn()) =>
+  const createContext = (attachmentsAdd = jest.fn(), getJobs = jest.fn()) =>
     ({
-      esClient: { asInternalUser: { ml: { getJobs: jest.fn() } } },
+      esClient: { asCurrentUser: { ml: { getJobs } } },
       request: {},
       logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
       attachments: {
@@ -88,5 +88,64 @@ describe('createMlChartsTool', () => {
     expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
       ToolResultType.other
     );
+  });
+
+  it('looks up detector config as the current user, not the internal user', async () => {
+    const getJobs = jest.fn().mockResolvedValue({
+      jobs: [
+        {
+          analysis_config: {
+            detectors: [{ partition_field_name: 'host.name' }],
+          },
+        },
+      ],
+    });
+    const asInternalUser = { ml: { getJobs: jest.fn() } };
+    const attachmentsAdd = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
+    const context = {
+      ...createContext(attachmentsAdd, getJobs),
+      esClient: {
+        asCurrentUser: { ml: { getJobs } },
+        asInternalUser,
+      },
+    };
+
+    const result = await createMlChartsToolInstance.handler(
+      {
+        chart_type: 'single_metric_viewer',
+        job_ids: ['job-1'],
+        selected_entities: { 'host.name': 'web-01' },
+      },
+      context
+    );
+
+    expect(getJobs).toHaveBeenCalledWith({ job_id: 'job-1' });
+    expect(asInternalUser.ml.getJobs).not.toHaveBeenCalled();
+    expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
+      ToolResultType.other
+    );
+  });
+
+  it('looks up detector config via mlClient when the factory is provided', async () => {
+    const mlClient = { getJobs: jest.fn().mockResolvedValue({ jobs: [{ analysis_config: {} }] }) };
+    const asCurrentUserGetJobs = jest.fn();
+    const tool = createMlChartsTool(
+      resolveMlCapabilities,
+      undefined,
+      mlLicense,
+      undefined,
+      () => mlClient as any
+    );
+    const attachmentsAdd = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
+
+    await tool.handler(
+      { chart_type: 'single_metric_viewer', job_ids: ['job-1'] },
+      {
+        ...createContext(attachmentsAdd, asCurrentUserGetJobs),
+      }
+    );
+
+    expect(mlClient.getJobs).toHaveBeenCalledWith({ job_id: 'job-1' });
+    expect(asCurrentUserGetJobs).not.toHaveBeenCalled();
   });
 });
