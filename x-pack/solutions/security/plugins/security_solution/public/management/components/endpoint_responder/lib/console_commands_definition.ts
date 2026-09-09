@@ -189,7 +189,7 @@ export interface GetEndpointConsoleCommandsOptions {
 }
 
 // A refactor of response action command definition will be done in the near(ish) future
-// eslint-disable-next-line complexity
+
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
   agentType,
