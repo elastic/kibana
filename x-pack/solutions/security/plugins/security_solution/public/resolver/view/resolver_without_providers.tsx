@@ -79,7 +79,7 @@ export const ResolverWithoutProviders = React.memo(
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openPreviewPanel } = useExpandableFlyoutApi();
-    const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
+    const { openDocumentFlyoutFromPatternAsChild } = useFlyoutApi();
 
     useResolverQueryParamCleaner(resolverComponentInstanceID);
     /**
@@ -146,17 +146,21 @@ export const ResolverWithoutProviders = React.memo(
       onAlertUpdated?.();
     }, [onAlertUpdated]);
 
+    // Resolve the node's document by *pattern* (routing the search at the index) rather than by
+    // concrete `_index`, so cross-cluster / outside-data-view documents resolve. Alert backing
+    // indices are converted to their alias inside the wrapper. See
+    // https://github.com/elastic/kibana/issues/286323.
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
         () =>
-          openDocumentFlyoutFromIndexAsChild({
+          openDocumentFlyoutFromPatternAsChild({
             documentId: documentId ?? '',
             indexName,
             renderCellActions,
             onAlertUpdated: handleAlertUpdated,
             origin: FLYOUT_ORIGIN.RESOLVER_NODE,
           }),
-      [openDocumentFlyoutFromIndexAsChild, renderCellActions, handleAlertUpdated]
+      [openDocumentFlyoutFromPatternAsChild, renderCellActions, handleAlertUpdated]
     );
 
     const onShowPanel = useCallback(() => {
