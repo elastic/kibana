@@ -9,7 +9,7 @@ import type { Readable } from 'stream';
 import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, imageAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { FilesStart } from '@kbn/files-plugin/server';
+import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
 
 const streamToBuffer = (stream: Readable): Promise<Buffer> =>
   new Promise((resolve, reject) => {
@@ -37,8 +37,11 @@ export const createImageAttachmentType = ({
       const fileService = filesPlugin.fileServiceFactory.asScoped(context.request);
       try {
         await fileService.getById({ id: parse.data.file_id });
-      } catch {
-        return { valid: false, error: 'image file not found' };
+      } catch (e) {
+        if (e instanceof FileNotFoundError) {
+          return { valid: false, error: 'image file not found' };
+        }
+        throw e;
       }
 
       return { valid: true, data: parse.data };

@@ -20,6 +20,7 @@ import {
   ATTACHMENT_REF_ACTOR,
   getLatestVersion,
   getContentKey,
+  hashContent,
 } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
@@ -75,10 +76,15 @@ const mergeInputAttachmentsIntoAttachmentState = async (
     if (input.id) {
       const existing = attachmentStateManager.getAttachmentRecord(input.id);
       if (existing) {
+        // Skip validate() when content is unchanged
+        const dataUnchanged =
+          input.data !== undefined &&
+          getLatestVersion(existing)?.content_hash === hashContent(input.data);
+
         await attachmentStateManager.update(
           input.id,
           {
-            data: input.data,
+            ...(dataUnchanged ? {} : { data: input.data }),
             ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
           },
           ATTACHMENT_REF_ACTOR.user,

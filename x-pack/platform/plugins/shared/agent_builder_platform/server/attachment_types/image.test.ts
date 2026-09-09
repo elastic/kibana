@@ -9,7 +9,7 @@ import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment, ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { FilesStart } from '@kbn/files-plugin/server';
+import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
 import { createImageAttachmentType } from './image';
 
 const validImage: ImageAttachmentData = {
@@ -70,9 +70,9 @@ describe('image attachment type', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('rejects when file not found (getById throws)', async () => {
+    it('rejects when file not found (getById throws FileNotFoundError)', async () => {
       const getById = jest.fn(async () => {
-        throw new Error('Not Found');
+        throw new FileNotFoundError('File not found');
       });
       const asScoped = jest.fn(() => ({ getById }));
       const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
@@ -80,6 +80,18 @@ describe('image attachment type', () => {
       const result = await definition.validate(validImage, validateContext);
       expect(result.valid).toBe(false);
       if (!result.valid) expect(result.error).toBe('image file not found');
+    });
+
+    it('propagates transient errors instead of treating them as not-found', async () => {
+      const getById = jest.fn(async () => {
+        throw new Error('ES cluster unavailable');
+      });
+      const asScoped = jest.fn(() => ({ getById }));
+      const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
+      const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
+      await expect(definition.validate(validImage, validateContext)).rejects.toThrow(
+        'ES cluster unavailable'
+      );
     });
   });
 
