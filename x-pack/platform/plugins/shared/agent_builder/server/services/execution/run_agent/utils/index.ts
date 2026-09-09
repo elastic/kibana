@@ -7,8 +7,14 @@
 
 export { addRoundCompleteEvent } from './add_round_complete_event';
 export { extractRound } from './extract_round';
-export { convertPreviousRounds } from './to_langchain_messages';
+export { prepareMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
+export {
+  groupTimelineRounds,
+  sliceTimelineRounds,
+  type ProcessedTimelineEvent,
+  type TimelineRound,
+} from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
