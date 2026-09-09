@@ -43,10 +43,13 @@ const RULE_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
   id: 'alerting-v2-rule-executions',
   title: 'alerting-v2-rule-executions',
   fields: {
+    // Only started_at and duration are sortable — the Rules API supports server-side sort on those
+    // two fields only (see rule_execution_history_schema `sort` enum).
     [RULE_EXECUTION_FIELDS.startedAt]: displayField(
       RULE_EXECUTION_FIELDS.startedAt,
       'date',
-      COLUMN_TIMESTAMP
+      COLUMN_TIMESTAMP,
+      { sortable: true }
     ),
     [RULE_EXECUTION_FIELDS.ruleId]: displayField(
       RULE_EXECUTION_FIELDS.ruleId,
@@ -56,7 +59,8 @@ const RULE_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
     [RULE_EXECUTION_FIELDS.duration]: displayField(
       RULE_EXECUTION_FIELDS.duration,
       'number',
-      RULES_COLUMN_DURATION
+      RULES_COLUMN_DURATION,
+      { sortable: true }
     ),
     [RULE_EXECUTION_FIELDS.outcome]: displayField(
       RULE_EXECUTION_FIELDS.outcome,

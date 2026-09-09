@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -51,8 +51,12 @@ const DEFAULT_PER_PAGE = 10;
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
 const MS_TO_US = 1000;
 
-// Sorting is disabled (server-side paging), but the grid requires a `sort` value.
-const EMPTY_SORT: SortOrder[] = [];
+type RuleSortField = typeof RULE_EXECUTION_FIELDS.startedAt | typeof RULE_EXECUTION_FIELDS.duration;
+const DEFAULT_SORT_FIELD: RuleSortField = RULE_EXECUTION_FIELDS.startedAt;
+const SORTABLE_FIELDS: readonly string[] = [
+  RULE_EXECUTION_FIELDS.startedAt,
+  RULE_EXECUTION_FIELDS.duration,
+];
 
 // UnifiedDataTable requires a CellActionsProvider, but the synthetic data view can't be filtered,
 // so we offer no cell actions. Copy-value and cell expansion are built in and unaffected.
@@ -212,11 +216,15 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [outcomeFilter, setOutcomeFilter] = useState<RuleOutcomeFilter>('all');
+  const [sortField, setSortField] = useState<RuleSortField>(DEFAULT_SORT_FIELD);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const { data, isFetching, isError, refetch } = useFetchRuleExecutions({
     page: page + 1,
     perPage,
     outcome: toOutcomeParam(outcomeFilter),
+    sort: sortField === RULE_EXECUTION_FIELDS.startedAt ? 'startedAt' : 'duration',
+    sortOrder: sortDirection,
   });
 
   const http = useService(CoreStart('http'));
@@ -258,16 +266,37 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     [dateTimeFormat, rulesCache, onRuleClick]
   );
 
-  const onOutcomeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+  const sort = useMemo<SortOrder[]>(
+    () => [[sortField, sortDirection]],
+    [sortField, sortDirection]
+  );
+
+  const onSort = (nextSort: string[][]) => {
+    const last = nextSort[nextSort.length - 1];
+    if (!last) {
+      setSortField(DEFAULT_SORT_FIELD);
+      setSortDirection('desc');
+      setPage(0);
+      return;
+    }
+    const [field, direction] = last;
+    if (SORTABLE_FIELDS.includes(field)) {
+      setSortField(field as RuleSortField);
+      setSortDirection(direction === 'asc' ? 'asc' : 'desc');
+      setPage(0);
+    }
+  };
+
+  const onOutcomeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setOutcomeFilter(e.target.value as RuleOutcomeFilter);
     setPage(0);
-  }, []);
+  };
 
-  const onChangePage = useCallback((pageIndex: number) => setPage(pageIndex), []);
-  const onChangeItemsPerPage = useCallback((size: number) => {
+  const onChangePage = (pageIndex: number) => setPage(pageIndex);
+  const onChangeItemsPerPage = (size: number) => {
     setPerPage(size);
     setPage(0);
-  }, []);
+  };
 
   // Clamp the total to the API's max result window so pagination can't page past it.
   const total = Math.min(data?.total ?? 0, EXECUTION_HISTORY_MAX_RESULT_WINDOW);
@@ -312,8 +341,9 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
               sampleSizeState={rows.length}
               totalHits={total}
               isPaginationEnabled={false}
-              isSortEnabled={false}
-              sort={EMPTY_SORT}
+              isSortEnabled
+              sort={sort}
+              onSort={onSort}
               showTimeCol={false}
               settings={tableSettings}
               onResize={onColumnResize}

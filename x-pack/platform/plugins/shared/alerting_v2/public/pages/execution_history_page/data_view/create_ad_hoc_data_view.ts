@@ -15,13 +15,22 @@ import type { DataView, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/c
  * Builds a display-only field spec. Execution-history rows come from a REST API, not a queryable
  * index, so these fields are never searched or aggregated client-side — `UnifiedDataTable` only
  * needs them to have a column identity, type, and label.
+ *
+ * `sortable` maps to `indexed`, which (with a sortable field type) is what `DataViewField.sortable`
+ * keys off. Enable it only for columns the API can sort server-side.
  */
-export const displayField = (name: string, type: string, customLabel: string): FieldSpec => ({
+export const displayField = (
+  name: string,
+  type: string,
+  customLabel: string,
+  { sortable = false }: { sortable?: boolean } = {}
+): FieldSpec => ({
   name,
   type,
   customLabel,
   searchable: false,
   aggregatable: false,
+  indexed: sortable,
 });
 
 export interface AdHocDataViewState {
