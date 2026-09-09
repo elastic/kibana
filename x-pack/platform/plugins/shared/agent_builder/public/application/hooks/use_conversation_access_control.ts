@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
-  ConversationAccessControlMode,
+  isPrivatelySharedConversation,
   normalizeConversationAccessControl,
   type ConversationAccessControl,
 } from '@kbn/agent-builder-common';
@@ -20,18 +20,11 @@ import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useConversation } from './use_conversation';
 import { useUserProfiles } from './use_user_profiles';
 
-export const hasInviteMembersSummary = (accessControl: ConversationAccessControl) => {
-  return (
-    accessControl.access_mode === ConversationAccessControlMode.Private &&
-    accessControl.entries.length > 0
-  );
-};
-
 export const useInviteMembersSummary = () => {
   const { conversation } = useConversation();
 
   const accessControl = normalizeConversationAccessControl(conversation?.access_control);
-  const hasSummary = hasInviteMembersSummary(accessControl);
+  const hasSummary = isPrivatelySharedConversation(accessControl);
 
   const memberIdsByLatestAdded = [...accessControl.entries]
     .sort((firstEntry, secondEntry) => {
