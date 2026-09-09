@@ -314,12 +314,10 @@ export const EditPackagePolicyForm = memo<{
     [updatePackagePolicy, setFormState]
   );
 
-  // Same channel as the extension view: the cloud connector section can block submission
-  // (IaC key mismatch, https://github.com/elastic/ingest-dev/issues/9415).
-  const handleCloudConnectorValidityChange = useCallback(
-    (isValid: boolean) => setFormState(isValid ? 'VALID' : 'INVALID'),
-    [setFormState]
-  );
+  // Tracked apart from formState: the cloud connector section can block submission (IaC key
+  // mismatch, https://github.com/elastic/ingest-dev/issues/9415) and form validation must not
+  // be able to clear that block, nor the block hide a real validation error.
+  const [isCloudConnectorBlocked, setIsCloudConnectorBlocked] = useState(false);
 
   // Cancel url + Success redirect Path:
   //  if `from === 'edit'` then it links back to Policy Details
@@ -361,6 +359,10 @@ export const EditPackagePolicyForm = memo<{
   }, [existingAgentPolicies, isFirstLoad]);
 
   const onSubmit = async () => {
+    // Belt and braces: the Save button is already disabled while the block is set.
+    if (isCloudConnectorBlocked) {
+      return;
+    }
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
       return;
@@ -529,7 +531,7 @@ export const EditPackagePolicyForm = memo<{
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               agentPolicies={agentPolicies}
-              onCloudConnectorValidityChange={handleCloudConnectorValidityChange}
+              onCloudConnectorBlockingChange={setIsCloudConnectorBlocked}
               onNamespaceCustomizationEnabledChange={(enabled, isInit) => {
                 namespaceCustomizationEnabledRef.current = enabled;
                 if (!isInit) {
@@ -588,7 +590,6 @@ export const EditPackagePolicyForm = memo<{
       extensionView,
       formState,
       handleExtensionViewOnChange,
-      handleCloudConnectorValidityChange,
       hasAgentlessAgentPolicy,
       originalPackagePolicy,
       packageInfo,
@@ -761,6 +762,7 @@ export const EditPackagePolicyForm = memo<{
                         isDisabled={
                           !canWriteIntegrationPolicies ||
                           formState !== 'VALID' ||
+                          isCloudConnectorBlocked ||
                           hasAgentPolicyError ||
                           !validationResults ||
                           (!isEdited && !isUpgrade)

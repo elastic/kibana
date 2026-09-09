@@ -44,8 +44,6 @@ export interface UseVarGroupCloudConnectorProps {
   packagePolicy: NewPackagePolicy;
   /** Callback to update the package policy */
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  /** Receives the cloud connector section's validity (e.g. a blocking IaC key mismatch). */
-  onValidityChange?: (isValid: boolean) => void;
 }
 
 /**
@@ -67,7 +65,6 @@ export const useVarGroupCloudConnector = ({
   varGroupSelections,
   packagePolicy,
   updatePackagePolicy,
-  onValidityChange,
 }: UseVarGroupCloudConnectorProps): CloudConnectorInfo => {
   // Check if a cloud connector option is selected
   const cloudConnectorOption = useMemo(
@@ -100,13 +97,8 @@ export const useVarGroupCloudConnector = ({
 
   // Create an UpdatePolicy callback compatible with CloudConnectorSetup
   const handleCloudConnectorUpdate: UpdatePolicy = useCallback(
-    ({ updatedPolicy, isValid }) => {
-      updatePackagePolicy(updatedPolicy);
-      if (isValid !== undefined) {
-        onValidityChange?.(isValid);
-      }
-    },
-    [updatePackagePolicy, onValidityChange]
+    ({ updatedPolicy }) => updatePackagePolicy(updatedPolicy),
+    [updatePackagePolicy]
   );
 
   return {

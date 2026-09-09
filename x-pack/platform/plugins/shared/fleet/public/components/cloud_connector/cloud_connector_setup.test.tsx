@@ -727,4 +727,66 @@ describe('CloudConnectorSetup', () => {
       });
     });
   });
+
+  describe('IaC key check blocking', () => {
+    // The policy already opts in, so the supports_cloud_connector effect leaves updatePolicy alone
+    // and every call below comes from the validity report.
+    const policyWithSupport = { ...getMockPolicyAWS(), supports_cloud_connector: true };
+
+    const reportValidity = (isValid: boolean) => {
+      const { calls } = mockCloudConnectorTabs.mock;
+      const { tabs } = calls[calls.length - 1][0];
+      const existingTab = tabs.find((tab) => tab.id === 'existing-connection');
+      const content = existingTab?.content as React.ReactElement<{
+        onValidityChange: (isValid: boolean) => void;
+      }>;
+
+      act(() => {
+        content.props.onValidityChange(isValid);
+      });
+    };
+
+    it('should report a block through onIacBlockingChange and leave the policy validity alone', () => {
+      setupMocks([]);
+      const onIacBlockingChange = jest.fn();
+
+      renderComponent({ newPolicy: policyWithSupport, onIacBlockingChange });
+      reportValidity(false);
+
+      expect(onIacBlockingChange).toHaveBeenCalledWith(true);
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
+    });
+
+    it('should clear the block through onIacBlockingChange', () => {
+      setupMocks([]);
+      const onIacBlockingChange = jest.fn();
+
+      renderComponent({ newPolicy: policyWithSupport, onIacBlockingChange });
+      reportValidity(true);
+
+      expect(onIacBlockingChange).toHaveBeenCalledWith(false);
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to updatePolicy when blocking and no onIacBlockingChange is provided', () => {
+      setupMocks([]);
+
+      renderComponent({ newPolicy: policyWithSupport });
+      reportValidity(false);
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith({
+        updatedPolicy: policyWithSupport,
+        isValid: false,
+      });
+    });
+
+    it('should not call updatePolicy when unblocking and no onIacBlockingChange is provided', () => {
+      setupMocks([]);
+
+      renderComponent({ newPolicy: policyWithSupport });
+      reportValidity(true);
+
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
+    });
+  });
 });

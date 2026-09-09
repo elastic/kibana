@@ -238,33 +238,6 @@ describe('useVarGroupCloudConnector hook', () => {
     expect(mockUpdatePackagePolicy).toHaveBeenCalledWith(updatedPolicy);
   });
 
-  it('should forward isValid from handleCloudConnectorUpdate to onValidityChange', () => {
-    const varGroups = createMockVarGroups();
-    const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
-    const onValidityChange = jest.fn();
-
-    const { result } = renderHook(() =>
-      useVarGroupCloudConnector({
-        varGroups,
-        varGroupSelections: selections,
-        packagePolicy: createMockPackagePolicy() as any,
-        updatePackagePolicy: mockUpdatePackagePolicy,
-        onValidityChange,
-      })
-    );
-
-    const updatedPolicy = { name: 'updated-policy', enabled: true, policy_ids: [], inputs: [] };
-    act(() => {
-      result.current.handleCloudConnectorUpdate({ updatedPolicy, isValid: false });
-    });
-    expect(onValidityChange).toHaveBeenCalledWith(false);
-
-    act(() => {
-      result.current.handleCloudConnectorUpdate({ updatedPolicy });
-    });
-    expect(onValidityChange).toHaveBeenCalledTimes(1);
-  });
-
   it('should update when varGroupSelections change', () => {
     const varGroups = createMockVarGroups();
     let selections: VarGroupSelection = { auth_method: 'manual' };

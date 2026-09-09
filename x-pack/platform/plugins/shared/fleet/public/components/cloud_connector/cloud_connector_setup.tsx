@@ -35,6 +35,11 @@ export interface CloudConnectorSetupProps {
   accountType?: AccountType;
   /** Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates. */
   iacTemplateUrl?: string;
+  /**
+   * Receives whether the IaC key check currently blocks submission. Kept separate from the
+   * policy's own validity so the block cannot be overwritten by ordinary form validation.
+   */
+  onIacBlockingChange?: (isBlocked: boolean) => void;
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
@@ -48,6 +53,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   templateName,
   accountType = SINGLE_ACCOUNT,
   iacTemplateUrl,
+  onIacBlockingChange,
 }) => {
   const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
     cloudProvider || '',
@@ -70,16 +76,27 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
-  // Propagates the IaC key-check blocking state up to the wizard. Reads the policy through a
-  // ref so the callback identity is stable and the check's effect fires only when the blocking
-  // state itself changes, not after every policy edit.
+  // Propagates the IaC key-check blocking state up to the host. Reads the policy through a
+  // ref so the fallback below never sends a stale policy back.
   const newPolicyRef = useRef(newPolicy);
   newPolicyRef.current = newPolicy;
   const onValidityChange = useCallback(
     (isValid: boolean) => {
-      updatePolicy({ updatedPolicy: newPolicyRef.current, isValid });
+      if (onIacBlockingChange) {
+        // Fleet-native path: the block lives in its own flag, so form validation cannot clear it.
+        onIacBlockingChange(!isValid);
+        return;
+      }
+      // Extension hosts (e.g. cloud security posture) expose no blocking channel, so a block is
+      // reported through the shared policy validity flag instead. Limitation: unblocking is not
+      // reported, because writing `isValid: true` here would overwrite the extension's own
+      // validation. The extension re-asserts validity on its next change
+      // (https://github.com/elastic/ingest-dev/issues/9415).
+      if (!isValid) {
+        updatePolicy({ updatedPolicy: newPolicyRef.current, isValid: false });
+      }
     },
-    [updatePolicy]
+    [onIacBlockingChange, updatePolicy]
   );
 
   useEffect(() => {
