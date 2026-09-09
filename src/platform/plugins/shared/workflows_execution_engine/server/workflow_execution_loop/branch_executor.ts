@@ -12,10 +12,12 @@ import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_FAN_OUT,
   ExecutionStatus,
+  isTerminalStatus,
 } from '@kbn/workflows';
 import { ExecutionBudget } from './execution_budget';
 import { outsideExecutionFence } from './execution_fence';
 import { runNode } from './run_node';
+import { timeoutBranchScopes } from './timeout_branch_scopes';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { ParallelBranchState } from '../step/parallel_step/types';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -62,6 +64,42 @@ export class BranchExecutor {
     { runtime: StepExecutionRuntime; done: Promise<void> }
   >();
 
+  public async requestTermination(
+    runtime: StepExecutionRuntime,
+    output: Record<string, unknown>,
+    status: ExecutionStatus,
+    error?: Error
+  ): Promise<void> {
+    if (this.params.workflowRuntime.getWorkflowExecution().pendingTermination) return;
+    const decision = {
+      nodeId: runtime.node.id,
+      stackFrames: runtime.scopeStack.stackFrames,
+      stepExecutionId: runtime.stepExecutionId,
+      status,
+      output,
+      ...(error ? { error: { type: error.name, message: error.message } } : {}),
+    };
+    outsideExecutionFence(() => {
+      runtime.finishStep(output);
+      this.params.workflowExecutionState.updateWorkflowExecution({ pendingTermination: decision });
+      this.params.executionFailure?.stopForTermination();
+    });
+    try {
+      await this.params.workflowExecutionState.flushWorkflowDoc();
+    } catch (cause) {
+      throw (
+        this.params.executionFailure?.fail(
+          'Failed to persist workflow termination',
+          cause instanceof Error ? cause : new Error(String(cause))
+        ) ?? cause
+      );
+    }
+  }
+
+  public get executionFailure() {
+    return this.params.executionFailure;
+  }
+
   public abortActive(): void {
     for (const { runtime } of this.active.values()) runtime.abortController.abort();
   }
@@ -70,9 +108,10 @@ export class BranchExecutor {
     const active = this.active.get(branchId);
     if (!active) return false;
     active.runtime.abortController.abort();
-    outsideExecutionFence(() =>
-      active.runtime.timeoutStep(new Error('Parallel branch was terminated by a timeout.'))
-    );
+    outsideExecutionFence(() => {
+      if (!active.runtime.stepExecution || !isTerminalStatus(active.runtime.stepExecution.status))
+        active.runtime.timeoutStep(new Error('Parallel branch was terminated by a timeout.'));
+    });
     await active.done;
     return true;
   }
@@ -108,19 +147,30 @@ export class BranchExecutor {
       nodeId: branch.currentNodeId ?? request.startNodeId,
       stackFrames: branch.stackFrames ?? request.stackFrames,
     });
-    await this.params.workflowRuntime.withExecutionCursor(cursor, async () => {
-      const limit = this.params.parallelLimits?.maxTransitionsPerTick ?? 1000;
-      for (let transitions = 0; transitions < limit; transitions++) {
-        if (parentSignal.aborted) return;
-        const checkpoint = await this.advanceNode(request, cursor);
-        if (!checkpoint || parentSignal.aborted) return;
-        await this.commitProgress(request, checkpoint);
-        if (branch.status !== 'running' || branch.waiting || checkpoint.yielded) return;
-        cursor.restorePosition(checkpoint.currentNodeId, checkpoint.stackFrames);
-      }
-      Object.assign(branch, { waiting: false });
-      request.onProgress();
-    });
+    try {
+      this.params.executionFailure?.throwIfFailed();
+      await this.params.workflowRuntime.withExecutionCursor(cursor, async () => {
+        const limit = this.params.parallelLimits?.maxTransitionsPerTick ?? 1000;
+        for (let transitions = 0; transitions < limit; transitions++) {
+          this.params.executionFailure?.throwIfFailed();
+          if (parentSignal.aborted) return;
+          const checkpoint = await this.advanceNode(request, cursor);
+          if (!checkpoint || parentSignal.aborted) return;
+          await this.commitProgress(request, checkpoint);
+          if (branch.status !== 'running' || branch.waiting || checkpoint.yielded) return;
+          cursor.restorePosition(checkpoint.currentNodeId, checkpoint.stackFrames);
+        }
+        Object.assign(branch, { waiting: false });
+        request.onProgress();
+      });
+    } catch (error) {
+      throw (
+        this.params.executionFailure?.fail(
+          'Parallel checkpoint or cursor transition failed',
+          error instanceof Error ? error : new Error(String(error))
+        ) ?? error
+      );
+    }
   }
 
   private async advanceNode(
@@ -283,6 +333,14 @@ export class BranchExecutor {
     if (runtime.abortController.signal.aborted) {
       outsideExecutionFence(() =>
         runtime.timeoutStep(new Error('Parallel branch was terminated by a timeout.'))
+      );
+      outsideExecutionFence(() =>
+        timeoutBranchScopes(
+          this.params.stepExecutionRuntimeFactory,
+          stackFrames,
+          request.boundaryNodeId,
+          new Error('Parallel branch was terminated by a timeout.')
+        )
       );
       return { ...base, status: 'timed_out' };
     }

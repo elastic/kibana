@@ -71,6 +71,7 @@ import {
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import { EnterParallelNodeImpl, ExitParallelNodeImpl } from './parallel_step';
+import { EnterV1ParallelNodeImpl } from './parallel_step/enter_v1_parallel_node_impl';
 import {
   EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
@@ -220,8 +221,12 @@ export class NodesFactory {
           this.stepIoService,
           this.workflowGraph
         );
-      case 'enter-parallel':
-        return new EnterParallelNodeImpl(
+      case 'enter-parallel': {
+        const ParallelImplementation =
+          this.workflowRuntime.getWorkflowExecution().executionMode === 'legacy'
+            ? EnterV1ParallelNodeImpl
+            : EnterParallelNodeImpl;
+        return new ParallelImplementation(
           node as EnterParallelNode,
           this.workflowRuntime,
           stepExecutionRuntime,
@@ -230,6 +235,7 @@ export class NodesFactory {
           this,
           this.workflowGraph
         );
+      }
       case 'exit-parallel':
         return new ExitParallelNodeImpl(this.workflowRuntime);
       case 'loop-break':

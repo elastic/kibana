@@ -55,6 +55,7 @@ describe('setupDependencies', () => {
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     parallel: {
+      cursorExecutionEnabled: true,
       maxConcurrentOperations: 20,
       maxOutstandingBranches: 100,
       maxTransitionsPerTick: 1000,
@@ -99,6 +100,7 @@ describe('setupDependencies', () => {
     const mockWorkflowGraph = {
       fromWorkflowDefinition: jest.fn().mockReturnThis(),
       getStepGraph: jest.fn().mockReturnThis(),
+      getAllNodes: jest.fn().mockReturnValue([]),
       topologicalOrder: ['entry-node'],
       getNode: jest.fn().mockReturnValue({ id: 'entry-node' }),
       getNodeStack: jest.fn().mockReturnValue(['entry-node']),

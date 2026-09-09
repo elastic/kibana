@@ -1086,13 +1086,6 @@ function buildParallelBranchBody(
     parallelScopeDepth: context.stack.length,
   });
 
-  if (bodyGraph.nodes().some((nodeId) => bodyGraph.node(nodeId).type === 'workflow.output')) {
-    throw new GraphBuildError(
-      `Parallel step "${stepId}" does not yet support workflow.output or workflow.fail in branch bodies.`,
-      stepId
-    );
-  }
-
   const timeoutNode = bodyGraph.nodes().find((nodeId) => {
     const { type } = bodyGraph.node(nodeId);
     return type === 'enter-timeout-zone';

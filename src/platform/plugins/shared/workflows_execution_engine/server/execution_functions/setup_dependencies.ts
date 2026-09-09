@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
-import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
+import { GraphBuildError, isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
@@ -110,6 +110,45 @@ export async function setupDependencies(
       workflowExecution.workflowDefinition,
       defaultWorkflowSettings
     );
+    const hasParallel = workflowExecutionGraph
+      .getAllNodes()
+      .some((node) => node.type === 'enter-parallel');
+    const executionMode =
+      workflowExecution.executionMode ??
+      (workflowExecution.status === ExecutionStatus.PENDING &&
+      hasParallel &&
+      config.parallel.cursorExecutionEnabled
+        ? 'parallel_v4'
+        : 'legacy');
+    if (executionMode !== 'legacy' && executionMode !== 'parallel_v4') {
+      throw new GraphBuildError('Unsupported persisted workflow execution mode.', 'workflow');
+    }
+    if (executionMode === 'legacy') {
+      for (const node of workflowExecutionGraph.getAllNodes()) {
+        const insideParallel = workflowExecutionGraph
+          .getNodeStack(node.id)
+          .some(
+            (id) => id !== node.id && workflowExecutionGraph.getNode(id).type === 'enter-parallel'
+          );
+        if (
+          insideParallel &&
+          (node.type.startsWith('enter-') || node.type.startsWith('exit-')) &&
+          node.type !== 'exit-parallel'
+        ) {
+          throw new GraphBuildError(
+            'Nested parallel flow control requires parallel.cursorExecutionEnabled for new executions.',
+            node.stepId
+          );
+        }
+      }
+    }
+    if (!workflowExecution.executionMode) {
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowRunId,
+        executionMode,
+      });
+      workflowExecution.executionMode = executionMode;
+    }
   } catch (error) {
     if (isGraphBuildError(error)) {
       const finishedAt = new Date();
@@ -151,11 +190,13 @@ export async function setupDependencies(
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository
+    workflowExecutionRepository,
+    workflowExecution.executionMode === 'parallel_v4'
   );
 
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
+    serializeWrites: workflowExecution.executionMode === 'parallel_v4',
     state: workflowExecutionState,
     evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,

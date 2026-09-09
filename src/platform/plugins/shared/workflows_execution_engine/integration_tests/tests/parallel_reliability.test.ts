@@ -41,6 +41,37 @@ const drain = async (fixture: WorkflowRunFixture) => {
 afterEach(() => jest.restoreAllMocks());
 
 describe('parallel execution reliability', () => {
+  it('fails closed when cancellation status cannot be read', async () => {
+    const fixture = new WorkflowRunFixture();
+    const repository = fixture.workflowExecutionRepositoryMock;
+    const read = repository.getWorkflowExecutionById.bind(repository);
+    jest
+      .spyOn(repository, 'getWorkflowExecutionById')
+      .mockImplementationOnce(read)
+      .mockRejectedValue(new Error('Cancellation storage unavailable'));
+    await fixture.runWorkflow({
+      workflowYaml: `
+steps:
+  - name: branches
+    type: parallel
+    foreach: [a, b]
+    on-failure:
+      fallback:
+        - name: forbiddenFallback
+          type: console
+          with: { message: forbidden }
+    steps:
+      - name: forbiddenEffect
+        type: console
+        with: { message: forbidden }
+`,
+    });
+    expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
+    expect(getWorkflow(fixture)?.error?.message).toContain('cancellation status');
+    expect(steps(fixture, 'forbiddenEffect')).toHaveLength(0);
+    expect(steps(fixture, 'forbiddenFallback')).toHaveLength(0);
+  });
+
   it('bounds parked-node cleanup and rejects writes after its cleanup deadline', async () => {
     const fixture = new WorkflowRunFixture();
     const finishCleanup = deferred();
@@ -76,7 +107,8 @@ steps:
     const date = jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 2000);
     try {
       await fixture.resumeWorkflow();
-      expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
+      expect(getWorkflow(fixture)?.error?.message).toContain('cleanup exceeded');
       expect(onCancel).toHaveBeenCalledTimes(2);
       const snapshot = structuredClone(steps(fixture, 'parked'));
       finishCleanup.resolve();
@@ -136,6 +168,8 @@ steps:
 
   it('aborts the actual nested runtime and fences writes from an operation that ignores abort', async () => {
     const fixture = new WorkflowRunFixture();
+    jest.replaceProperty(fixture.configMock.parallel, 'maxConcurrentOperations', 1);
+    let invocations = 0;
     const entered = deferred();
     const finish = deferred();
     let activeRuntime: StepExecutionRuntime | undefined;
@@ -147,6 +181,7 @@ steps:
         if (runtime.node.stepId !== 'effect') return create.call(this, runtime);
         return {
           run: async () => {
+            invocations++;
             activeRuntime = runtime;
             runtime.startStep();
             entered.resolve();
@@ -166,7 +201,7 @@ steps:
     steps:
       - name: inner
         type: parallel
-        foreach: '[1]'
+        foreach: '[1, 2]'
         steps:
           - name: effect
             type: console
@@ -177,13 +212,16 @@ steps:
     fixture.taskAbortController.abort();
     await run;
     expect(activeRuntime?.abortController.signal.aborted).toBe(true);
-    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onCancel).toHaveBeenCalledTimes(2);
+    expect(invocations).toBe(1);
     const snapshot = structuredClone(steps(fixture, 'effect'));
     finish.resolve();
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(steps(fixture, 'effect')).toEqual(snapshot);
     expect(activeRuntime?.stepExecution?.state).not.toEqual({ late: true });
-    expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.CANCELLED);
+    expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
+    expect(getWorkflow(fixture)?.error?.message).toContain('did not settle');
+    expect(invocations).toBe(1);
   });
 
   it('retains branch admission across transition yields with count-waiting:false', async () => {
@@ -317,28 +355,35 @@ steps:
     });
   });
 
-  it('restores fallback scope updates from the node commit after a partial bulk write', async () => {
-    const fixture = new WorkflowRunFixture();
-    const repository = fixture.stepExecutionRepositoryMock;
-    const bulkUpsert = repository.bulkUpsert.bind(repository);
-    let snapshot:
-      | { workflow: EsWorkflowExecution; steps: Map<string, EsWorkflowStepExecution> }
-      | undefined;
-    jest.spyOn(repository, 'bulkUpsert').mockImplementation(async (updates) => {
-      await bulkUpsert(structuredClone(updates));
-      if (!snapshot && updates.some((step) => step.executionCheckpoint?.nodeId === 'flaky')) {
-        const workflow = getWorkflow(fixture);
-        if (!workflow) throw new Error('Missing workflow');
-        snapshot = structuredClone({ workflow, steps: repository.stepExecutions });
-      }
-    });
-    await fixture.runWorkflow({
-      workflowYaml: `
+  it.each([1, 2])(
+    'restores %i sibling fallback checkpoints after a partial bulk write',
+    async (branchCount) => {
+      const fixture = new WorkflowRunFixture();
+      const repository = fixture.stepExecutionRepositoryMock;
+      const bulkUpsert = repository.bulkUpsert.bind(repository);
+      let snapshot:
+        | { workflow: EsWorkflowExecution; steps: Map<string, EsWorkflowStepExecution> }
+        | undefined;
+      jest.spyOn(repository, 'bulkUpsert').mockImplementation(async (updates) => {
+        await bulkUpsert(structuredClone(updates));
+        if (
+          !snapshot &&
+          [...repository.stepExecutions.values()].filter(
+            (step) => step.executionCheckpoint?.nodeId === 'flaky'
+          ).length === branchCount
+        ) {
+          const workflow = getWorkflow(fixture);
+          if (!workflow) throw new Error('Missing workflow');
+          snapshot = structuredClone({ workflow, steps: repository.stepExecutions });
+        }
+      });
+      await fixture.runWorkflow({
+        workflowYaml: `
 steps:
   - name: parallelWork
     type: parallel
     mode: settled
-    foreach: '[1]'
+    foreach: ${JSON.stringify(Array.from({ length: branchCount }, (_, index) => index))}
     steps:
       - name: flaky
         type: ${FakeConnectors.constantlyFailing.actionTypeId}
@@ -350,18 +395,29 @@ steps:
               type: console
               with: { message: recovered }
 `,
-    });
-    if (!snapshot) throw new Error('Did not observe the failure transition commit');
-    const callsBeforeResume = fixture.unsecuredActionsClientMock.execute.mock.calls.length;
-    repository.stepExecutions.clear();
-    for (const [id, step] of snapshot.steps) repository.stepExecutions.set(id, step);
-    fixture.workflowExecutionRepositoryMock.workflowExecutions.set(executionId, snapshot.workflow);
-    await fixture.resumeWorkflow();
-    await drain(fixture);
-    expect(fixture.unsecuredActionsClientMock.execute.mock.calls.length).toBe(callsBeforeResume);
-    expect(steps(fixture, 'fallback')[0].output).toBe('recovered');
-    expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
-  });
+      });
+      if (!snapshot) throw new Error('Did not observe the failure transition commit');
+      const callsBeforeResume = fixture.unsecuredActionsClientMock.execute.mock.calls.length;
+      repository.stepExecutions.clear();
+      for (const [id, step] of snapshot.steps) repository.stepExecutions.set(id, step);
+      fixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+        executionId,
+        snapshot.workflow
+      );
+      await fixture.resumeWorkflow();
+      await drain(fixture);
+      expect(fixture.unsecuredActionsClientMock.execute.mock.calls.length).toBe(callsBeforeResume);
+      expect(steps(fixture, 'fallback').map((step) => step.output)).toEqual(
+        Array(branchCount).fill('recovered')
+      );
+      const checkpointScopes = [...snapshot.steps.values()]
+        .filter((step) => step.executionCheckpoint?.nodeId === 'flaky')
+        .map((step) => new Set(step.executionCheckpoint?.scopeUpdates?.map((scope) => scope.id)));
+      if (branchCount === 2)
+        expect([...checkpointScopes[0]].filter((id) => checkpointScopes[1].has(id))).toEqual([]);
+      expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    }
+  );
 
   it('rejects nested fan-out that exceeds the workflow-wide outstanding branch limit', async () => {
     const fixture = new WorkflowRunFixture();
@@ -411,13 +467,18 @@ steps:
           },
         };
       });
-    await expect(
-      fixture.runWorkflow({
-        workflowYaml: `
+    await fixture.runWorkflow({
+      workflowYaml: `
 steps:
   - name: parallelWork
     type: parallel
     foreach: '[1]'
+    on-failure:
+      retry: { max-attempts: 2, delay: 1ms }
+      fallback:
+        - name: forbiddenFallback
+          type: console
+          with: { message: must not run }
     steps:
       - name: first
         type: console
@@ -426,8 +487,9 @@ steps:
         type: console
         with: { message: must not start }
 `,
-      })
-    ).rejects.toThrow('Checkpoint storage unavailable');
+    });
+    expect(getWorkflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
+    expect(getWorkflow(fixture)?.error?.message).toContain('checkpoint');
     expect(started).toEqual(['first']);
   });
 });

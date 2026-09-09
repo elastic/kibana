@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import { catchError } from './catch_error';
 import type { ExecutionBudget } from './execution_budget';
+import { awaitCancellation } from './execution_failure';
 import { createExecutionFence, outsideExecutionFence } from './execution_fence';
 import { handleExecutionDelay } from './handle_execution_delay';
 import { runOnCancelIfNeeded } from './run_node_cancellation';
@@ -67,9 +68,12 @@ export async function runNode(
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
   let nodeImplementation: NodeImplementation | undefined;
   const fence = createExecutionFence(() => workflowExecutionCursor.currentStackFrames);
+  const monitorFence = createExecutionFence(() => workflowExecutionCursor.currentStackFrames);
+  let monitorOperation: Promise<void> | undefined;
   let release: (() => void) | undefined;
-  let inFlightOperation: Promise<void> | undefined;
+  const inFlightOperations: Array<Promise<void>> = [];
   let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  let unlinkFailure: (() => void) | undefined;
   let unlinkAbort: (() => void) | undefined;
   let closeAbortWait: (() => void) | undefined;
 
@@ -91,7 +95,77 @@ export async function runNode(
     }
   }
 
+  const finalizeNode = async (): Promise<void> => {
+    fence.close();
+    monitorAbortController?.abort();
+    monitorFence.close();
+    unlinkAbort?.();
+    closeAbortWait?.();
+    if (deadlineTimer) clearTimeout(deadlineTimer);
+    // Ignoring abort must not let an operation release capacity while its I/O is still active.
+    if (release) void Promise.allSettled(inFlightOperations).then(release);
+
+    // Run cancellation cleanup in `finally` so it fires on BOTH the normal path
+    // and the path where a monitor (cancellation or a timeout zone) threw and
+    // bypassed the try body. `runOnCancelIfNeeded` only acts when the step's
+    // abort signal fired and the node is cancellable, and `onCancel` is required
+    // to be idempotent, so this is safe to call unconditionally here.
+    if (nodeImplementation && stepExecutionRuntime) {
+      const implementation = nodeImplementation;
+      const runtime = stepExecutionRuntime;
+      await outsideExecutionFence(() =>
+        runOnCancelIfNeeded(implementation, runtime, params.workflowLogger, params.executionFailure)
+      );
+    }
+
+    if (
+      params.executionFailure &&
+      (monitorOperation || stepExecutionRuntime?.abortController.signal.aborted)
+    ) {
+      const operations = monitorOperation
+        ? [...inFlightOperations, monitorOperation]
+        : inFlightOperations;
+      await awaitCancellation(
+        Promise.allSettled(operations).then(() => undefined),
+        params.cancellationGraceMs ?? 5000,
+        params.executionFailure
+      );
+    }
+
+    if (
+      stepExecutionRuntime &&
+      !params.executionFailure?.signal.aborted &&
+      !(params.boundaryNodeId && stepExecutionRuntime.abortController.signal.aborted)
+    ) {
+      const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
+      if (params.boundaryNodeId)
+        await catchError(params, stepExecutionRuntime, params.boundaryNodeId);
+      else await catchError(params, stepExecutionRuntime);
+      catchErrorSpan?.end();
+    }
+
+    // Note: predecessor outputs that `prepareForRead` rehydrated for this
+    // step are released by the *next* step's `prepareForRead` (deferred
+    // release) so that consecutive consumers of the same predecessor reuse
+    // the in-memory copy instead of re-fetching from ES. The execution
+    // loop's final-flush path is responsible for the workflow-end cleanup
+    // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
+
+    // Release the read-pins set by ensureContextReady so outputs that were
+    // only needed by this node become eviction-eligible again. Must run after
+    // the node's synchronous getContext() reads have all completed.
+    // Idempotent — safe even if ensureContextReady took the eviction-disabled
+    // fast path and never set any pins.
+    stepExecutionRuntime?.contextManager.releaseReadPins();
+
+    unlinkFailure?.();
+    if (params.executionFailure?.error) nodeSpan?.setOutcome('failure');
+    nodeSpan?.end();
+    params.executionFailure?.throwIfFailed();
+  };
+
   try {
+    params.executionFailure?.throwIfFailed();
     stepExecutionRuntime =
       options.runtime ??
       stepExecutionRuntimeFactory.createStepExecutionRuntime({
@@ -112,6 +186,18 @@ export async function runNode(
     parentSignal.addEventListener('abort', abort, { once: true });
     unlinkAbort = () => parentSignal.removeEventListener('abort', abort);
     if (parentSignal.aborted) abort();
+    if (params.workflowRuntime.getWorkflowExecution().pendingTermination)
+      params.executionFailure?.stopForTermination();
+    const failureSignal = params.executionFailure?.signal;
+    if (failureSignal) {
+      const fail = () => {
+        fence.close();
+        runtime.abortController.abort(failureSignal.reason);
+      };
+      failureSignal.addEventListener('abort', fail, { once: true });
+      unlinkFailure = () => failureSignal.removeEventListener('abort', fail);
+      if (failureSignal.aborted) fail();
+    }
     if (options.deadline !== undefined) {
       const timeout = () => {
         fence.close();
@@ -138,7 +224,8 @@ export async function runNode(
         stepExecutionRuntime,
         params.workflowLogger,
         workflowExecutionCursor,
-        stepExecutionRuntime.abortController
+        stepExecutionRuntime.abortController,
+        params.executionFailure
       );
     }
 
@@ -165,12 +252,35 @@ export async function runNode(
 
     // Pre-warm: rehydrate any evicted step outputs that the upcoming step will need.
     // This must happen before getContext() is called (which is synchronous).
-    await stepExecutionRuntime.contextManager.ensureContextReady();
+    if (params.executionFailure) {
+      const failure = params.executionFailure;
+      const hydration = fence
+        .run(() => runtime.contextManager.ensureContextReady())
+        .catch((error) => {
+          throw failure.fail(
+            'Failed to rehydrate workflow context',
+            error instanceof Error ? error : new Error(String(error))
+          );
+        });
+      inFlightOperations.push(hydration);
+      await Promise.race([hydration, aborted]);
+      if (runtime.abortController.signal.aborted) return;
+    } else {
+      await stepExecutionRuntime.contextManager.ensureContextReady();
+    }
 
-    monitorAbortController = new AbortController();
+    const monitorController = new AbortController();
+    monitorAbortController = monitorController;
 
     // Run stack monitoring once before the race so timeouts/cancel win over step.run().
-    await processNodeStackMonitoring(params, stepExecutionRuntime);
+    if (params.executionFailure) {
+      const initialMonitoring = monitorFence.run(() => processNodeStackMonitoring(params, runtime));
+      inFlightOperations.push(initialMonitoring);
+      await Promise.race([initialMonitoring, aborted]);
+      if (runtime.abortController.signal.aborted) return;
+    } else {
+      await processNodeStackMonitoring(params, stepExecutionRuntime);
+    }
 
     /**
      * Run monitoring in parallel with step execution to handle:
@@ -179,15 +289,14 @@ export async function runNode(
      * - Custom monitoring logic for monitor-able nodes
      * The order of these promises is important - we want to stop monitoring
      */
-    const runMonitorPromise = runStackMonitor(
-      params,
-      stepExecutionRuntime,
-      monitorAbortController
-    ).catch((error) => {
-      if (!params.boundaryNodeId || !runtime.abortController.signal.aborted)
-        workflowExecutionCursor.captureError(error);
-      throw error;
-    });
+    const runMonitorPromise = monitorFence.run(() =>
+      runStackMonitor(params, runtime, monitorController).catch((error) => {
+        if (!params.boundaryNodeId || !runtime.abortController.signal.aborted)
+          workflowExecutionCursor.captureError(error);
+        throw error;
+      })
+    );
+    monitorOperation = runMonitorPromise;
     let runStepPromise: Promise<void> = Promise.resolve();
 
     // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
@@ -207,69 +316,30 @@ export async function runNode(
           }
         } finally {
           if (stepExecutionRuntime) {
-            await stepExecutionRuntime.flushEventLogs({
-              signal: params.signal,
+            await stepExecutionRuntime.flushEventLogs({ signal: params.signal }).catch((error) => {
+              throw (
+                params.executionFailure?.fail(
+                  'Failed to flush step events',
+                  error instanceof Error ? error : new Error(String(error))
+                ) ?? error
+              );
             });
           }
         }
       })();
     }
 
-    inFlightOperation = runStepPromise;
+    inFlightOperations.push(runStepPromise);
     await Promise.race([runMonitorPromise, runStepPromise, aborted]);
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    if (!params.boundaryNodeId || !stepExecutionRuntime?.abortController.signal.aborted)
+    if (
+      !params.executionFailure?.error &&
+      (!params.boundaryNodeId || !stepExecutionRuntime?.abortController.signal.aborted)
+    )
       workflowExecutionCursor.captureError(error);
     nodeSpan?.setOutcome('failure');
   } finally {
-    fence.close();
-    monitorAbortController?.abort();
-    unlinkAbort?.();
-    closeAbortWait?.();
-    if (deadlineTimer) clearTimeout(deadlineTimer);
-    // Ignoring abort must not let an operation release capacity while its I/O is still active.
-    if (inFlightOperation && release) void inFlightOperation.then(release, release);
-    else release?.();
-
-    // Run cancellation cleanup in `finally` so it fires on BOTH the normal path
-    // and the path where a monitor (cancellation or a timeout zone) threw and
-    // bypassed the try body. `runOnCancelIfNeeded` only acts when the step's
-    // abort signal fired and the node is cancellable, and `onCancel` is required
-    // to be idempotent, so this is safe to call unconditionally here.
-    if (nodeImplementation && stepExecutionRuntime) {
-      const implementation = nodeImplementation;
-      const runtime = stepExecutionRuntime;
-      await outsideExecutionFence(() =>
-        runOnCancelIfNeeded(implementation, runtime, params.workflowLogger)
-      );
-    }
-
-    if (
-      stepExecutionRuntime &&
-      !(params.boundaryNodeId && stepExecutionRuntime.abortController.signal.aborted)
-    ) {
-      const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
-      if (params.boundaryNodeId)
-        await catchError(params, stepExecutionRuntime, params.boundaryNodeId);
-      else await catchError(params, stepExecutionRuntime);
-      catchErrorSpan?.end();
-    }
-
-    // Note: predecessor outputs that `prepareForRead` rehydrated for this
-    // step are released by the *next* step's `prepareForRead` (deferred
-    // release) so that consecutive consumers of the same predecessor reuse
-    // the in-memory copy instead of re-fetching from ES. The execution
-    // loop's final-flush path is responsible for the workflow-end cleanup
-    // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
-
-    // Release the read-pins set by ensureContextReady so outputs that were
-    // only needed by this node become eviction-eligible again. Must run after
-    // the node's synchronous getContext() reads have all completed.
-    // Idempotent — safe even if ensureContextReady took the eviction-disabled
-    // fast path and never set any pins.
-    stepExecutionRuntime?.contextManager.releaseReadPins();
-
-    nodeSpan?.end();
+    await finalizeNode();
   }
 }

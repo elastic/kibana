@@ -161,7 +161,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
-  it('rejects a workflow.fail step inside a dynamic branch body', () => {
+  it('compiles a workflow.fail step inside a dynamic branch body', () => {
     expect(() =>
       buildGraph({
         ...baseParallel,
@@ -173,10 +173,10 @@ describe('convertToWorkflowGraph - parallel step', () => {
           } as unknown as ConnectorStep,
         ],
       })
-    ).toThrow(/workflow.output or workflow.fail/);
+    ).not.toThrow();
   });
 
-  it('rejects a workflow.output step inside a dynamic branch body', () => {
+  it('compiles a workflow.output step inside a dynamic branch body', () => {
     expect(() =>
       buildGraph({
         ...baseParallel,
@@ -188,7 +188,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
           } as unknown as ConnectorStep,
         ],
       })
-    ).toThrow(/workflow.output or workflow.fail/);
+    ).not.toThrow();
   });
 
   it('compiles static branches into one chain per branch between enter and exit', () => {
@@ -329,7 +329,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
-  it('rejects a workflow.fail step inside a static branch body', () => {
+  it('compiles a workflow.fail step inside a static branch body', () => {
     expect(() =>
       buildGraph({
         name: 'fanOut',
@@ -345,7 +345,7 @@ describe('convertToWorkflowGraph - parallel step', () => {
           },
         ],
       } as unknown as ParallelStep)
-    ).toThrow(/workflow.output or workflow.fail/);
+    ).not.toThrow();
   });
 
   it('wraps the parallel block in a timeout zone when timeout is set', () => {

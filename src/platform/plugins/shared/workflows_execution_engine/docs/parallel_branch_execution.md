@@ -17,7 +17,7 @@ The parent variables stay `{"owner":"parent","values":[]}`. Branch writes do not
 
 `EnterParallelNodeImpl` manages branch admission and aggregation. `BranchExecutor` owns branch cursors and runs each node through the same `runNode` lifecycle used by the root cursor: context hydration, tracing, stack monitoring, error handling, event-log flushing, and read-pin release. The nearest parallel node bounds branch error handling and monitoring. Ancestor monitors and cancellation polling remain with the parent cursor.
 
-A node invocation has a revocable write lifetime. Parent abort propagates to the actual child runtime and all descendants. The coordinator registers live instances before invoking them. Cancellation uses their actual abort controllers and hooks; reconstruction is reserved for parked nodes. Node and cleanup writes are rejected after their respective lifetimes end. Active and parked node cleanup use the same revocable, one-second cleanup lifetime. Aborting cannot undo a request already accepted by an external service.
+A node invocation has a revocable write lifetime. Parent abort propagates to the actual child runtime and all descendants. The coordinator registers live instances before invoking them. Cancellation uses their actual abort controllers and hooks; reconstruction is reserved for parked nodes. Node and cleanup writes are rejected after their respective lifetimes end. External cancellation hooks have a revocable, one-second cleanup lifetime. Parallel coordinators join those bounded descendant cleanups. Cleanup is invoked at most once per step execution per task. After cleanup, an aborted operation has five seconds to settle; exceeding that grace period fails the entire execution without releasing capacity to queued work. Aborting cannot undo a request already accepted by an external service.
 
 ## Concurrency and suspension
 
@@ -29,12 +29,13 @@ The following server settings apply to one workflow execution, including every n
 
 ```yaml
 workflowsExecutionEngine.parallel:
+  cursorExecutionEnabled: true # opt in; defaults to false
   maxConcurrentOperations: 20
   maxOutstandingBranches: 100
   maxTransitionsPerTick: 1000
 ```
 
-These are the defaults and upper bounds; administrators can lower them. Local YAML `concurrency.max` remains a separate branch limit. Fan-out beyond the workflow-wide outstanding-branch limit fails with a specific error before launching the extra branches. These limits do not combine independent workflow executions or child workflows into one budget.
+The numeric values are the defaults and upper bounds; administrators can lower them. Local YAML `concurrency.max` remains a separate branch limit. Fan-out beyond the workflow-wide outstanding-branch limit fails with a specific error before launching the extra branches. These limits do not combine independent workflow executions or child workflows into one budget.
 
 ## Persistence and delivery guarantees
 
@@ -42,11 +43,21 @@ Every branch transition carries a monotonic sequence, next node, scope frames, s
 
 On resume, a matching committed transition takes precedence over a stale parent position. Recovery reapplies its scope updates, including retry/fallback state, and advances without invoking the completed operation again. Sequence numbers distinguish recovery from legitimate visits to the same control node. Nested parallel coordination records remain available for child progress checkpoints while the join runs.
 
-External effects have **at-least-once delivery**, not exactly-once delivery. If a destination accepts a request and the process dies before recording its result, recovery can repeat that request. Use destination-supported idempotency keys derived from the workflow execution and logical step execution for operations that must deduplicate. This change does not add cross-system transactions or change Task Manager ownership guarantees. Persisted executions without transition metadata continue through the existing cursor path and gain checkpoints as they advance.
+External effects have **at-least-once delivery**, not exactly-once delivery. If a destination accepts a request and the process dies before recording its result, recovery can repeat that request. Use destination-supported idempotency keys derived from the workflow execution and logical step execution for operations that must deduplicate. This change does not add cross-system transactions or change Task Manager ownership guarantees. New executions persist `executionMode` before starting any step. Only new parallel executions admitted with `cursorExecutionEnabled: true` select `parallel_v4`. Sequential workflows, flag-disabled executions, and existing executions without a mode use `legacy`. Resumes retain the stored mode even when the rollout flag changes. Pre-release branch-cursor executions without a mode require an explicit migration; they must not be silently reinterpreted.
+
+## Fatal failures and termination
+
+Checkpoint, context-rehydration, and event persistence failures stop the entire V4 execution. They bypass workflow retry/fallback, abort active runtimes, reject queued admission, and fence late node writes. Cleanup errors and operations that exceed cancellation grace use the same path. Connector/business failures continue through normal workflow handlers.
+
+Both drivers are joined before terminal persistence. If a failed persistence queue cannot be reused, the engine attempts a direct terminal workflow update. When Elasticsearch cannot accept that update, the task rejects: stopping locally is not proof that a durable failure record exists. The engine cannot forcibly kill an external operation that ignores abort, and the local write fence is not a distributed ownership fence. Lease takeover, Elasticsearch outage, and connector idempotency soak tests remain required before broad enablement.
+
+`workflow.output` returns a result and terminates the whole workflow. `workflow.fail` does the same with failed status. Inside parallel, the first accepted terminator stores a `pendingTermination` decision and stops sibling admission. Sibling cleanup completes before final status is published. A restart with a pending decision completes cleanup using that decision, so another branch cannot replace the result. Failed cleanup overrides successful termination with an engine failure. Ordinary branch step outputs still contribute to the parallel aggregate without terminating the workflow.
+
+The V1 node driver and flat parallel implementation are preserved in `run_v1_node.ts` and `enter_v1_parallel_node_impl.ts` from the pre-cursor implementation (`3019ed58ee1a^`). The disabled path does not instantiate branch cursors or use serialized checkpoint queues. Retaining these implementations is a rollout compatibility boundary; removing them requires a separate migration decision. Shared context/IO helpers still require the existing sequential and flat-parallel regression suites.
 
 ## Supported boundary
 
-Branch-local timeout zones, HITL input/approval waits, and workflow-level terminators (`workflow.output` / `workflow.fail`) remain rejected by graph validation. Use the parallel step's overall/branch timeout and its aggregate result. Loop break/continue must target a loop within the same parallel branch; they cannot escape into an enclosing parent loop. These exclusions are explicit supported-scope limits, not silent changes to workflow-wide behavior.
+Branch-local timeout zones and HITL input/approval waits remain rejected by graph validation. Use the parallel step's overall/branch timeout and its aggregate result. Timeout cleanup unwinds active foreach/while/retry/fallback records up to the owning parallel boundary. Loop break/continue must target a loop within the same parallel branch; they cannot escape into an enclosing parent loop. These exclusions are explicit supported-scope limits, not silent changes to workflow-wide behavior.
 
 A parallel step can have its own retry/fallback/continue handler. Retrying the join creates new attempt scopes for every branch. As in the sequential engine, fallback preserves the original failure; `continue: true` is required to proceed after the handler.
 

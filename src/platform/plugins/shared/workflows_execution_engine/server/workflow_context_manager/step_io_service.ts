@@ -37,6 +37,7 @@ import {
 export type PredecessorsResolver = (node: GraphNodeUnion) => ReadonlyArray<GraphNodeUnion>;
 
 export interface StepIoServiceInit {
+  serializeWrites?: boolean;
   stepRepository: StepExecutionRepository;
   state: StepIoStateAccessor;
   pinnedStepTypes?: ReadonlySet<string>;
@@ -151,6 +152,7 @@ export interface StepIoLifecycle {
  * stepExecutionRepository.
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
+  private readonly serializeWrites: boolean;
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: StepIoStateAccessor;
   private readonly pinnedStepTypes: ReadonlySet<string>;
@@ -278,6 +280,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly dataSetVariablesCache = new Map<string, Record<string, unknown>>();
 
   constructor(init: StepIoServiceInit) {
+    this.serializeWrites = init.serializeWrites ?? true;
     this.stepRepository = init.stepRepository;
     this.state = init.state;
     this.pinnedStepTypes = init.pinnedStepTypes ?? EVICTION_EXEMPT_STEP_TYPES;
@@ -546,6 +549,8 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * bulk-upsert.
    */
   public flushStepChanges(): Promise<void> {
+    if (!this.serializeWrites)
+      return this.persistMergedStepChanges().then((ids) => this.runDeferredEvictionCycle(ids));
     // Serialize snapshots so an older bulk cannot overwrite a newer checkpoint.
     // A failed write poisons this task's queue: no subsequent side effect may start.
     this.stepFlushQueue = this.stepFlushQueue.then(async () => {

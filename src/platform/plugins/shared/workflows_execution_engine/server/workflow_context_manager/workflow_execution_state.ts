@@ -103,7 +103,8 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository
+    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private readonly serializeWrites = true
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
@@ -291,6 +292,7 @@ export class WorkflowExecutionState {
   private workflowFlushQueue: Promise<void> = Promise.resolve();
 
   public flushWorkflowDoc(): Promise<void> {
+    if (!this.serializeWrites) return this.persistWorkflowDoc();
     this.workflowFlushQueue = this.workflowFlushQueue.then(() => this.persistWorkflowDoc());
     return this.workflowFlushQueue;
   }
