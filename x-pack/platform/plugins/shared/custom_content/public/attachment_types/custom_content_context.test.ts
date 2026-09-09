@@ -73,10 +73,11 @@ describe('customContentContextAttachmentUiDefinition', () => {
   });
 
   describe('rendering surface', () => {
-    // The card must stay header-only: defining either renderer would make agent builder open the
-    // canvas flyout, which is not how the dashboard preview behaves.
-    it('renders no inline or canvas content', () => {
-      expect(customContentContextAttachmentUiDefinition.renderInlineContent).toBeUndefined();
+    // Inline renders the snapshot so a version can be read in the conversation. Canvas stays
+    // undefined on purpose: it is the only thing that opens the expanded flyout
+    // (see `canvas_flyout.tsx`), and a panel belongs on its dashboard, not in a flyout.
+    it('renders inline content but never canvas content', () => {
+      expect(customContentContextAttachmentUiDefinition.renderInlineContent).toBeDefined();
       expect(customContentContextAttachmentUiDefinition.renderCanvasContent).toBeUndefined();
     });
   });
