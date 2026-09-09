@@ -70,7 +70,10 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
       selectedServiceIds: ['elb'],
       globalRegion: 'us-east-1',
       serviceVars: {},
-      authenticateAndDeployStep: { connectorId: 'connector-test-123', authMethod: 'identity_federation' },
+      authenticateAndDeployStep: {
+        connectorId: 'connector-test-123',
+        authMethod: 'identity_federation',
+      },
     });
 
     // Mock SO create — returns a deployment id that the update will reference.

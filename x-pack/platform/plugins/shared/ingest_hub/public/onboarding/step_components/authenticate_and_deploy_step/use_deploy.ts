@@ -204,10 +204,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           authMethod: connectorId ? 'identity_federation' : 'static_keys',
         }).catch(() => {
           services.notifications.toasts.addDanger(
-            i18n.translate(
-              'xpack.ingestHub.authenticateAndDeployStep.soCreateError',
-              { defaultMessage: 'Could not save deployment record. Deploy will proceed, but resume may not be available.' }
-            )
+            i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soCreateError', {
+              defaultMessage:
+                'Could not save deployment record. Deploy will proceed, but resume may not be available.',
+            })
           );
           return null;
         });
@@ -263,10 +263,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
         }).catch(() => {
           services.notifications.toasts.addDanger(
-            i18n.translate(
-              'xpack.ingestHub.authenticateAndDeployStep.soUpdateError',
-              { defaultMessage: 'Could not update deployment record. Deploy outcome may not be reflected on resume.' }
-            )
+            i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soUpdateError', {
+              defaultMessage:
+                'Could not update deployment record. Deploy outcome may not be reflected on resume.',
+            })
           );
         });
       }

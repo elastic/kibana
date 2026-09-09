@@ -117,8 +117,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   globalRegion: schema.maybe(
     schema.string({
       meta: {
-        description:
-          'Global AWS region from the Service Settings step.',
+        description: 'Global AWS region from the Service Settings step.',
       },
     })
   ),

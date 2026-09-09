@@ -40,7 +40,9 @@ describe('hydrateOnboardingSession', () => {
     const result = await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
     expect(result).toBe(true);
     expect(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.servicesStep`)).not.toBeNull();
-    expect(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`)).not.toBeNull();
+    expect(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`)
+    ).not.toBeNull();
   });
 
   it('returns false and does not write session storage when fetch fails', async () => {
