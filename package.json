@@ -1073,7 +1073,7 @@
     "@kbn/rule-data-utils": "workspace:*",
     "@kbn/rule-registry-plugin": "workspace:*",
     "@kbn/runtime-fields-plugin": "workspace:*",
-    "@kbn/rxjs-history": "link:src/platform/packages/private/kbn-rxjs-history",
+    "@kbn/rxjs-history": "workspace:*",
     "@kbn/safer-lodash-set": "workspace:*",
     "@kbn/saml-provider-plugin": "workspace:*",
     "@kbn/sample-data-ingest": "workspace:*",
