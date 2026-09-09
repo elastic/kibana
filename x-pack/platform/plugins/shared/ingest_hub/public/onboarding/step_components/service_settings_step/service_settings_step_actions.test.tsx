@@ -80,6 +80,7 @@ function makeInstance(
 function renderStep(instances: ServiceInstance[], servicesMap: Map<string, AwsServiceMatrixEntry>) {
   (useOnboardingFlow as jest.Mock).mockReturnValue({
     awsServicesMap: servicesMap,
+    detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
   });
   (useServiceSettings as jest.Mock).mockReturnValue({
     globalRegion: 'us-east-1',
