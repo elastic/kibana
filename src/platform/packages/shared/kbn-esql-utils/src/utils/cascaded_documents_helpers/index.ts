@@ -164,8 +164,11 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
         ))
       ) {
         groupDeclarationStatsCommandIndex = groupDeclarationStatsCommandLookupIndex;
-        // update the group field node to it's actual definition
-        groupFieldNode = groupDeclarationCommandSummary.grouping[group.field];
+        // update the group field node to it's actual definition; the referenced field may have
+        // been declared either as a grouping option or as an aggregate in the preceding command
+        groupFieldNode =
+          groupDeclarationCommandSummary.grouping[group.field] ??
+          groupDeclarationCommandSummary.aggregates[group.field];
       }
     }
 

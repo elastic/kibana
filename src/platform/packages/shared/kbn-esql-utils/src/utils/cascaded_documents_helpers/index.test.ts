@@ -149,6 +149,19 @@ describe('cascaded documents helpers utils', () => {
       ]);
     });
 
+    it('should not throw and should return empty metadata when a group field references a field that was declared as an aggregate (not a grouping option) by a preceding command', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS x = MAX(bytes)
+        | STATS c = COUNT(*) BY x
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
     it('should return a single group by field if there is a where command following a STATS by command targeting a column specified as a grouping option in the operating stats command', () => {
       const queryString = `
      FROM kibana_sample_data_logs
