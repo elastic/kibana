@@ -6,11 +6,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import { firstValueFrom, toArray } from 'rxjs';
+import { firstValueFrom, toArray, of } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
+import type { EventChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -18,7 +18,8 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { conversePayloadSchema } from './chat';
+import { getMessageOnlyHandler } from './message_only';
+import { eventConversePayloadSchema } from './chat';
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -28,6 +29,7 @@ export function registerChatApiRoutes({
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+  const persistMessage = getMessageOnlyHandler({ getInternalServices });
 
   const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
@@ -42,7 +44,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning.',
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, persists text or attachments without execution and returns { conversation_id, message_id }; execution-only options are rejected.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -58,14 +60,23 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: conversePayloadSchema },
+          request: { body: eventConversePayloadSchema },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
           const { execution: executionService, conversations: conversationsService } =
             getInternalServices();
-          const payload = request.body as ChatRequestBodyPayload;
+          const payload = request.body as EventChatRequestBodyPayload;
+
+          if (payload.trigger_mode === 'never') {
+            const body = await persistMessage({
+              payload,
+              request,
+              spaceId: (await ctx.agentBuilder).spaces.getSpaceId(),
+            });
+            return response.ok({ body });
+          }
 
           await validateConfigurationOverrides({ payload, request });
           validateAction(payload);
@@ -97,7 +108,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message (streaming)',
       description:
-        'Send a message to an agent and stream the response as server-sent events as the agent works.',
+        'Send a message to an agent and stream the response as server-sent events as the agent works. With trigger_mode: never, emits one message_persisted event containing { conversation_id, message_id } after persistence and closes. Public message-only requests do not deduplicate retries.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -113,18 +124,33 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: conversePayloadSchema },
+          request: { body: eventConversePayloadSchema },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
-          const [, { cloud }] = await coreSetup.getStartServices();
           const { execution: executionService } = getInternalServices();
-          const payload = request.body as ChatRequestBodyPayload;
+          const payload = request.body as EventChatRequestBodyPayload;
+
+          if (payload.trigger_mode === 'never') {
+            const data = await persistMessage({
+              payload,
+              request,
+              spaceId: (await ctx.agentBuilder).spaces.getSpaceId(),
+            });
+            return response.ok({
+              headers: getSSEResponseHeaders(),
+              body: observableIntoEventSourceStream(of({ type: 'message_persisted', data }), {
+                logger,
+                signal: new AbortController().signal,
+              }),
+            });
+          }
 
           await validateConfigurationOverrides({ payload, request });
           validateAction(payload);
 
+          const [, { cloud }] = await coreSetup.getStartServices();
           const abortController = new AbortController();
           request.events.aborted$.subscribe(() => {
             abortController.abort();

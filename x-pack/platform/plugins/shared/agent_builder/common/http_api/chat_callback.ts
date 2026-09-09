@@ -12,15 +12,15 @@ import type {
   ConversationOriginType,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { ChatRequestBodyPayload } from './chat';
+import type { EventChatRequestBodyPayload } from './chat';
 
-export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
+export interface ChatCallbackRequestBodyPayload extends EventChatRequestBodyPayload {
   execution_idempotency_key: string;
   origin?: ConversationOrigin & {
     type: ConversationOriginType;
     author?: ConversationRoundAuthor;
   };
-  callback: {
+  callback?: {
     url: string;
   };
 }

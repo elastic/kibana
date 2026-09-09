@@ -6,6 +6,9 @@
  */
 
 import type {
+  ConversationOrigin,
+  ConversationOriginType,
+  ConversationRoundAuthor,
   ConversationAction,
   ConversationAccessControl,
   ConversationRound,
@@ -52,4 +55,15 @@ export type ChatResponse = Omit<
   };
 };
 
-export type ChatConverseResponse = ConversationWithPermissions;
+export type ChatConverseResponse = ConversationWithPermissions | MessagePersistedResponse;
+
+/** Payload for the events-native chat endpoints. */
+export interface EventChatRequestBodyPayload extends ChatRequestBodyPayload {
+  trigger_mode?: 'always' | 'never';
+  origin?: ConversationOrigin & { type: ConversationOriginType; author?: ConversationRoundAuthor };
+}
+
+export interface MessagePersistedResponse {
+  conversation_id: string;
+  message_id: string;
+}

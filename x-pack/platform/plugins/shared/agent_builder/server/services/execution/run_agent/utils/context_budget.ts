@@ -63,7 +63,11 @@ export const shouldTriggerCompaction = (
 ): boolean => {
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
-      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
+      sumTokens(
+        perRoundTokenCounts.slice(
+          existingSummary.summarized_entry_count ?? existingSummary.summarized_round_count
+        )
+      )
     : sumTokens(perRoundTokenCounts);
   return effectiveTokens > budget.triggerThreshold;
 };

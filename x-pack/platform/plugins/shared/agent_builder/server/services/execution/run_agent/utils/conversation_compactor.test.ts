@@ -308,6 +308,9 @@ describe('compactConversation', () => {
 
     const existingSummary: CompactionSummary = {
       summarized_round_count: 1,
+      timeline_version: 1,
+      through_event_id: 'r1::user_message',
+      summarized_entry_count: 1,
       created_at: new Date().toISOString(),
       token_count: 100,
       structured_data: {
@@ -359,6 +362,9 @@ describe('compactConversation', () => {
     // Stale summary that only covered the first round
     const existingSummary: CompactionSummary = {
       summarized_round_count: 1,
+      timeline_version: 1,
+      through_event_id: 'r1::user_message',
+      summarized_entry_count: 1,
       created_at: new Date().toISOString(),
       token_count: 100,
       structured_data: {

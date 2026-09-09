@@ -24,12 +24,18 @@ import type {
   ConversationInternalState,
 } from '@kbn/agent-builder-common/chat';
 import type {
+  AttachmentInput,
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type {
+  ConversationRoundAuthor,
+  ConversationRoundOrigin,
+  TimelineEvent,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
@@ -234,3 +240,17 @@ export type NormalizedConversation = Conversation & {
   read_by?: ConversationReadByEntry[];
   pinned_by?: ConversationPinnedByEntry[];
 };
+
+export interface AppendUserMessageRequest {
+  id: string;
+  create?: ConversationCreateRequest;
+  messageId: string;
+  createdAt: string;
+  message: string;
+  author?: ConversationRoundAuthor;
+  origin?: ConversationRoundOrigin;
+  attachments: AttachmentInput[];
+  getTypeDefinition: (
+    type: string
+  ) => import('@kbn/agent-builder-server/attachments').AttachmentTypeDefinition | undefined;
+}

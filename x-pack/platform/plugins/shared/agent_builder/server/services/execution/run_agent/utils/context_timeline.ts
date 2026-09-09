@@ -17,7 +17,11 @@ import type {
 import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
-import { parseExecutionId, roundsToEvents } from '../../../conversation/client/rounds_to_events';
+import {
+  isRoundDerivedEventId,
+  parseExecutionId,
+  roundsToEvents,
+} from '../../../conversation/client/rounds_to_events';
 
 /**
  * The normalized timeline the agent context is built from: one execution per round, with HITL
@@ -25,12 +29,19 @@ import { parseExecutionId, roundsToEvents } from '../../../conversation/client/r
  * stored rounds; events-native conversations are folded and re-serialized. Context only, never
  * persisted, so downstream consumers can read events without reconstructing rounds.
  */
-export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
-  isEventsNativeVersion(conversation.schema_version) &&
-  conversation.events &&
-  conversation.events.length > 0
-    ? roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) })
-    : roundsToEvents(conversation);
+export const eventsForContext = (conversation: Conversation): TimelineEvent[] => {
+  if (!isEventsNativeVersion(conversation.schema_version) || !conversation.events?.length) {
+    return roundsToEvents(conversation);
+  }
+  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) });
+  const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
+  return [...folded, ...standaloneMessages(conversation.events)].sort(
+    (left, right) =>
+      left.created_at.localeCompare(right.created_at) ||
+      (positions.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+        (positions.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+  );
+};
 
 /** A `user_message` whose payload has been processed for the agent (attachments migrated to refs, context rendered). */
 export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'data'> & {
@@ -149,3 +160,52 @@ export const lastExecutionTerminated = (
     (event): event is ExecutionTerminatedEvent =>
       event.type === TimelineEventType.executionTerminated
   );
+
+export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
+  | TimelineRound<E>
+  | {
+      userMessage: UserMessageOf<E>;
+      events: E[];
+    };
+
+/** Selects independent inputs, excluding execution triggers and receipt-time round inputs. */
+export const standaloneMessages = <E extends AnyTimelineEvent>(
+  timeline: E[]
+): Array<UserMessageOf<E>> => {
+  const triggerIds = new Set(timeline.map((event) => event.trigger_event_id));
+  return timeline.filter(
+    (event): event is E & UserMessageOf<E> =>
+      event.type === TimelineEventType.userMessage &&
+      !event.execution_id &&
+      !triggerIds.has(event.id) &&
+      !isRoundDerivedEventId(event.id)
+  );
+};
+
+/** Groups execution history and independent messages without fabricating rounds. */
+export const groupTimelineEntries = <E extends AnyTimelineEvent>(
+  timeline: E[]
+): Array<TimelineEntry<E>> => {
+  const entries: Array<TimelineEntry<E>> = [
+    ...groupTimelineRounds(timeline),
+    ...standaloneMessages(timeline).map((userMessage) => ({
+      userMessage,
+      events: [userMessage] as E[],
+    })),
+  ];
+  const positions = new Map(timeline.map((event, index) => [event.id, index]));
+  return entries.sort(
+    (left, right) =>
+      left.userMessage.created_at.localeCompare(right.userMessage.created_at) ||
+      (positions.get(left.userMessage.id) ?? 0) - (positions.get(right.userMessage.id) ?? 0)
+  );
+};
+
+export const sliceTimelineEntries = <E extends AnyTimelineEvent>(
+  timeline: E[],
+  start: number,
+  end?: number
+): E[] =>
+  groupTimelineEntries(timeline)
+    .slice(start, end)
+    .flatMap((entry) => entry.events);

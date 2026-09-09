@@ -6,7 +6,12 @@
  */
 
 import type { ConverseInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationOriginType,
+  ConversationRoundStatus,
+  EventActorType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
@@ -154,6 +159,30 @@ describe('preflight_checks', () => {
         };
 
         expect(() => ensureValidInput({ input, timeline: roundsToEvents(conversation) })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
+      });
+
+      it('should not treat later standalone messages as prompt responses', () => {
+        const conversation = createConversationAwaitingPrompt('prompt-123');
+        const timeline = [
+          ...roundsToEvents(conversation),
+          {
+            id: 'standalone-message',
+            type: TimelineEventType.userMessage,
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: {
+              type: EventActorType.external,
+              id: 'alice',
+              full_name: 'Alice',
+              origin: { type: ConversationOriginType.Slack },
+            },
+            data: { message: 'Approved in Slack' },
+          },
+        ];
+        const input: ConverseInput = { message: 'continue' };
+
+        expect(() => ensureValidInput({ input, timeline })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
