@@ -119,15 +119,13 @@ Count by type
   different types across the matched indices is reported as `conflict`.
 - `Semantic fields` lists the searchable `semantic_text` fields among those
   shown, detected from the mapping type. Omitted when there are none.
-- `Knowledge item types` and `Tags` are the top 20 values of `type` / `tags`
-  by document count in the current space, one `"value": count` per line (keys
-  are JSON strings, so spaces and commas inside a value are unambiguous). Each
-  is omitted when it has no values, or when its field is not an aggregatable
-  keyword: unmapped, mapped as `text` in a custom index, or mapped to
-  different types across a pattern (`conflict`). The `ai-index@mappings`
-  component template maps both as `keyword`, so canonical indices always
-  qualify. Computed by one `terms` aggregation that fails rather than
-  undercounts when shards fail.
+- `Knowledge item types` and `Tags` show the top 20 `type` / `tags` values by
+  document count in the current space, one `"value": count` per line. Each
+  section is omitted unless its field is an aggregatable `keyword` — always the
+  case on canonical KI indices, but a custom index that maps `type` / `tags` as
+  `text`, or inconsistently across a pattern, gets no counts. One `terms`
+  aggregation backs both; it errors rather than return undercounts if a shard
+  fails.
 - `Example queries` are three fixed ES|QL shapes written for the canonical KI
   schema (`title`, `description`, `content`, their `.semantic` multi-fields,
   `type`, `tags`) with only the `FROM` target substituted. They use named
