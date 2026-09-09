@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
@@ -13,6 +15,10 @@ import type {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
+
+const LazyRenderPanelContext = React.lazy(() =>
+  import('./render_panel_context').then((module) => ({ default: module.RenderPanelContext }))
+);
 
 export const customContentContextAttachmentUiDefinition: AttachmentUIDefinition<
   Attachment<typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE, CustomContentContextAttachmentData>
@@ -23,6 +29,11 @@ export const customContentContextAttachmentUiDefinition: AttachmentUIDefinition<
       defaultMessage: 'Custom panel',
     }),
   getIcon: () => 'sparkles',
+  renderInlineContent: ({ attachment }) => (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <LazyRenderPanelContext data={attachment.data} />
+    </Suspense>
+  ),
   getActionButtons: ({ attachment, isCanvas }) => {
     if (isCanvas) return [];
 
