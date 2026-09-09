@@ -352,9 +352,10 @@ const xyStylingSchema = z
         z.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
         z.literal(XY_API_LINE_INTERPOLATION.STEPPED),
       ])
-      .default(DEFAULT_LINES_INTERPOLATION)
       .optional()
-      .meta({ description: 'Curve interpolation method for line and area series' }),
+      .meta({
+        description: 'Curve interpolation method for line and area series. Defaults to linear.',
+      }),
     points: z
       .object({
         visibility: z
