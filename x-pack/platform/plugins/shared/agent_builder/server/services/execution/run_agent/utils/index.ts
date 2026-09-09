@@ -14,6 +14,7 @@ export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export { formatAttachmentsMetadata } from './attachment_presentation';
+export { createPreExecutionSteps } from './round_steps';
 export {
   createResultTransformer,
   type CreateResultTransformerOptions,

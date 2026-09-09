@@ -33,8 +33,8 @@ small for pages with sticky or shared top-nav constraints while still using the 
 Use `useChromeAppHeaderRegistration` only for lower-level wrappers that need to compose registration
 with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
-Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
-primitive behind the React APIs.
+Use deprecated `chrome.next.appHeader.set` only when a React adapter is not practical. It is the
+imperative primitive behind the React APIs.
 
 ## Migrating route headers
 
