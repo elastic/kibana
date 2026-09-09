@@ -71,7 +71,6 @@ import {
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import { EnterParallelNodeImpl, ExitParallelNodeImpl } from './parallel_step';
-import { EnterV1ParallelNodeImpl } from './parallel_step/enter_v1_parallel_node_impl';
 import {
   EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
@@ -222,11 +221,7 @@ export class NodesFactory {
           this.workflowGraph
         );
       case 'enter-parallel': {
-        const ParallelImplementation =
-          this.workflowRuntime.getWorkflowExecution().executionMode === 'legacy'
-            ? EnterV1ParallelNodeImpl
-            : EnterParallelNodeImpl;
-        return new ParallelImplementation(
+        return new EnterParallelNodeImpl(
           node as EnterParallelNode,
           this.workflowRuntime,
           stepExecutionRuntime,
@@ -438,8 +433,7 @@ export class NodesFactory {
           node as WorkflowOutputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.stepExecutionRuntimeFactory
+          stepLogger
         );
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);

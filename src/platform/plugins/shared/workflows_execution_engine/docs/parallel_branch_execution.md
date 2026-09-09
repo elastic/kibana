@@ -1,4 +1,6 @@
-# Parallel branch execution
+# Cursor execution engine
+
+Every new workflow uses one shared execution lifecycle. Sequential workflows have one root cursor; parallel steps add branch cursors. There is no alternate V1 engine or rollout flag.
 
 Parallel branches can contain conditions, sequential foreach/while loops, switch, nested parallel steps, and retry/continue/fallback handlers. Each branch owns a cursor and isolated variable scope. The workflow still uses one execution document and the existing Task Manager resume path.
 
@@ -29,7 +31,6 @@ The following server settings apply to one workflow execution, including every n
 
 ```yaml
 workflowsExecutionEngine.parallel:
-  cursorExecutionEnabled: true # opt in; defaults to false
   maxConcurrentOperations: 20
   maxOutstandingBranches: 100
   maxTransitionsPerTick: 1000
@@ -43,19 +44,17 @@ Every branch transition carries a monotonic sequence, next node, scope frames, s
 
 On resume, a matching committed transition takes precedence over a stale parent position. Recovery reapplies its scope updates, including retry/fallback state, and advances without invoking the completed operation again. Sequence numbers distinguish recovery from legitimate visits to the same control node. Nested parallel coordination records remain available for child progress checkpoints while the join runs.
 
-External effects have **at-least-once delivery**, not exactly-once delivery. If a destination accepts a request and the process dies before recording its result, recovery can repeat that request. Use destination-supported idempotency keys derived from the workflow execution and logical step execution for operations that must deduplicate. This change does not add cross-system transactions or change Task Manager ownership guarantees. New executions persist `executionMode` before starting any step. Only new parallel executions admitted with `cursorExecutionEnabled: true` select `parallel_v4`. Sequential workflows, flag-disabled executions, and existing executions without a mode use `legacy`. Resumes retain the stored mode even when the rollout flag changes. Pre-release branch-cursor executions without a mode require an explicit migration; they must not be silently reinterpreted.
+External effects have **at-least-once delivery**, not exactly-once delivery. If a destination accepts a request and the process dies before recording its result, recovery can repeat that request. Use destination-supported idempotency keys derived from the workflow execution and logical step execution for operations that must deduplicate. This change does not add cross-system transactions or change Task Manager ownership guarantees. All new executions use this cursor engine, including workflows with no parallel steps. The persisted `executionMode: parallel_v4` value identifies the existing cursor checkpoint format; its historical name does not restrict it to parallel. There is no feature flag or V1 driver. A new unmarked PENDING or QUEUED execution with no cursor or step history receives this format marker before its first step. An in-flight execution with a missing, legacy, or unknown marker fails explicitly before checkpoints are loaded. Start a new execution instead of resuming legacy state.
 
 ## Fatal failures and termination
 
 Checkpoint, context-rehydration, and event persistence failures stop the entire V4 execution. They bypass workflow retry/fallback, abort active runtimes, reject queued admission, and fence late node writes. Cleanup errors and operations that exceed cancellation grace use the same path. Connector/business failures continue through normal workflow handlers.
 
-Join-time branch result rehydration also uses the fatal path, so an unavailable result cannot trigger parent retry/fallback and repeat completed effects. Strict event logging checks both transport errors and partial bulk failures. Root and step loggers share a serialized event buffer for cursor executions, including reconstructed cleanup/termination runtimes; legacy logging remains best effort.
+Join-time branch result rehydration also uses the fatal path, so an unavailable result cannot trigger parent retry/fallback and repeat completed effects. Strict event logging checks both transport errors and partial bulk failures. Root and step loggers share a serialized event buffer, including reconstructed cleanup/termination runtimes; all engine executions use strict logging.
 
 Both drivers are joined before terminal persistence. If a failed persistence queue cannot be reused, the engine attempts a direct terminal workflow update. For queued concurrency groups, that write uses `refresh: 'wait_for'`, matching normal terminal persistence before the queue drainer searches. When Elasticsearch cannot accept that update, the task rejects: stopping locally is not proof that a durable failure record exists. The engine cannot forcibly kill an external operation that ignores abort, and the local write fence is not a distributed ownership fence. Lease takeover, Elasticsearch outage, and connector idempotency soak tests remain required before broad enablement.
 
 `workflow.output` returns a result and terminates the whole workflow. `workflow.fail` does the same with failed status. Inside parallel, the first accepted terminator stores a `pendingTermination` decision and stops sibling admission. Sibling cleanup completes before final status is published. A restart with a pending decision completes cleanup using that decision, so another branch cannot replace the result. The winning node and its exact enclosing scopes complete with cleared error/checkpoint fields before sibling cancellation, including during recovery. Interrupted sibling scopes are cancelled, not timed out. Failed cleanup overrides successful termination with an engine failure. Ordinary branch step outputs still contribute to the parallel aggregate without terminating the workflow.
-
-The V1 node driver and flat parallel implementation are preserved in `run_v1_node.ts` and `enter_v1_parallel_node_impl.ts` from the pre-cursor implementation (`3019ed58ee1a^`). The disabled path does not instantiate branch cursors or use serialized checkpoint queues. Retaining these implementations is a rollout compatibility boundary; removing them requires a separate migration decision. Shared context/IO helpers still require the existing sequential and flat-parallel regression suites.
 
 ## Supported boundary
 
@@ -72,4 +71,17 @@ node scripts/jest_integration 'src/platform/plugins/shared/workflows_execution_e
 node scripts/check.js --scope=local
 ```
 
-See [the edge-case audit](parallel_edge_case_audit.md) for saved-workflow examples, regression coverage, and validation limits.
+## Review examples
+
+The examples in `examples/parallel_audit` cover distinct control-flow, cancellation, and recovery scenarios. Existing saved review workflows remain available on the dedicated Kibana instance.
+
+- [Sequential baseline](../examples/parallel_audit/18_sequential_baseline.yml): foreach, break, wait, retry/continue and workflow return through the same engine.
+- [Unequal waits](../examples/parallel_audit/25_unequal_waits.yml): independent branch wake-up and a single join.
+- [Timeout cleanup](../examples/parallel_audit/26_timeout_scopes.yml): terminal foreach, while and retry scopes.
+- [Workflow return](../examples/parallel_audit/27_workflow_termination.yml) and [workflow failure](../examples/parallel_audit/28_workflow_termination.yml): first accepted result wins, ancestors complete and siblings cancel.
+- [Return cancels child](../examples/parallel_audit/29_return_cancels_child.yml), using [the slow child](../examples/parallel_audit/21_slow_child.yml): both parent and child become terminal.
+- [Fail-fast admission](../examples/parallel_audit/24_fail_fast_long_wait.yml): started work drains without repeated wake-ups for blocked queued branches.
+
+`cursor_execution_format.test.ts` checks sequential and parallel admission/resume, rejects unsupported formats before checkpoint loading, and tests fatal event persistence for sequential workflows. The existing sequential suite covers loops, handlers, input waits, cancellation, timeouts, output eviction and output/fail. Parallel reliability tests cover sibling partial-checkpoint recovery, global limit one, ignored abort, join rehydration and partial event-indexing failures.
+
+Dark Watch, multi-Kibana lease takeover during Elasticsearch partitions, sustained soak testing and connector idempotency validation remain outstanding. Local tests do not establish exactly-once external delivery or distributed ownership fencing.

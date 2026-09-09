@@ -35,6 +35,7 @@ describe('setupDependencies', () => {
     },
     spaceId,
     status: 'running',
+    executionMode: 'parallel_v4',
     startedAt: Date.now(),
   };
 
@@ -55,7 +56,6 @@ describe('setupDependencies', () => {
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     parallel: {
-      cursorExecutionEnabled: true,
       maxConcurrentOperations: 20,
       maxOutstandingBranches: 100,
       maxTransitionsPerTick: 1000,
@@ -268,7 +268,8 @@ describe('setupDependencies', () => {
           id: workflowRunId,
           status: 'failed',
           error: expect.objectContaining({ message: buildError.message }),
-        })
+        }),
+        {}
       );
     });
 

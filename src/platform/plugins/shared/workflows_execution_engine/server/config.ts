@@ -44,7 +44,6 @@ const configSchema = schema.object({
    * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).
    */
   parallel: schema.object({
-    cursorExecutionEnabled: schema.boolean({ defaultValue: false }),
     maxConcurrentOperations: executionLimit(20),
     maxOutstandingBranches: executionLimit(100),
     maxTransitionsPerTick: executionLimit(1000),
