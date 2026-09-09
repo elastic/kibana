@@ -169,10 +169,10 @@ function configureExperiment({
   // MRR, NDCG, and MAP are excluded: multi-hop search concatenates results from multiple
   // tool calls chronologically, not by relevance rank.
   const irEvaluators = getEffectiveK([10]).flatMap((k) => [
-    createPrecisionAtKEvaluator({ ...irConfig, k }),
-    createRecallAtKEvaluator({ ...irConfig, k }),
-    createF1AtKEvaluator({ ...irConfig, k }),
-    createHitRateAtKEvaluator({ ...irConfig, k }),
+    createPrecisionAtKEvaluator(irConfig, k),
+    createRecallAtKEvaluator(irConfig, k),
+    createF1AtKEvaluator(irConfig, k),
+    createHitRateAtKEvaluator(irConfig, k),
   ]);
 
   const selectedEvaluators = selectEvaluators([

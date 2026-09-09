@@ -28,7 +28,6 @@ interface TestReferenceOutput {
 
 describe('IR Evaluators', () => {
   const config: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-    k: 5,
     relevanceThreshold: 1,
     extractRetrievedDocs: (output) => output.retrievedDocs,
     extractGroundTruth: (referenceOutput) => referenceOutput.groundTruth,
@@ -47,7 +46,7 @@ describe('IR Evaluators', () => {
 
   describe('Precision@KEvaluator', () => {
     it('should calculate precision correctly', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -70,7 +69,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -84,7 +83,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should handle fewer retrieved docs than K', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -100,7 +99,7 @@ describe('IR Evaluators', () => {
 
   describe('Recall@KEvaluator', () => {
     it('should calculate recall correctly', async () => {
-      const evaluator = createRecallAtKEvaluator(config);
+      const evaluator = createRecallAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -123,7 +122,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createRecallAtKEvaluator(config);
+      const evaluator = createRecallAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -139,7 +138,7 @@ describe('IR Evaluators', () => {
 
   describe('F1@KEvaluator', () => {
     it('should calculate F1 correctly', async () => {
-      const evaluator = createF1AtKEvaluator(config);
+      const evaluator = createF1AtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -163,7 +162,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createF1AtKEvaluator(config);
+      const evaluator = createF1AtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -178,7 +177,7 @@ describe('IR Evaluators', () => {
 
   describe('HitRate@KEvaluator', () => {
     it('should return 1 when at least one relevant doc is in top K', async () => {
-      const evaluator = createHitRateAtKEvaluator(config);
+      const evaluator = createHitRateAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -192,7 +191,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return 0 when no relevant doc is in top K', async () => {
-      const evaluator = createHitRateAtKEvaluator(config);
+      const evaluator = createHitRateAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -205,7 +204,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createHitRateAtKEvaluator(config);
+      const evaluator = createHitRateAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -221,7 +220,7 @@ describe('IR Evaluators', () => {
 
   describe('MRR@KEvaluator', () => {
     it('should return 1 when the first result is relevant', async () => {
-      const evaluator = createMrrAtKEvaluator(config);
+      const evaluator = createMrrAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -235,7 +234,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return the reciprocal rank of the first relevant result', async () => {
-      const evaluator = createMrrAtKEvaluator(config);
+      const evaluator = createMrrAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -251,7 +250,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return 0 when the first relevant result is beyond K', async () => {
-      const evaluator = createMrrAtKEvaluator({ ...config, k: 2 });
+      const evaluator = createMrrAtKEvaluator(config, 2);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -266,7 +265,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createMrrAtKEvaluator(config);
+      const evaluator = createMrrAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -282,7 +281,7 @@ describe('IR Evaluators', () => {
 
   describe('NDCG@KEvaluator', () => {
     it('should return 1 for a perfect ranking', async () => {
-      const evaluator = createNdcgAtKEvaluator(config);
+      const evaluator = createNdcgAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -304,7 +303,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should score a partial graded ranking against the full ground truth ideal', async () => {
-      const evaluator = createNdcgAtKEvaluator(config);
+      const evaluator = createNdcgAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -323,7 +322,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return 0 when no relevant docs were retrieved', async () => {
-      const evaluator = createNdcgAtKEvaluator(config);
+      const evaluator = createNdcgAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -336,7 +335,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createNdcgAtKEvaluator(config);
+      const evaluator = createNdcgAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -352,7 +351,7 @@ describe('IR Evaluators', () => {
 
   describe('MAP@KEvaluator', () => {
     it('should return 1 when all relevant docs are ranked at the top', async () => {
-      const evaluator = createMapAtKEvaluator(config);
+      const evaluator = createMapAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -373,7 +372,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should average precision at each relevant hit', async () => {
-      const evaluator = createMapAtKEvaluator(config);
+      const evaluator = createMapAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -395,7 +394,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return 0 when no relevant docs were retrieved', async () => {
-      const evaluator = createMapAtKEvaluator(config);
+      const evaluator = createMapAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -408,7 +407,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should return unavailable when no ground truth', async () => {
-      const evaluator = createMapAtKEvaluator(config);
+      const evaluator = createMapAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -424,7 +423,7 @@ describe('IR Evaluators', () => {
 
   describe('duplicate retrieved docs', () => {
     it('should deduplicate docs before applying the top-K cutoff', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -447,7 +446,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should not double-count a duplicated relevant doc', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -463,7 +462,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should compute ranks over deduplicated docs', async () => {
-      const evaluator = createMrrAtKEvaluator(config);
+      const evaluator = createMrrAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -483,12 +482,11 @@ describe('IR Evaluators', () => {
   describe('relevance threshold', () => {
     it('should use default threshold of 1 when not specified', async () => {
       const configWithoutThreshold: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        k: 5,
         extractRetrievedDocs: (output) => output.retrievedDocs,
         extractGroundTruth: (referenceOutput) => referenceOutput.groundTruth,
       };
 
-      const evaluator = createPrecisionAtKEvaluator(configWithoutThreshold);
+      const evaluator = createPrecisionAtKEvaluator(configWithoutThreshold, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -515,7 +513,7 @@ describe('IR Evaluators', () => {
         relevanceThreshold: 2,
       };
 
-      const evaluator = createPrecisionAtKEvaluator(highThresholdConfig);
+      const evaluator = createPrecisionAtKEvaluator(highThresholdConfig, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -544,7 +542,7 @@ describe('IR Evaluators', () => {
     };
 
     it('should match docs across multiple indices', async () => {
-      const evaluator = createRecallAtKEvaluator(config);
+      const evaluator = createRecallAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -564,7 +562,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should not match docs from wrong index', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -594,11 +592,11 @@ describe('IR Evaluators', () => {
     it('should filter docs to only ground truth indices when enabled via config', async () => {
       const filterConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
-        k: 2, // Making the top K more sensitive to index filtering
         filterByGroundTruthIndices: true,
       };
 
-      const evaluator = createPrecisionAtKEvaluator(filterConfig);
+      // K of 2 makes the top K sensitive to index filtering
+      const evaluator = createPrecisionAtKEvaluator(filterConfig, 2);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -624,11 +622,11 @@ describe('IR Evaluators', () => {
     it('should not filter when filterByGroundTruthIndices is false', async () => {
       const noFilterConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
-        k: 2, // Making the top K more sensitive to index filtering
         filterByGroundTruthIndices: false,
       };
 
-      const evaluator = createPrecisionAtKEvaluator(noFilterConfig);
+      // K of 2 makes the top K sensitive to index filtering
+      const evaluator = createPrecisionAtKEvaluator(noFilterConfig, 2);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -654,7 +652,7 @@ describe('IR Evaluators', () => {
 
   describe('edge cases', () => {
     it('should handle empty retrieved docs', async () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
+      const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -667,7 +665,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should handle all irrelevant retrieved docs', async () => {
-      const evaluator = createRecallAtKEvaluator(config);
+      const evaluator = createRecallAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -682,10 +680,7 @@ describe('IR Evaluators', () => {
     });
 
     it('should handle perfect retrieval', async () => {
-      const evaluator = createF1AtKEvaluator({
-        ...config,
-        k: 4,
-      });
+      const evaluator = createF1AtKEvaluator(config, 4);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -709,14 +704,13 @@ describe('IR Evaluators', () => {
   describe('extractor error handling', () => {
     it('should return unavailable when extractGroundTruth throws', async () => {
       const errorConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        k: 5,
         extractRetrievedDocs: (output) => output.retrievedDocs,
         extractGroundTruth: () => {
           throw new Error('Ground truth extraction failed');
         },
       };
 
-      const evaluator = createPrecisionAtKEvaluator(errorConfig);
+      const evaluator = createPrecisionAtKEvaluator(errorConfig, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -732,14 +726,13 @@ describe('IR Evaluators', () => {
 
     it('should return unavailable when extractRetrievedDocs throws', async () => {
       const errorConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        k: 5,
         extractRetrievedDocs: () => {
           throw new Error('Retrieved docs extraction failed');
         },
         extractGroundTruth: (referenceOutput) => referenceOutput.groundTruth,
       };
 
-      const evaluator = createRecallAtKEvaluator(errorConfig);
+      const evaluator = createRecallAtKEvaluator(errorConfig, 5);
 
       const result = await evaluator.evaluate({
         input: {},
@@ -756,13 +749,8 @@ describe('IR Evaluators', () => {
 
   describe('evaluator naming', () => {
     it('should include K value in evaluator names', () => {
-      const evaluator = createPrecisionAtKEvaluator({ ...config, k: 10 });
+      const evaluator = createPrecisionAtKEvaluator(config, 10);
       expect(evaluator.name).toBe('Precision@10');
-    });
-
-    it('should use first K value for individual evaluator when array is passed', () => {
-      const evaluator = createRecallAtKEvaluator({ ...config, k: [5, 10, 20] });
-      expect(evaluator.name).toBe('Recall@5');
     });
   });
 
@@ -778,12 +766,7 @@ describe('IR Evaluators', () => {
     ];
 
     it('should create evaluators for each K value, deduplicate, and sort', () => {
-      const multiKConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        ...config,
-        k: [10, 5, 10, 20, 5],
-      };
-
-      const evaluators = createIrEvaluators(multiKConfig);
+      const evaluators = createIrEvaluators(config, [10, 5, 10, 20, 5]);
 
       expect(evaluators).toHaveLength(21);
       expect(evaluators.map((e) => e.name)).toEqual([
@@ -794,24 +777,14 @@ describe('IR Evaluators', () => {
     });
 
     it('should create 7 evaluators when k is a single number', () => {
-      const singleKConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        ...config,
-        k: 5,
-      };
-
-      const evaluators = createIrEvaluators(singleKConfig);
+      const evaluators = createIrEvaluators(config, 5);
 
       expect(evaluators).toHaveLength(7);
       expect(evaluators.map((e) => e.name)).toEqual(metricNamesForK(5));
     });
 
     it('should calculate metrics correctly for different K values', async () => {
-      const multiKConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        ...config,
-        k: [2, 5],
-      };
-
-      const evaluators = createIrEvaluators(multiKConfig);
+      const evaluators = createIrEvaluators(config, [2, 5]);
       const precision2 = evaluators.find((e) => e.name === 'Precision@2')!;
       const precision5 = evaluators.find((e) => e.name === 'Precision@5')!;
 
@@ -866,7 +839,7 @@ describe('IR Evaluators', () => {
     it('should parse comma-separated IR_EVAL_K values with mixed spacing', () => {
       process.env.IR_EVAL_K = '5, 10,20';
 
-      const evaluators = createIrEvaluators(config);
+      const evaluators = createIrEvaluators(config, 10);
 
       expect(evaluators).toHaveLength(21);
       expect(evaluators.map((e) => e.name)).toContain('Precision@5');
@@ -877,12 +850,7 @@ describe('IR Evaluators', () => {
     it('should override config k when IR_EVAL_K is set', () => {
       process.env.IR_EVAL_K = '3';
 
-      const multiKConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        ...config,
-        k: [5, 10, 20],
-      };
-
-      const evaluators = createIrEvaluators(multiKConfig);
+      const evaluators = createIrEvaluators(config, [5, 10, 20]);
 
       expect(evaluators).toHaveLength(7);
       expect(evaluators.map((e) => e.name)).toContain('Precision@3');
@@ -891,7 +859,7 @@ describe('IR Evaluators', () => {
     it('should fall back to the deprecated RAG_EVAL_K when IR_EVAL_K is not set', () => {
       process.env.RAG_EVAL_K = '3';
 
-      const evaluators = createIrEvaluators(config);
+      const evaluators = createIrEvaluators(config, 10);
 
       expect(evaluators).toHaveLength(7);
       expect(evaluators.map((e) => e.name)).toContain('Precision@3');
@@ -901,7 +869,7 @@ describe('IR Evaluators', () => {
       process.env.IR_EVAL_K = '3';
       process.env.RAG_EVAL_K = '9';
 
-      const evaluators = createIrEvaluators(config);
+      const evaluators = createIrEvaluators(config, 10);
 
       expect(evaluators.map((e) => e.name)).toContain('Precision@3');
       expect(evaluators.map((e) => e.name)).not.toContain('Precision@9');
@@ -910,7 +878,7 @@ describe('IR Evaluators', () => {
     it('should throw error naming IR_EVAL_K when it is invalid', () => {
       process.env.IR_EVAL_K = 'invalid';
 
-      expect(() => createIrEvaluators({ ...config, k: 7 })).toThrow(
+      expect(() => createIrEvaluators(config, 7)).toThrow(
         'Invalid IR_EVAL_K value(s): "invalid". All values must be positive integers.'
       );
     });
@@ -918,7 +886,7 @@ describe('IR Evaluators', () => {
     it('should throw error naming RAG_EVAL_K when the fallback value is invalid', () => {
       process.env.RAG_EVAL_K = '5,invalid,10';
 
-      expect(() => createIrEvaluators(config)).toThrow(
+      expect(() => createIrEvaluators(config, 10)).toThrow(
         'Invalid RAG_EVAL_K value(s): "invalid". All values must be positive integers.'
       );
     });
@@ -926,7 +894,7 @@ describe('IR Evaluators', () => {
     it('should throw error for zero or negative values', () => {
       process.env.IR_EVAL_K = '5,0,-1,10';
 
-      expect(() => createIrEvaluators(config)).toThrow(
+      expect(() => createIrEvaluators(config, 10)).toThrow(
         'Invalid IR_EVAL_K value(s): "0", "-1". All values must be positive integers.'
       );
     });
@@ -934,8 +902,14 @@ describe('IR Evaluators', () => {
     it('should throw error for floating point values', () => {
       process.env.IR_EVAL_K = '5,10.5,20';
 
-      expect(() => createIrEvaluators(config)).toThrow(
+      expect(() => createIrEvaluators(config, 10)).toThrow(
         'Invalid IR_EVAL_K value(s): "10.5". All values must be positive integers.'
+      );
+    });
+
+    it('should throw error when k is an empty array', () => {
+      expect(() => createIrEvaluators(config, [])).toThrow(
+        'k must be a positive integer or a non-empty array of positive integers'
       );
     });
   });
@@ -970,7 +944,7 @@ describe('IR Evaluators', () => {
       async (envVar) => {
         process.env[envVar] = 'true';
 
-        const evaluator = createPrecisionAtKEvaluator({ ...config, k: 1 });
+        const evaluator = createPrecisionAtKEvaluator(config, 1);
 
         const result = await evaluator.evaluate({
           input: {},
@@ -985,7 +959,7 @@ describe('IR Evaluators', () => {
     );
 
     it('should not filter when neither env var is set', async () => {
-      const evaluator = createPrecisionAtKEvaluator({ ...config, k: 1 });
+      const evaluator = createPrecisionAtKEvaluator(config, 1);
 
       const result = await evaluator.evaluate({
         input: {},

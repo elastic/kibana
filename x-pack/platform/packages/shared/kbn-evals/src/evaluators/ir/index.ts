@@ -61,28 +61,25 @@ function parseIrEvalKEnvVar(envK: string, envVarName: string): number[] {
   return parsedValues;
 }
 
-/** Returns deduplicated, sorted K values from IR_EVAL_K env var (falling back to the deprecated RAG_EVAL_K) or config. */
-export function getEffectiveK(configK: number | number[]): number[] {
+/**
+ * Returns deduplicated, sorted K values. IR_EVAL_K (or the deprecated RAG_EVAL_K) takes
+ * precedence over the passed `k`. Use this when composing individual `create*AtKEvaluator`
+ * factories directly so the env var override still applies.
+ */
+export function getEffectiveK(k: number | number[]): number[] {
   let kValues: number[];
   if (process.env.IR_EVAL_K !== undefined) {
     kValues = parseIrEvalKEnvVar(process.env.IR_EVAL_K, 'IR_EVAL_K');
   } else if (process.env.RAG_EVAL_K !== undefined) {
     kValues = parseIrEvalKEnvVar(process.env.RAG_EVAL_K, 'RAG_EVAL_K');
   } else {
-    kValues = Array.isArray(configK) ? configK : [configK];
+    kValues = Array.isArray(k) ? k : [k];
   }
-  return [...new Set(kValues)].sort((a, b) => a - b);
-}
-
-/**
- * Returns a single K value. Uses the number directly or first value from array.
- */
-function getSingleK(configK: number | number[]): number {
-  if (typeof configK === 'number') {
-    return configK;
+  const result = [...new Set(kValues)].sort((a, b) => a - b);
+  if (result.length === 0) {
+    throw new Error('k must be a positive integer or a non-empty array of positive integers');
   }
-  const kValues = getEffectiveK(configK);
-  return kValues[0];
+  return result;
 }
 
 interface IrMetrics {
@@ -102,11 +99,11 @@ interface IrMetrics {
 
 function computeIrMetrics<TOutput, TReferenceOutput>(
   config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number,
   output: TOutput,
   referenceOutput: TReferenceOutput
 ): IrMetrics | null {
   const { extractRetrievedDocs, extractGroundTruth } = config;
-  const k = getSingleK(config.k);
   const threshold = config.relevanceThreshold ?? DEFAULT_RELEVANCE_THRESHOLD;
 
   const groundTruth: GroundTruth = extractGroundTruth(referenceOutput);
@@ -165,6 +162,7 @@ interface IrMetricSpec {
  */
 function createIrMetricEvaluator<TOutput, TReferenceOutput>(
   config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number,
   spec: IrMetricSpec
 ): Evaluator {
   return {
@@ -174,7 +172,7 @@ function createIrMetricEvaluator<TOutput, TReferenceOutput>(
     evaluate: async ({ output, expected }) => {
       let metrics: IrMetrics | null;
       try {
-        metrics = computeIrMetrics(config, output as TOutput, expected as TReferenceOutput);
+        metrics = computeIrMetrics(config, k, output as TOutput, expected as TReferenceOutput);
       } catch (error) {
         return {
           score: null,
@@ -199,10 +197,10 @@ function createIrMetricEvaluator<TOutput, TReferenceOutput>(
 }
 
 export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `Precision@${k}`,
     getResult: (metrics) => ({
       score: metrics.precision,
@@ -215,10 +213,10 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput 
 }
 
 export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `Recall@${k}`,
     getResult: (metrics) => ({
       score: metrics.recall,
@@ -231,10 +229,10 @@ export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = u
 }
 
 export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `F1@${k}`,
     getResult: (metrics) => ({
       score: metrics.f1,
@@ -256,10 +254,10 @@ export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unkno
  * HitRate@K (also known as Accuracy@K): 1 if at least one relevant doc is in the top K, else 0.
  */
 export function createHitRateAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `HitRate@${k}`,
     getResult: (metrics) => ({
       score: metrics.hitRate,
@@ -278,10 +276,10 @@ export function createHitRateAtKEvaluator<TOutput = unknown, TReferenceOutput = 
  * The mean across all examples yields the suite-level Mean Reciprocal Rank.
  */
 export function createMrrAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `MRR@${k}`,
     getResult: (metrics) => ({
       score: metrics.mrr,
@@ -300,10 +298,10 @@ export function createMrrAtKEvaluator<TOutput = unknown, TReferenceOutput = unkn
  * using graded relevance (ground-truth scores as gains).
  */
 export function createNdcgAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `NDCG@${k}`,
     getResult: (metrics) => ({
       score: metrics.ndcg,
@@ -320,10 +318,10 @@ export function createNdcgAtKEvaluator<TOutput = unknown, TReferenceOutput = unk
  * min(K, total relevant docs). The mean across all examples yields Mean Average Precision.
  */
 export function createMapAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number
 ): Evaluator {
-  const k = getSingleK(config.k);
-  return createIrMetricEvaluator(config, {
+  return createIrMetricEvaluator(config, k, {
     name: `MAP@${k}`,
     getResult: (metrics) => ({
       score: metrics.map,
@@ -340,23 +338,21 @@ export function createMapAtKEvaluator<TOutput = unknown, TReferenceOutput = unkn
  * with shared configuration.
  * `extractRetrievedDocs` must return docs ordered best match first: MRR, NDCG, and MAP derive
  * each doc's rank from its array position.
- * When k is an array or IR_EVAL_K (or the deprecated RAG_EVAL_K) contains comma-separated
- * values, evaluators are created for each K value.
- * For example, k: [5, 10] will create Precision@5 ... MAP@5, Precision@10 ... MAP@10.
+ * Evaluators are created for each K value. IR_EVAL_K (or the deprecated RAG_EVAL_K) takes
+ * precedence over `k`. For example, k: [5, 10] creates Precision@5 ... MAP@5, Precision@10 ... MAP@10.
  */
 export function createIrEvaluators<TOutput = unknown, TReferenceOutput = unknown>(
-  config: IrEvaluatorConfig<TOutput, TReferenceOutput>
+  config: IrEvaluatorConfig<TOutput, TReferenceOutput>,
+  k: number | number[]
 ): Evaluator[] {
-  const kValues = getEffectiveK(config.k);
-
-  return kValues.flatMap((kValue) => [
-    createPrecisionAtKEvaluator({ ...config, k: kValue }),
-    createRecallAtKEvaluator({ ...config, k: kValue }),
-    createF1AtKEvaluator({ ...config, k: kValue }),
-    createHitRateAtKEvaluator({ ...config, k: kValue }),
-    createMrrAtKEvaluator({ ...config, k: kValue }),
-    createNdcgAtKEvaluator({ ...config, k: kValue }),
-    createMapAtKEvaluator({ ...config, k: kValue }),
+  return getEffectiveK(k).flatMap((kValue) => [
+    createPrecisionAtKEvaluator(config, kValue),
+    createRecallAtKEvaluator(config, kValue),
+    createF1AtKEvaluator(config, kValue),
+    createHitRateAtKEvaluator(config, kValue),
+    createMrrAtKEvaluator(config, kValue),
+    createNdcgAtKEvaluator(config, kValue),
+    createMapAtKEvaluator(config, kValue),
   ]);
 }
 
