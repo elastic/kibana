@@ -9,7 +9,7 @@
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import type { DiscoverSessionApiTab } from '../schema';
+import type { DiscoverSessionApiTab } from '../../server';
 
 type StoredVisContext = DiscoverSessionTabAttributes['visContext'];
 type ApiVisContext = DiscoverSessionApiTab['vis_context'];
@@ -22,12 +22,8 @@ export interface StoredVisContextRequestData {
   breakdownField?: string;
 }
 
-const isApiSuggestionType = (value: unknown): value is ApiSuggestionType =>
-  value === UnifiedHistogramSuggestionType.lensSuggestion ||
-  value === UnifiedHistogramSuggestionType.histogramForESQL ||
-  value === UnifiedHistogramSuggestionType.histogramForDataView;
-
-export const transformVisContextOut = (visContext: StoredVisContext): ApiVisContext | undefined => {
+/** Converts stored chart state to API fields, omitting the runtime fingerprint. */
+export const toApiVisContext = (visContext: StoredVisContext): ApiVisContext | undefined => {
   if (
     !visContext ||
     !('suggestionType' in visContext) ||
@@ -48,7 +44,8 @@ export const transformVisContextOut = (visContext: StoredVisContext): ApiVisCont
   };
 };
 
-export const transformVisContextIn = (
+/** Converts API chart fields to stored state with the supplied fingerprint. */
+export const fromApiVisContext = (
   visContext: ApiVisContext,
   requestData: StoredVisContextRequestData = {}
 ): StoredVisContext => {
@@ -62,3 +59,8 @@ export const transformVisContextIn = (
     attributes: visContext.attributes,
   };
 };
+
+const isApiSuggestionType = (value: unknown): value is ApiSuggestionType =>
+  value === UnifiedHistogramSuggestionType.lensSuggestion ||
+  value === UnifiedHistogramSuggestionType.histogramForESQL ||
+  value === UnifiedHistogramSuggestionType.histogramForDataView;

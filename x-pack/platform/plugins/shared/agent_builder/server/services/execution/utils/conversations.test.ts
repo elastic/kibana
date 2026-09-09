@@ -31,6 +31,7 @@ import {
 } from '../../../test_utils';
 import type { ConversationWithOperation } from './conversations';
 import {
+  appendResumeExecution$,
   appendRoundTerminated$,
   getConversation,
   persistRoundInput,
@@ -680,6 +681,194 @@ describe('conversations utils', () => {
         'round-x::step::1',
         'round-x::execution_terminated',
       ]);
+    });
+  });
+
+  describe('appendResumeExecution$ (append-only resume write)', () => {
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    // A stored, paused conversation: exec_0 exists (execution_id `round-1::execution`).
+    const pausedConversation = (): ConversationWithOperation => ({
+      ...withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE'),
+      events: [
+        {
+          id: 'round-1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2024-01-01T00:00:00.000Z',
+          actor: { type: 'agent', id: 'agent-1' } as never,
+          execution_id: 'round-1::execution',
+          trigger_event_id: 'round-1::user_message',
+          data: {
+            model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 1,
+            outcome: { type: 'prompt_requested', prompts: [] },
+          },
+        },
+      ] as never,
+    });
+
+    const followUpRound = () => ({
+      ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+      started_at: '2024-01-01T00:05:00.000Z',
+      time_to_last_token: 500,
+      steps: [
+        { type: ConversationRoundStepType.reasoning, reasoning: 'done' } as ConversationRoundStep,
+      ],
+      response: { message: 'ok' },
+      input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
+    });
+
+    const run = (
+      conversation: ConversationWithOperation,
+      conversationClient: ReturnType<typeof createConversationClientMock>,
+      roundCompleteEvent: RoundCompleteEvent
+    ) =>
+      lastValueFrom(
+        appendResumeExecution$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of(roundCompleteEvent),
+          input: { prompts: { 'tools.my_tool.confirmation': { allow: true } } },
+        }).pipe(toArray())
+      );
+
+    it('appends a prompt_response + a new exec_1 without touching exec_0', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = pausedConversation();
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      const follow = followUpRound();
+
+      const emitted = await run(conversation, conversationClient, {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+          resumed: true,
+          resume_execution: { follow_up_round: follow },
+        },
+      });
+
+      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.events.map((e: { id: string }) => e.id)).toEqual([
+        'round-1::prompt_response::1',
+        'round-1::execution::1::execution_started',
+        'round-1::execution::1::step::0',
+        'round-1::execution::1::execution_terminated',
+      ]);
+      expect(args.status).toBe(ConversationRoundStatus.completed);
+
+      const promptResponse = args.events[0];
+      expect(promptResponse.type).toBe(TimelineEventType.promptResponse);
+      expect(promptResponse.data).toMatchObject({
+        prompt_requested_event_id: 'round-1::execution_terminated',
+        responses: { 'tools.my_tool.confirmation': { allow: true } },
+        input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
+      });
+      expect(emitted[0].type).toBe(ChatEventType.conversationUpdated);
+    });
+
+    it('derives exec_2 (index 2) for a re-pause chain', async () => {
+      const conversationClient = createConversationClientMock();
+      // exec_0 + exec_1 already stored -> the next resume is exec_2, answering exec_1's terminated
+      const conversation: ConversationWithOperation = {
+        ...pausedConversation(),
+        events: [
+          ...(pausedConversation().events ?? []),
+          {
+            id: 'round-1::execution::1::execution_terminated',
+            type: TimelineEventType.executionTerminated,
+            created_at: '2024-01-01T00:05:00.000Z',
+            actor: { type: 'agent', id: 'agent-1' } as never,
+            execution_id: 'round-1::execution::1',
+            trigger_event_id: 'round-1::prompt_response::1',
+            data: {
+              model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+              time_to_first_token: 1,
+              time_to_last_token: 1,
+              outcome: { type: 'prompt_requested', prompts: [] },
+            },
+          },
+        ] as never,
+      };
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await run(conversation, conversationClient, {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+          resumed: true,
+          resume_execution: { follow_up_round: followUpRound() },
+        },
+      });
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.events[0].id).toBe('round-1::prompt_response::2');
+      expect(args.events[0].data).toMatchObject({
+        prompt_requested_event_id: 'round-1::execution::1::execution_terminated',
+      });
+      expect(args.events[1].id).toBe('round-1::execution::2::execution_started');
+    });
+
+    it('throws when the round_complete carries no resume_execution payload', async () => {
+      const conversationClient = createConversationClientMock();
+      await expect(
+        run(pausedConversation(), conversationClient, {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            resumed: true,
+          },
+        })
+      ).rejects.toThrow(/requires a resume_execution payload/);
+    });
+
+    it('throws when no prior execution is stored for the round', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation: ConversationWithOperation = {
+        ...withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE'),
+        events: [],
+      };
+      await expect(
+        run(conversation, conversationClient, {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            resumed: true,
+            resume_execution: { follow_up_round: followUpRound() },
+          },
+        })
+      ).rejects.toThrow(/no prior execution stored/);
+    });
+
+    it('persists a resolved title alongside the resume append when title$ is provided', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = pausedConversation();
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await lastValueFrom(
+        appendResumeExecution$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: {
+              round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+              resumed: true,
+              resume_execution: { follow_up_round: followUpRound() },
+            },
+          }),
+          input: { prompts: { 'tools.my_tool.confirmation': { allow: true } } },
+          title$: of('Generated title'),
+        }).pipe(toArray())
+      );
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.title).toBe('Generated title');
     });
   });
 });
