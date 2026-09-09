@@ -755,6 +755,7 @@ packages:
   - 'src/platform/packages/shared/kbn-data-grid-in-table-search'
   - 'src/platform/packages/shared/kbn-data-service'
   - 'src/platform/packages/shared/kbn-data-service-server'
+  - 'src/platform/packages/shared/kbn-data-source'
   - 'src/platform/packages/shared/kbn-data-view-utils'
   - 'src/platform/packages/shared/kbn-data-view-validation'
   - 'src/platform/packages/shared/kbn-datemath'
