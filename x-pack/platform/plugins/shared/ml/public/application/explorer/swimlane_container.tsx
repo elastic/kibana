@@ -198,7 +198,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const { colorMode, euiTheme } = useEuiTheme();
   const isDarkTheme = colorMode === 'DARK';
 
-
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
 
