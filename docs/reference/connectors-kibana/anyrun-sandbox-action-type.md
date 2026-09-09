@@ -9,7 +9,9 @@ applies_to:
 
 # ANY.RUN Sandbox connector [anyrun-sandbox-action-type]
 
-The ANY.RUN Sandbox connector gives Agent Builder access to the [ANY.RUN Sandbox API](https://any.run/sandbox-api/). It can submit a file or URL for interactive analysis, monitor the resulting task, and retrieve report and indicator data. Threat Intelligence Lookup is a separate ANY.RUN API and is not part of this connector.
+The ANY.RUN Sandbox connector supports chat-based investigations in Agent Builder and automated analysis in Workflows through the [ANY.RUN Sandbox API](https://any.run/sandbox-api/). Use Agent Builder to find existing analyses, check task status, and read reports and indicators. Use Workflows to submit an approved file or URL for private analysis, monitor the task, and retrieve the results.
+
+The connector has eight actions. All actions are available in Workflows. The six read actions are also available as Agent Builder tools. File and URL submissions are not available as Agent Builder tools. Threat Intelligence Lookup is a separate ANY.RUN API and is not part of this connector.
 
 ::::{important}
 Submission sends a file or URL to a third-party service, consumes account quota, and can create a duplicate charge if repeated. Require operator approval before calling `submitFile` or `submitUrl`. The connector does not retry either submission automatically.
@@ -36,7 +38,7 @@ The connector test reads account limits. It does not submit a file or URL.
 ## Connector actions [anyrun-sandbox-connector-actions]
 
 `submitUrl`
-:   Submits one HTTP or HTTPS URL. Visibility is `owner` by default and can be `byteam`; public and link-only modes are not accepted. You can pass one exact environment combination marked `supportedForSubmission` by `listEnvironments`, or omit it to use the vendor default. Windows 11 and Windows Server 2025 environments require 64 bit. Returns either a permanent `taskId` and region-matched `analysisUrl` or a temporary `queueTaskId`. This action consumes quota and requires explicit approval.
+:   Submits one HTTP or HTTPS URL. Visibility is `owner` by default and can be `byteam`. Public and link-only modes are not accepted. You can pass one exact environment combination marked `supportedForSubmission` by `listEnvironments`, or omit it to use the vendor default. Windows 11 and Windows Server 2025 environments require 64 bit. Returns either a permanent `taskId` and region-matched `analysisUrl` or a temporary `queueTaskId`. This action consumes quota and requires explicit approval.
 
 `submitFile`
 :   Submits one canonical Base64-encoded file with its file name. The decoded file must not exceed 2 MiB. You can pass one exact environment combination marked `supportedForSubmission` by `listEnvironments`, or omit it to use the vendor default. Windows 11 and Windows Server 2025 environments require 64 bit. The connector does not fetch, extract, or decrypt Elastic Defend ZIP archives or other password-protected archives. Supply approved, decoded file bytes only. The file value can remain in execution history, so do not use confidential samples. Returns either a permanent `taskId` and region-matched `analysisUrl` or a temporary `queueTaskId`. This action consumes quota and requires explicit approval.
@@ -76,5 +78,3 @@ The connector test reads account limits. It does not submit a file or URL.
 2. In the ANY.RUN account, create or retrieve a Sandbox API key according to the [Sandbox API documentation](https://any.run/sandbox-api/).
 3. Copy only the key value into the connector. Do not include `API-KEY`.
 4. Run the connector test to read account limits without submitting a sample.
-
-ANY.RUN advertises a 14-day trial request for eligible paid plans. The request requires a business email and vendor review, so it is not an immediate self-service API test environment. If no entitled internal account exists, request temporary review access from the team or ANY.RUN before live validation.

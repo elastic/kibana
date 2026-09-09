@@ -346,7 +346,7 @@ export const AnyrunSandbox: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
   auth: {
     types: [

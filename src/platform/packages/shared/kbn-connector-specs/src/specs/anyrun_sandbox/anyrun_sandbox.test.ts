@@ -95,8 +95,11 @@ describe('ANY.RUN Sandbox', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('uses the staged release policy and stores a bare API key', () => {
-    expect(AnyrunSandbox.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+  it('supports Agent Builder and Workflows', () => {
+    expect(AnyrunSandbox.metadata.supportedFeatureIds).toEqual(['agentBuilder', 'workflows']);
+  });
+
+  it('stores a bare API key and does not retry submissions', () => {
     expect(AnyrunSandbox.auth?.types).toEqual([
       expect.objectContaining({
         type: 'api_key_header',
