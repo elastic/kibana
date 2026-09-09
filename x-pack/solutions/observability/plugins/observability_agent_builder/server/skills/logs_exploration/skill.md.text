@@ -50,10 +50,21 @@ Each tool result contains `attachment_ids`. Render the view by emitting:
 
 Both tools write to the **same** attachment, so switching between the two views reuses one id.
 
-## Reading the user's state before you answer
+## Read the attachment before you answer
 
-The attachment's content is in your context and reflects everything the user has done since it was
-created. It is authoritative. Before answering any question about these logs:
+The attachment's content is **not** in your context. Only its metadata is, and only on turns where
+something touched it — a plain follow-up question carries nothing about it at all. What you can see
+in this conversation is whatever you last read, at the moment you read it.
+
+**Call `attachments.read` before answering any message about these logs.** Every message, and most
+of all the short ones — "and the top one?", "biggest?", "what about now?". Those are where
+continuing your previous answer feels natural and is most likely to be wrong, because the user has
+usually clicked something since. Mutes and range changes take no turn from you, so they reach you
+only when you read.
+
+The view being on screen is not a reason to skip the read. It is the reason the read is needed.
+
+Once you have read it:
 
 1. Read the **MUTED PATTERNS** list. The user dismissed these as noise. Never name them in an
    answer, never include them in a summary, count or comparison, and never investigate them, even if
@@ -105,7 +116,8 @@ Either way:
   taken at that moment ("as of this reading") and never imply they will still match the view.
 - **Say what the view does not.** The user is looking at the rows and the bars. Reading them back is
   not an answer; the share of the cut, the trend behind each sparkline, what is related to what, and
-  what to do next are the parts only you can supply.
+  what to do next are the parts only you can supply. This governs what you **write**, never whether
+  you read. Answer from a fresh `attachments.read` either way.
 
 ## Re-render the view when your answer is actionable in it
 

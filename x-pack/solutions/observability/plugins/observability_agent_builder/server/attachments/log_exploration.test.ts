@@ -199,6 +199,18 @@ describe('log exploration attachment format()', () => {
         'Do not re-render when your reply recommends nothing the view can act'
       );
     });
+
+    it('closes with a dated re-read instruction, after the numbers it qualifies', async () => {
+      const value = await formatValue(volumeComparisonData(EMPTY_HISTOGRAM));
+
+      expect(value).toContain('END OF READING');
+      expect(value).toContain('fetched at 2026-09-04T18:00:00.000Z');
+      expect(value).toContain('Call attachments.read on LiDoF1 again');
+      // Position is the point: the warning has to age with the data, not precede it.
+      expect(value.indexOf('END OF READING')).toBeGreaterThan(
+        value.indexOf('Total documents in current range')
+      );
+    });
   });
 
   describe('volume comparison', () => {

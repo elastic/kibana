@@ -258,6 +258,25 @@ const formatRefinements = (refinements: LogExplorationRefinement[]): string => {
   return sections.join('\n\n');
 };
 
+/**
+ * Sits last, immediately after the numbers it qualifies. This text persists in context as a tool
+ * result on later rounds, where those numbers are already old and nothing else in the round says
+ * so: a question-only round carries no attachment metadata at all. Reproduced answering "the top
+ * pattern is X, 540 documents" from an earlier reading, with X muted by then and no read attempted.
+ */
+const formatStalenessWarning = (attachmentId: string, generatedAt: string): string =>
+  dedent(`
+    END OF READING. The numbers above were fetched at ${generatedAt}; compare that against the
+    timestamp on the message you are answering. They describe the view as it was then. The user
+    changes it with instant controls that take no turn from you, so it goes out of date with no
+    signal reaching you.
+
+    Call attachments.read on ${attachmentId} again before answering any later message about these
+    logs, including a two-word follow-up. Those are the ones that go wrong: continuing your last
+    answer reads as natural, and the view has usually moved. Naming a pattern that led an earlier
+    reading and has since been muted is the specific failure to avoid.
+  `);
+
 export function createLogExplorationAttachmentType(): AttachmentTypeDefinition<
   typeof OBSERVABILITY_LOG_EXPLORATION_ATTACHMENT_TYPE_ID,
   LogExplorationData
@@ -327,7 +346,8 @@ export function createLogExplorationAttachmentType(): AttachmentTypeDefinition<
               Frame them that way ("as of this reading", "at the time of this summary"), and never
               promise they still match the view.
             - Prefer saying what the user cannot already see. Repeating a row, a count or a bar back
-              to them is not an answer.
+              to them is not an answer. That governs what you write, never whether you read: the
+              view being on screen is not a reason to answer without reading it.
 
             WHEN TO RE-RENDER THIS VIEW. If your reply recommends something the user can do in the
             view — mute a pattern, investigate one, compare one against the baseline — end the reply
@@ -341,6 +361,8 @@ export function createLogExplorationAttachmentType(): AttachmentTypeDefinition<
             ${formatRefinements(data.refinements)}
 
             ${formatView(data)}
+
+            ${formatStalenessWarning(attachment.id, data.result.generatedAt)}
           `),
         }),
       };
