@@ -89,8 +89,16 @@ describe('createAiIndexAttachmentType', () => {
   it('leaves the save decision to the tool confirmation rather than a chat question', () => {
     const description = attachmentType.getAgentDescription?.();
 
-    expect(description).toMatch(/Never end a turn asking for permission to save/);
-    expect(description).toMatch(/never offer saving and running as a choice/);
+    expect(description).toMatch(/Never end a turn asking for permission to save or to run/);
+    expect(description).toMatch(/never offer them as separate choices/);
+  });
+
+  it('runs as part of the save, so one dialog covers both decisions', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/`run` set to true/);
+    expect(description).toMatch(/that dialog names the full-corpus run/);
+    expect(description).toMatch(/do not follow a save with an `ask_user_question` offering to run/);
   });
 
   it('formats the attachment for the agent', async () => {

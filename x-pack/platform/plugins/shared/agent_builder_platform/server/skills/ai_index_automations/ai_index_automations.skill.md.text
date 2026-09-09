@@ -281,8 +281,11 @@ Piloting inside the loop above is authorized by the brief that started it, and i
 handful of documents that get deleted afterwards. Running the saved automation is not the same act:
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
-Do not execute a saved workflow unless the run you are in has told you to. `platform.core.execute_workflow`
-starts a run and `platform.core.get_workflow_execution_status` reports on it.
+Saving with the save tool's `run` flag is not an exception to that. The run is named in the save
+confirmation, so approving the save approves the run, and no further question is owed. What is not
+covered is starting a run of your own accord on a workflow already saved: do not execute a saved
+workflow unless the run you are in has told you to. `platform.core.execute_workflow` starts one and
+`platform.core.get_workflow_execution_status` reports on it.
 
 ## Corpora larger than 10,000 documents
 
