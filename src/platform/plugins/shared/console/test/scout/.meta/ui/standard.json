@@ -1,5 +1,5 @@
 {
-  "sha1": "77b255816394d13108cd0d87d4eb2f0e9b5c27ba",
+  "sha1": "10775c2bb897c2c164cb9b508fe3d4245326be76",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 58,
+        "line": 61,
         "column": 13
       }
     },
@@ -100,7 +100,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 63,
+        "line": 66,
         "column": 5
       }
     },
@@ -120,7 +120,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 75,
+        "line": 78,
         "column": 62
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 82,
+        "line": 85,
         "column": 8
       }
     },
@@ -160,7 +160,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 86,
+        "line": 89,
         "column": 44
       }
     },
@@ -180,7 +180,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 92,
+        "line": 95,
         "column": 5
       }
     },
@@ -200,7 +200,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 97,
+        "line": 100,
         "column": 23
       }
     },
@@ -220,7 +220,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 109,
+        "line": 112,
         "column": 11
       }
     },
@@ -240,7 +240,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 121,
+        "line": 124,
         "column": 5
       }
     },
@@ -260,7 +260,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 130,
+        "line": 133,
         "column": 23
       }
     },
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 183,
+        "line": 186,
         "column": 1
       }
     },
@@ -300,7 +300,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 190,
+        "line": 193,
         "column": 1
       }
     },

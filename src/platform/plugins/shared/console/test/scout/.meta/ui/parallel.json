@@ -1,5 +1,5 @@
 {
-  "sha1": "77b255816394d13108cd0d87d4eb2f0e9b5c27ba",
+  "sha1": "10775c2bb897c2c164cb9b508fe3d4245326be76",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -354,8 +354,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_config.spec.ts",
-        "line": 15,
-        "column": 64
+        "line": 22,
+        "column": 13
       }
     },
     {
@@ -374,8 +374,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_config.spec.ts",
-        "line": 37,
-        "column": 11
+        "line": 42,
+        "column": 43
       }
     },
     {
@@ -394,8 +394,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_config.spec.ts",
-        "line": 52,
-        "column": 27
+        "line": 57,
+        "column": 29
       }
     },
     {
@@ -808,8 +808,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
-        "line": 15,
-        "column": 64
+        "line": 20,
+        "column": 5
       }
     },
     {
@@ -828,8 +828,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
-        "line": 23,
-        "column": 23
+        "line": 30,
+        "column": 65
       }
     },
     {
@@ -848,8 +848,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
-        "line": 34,
-        "column": 75
+        "line": 40,
+        "column": 5
       }
     },
     {
@@ -1328,8 +1328,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
-        "line": 18,
-        "column": 23
+        "line": 21,
+        "column": 5
       }
     },
     {
@@ -1348,8 +1348,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
-        "line": 25,
-        "column": 23
+        "line": 28,
+        "column": 68
       }
     },
     {
@@ -1368,8 +1368,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
-        "line": 33,
-        "column": 66
+        "line": 37,
+        "column": 13
       }
     },
     {
@@ -1388,8 +1388,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
-        "line": 43,
-        "column": 91
+        "line": 47,
+        "column": 13
       }
     },
     {
@@ -1408,8 +1408,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
-        "line": 54,
-        "column": 13
+        "line": 55,
+        "column": 18
       }
     }
   ]
