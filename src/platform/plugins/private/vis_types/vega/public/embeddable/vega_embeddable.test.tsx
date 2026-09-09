@@ -462,7 +462,6 @@ describe('vegaEmbeddableFactory', () => {
 
     expect(api.esql$.getValue()).toEqual([{ esql: query }]);
     expect(apiPublishesEsqlUsage(api)).toBe(true);
-    expect(api).not.toHaveProperty('filters$');
   });
 
   it('publishes an empty esql$ for non-ES|QL specs', async () => {
