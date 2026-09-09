@@ -91,6 +91,32 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
+const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_manage_rules',
+      name: i18n.translate('xpack.synthetics.features.canManageRules.label', {
+        defaultMessage: 'Can manage rules',
+      }),
+      includeIn: 'none',
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      alerting: {
+        rule: {
+          all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
+        },
+      },
+      ui: [],
+    },
+  ],
+};
+
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -197,6 +223,15 @@ export const syntheticsFeature = {
         defaultMessage: 'This feature allows you to read global parameters values',
       }),
       privilegeGroups: [canReadParamsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.rules', {
+        defaultMessage: 'Alert rules',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.rules.description', {
+        defaultMessage: 'Create and manage alert rules for monitors.',
+      }),
+      privilegeGroups: [canManageRulesPrivilege],
     },
   ],
 };
