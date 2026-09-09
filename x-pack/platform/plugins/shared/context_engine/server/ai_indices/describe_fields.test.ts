@@ -218,13 +218,16 @@ describe('describeAiIndexFields', () => {
       },
     });
 
-    const { fields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
+    const { fields, allFields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
       esClient,
       target: 'ai-index-idx-a',
     });
 
     expect(fields).toHaveLength(MAX_AI_INDEX_DESCRIBE_FIELDS);
     expect(fields.some(({ path }) => path === 'zzz_semantic')).toBe(false);
+    // Uncapped: callers deciding on a specific path must not lose it to the display cap.
+    expect(allFields).toHaveLength(MAX_AI_INDEX_DESCRIBE_FIELDS + 3);
+    expect(allFields.some(({ path }) => path === 'zzz_semantic')).toBe(true);
     expect(semanticFields).toEqual(['aaa_semantic']);
     // MAX + 1 keywords plus two semantic fields, minus the MAX kept.
     expect(omittedFieldCount).toBe(3);
