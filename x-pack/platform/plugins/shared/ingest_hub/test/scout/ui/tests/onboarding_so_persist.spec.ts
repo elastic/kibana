@@ -170,9 +170,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
 
     await browserAuth.loginAsAdmin();
     // Navigate with ?deploymentId= to trigger the hydration path.
-    await page.goto(
-      page.url().replace(/\/app\/.*/, '/app/onboarding/aws?deploymentId=dep-e2e-resume')
-    );
+    await page.gotoApp('onboarding/aws', { params: { deploymentId: 'dep-e2e-resume' } });
 
     // Wait for the app to mount (any step element is enough).
     await page.waitForSelector('[data-test-subj^="onboardingStep-"]');
@@ -251,14 +249,10 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
 
     await browserAuth.loginAsAdmin();
     // Use ?deploymentId= so isEditMode=true and StaticKeysReplaceView renders.
-    await page.goto(
-      page
-        .url()
-        .replace(
-          /\/app\/.*/,
-          '/app/onboarding/aws?deploymentId=dep-static-seed#authenticate-and-deploy'
-        )
-    );
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: 'dep-static-seed' },
+      hash: 'authenticate-and-deploy',
+    });
 
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments$/.test(url.pathname),
@@ -340,9 +334,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     );
 
     await browserAuth.loginAsAdmin();
-    await page.goto(
-      page.url().replace(/\/app\/.*/, '/app/onboarding/aws?deploymentId=dep-static-resume')
-    );
+    await page.gotoApp('onboarding/aws', { params: { deploymentId: 'dep-static-resume' } });
 
     await page.waitForSelector('[data-test-subj^="onboardingStep-"]');
 
