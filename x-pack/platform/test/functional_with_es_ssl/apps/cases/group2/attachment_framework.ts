@@ -350,13 +350,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await cases.casesTable.filterByOwner(owner);
           }
 
-          await cases.casesTable.waitForTableToFinishLoading();
-
-          /**
-           * The select button matched the query of the
-           * [data-test-subj*="cases-table-row-" query
-           */
-          await cases.casesTable.validateCasesTableHasNthRows(6);
+          // Each case contributes two matches to the row selector: the row itself and its select
+          // button (`cases-table-row-select-<id>`).
+          await cases.casesTable.waitForNthToBeListed(TOTAL_OWNERS.length * 2);
 
           for (const caseId of createdCases.values()) {
             await cases.casesTable.getCaseById(caseId);
