@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy } from 'lodash';
+import { isNil, omitBy, orderBy } from 'lodash';
 
 import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
@@ -47,10 +47,7 @@ import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
 import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
-import {
-  toApiFieldSettings,
-  fromApiFieldSettings,
-} from '../../../../transforms/columns/field_settings';
+import { toApiFieldSettings } from '../../../../transforms/columns/field_settings';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -331,8 +328,19 @@ function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
     delete dv.fieldAttrs;
   }
 
-  // Roundtrip the data view field formats so they are normalized to the typed formats
-  const { fieldFormats: normalizedFieldFormats } = fromApiFieldSettings(toApiFieldSettings(dv));
+  const normalizedFieldFormats = dv.fieldFormats ?? {};
+  for (const [key, value] of Object.entries(normalizedFieldFormats)) {
+    if (value.id === 'url') {
+      // Clean null params + parsedUrl key
+      normalizedFieldFormats[key].params = omitBy(value.params, isNil);
+      normalizedFieldFormats[key].params.parsedUrl = undefined;
+    }
+
+    if (Object.keys(value.params ?? {}).length === 0) {
+      delete normalizedFieldFormats[key].params;
+    }
+  }
+
   dv.fieldFormats = normalizedFieldFormats;
   if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
     delete dv.fieldFormats;
