@@ -30,6 +30,7 @@ const DISABLE_MISSING_TEST_REPORT_ERRORS =
 export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
+      const alertSlack = Boolean(flags['alert-slack']);
       const indexInEs = Boolean(flags['index-errors']);
       const reportUpdate = Boolean(flags['report-update']);
 
@@ -121,7 +122,7 @@ export function runFailedTestsReporterCli() {
           await processScoutReports(scoutReports, processParams);
 
           // Generate Scout test failure artifacts after reports are updated (GH issue info, html reports, etc.)
-          await generateScoutTestFailureArtifacts({ log, bkMeta });
+          await generateScoutTestFailureArtifacts({ log, bkMeta, alertSlack });
         }
       } finally {
         await CiStatsReporter.fromEnv(log).metrics([
@@ -141,18 +142,20 @@ export function runFailedTestsReporterCli() {
     {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
-        boolean: ['github-update', 'report-update'],
+        boolean: ['alert-slack', 'github-update', 'report-update'],
         string: ['build-url'],
         default: {
-          'github-update': true,
-          'report-update': true,
-          'index-errors': true,
+          'alert-slack': true,
           'build-url': process.env.BUILD_URL,
+          'github-update': true,
+          'index-errors': true,
+          'report-update': true,
         },
         help: `
+        --no-alert-slack   Exclude generated Scout failure artifacts from Slack alerts
         --no-github-update Execute the CLI without writing to Github
-        --no-report-update Execute the CLI without writing to the JUnit reports
         --no-index-errors  Execute the CLI without indexing failures into Elasticsearch
+        --no-report-update Execute the CLI without writing to the JUnit reports
         --build-url        URL of the failed build, defaults to process.env.BUILD_URL
       `,
       },
