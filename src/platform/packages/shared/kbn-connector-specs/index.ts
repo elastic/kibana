@@ -23,14 +23,42 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export {
+  connectorSpecHasEvents,
+  connectorTypeHasInboundEvents,
+} from './src/connector_spec_has_events';
+export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
+export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
+export {
+  INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+  MAX_HANDSHAKE_CHALLENGE_LENGTH,
+} from './src/specs/inbound_webhook/constants';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,
   EventPayload,
+  HandleEventsHttpResponse,
   HandleEventsResult,
   ConnectorSpecEvents,
 } from './src/connector_spec_events';
+export {
+  handleEventsResultSchema,
+  isJsonSerializableSpokeBody,
+  parseHandleEventsResult,
+  MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH,
+  MAX_HANDLE_EVENTS_EVENT_ID_LENGTH,
+  MAX_HANDLE_EVENTS_EVENTS,
+  MAX_HANDLE_EVENTS_EVENTS_LIMIT,
+  MAX_HANDLE_EVENTS_HEADERS,
+  MAX_HANDLE_EVENTS_HEADER_NAME_LENGTH,
+  MAX_HANDLE_EVENTS_HEADER_VALUE_LENGTH,
+  MAX_HANDLE_EVENTS_HTTP_BODY_BYTES,
+  MAX_HANDLE_EVENTS_PAYLOAD_BYTES,
+  MAX_HANDLE_EVENTS_PAYLOAD_KEY_LENGTH,
+  MAX_HANDLE_EVENTS_PAYLOAD_KEYS,
+} from './src/handle_events_result';
+export type { ParseHandleEventsLimits } from './src/handle_events_result';
 export {
   buildEventId,
   connectorTypeToEventNamespace,

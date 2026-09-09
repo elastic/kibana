@@ -54,6 +54,17 @@ export const leadEntitySchema = z.object({
 
 export type LeadEntity = z.infer<typeof leadEntitySchema>;
 
+export const relatedEntitySchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  name: z.string(),
+  kinds: z.array(z.string()),
+  riskLevel: z.string().optional(),
+  criticality: z.string().optional(),
+  interactedWithAtLeast: z.number().optional(),
+});
+export type RelatedEntity = z.infer<typeof relatedEntitySchema>;
+
 // ---------------------------------------------------------------------------
 // Lead
 // ---------------------------------------------------------------------------
@@ -76,6 +87,9 @@ export const leadSchema = z.object({
   staleness: LeadStalenessEnum,
   status: LeadStatusEnum.default('active'),
   observations: z.array(observationSchema),
+  topRelatedEntities: z.array(relatedEntitySchema).default([]),
+  // there is a cap of how many related entities are kept per kind, this is the count of the total number of related entities per kind
+  relatedEntityCounts: z.record(z.string(), z.number()).default({}),
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
   createdAt: z.string(),

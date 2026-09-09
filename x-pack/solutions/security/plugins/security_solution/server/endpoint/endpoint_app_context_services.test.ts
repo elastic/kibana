@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
@@ -205,7 +206,11 @@ describe('test endpoint app context services', () => {
 
     it('getSpace() delegates to getActiveSpace', async () => {
       startService(true);
-      const expectedSpace = { id: 'some-space', name: 'Some Space', disabledFeatures: [] };
+      const expectedSpace = {
+        id: asSpaceId('some-space'),
+        name: 'Some Space',
+        disabledFeatures: [],
+      };
       jest.spyOn(service, 'getActiveSpace').mockResolvedValue(expectedSpace);
 
       const result = await service.asScoped(request).getSpace();

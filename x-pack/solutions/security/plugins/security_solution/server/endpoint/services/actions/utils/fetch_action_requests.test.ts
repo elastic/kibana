@@ -331,7 +331,7 @@ describe('fetchActionRequests()', () => {
   });
 
   it('should filter by `automated` action type', async () => {
-    fetchOptions.types = ['manual'];
+    fetchOptions.types = ['automated'];
     await fetchActionRequests(fetchOptions);
 
     expect(esClientMock.search).toHaveBeenCalledWith(
@@ -347,7 +347,7 @@ describe('fetchActionRequests()', () => {
               },
               { bool: { filter: [] } },
             ],
-            must_not: { exists: { field: 'data.alert_id' } },
+            filter: { exists: { field: 'data.alert_id' } },
           },
         },
         from: 0,

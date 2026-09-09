@@ -25,6 +25,7 @@ import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
 import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
@@ -56,6 +57,17 @@ const mockEuiTheme = {
     danger: '#BD271E',
     borderBasePlain: '#D3DAE6',
   },
+  size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
+  border: { radius: { medium: '6px', small: '4px' } },
+  animation: {
+    fast: '150ms',
+    normal: '250ms',
+    slow: '350ms',
+    resistance: 'cubic-bezier(.32,.72,0,1)',
+  },
+  font: {
+    family: 'Inter, sans-serif',
+  },
 } as unknown as EuiThemeComputed;
 
 beforeEach(() => {
@@ -81,6 +93,7 @@ const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
 };
 
 const VALID_HTML = `<html><body><p>hello</p></body></html>`;
@@ -412,6 +425,58 @@ describe('useCustomContentHtml', () => {
         undefined,
         expect.any(AbortSignal),
         expect.objectContaining({ filters: activeFilters })
+      );
+    });
+  });
+
+  describe('esqlVariables — dashboard ES|QL control variables', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+    const variables = [
+      { key: '?threshold', value: 100, type: ESQLVariableType.VALUES },
+      { key: '?env', value: 'production', type: ESQLVariableType.VALUES },
+    ];
+
+    it('passes esqlVariables to fetchEsqlData when provided', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, esqlVariables: variables })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ esqlVariables: variables })
+      );
+    });
+
+    it('re-fetches when esqlVariables change', async () => {
+      type Vars = typeof variables | undefined;
+      const { rerender } = renderHook(
+        ({ esqlVariables }: { esqlVariables: Vars }) =>
+          useCustomContentHtml({ ...esqlParams, esqlVariables }),
+        { initialProps: { esqlVariables: undefined as Vars } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ esqlVariables: variables });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ esqlVariables: variables })
       );
     });
   });

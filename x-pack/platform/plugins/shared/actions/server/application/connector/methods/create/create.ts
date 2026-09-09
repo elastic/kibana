@@ -7,25 +7,26 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import type { HookServices, ActionResult } from '../../../../types';
+import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
+import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
 
 export async function create({
   context,
   action: { actionTypeId, name, config, secrets },
   options,
-}: ConnectorCreateParams): Promise<ActionResult> {
+}: ConnectorCreateParams): Promise<Connector> {
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -138,16 +139,21 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
+  const configWithIngress = preserveInboundIngressHashIfNeeded({
+    actionTypeId,
+    config: configForSave as Record<string, unknown>,
+  });
+
   const result = await tryCatch(
     async () =>
-      await context.unsecuredSavedObjectsClient.create(
+      await context.unsecuredSavedObjectsClient.create<RawAction>(
         'action',
         {
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configForSave as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configWithIngress,
+          secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
         },
         { id }

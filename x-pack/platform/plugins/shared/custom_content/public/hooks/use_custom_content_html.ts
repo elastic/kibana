@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +33,7 @@ export interface UseCustomContentHtmlParams {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
 }
 
 export interface UseCustomContentHtmlResult {
@@ -53,6 +55,7 @@ export function useCustomContentHtml({
   projectRouting,
   query,
   filters,
+  esqlVariables,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [processedHtml, setProcessedHtml] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +80,7 @@ export function useCustomContentHtml({
         query,
         filters,
         esQueryConfig: getEsQueryConfig(core.uiSettings),
+        esqlVariables,
       };
       const template = stripMarkdownFences(trimmedTemplate);
 
@@ -111,6 +115,7 @@ export function useCustomContentHtml({
     projectRouting,
     query,
     filters,
+    esqlVariables,
   ]);
 
   const html = useMemo(

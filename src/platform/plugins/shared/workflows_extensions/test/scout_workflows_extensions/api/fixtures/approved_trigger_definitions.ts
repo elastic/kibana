@@ -39,6 +39,10 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'ai.conversation.metadataUpdated',
+    schemaHash: '3ddfb053989618f32071989376a39b001b3ed1bead0e81bf9f48c20253a53c57',
+  },
+  {
     id: 'alerting.episodeAcked',
     schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
@@ -123,6 +127,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '7e13967e0f1185cbd309f016b25d3631b514706e5217da41f8655e93d23d90c6',
   },
   {
+    id: 'cases.extendedFieldsUpdated',
+    schemaHash: 'cfb4b84727e79d6826fa8a786b7591ea1a86661c7fff2bb2fa768abbc3aaf37c',
+  },
+  {
     id: 'entityStore.entityAssetCriticalityUpdated',
     schemaHash: 'ef5a71ccf64832ea19fda336a36fbf0b8200a1bd4f703d78417075deedb77c3f',
   },
@@ -141,6 +149,38 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   {
     id: 'nightshift-investigations.started',
     schemaHash: '2cfb1c09d421df1f1810116a6c8d477b0c87329e816fef8e5b4fbe828c61b681',
+  },
+  {
+    id: 'security.alertAssigneesChanged',
+    schemaHash: 'b5fc06e212a8791e0d8c72b909d6e8b253aa78eda3490d111936ec5b4488e7e5',
+  },
+  {
+    id: 'security.alertStatusChanged',
+    schemaHash: '975d9066961cad2453415869279d140e23af66ca7e637c04d6c1b22e0eb5b75a',
+  },
+  {
+    id: 'security.alertTagsChanged',
+    schemaHash: '0e22ac0856896430830756f721a86de8915439a338853bd63fb78e2f1b4080f3',
+  },
+  {
+    id: 'security.attackAssigneesChanged',
+    schemaHash: '9534bb2673e1e540d676cf4a7f09811e48d344af6e9322ed395c0530dcefce6e',
+  },
+  {
+    id: 'security.attackStatusChanged',
+    schemaHash: 'f335fee29e4c6ede819550ad725a0fdc25d84e655b4ae7557856524a76dfc1d3',
+  },
+  {
+    id: 'security.attackTagsChanged',
+    schemaHash: 'fcccbe2808b9da1ad9617be1be4def8318c810740c07a69cc907f72ac363157f',
+  },
+  {
+    id: 'security.noteCreated',
+    schemaHash: 'ea5ae619dc62034662d523423d67601c66b1e67bdf89ab38425bd20990de5e30',
+  },
+  {
+    id: 'security.noteUpdated',
+    schemaHash: '83c558e058984b93c00d27b5a14082f7c0b3051ad6db06dc2e2b9c15b189a987',
   },
   {
     id: 'significant-events.eventCreated',

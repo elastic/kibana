@@ -30,7 +30,6 @@ import { useRule } from '../rule_context';
 import { useFetchSignalFirings } from '../../../hooks/use_fetch_signal_firings';
 import { getDiscoverHrefForRuleQuery } from '../../../utils/discover_href_for_episode';
 import { useAlertTimelineUrlState } from './alert_timeline/use_alert_timeline_url_state';
-import { DEFAULT_ACTIVITY_TIME_RANGE } from './time_range';
 import { useResolvedActivityWindow } from './use_resolved_activity_window';
 import { StatsRow, type StatItem } from './stats_row';
 import { SignalFiringsChart } from './signal_activity/signal_firings_chart';
@@ -54,7 +53,7 @@ export const SignalRuleOverview: React.FC = () => {
   const rule = useRule();
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
-  const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
+  const [timeRange, setTimeRange] = useAlertTimelineUrlState();
 
   const onBrushRange = useCallback(
     (fromMs: number, toMs: number) =>

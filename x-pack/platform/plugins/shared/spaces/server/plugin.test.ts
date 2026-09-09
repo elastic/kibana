@@ -23,6 +23,10 @@ jest.mock('./default_space/create_default_space');
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
+    beforeEach(() => {
+      jest.mocked(createDefaultSpace).mockClear();
+    });
+
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
@@ -97,7 +101,7 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing, cloud });
 
       expect(createDefaultSpace).toHaveBeenCalledWith(
-        expect.objectContaining({ solution: 'security' })
+        expect.objectContaining({ solution: 'security', solutionSetupRequired: false })
       );
     });
 
@@ -114,9 +118,30 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing });
 
       expect(createDefaultSpace).toHaveBeenCalledWith(
-        expect.objectContaining({ solution: 'oblt' })
+        expect.objectContaining({ solution: 'oblt', solutionSetupRequired: false })
       );
     });
+
+    it.each`
+      label                                                                | config                                                          | solutionSetupRequired
+      ${'initial solution setup is disabled'}                              | ${{ maxSpaces: 1000 }}                                          | ${false}
+      ${'initial solution setup is enabled without a configured solution'} | ${{ maxSpaces: 1000, initialSolutionSetup: { enabled: true } }} | ${true}
+    `(
+      'when $label, passes solutionSetupRequired=$solutionSetupRequired',
+      ({ config, solutionSetupRequired }) => {
+        const initializerContext = coreMock.createPluginInitializerContext(config);
+        const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
+        const features = featuresPluginMock.createSetup();
+        const licensing = licensingMock.createSetup();
+
+        const plugin = new SpacesPlugin(initializerContext);
+        plugin.setup(core, { features, licensing });
+
+        expect(createDefaultSpace).toHaveBeenLastCalledWith(
+          expect.objectContaining({ solutionSetupRequired })
+        );
+      }
+    );
 
     it('does not register Elasticsearch feature when CPS is disabled', () => {
       const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });

@@ -228,6 +228,14 @@
       "approvedBy": "@elastic/workchat-eng",
       "oasdiffId": "request-property-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/conversations",
+      "method": "post",
+      "reason": "agent_id maxLength validation added to route, it was already done in the request.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/286654"
     }
   ]
 }
