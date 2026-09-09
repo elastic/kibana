@@ -77381,6 +77381,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Include execution input data.
           in: query
@@ -77511,6 +77512,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -77549,6 +77551,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -77612,6 +77615,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter logs by a specific step execution ID.
           in: query
@@ -77726,6 +77730,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -77815,12 +77820,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Step execution ID.
           in: path
           name: stepExecutionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -77915,6 +77922,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Page number.
           in: query
@@ -78301,6 +78309,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -78985,6 +78994,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
           in: query
@@ -79037,6 +79047,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -79125,6 +79136,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -79241,6 +79253,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -79331,6 +79344,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -79412,6 +79426,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by execution status.
           in: query
@@ -79619,6 +79634,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -79657,6 +79673,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by step ID.
           in: query
