@@ -339,6 +339,7 @@ export function registerAgentRoutes({
                   post_round_workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
+                        maxLength: 512,
                         meta: {
                           description:
                             'Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.',
@@ -488,6 +489,7 @@ export function registerAgentRoutes({
                     post_round_workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({
+                          maxLength: 512,
                           meta: {
                             description:
                               'Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.',
