@@ -435,6 +435,7 @@ export default function ({ getService }: FtrProviderContext) {
               'can_manage_private_locations',
               'can_manage_rules',
               'can_read_param_values',
+              'can_run_test_manually',
               'elastic_managed_locations_enabled',
               'read',
               'minimal_all',
