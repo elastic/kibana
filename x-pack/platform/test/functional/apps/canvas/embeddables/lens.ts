@@ -82,7 +82,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await canvas.goToListingPage();
         await canvas.loadFirstWorkpad('Test Workpad');
         await header.waitUntilLoadingHasFinished();
-
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });
@@ -92,6 +91,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await canvas.addNewPage();
         await canvas.goToPreviousPage();
         await header.waitUntilLoadingHasFinished();
+        // Test Workpad does not provide time range
+        // time range default to last 15 minutes - which has no data
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });
