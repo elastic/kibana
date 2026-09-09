@@ -14,9 +14,9 @@ import type {
 import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
- * Props passed to a conversation template tab's `content` component.
+ * Props shared by conversation details tabs, headers, and footers.
  */
-export interface ConversationTemplateTabRenderProps {
+export interface ConversationTemplateDetailsFlyoutRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
 }
@@ -35,7 +35,7 @@ export interface ConversationTemplateTabDefinition {
    * mount any providers you need inside this component. The flyout can render outside any
    * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
    */
-  content: ComponentType<ConversationTemplateTabRenderProps>;
+  content: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
 }
 
 export interface ConversationTemplateBriefCardRenderProps {
@@ -68,6 +68,13 @@ export interface ConversationTemplateUIDefinition {
   tabs: readonly string[];
   /** Self-contained card component; capture solution services and providers at registration. */
   briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /** Optional flyout content; capture capabilities from the template registration context. */
+  detailsFlyout?: {
+    /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
+    header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
+    footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+  };
 }
 
 /**
