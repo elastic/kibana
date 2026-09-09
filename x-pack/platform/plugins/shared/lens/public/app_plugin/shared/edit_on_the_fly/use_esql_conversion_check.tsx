@@ -262,8 +262,20 @@ export const useEsqlConversionCheck = (
       );
     }
 
+    // Guard: converting only a subset of data layers would leave a form-based data
+    // layer alongside text-based ones, which is an invalid mixed state
+    // (buildVisualizationAPI rejects mixed ESQL and non-ESQL data layers).
+    const nonConvertibleDataLayer = convertibleLayers.find(
+      (layer) => layer.type === layerTypes.DATA && !layer.isConvertibleToEsql
+    );
+    if (nonConvertibleDataLayer) {
+      return getEsqlConversionDisabledSettings(
+        esqlConversionFailureReasonMessages[nonConvertibleDataLayer.failureReason ?? 'unknown']
+      );
+    }
+
     // Trendline is auto-included in the conversion but not shown in the modal.
-    // Unsupported data and non-data layers remain in their original datasource.
+    // Non-data helper layers (reference lines/annotations) remain in their original datasource.
     const convertibleDataLayers = convertibleLayers.filter(
       (layer) => layer.type === layerTypes.DATA && layer.isConvertibleToEsql
     );

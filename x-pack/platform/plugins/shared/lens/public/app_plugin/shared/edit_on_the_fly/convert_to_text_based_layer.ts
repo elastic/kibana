@@ -226,7 +226,9 @@ export function convertFormBasedToTextBasedLayer({
   const hasRemainingFormBasedLayers = Object.keys(remainingFormBasedLayers).length > 0;
 
   // Build new attributes with converted layers in the text-based datasource and preserve
-  // non-data or unsupported layers in the form-based datasource.
+  // non-data helper layers (reference lines/annotations) in the form-based datasource.
+  // Callers must not pass a subset of data layers: leaving a form-based data layer
+  // alongside text-based ones creates an invalid mixed state (see useEsqlConversionCheck guard).
   const newAttributes: TypedLensSerializedState['attributes'] = {
     ...attributes,
     state: {
