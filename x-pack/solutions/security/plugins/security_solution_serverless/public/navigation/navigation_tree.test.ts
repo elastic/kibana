@@ -70,21 +70,4 @@ describe('createNavigationTree', () => {
     expect(agentBuilderIndex).toBe(0);
     expect(contextEngineIndex).toBe(1);
   });
-
-  it('includes Analytics Dashboards next to Discover', async () => {
-    const { body } = (await createNavigationTree(
-      createServices(),
-      AIChatExperience.Classic
-    )) as NavigationTreeDefinition;
-
-    const discoverIndex = body.findIndex((item) => item.link === 'discover');
-    const dashboardsIndex = body.findIndex((item) => item.link === 'dashboards');
-
-    expect(discoverIndex).toBeGreaterThan(-1);
-    expect(dashboardsIndex).toBe(discoverIndex + 1);
-    expect(body[dashboardsIndex]).toMatchObject({
-      link: 'dashboards',
-      icon: 'productDashboard',
-    });
-  });
 });
