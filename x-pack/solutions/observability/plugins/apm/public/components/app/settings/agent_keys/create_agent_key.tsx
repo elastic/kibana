@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -41,6 +41,8 @@ interface Props {
 
 export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
   const [formTouched, setFormTouched] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const isCreatingRef = useRef(false);
 
   const [agentKeyBody, setAgentKeyBody] = useState({
     name: '',
@@ -69,9 +71,12 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
   const createAgentKey = async () => {
     setFormTouched(true);
-    if (isInputInvalid) {
+    if (isInputInvalid || isCreatingRef.current) {
       return;
     }
+
+    isCreatingRef.current = true;
+    setIsCreating(true);
 
     try {
       const privileges: PrivilegeType[] = [];
@@ -96,6 +101,9 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
       onSuccess(agentKey);
     } catch (error) {
       onError(name, error.body?.message || error.message);
+    } finally {
+      isCreatingRef.current = false;
+      setIsCreating(false);
     }
   };
 
@@ -220,7 +228,8 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               fill={true}
               onClick={createAgentKey}
               type="submit"
-              disabled={isFormInvalid}
+              disabled={isFormInvalid || isCreating}
+              isLoading={isCreating}
             >
               {createAgentKeyTitle}
             </EuiButton>
