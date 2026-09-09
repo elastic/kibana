@@ -10,6 +10,8 @@
 import { isObject } from 'lodash';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import { ZodError } from '@kbn/zod';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { DiscoverSessionControlPanels, DiscoverSessionWarning } from '../schema';
 import { discoverSessionControlPanelSchema, discoverSessionControlPanelsSchema } from '../schema';
 
@@ -33,14 +35,20 @@ const createDroppedPanelWarning = (
   tabId: string,
   panelId: string,
   error: unknown
-): DiscoverSessionWarning => ({
-  type: 'dropped_panel',
-  tab_id: tabId,
-  panel_id: panelId,
-  message: `Unable to transform control panel [${panelId}]. Error: ${
-    error instanceof Error ? error.message : 'Unknown error'
-  }`,
-});
+): DiscoverSessionWarning => {
+  let message = error instanceof Error ? error.message : 'Unknown error';
+
+  if (error instanceof ZodError) {
+    message = stringifyZodError(error);
+  }
+
+  return {
+    type: 'dropped_panel',
+    tab_id: tabId,
+    panel_id: panelId,
+    message: `Unable to transform control panel [${panelId}]. Error: ${message}`,
+  };
+};
 
 /*
  * Converts one stored panel to the API shape and validates it.
