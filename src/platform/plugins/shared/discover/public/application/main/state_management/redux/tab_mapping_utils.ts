@@ -12,12 +12,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-utils';
-import {
-  COMPARE_ALL_OPTIONS,
-  dedupFilters,
-  isFilterPinned,
-  isOfAggregateQueryType,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
@@ -36,8 +31,7 @@ export const fromSavedObjectTabToAppState = ({
   return omitBy<DiscoverAppState>(
     {
       columns: tab.columns,
-      // Pinned filters already go in global state. Don't add them here too.
-      filters: tab.serializedSearchSource.filter?.filter((filter) => !isFilterPinned(filter)),
+      filters: tab.serializedSearchSource.filter,
       grid: tab.grid,
       hideChart: tab.hideChart,
       hideTable: tab.hideTable,
@@ -75,35 +69,13 @@ export const fromSavedObjectTabToTabState = ({
   initialAppState?: DiscoverAppState;
   profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
-  let appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
-
-  // Global filters are pinned filters. They can arrive mixed with unpinned filters, so separate them.
-  // See FilterManager.partitionFilters in data/public/query/filter_manager/filter_manager.ts:80.
-  const incomingPinnedFilters = tab.serializedSearchSource.filter?.filter(isFilterPinned);
-
-  // Keep the current list, even if it's empty. Don't bring back filters the user removed.
-  let pinnedFilters = existingTab?.globalState.filters;
-  if (pinnedFilters === undefined && incomingPinnedFilters?.length) {
-    pinnedFilters = incomingPinnedFilters;
-  }
-
-  if (pinnedFilters?.length && appState.filters?.length) {
-    // A filter pinned after saving is still unpinned in the saved copy. Restore it only once.
-    appState = {
-      ...appState,
-      filters: dedupFilters(pinnedFilters, appState.filters, {
-        ...COMPARE_ALL_OPTIONS,
-        state: false,
-      }),
-    };
-  }
+  const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
   const globalState = {
     timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
     refreshInterval: tab.timeRestore
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
-    ...(pinnedFilters !== undefined && { filters: pinnedFilters }),
   };
 
   return {

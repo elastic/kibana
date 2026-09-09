@@ -9,16 +9,14 @@
 
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { VIEW_MODE, type DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import { internalStateActions, selectHasUnsavedChanges } from '..';
-import { FilterManager } from '@kbn/data-plugin/public';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
-import { map } from 'rxjs';
 import {
   createDiscoverSessionPersistence,
   type DiscoverSessionClient,
@@ -48,12 +46,11 @@ const getSaveDiscoverSessionParams = (
 const setup = async ({
   additionalPersistedTabs,
   initializeTab = false,
-  services = createDiscoverServicesMock(),
 }: {
   additionalPersistedTabs?: (services: DiscoverServices) => DiscoverSessionTab[];
   initializeTab?: boolean;
-  services?: DiscoverServices;
 } = {}) => {
+  const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
     .spyOn(services.discoverSessionPersistence, 'save')
     .mockImplementation((discoverSession) =>
@@ -204,113 +201,6 @@ describe('saveDiscoverSession', () => {
     expect(savedTab).not.toHaveProperty('hideSidebar');
     expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(true);
   });
-
-  it.each([
-    {
-      action: 'Save',
-      copyOnSave: false,
-      sessionId: 'test-session',
-      tabId: 'default-tab',
-      expectedMethod: 'upsert' as const,
-      unusedMethod: 'create' as const,
-      expectedIdArgs: ['test-session'],
-    },
-    {
-      action: 'Save As',
-      copyOnSave: true,
-      sessionId: 'copied-session',
-      tabId: 'test-uuid',
-      expectedMethod: 'create' as const,
-      unusedMethod: 'upsert' as const,
-      expectedIdArgs: [],
-    },
-  ])(
-    'should keep pinned filters only in global state after HTTP $action without unsaved changes',
-    async ({ copyOnSave, sessionId, tabId, expectedMethod, unusedMethod, expectedIdArgs }) => {
-      const services = createDiscoverServicesMock();
-      const filterManager = new FilterManager(services.uiSettings);
-      services.filterManager = filterManager;
-      services.data.query.filterManager = filterManager;
-      // The query service is mocked, so forward filter updates to Discover's state sync.
-      services.data.query.state$ = filterManager.getUpdates$().pipe(
-        map(() => ({
-          changes: { filters: true, globalFilters: true },
-          state: { filters: filterManager.getFilters() },
-        }))
-      );
-      const { toolkit, saveDiscoverSessionSpy } = await setup({ services, initializeTab: true });
-
-      // The UI normalizes pinned filters through FilterManager before Discover saves them.
-      filterManager.setGlobalFilters([
-        { meta: { index: dataViewMock.id }, query: { match_all: {} } },
-      ]);
-      const [pinnedFilter] = filterManager.getGlobalFilters();
-
-      expect(toolkit.getCurrentTab().globalState.filters).toEqual([pinnedFilter]);
-      const apiResponse: Awaited<ReturnType<DiscoverSessionClient['create']>> = {
-        id: sessionId,
-        meta: { managed: false },
-        data: {
-          title: 'new title',
-          description: 'new description',
-          tags: [],
-          tabs: [
-            {
-              id: tabId,
-              label: 'Untitled',
-              data_source: { type: 'data_view_reference', ref_id: 'the-data-view-id' },
-              filters: [],
-              sort: [],
-              column_order: ['default_column'],
-              query: { language: 'kql', expression: '' },
-              breakdown_field: '',
-              chart_interval: 'auto',
-              hide_chart: false,
-              hide_table: false,
-              view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-            },
-          ],
-        },
-      };
-      const apiClient: jest.Mocked<DiscoverSessionClient> = {
-        get: jest.fn(),
-        upsert: jest.fn().mockResolvedValue(apiResponse),
-        create: jest.fn().mockResolvedValue(apiResponse),
-      };
-      const persistence = createDiscoverSessionPersistence({
-        apiClient,
-        legacyClient: services.savedSearch,
-        useHttpApi: true,
-      });
-      saveDiscoverSessionSpy.mockImplementation(persistence.save);
-
-      await toolkit.internalState
-        .dispatch(
-          internalStateActions.saveDiscoverSession(
-            getSaveDiscoverSessionParams({ newCopyOnSave: copyOnSave })
-          )
-        )
-        .unwrap();
-
-      expect(apiClient[expectedMethod]).toHaveBeenCalledTimes(1);
-      expect(apiClient[expectedMethod]).toHaveBeenCalledWith(...expectedIdArgs, apiResponse.data);
-      expect(apiClient[unusedMethod]).not.toHaveBeenCalled();
-      const state = toolkit.internalState.getState();
-      const savedTab = toolkit.getCurrentTab();
-      expect(state.persistedDiscoverSession?.id).toBe(sessionId);
-      expect(state.tabs.allIds).toEqual([tabId]);
-      expect(savedTab.id).toBe(tabId);
-      expect(savedTab.globalState.filters).toEqual([pinnedFilter]);
-      expect(filterManager.getGlobalFilters()).toEqual([pinnedFilter]);
-      expect(savedTab.appState.filters).toEqual([]);
-      expect(
-        selectHasUnsavedChanges(state, {
-          runtimeStateManager: toolkit.runtimeStateManager,
-          services,
-        })
-      ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
-    }
-  );
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
     const resetOnSavedSearchChangeSpy = jest.spyOn(
