@@ -37,13 +37,17 @@ jest.mock('.', () => ({
   DocumentFlyout: (props: MockDocumentFlyoutProps) => mockDocumentFlyout(props),
 }));
 
-const createAlertHit = (): DataTableRecord =>
+// `_id` matters: the wrapper tells "still resolving the next document" from "showing the
+// requested one" by comparing the rendered hit's `_id` with the requested document id.
+const createHit = (id: string, eventKind: string = 'event'): DataTableRecord =>
   ({
-    id: '1',
-    raw: {},
-    flattened: { 'event.kind': 'signal' },
+    id,
+    raw: { _id: id },
+    flattened: { 'event.kind': eventKind },
     isAnchor: false,
   } as DataTableRecord);
+
+const createAlertHit = (): DataTableRecord => createHit('doc-id', 'signal');
 
 const mockDataView = {
   hasMatchedIndices: () => true,
@@ -115,12 +119,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('does not render loading when alerts privileges are loading but document is not an alert', () => {
-    const nonAlertHit: DataTableRecord = {
-      id: '2',
-      raw: {},
-      flattened: { 'event.kind': 'event' },
-      isAnchor: false,
-    } as DataTableRecord;
+    const nonAlertHit = createHit('doc-id');
     (useEsDocSearch as jest.Mock).mockReturnValue([
       ElasticRequestState.Found,
       nonAlertHit,
@@ -135,7 +134,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('renders DocumentFlyout when document is found', () => {
-    const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
+    const hit = createHit('doc-id');
     const refetchDocument = jest.fn();
     const onAlertUpdated = jest.fn();
     (useEsDocSearch as jest.Mock).mockReturnValue([
@@ -204,7 +203,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('still fetches the document when the data view has no matched indices', () => {
-    const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
+    const hit = createHit('doc-id');
     const degradedDataView = {
       ...mockDataView,
       hasMatchedIndices: () => false,
@@ -226,29 +225,33 @@ describe('DocumentFlyoutWrapper', () => {
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
   });
 
-  it('renders nothing when the document request returns found without a hit', () => {
+  it('renders the loading state when the request reports found before any hit has arrived', () => {
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, null, jest.fn()]);
 
-    const { queryByTestId } = renderDocumentFlyoutWrapper();
+    const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
     expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
     expect(queryByTestId('document-overview-fetch-error')).not.toBeInTheDocument();
     expect(queryByTestId('document-overview-wrapper-not-found')).not.toBeInTheDocument();
   });
 
   it('keeps the previously resolved document mounted while a new one is loading', () => {
-    const firstHit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
+    const firstHit = createHit('doc-id');
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, firstHit, jest.fn()]);
 
     const { rerender, getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hit: firstHit, isPaginationLoading: false })
+    );
 
-    // Paginating to another document sends the search back to `Loading` with no hit. The
-    // flyout must stay mounted (so the header keeps its pagination controls) and only be
-    // told that it is loading.
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
-
+    // `useEsDocSearch` doesn't report `Loading` again while it fetches the newly requested
+    // document: it keeps returning `Found` with the document it resolved last. The flyout must
+    // stay mounted (so the header keeps its pagination controls) but be told that what it renders
+    // is no longer the requested document, otherwise the previous one stays fully rendered while
+    // the pagination control already points at the new position.
     rerender(
       <TestProviders>
         <DocumentFlyoutWrapper
@@ -267,17 +270,35 @@ describe('DocumentFlyoutWrapper', () => {
     );
   });
 
+  it('does not report loading while the current document is refetched after a mutation', () => {
+    const hit = createHit('doc-id');
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
+
+    const { rerender } = renderDocumentFlyoutWrapper();
+
+    rerender(
+      <TestProviders>
+        <DocumentFlyoutWrapper
+          documentId="doc-id"
+          indexName="my-index"
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hit, isPaginationLoading: false })
+    );
+  });
+
   it.each([
     [ElasticRequestState.NotFound, 'document-overview-wrapper-not-found'],
     [ElasticRequestState.Error, 'document-overview-fetch-error'],
   ])(
     'keeps the previously resolved document mounted and moves the %s state into its body',
     (requestState, calloutTestSubj) => {
-      const firstHit = {
-        id: '1',
-        raw: {},
-        flattened: { 'event.kind': 'event' },
-      } as DataTableRecord;
+      const firstHit = createHit('doc-id');
       (useEsDocSearch as jest.Mock).mockReturnValue([
         ElasticRequestState.Found,
         firstHit,
