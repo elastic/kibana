@@ -15,7 +15,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensSavedObject } from '../../../content_management';
+import type { LensSavedObject } from '../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
 
@@ -32,8 +32,8 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -47,6 +47,10 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   deleteRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('./oas_examples')).deleteLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           params: lensDeleteRequestParamsSchema,
@@ -74,7 +78,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for<LensSavedObject>(LENS_CONTENT_TYPE);

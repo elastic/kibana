@@ -11,7 +11,13 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataTableColumnsMeta,
+  SortOrder,
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -44,6 +50,8 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
   viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
   density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
+  documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
+  jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),

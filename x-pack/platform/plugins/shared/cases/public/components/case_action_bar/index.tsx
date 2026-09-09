@@ -25,6 +25,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 import { useStatusAction } from '../actions/status/use_status_action';
+import { CaseChatActions } from '../../agent_builder/case_chat_actions';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -160,6 +161,10 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 
         <EuiFlexItem grow={false}>
           <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <CaseChatActions caseData={caseData} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>

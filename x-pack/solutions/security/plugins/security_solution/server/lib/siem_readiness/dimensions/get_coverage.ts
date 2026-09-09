@@ -5,45 +5,29 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, CoveragePayload, MainCategories } from '@kbn/siem-readiness';
+import type {
+  ActionableFinding,
+  CategoriesResponse,
+  CoveragePayload,
+  MainCategories,
+} from '@kbn/siem-readiness';
 import { CATEGORY_ORDER, getCoverageStatus } from '@kbn/siem-readiness';
-import { fetchCategories } from '../fetchers';
-
-const fetchHasEnabledDetectionRules = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
-): Promise<boolean> => {
-  try {
-    const result = await savedObjectsClient.find({
-      type: 'alert',
-      filter: 'alert.attributes.enabled:true',
-      perPage: 1,
-    });
-    return result.total > 0;
-  } catch (error: unknown) {
-    const e = error as { message?: string };
-    logger.warn(`Failed to check detection rules: ${e.message ?? 'unknown error'}`);
-    return false;
-  }
-};
 
 export const getCoverage = async ({
-  esClient,
-  savedObjectsClient,
-  logger,
+  logger: _logger,
+  categoriesData,
+  hasDetectionRules,
 }: {
-  esClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  /** Pre-fetched categories result from the shared context — passed in to avoid a duplicate ES call */
+  categoriesData: CategoriesResponse;
+  /**
+   * Whether any enabled detection rules exist. Derived from reverseMapResult by the caller
+   * to avoid a savedObjectsClient query that lacks access to alert objects in the Agent Builder context.
+   */
+  hasDetectionRules: boolean;
 }): Promise<CoveragePayload> => {
-  const [categoriesData, hasDetectionRules] = await Promise.all([
-    fetchCategories({ esClient, logger }),
-    fetchHasEnabledDetectionRules(savedObjectsClient, logger),
-  ]);
-
   // Pass undefined for ruleIntegrationCoverage — integration gap analysis requires
   // fleet package data which is not available here without the fleet plugin.
   const status = getCoverageStatus(categoriesData, hasDetectionRules, undefined);
@@ -53,7 +37,7 @@ export const getCoverage = async ({
   if (!hasDetectionRules) {
     actionableFindings.push({
       category: 'Endpoint',
-      severity: 'warning',
+      severity: 'WARNING',
       message: 'No enabled detection rules found. Enable rules to improve SIEM coverage.',
       resource: 'detection_rules',
     });
@@ -65,7 +49,7 @@ export const getCoverage = async ({
     if (totalDocs === 0) {
       actionableFindings.push({
         category: category as MainCategories,
-        severity: 'warning',
+        severity: 'WARNING',
         message: `No data ingested for the ${category} category.`,
         resource: category,
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ComponentProps } from 'react';
+import type { Alert } from '@kbn/alerting-types';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -19,6 +20,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 import { AlertActions } from './alert_actions';
@@ -36,6 +38,17 @@ import type {
   RenderContext,
 } from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+
+const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+  authorizedToReadRuleType: (_ruleTypeId: string, _consumer?: string): boolean => true,
+  authorizedToReadRuleForAlert: (): boolean => true,
+  authorizedToCreateAnyRules: false,
+}));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
+  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+}));
+
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
   open: () => {
@@ -114,9 +127,17 @@ describe('ObservabilityActions component', () => {
     jest.clearAllMocks();
     getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
     mockTelemetryClient.reportAlertAddedToCase.mockClear();
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: () => true,
+      authorizedToReadRuleForAlert: () => true,
+      authorizedToCreateAnyRules: false,
+    });
   });
 
-  const setup = async (pageId: string) => {
+  const setup = async (
+    pageId: string,
+    { alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] } }: { alert?: Alert } = {}
+  ) => {
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -151,7 +172,7 @@ describe('ObservabilityActions component', () => {
     > = {
       tableId: pageId,
       config,
-      alert: inventoryThresholdAlertEs,
+      alert,
       ecsAlert: [],
       nonEcsData: [],
       rowIndex: 1,
@@ -181,13 +202,15 @@ describe('ObservabilityActions component', () => {
       <Router history={createMemoryHistory()}>
         <KibanaContextProvider services={mockKibana.services}>
           <AlertsTableContextProvider value={context}>
-            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-              <AlertActions
-                {...(props as unknown as ComponentProps<
-                  GetObservabilityAlertsTableProp<'renderActionsCell'>
-                >)}
-                services={services}
-              />
+            <QueryClientProvider client={queryClient}>
+              <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+                <AlertActions
+                  {...(props as unknown as ComponentProps<
+                    GetObservabilityAlertsTableProp<'renderActionsCell'>
+                  >)}
+                  services={services}
+                />
+              </QueryClientProvider>
             </QueryClientProvider>
           </AlertsTableContextProvider>
         </KibanaContextProvider>
@@ -214,6 +237,19 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
+    });
+  });
+
+  it('should hide "View rule details" menu item when unauthorized to read the rule type', async () => {
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: () => false,
+      authorizedToReadRuleForAlert: () => false,
+      authorizedToCreateAnyRules: false,
+    });
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
     });
   });
 
@@ -335,7 +371,7 @@ describe('ObservabilityActions component', () => {
 
     await waitFor(() => {
       wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseover');
-      expect(prependMock).toBeCalledTimes(1);
+      expect(prependMock).toHaveBeenCalledTimes(1);
     });
   });
 });

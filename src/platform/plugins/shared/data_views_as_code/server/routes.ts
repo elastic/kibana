@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpServiceSetup } from '@kbn/core/server';
+import type { HttpServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { routes } from './rest_routes';
+import type { DataViewsAsCodeServerPluginStartDependencies } from './types';
+
 export const INITIAL_REST_VERSION = '2023-10-31';
 
 interface RegisterRoutesArgs {
   http: HttpServiceSetup;
+  usageCounter: UsageCounter | undefined;
+  logger: Logger;
+  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>;
 }
 
-export function registerRoutes(_: RegisterRoutesArgs) {
-  // The routes are going to be registered here at plugin setup
-  // 1. GET /api/data_views/{id}
-  // 2. POST /api/data_views
-  // 3. PUT /api/data_views/{id}
-  // 4. DELETE /api/data_views/{id}
+export function registerRoutes({ http, ...args }: RegisterRoutesArgs) {
+  const router = http.createRouter();
+
+  routes.forEach((route) => route({ router, ...args }));
 }

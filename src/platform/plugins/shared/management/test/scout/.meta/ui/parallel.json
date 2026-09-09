@@ -1,5 +1,8 @@
 {
-  "sha1": "c277b6355c68db2a771bb2ca3dfe90a840ec44f1",
+  "sha1": "e301847e3f3650433848f6e4d0147497e0cb2186",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a85e30db18dd980-231d31d916345e0",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 14,
+        "column": 24
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 38,
+        "column": 11
       }
     },
     {
@@ -34,13 +37,12 @@
       "title": "Stack Management — data section ccr_user sees cross_cluster_replication and the full cluster:manage data section",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 65,
+        "column": 9
       }
     },
     {
@@ -53,8 +55,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 108,
-        "column": 7
+        "line": 120,
+        "column": 16
       }
     },
     {
@@ -67,8 +69,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/nav_access.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 16,
+        "column": 14
       }
     },
     {
@@ -81,8 +83,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/nav_access.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 81,
+        "column": 3
       }
     },
     {
@@ -95,8 +97,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 14,
+        "column": 24
       }
     },
     {
@@ -109,7 +111,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 46,
+        "line": 39,
         "column": 9
       }
     },
@@ -118,13 +120,12 @@
       "title": "Stack Management — ingest, security, and stack sections cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
         "line": 71,
-        "column": 9
+        "column": 5
       }
     }
   ]

@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
+import { KibanaVersionBadge } from '@kbn/search-shared-ui';
+import { TrialUsageBadge } from '@kbn/shared-components';
 
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';

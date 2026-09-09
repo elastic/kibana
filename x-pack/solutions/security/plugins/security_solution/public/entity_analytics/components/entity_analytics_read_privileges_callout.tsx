@@ -7,57 +7,101 @@
 
 import React, { useMemo } from 'react';
 import hash from 'object-hash';
-import { CallOutSwitcher } from '../../common/components/callouts';
+import type { CallOutMessage } from '../../common/components/callouts';
+import { CallOut, CallOutSwitcher } from '../../common/components/callouts';
 import { missingPrivilegesCallOutBody } from '../../common/components/missing_privileges';
 import { MISSING_PRIVILEGES_CALLOUT_TITLE } from '../../common/components/missing_privileges/translations';
-import type { MissingIndexPrivileges } from '../../common/hooks/use_missing_privileges';
+import type {
+  MissingFeaturePrivileges,
+  MissingIndexPrivileges,
+} from '../../common/hooks/use_missing_privileges';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 
+interface EntityAnalyticsReadPrivilegesCalloutProps {
+  riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
+  entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
+  leadGenerationPrivileges?: EntityAnalyticsPrivileges;
+  anomalyPrivileges?: EntityAnalyticsPrivileges;
+  /**
+   * Identifies the surface rendering the callout. Used as the dismissal storage
+   * namespace and as the message id prefix, so ids stay unique and dismissals
+   * stay independent across pages.
+   */
+  id: string;
+  /**
+   * When `true` (default) renders a dismissible callout whose dismissal is
+   * remembered in local storage. When `false` renders a static, non-dismissible
+   * inline callout (e.g. the cases "Entities" attachment tab).
+   */
+  dismissible?: boolean;
+}
+
 /**
- * Displays a Callout section when the user has missing privileges to view the Entity Analytics home page.
+ * Displays an "Insufficient privileges" callout when the user is missing read
+ * privileges required by Entity Analytics, or nothing when all are granted.
+ *
+ * Shared across surfaces (the EA home page and the cases "Entities" attachment
+ * tab): `dismissible` selects the container (dismissible `CallOutSwitcher` vs a
+ * static `CallOut`) while the privilege derivation stays in one place.
  */
 export const EntityAnalyticsReadPrivilegesCallout = React.memo(
   ({
     riskEngineReadPrivileges,
     entityEnginePrivileges,
     leadGenerationPrivileges,
-  }: {
-    riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
-    entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
-    leadGenerationPrivileges?: EntityAnalyticsPrivileges;
-  }) => {
-    const message = useMemo(() => {
+    anomalyPrivileges,
+    id,
+    dismissible = true,
+  }: EntityAnalyticsReadPrivilegesCalloutProps) => {
+    const message = useMemo<CallOutMessage | null>(() => {
       const indexPrivileges: MissingIndexPrivileges[] = [
         ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
-        ...getEntityStoreMissingReadPrivileges(entityEnginePrivileges),
-        ...getEntityStoreMissingReadPrivileges(leadGenerationPrivileges),
+        ...getAnyMissingReadPrivileges(entityEnginePrivileges),
+        ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
+        ...getAnyMissingReadPrivileges(anomalyPrivileges),
       ];
 
-      if (indexPrivileges.length === 0) return null;
+      const featurePrivileges: MissingFeaturePrivileges[] = [
+        ...getAnomalyMissingKibanaPrivileges(anomalyPrivileges),
+      ];
+
+      if (indexPrivileges.length === 0 && featurePrivileges.length === 0) return null;
 
       return {
         type: 'primary' as const,
-        id: `entity-analytics-home-missing-privileges-${hash(indexPrivileges)}`,
+        id: `entity-analytics-home-missing-privileges-${hash({
+          indexPrivileges,
+          featurePrivileges,
+        })}`,
         title: MISSING_PRIVILEGES_CALLOUT_TITLE,
         description: missingPrivilegesCallOutBody({
           indexPrivileges,
-          featurePrivileges: [],
+          featurePrivileges,
           docs: [],
         }),
       };
-    }, [riskEngineReadPrivileges, entityEnginePrivileges, leadGenerationPrivileges]);
+    }, [
+      riskEngineReadPrivileges,
+      entityEnginePrivileges,
+      leadGenerationPrivileges,
+      anomalyPrivileges,
+    ]);
 
     if (!message) return null;
 
-    return <CallOutSwitcher namespace="entity-analytics-home" condition={true} message={message} />;
+    if (dismissible) {
+      return <CallOutSwitcher namespace={id} condition={true} message={message} />;
+    }
+
+    return <CallOut message={message} showDismissButton={false} />;
   }
 );
 EntityAnalyticsReadPrivilegesCallout.displayName = 'EntityAnalyticsPrivilegesCallout';
 
 const READ_RELEVANT_PRIVILEGES = new Set(['read', 'view_index_metadata']);
 
-const getEntityStoreMissingReadPrivileges = (
+const getAnyMissingReadPrivileges = (
   privileges: EntityAnalyticsPrivileges | undefined
 ): MissingIndexPrivileges[] => {
   if (!privileges) return [];
@@ -72,6 +116,20 @@ const getEntityStoreMissingReadPrivileges = (
       ]
     )
     .filter(([, missingPrivs]) => missingPrivs.length > 0);
+};
+
+const ML_KIBANA_READ_ACTION = 'ui:ml/canGetJobs';
+
+const getAnomalyMissingKibanaPrivileges = (
+  privileges: EntityAnalyticsPrivileges | undefined
+): MissingFeaturePrivileges[] => {
+  if (!privileges) return [];
+
+  if (privileges.privileges.kibana?.[ML_KIBANA_READ_ACTION] === false) {
+    return [['Machine Learning', ['read']]];
+  }
+
+  return [];
 };
 
 const getRiskEngineMissingReadPrivileges = (

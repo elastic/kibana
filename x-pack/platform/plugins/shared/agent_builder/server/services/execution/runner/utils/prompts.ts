@@ -6,6 +6,10 @@
  */
 
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  type ToolConfirmationPolicyMode,
+} from '@kbn/agent-builder-common';
 import type {
   PromptManager,
   ToolPromptManager,
@@ -24,11 +28,11 @@ import {
   AgentPromptType,
   AuthorizationStatus,
   ConfirmationStatus,
+  isAskUserQuestionPromptResponse,
   isAuthorizationPromptResponse,
   isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
-import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
 import type { ToolPolicyConfirmationDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { i18nBundles } from '../i18n';
 
@@ -99,6 +103,9 @@ export const createPromptManager = ({
     get: (promptId) => {
       return promptMap.get(promptId);
     },
+    delete: (promptId) => {
+      promptMap.delete(promptId);
+    },
     getConfirmationStatus: (promptId) => {
       return checkConfirmationStatus(promptId);
     },
@@ -131,10 +138,23 @@ export const getAgentPromptStorageState = ({
   input: ConverseInput;
   conversation?: Conversation;
 }): PromptStorageState => {
+  const rounds = conversation?.rounds ?? [];
+  const lastRound = rounds[rounds.length - 1];
+  const isResumingRound = lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+
   // Create a shallow copy to avoid mutating the original conversation state
-  const state: PromptStorageState = {
-    responses: { ...(conversation?.state?.prompt?.responses ?? {}) },
-  };
+  const responses = { ...(conversation?.state?.prompt?.responses ?? {}) };
+
+  // Scope authorization responses to the conversation round (subsequent rounds can re-prompt)
+  if (!isResumingRound) {
+    Object.entries(responses).forEach(([promptId, { response }]) => {
+      if (isAuthorizationPromptResponse(response)) {
+        delete responses[promptId];
+      }
+    });
+  }
+
+  const state: PromptStorageState = { responses };
 
   if (input.prompts) {
     Object.entries(input.prompts).forEach(([promptId, response]) => {
@@ -146,6 +166,11 @@ export const getAgentPromptStorageState = ({
       } else if (isAuthorizationPromptResponse(response)) {
         state.responses[promptId] = {
           type: AgentPromptType.authorization,
+          response,
+        };
+      } else if (isAskUserQuestionPromptResponse(response)) {
+        state.responses[promptId] = {
+          type: AgentPromptType.ask_user_question,
           response,
         };
       }

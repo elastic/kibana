@@ -28,6 +28,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_MUTED,
+  ALERT_SNOOZED,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -195,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -217,10 +219,13 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: [],
+        // On MKI the rule is created with an ES API key and no UIAM key, so alerting adds the
+        // "Missing Elastic Cloud API Key" tag. Compare against what the create API returned
+        // instead of hardcoding [] so this holds both locally and on MKI.
+        [ALERT_RULE_TAGS]: createdRule.tags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: [],
+        [TAGS]: createdRule.tags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
@@ -331,6 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -353,10 +359,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_TAGS]: createdRule.tags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: [],
+        [TAGS]: createdRule.tags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
@@ -555,6 +561,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_PREVIOUS_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_MUTED]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -578,10 +585,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_TAGS]: createdRule.tags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: [],
+        [TAGS]: createdRule.tags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });

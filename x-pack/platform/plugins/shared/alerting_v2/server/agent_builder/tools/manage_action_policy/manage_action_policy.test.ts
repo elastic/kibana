@@ -5,13 +5,32 @@
  * 2.0.
  */
 
+jest.mock('uuid', () => ({
+  v4: () => '00000000-0000-4000-8000-000000000001',
+}));
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
-import { actionPolicyOperationSchema } from './operations';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
 
-const createDeps = (): ManageActionPolicyToolDeps => ({
+const createLogger = (): jest.Mocked<
+  Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
+> => ({
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  forSubsystem: jest.fn(),
+});
+
+const createDeps = (
+  logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
+): ManageActionPolicyToolDeps => ({
+  logger,
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
 });
@@ -113,6 +132,12 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
+
+      // The agent-builder-assisted tag is stamped on the data persisted via update()
+      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
+        data: { tags?: string[] };
+      };
+      expect(updateCall.data.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when creating a policy without a name', async () => {
@@ -183,69 +208,45 @@ describe('manageActionPolicyTool', () => {
     });
   });
 
-  describe('set_type operation', () => {
-    it('creates a single_rule policy with type and ruleId in the result', async () => {
-      const deps = createDeps();
-      const tool = manageActionPolicyTool(deps);
-      const ctx = createContext();
+  it('creates a rule-scoped policy with the rule.id matcher in the result', async () => {
+    const deps = createDeps();
+    const tool = manageActionPolicyTool(deps);
+    const ctx = createContext();
 
-      const result = await tool.handler(
-        {
-          operations: [
-            { operation: 'set_metadata', name: 'Single Rule Policy', description: 'desc' },
-            {
-              operation: 'set_destinations',
-              destinations: [{ type: 'workflow', id: 'wf-1' }],
-            },
-            { operation: 'set_type', type: 'single_rule', ruleId: 'rule-abc' },
-          ],
-        },
-        ctx
-      );
+    const result = await tool.handler(
+      {
+        operations: [
+          { operation: 'set_metadata', name: 'Rule-scoped Policy', description: 'desc' },
+          {
+            operation: 'set_destinations',
+            destinations: [{ type: 'workflow', id: 'wf-1' }],
+          },
+          { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
+        ],
+      },
+      ctx
+    );
 
-      const { results } = result as {
-        results: Array<{
-          type: string;
-          data?: {
-            actionPolicyAttachment?: {
-              type?: string;
-              ruleId?: string;
-              name?: string;
-            };
+    const { results } = result as {
+      results: Array<{
+        type: string;
+        data?: {
+          actionPolicyAttachment?: {
+            matcher?: string | null;
+            name?: string;
           };
-        }>;
-      };
-      expect(results[0].type).toBe(ToolResultType.other);
-      expect(results[0].data?.actionPolicyAttachment?.type).toBe('single_rule');
-      expect(results[0].data?.actionPolicyAttachment?.ruleId).toBe('rule-abc');
-      expect(results[0].data?.actionPolicyAttachment?.name).toBe('Single Rule Policy');
-    });
-
-    it('rejects set_type global with a ruleId at schema level', () => {
-      const result = actionPolicyOperationSchema.safeParse({
-        operation: 'set_type',
-        type: 'global',
-        ruleId: 'rule-abc',
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.error!.issues[0].message).toContain('ruleId is only allowed');
-    });
-
-    it('rejects set_type single_rule without ruleId at schema level', () => {
-      const result = actionPolicyOperationSchema.safeParse({
-        operation: 'set_type',
-        type: 'single_rule',
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.error!.issues[0].message).toContain('ruleId is required');
-    });
+        };
+      }>;
+    };
+    expect(results[0].type).toBe(ToolResultType.other);
+    expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+    expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
   });
 
   describe('logger severity', () => {
     it('logs validation errors at debug level', async () => {
-      const deps = createDeps();
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
 
@@ -261,14 +262,17 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
-      expect(ctx.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('manage_action_policy tool: invalid input')
-      );
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith({
+        message: 'Invalid manage_action_policy input',
+        labels: { space_id: ctx.spaceId },
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs unexpected errors at warn level', async () => {
-      const deps = createDeps();
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.add.mockRejectedValueOnce(new Error('ES exploded'));
@@ -286,10 +290,82 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
-      expect(ctx.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Error in manage_action_policy tool')
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage action policy',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+        labels: { space_id: ctx.spaceId, policy_id: expect.any(String) },
+        error: expect.any(Error),
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('includes policy_id on unexpected errors when the policy is already persisted', async () => {
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        origin: 'policy-persisted-id',
+        versions: [
+          {
+            data: {
+              id: 'policy-persisted-id',
+              name: 'Existing Policy',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          actionPolicyAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
       );
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage action policy',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+        labels: { space_id: ctx.spaceId, policy_id: 'policy-persisted-id' },
+        error: expect.any(Error),
+      });
+    });
+
+    it('includes policy_id on unexpected errors when the policy is only in memory', async () => {
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        versions: [
+          {
+            data: {
+              id: 'policy-in-memory-id',
+              name: 'Draft Policy',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          actionPolicyAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage action policy',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+        labels: { space_id: ctx.spaceId, policy_id: 'policy-in-memory-id' },
+        error: expect.any(Error),
+      });
     });
   });
 });

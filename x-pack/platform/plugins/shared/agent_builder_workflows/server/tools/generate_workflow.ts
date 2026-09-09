@@ -15,8 +15,8 @@ import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/u
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
+import { workflowTools } from '../../common/constants';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
 const generateWorkflowSchema = z.object({
@@ -60,7 +60,6 @@ export const generateWorkflowTool = ({
   return {
     id: platformCoreTools.generateWorkflow,
     type: ToolType.builtin,
-    experimental: true,
     description:
       cleanPrompt(`Generate or update an Elastic workflow definition based on a natural-language description.
 
@@ -97,8 +96,23 @@ And you should **not**:
 — The tool creates (or updates) a workflow attachment and emits a diff card in chat.
 — Render the diff with "<render_attachment id="{diffAttachmentId}"/>" and the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
 
+## Alert-triggered workflows
+
+When the workflow is alert-triggered (\`type: alert\`), runtime alert data is exposed to Liquid expressions as \`event.*\` — NEVER \`triggers.event\` or \`trigger.event\` (the \`triggers\` block only configures which triggers fire the workflow; it does not carry runtime data). If the user's request names specific alert fields (rule name, severity, alert ID, tags, space), pass them in \`context\` using this schema so the generated Liquid resolves correctly:
+— \`event.alerts\` — array of alert objects that fired
+— \`event.alerts[0]._id\` / \`._index\` / \`.kibana.alert.*\` / \`["@timestamp"]\`
+— \`event.rule.id\` / \`event.rule.name\` / \`event.rule.tags\`
+— \`event.spaceId\` — the space where the event was emitted
+
     `),
     schema: generateWorkflowSchema,
+    annotations: {
+      title: 'Generate Workflow',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async (
       { query, attachmentId, context: workflowContext, instructions, workflowId },
       toolContext
@@ -108,8 +122,20 @@ And you should **not**:
 
       const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
       if (attachmentId && !sourceAttachment) {
+        const workflowAttachmentIds = attachments
+          .getActive()
+          .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
+          .map((attachment) => attachment.id);
+        const existingAttachmentHint =
+          workflowAttachmentIds.length > 0
+            ? ` Conversation workflow attachment ids: ${workflowAttachmentIds.join(', ')}.`
+            : '';
         return {
-          results: [errorResult(`Attachment with ID '${attachmentId}' not found.`)],
+          results: [
+            errorResult(
+              `Attachment with ID '${attachmentId}' not found.${existingAttachmentHint} To edit a saved workflow that is not yet in the conversation, call \`${workflowTools.getWorkflow}\` with \`attach: true\` first, then pass the returned \`attachmentId\` to this tool. Workflow ids from automation lists are not conversation attachment ids until attached.`
+            ),
+          ],
         };
       }
       if (sourceAttachment && sourceAttachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
@@ -132,7 +158,11 @@ And you should **not**:
       }
 
       try {
-        const { workflow, response: generationComment } = await generateWorkflow({
+        const {
+          workflow,
+          yaml: afterYaml,
+          response: generationComment,
+        } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
           additionalContext: workflowContext,
@@ -145,7 +175,6 @@ And you should **not**:
         });
 
         const beforeYaml = sourceData?.yaml ?? '';
-        const afterYaml = stringifyWorkflowDefinition(workflow);
         const proposalId = v4();
 
         const {
@@ -158,7 +187,7 @@ And you should **not**:
           proposalId,
           workflowId: sourceData?.workflowId ?? workflowId,
           name: workflow.name,
-          description: query,
+          description: `Diff for workflow '${workflow.name}'`,
           toolId: platformCoreTools.generateWorkflow,
         });
 

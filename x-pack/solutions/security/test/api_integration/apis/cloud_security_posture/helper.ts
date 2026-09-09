@@ -43,6 +43,24 @@ export const createCSPRole = async (
   });
 };
 
+/**
+ * Creates a role that is a valid authenticated Kibana user but intentionally
+ * lacks the `cloud-security-posture-read` privilege (granted only by the
+ * Security Solution feature `read`/`all`). Used to assert the status route's
+ * `requiredPrivileges` gate returns a 403 — the Kibana feature-privilege axis,
+ * distinct from the ES index-ACL `unprivileged` status `createCSPRole` exercises.
+ */
+export const createRoleWithoutCspRead = async (security: SecurityService, roleName: string) => {
+  await security.role.create(roleName, {
+    kibana: [
+      {
+        feature: { fleetv2: ['read'] },
+        spaces: ['*'],
+      },
+    ],
+  });
+};
+
 export const deleteRole = async (security: SecurityService, roleName: string) => {
   await security.role.delete(roleName);
 };

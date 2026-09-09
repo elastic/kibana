@@ -11,9 +11,11 @@ export { handleCancellation } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
-  conversationExists,
   updateConversation$,
   createConversation$,
+  persistRoundInput,
+  appendRoundTerminated$,
+  appendResumeExecution$,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,

@@ -19,6 +19,7 @@ import { transformStateSchema, runtimeMappingsSchema } from './common';
 // GET transform nodes
 export interface GetTransformNodesResponseSchema {
   count: number;
+  isCrossProjectEnabled: boolean;
 }
 
 // GET transforms
@@ -84,6 +85,7 @@ export const sourceSchema = schema.object({
     schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
   ]),
   query: schema.maybe(schema.recordOf(schema.string({ maxLength: 1000 }), schema.any())),
+  project_routing: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 
 export const syncSchema = schema.object({
@@ -154,7 +156,7 @@ export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 
 
 export const putTransformQuerySchema = schema.object({
   createDataView: schema.boolean({ defaultValue: false }),
-  timeFieldName: schema.maybe(schema.string()),
+  timeFieldName: schema.maybe(schema.string({ maxLength: 1000 })),
   deferValidation: schema.boolean({ defaultValue: false }),
 });
 

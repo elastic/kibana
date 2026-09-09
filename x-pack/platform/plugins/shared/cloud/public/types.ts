@@ -187,6 +187,11 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   csp?: string;
   /**
+   * The cloud region identifier (e.g., `us-east-1`, `europe-west1`, `eastus2`).
+   * Provider-specific region name without the CSP prefix.
+   */
+  region?: string;
+  /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
@@ -212,7 +217,8 @@ export interface CloudSetup extends CloudBasicUrls {
   isCloudEnabled: boolean;
   /**
    * `true` when running on ECE (Elastic Cloud Enterprise).
-   * `false` or `undefined` on ESS or self-managed.
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
    */
   isEce?: boolean;
   /**

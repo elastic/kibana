@@ -11,6 +11,8 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EnterpriseGatingModal } from './enterprise_gating_modal';
 import { getPrimaryActionLabel } from './strings';
 
+const SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
+
 describe('EnterpriseGatingModal', () => {
   it('renders the start trial primary action for cloud users that can manage subscriptions', () => {
     const onPrimaryAction = jest.fn();
@@ -20,6 +22,7 @@ describe('EnterpriseGatingModal', () => {
         environment="cloud"
         hasManageSubscriptionPermission={true}
         trialStatus="notStarted"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
         onPrimaryAction={onPrimaryAction}
         onCancel={() => {}}
       />
@@ -41,6 +44,7 @@ describe('EnterpriseGatingModal', () => {
         environment="cloud"
         hasManageSubscriptionPermission={true}
         trialStatus="expired"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
         onPrimaryAction={onPrimaryAction}
         onCancel={() => {}}
       />
@@ -59,6 +63,7 @@ describe('EnterpriseGatingModal', () => {
       <EnterpriseGatingModal
         environment="cloud"
         hasManageSubscriptionPermission={false}
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
         onCancel={() => {}}
       />
     );
@@ -74,6 +79,7 @@ describe('EnterpriseGatingModal', () => {
     renderWithI18n(
       <EnterpriseGatingModal
         environment="selfManaged"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
         onPrimaryAction={onPrimaryAction}
         onCancel={() => {}}
       />
@@ -94,6 +100,7 @@ describe('EnterpriseGatingModal', () => {
       <EnterpriseGatingModal
         environment="selfManaged"
         hasManageSubscriptionPermission={false}
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
         onPrimaryAction={onPrimaryAction}
         onCancel={() => {}}
       />
@@ -104,14 +111,20 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('omits the primary action when onPrimaryAction is not provided', () => {
-    renderWithI18n(<EnterpriseGatingModal environment="selfManaged" onCancel={() => {}} />);
+    renderWithI18n(
+      <EnterpriseGatingModal
+        environment="selfManaged"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
+        onCancel={() => {}}
+      />
+    );
 
     expect(
       screen.queryByTestId('enterpriseGatingModalPrimaryActionButton')
     ).not.toBeInTheDocument();
   });
 
-  it('links to the configured subscription features URL', () => {
+  it('links to the provided subscription features URL', () => {
     renderWithI18n(
       <EnterpriseGatingModal
         environment="cloud"
@@ -129,28 +142,6 @@ describe('EnterpriseGatingModal', () => {
     ).toHaveAttribute('target', '_blank');
   });
 
-  it('links to the cloud subscription features page by default on cloud', () => {
-    renderWithI18n(
-      <EnterpriseGatingModal
-        environment="cloud"
-        hasManageSubscriptionPermission={true}
-        onCancel={() => {}}
-      />
-    );
-
-    expect(
-      screen.getByTestId('enterpriseGatingModalReviewSubscriptionFeaturesButton')
-    ).toHaveAttribute('href', 'https://www.elastic.co/subscriptions/cloud');
-  });
-
-  it('links to the self-managed subscription features page by default on self-managed', () => {
-    renderWithI18n(<EnterpriseGatingModal environment="selfManaged" onCancel={() => {}} />);
-
-    expect(
-      screen.getByTestId('enterpriseGatingModalReviewSubscriptionFeaturesButton')
-    ).toHaveAttribute('href', 'https://www.elastic.co/subscriptions');
-  });
-
   it('does not render when isOpen is false', () => {
     renderWithI18n(
       <EnterpriseGatingModal
@@ -158,6 +149,7 @@ describe('EnterpriseGatingModal', () => {
         environment="cloud"
         hasManageSubscriptionPermission={true}
         trialStatus="notStarted"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
         onCancel={() => {}}
       />
     );
@@ -168,7 +160,13 @@ describe('EnterpriseGatingModal', () => {
   it('calls onCancel when cancel is clicked', () => {
     const onCancel = jest.fn();
 
-    renderWithI18n(<EnterpriseGatingModal environment="cloud" onCancel={onCancel} />);
+    renderWithI18n(
+      <EnterpriseGatingModal
+        environment="cloud"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
+        onCancel={onCancel}
+      />
+    );
     expect(screen.getByTestId('enterpriseGatingModal')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('enterpriseGatingModalCancelButton'));
@@ -179,7 +177,13 @@ describe('EnterpriseGatingModal', () => {
   it('calls onCancel when the modal is closed via the close button', () => {
     const onCancel = jest.fn();
 
-    renderWithI18n(<EnterpriseGatingModal environment="cloud" onCancel={onCancel} />);
+    renderWithI18n(
+      <EnterpriseGatingModal
+        environment="cloud"
+        subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
+        onCancel={onCancel}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /close/i }));
     expect(onCancel).toHaveBeenCalled();

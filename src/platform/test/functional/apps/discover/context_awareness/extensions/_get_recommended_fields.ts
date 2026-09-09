@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_recommended_fields.ts
+
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, but keep only the coarse assertions (section present for a
+ * matching profile, absent for a non-matching one). Drop the per-field checks — the
+ * "in the profile but not in the data" filtering is covered by
+ * kbn-unified-field-list/src/hooks/use_grouped_fields.test.tsx (`describe('recommendedFields
+ * filtering')`), and the accessor's field list by
+ * profile_providers/observability/logs_data_source_profile/accessors/get_recommended_fields.test.ts.
+ */
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

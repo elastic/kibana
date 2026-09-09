@@ -6,16 +6,27 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
-import type { ToolOrigin } from '../tools/definition';
+import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
   ConversationInternalState,
   ConversationRound,
+  ConversationRoundAuthor,
+  ConversationRoundOrigin,
+  RoundInput,
   BackgroundExecutionState,
+  SubagentRosterEntry,
   TodoItem,
 } from './conversation';
-import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
+import type {
+  PromptRequestSource,
+  PromptRequest,
+  AskUserQuestionItem,
+  AskUserQuestionAnswer,
+} from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
+import type { ConversationAccessControl } from './access_control';
+import type { UserIdAndName } from '../base/users';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -28,6 +39,7 @@ export enum ChatEventType {
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
   promptRequest = 'prompt_request',
+  roundStarted = 'round_started',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -35,6 +47,9 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  subagentRosterUpdated = 'subagent_roster_updated',
+  userQuestionAsked = 'user_question_asked',
+  userQuestionAnswered = 'user_question_answered',
 }
 
 export type ChatEventBase<
@@ -50,6 +65,7 @@ export interface ToolCallEventData {
   params: Record<string, unknown>;
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
+  tool_type?: ToolType;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -146,6 +162,58 @@ export const isPromptRequestEvent = (
   return event.type === ChatEventType.promptRequest;
 };
 
+// Ask-user-question lifecycle
+
+export interface UserQuestionAskedEventData {
+  prompt_id: string;
+  questions: AskUserQuestionItem[];
+}
+
+export type UserQuestionAskedEvent = ChatEventBase<
+  ChatEventType.userQuestionAsked,
+  UserQuestionAskedEventData
+>;
+
+export const isUserQuestionAskedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is UserQuestionAskedEvent => {
+  return event.type === ChatEventType.userQuestionAsked;
+};
+
+export const createUserQuestionAskedEvent = (
+  data: UserQuestionAskedEventData
+): UserQuestionAskedEvent => {
+  return {
+    type: ChatEventType.userQuestionAsked,
+    data,
+  };
+};
+
+export interface UserQuestionAnsweredEventData {
+  prompt_id: string;
+  answers: AskUserQuestionAnswer[];
+}
+
+export type UserQuestionAnsweredEvent = ChatEventBase<
+  ChatEventType.userQuestionAnswered,
+  UserQuestionAnsweredEventData
+>;
+
+export const isUserQuestionAnsweredEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is UserQuestionAnsweredEvent => {
+  return event.type === ChatEventType.userQuestionAnswered;
+};
+
+export const createUserQuestionAnsweredEvent = (
+  data: UserQuestionAnsweredEventData
+): UserQuestionAnsweredEvent => {
+  return {
+    type: ChatEventType.userQuestionAnswered,
+    data,
+  };
+};
+
 // reasoning
 
 export interface ReasoningEventData {
@@ -224,6 +292,31 @@ export const isThinkingCompleteEvent = (
   return event.type === ChatEventType.thinkingComplete;
 };
 
+// Round started
+
+export interface RoundStartedEventData {
+  /** id of the round that started; matches the eventual `round_complete` round id */
+  round_id: string;
+  /** the processed input driving the round (what the round's `input` will be) */
+  input: RoundInput;
+  /** ISO timestamp the round started at (the round's `started_at`) */
+  started_at: string;
+  /** author of the round, when known */
+  author?: ConversationRoundAuthor;
+  /** origin of the round, for externally-originated rounds */
+  origin?: ConversationRoundOrigin;
+  /** true when this round resumed a paused (HITL) round */
+  resumed?: boolean;
+}
+
+export type RoundStartedEvent = ChatEventBase<ChatEventType.roundStarted, RoundStartedEventData>;
+
+export const isRoundStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is RoundStartedEvent => {
+  return event.type === ChatEventType.roundStarted;
+};
+
 // Round complete
 
 export interface RoundCompleteEventData {
@@ -231,12 +324,23 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /**
+   * Present only on a resumed round. Carries the resume execution (`exec_k`) as its own round so the
+   * persistence layer can append it to the timeline append-only, without rewriting the pause.
+   */
+  resume_execution?: {
+    follow_up_round: ConversationRound;
+  };
   /** if the prompt state was updated during the round, contains the up-to-date version */
   conversation_state?: ConversationInternalState;
   /**
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Set when this round initialized the bash/VFS workspace for this conversation.
+   */
+  workspace_id?: string;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -252,6 +356,8 @@ export const isRoundCompleteEvent = (
 export interface ConversationCreatedEventData {
   conversation_id: string;
   title: string;
+  access_control: ConversationAccessControl;
+  user: UserIdAndName;
 }
 
 export type ConversationCreatedEvent = ChatEventBase<
@@ -270,6 +376,7 @@ export const isConversationCreatedEvent = (
 export interface ConversationUpdatedEventData {
   conversation_id: string;
   title: string;
+  access_control: ConversationAccessControl;
 }
 
 export type ConversationUpdatedEvent = ChatEventBase<
@@ -353,6 +460,29 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+export interface SubagentRosterUpdatedEventData {
+  /** Full active roster at time of emission. */
+  roster: SubagentRosterEntry[];
+}
+
+export type SubagentRosterUpdatedEvent = ChatEventBase<
+  ChatEventType.subagentRosterUpdated,
+  SubagentRosterUpdatedEventData
+>;
+
+export const createSubagentRosterUpdatedEvent = (
+  roster: SubagentRosterEntry[]
+): SubagentRosterUpdatedEvent => ({
+  type: ChatEventType.subagentRosterUpdated,
+  data: { roster },
+});
+
+export const isSubagentRosterUpdatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is SubagentRosterUpdatedEvent => {
+  return event.type === ChatEventType.subagentRosterUpdated;
+};
+
 export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
 
 export interface TodosUpdatedUiEventData {
@@ -380,10 +510,14 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
+  | RoundStartedEvent
   | RoundCompleteEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
-  | BackgroundAgentCompleteEvent;
+  | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
+  | UserQuestionAskedEvent
+  | UserQuestionAnsweredEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

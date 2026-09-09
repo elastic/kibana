@@ -13,7 +13,7 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { LRUCache } from 'lru-cache';
-import type { ToolOrigin } from '@kbn/agent-builder-common';
+import type { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, ExecutableTool } from '@kbn/agent-builder-server';
 import type { ToolReturnSummarizerFn } from '@kbn/agent-builder-server/tools/builtin';
 import type {
@@ -24,6 +24,10 @@ import type {
   AddToolInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import {
+  buildGuardedToolContent,
+  DEFAULT_MAX_TOOL_RESULT_TOKENS,
+} from '../../run_agent/utils/tool_result_guardrail';
 
 export const createToolManager = (): ToolManager => {
   return new ToolManager({
@@ -43,8 +47,10 @@ export class ToolManager implements IToolManager {
   private dynamicTools: LRUCache<ToolName, StructuredTool>;
   private toolIdMappings: Map<string, string>;
   private toolOrigins: Map<string, ToolOrigin>;
+  private toolTypes: Map<string, ToolType>;
   private executableTools: Map<string, ExecutableTool> = new Map<string, ExecutableTool>();
   private eventEmitter?: AgentEventEmitterFn;
+  private maxToolResultTokens: number = DEFAULT_MAX_TOOL_RESULT_TOKENS;
 
   constructor(params: ToolManagerParams) {
     this.dynamicTools = new LRUCache<ToolName, StructuredTool>({
@@ -52,10 +58,15 @@ export class ToolManager implements IToolManager {
     });
     this.toolIdMappings = new Map<string, string>();
     this.toolOrigins = new Map<string, ToolOrigin>();
+    this.toolTypes = new Map<string, ToolType>();
   }
 
   public setEventEmitter(eventEmitter: AgentEventEmitterFn): void {
     this.eventEmitter = eventEmitter;
+  }
+
+  public setMaxToolResultTokens(maxTokens: number): void {
+    this.maxToolResultTokens = maxTokens;
   }
 
   /**
@@ -74,6 +85,7 @@ export class ToolManager implements IToolManager {
       const toolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
       const tools: ExecutableTool[] = toolsWithOrigin.map(({ origin, ...tool }) => {
         this.toolOrigins.set(tool.id, origin);
+        this.toolTypes.set(tool.id, tool.type);
         this.executableTools.set(tool.id, tool);
         return tool;
       });
@@ -87,6 +99,13 @@ export class ToolManager implements IToolManager {
             sendEvent: this.eventEmitter,
             toolId: toolIdMapping.get(tool.id),
             addReasoningParam: false,
+            buildContent: ({ results, toolId, toolCallId }) =>
+              buildGuardedToolContent({
+                results,
+                toolId,
+                toolCallId,
+                maxTokens: tool.maxResultTokens ?? this.maxToolResultTokens,
+              }),
           })
         )
       );
@@ -152,11 +171,18 @@ export class ToolManager implements IToolManager {
     return this.toolIdMappings;
   }
 
-  /**
-   * Returns the origin metadata for a given internal tool ID.
-   */
-  public getToolOrigin(toolId: string): ToolOrigin | undefined {
-    return this.toolOrigins.get(toolId);
+  public getToolMeta(toolId: string): {
+    origin: ToolOrigin | undefined;
+    type: ToolType | undefined;
+  } {
+    return {
+      origin: this.toolOrigins.get(toolId),
+      type: this.toolTypes.get(toolId),
+    };
+  }
+
+  public getExecutable(toolId: string): ExecutableTool | undefined {
+    return this.executableTools.get(toolId);
   }
 
   /**

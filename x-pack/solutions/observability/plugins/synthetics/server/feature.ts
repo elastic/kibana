@@ -11,9 +11,7 @@ import type {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
-import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { SYNTHETICS_ALERTING_FEATURES } from '@kbn/rule-data-utils';
 import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
@@ -32,13 +30,32 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 
-const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
+const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
 
-const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
-}));
+const canRunTestManuallyPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_run_test_manually',
+      name: i18n.translate('xpack.synthetics.features.canRunTestManually', {
+        defaultMessage: 'Can run tests manually',
+      }),
+      // `includeIn: 'none'` — never granted implicitly. The run-test route accepts
+      // EITHER `uptime-write` (which base `all` already has, so existing roles keep
+      // working) OR this `monitor-run-manually` privilege, which lets an admin grant manual
+      // test runs to an otherwise read-only role without granting write access.
+      includeIn: 'none',
+      api: [MONITOR_RUN_MANUALLY_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canRunTestManually'],
+    },
+  ],
+};
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
@@ -106,7 +123,7 @@ export const syntheticsFeature = {
   app: ['uptime', 'kibana', 'synthetics'],
   catalogue: ['uptime'],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   privileges: {
@@ -139,7 +156,7 @@ export const syntheticsFeature = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: ['save', 'configureSettings', 'show', 'alerting:save'],
     },
@@ -170,12 +187,22 @@ export const syntheticsFeature = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: ['show', 'alerting:save'],
     },
   },
   subFeatures: [
+    {
+      name: i18n.translate('xpack.synthetics.features.app.runTest', {
+        defaultMessage: 'Run tests manually',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.runTest.description', {
+        defaultMessage:
+          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors.',
+      }),
+      privilegeGroups: [canRunTestManuallyPrivilege],
+    },
     {
       name: i18n.translate('xpack.synthetics.features.app.elastic', {
         defaultMessage: 'Elastic managed locations',

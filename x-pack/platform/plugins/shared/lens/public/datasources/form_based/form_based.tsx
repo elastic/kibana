@@ -56,6 +56,7 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { isColumnOfType } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -104,10 +105,11 @@ import {
 } from './operations/layer_helpers';
 import type { DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
+import { getColumnParamsForNewBucket } from './include_empty_rows_defaults';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { cleanupFormulaColumns, isColumnOfType } from './operations/definitions/helpers';
+import { cleanupFormulaColumns } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
@@ -194,6 +196,7 @@ export function columnToOperation(
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
+    ...(column.customLabel ? { customLabel: true } : {}),
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
@@ -208,11 +211,8 @@ export function columnToOperation(
 
 export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../../common/expressions';
 
-export {
-  getSuffixFormatter,
-  unitSuffixesLong,
-  suffixFormatterId,
-} from '../../../common/suffix_formatter';
+export { unitSuffixesLong } from '@kbn/lens-common';
+export { getSuffixFormatter, suffixFormatterId } from '../../../common/suffix_formatter';
 
 export function getFormBasedDatasource({
   core,
@@ -361,7 +361,14 @@ export function getFormBasedDatasource({
       state,
       layerId,
       indexPatterns,
-      { columnId, groupId, staticValue, autoTimeField, visualizationGroups }
+      {
+        columnId,
+        groupId,
+        staticValue,
+        autoTimeField,
+        visualizationGroups,
+        activeVisualizationTypeId,
+      }
     ) {
       const indexPattern = indexPatterns[state.layers[layerId]?.indexPatternId];
       let ret = state;
@@ -395,6 +402,7 @@ export function getFormBasedDatasource({
             indexPattern,
             visualizationGroups,
             targetGroup: groupId,
+            columnParams: getColumnParamsForNewBucket('date_histogram', activeVisualizationTypeId),
           }),
         });
       }

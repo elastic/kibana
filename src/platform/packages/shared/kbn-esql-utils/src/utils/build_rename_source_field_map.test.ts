@@ -71,6 +71,44 @@ describe('buildRenameSourceFieldMap', () => {
       const query = 'FROM index | EVAL computed = price * 2 | RENAME computed AS total';
       expect(resolve('total', query)).toBe('total');
     });
+
+    it('resolves EVAL new = old as a rename to the source field', () => {
+      const query = 'FROM kibana_sample_data_logs | EVAL file_size = bytes';
+      expect(resolve('file_size', query)).toBe('bytes');
+    });
+
+    it('resolves EVAL new = old | DROP old as a rename to the source field', () => {
+      const query = 'FROM kibana_sample_data_logs | EVAL file_size = bytes | DROP bytes';
+      expect(resolve('file_size', query)).toBe('bytes');
+    });
+
+    it('does not resolve EVAL new = func(...) as a rename', () => {
+      const query = 'FROM kibana_sample_data_logs | EVAL file_size = ABS(bytes)';
+      expect(resolve('file_size', query)).toBe('file_size');
+    });
+
+    it('does not resolve EVAL new = old when new is subsequently shadowed by EVAL', () => {
+      const query =
+        'FROM kibana_sample_data_logs | EVAL file_size = bytes | EVAL file_size = file_size * 2';
+      expect(resolve('file_size', query)).toBe('file_size');
+    });
+
+    it('resolves multiple EVAL renames independently', () => {
+      const query = 'FROM kibana_sample_data_logs | EVAL client_ip = clientip, os = machine.os';
+      expect(resolve('client_ip', query)).toBe('clientip');
+      expect(resolve('os', query)).toBe('machine.os');
+    });
+
+    it('resolves only the plain-column rename when EVAL mixes a rename and a computed column', () => {
+      const query =
+        'FROM kibana_sample_data_logs | EVAL renamed_host = CONCAT(host, "*"), clientip_renamed = clientip | KEEP clientip_renamed, renamed_host, bytes';
+      // plain column rename: should resolve to source field
+      expect(resolve('clientip_renamed', query)).toBe('clientip');
+      // computed column: should not resolve (not filterable)
+      expect(resolve('renamed_host', query)).toBe('renamed_host');
+      // untouched field: no change
+      expect(resolve('bytes', query)).toBe('bytes');
+    });
   });
 
   describe('STATS BY aliases and TBUCKET', () => {
@@ -115,6 +153,33 @@ describe('buildRenameSourceFieldMap', () => {
       const query =
         'FROM kibana_sample_data_logs | STATS COUNT() BY pattern = categorize(message) | RENAME pattern AS meow';
       expect(resolve('meow', query)).toBe('meow');
+    });
+  });
+
+  describe('FORK branches', () => {
+    it('resolves EVAL renames inside FORK branches', () => {
+      const query =
+        'FROM kibana_sample_data_logs | FORK (EVAL c = bytes) (EVAL f = agent.keyword) | KEEP c, f';
+      expect(resolve('c', query)).toBe('bytes');
+      expect(resolve('f', query)).toBe('agent.keyword');
+    });
+  });
+
+  describe('ENRICH WITH aliases', () => {
+    it('resolves ENRICH ... WITH new_name = enrich_field as a rename', () => {
+      const query = 'FROM logs | ENRICH servers ON host WITH server_name = host_name';
+      expect(resolve('server_name', query)).toBe('host_name');
+    });
+
+    it('does not resolve ENRICH fields that have no alias', () => {
+      const query = 'FROM logs | ENRICH servers ON host WITH host_name';
+      expect(resolve('host_name', query)).toBe('host_name');
+    });
+
+    it('chains ENRICH alias with a following RENAME', () => {
+      const query =
+        'FROM logs | ENRICH servers ON host WITH server_name = host_name | RENAME server_name AS sn';
+      expect(resolve('sn', query)).toBe('host_name');
     });
   });
 

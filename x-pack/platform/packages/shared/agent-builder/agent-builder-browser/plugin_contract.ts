@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, RefAttributes } from 'react';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -15,9 +15,11 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
+import type { ConversationTemplateServiceStartContract } from './templates';
 
 /**
  * Props for the embeddable conversation component.
@@ -79,6 +81,16 @@ export interface EmbeddableConversationProps {
   attachments?: ConversationAttachment[];
 
   /**
+   * Optional heading shown on the empty "new conversation" screen in place of the
+   * default "How can I help you?" greeting. Use this to surface a page-specific
+   * call to action (e.g. "What do you want to automate?" for the workflow editor).
+   *
+   * The value is rendered as plain text; embedders are expected to pass an
+   * already-translated string.
+   */
+  greetingMessage?: string;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
@@ -111,10 +123,33 @@ export interface PublicEmbeddableConversationProps extends EmbeddableConversatio
   ariaLabelledBy?: string;
 }
 
+export interface EmbeddableConversationInputRef {
+  /**
+   * Add an attachment pill to the input. The pill appears immediately and the
+   * user can remove it before sending. Duplicates (matched by `id`) are merged.
+   */
+  addAttachment: (attachment: ConversationAttachment) => void;
+}
+
+export interface PublicEmbeddableConversationInputProps {
+  /**
+   * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
+   */
+  agentId?: string;
+}
+
 /**
  * Options passed when opening or toggling the conversation sidebar.
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
+  onClose?: () => void;
+}
+
+/**
+ * Options passed when opening conversation details.
+ */
+export interface OpenConversationDetailsOptions {
+  conversationId: string;
   onClose?: () => void;
 }
 
@@ -136,6 +171,15 @@ export interface OpenConversationSidebarReturn {
 export interface AgentBuilderPluginSetup {}
 
 /**
+ * Embeddable chat access signals matching the embeddable access boundary checks
+ * in the agent_builder plugin (license, LLM connector).
+ */
+export interface EmbeddableChatAccess {
+  hasRequiredLicense: boolean;
+  hasLlmConnector: boolean;
+}
+
+/**
  * Public start contract for the browser-side agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -148,6 +192,15 @@ export interface AgentBuilderPluginStart {
    */
   attachments: AttachmentServiceStartContract;
   /**
+   * Renderer service contract, can be used to register and retrieve renderer UI definitions.
+   */
+  renderers: RendererServiceStartContract;
+  /**
+   * Conversation template service contract, can be used to register and retrieve
+   * per-template UI definitions (reusable tabs, and which tabs each template shows).
+   */
+  conversationTemplates: ConversationTemplateServiceStartContract;
+  /**
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
@@ -155,6 +208,12 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /**
+   * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
+   * also require `application.capabilities.agentBuilder.show === true` before
+   * programmatically opening chat.
+   */
+  getAgentBuilderAccess: () => Promise<EmbeddableChatAccess>;
   /**
    * Opens the conversation sidebar.
    *
@@ -189,6 +248,13 @@ export interface AgentBuilderPluginStart {
    */
   addAttachment: (attachment: AttachmentInput) => void;
   /**
+   * Removes a staged attachment from the active conversation sidebar by its id.
+   * If no sidebar is open or the id is not found, the call is a no-op.
+   *
+   * @param attachmentId - The id of the attachment to remove
+   */
+  removeAttachment: (attachmentId: string) => void;
+  /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.
    *
@@ -218,4 +284,26 @@ export interface AgentBuilderPluginStart {
    * functional agent_builder chat without the sidebar chrome.
    */
   EmbeddableConversation: ComponentType<PublicEmbeddableConversationProps>;
+  /**
+   * Inline-embeddable chat **input** component, pre-bound to the plugin's
+   * internal services.
+   *
+   * Use this when you want to give users an Agent Builder–style entry point
+   * inside your own UI without hosting the full conversation.
+   *
+   * @example
+   * ```tsx
+   * const inputRef = useRef<EmbeddableConversationInputRef>(null);
+   *
+   * <plugins.agentBuilder.EmbeddableConversationInput
+   *   ref={inputRef}
+   *   agentId="my-agent-id"
+   * />
+   * <button onClick={() => inputRef.current?.addAttachment(att)}>Attach</button>
+   * ```
+   */
+  EmbeddableConversationInput: ComponentType<
+    PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
+  >;
+  openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

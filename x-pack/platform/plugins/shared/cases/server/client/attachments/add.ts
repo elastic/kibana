@@ -18,7 +18,9 @@ import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
+import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
+
 /**
  * Create an attachment to a case.
  *
@@ -30,8 +32,6 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
   const {
     logger,
     authorization,
-    persistableStateAttachmentTypeRegistry,
-    externalReferenceAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
@@ -40,11 +40,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     const query = decodeWithExcessOrThrow(AttachmentRequestRtV2)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
-    decodeCommentRequestV2(
-      comment,
-      externalReferenceAttachmentTypeRegistry,
-      unifiedAttachmentTypeRegistry
-    );
+    decodeCommentRequestV2(comment, unifiedAttachmentTypeRegistry);
 
     const savedObjectID = SavedObjectsUtils.generateId();
     await authorization.ensureAuthorized({
@@ -59,8 +55,6 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
 
     validateRegisteredAttachments({
       query,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
     });
 
@@ -76,6 +70,9 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     const updatedCase = await updatedModel.encodeWithComments({ mode });
 
     emitAttachmentsAddedEvent(clientArgs, updatedCase, [savedObjectID], query.type);
+
+    // This call never throws — failures are logged and do not abort the attachment creation.
+    await extractAndAddObservables(caseId, [comment], updatedCase, clientArgs);
 
     return updatedCase;
   } catch (error) {

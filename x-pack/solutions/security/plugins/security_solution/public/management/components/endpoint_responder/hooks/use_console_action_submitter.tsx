@@ -121,6 +121,7 @@ export const useConsoleActionSubmitter = <
   const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(dataTestSubj);
   const isPending = status === 'pending';
+  const isCreating = status === 'creating';
 
   const currentActionState = useMemo<
     Immutable<
@@ -169,6 +170,8 @@ export const useConsoleActionSubmitter = <
         sent: true,
       };
 
+      setStatus('creating');
+
       // The object defined above (`updatedRequestState`) is saved to the command state right away.
       // the creation of the Action request (below) will mutate this object to store the Action ID
       // once the API response is received. We do this to ensure that the action is not created more
@@ -180,9 +183,17 @@ export const useConsoleActionSubmitter = <
         .mutateAsync(actionRequestBody)
         .then((response) => {
           updatedRequestState.actionId = response.data.id;
+
+          if (isMounted()) {
+            setStatus('pending');
+          }
         })
         .catch((err) => {
           updatedRequestState.error = err;
+
+          if (isMounted()) {
+            setStatus('error');
+          }
         })
         .finally(() => {
           // If the component is mounted, then set the store with the updated data (causes a rerender)
@@ -215,16 +226,26 @@ export const useConsoleActionSubmitter = <
     actionRequestSent,
     currentActionState,
     isMounted,
+    setStatus,
     setStore,
   ]);
+
+  // If we have an Action ID, but the overall status is `creating`, then set the status to pending.
+  // This status inconsistency can happen if the user closes the console while the action request is
+  // still being created
+  useEffect(() => {
+    if (actionId && isCreating) {
+      setStatus('pending');
+    }
+  }, [actionId, isCreating, setStatus]);
 
   // If an error was returned while attempting to create the action request,
   // then set command status to error
   useEffect(() => {
-    if (actionRequestError && isPending) {
+    if (actionRequestError && (isPending || isCreating)) {
       setStatus('error');
     }
-  }, [actionRequestError, isPending, setStatus]);
+  }, [actionRequestError, isPending, isCreating, setStatus]);
 
   // If an error was return by the Action Details API, then store it and set the status to error
   useEffect(() => {
@@ -263,6 +284,19 @@ export const useConsoleActionSubmitter = <
 
   // Calculate the action's UI result based on the different API responses
   const result = useMemo(() => {
+    // If we don't yet have an Action ID and no API error, then show message indicating that
+    // action request is still being created
+    if (isCreating) {
+      return (
+        <ResultComponent showAs="pending" data-test-subj={getTestId('creating')}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpointResponder.creatingActionMessage"
+            defaultMessage="Creating action (do not close the console until this step is completed)..."
+          />
+        </ResultComponent>
+      );
+    }
+
     if (isPending) {
       return (
         <ResultComponent showAs="pending" data-test-subj={getTestId('pending')}>
@@ -321,6 +355,7 @@ export const useConsoleActionSubmitter = <
     return <></>;
   }, [
     isPending,
+    isCreating,
     actionRequestError,
     actionDetailsError,
     actionDetails,

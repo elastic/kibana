@@ -9,6 +9,7 @@ export type {
   AttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
+  ImageAttachmentRepresentation,
   AttachmentValidationResult,
   AgentFormattedAttachment,
   AttachmentFormatContext,
@@ -28,3 +29,12 @@ export type {
   ResolvedAttachmentRef,
 } from './attachment_state_manager';
 export { createAttachmentStateManager } from './attachment_state_manager';
+export type {
+  AttachmentPublicClient,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+} from './public_client';

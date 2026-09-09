@@ -7,41 +7,70 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiBreadcrumb, EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiBetaBadge,
-  EuiButtonEmpty,
+  EuiBreadcrumbs,
   EuiFlexGroup,
   EuiFlexItem,
-  euiFontSize,
-  EuiHighlight,
-  EuiIcon,
   EuiSelectable,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { componentStyles } from './actions_menu.styles';
+import { getOptionActionId, renderActionOption } from './actions_menu_option';
+import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
-import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
-import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
+import {
+  getActionMatchRank,
+  isActionSearchMatch,
+  STEPS_PREFIX,
+  useDisplayOptions,
+} from '../lib/use_display_options';
 import {
   type ActionOptionData,
   type EditorCommand,
   getMenuItemData,
   isActionConnectorGroup,
-  isActionConnectorOption,
   isActionGroup,
-  isActionOption,
   type JumpToStepEntry,
 } from '../types';
 
 export type { EditorCommand, JumpToStepEntry };
+
+const SEARCH_INPUT_NAME = 'actions-menu-search';
+const SELECTABLE_ID = 'actions-menu-selectable';
+const SEARCH_VIRTUALIZATION_THRESHOLD = 30;
+
+type PendingListFocus = 'first' | 'none' | { optionId: string };
+
+function getActionableDisplayOptions<T extends EuiSelectableOption>(options: T[]): T[] {
+  return options.filter((option) => !option.isGroupLabel && !option.disabled);
+}
+
+function isCategoryOption(option: EuiSelectableOption): boolean {
+  const itemData = getMenuItemData(option);
+  const action =
+    itemData?.kind === 'action' ? itemData.action : (option as unknown as ActionOptionData);
+  return isActionGroup(action) || isActionConnectorGroup(action);
+}
+
+function getOptionsAtPath(rootOptions: ActionOptionData[], path: string[]): ActionOptionData[] {
+  let options = rootOptions;
+  for (const id of path) {
+    const option = options.find((item) => item.id === id);
+    if (!option || !isActionGroup(option)) {
+      return [];
+    }
+    options = option.options;
+  }
+  return options;
+}
 
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
@@ -49,6 +78,25 @@ export interface ActionsMenuProps {
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
+}
+
+function resolvePathLabels(
+  path: string[],
+  rootOptions: ActionOptionData[]
+): Array<{ id: string; label: string }> {
+  const labels: Array<{ id: string; label: string }> = [];
+  let current = rootOptions;
+  for (const id of path) {
+    const found = current.find((o) => o.id === id);
+    if (!found) break;
+    labels.push({ id, label: found.label });
+    if (isActionGroup(found) || isActionConnectorGroup(found)) {
+      current = found.options;
+    } else {
+      break;
+    }
+  }
+  return labels;
 }
 
 export function ActionsMenu({
@@ -62,144 +110,225 @@ export function ActionsMenu({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
   const { workflowsExtensions } = useKibana().services;
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
+  const pendingListFocusRef = useRef<PendingListFocus | null>(null);
+  const keyboardIndexRef = useRef<number | null>(null);
   const defaultOptions = useMemo(
     () => getActionOptions(euiTheme, workflowsExtensions),
     [euiTheme, workflowsExtensions]
   );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
-  const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
+  const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
+  const [pinnedOption, setPinnedOption] = useState<ActionOptionData | null>(null);
+  const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
+  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
+  keyboardIndexRef.current = keyboardIndex;
+
+  const focusSearch = useCallback(() => {
+    searchInputRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  const clearKeyboardSelection = useCallback(() => {
+    setKeyboardIndex(null);
+    setHoveredOption(null);
+    setHoveredJumpEntry(null);
+  }, []);
 
   useEffect(() => {
-    if (currentPath.length === 0) {
-      setOptions(defaultOptions);
-    } else {
-      let nextOptions = defaultOptions;
-      for (const id of currentPath) {
-        const next = nextOptions.find((o) => o.id === id);
-        if (next && isActionGroup(next)) {
-          nextOptions = next.options;
-        } else {
-          nextOptions = [];
-        }
-      }
-      setOptions(nextOptions);
+    focusSearch();
+  }, [focusSearch]);
+
+  const keepSearchFocused = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`)) {
+      return;
     }
-  }, [defaultOptions, currentPath]);
+    e.preventDefault();
+  }, []);
+
+  const options = useMemo(() => {
+    if (!searchTerm.startsWith(STEPS_PREFIX)) {
+      return getOptionsAtPath(defaultOptions, currentPath);
+    }
+    const query = searchTerm.slice(STEPS_PREFIX.length).trim().toLowerCase();
+    if (!query) {
+      return flatOptions;
+    }
+    return flatOptions
+      .filter((option) => isActionSearchMatch(option, query))
+      .sort((a, b) => {
+        const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
+        return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
+      });
+  }, [currentPath, defaultOptions, flatOptions, searchTerm]);
 
   const displayOptions = useDisplayOptions({
     options,
+    categoryTree: defaultOptions,
     searchTerm,
     commands,
     jumpToStepEntries,
     currentPath,
   });
 
-  const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
-    const itemData = getMenuItemData(rawOption);
-    const effectiveSearch = searchValue.startsWith(STEPS_PREFIX)
-      ? searchValue.slice(STEPS_PREFIX.length).trim()
-      : searchValue.startsWith('#')
-      ? searchValue.slice(1).trim()
-      : searchValue;
+  const actionableDisplayOptions = useMemo(
+    () => getActionableDisplayOptions(displayOptions),
+    [displayOptions]
+  );
+  const actionableDisplayOptionsRef = useRef(actionableDisplayOptions);
+  actionableDisplayOptionsRef.current = actionableDisplayOptions;
 
-    if (itemData?.kind === 'command' || itemData?.kind === 'jump') {
-      return (
-        <EuiText size="s">
-          <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
-        </EuiText>
-      );
+  const currentPathRef = useRef(currentPath);
+  currentPathRef.current = currentPath;
+
+  const syncPreviewFromSelectableOption = useCallback((option: EuiSelectableOption) => {
+    const itemData = getMenuItemData(option);
+    if (itemData?.kind === 'jump') {
+      setHoveredJumpEntry(itemData.entry);
+      setHoveredOption(null);
+      return;
     }
-
-    if (itemData?.kind === 'nav') {
-      return (
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="xs"
-          css={styles.viewAllLink}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="primary">
-              {rawOption.label}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowRight" size="s" color="primary" aria-hidden={true} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+    if (itemData?.kind === 'command' || itemData?.kind === 'nav') {
+      return;
     }
-
     const action =
-      itemData?.kind === 'action' ? itemData.action : (rawOption as unknown as ActionOptionData);
-    const shouldUseGroupStyle = isActionGroup(action);
-    return (
-      <EuiFlexGroup alignItems="center" css={styles.actionOption}>
-        <EuiFlexItem
-          grow={false}
-          css={[
-            styles.iconOuter,
-            shouldUseGroupStyle ? styles.groupIconOuter : styles.actionIconOuter,
-          ]}
-        >
-          <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
-            {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
-              <StepIcon stepType={action.connectorType} executionStatus={undefined} />
-            ) : isActionGroup(action) || isActionOption(action) ? (
-              <EuiIcon
-                type={action.iconType}
-                size="m"
-                color={action.iconColor}
-                aria-hidden={true}
-              />
-            ) : null}
-          </span>
-        </EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiTitle size="xxxs" css={styles.actionTitle}>
-                  <h6>
-                    <EuiHighlight search={effectiveSearch}>{action.label}</EuiHighlight>
-                  </h6>
-                </EuiTitle>
-                {action.stability === 'tech_preview' && (
-                  <EuiBetaBadge
-                    iconType="flask"
-                    label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
-                      defaultMessage: 'Tech preview',
-                    })}
-                    size="s"
-                    css={styles.techPreviewBadge}
-                  />
-                )}
-                {action.stability === 'beta' && (
-                  <EuiBetaBadge
-                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
-                      defaultMessage: 'Beta',
-                    })}
-                    size="s"
-                    css={styles.techPreviewBadge}
-                  />
-                )}
-              </EuiFlexGroup>
-              <EuiText color="subdued" size="xs">
-                {action.instancesLabel}
-              </EuiText>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-              <EuiHighlight search={effectiveSearch}>{action.description || ''}</EuiHighlight>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    );
-  };
+      itemData?.kind === 'action' ? itemData.action : (option as unknown as ActionOptionData);
+    setHoveredOption(action);
+    setHoveredJumpEntry(null);
+  }, []);
+
+  const setKeyboardIndexAndPreview = useCallback(
+    (index: number | null) => {
+      setKeyboardIndex(index);
+      if (index == null) {
+        return;
+      }
+      const option = actionableDisplayOptionsRef.current[index];
+      if (option) {
+        syncPreviewFromSelectableOption(option);
+      }
+    },
+    [syncPreviewFromSelectableOption]
+  );
+
+  // Apply pending keyboard focus after category enter/leave re-renders the list.
+  useEffect(() => {
+    const pending = pendingListFocusRef.current;
+    if (pending == null || pending === 'none') {
+      if (pending === 'none') {
+        pendingListFocusRef.current = null;
+      }
+      return;
+    }
+    pendingListFocusRef.current = null;
+
+    const actionable = getActionableDisplayOptions(displayOptions);
+    if (pending === 'first') {
+      if (actionable.length === 0) {
+        setKeyboardIndex(null);
+        return;
+      }
+      setKeyboardIndexAndPreview(0);
+      return;
+    }
+
+    const idx = actionable.findIndex((option) => getOptionActionId(option) === pending.optionId);
+    setKeyboardIndexAndPreview(idx >= 0 ? idx : null);
+  }, [displayOptions, currentPath, setKeyboardIndexAndPreview]);
+
+  const isSearching =
+    searchTerm.trim().length > 0 &&
+    !searchTerm.trimStart().startsWith('#') &&
+    !searchTerm.startsWith(STEPS_PREFIX);
+
+  const hasActionableItems = displayOptions.some((o) => !o.isGroupLabel);
+  const showNoResults = isSearching && !hasActionableItems;
+
+  const previewOption = hoveredOption ?? pinnedOption;
+
+  const handleListMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const el = e.target as HTMLElement;
+      const actionableOptions = actionableDisplayOptionsRef.current;
+
+      const jumpTarget = el.closest('[data-jump-id]');
+      if (jumpTarget) {
+        const jumpId = jumpTarget.getAttribute('data-jump-id');
+        const index = actionableOptions.findIndex((option) => {
+          const itemData = getMenuItemData(option);
+          return itemData?.kind === 'jump' && itemData.entry.id === jumpId;
+        });
+        setKeyboardIndex(index >= 0 ? index : null);
+        const entry = jumpToStepEntries?.find((j) => j.id === jumpId);
+        if (entry && entry.id !== hoveredJumpEntry?.id) {
+          setHoveredJumpEntry(entry);
+          setHoveredOption(null);
+        }
+        return;
+      }
+
+      const commandTarget = el.closest('[data-command-id]');
+      if (commandTarget) {
+        const commandId = commandTarget.getAttribute('data-command-id');
+        const index = actionableOptions.findIndex((option) => {
+          const itemData = getMenuItemData(option);
+          return itemData?.kind === 'command' && itemData.command.id === commandId;
+        });
+        setKeyboardIndex(index >= 0 ? index : null);
+        return;
+      }
+
+      const optionTarget = el.closest('[data-option-id]');
+      if (!optionTarget) return;
+      const optionId = optionTarget.getAttribute('data-option-id');
+      if (!optionId) return;
+      const index = actionableOptions.findIndex((option) => getOptionActionId(option) === optionId);
+      setKeyboardIndex(index >= 0 ? index : null);
+      const found = flatOptions.find((o) => o.id === optionId);
+      if (found && found.id !== hoveredOption?.id) {
+        setHoveredOption(found);
+        setHoveredJumpEntry(null);
+      }
+    },
+    [flatOptions, hoveredOption, hoveredJumpEntry, jumpToStepEntries]
+  );
+
+  const navigateToPath = useCallback(
+    (nextPath: string[], pendingFocus: PendingListFocus = 'none') => {
+      pendingListFocusRef.current = pendingFocus;
+      setCurrentPath(nextPath);
+      setPinnedOption(null);
+      setHoveredOption(null);
+      setHoveredJumpEntry(null);
+      setKeyboardIndex(null);
+    },
+    []
+  );
+
+  const handleStepOrGroupSelected = useCallback(
+    (action: ActionOptionData) => {
+      if (isActionGroup(action)) {
+        const nextPath = action.pathIds ?? [...currentPath, action.id];
+        setSearchTerm('');
+        navigateToPath([...nextPath], 'none');
+      } else {
+        setPinnedOption(null);
+        onActionSelected(action);
+      }
+    },
+    [currentPath, navigateToPath, onActionSelected]
+  );
+
+  const handleAddStep = useCallback(
+    (action: ActionOptionData) => {
+      setPinnedOption(null);
+      onActionSelected(action);
+    },
+    [onActionSelected]
+  );
 
   const handleChange = (
     _updatedOptions: EuiSelectableOption[],
@@ -230,113 +359,234 @@ export function ActionsMenu({
       itemData?.kind === 'action'
         ? itemData.action
         : (selectedOption as unknown as ActionOptionData);
-    if (isActionGroup(action)) {
-      const nextPath = action.pathIds ?? [...currentPath, action.id];
-      setCurrentPath([...nextPath]);
-      setSearchTerm('');
-      setOptions(action.options);
-    } else {
-      onActionSelected(action);
-    }
+    handleStepOrGroupSelected(action);
   };
 
-  const handleBack = () => {
-    const nextPath = currentPath.slice(0, -1);
-    let nextOptions: ActionOptionData[] = defaultOptions;
-    for (const id of nextPath) {
-      const nextOption = nextOptions.find((option) => option.id === id);
-      if (nextOption && isActionGroup(nextOption)) {
-        nextOptions = nextOption.options;
-      } else {
-        nextOptions = [];
-      }
-    }
-    setCurrentPath(nextPath);
-    setOptions(nextOptions);
-  };
+  const handleChangeRef = useRef(handleChange);
+  handleChangeRef.current = handleChange;
 
-  /** Lower rank = higher priority in search results (see getActionMatchRank). */
-  const MAX_ACTION_MATCH_RANK = 5;
+  const enterCategoryFromKeyboard = useCallback(() => {
+    const index = keyboardIndexRef.current;
+    if (index == null) return;
+    const option = actionableDisplayOptionsRef.current[index];
+    if (!option || !isCategoryOption(option)) return;
+    const itemData = getMenuItemData(option);
+    const action =
+      itemData?.kind === 'action' ? itemData.action : (option as unknown as ActionOptionData);
+    if (!isActionGroup(action)) return;
+    const nextPath = action.pathIds ?? [...currentPathRef.current, action.id];
+    setSearchTerm('');
+    navigateToPath([...nextPath], 'first');
+  }, [navigateToPath]);
 
-  const getActionMatchRank = (option: ActionOptionData, normalizedTerm: string): number => {
-    if (!normalizedTerm) {
-      return 0;
-    }
-    const id = option.id.toLowerCase();
-    const label = option.label.toLowerCase();
-    const description = option.description?.toLowerCase() ?? '';
+  const leaveCategoryFromKeyboard = useCallback(() => {
+    const path = currentPathRef.current;
+    if (path.length === 0) return;
+    const exitedId = path[path.length - 1];
+    navigateToPath(path.slice(0, -1), { optionId: exitedId });
+  }, [navigateToPath]);
 
-    if (id === normalizedTerm) {
-      return 0;
+  const activateKeyboardOption = useCallback(() => {
+    const index = keyboardIndexRef.current;
+    if (index == null) return;
+    const option = actionableDisplayOptionsRef.current[index];
+    if (!option) return;
+    if (isCategoryOption(option)) {
+      enterCategoryFromKeyboard();
+      return;
     }
-    if (label === normalizedTerm) {
-      return 1;
-    }
-    if (description === normalizedTerm) {
-      return 2;
-    }
-    if (id.includes(normalizedTerm)) {
-      return 3;
-    }
-    if (label.includes(normalizedTerm)) {
-      return 4;
-    }
-    if (description.includes(normalizedTerm)) {
-      return 5;
-    }
-    return MAX_ACTION_MATCH_RANK + 1;
-  };
+    handleChangeRef.current([], {} as React.BaseSyntheticEvent, option);
+  }, [enterCategoryFromKeyboard]);
 
-  const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
-    getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
-
-  // Filtering is handled by handleSearchChange + useDisplayOptions;
-  // override EuiSelectable's built-in matcher so it doesn't double-filter.
   const optionMatcher = () => true;
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
-
-    if (searchValue.startsWith(STEPS_PREFIX)) {
-      const query = searchValue.slice(STEPS_PREFIX.length).trim().toLowerCase();
-      if (query.length === 0) {
-        setOptions(flatOptions);
-      } else {
-        const matches = flatOptions
-          .filter((option) => isActionSearchMatch(option, query))
-          .sort((a, b) => {
-            const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
-            return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
-          });
-        setOptions(matches);
-      }
-      return;
-    }
-
-    if (searchValue.trimStart().startsWith('#')) {
-      return;
-    }
+    setPinnedOption(null);
+    setHoveredOption(null);
+    setHoveredJumpEntry(null);
+    setKeyboardIndex(null);
 
     if (searchValue.length > 0) {
-      const term = searchValue.trim().toLowerCase();
-      if (term.length === 0) {
-        setOptions(flatOptions);
-        return;
-      }
-      const matches = flatOptions
-        .filter((option) => isActionSearchMatch(option, term))
-        .sort((a, b) => {
-          const rankDiff = getActionMatchRank(a, term) - getActionMatchRank(b, term);
-          return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
-        });
-      setOptions(matches);
-    } else {
-      setOptions(defaultOptions);
+      setCurrentPath([]);
     }
   };
 
+  const handleSearchChangeRef = useRef(handleSearchChange);
+  handleSearchChangeRef.current = handleSearchChange;
+
+  const setKeyboardIndexAndPreviewRef = useRef(setKeyboardIndexAndPreview);
+  setKeyboardIndexAndPreviewRef.current = setKeyboardIndexAndPreview;
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const input = searchInputRef.current;
+      if (!input || !document.body.contains(input)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const menuEl = menuContainerRef.current;
+      if (menuEl && !menuEl.contains(document.activeElement) && document.activeElement !== input) {
+        if (!menuEl.contains(e.target as Node)) return;
+      }
+      const eventTarget = e.target as HTMLElement;
+      if (eventTarget !== input && eventTarget.closest('button, a, [role="tab"]')) {
+        return;
+      }
+
+      const actionable = actionableDisplayOptionsRef.current;
+      const isSearchFocused = document.activeElement === input;
+      const keyboardIdx = keyboardIndexRef.current;
+      const inListNavMode = keyboardIdx != null;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (actionable.length === 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!inListNavMode) {
+          setKeyboardIndexAndPreviewRef.current(e.key === 'ArrowDown' ? 0 : actionable.length - 1);
+          return;
+        }
+
+        const delta = e.key === 'ArrowDown' ? 1 : -1;
+        const next = (keyboardIdx + delta + actionable.length) % actionable.length;
+        setKeyboardIndexAndPreviewRef.current(next);
+        return;
+      }
+
+      if (e.key === 'ArrowRight') {
+        if (!inListNavMode) return;
+        e.preventDefault();
+        e.stopPropagation();
+        enterCategoryFromKeyboard();
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        if (!inListNavMode) return;
+        e.preventDefault();
+        e.stopPropagation();
+        leaveCategoryFromKeyboard();
+        return;
+      }
+
+      if (e.key === 'Enter' && inListNavMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        activateKeyboardOption();
+        return;
+      }
+
+      const isPrintable = e.key.length === 1;
+      if (isSearchFocused) {
+        if (inListNavMode && (isPrintable || e.key === 'Backspace' || e.key === 'Delete')) {
+          clearKeyboardSelection();
+        }
+        return;
+      }
+
+      if (!isPrintable && e.key !== 'Backspace' && e.key !== 'Delete') return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      clearKeyboardSelection();
+      focusSearch();
+
+      if (isPrintable) {
+        handleSearchChangeRef.current(`${input.value}${e.key}`);
+      } else if (e.key === 'Backspace') {
+        handleSearchChangeRef.current(input.value.slice(0, -1));
+      } else if (e.key === 'Delete') {
+        handleSearchChangeRef.current('');
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [
+    activateKeyboardOption,
+    clearKeyboardSelection,
+    enterCategoryFromKeyboard,
+    focusSearch,
+    leaveCategoryFromKeyboard,
+  ]);
+
+  const pathLabels = useMemo(
+    () => resolvePathLabels(currentPath, defaultOptions),
+    [currentPath, defaultOptions]
+  );
+
+  const breadcrumbs: EuiBreadcrumb[] = useMemo(() => {
+    const allActionsLabel = i18n.translate('workflows.actionsMenu.breadcrumb.allActions', {
+      defaultMessage: 'All actions',
+    });
+
+    if (isSearching || searchTerm.startsWith(STEPS_PREFIX)) {
+      return [
+        {
+          text: allActionsLabel,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            setSearchTerm('');
+            navigateToPath([]);
+          },
+        },
+        {
+          text: i18n.translate('workflows.actionsMenu.breadcrumb.searchResults', {
+            defaultMessage: 'Search results',
+          }),
+        },
+      ];
+    }
+
+    if (currentPath.length === 0) return [];
+
+    const crumbs: EuiBreadcrumb[] = [
+      {
+        text: allActionsLabel,
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          navigateToPath([]);
+        },
+      },
+    ];
+
+    pathLabels.forEach((item, index) => {
+      const isLast = index === pathLabels.length - 1;
+      const pathToHere = currentPath.slice(0, index + 1);
+      crumbs.push({
+        text: item.label,
+        ...(isLast
+          ? {}
+          : {
+              onClick: (e: React.MouseEvent) => {
+                e.preventDefault();
+                navigateToPath(pathToHere);
+              },
+            }),
+      });
+    });
+
+    return crumbs;
+  }, [isSearching, searchTerm, currentPath, pathLabels, navigateToPath]);
+
+  const showBreadcrumbs = breadcrumbs.length > 0;
+  const activeOption = keyboardIndex == null ? undefined : actionableDisplayOptions[keyboardIndex];
+  const activeOptionIndex = activeOption ? displayOptions.indexOf(activeOption) : undefined;
+  const activeOptionId =
+    activeOptionIndex === undefined
+      ? undefined
+      : `${SELECTABLE_ID}_listbox_option-${activeOptionIndex}`;
+  useEffect(() => {
+    if (!activeOptionId) return;
+    document.getElementById(activeOptionId)?.scrollIntoView({ block: 'nearest' });
+  }, [activeOptionId]);
+  const isSearchVirtualized =
+    searchTerm.length > 0 && displayOptions.length > SEARCH_VIRTUALIZATION_THRESHOLD;
+
   return (
     <EuiSelectable
+      id={SELECTABLE_ID}
       aria-label={i18n.translate('workflows.actionsMenu.ariaLabel', {
         defaultMessage: 'Actions menu',
       })}
@@ -346,156 +596,135 @@ export function ActionsMenu({
       optionMatcher={optionMatcher}
       searchProps={{
         id: 'actions-menu-search',
-        name: 'actions-menu-search',
+        name: SEARCH_INPUT_NAME,
         placeholder: i18n.translate('workflows.actionsMenu.searchPlaceholder', {
           defaultMessage: 'Search step, command or # to go to a step',
         }),
         value: searchTerm,
         onChange: handleSearchChange,
+        compressed: true,
+        isClearable: true,
+        fullWidth: true,
+        inputRef: (node: HTMLInputElement | null) => {
+          searchInputRef.current = node;
+        },
+        'aria-activedescendant': activeOptionId,
+        onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+          const next = e.relatedTarget as Node | null;
+          const menuEl = menuContainerRef.current;
+          // Keep list keyboard nav possible; only pull focus back if it left the menu.
+          if (menuEl && next && menuEl.contains(next)) {
+            return;
+          }
+          requestAnimationFrame(() => {
+            if (searchInputRef.current && document.body.contains(searchInputRef.current)) {
+              const active = document.activeElement;
+              if (menuContainerRef.current?.contains(active)) {
+                return;
+              }
+              focusSearch();
+            }
+          });
+        },
       }}
       listProps={{
         showIcons: false,
-        // Normal mode mixes tall action rows (~76px) with compact command/jump
-        // rows (~36px) and has at most ~15 items, so virtualization is off.
-        // "Steps:" mode shows the full step catalog (uniform action rows) and
-        // benefits from virtualization to avoid DOM bloat.
-        isVirtualized: searchTerm.startsWith(STEPS_PREFIX),
-        ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 76 }),
+        activeOptionIndex,
+        paddingSize: 'none',
+        onFocusBadge: false,
+        isVirtualized: isSearchVirtualized,
+        ...(isSearchVirtualized && { rowHeight: 64 }),
       }}
-      renderOption={renderActionOption}
+      renderOption={(rawOption, searchValue) =>
+        renderActionOption({
+          rawOption,
+          searchValue,
+          searchTerm,
+          keyboardIndex,
+          actionableDisplayOptions,
+          styles,
+          euiTheme,
+        })
+      }
       css={styles.selectable}
       singleSelection
+      height="full"
     >
       {(list, search) => (
-        <>
-          <EuiFlexGroup direction="column" gutterSize="s" css={styles.header}>
-            <EuiFlexItem css={styles.title}>
-              <EuiTitle size="xxs">
-                {currentPath.length === 0 ? (
-                  <h3>
-                    <FormattedMessage
-                      id="workflows.actionsMenu.title"
-                      defaultMessage="Actions menu"
-                    />
-                  </h3>
-                ) : (
-                  <EuiButtonEmpty
-                    onClick={handleBack}
-                    iconType="chevronSingleLeft"
-                    size="xs"
-                    aria-label={i18n.translate('workflows.actionsMenu.back', {
-                      defaultMessage: 'Back',
-                    })}
-                  >
-                    <FormattedMessage id="workflows.actionsMenu.back" defaultMessage="Back" />
-                  </EuiButtonEmpty>
-                )}
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>{search}</EuiFlexItem>
-          </EuiFlexGroup>
+        <div ref={menuContainerRef} css={styles.container}>
+          <div css={styles.header}>
+            <EuiTitle size="xxs">
+              <h3 css={styles.title}>
+                <FormattedMessage id="workflows.actionsMenu.title" defaultMessage="Actions menu" />
+              </h3>
+            </EuiTitle>
+            <div>{search}</div>
+          </div>
 
-          {list}
-        </>
+          <EuiFlexGroup gutterSize="none" css={styles.body}>
+            <EuiFlexItem
+              css={styles.leftColumn}
+              onMouseDown={keepSearchFocused}
+              onMouseMove={handleListMouseMove}
+            >
+              {showBreadcrumbs && (
+                <div css={styles.breadcrumbRow}>
+                  <EuiBreadcrumbs
+                    breadcrumbs={breadcrumbs}
+                    truncate={false}
+                    max={4}
+                    aria-label={i18n.translate('workflows.actionsMenu.breadcrumb.ariaLabel', {
+                      defaultMessage: 'Actions menu navigation',
+                    })}
+                  />
+                </div>
+              )}
+              {showNoResults ? (
+                <div css={styles.noResults}>
+                  <EuiText size="s" color="subdued" textAlign="center">
+                    <FormattedMessage
+                      id="workflows.actionsMenu.noResults"
+                      defaultMessage="{query} doesn't match any options."
+                      values={{ query: searchTerm.trim() }}
+                    />
+                  </EuiText>
+                </div>
+              ) : (
+                <div css={styles.listViewport}>
+                  <div css={styles.listPane}>{list}</div>
+                </div>
+              )}
+            </EuiFlexItem>
+
+            <EuiFlexItem css={styles.rightColumn} data-test-subj="actionsMenuPreview">
+              <ActionsMenuPreviewPanel
+                hoveredOption={previewOption}
+                hoveredJumpEntry={hoveredJumpEntry}
+                onStepSelected={handleStepOrGroupSelected}
+                onAddStep={handleAddStep}
+                onPinPreview={(action, parentSection) => {
+                  if (
+                    parentSection &&
+                    (isActionGroup(parentSection) || isActionConnectorGroup(parentSection))
+                  ) {
+                    const nextPath = parentSection.pathIds ?? [...currentPath, parentSection.id];
+                    const alreadyThere =
+                      nextPath.length === currentPath.length &&
+                      nextPath.every((id, i) => id === currentPath[i]);
+                    if (!alreadyThere) {
+                      setSearchTerm('');
+                      navigateToPath([...nextPath]);
+                    }
+                  }
+                  setPinnedOption(action);
+                  setHoveredOption(action);
+                  setHoveredJumpEntry(null);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       )}
     </EuiSelectable>
   );
 }
-
-const componentStyles = {
-  selectable: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      '& .euiSelectableListItem': {
-        paddingBlock: euiTheme.size.m,
-        paddingInline: '16px',
-      },
-      '& .euiSelectableListItem.compactOption': {
-        paddingBlock: euiTheme.size.s,
-      },
-      // EUI 116 routes EuiSelectableListItem through EuiListItemLayout, which
-      // adds gap on __content and vertical padding on __text and drops the
-      // between-row border. renderActionOption owns its own spacing, so zero
-      // the new gap/padding out and re-add the row border to match the design.
-      '& .euiSelectableListItem__content': {
-        gap: 0,
-      },
-      '& .euiSelectableListItem__text': {
-        paddingBlock: 0,
-      },
-      '& .euiSelectableListItem:not(:last-of-type)': {
-        borderBottom: euiTheme.border.thin,
-      },
-      '& .euiSelectableList': {
-        maxHeight: '420px',
-        overflowY: 'auto',
-      },
-      '& .euiSelectableList__groupLabel': {
-        borderBottom: euiTheme.border.thin,
-        paddingInline: '16px',
-      },
-      '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
-        marginTop: '24px',
-      },
-    }),
-  title: css({
-    display: 'flex',
-    alignItems: 'flex-start',
-    minHeight: '24px',
-  }),
-  header: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      paddingBlock: euiTheme.size.m,
-      paddingInline: '16px',
-    }),
-  actionOption: css({
-    gap: '12px',
-  }),
-  viewAllLink: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      cursor: 'pointer',
-      width: '100%',
-      color: euiTheme.colors.primaryText,
-      '& .euiIcon': {
-        color: euiTheme.colors.primaryText,
-      },
-    }),
-  iconOuter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '40px',
-      height: '40px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      borderRadius: euiTheme.border.radius.medium,
-    }),
-  groupIconOuter: ({ euiTheme }: UseEuiTheme) => css({}),
-  actionIconOuter: ({ euiTheme }: UseEuiTheme) => css({}),
-  groupIconInner: ({ euiTheme }: UseEuiTheme) => css({}),
-  actionIconInner: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '24px',
-      height: '24px',
-      borderRadius: '100%',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }),
-  actionTitle: (euiThemeContext: UseEuiTheme) =>
-    css({
-      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
-      '&::first-letter': {
-        textTransform: 'capitalize',
-      },
-    }),
-  actionDescription: (euiThemeContext: UseEuiTheme) =>
-    css({
-      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
-    }),
-  techPreviewBadge: css({
-    marginBottom: '-4px',
-  }),
-};

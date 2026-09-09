@@ -38,10 +38,11 @@ describe('episodes_list_url_state', () => {
   describe('readEpisodesListAppStateFromUrlStorage', () => {
     it('reads filter + time fields as expected from _a.episodesList', async () => {
       const storage = await createKbnTestUrlStorage({
-        status: 'active',
+        status: ['active', 'pending'],
         ruleId: 'r1',
         queryString: '  host  ',
         tags: ['a', 'b'],
+        severity: ['high', '__no_severity__'],
         assigneeUid: 'u1',
         extra: 'ignored',
         timeFrom: 'now-7d',
@@ -49,10 +50,11 @@ describe('episodes_list_url_state', () => {
       });
       expect(readEpisodesListAppStateFromUrlStorage(storage)).toEqual({
         filterState: {
-          status: 'active',
+          status: ['active', 'pending'],
           ruleId: 'r1',
           queryString: 'host',
           tags: ['a', 'b'],
+          severity: ['high', '__no_severity__'],
           assigneeUid: 'u1',
         },
         timeRange: { from: 'now-7d', to: 'now' },
@@ -68,7 +70,7 @@ describe('episodes_list_url_state', () => {
         assigneeUid: '',
       });
       expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toEqual({
-        status: 'active',
+        status: ['active'],
       });
     });
 
@@ -79,11 +81,40 @@ describe('episodes_list_url_state', () => {
       expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.status).toBeUndefined();
     });
 
+    it('wraps a legacy single-string status (pre multi-select bookmarks) in an array', async () => {
+      const storage = await createKbnTestUrlStorage({
+        status: 'recovering',
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.status).toEqual([
+        'recovering',
+      ]);
+    });
+
     it('defaults status to active when _a is missing', async () => {
       const storage = await createKbnTestUrlStorage();
       expect(readEpisodesListAppStateFromUrlStorage(storage)).toEqual({
-        filterState: { status: 'active' },
+        filterState: { status: ['active'] },
       });
+    });
+
+    it('reads groupHash and groupingValues from the URL blob', async () => {
+      const storage = await createKbnTestUrlStorage({
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', region: null },
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toMatchObject({
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', region: null },
+      });
+    });
+
+    it('ignores groupingValues when it is not a plain object', async () => {
+      const storage = await createKbnTestUrlStorage({
+        groupingValues: 'not-an-object',
+      });
+      expect(
+        readEpisodesListAppStateFromUrlStorage(storage).filterState.groupingValues
+      ).toBeUndefined();
     });
   });
 
@@ -95,11 +126,31 @@ describe('episodes_list_url_state', () => {
 
       await writeEpisodesListAppStateToUrlStorage(
         storage,
-        { status: 'active' },
+        { status: ['active'] },
         DEFAULT_EPISODES_LIST_TIME_RANGE
       );
 
       expect(storage.get('_a')).toEqual({});
+    });
+
+    it('writes a non-default status array as-is', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        { status: ['active', 'pending'] },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [EPISODES_LIST_APP_STATE_KEY]: {
+          status: ['active', 'pending'],
+        },
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.status).toEqual([
+        'active',
+        'pending',
+      ]);
     });
 
     it('writes episodesList when there are non-default values', async () => {
@@ -117,6 +168,50 @@ describe('episodes_list_url_state', () => {
           queryString: 'host',
           timeFrom: 'now-7d',
           timeTo: 'now',
+        },
+      });
+    });
+
+    it('round-trips severity', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        {
+          status: ['active'],
+          severity: ['high', '__no_severity__'],
+        },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [EPISODES_LIST_APP_STATE_KEY]: {
+          severity: ['high', '__no_severity__'],
+        },
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.severity).toEqual([
+        'high',
+        '__no_severity__',
+      ]);
+    });
+
+    it('round-trips groupHash and groupingValues', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        {
+          status: ['active'],
+          groupHash: 'xyz',
+          groupingValues: { 'host.name': 'web-01', region: null },
+        },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [EPISODES_LIST_APP_STATE_KEY]: {
+          groupHash: 'xyz',
+          groupingValues: { 'host.name': 'web-01', region: null },
         },
       });
     });

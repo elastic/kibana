@@ -22,7 +22,7 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
 
     it('clicking on newsfeed icon should open you empty newsfeed', async () => {
       await globalNav.clickNewsfeed();
-      const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
+      const isOpen = await PageObjects.newsfeed.isNewsfeedPanelOpen();
       expect(isOpen).to.be(true);
 
       const hasNewsfeedEmptyPanel = await PageObjects.newsfeed.openNewsfeedEmptyPanel();
@@ -39,9 +39,9 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
       expect(objects).to.eql([]);
     });
 
-    it('clicking on newsfeed icon should close opened newsfeed', async () => {
-      await globalNav.clickNewsfeed();
-      const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
+    it('closes the opened newsfeed', async () => {
+      await PageObjects.newsfeed.closeNewsfeedPanel();
+      const isOpen = await PageObjects.newsfeed.isNewsfeedPanelOpen();
       expect(isOpen).to.be(false);
     });
   });

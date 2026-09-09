@@ -48,7 +48,6 @@ describe('AttackDetailsContainer', () => {
   const defaultProps = {
     attack: mockAttack,
     showAnonymized: false,
-    groupingFilters: [],
     defaultFilters: [],
     isTableLoading: false,
   };

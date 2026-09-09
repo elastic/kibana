@@ -7,180 +7,77 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { GlobalSearchConfig } from './global_search';
-
-/** @public */
-export type AppHeaderBack = string | AppHeaderBackTarget;
-
-/** @public */
-export interface AppHeaderBackTarget {
-  href: string;
-  /** Click handler, called alongside href navigation when provided. */
-  onClick?: MouseEventHandler;
-  /** Destination name for accessibility (e.g. "Back to {label}"). */
-  label?: string;
-}
-
-/** @public */
-export interface AppHeaderBadge {
-  label: string;
-  /** EUI badge color. `filled` is intentionally excluded. */
-  color?: 'hollow' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
-  tooltip?: string;
-  onClick?: () => void;
-  onClickAriaLabel?: string;
-  'data-test-subj'?: string;
-  /** @deprecated Used for compatibility with existing breadcrumb badge custom renderers. */
-  renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
-  /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
-  items?: AppHeaderBadgeItem[];
-  /** Width of the popover menu panel in pixels. */
-  popoverWidth?: number;
-}
-
-/** @public */
-export interface AppHeaderBadgeItem {
-  name: string;
-  icon?: string;
-  onClick?: () => void;
-  items?: AppHeaderBadgeItem[];
-  popoverWidth?: number;
-  'data-test-subj'?: string;
-  disabled?: boolean;
-  toolTipContent?: string;
-}
-
-/** @public */
-export interface AppHeaderTab {
-  id: string;
-  label: string;
-  isSelected?: boolean;
-  onClick?: () => void;
-  href?: string;
-  badge?: number;
-  'data-test-subj'?: string;
-}
-
-/** @public */
-export type AppHeaderMetadataItem =
-  | AppHeaderMetadataTextItem
-  | AppHeaderMetadataButtonItem
-  | AppHeaderMetadataHealthItem;
-
-/** @public */
-export type AppHeaderMetadataItems = readonly [
-  AppHeaderMetadataItem,
-  AppHeaderMetadataItem?,
-  AppHeaderMetadataItem?
-];
-
-/** @public */
-export interface AppHeaderMetadataTextItem {
-  type: 'text';
-  label: string;
-  'data-test-subj'?: string;
-}
-
-/** @public */
-export type AppHeaderMetadataButtonItem =
-  | AppHeaderMetadataButtonAction
-  | AppHeaderMetadataButtonLink;
-
-/** @public */
-export interface AppHeaderMetadataButtonBase {
-  type: 'button';
-  label: string;
-  iconType?: string;
-  'data-test-subj'?: string;
-}
-
-/** @public */
-export interface AppHeaderMetadataButtonAction extends AppHeaderMetadataButtonBase {
-  onClick: () => void;
-  href?: never;
-}
-
-/** @public */
-export interface AppHeaderMetadataButtonLink extends AppHeaderMetadataButtonBase {
-  href: string;
-  onClick?: never;
-}
-
-/** @public */
-export interface AppHeaderMetadataHealthItem {
-  type: 'health';
-  label: string;
-  color: string;
-  'data-test-subj'?: string;
-}
-
-/** @public */
-export interface AppHeaderConfig {
-  title?: string;
-  back?: AppHeaderBack;
-  tabs?: AppHeaderTab[];
-  badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig;
-  favorite?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
-}
+import type { ChromeAppHeaderConfig } from '../app_header';
+import type { ChromeControls } from '../controls';
+import type { ChromeHelp, ChromeNewsfeedHandler } from '../help';
 
 /**
- * Chrome Next rollout APIs.
+ * Deprecated compatibility facade for the former Chrome Next rollout namespace.
  *
- * @remarks
- * This namespace starts with the rollout state and will host additional Chrome Next APIs as
- * follow-up feature slices land behind the same flag.
- *
+ * @deprecated Use {@link ChromeControls} via `chrome.controls` and {@link ChromeHelp} via
+ * `chrome.help`. App-header registration should use `AppHeader`,
+ * `ChromeAppHeaderRegistration`, or `useChromeAppHeaderRegistration` from `@kbn/app-header`.
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome Next feature flag is enabled. */
-  readonly isEnabled: boolean;
-  /** Global search configuration. */
-  globalSearch: {
-    /**
-     * Set the global search configuration for the Chrome-Next header.
-     * Chrome renders a search button; clicking it fires `onClick`.
-     * Pass `undefined` to remove. Global — persists across app changes.
-     */
-    set(config?: GlobalSearchConfig): void;
-  };
-  /** Context switcher content. */
-  contextSwitcher: {
-    /**
-     * Set the context switcher content for the Chrome-Next header.
-     * Pass `undefined` to remove. Global — persists across app changes.
-     */
-    set(content?: ReactNode): void;
-  };
+  /**
+   * @deprecated Use `chrome.controls.aiButton`.
+   */
+  aiButton: ChromeControls['aiButton'];
+  /**
+   * @deprecated Use `chrome.controls.globalSearch`.
+   */
+  globalSearch: ChromeControls['globalSearch'];
+  /**
+   * @deprecated Use `chrome.controls.contextSwitcher`.
+   */
+  contextSwitcher: ChromeControls['contextSwitcher'];
+  /**
+   * @deprecated Use `chrome.controls.projectPicker`.
+   */
+  projectPicker: ChromeControls['projectPicker'];
+  /**
+   * @deprecated Use `AppHeader` from `@kbn/app-header`, `ChromeAppHeaderRegistration`, or
+   * `useChromeAppHeaderRegistration`.
+   */
   appHeader: {
     /**
-     * Set the app header configuration for the Chrome Next project header.
+     * Set the app header configuration.
      * Chrome renders an application top bar with back navigation, title, tabs,
      * badges, menu, share action, and favorite action based on this config.
      * Pass the config to show; the returned callback removes it.
      * Per-app, cleared on app change.
+     *
+     * @deprecated Use `AppHeader` from `@kbn/app-header`, `ChromeAppHeaderRegistration`, or
+     * `useChromeAppHeaderRegistration`.
      */
-    set(config: AppHeaderConfig): () => void;
+    set(config: ChromeAppHeaderConfig): () => void;
   };
   /**
-   * Register a handler that opens the feedback UI in the Chrome Next help menu.
-   *
-   * @returns A function to unregister the handler.
+   * @deprecated Use `chrome.controls.userMenu`.
    */
-  registerFeedbackHandler(handler: () => void): () => void;
-  /** Get the currently registered Chrome Next feedback handler. */
+  userMenu: ChromeControls['userMenu'];
+  /**
+   * @deprecated Use `chrome.help.registerFeedbackHandler`.
+   */
+  registerFeedbackHandler: ChromeHelp['registerFeedbackHandler'];
+  /**
+   * Get the currently registered feedback handler.
+   *
+   * @deprecated This getter is renderer plumbing and will be removed. Register with
+   * `chrome.help.registerFeedbackHandler`.
+   */
   getFeedbackHandler$(): Observable<(() => void) | undefined>;
   /**
-   * Register a handler that opens the newsfeed UI in the Chrome Next help menu.
-   *
-   * @returns A function to unregister the handler.
+   * @deprecated Use `chrome.help.registerNewsfeedHandler`.
    */
-  registerNewsfeedHandler(handler: { open: () => void; hasNew$: Observable<boolean> }): () => void;
-  /** Get the currently registered Chrome Next newsfeed handler. */
-  getNewsfeedHandler$(): Observable<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
+  registerNewsfeedHandler: ChromeHelp['registerNewsfeedHandler'];
+  /**
+   * Get the currently registered newsfeed handler.
+   *
+   * @deprecated This getter is renderer plumbing and will be removed. Register with
+   * `chrome.help.registerNewsfeedHandler`.
+   */
+  getNewsfeedHandler$(): Observable<ChromeNewsfeedHandler | undefined>;
 }

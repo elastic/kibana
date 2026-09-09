@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
-
-export const getScheduledIndexPattern = (spaceId: string): string => {
-  return `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`;
-};
+export { getScheduledIndexPattern } from '@kbn/attack-discovery-schedules-common';

@@ -19,26 +19,30 @@ import {
 } from '../../common/mock';
 import { CasesRoutes } from './routes';
 import type { CasesPermissions } from '../../../common';
-import { useGetCase } from '../../containers/use_get_case';
-import { defaultGetCase } from '../case_view/mocks';
 import { KibanaServices } from '../../common/lib/kibana';
 
-jest.mock('../../containers/use_get_case');
-
-jest.mock('../all_cases', () => ({
-  AllCases: () => <div>{'All cases'}</div>,
+jest.mock('../cases_redesign/all_cases', () => ({
+  __esModule: true,
+  default: () => <div>{'All cases'}</div>,
 }));
 
 jest.mock('../create', () => ({
   CreateCase: () => <div>{'Create case'}</div>,
 }));
 
-jest.mock('../configure_cases', () => ({
-  ConfigureCases: () => <div>{'Settings'}</div>,
+jest.mock('../cases_redesign/configure_cases/configure_cases', () => ({
+  __esModule: true,
+  default: () => <div>{'Settings'}</div>,
 }));
 
-jest.mock('../case_view/case_view_page', () => ({
-  CaseViewPage: () => <div>{'Case View Page'}</div>,
+jest.mock('../cases_redesign/case_view', () => ({
+  __esModule: true,
+  default: () => <div>{'Case View Page'}</div>,
+}));
+
+jest.mock('../templates_v2/pages/all_templates_page', () => ({
+  __esModule: true,
+  default: () => <div>{'All templates'}</div>,
 }));
 
 jest.mock('../templates_v2/pages/create_template/page', () => ({
@@ -50,8 +54,6 @@ jest.mock('../templates_v2/pages/edit_template/page', () => ({
   __esModule: true,
   default: () => <div>{'Edit template'}</div>,
 }));
-
-const useGetCaseMock = useGetCase as jest.Mock;
 
 const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
 
@@ -83,12 +85,6 @@ describe('Cases routes', () => {
   });
 
   describe('Case view', () => {
-    beforeEach(() => {
-      useGetCaseMock.mockReturnValue({
-        ...defaultGetCase,
-      });
-    });
-
     it.each(getCaseViewPaths())(
       'navigates to the cases view page for path: %s',
       async (path: string) => {
@@ -129,6 +125,39 @@ describe('Cases routes', () => {
       renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
       expect(await screen.findByText('Privileges required')).toBeInTheDocument();
     });
+
+    // Regression coverage for the templates-OFF flag combination: the v2 templates and
+    // field-library routes must be unregistered (falling through to the settings route, where
+    // custom fields and templates are managed inline) rather than dead-ending the user.
+    describe('with templates disabled', () => {
+      let getConfigSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        getConfigSpy = jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+          templates: { enabled: false },
+        } as ReturnType<typeof KibanaServices.getConfig>);
+      });
+
+      afterEach(() => {
+        getConfigSpy.mockRestore();
+      });
+
+      it('renders the settings page on /configure', async () => {
+        renderWithRouter(['/cases/configure']);
+        expect(await screen.findByText('Settings')).toBeInTheDocument();
+      });
+
+      it('does not register the v2 templates route', async () => {
+        renderWithRouter(['/cases/configure/templates']);
+        expect(await screen.findByText('Settings')).toBeInTheDocument();
+        expect(screen.queryByText('All templates')).not.toBeInTheDocument();
+      });
+
+      it('does not register the v2 field library route', async () => {
+        renderWithRouter(['/cases/configure/field_library']);
+        expect(await screen.findByText('Settings')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Templates routes', () => {
@@ -144,6 +173,28 @@ describe('Cases routes', () => {
 
     afterEach(() => {
       getConfigSpy.mockRestore();
+    });
+
+    it('navigates to the templates list page', async () => {
+      renderWithRouter(['/cases/configure/templates']);
+      expect(await screen.findByText('All templates')).toBeInTheDocument();
+    });
+
+    it('shows the no privileges page on the templates list route when user lacks manageTemplates permission', async () => {
+      renderWithRouter(
+        ['/cases/configure/templates'],
+        buildCasesPermissions({ manageTemplates: false })
+      );
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+      expect(screen.queryByText('All templates')).not.toBeInTheDocument();
+    });
+
+    it('allows access to the templates list page without settings permission as long as the user has manageTemplates permission', async () => {
+      renderWithRouter(
+        ['/cases/configure/templates'],
+        buildCasesPermissions({ settings: false, manageTemplates: true })
+      );
+      expect(await screen.findByText('All templates')).toBeInTheDocument();
     });
 
     it('navigates to the create template page', async () => {

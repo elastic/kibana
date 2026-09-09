@@ -8,16 +8,21 @@
  */
 
 import { parse as yamlLoad } from 'yaml';
+import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
+import { getKibanaDir } from '#pipeline-utils/utils';
 
+process.chdir(getKibanaDir());
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
 const mockDoAllChangesMatch = jest.fn();
 const mockGetAgentImageConfig = jest.fn();
 const mockFlushCancelOnGateFailureMetadata = jest.fn();
 const mockRunPreBuild = jest.fn();
-const mockGetEvalPipeline = jest.fn();
+const mockGetEvalTriggerStep = jest.fn();
 const mockIsAutomatedVersionBumpPR = jest.fn();
+const mockGetPrChangesCached = jest.fn();
+const mockGetAffectedPackages = jest.fn();
 
 jest.mock('#pipeline-utils', () => {
   const actual = jest.requireActual('#pipeline-utils');
@@ -30,6 +35,8 @@ jest.mock('#pipeline-utils', () => {
     getAgentImageConfig: mockGetAgentImageConfig,
     flushCancelOnGateFailureMetadata: mockFlushCancelOnGateFailureMetadata,
     isAutomatedVersionBumpPR: mockIsAutomatedVersionBumpPR,
+    getPrChangesCached: mockGetPrChangesCached,
+    getAffectedPackages: mockGetAffectedPackages,
   };
 });
 
@@ -38,7 +45,7 @@ jest.mock('./pre_build', () => ({
 }));
 
 jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
-  getEvalPipeline: mockGetEvalPipeline,
+  getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
 
 const ORIGINAL_ENV = process.env;
@@ -79,8 +86,10 @@ describe('pull_request pipeline generation', () => {
     mockDoAllChangesMatch.mockResolvedValue(false);
     mockGetAgentImageConfig.mockReturnValue('agents:\n  provider: gcp\n');
     mockRunPreBuild.mockResolvedValue(undefined);
-    mockGetEvalPipeline.mockReturnValue(null);
+    mockGetEvalTriggerStep.mockReturnValue(null);
     mockIsAutomatedVersionBumpPR.mockResolvedValue(false);
+    mockGetPrChangesCached.mockResolvedValue([]);
+    mockGetAffectedPackages.mockResolvedValue(new Set());
   });
 
   afterEach(() => {
@@ -147,6 +156,41 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('post_build.sh');
   });
 
+  it('emits a step that triggers the dedicated evals pipeline (not an inline group) when labels match', async () => {
+    mockGetEvalTriggerStep.mockReturnValue(
+      [
+        `  - label: ':robot_face: Trigger LLM Evals'`,
+        `    key: kibana-evals-trigger`,
+        `    depends_on:`,
+        `      - build`,
+        `    command: bash .buildkite/scripts/steps/evals/trigger_pr_evals.sh`,
+        `    soft_fail: true`,
+      ].join('\n')
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('trigger_pr_evals.sh');
+    // Evals must not run inline in kibana-pull-request anymore.
+    expect(output).not.toContain('group: LLM Evals');
+
+    const parsed = yamlLoad(output) as { steps: Array<Record<string, unknown>> };
+    const triggerStep = parsed.steps.find((step) => step.key === 'kibana-evals-trigger');
+    expect(triggerStep).toMatchObject({ soft_fail: true, depends_on: ['build'] });
+  });
+
+  it('does not emit an evals trigger when no eval labels match', async () => {
+    mockGetEvalTriggerStep.mockReturnValue(null);
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('kibana-evals-trigger');
+  });
+
   it('includes FIPS verification step when FIPS label is present', async () => {
     process.env.GITHUB_PR_LABELS = FIPS_GH_LABELS[FIPS_VERSION.TWO];
     const emitted = waitForEmission();
@@ -174,6 +218,70 @@ describe('pull_request pipeline generation', () => {
     );
   });
 
+  it('does not trigger Cypress suites for a Scout-tests-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts',
+      },
+      {
+        filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_tines.spec.ts',
+        previous_filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/tines.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('security_serverless_explore.sh');
+    expect(output).not.toContain('security_solution_explore.sh');
+    expect(output).not.toContain('security_solution_investigations.sh');
+  });
+
+  it('triggers Cypress suites for product changes in the same plugin', async () => {
+    const changes = [
+      { filename: 'x-pack/platform/plugins/shared/triggers_actions_ui/public/application/app.tsx' },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('security_serverless_explore.sh');
+  });
+
+  it('still triggers Scout suites for a Scout-tests-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/chat.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-agent-builder-smoke-tests');
+  });
+
   it('emits empty pipeline for automated version bump PRs from kibanamachine', async () => {
     mockIsAutomatedVersionBumpPR.mockResolvedValueOnce(true);
     const emitted = waitForEmission();
@@ -185,5 +293,55 @@ describe('pull_request pipeline generation', () => {
     expect(parsed).toEqual({ steps: [] });
     expect(mockRunPreBuild).not.toHaveBeenCalled();
     expect(mockAreChangesSkippable).not.toHaveBeenCalled();
+  });
+
+  it('emits storybooks when yarn.lock changes', async () => {
+    const changes = [{ filename: 'yarn.lock' }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
+    expect(mockGetAffectedPackages).not.toHaveBeenCalled();
+  });
+
+  it('emits storybooks when @kbn/storybook is in the affected set', async () => {
+    mockGetAffectedPackages.mockResolvedValue(new Set(['@kbn/storybook']));
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
+    expect(mockGetAffectedPackages).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ changedFiles: expect.any(Array) })
+    );
+  });
+
+  it('does not emit storybooks for an unrelated affected set', async () => {
+    mockGetAffectedPackages.mockResolvedValue(new Set(['@kbn/unified-search-plugin']));
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('Build Storybooks');
+  });
+
+  it('emits storybooks when affected-package detection fails', async () => {
+    mockGetAffectedPackages.mockRejectedValue(new Error('git merge-base failed'));
+    jest.spyOn(console, 'error').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
   });
 });

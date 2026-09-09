@@ -10,12 +10,14 @@ import { expect } from '@kbn/scout-security/ui';
 
 const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment';
+const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 spaceTest.describe(
   'Attack details flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
       await apiServices.attackDiscovery.seedAttackSchedule();
     });
@@ -25,6 +27,7 @@ spaceTest.describe(
 
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
+        [ENABLE_NEW_FLYOUT_SETTING]: false,
       });
       await browserAuth.loginAsPlatformEngineer();
 
@@ -33,8 +36,7 @@ spaceTest.describe(
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeAttached();
       await detectionsAttackDiscoveryPage.attacksTableSection.scrollIntoViewIfNeeded();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(1);
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(2);
       await detectionsAttackDiscoveryPage.openFirstAttackDetailsFromTable();
       await expect(attackDetailsRightPanelPage.detailsFlyoutBody).toBeAttached();
       await attackDetailsRightPanelPage.detailsFlyoutBody.scrollIntoViewIfNeeded();
@@ -43,6 +45,11 @@ spaceTest.describe(
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+      await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest('shows Insights section in attack details flyout', async ({ pageObjects }) => {

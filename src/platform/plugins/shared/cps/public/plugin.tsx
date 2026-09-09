@@ -8,14 +8,20 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
-import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
+import type {
+  CPSPluginSetup,
+  CPSPluginStart,
+  CPSPluginStartDependencies,
+  CPSConfigType,
+} from './types';
 import { CPSManager } from './services/cps_manager';
 
-export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
+export class CpsPlugin
+  implements Plugin<CPSPluginSetup, CPSPluginStart, {}, CPSPluginStartDependencies>
+{
   private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
   private readonly appAccessResolvers = new Map<string, CPSAppAccessResolver>();
 
@@ -34,7 +40,7 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
     };
   }
 
-  public start(core: CoreStart): CPSPluginStart {
+  public start(core: CoreStart, { cloud }: CPSPluginStartDependencies = {}): CPSPluginStart {
     const { cpsEnabled } = this.initializerContext.config.get();
     let cpsManager: ICPSManager | undefined;
 
@@ -44,34 +50,23 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
         logger: this.initializerContext.logger.get('cps'),
         application: core.application,
         appAccessResolvers: this.appAccessResolvers,
+        cloud,
       });
 
       // Register project picker only after the default project routing is known
       manager.whenReady().then(() =>
         import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
-          core.chrome.navControls.registerLeft({
-            mount: (element) => {
-              ReactDOM.render(
-                <I18nProvider>
-                  <ProjectPickerContainer cpsManager={manager} />
-                </I18nProvider>,
-                element,
-                () => {}
-              );
-
-              return () => {
-                ReactDOM.unmountComponentAtNode(element);
-              };
-            },
-            order: 1000,
-          });
+          core.chrome.next.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
         })
       );
       cpsManager = manager;
     }
 
+    const isTierEligible = core.pricing.isFeatureAvailable(CPS_TIER_ELIGIBLE_FEATURE_ID);
+
     return {
       cpsManager,
+      isTierEligible,
     };
   }
 

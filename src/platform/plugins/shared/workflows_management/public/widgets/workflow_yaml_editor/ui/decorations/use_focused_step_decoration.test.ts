@@ -9,7 +9,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
 import { useFocusedStepDecoration } from './use_focused_step_decoration';
 import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
@@ -78,7 +78,8 @@ const renderHookWithProviders = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   stepInfos: Record<string, StepInfo> = {
     'step-1': createStepInfo({ stepId: 'step-1', lineStart: 5, lineEnd: 10 }),
-  }
+  },
+  overrideRange?: { lineStart: number; lineEnd: number } | null
 ) => {
   const store = createMockStore();
 
@@ -96,7 +97,7 @@ const renderHookWithProviders = (
   };
 
   return {
-    ...renderHook(() => useFocusedStepDecoration(editor), { wrapper }),
+    ...renderHook(() => useFocusedStepDecoration(editor, overrideRange), { wrapper }),
     store,
   };
 };
@@ -104,6 +105,43 @@ const renderHookWithProviders = (
 describe('useFocusedStepDecoration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('draws a highlight box over the whole triggers block when cursor is on a trigger line', () => {
+    const { editor, decorationsCollection } = createMockEditor();
+    const store = createMockStore();
+
+    store.dispatch(setYamlString('version: "1"\nname: test'));
+    const computedData: ComputedData = {
+      workflowLookup: {
+        steps: {},
+        triggersLineStart: 2,
+        triggersLineEnd: 4,
+        stepsLineStart: 6,
+      },
+    };
+    store.dispatch(_setComputedDataInternal(computedData));
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Provider, { store }, children);
+
+    renderHook(() => useFocusedStepDecoration(editor), { wrapper });
+
+    act(() => {
+      // line 3 is within [triggersLineStart=2, stepsLineStart=6) → focusedTriggerId set
+      store.dispatch(setCursorPosition({ lineNumber: 3, column: 1 }));
+    });
+
+    expect(decorationsCollection.set).toHaveBeenCalledTimes(1);
+    const [decoration] = decorationsCollection.set.mock.calls[0][0];
+    expect(decoration.range).toEqual({
+      startLineNumber: 2,
+      startColumn: 1,
+      endLineNumber: 4,
+      endColumn: 1,
+    });
+    expect(decoration.options.blockClassName).toBe('mock-block-class-name');
+    expect(decoration.options.isWholeLine).toBe(true);
   });
 
   it('should create exactly one block decoration spanning from lineStart to lineEnd', () => {
@@ -128,6 +166,32 @@ describe('useFocusedStepDecoration', () => {
     });
     expect(decoration.options.blockClassName).toBe('mock-block-class-name');
     expect(decoration.options.isWholeLine).toBe(true);
+  });
+
+  it('should prefer overrideRange over the focused step', () => {
+    const { editor, decorationsCollection } = createMockEditor();
+    const { store } = renderHookWithProviders(
+      editor,
+      {
+        'step-1': createStepInfo({ stepId: 'step-1', lineStart: 5, lineEnd: 10 }),
+      },
+      {
+        lineStart: 20,
+        lineEnd: 25,
+      }
+    );
+
+    act(() => {
+      store.dispatch(setCursorPosition({ lineNumber: 7, column: 1 }));
+    });
+
+    const decorations = decorationsCollection.set.mock.calls.at(-1)?.[0];
+    expect(decorations[0].range).toEqual({
+      startLineNumber: 20,
+      startColumn: 1,
+      endLineNumber: 25,
+      endColumn: 1,
+    });
   });
 
   it('should clear decorations on unmount', () => {

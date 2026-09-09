@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 /**
  * Request-scoped space id for the current request (from Spaces).
  * Used by RulesClient, AlertActionsClient, and can be overridden to bind clients to an explicit space.
  */
-export const RequestSpaceIdToken = Symbol.for(
-  'alerting_v2.SpacesService.RequestSpaceId'
-) as ServiceIdentifier<string>;
+export const RequestSpaceIdToken = createToken<string>('alerting_v2.SpacesService.RequestSpaceId');

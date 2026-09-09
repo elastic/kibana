@@ -1,0 +1,29 @@
+import { inject, injectable } from 'inversify';
+import { Response } from '@kbn/core-di-server';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import { ExampleService } from './example_service';
+
+@injectable()
+export class ExampleRoute {
+  static method = 'get' as const;
+  static path = '/api/<%= snakeCase(name) %>/example';
+  static validate = false as const;
+  static security = {
+    authz: {
+      enabled: false,
+      reason:
+        'Example route that returns non-sensitive demo data; replace with appropriate authz configuration for real endpoints.',
+    },
+  } as const;
+
+  constructor(
+    @inject(ExampleService) private readonly service: ExampleService,
+    @inject(Response) private readonly response: KibanaResponseFactory
+  ) {}
+
+  async handle() {
+    return this.response.ok({
+      body: await this.service.getExample(),
+    });
+  }
+}

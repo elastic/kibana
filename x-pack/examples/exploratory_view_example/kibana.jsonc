@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/exploratory-view-example-plugin",
-  "owner": "@elastic/obs-presentation-team",
+  "owner": "@elastic/obs-signals-logs-team",
   "group": "observability",
   "visibility": "private",
   "plugin": {

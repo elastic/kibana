@@ -52,14 +52,16 @@
       "apmSourcesAccess",
       "fileUpload",
       "cps",
-      "alertingVTwo"
+      "alertingVTwo",
+      "feedback"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
       "presentationUtil",
-      "esql"
+      "esql",
+      "share"
     ],
     "extraPublicDirs": [
       "common"

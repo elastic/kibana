@@ -71,6 +71,7 @@ export function validateProcessorValues(
     case 'sort':
     case 'network_direction':
     case 'enrich':
+    case 'user_agent':
     case 'registered_domain':
     case 'manual_ingest_pipeline':
       break;

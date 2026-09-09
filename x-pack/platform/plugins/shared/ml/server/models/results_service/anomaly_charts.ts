@@ -45,6 +45,7 @@ import type {
 } from '@kbn/ml-common-types/results';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 import {
   isMappableJob,
@@ -958,9 +959,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return severity.some((threshold) => {
+        const thresholdMax = getSeverityThresholdMax(threshold);
+
         return (
           Number(record.record_score) >= threshold.min &&
-          (threshold.max === undefined || Number(record.record_score) <= threshold.max)
+          (thresholdMax === undefined || Number(record.record_score) <= thresholdMax)
         );
       });
     });
@@ -1017,7 +1020,6 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }
       }
     }
-
     const { chartRange, tooManyBuckets } = calculateChartRange(
       seriesConfigs as SeriesConfigWithMetadata[],
       selectedEarliestMs,
@@ -1239,13 +1241,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         };
       });
 
-    if (mapData.length) {
-      // push map data in if it's available
-      // @ts-ignore
-      seriesToPlot.push(...mapData);
-    }
-
-    data.seriesToPlot = seriesToPlot;
+    data.seriesToPlot = mapData.length
+      ? [
+          ...seriesToPlot,
+          ...mapData.map((series) => ({
+            ...series,
+            plotEarliest: chartRange.min,
+            plotLatest: chartRange.max,
+          })),
+        ]
+      : seriesToPlot;
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
@@ -1509,7 +1514,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    intervalMs: number
+    intervalMs: number,
+    projectRouting?: string
   ): Promise<any> {
     if (splitField === undefined) {
       return [];
@@ -1592,6 +1598,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           },
         },
       },
+      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     };
 
     if (
@@ -1694,7 +1701,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         config.timeField,
         range.min,
         range.max,
-        config.bucketSpanSeconds * 1000
+        config.bucketSpanSeconds * 1000,
+        config.datafeedConfig.project_routing
       );
     } catch (e) {
       handleError(
@@ -1707,9 +1715,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getRecordsForCriteriaChart(config: SeriesConfigWithMetadata, range: ChartRange) {
-    let criteria: MlEntityField[] = [];
-    criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
-    criteria = criteria.concat(config.entityFields);
+    const criteria: CriteriaField[] = [
+      { fieldName: 'detector_index', fieldValue: config.detectorIndex },
+      ...config.entityFields.map(({ fieldName, fieldValue, fieldType }) => ({
+        fieldName,
+        fieldValue,
+        fieldType,
+      })),
+    ];
 
     try {
       return await getRecordsForCriteria(
@@ -1949,14 +1962,18 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const thresholdCriteria = threshold.map((t) => ({
-      range: {
-        record_score: {
-          gte: t.min,
-          ...(t.max !== undefined && { lte: t.max }),
+    const thresholdCriteria = threshold.map((t) => {
+      const thresholdMax = getSeverityThresholdMax(t);
+
+      return {
+        range: {
+          record_score: {
+            gte: t.min,
+            ...(thresholdMax !== undefined && { lte: thresholdMax }),
+          },
         },
-      },
-    }));
+      };
+    });
 
     boolCriteria.push({
       bool: {

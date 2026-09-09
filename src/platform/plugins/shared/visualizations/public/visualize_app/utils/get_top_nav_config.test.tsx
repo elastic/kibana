@@ -99,7 +99,7 @@ describe('getTopNavConfig', () => {
         },
       },
     } as VisualizeEditorVisInstance;
-    const novizSaveServices = {
+    const novisSaveServices = {
       ...services,
       visualizeCapabilities: {
         save: false,
@@ -118,7 +118,7 @@ describe('getTopNavConfig', () => {
         visualizationIdFromUrl: undefined,
         stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
-      novizSaveServices as unknown as VisualizeServices
+      novisSaveServices as unknown as VisualizeServices
     );
 
     expect(topNavLinks).toMatchInlineSnapshot(`

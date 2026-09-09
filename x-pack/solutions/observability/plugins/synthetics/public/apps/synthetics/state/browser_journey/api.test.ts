@@ -163,7 +163,7 @@ describe('getJourneyScreenshot', () => {
       initialBackoff,
     });
     expect(result).toBeNull();
-    expect(mockFetch).toBeCalledTimes(maxRetry + 1);
+    expect(mockFetch).toHaveBeenCalledTimes(maxRetry + 1);
   });
 });
 
@@ -191,6 +191,50 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
       { remoteName: 'remote-a' },
+      expect.anything()
+    );
+  });
+
+  it('forwards the run timestamp to apiService.get when present', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', timestamp: '2023-01-01T00:00:00.000Z' });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { timestamp: '2023-01-01T00:00:00.000Z' },
+      expect.anything()
+    );
+  });
+
+  it('forwards both remoteName and timestamp when present', async () => {
+    await fetchBrowserJourney({
+      checkGroup: 'cg-1',
+      remoteName: 'remote-a',
+      timestamp: '2023-01-01T00:00:00.000Z',
+    });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { remoteName: 'remote-a', timestamp: '2023-01-01T00:00:00.000Z' },
+      expect.anything()
+    );
+  });
+
+  it('forwards stepsOnly to apiService.get when set', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', stepsOnly: true });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { stepsOnly: true },
+      expect.anything()
+    );
+  });
+
+  it('omits stepsOnly when not set', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', timestamp: '2023-01-01T00:00:00.000Z' });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { timestamp: '2023-01-01T00:00:00.000Z' },
       expect.anything()
     );
   });

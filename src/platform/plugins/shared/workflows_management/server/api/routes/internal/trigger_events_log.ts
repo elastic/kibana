@@ -17,7 +17,7 @@ import {
   MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import { WORKFLOW_TRIGGER_EVENTS_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export const triggerEventsLogSearchBodySchema = schema.object({
@@ -29,13 +29,13 @@ export const triggerEventsLogSearchBodySchema = schema.object({
 });
 
 export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
-  const { router, service, spaces } = deps;
+  const { router, workflowsService, spaces } = deps;
 
   router.versioned
     .post({
       path: '/internal/workflows/trigger_events/_search',
       access: 'internal',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_TRIGGER_EVENTS_READ_SECURITY,
       enableQueryVersion: true,
     })
     .addVersion(
@@ -50,7 +50,7 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
       withAvailabilityCheck(async (_context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
-          const { triggerEvents } = await service.getWorkflowsExecutionEngine();
+          const { triggerEvents } = await workflowsService.getWorkflowsExecutionEngine();
           const { kql, from: fromTs, to: toTs, page, size } = request.body;
 
           const result = await triggerEvents.searchTriggerEventLog({

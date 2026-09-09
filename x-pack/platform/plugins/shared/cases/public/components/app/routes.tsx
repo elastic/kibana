@@ -12,9 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';
-import { ConfigureCases } from '../configure_cases';
 import type { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import {
@@ -27,6 +25,7 @@ import {
   getCasesConfigureCreateTemplatePath,
   getCasesConfigureEditTemplatePath,
   getCasesConfigureFieldLibraryPath,
+  getCasesConfigureTemplatesPath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
@@ -36,9 +35,10 @@ import type { CreateCaseFormProps } from '../create/form';
 import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
 import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
 import type { AllFieldDefinitionsPageProps } from '../field_library/pages/all_field_definitions_page';
-import { KibanaServices } from '../../common/lib/kibana/services';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { CasesPageLayout } from './cases_page_layout';
 
-const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+const AllTemplatesLazy: FC = lazy(() => import('../templates_v2/pages/all_templates_page'));
 
 const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
   () => import('../templates_v2/pages/create_template/page')
@@ -52,11 +52,9 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
   () => import('../field_library/pages/all_field_definitions_page')
 );
 
-// Temporary: placeholder pages for the Cases UX redesign (elastic/security-team#17398).
-// These will progressively replace the current pages and the FF will be removed.
-const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
-const CaseViewRedesignLazy = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesRedesignLazy = lazy(() => import('../cases_redesign/configure_cases'));
+const AllCasesLazy = lazy(() => import('../cases_redesign/all_cases'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
+const ConfigureCasesLazy = lazy(() => import('../cases_redesign/configure_cases/configure_cases'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();
@@ -69,105 +67,101 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
-  const config = KibanaServices.getConfig();
-  const isTemplatesEnabled = config?.templates?.enabled ?? false;
-  const casesRedesign = {
-    list: config?.casesRedesign?.list ?? false,
-    details: config?.casesRedesign?.details ?? false,
-    settings: config?.casesRedesign?.settings ?? false,
-  };
+  const { templatesEnabled: isTemplatesEnabled } = useCasesConfig();
 
   return (
     <>
       <ReactQueryDevtools initialIsOpen={false} />
-      <Routes>
-        <Route strict exact path={basePath}>
-          {casesRedesign.list ? (
+      <CasesPageLayout basePath={basePath}>
+        <Routes>
+          <Route strict exact path={basePath}>
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <AllCasesRedesignLazy />
+              <AllCasesLazy />
             </Suspense>
-          ) : (
-            <AllCases />
-          )}
-        </Route>
+          </Route>
 
-        <Route path={getCreateCasePath(basePath)}>
-          {permissions.create ? (
-            <CreateCase
-              onSuccess={onCreateCaseSuccess}
-              onCancel={navigateToAllCases}
-              timelineIntegration={timelineIntegration}
-            />
-          ) : (
-            <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
-          )}
-        </Route>
-
-        {isTemplatesEnabled && (
-          <Route exact path={getCasesConfigureFieldLibraryPath(basePath)}>
-            {permissions.manageTemplates ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllFieldDefinitionsLazy />
-              </Suspense>
+          <Route path={getCreateCasePath(basePath)}>
+            {permissions.create ? (
+              <CreateCase
+                onSuccess={onCreateCaseSuccess}
+                onCancel={navigateToAllCases}
+                timelineIntegration={timelineIntegration}
+              />
             ) : (
-              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+              <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
             )}
           </Route>
-        )}
 
-        {isTemplatesEnabled && (
-          <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
-            {permissions.manageTemplates ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <CreateTemplateLazy />
-              </Suspense>
-            ) : (
-              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
-            )}
-          </Route>
-        )}
-
-        {isTemplatesEnabled && (
-          <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
-            {permissions.manageTemplates ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <EditTemplateLazy />
-              </Suspense>
-            ) : (
-              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
-            )}
-          </Route>
-        )}
-
-        <Route path={getCasesConfigurePath(basePath)}>
-          {permissions.settings ? (
-            casesRedesign.settings ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <ConfigureCasesRedesignLazy />
-              </Suspense>
-            ) : (
-              <ConfigureCases />
-            )
-          ) : (
-            <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+          {isTemplatesEnabled && (
+            <Route exact path={getCasesConfigureTemplatesPath(basePath)}>
+              {permissions.manageTemplates ? (
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <AllTemplatesLazy />
+                </Suspense>
+              ) : (
+                <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+              )}
+            </Route>
           )}
-        </Route>
 
-        {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
-        <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            {casesRedesign.details ? (
-              <CaseViewRedesignLazy />
+          {isTemplatesEnabled && (
+            <Route exact path={getCasesConfigureFieldLibraryPath(basePath)}>
+              {permissions.manageTemplates ? (
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <AllFieldDefinitionsLazy />
+                </Suspense>
+              ) : (
+                <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+              )}
+            </Route>
+          )}
+
+          {isTemplatesEnabled && (
+            <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
+              {permissions.manageTemplates ? (
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <CreateTemplateLazy />
+                </Suspense>
+              ) : (
+                <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+              )}
+            </Route>
+          )}
+
+          {isTemplatesEnabled && (
+            <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
+              {permissions.manageTemplates ? (
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <EditTemplateLazy />
+                </Suspense>
+              ) : (
+                <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+              )}
+            </Route>
+          )}
+
+          <Route path={getCasesConfigurePath(basePath)}>
+            {permissions.settings ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <ConfigureCasesLazy />
+              </Suspense>
             ) : (
+              <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+            )}
+          </Route>
+
+          {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
+          <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
               <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
-            )}
-          </Suspense>
-        </Route>
+            </Suspense>
+          </Route>
 
-        <Route path={basePath}>
-          <Redirect to={basePath} />
-        </Route>
-      </Routes>
+          <Route path={basePath}>
+            <Redirect to={basePath} />
+          </Route>
+        </Routes>
+      </CasesPageLayout>
     </>
   );
 };

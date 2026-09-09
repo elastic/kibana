@@ -7,6 +7,8 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { Coordinate } from '@kbn/apm-types';
+import type { Maybe } from '@kbn/apm-types-shared';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -18,9 +20,6 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import type { Maybe } from '../../../typings/common';
-
-import type { Coordinate } from '../../../typings/timeseries';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface HttpRequestsTimeseries {

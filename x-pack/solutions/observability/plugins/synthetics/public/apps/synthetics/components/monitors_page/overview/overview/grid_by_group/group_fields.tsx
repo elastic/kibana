@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
@@ -17,6 +17,7 @@ import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import type { GroupByState } from '../../../../../state/overview';
 import { selectOverviewGroupBy, setOverviewGroupByAction } from '../../../../../state/overview';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { getRemoteOriginFieldLabel } from '../../../../../utils/remote/remote_origin_copy';
 
 const DEFAULT_GROUP_BY: GroupByState = { field: 'none', order: 'asc' };
 const LOCAL_STORAGE_KEY = 'synthetics.overviewGroupBy';
@@ -25,6 +26,9 @@ export const GroupFields = () => {
   const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
   const { allConfigs } = useSelector(selectOverviewStatus);
   const hasRemoteMonitors = allConfigs?.some((config) => Boolean(config.remote)) ?? false;
+  // Heartbeat / autodiscovery monitors otherwise hide inside the "Local monitors"
+  // bucket; only offer the source grouping when there are any to break out.
+  const hasHeartbeatMonitors = allConfigs?.some((config) => config.origin === 'heartbeat') ?? false;
   const dispatch = useDispatch();
   const [urlParams, updateUrlParams] = useUrlParams();
   const [localStorageGroupBy, setLocalStorageGroupBy] =
@@ -145,7 +149,7 @@ export const GroupFields = () => {
     ...(hasRemoteMonitors
       ? [
           {
-            label: REMOTE_CLUSTER_LABEL,
+            label: getRemoteOriginFieldLabel(),
             value: 'remoteName',
             checked: groupField === 'remoteName',
             defaultSortOrder: 'asc',
@@ -153,6 +157,22 @@ export const GroupFields = () => {
               handleChange({
                 field: 'remoteName' as const,
                 order: groupOrder,
+              });
+            },
+          },
+        ]
+      : []),
+    ...(hasHeartbeatMonitors
+      ? [
+          {
+            label: MONITOR_SOURCE_LABEL,
+            value: 'origin',
+            checked: groupField === 'origin',
+            defaultSortOrder: 'asc',
+            onClick: () => {
+              handleChange({
+                field: 'origin' as const,
+                order: 'asc',
               });
             },
           },
@@ -247,7 +267,13 @@ const getOrderContent = (groupField: string) => {
       return {
         asc: SORT_ALPHABETICAL_ASC,
         desc: SORT_ALPHABETICAL_DESC,
-        label: REMOTE_CLUSTER_LABEL,
+        label: getRemoteOriginFieldLabel(),
+      };
+    case 'origin':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_SOURCE_LABEL,
       };
 
     default:
@@ -313,9 +339,9 @@ const PROJECT_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.pro
   defaultMessage: 'Project',
 });
 
-const REMOTE_CLUSTER_LABEL = i18n.translate(
-  'xpack.synthetics.overview.groupPopover.remoteCluster.label',
+const MONITOR_SOURCE_LABEL = i18n.translate(
+  'xpack.synthetics.overview.groupPopover.monitorSource.label',
   {
-    defaultMessage: 'Remote cluster',
+    defaultMessage: 'Monitor source',
   }
 );

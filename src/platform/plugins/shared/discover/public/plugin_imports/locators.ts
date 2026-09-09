@@ -10,15 +10,18 @@
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { appLocatorGetLocationCommon } from '../../common/app_locator_get_location';
+import type { ProfileStateRegistry } from '../../common/context_awareness';
 
 export const appLocatorGetLocation = (
   {
     useHash,
+    profileStateRegistry,
   }: {
     useHash: boolean;
+    profileStateRegistry: ProfileStateRegistry;
   },
   params: DiscoverAppLocatorParams
-) => appLocatorGetLocationCommon({ useHash, setStateToKbnUrl }, params);
+) => appLocatorGetLocationCommon({ useHash, setStateToKbnUrl, profileStateRegistry }, params);
 
 export { contextAppLocatorGetLocation } from '../application/context/services/locator_get_location';
 export { singleDocLocatorGetLocation } from '../application/doc/locator_get_location';

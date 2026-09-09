@@ -34,7 +34,6 @@ function createBenchmark(name: string, config: string) {
 const config: InitialBenchConfig = {
   name: 'ftr',
   benchmarks: [
-    createBenchmark('discover', 'src/platform/test/functional/apps/discover/group8/config.ts'),
     createBenchmark(
       'security-saml',
       'x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts'

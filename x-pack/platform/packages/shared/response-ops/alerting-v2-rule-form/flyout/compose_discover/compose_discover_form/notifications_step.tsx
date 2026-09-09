@@ -5,46 +5,30 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React, { useMemo } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
-import type { ComposeFormValues } from '../compose_form_types';
+import { EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ActionForm, createInitialActionFormValue } from '../../../actions_form';
+import type { FormValues } from '../../../form/types';
+import { validateNotifications } from '../validation/notifications_validation';
 
 const notificationsTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
-  { defaultMessage: 'Simple actions' }
+  { defaultMessage: 'Simple action policy' }
 );
 
 const notificationsSubtext = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
   {
-    defaultMessage: "Send a notification when this rule's alerts change status.",
+    defaultMessage:
+      "Send a notification when this rule's alerts change status. A linked action policy will be created with this rule.",
   }
 );
 
-const createSingleActionLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
-  { defaultMessage: 'Create single action' }
-);
-
-interface Props {
-  services: RuleFormServices;
-}
-
-export const NotificationsStep = ({ services }: Props) => {
-  const { watch, setValue } = useFormContext<ComposeFormValues>();
-  const notifications = watch('notifications');
-  const enabled = !!notifications;
-  const { workflowForm } = services;
-  const [touched, setTouched] = useState(false);
-  const isWorkflowInvalid =
-    touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
-
-  const handleCreate = useCallback(() => {
-    setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
-  }, [setValue, workflowForm]);
+export const NotificationsStep = () => {
+  const { control } = useFormContext<FormValues>();
+  const defaultWorkflows = useMemo(() => createInitialActionFormValue(), []);
 
   return (
     <>
@@ -56,30 +40,30 @@ export const NotificationsStep = ({ services }: Props) => {
         <p>{notificationsSubtext}</p>
       </EuiText>
       <EuiSpacer size="m" />
-
-      {enabled ? (
-        <div onBlur={() => setTouched(true)}>
-          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-            <workflowForm.Component
-              value={notifications!.workflow}
-              onChange={(next) =>
-                setValue('notifications', { workflow: next }, { shouldDirty: true })
+      <Controller
+        name="notifications"
+        control={control}
+        rules={{ validate: validateNotifications }}
+        render={({ field, fieldState: { error } }) => (
+          <div
+            data-test-subj="composeDiscoverNotificationsField"
+            onBlur={(e) => {
+              // Form mode is `onBlur`; leaving the field runs rules.
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                field.onBlur();
               }
-              isInvalid={isWorkflowInvalid}
-            />
-          </Suspense>
-        </div>
-      ) : workflowForm.supported !== false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          onClick={handleCreate}
-          size="s"
-          color="text"
-          data-test-subj="createSingleActionButton"
-        >
-          {createSingleActionLabel}
-        </EuiButton>
-      ) : null}
+            }}
+          >
+            <EuiFormRow fullWidth isInvalid={!!error} error={error?.message}>
+              <ActionForm
+                value={field.value?.workflows ?? defaultWorkflows}
+                onChange={(next) => field.onChange({ workflows: next })}
+                isInvalid={!!error}
+              />
+            </EuiFormRow>
+          </div>
+        )}
+      />
     </>
   );
 };

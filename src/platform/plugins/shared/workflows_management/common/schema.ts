@@ -11,6 +11,7 @@ import type {
   BaseConnectorContract,
   ConnectorContractUnion,
   ConnectorTypeInfo,
+  CustomTriggerSchemaInput,
   StepDeprecationInfo,
   StepPropertyHandler,
 } from '@kbn/workflows';
@@ -96,6 +97,54 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   return z.any();
 }
 
+const getSubActionMetadata = (
+  actionTypeId: string,
+  subActionName: string
+): Pick<BaseConnectorContract, 'description' | 'documentation' | 'examples'> | undefined => {
+  if (actionTypeId !== '.xsoar') {
+    return undefined;
+  }
+
+  if (subActionName === 'getPlaybooks') {
+    return {
+      description: 'Retrieve XSOAR playbooks visible to the connector.',
+      examples: {
+        snippet: `- name: get_xsoar_playbooks
+  type: xsoar.getPlaybooks
+  connector-id: <connector-id>`,
+      },
+    };
+  }
+
+  if (subActionName === 'run') {
+    return {
+      description: 'Create an XSOAR incident and optionally associate it with a playbook.',
+      examples: {
+        params: {
+          name: 'Suspicious login detected',
+          playbookId: '<xsoar-playbook-id>',
+          body: '{"details":"Investigate suspicious login activity.","type":"Unclassified"}',
+        },
+        snippet: `- name: create_xsoar_incident
+  type: xsoar.run
+  connector-id: <connector-id>
+  with:
+    name: Suspicious login detected
+    playbookId: <xsoar-playbook-id>
+    createInvestigation: true
+    severity: 2
+    body: |
+      {
+        "details": "Investigate suspicious login activity.",
+        "type": "Unclassified"
+      }`,
+      },
+    };
+  }
+
+  return undefined;
+};
+
 /**
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
@@ -139,9 +188,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
 function convertDynamicConnectorsToContractsInternal(
   connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
+  const { inboundOnlyConnectorTypeIds } = getConnectorSchemas();
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
     if (connectorType.enabled === false) {
+      return;
+    }
+    if (inboundOnlyConnectorTypeIds.has(connectorType.actionTypeId)) {
       return;
     }
     try {
@@ -160,6 +213,7 @@ function convertDynamicConnectorsToContractsInternal(
 
           const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
           const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
+          const metadata = getSubActionMetadata(connectorType.actionTypeId, subAction.name);
 
           connectorContracts.push({
             actionTypeId: connectorType.actionTypeId,
@@ -171,6 +225,7 @@ function convertDynamicConnectorsToContractsInternal(
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
+            ...metadata,
           });
         });
       } else {
@@ -411,15 +466,15 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = [],
+  registeredTriggers: CustomTriggerSchemaInput[] = [],
   options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
   if (options.lightweight) {
-    return generateLightweightYamlSchema(registeredTriggerIds);
+    return generateLightweightYamlSchema(registeredTriggers);
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
 };
 
 export const getWorkflowZodSchemaLoose = (

@@ -37,7 +37,8 @@ export const defineInferenceConnectorsRoute = ({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
+          reason:
+            'This route intentionally lists connectors for LLM features using the Kibana internal ES user',
         },
       },
     })
@@ -46,7 +47,8 @@ export const defineInferenceConnectorsRoute = ({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route delegates authorization to the scoped ES client',
+            reason:
+              'This route intentionally lists connectors for LLM features using the Kibana internal ES user',
           },
         },
         validate: {

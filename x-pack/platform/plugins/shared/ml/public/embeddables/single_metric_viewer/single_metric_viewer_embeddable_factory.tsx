@@ -20,11 +20,12 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeStateApi } from '@kbn/presentation-publishing';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
 import {
@@ -75,17 +76,11 @@ export const getSingleMetricViewerEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           singleMetricManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...singleMetricViewerComparators,
-            id: 'skip',
-            query: 'skip',
-            filters: 'skip',
-            refreshConfig: 'skip',
-          };
-        },
+        getComparators: () => ({
+          ...titleComparators,
+          ...timeRangeComparators,
+          ...singleMetricViewerComparators,
+        }),
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);
@@ -151,6 +146,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           const { singleMetricViewerData, bounds, lastRefresh } =
             useStateFromPublishingSubject(singleMetricViewerData$);
+          const [isLoading, error] = useBatchedPublishingSubjects(dataLoading$, blockingError$);
 
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
@@ -178,13 +174,22 @@ export const getSingleMetricViewerEmbeddableFactory = (
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}
-              onError={(error) => blockingError$.next(error)}
+              onError={(err) => {
+                blockingError$.next(err);
+                if (err) {
+                  dataLoading$.next(false);
+                }
+              }}
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
+              isRenderComplete={error ? true : !isLoading}
+              onLoading={(loading) => {
+                dataLoading$.next(loading);
+              }}
               onRenderComplete={() => {
                 dataLoading$.next(false);
               }}

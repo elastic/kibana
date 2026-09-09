@@ -8,38 +8,20 @@
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { AlertTableCellContextProvider } from '../../../../detections/configurations/security_solution_detections/cell_value_context';
-import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
-import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import * as i18n from './translations';
 import { isNoisy } from './helpers';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
-import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
-import { PreviewRenderCellValue } from './preview_table_cell_renderer';
-import { getPreviewTableControlColumn } from './preview_table_control_columns';
-import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import type { TimeframePreviewOptions } from '../../../common/types';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { useKibana } from '../../../../common/lib/kibana';
 import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
-
-const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
-  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
-  width: 100%;
-`;
+import { RulePreviewAlertsTable } from './rule_preview_alerts_table';
 
 export const ID = 'previewHistogram';
 
@@ -64,19 +46,11 @@ const PreviewHistogramComponent = ({
   indexPattern,
   timeframeOptions,
 }: PreviewHistogramProps) => {
-  const { uiSettings } = useKibana().services;
   const startDate = useMemo(
     () => timeframeOptions.timeframeStart.toISOString(),
     [timeframeOptions]
   );
   const endDate = useMemo(() => timeframeOptions.timeframeEnd.toISOString(), [timeframeOptions]);
-  // It seems like the Table/Grid component uses end date value as a non-inclusive one,
-  // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
-  // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
-  const extendedEndDate = useMemo(
-    () => timeframeOptions.timeframeEnd.clone().add('1', 's').toISOString(),
-    [timeframeOptions]
-  );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -91,9 +65,6 @@ const PreviewHistogramComponent = ({
     [isEqlRule, previewId, spaceId]
   );
 
-  const license = useLicense();
-
-  const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
   const previewEmbeddableId = `${previewQueryId}-embeddable`;
@@ -111,37 +82,8 @@ const PreviewHistogramComponent = ({
     }
   }, [addNoiseWarning, previewId, previousPreviewId, timeframeOptions, totalCount]);
 
-  const config = getEsQueryConfig(uiSettings);
-  const pageFilters = useMemo(() => {
-    const filterQuery = buildEsQuery(
-      indexPattern,
-      [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
-      [],
-      {
-        nestedIgnoreUnmapped: true,
-        ...config,
-        dateFormatTZ: undefined,
-      }
-    );
-    return [
-      {
-        ...filterQuery,
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'kibana.alert.rule.uuid',
-          params: {
-            query: previewId,
-          },
-        },
-      },
-    ];
-  }, [config, indexPattern, previewId]);
-
   return (
-    <AlertTableCellContextProvider tableId={TableId.rulePreview} sourcererScope={PageScope.alerts}>
+    <>
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
@@ -183,22 +125,13 @@ const PreviewHistogramComponent = ({
         </EuiFlexGroup>
       </Panel>
       <EuiSpacer />
-      <FullScreenContainer $isFullScreen={globalFullScreen}>
-        <StatefulEventsViewer
-          pageFilters={pageFilters}
-          defaultModel={getAlertsPreviewDefaultModel(license)}
-          end={extendedEndDate}
-          tableId={TableId.rulePreview}
-          leadingControlColumns={getPreviewTableControlColumn(1.5)}
-          renderCellValue={PreviewRenderCellValue}
-          rowRenderers={defaultRowRenderers}
-          start={startDate}
-          pageScope={PageScope.alerts}
-          indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
-          bulkActions={false}
-        />
-      </FullScreenContainer>
-    </AlertTableCellContextProvider>
+      <RulePreviewAlertsTable
+        previewId={previewId}
+        spaceId={spaceId}
+        indexPattern={indexPattern}
+        timeframeOptions={timeframeOptions}
+      />
+    </>
   );
 };
 

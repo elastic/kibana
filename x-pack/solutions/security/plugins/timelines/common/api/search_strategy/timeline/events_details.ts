@@ -16,6 +16,11 @@ export const timelineEventsDetailsSchema = requestPaginated.partial().extend({
   authFilter: z.object({}).optional(),
   runtimeMappings,
   factoryQueryType: z.literal(TimelineEventsQueries.details),
+  /**
+   * When `true`, hidden indices are included in wildcard expansion for the lookup.
+   * Left unset by default. Used for example for the  fallback retry.
+   */
+  includeHiddenIndices: z.boolean().optional(),
 });
 
 export type TimelineEventsDetailsRequestOptionsInput = z.input<typeof timelineEventsDetailsSchema>;
