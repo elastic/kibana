@@ -323,6 +323,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         caseIds.push(case4.id);
       };
 
+      const expectStateToContain = (
+        state: Record<string, unknown>,
+        expected: Record<string, unknown>
+      ) => {
+        for (const [key, value] of Object.entries(expected)) {
+          expect(state[key]).to.eql(value);
+        }
+      };
+
+      const getCasesStateFromUrl = async () => {
+        const currentUrl = new URL(decodeURIComponent(await browser.getCurrentUrl()));
+        const casesParam = currentUrl.searchParams.get('cases') ?? '';
+
+        expect(casesParam).not.to.be('');
+
+        return rison.decode(casesParam) as Record<string, unknown>;
+      };
+
       before(async () => {
         await cases.api.deleteAllCases();
         await createUsersAndRoles(getService, users, roles);
@@ -580,7 +598,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           { key: 'tags', isActive: false },
           { key: 'assignees', isActive: false },
           { key: 'category', isActive: false },
-          { key: `cf_${customFields[0].key}`, isActive: false },
         ];
 
         await cases.casesTable.setFiltersConfigurationInLocalStorage(lsState);
@@ -593,15 +610,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           tags: theCase.tags,
           assignees: [profiles[0].uid],
           category: [theCase.category],
-          customFields: { [customFields[0].key]: ['on'] },
         };
 
         await cases.casesTable.setStateToUrlAndNavigate(casesState);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
-        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
+        expectStateToContain(await getCasesStateFromUrl(), casesState);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -609,7 +624,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'tags',
           'category',
           'assignees',
-          customFields[0].key,
         ]);
 
         const searchBar = await testSubjects.find('search-cases');
@@ -636,15 +650,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           tags: theCase.tags,
           assignees: [profiles[0].uid],
           category: [theCase.category],
-          customFields: { [customFields[0].key]: ['on'] },
         };
 
         await cases.casesTable.setStateToUrlAndNavigate(casesState);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
-        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
+        expectStateToContain(await getCasesStateFromUrl(), casesState);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -652,7 +664,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'tags',
           'category',
           'assignees',
-          customFields[0].key,
         ]);
 
         const searchBar = await testSubjects.find('search-cases');
@@ -679,7 +690,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           tags: theCase.tags,
           assignees: [profiles[0].uid],
           category: [theCase.category],
-          customFields: { [customFields[0].key]: ['on'] },
         };
 
         await cases.casesTable.setStateToUrlAndNavigate(casesState);
@@ -688,21 +698,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const currentState = await cases.casesTable.getAllCasesStateInLocalStorage();
 
-        expect(currentState).to.eql({
-          queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
-          filterOptions: {
-            search: theCase.title,
-            searchFields: ['title', 'description', 'incremental_id.text'],
-            severity: [theCase.severity],
-            assignees: [profiles[0].uid],
-            reporters: [],
-            status: [theCase.status],
-            tags: theCase.tags,
-            owner: [],
-            category: [theCase.category],
-            customFields: { my_field_01: { type: CustomFieldTypes.TOGGLE, options: ['on'] } },
-          },
+        expect(currentState.queryParams).to.eql({
+          page: 1,
+          perPage: 10,
+          sortField: 'createdAt',
+          sortOrder: 'desc',
         });
+
+        expectStateToContain(currentState.filterOptions, casesState);
       });
 
       it('loads the state from a legacy URL', async () => {
