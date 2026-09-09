@@ -27,8 +27,8 @@ import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { runOnCancelIfNeeded } from '../../workflow_execution_loop/run_node_cancellation';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
-import { isCancellableNode } from '../node_implementation';
 import type { NodesFactory } from '../nodes_factory';
 
 // Re-tick the parallel node when branches still have work to do but nothing is
@@ -199,7 +199,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     // branches run. In-flight and not-yet-started branches are marked timed out
     // so the step terminates immediately with a clear reason.
     const overallTimeoutMs = this.resolveTimeoutMs(this.node.configuration.timeout);
-    if (overallTimeoutMs !== undefined && now - state.startedAt > overallTimeoutMs) {
+    if (overallTimeoutMs !== undefined && now - state.startedAt >= overallTimeoutMs) {
       await this.timeOutNonTerminalBranches(state, now);
       this.stepExecutionRuntime.setCurrentStepState(state);
       this.workflowLogger.logDebug(
@@ -302,7 +302,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       for (const branch of state.branches) {
         const stillRunning = branch.status === 'running';
         const exceeded =
-          branch.startedAt !== undefined && checkNow - branch.startedAt > branchTimeoutMs;
+          branch.startedAt !== undefined && checkNow - branch.startedAt >= branchTimeoutMs;
         if (stillRunning && exceeded) {
           branch.status = 'timed_out';
           branch.timedOut = true;
@@ -472,28 +472,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
   private async cancelBranchNode(branchRuntime: StepExecutionRuntime): Promise<void> {
     branchRuntime.abortController.abort();
     const branchImpl = this.nodesFactory.create(branchRuntime);
-    await this.runBranchOnCancel(branchImpl);
-  }
-
-  /**
-   * Invokes a branch node implementation's `onCancel()` cleanup hook when it is a
-   * cancellable node (e.g. `workflow.execute`, which cancels its child workflow).
-   * Mirrors the teardown `run_node` performs for a normally-cancelled step. Errors
-   * are logged and swallowed so teardown of sibling branches / the parallel step
-   * continues; `onCancel` implementations are required to be idempotent.
-   */
-  private async runBranchOnCancel(branchImpl: NodeImplementation): Promise<void> {
-    if (!isCancellableNode(branchImpl)) {
-      return;
-    }
-    try {
-      await branchImpl.onCancel();
-    } catch (onCancelError) {
-      this.workflowLogger.logError(
-        `Parallel step "${this.node.stepId}": branch onCancel hook failed during timeout cleanup - continuing.`,
-        onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
-      );
-    }
+    await runOnCancelIfNeeded(branchImpl, branchRuntime, this.workflowLogger);
   }
 
   private buildBranchStackFrames(index: number): StackFrame[] {
@@ -534,8 +513,18 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
   private computeResumeAt(state: ParallelStepState): Date {
     const now = Date.now();
-    if (this.hasRunnableBranches(state)) return new Date(now + RETICK_FLOOR_MS);
-    let earliest: number | undefined;
+    const branchTimeout = this.resolveTimeoutMs(this.node.configuration['branch-timeout']);
+    const overallTimeout = this.resolveTimeoutMs(this.node.configuration.timeout);
+    const deadlines = state.branches.flatMap((branch) =>
+      !TERMINAL_BRANCH_STATUSES.has(branch.status) &&
+      branch.startedAt !== undefined &&
+      branchTimeout !== undefined
+        ? [branch.startedAt + branchTimeout]
+        : []
+    );
+    if (overallTimeout !== undefined) deadlines.push(state.startedAt + overallTimeout);
+    if (this.hasRunnableBranches(state)) deadlines.push(now + RETICK_FLOOR_MS);
+    let earliest: number | undefined = deadlines.length ? Math.min(...deadlines) : undefined;
 
     const inFlightBranches = state.branches.filter(
       (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
@@ -548,15 +537,16 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       });
       const resumeAt = branchRuntime.stepExecution?.state?.resumeAt;
       if (typeof resumeAt === 'string') {
-        const ts = new Date(resumeAt).getTime();
+        const parsed = new Date(resumeAt).getTime();
+        const ts = parsed <= now ? now + RETICK_FLOOR_MS : parsed;
         if (!Number.isNaN(ts) && (earliest === undefined || ts < earliest)) {
           earliest = ts;
         }
       }
     }
 
-    if (earliest !== undefined && earliest > now) {
-      return new Date(earliest);
+    if (earliest !== undefined) {
+      return new Date(Math.max(now, earliest));
     }
     return new Date(now + RETICK_FLOOR_MS);
   }

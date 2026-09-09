@@ -14,58 +14,18 @@ import { catchError } from './catch_error';
 import type { ExecutionBudget } from './execution_budget';
 import { createExecutionFence, outsideExecutionFence } from './execution_fence';
 import { handleExecutionDelay } from './handle_execution_delay';
+import { runOnCancelIfNeeded } from './run_node_cancellation';
 import { processNodeStackMonitoring } from './run_stack_monitor/process_node_stack_monitoring';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeImplementation } from '../step/node_implementation';
-import { isCancellableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export interface RunNodeOptions {
   runtime?: StepExecutionRuntime;
   parentSignal?: AbortSignal;
   deadline?: number;
   budget?: ExecutionBudget;
-}
-
-/**
- * Invokes the cancellable node's `onCancel` hook when the step's abort signal fired.
- * Errors are logged and swallowed so workflow teardown can continue.
- */
-async function runOnCancelIfNeeded(
-  nodeImplementation: NodeImplementation,
-  stepExecutionRuntime: StepExecutionRuntime,
-  workflowLogger: IWorkflowEventLogger
-): Promise<void> {
-  if (
-    !stepExecutionRuntime.abortController.signal.aborted ||
-    !isCancellableNode(nodeImplementation)
-  ) {
-    return;
-  }
-
-  const cleanupFence = createExecutionFence();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    await Promise.race([
-      cleanupFence.run(() => Promise.resolve(nodeImplementation.onCancel())),
-      new Promise<void>((resolve) => {
-        timer = setTimeout(() => {
-          workflowLogger.logWarn('Node cancellation cleanup exceeded its 1s deadline');
-          resolve();
-        }, 1000);
-      }),
-    ]);
-  } catch (onCancelError) {
-    workflowLogger.logError(
-      'Failed to execute onCancel hook - continuing execution',
-      onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
-    );
-  } finally {
-    cleanupFence.close();
-    if (timer) clearTimeout(timer);
-  }
 }
 
 /**

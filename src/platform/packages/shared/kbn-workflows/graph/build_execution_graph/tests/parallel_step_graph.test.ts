@@ -414,3 +414,30 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).not.toThrow();
   });
 });
+
+describe('parallel loop control boundary', () => {
+  it.each(['loop.break', 'loop.continue'] as const)(
+    'rejects %s targeting a loop outside the branch',
+    (type) => {
+      expect(() =>
+        convertToWorkflowGraph({
+          steps: [
+            {
+              name: 'outer',
+              type: 'foreach',
+              foreach: [1, 2],
+              steps: [
+                {
+                  name: 'parallel',
+                  type: 'parallel',
+                  foreach: [1, 2],
+                  steps: [{ name: 'escape', type }],
+                } as ParallelStep,
+              ],
+            },
+          ],
+        } as WorkflowYaml)
+      ).toThrow('same parallel branch');
+    }
+  );
+});

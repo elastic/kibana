@@ -1,0 +1,22 @@
+name: "Audit 23 - Workflow timeout during nested waits"
+description: "Workflow timeout must wake the parked execution and terminate all four nested waits. The workflow status is timed_out."
+enabled: true
+triggers:
+  - type: manual
+settings:
+  timeout: 2s
+steps:
+  - name: branches
+    type: parallel
+    foreach: [a, b]
+    steps:
+      - name: nested
+        type: parallel
+        foreach: [1, 2]
+        steps:
+          - name: long_wait
+            type: wait
+            with: { duration: 2m }
+          - name: after_wait
+            type: console
+            with: { message: MUST_NOT_RUN }
