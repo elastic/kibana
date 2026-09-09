@@ -1432,7 +1432,6 @@
     "core.euiSelectable.noMatchingOptions": "{searchValue} ne correspond à aucune option.",
     "core.euiSelectable.placeholderName": "Options de filtre",
     "core.euiSelectable.screenReaderInstructions": "Utilisez les flèches vers le haut et vers le bas pour déplacer la mise au point sur les options. Appuyez sur Entrée pour sélectionner. Appuyez sur Échap pour réduire les options.",
-    "core.euiSelectableListItem.checkedOption": "Option cochée.",
     "core.euiSelectableListItem.checkOptionInstructions": "Pour cocher cette option, appuyez sur Entrée.",
     "core.euiSelectableListItem.excludedOption": "Option exclue.",
     "core.euiSelectableListItem.excludeOptionInstructions": "Pour exclure cette option, appuyez sur Entrée.",

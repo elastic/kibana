@@ -1535,12 +1535,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
-    'euiSelectableListItem.checkedOption': i18n.translate(
-      'core.euiSelectableListItem.checkedOption',
-      {
-        defaultMessage: 'Checked option.',
-      }
-    ),
     'euiSelectableListItem.excludedOption': i18n.translate(
       'core.euiSelectableListItem.excludedOption',
       {
