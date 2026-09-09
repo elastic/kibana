@@ -50,9 +50,10 @@ const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
-// yarn.lock covers external dependency changes, which the package graph below cannot see.
+// this covers external dependency changes, which the package graph below cannot see.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
   /^yarn\.lock$/,
+  /^pnpm-workspace\.yaml$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
 
