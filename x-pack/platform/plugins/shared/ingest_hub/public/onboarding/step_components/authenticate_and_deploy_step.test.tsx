@@ -375,7 +375,10 @@ describe('AuthenticateAndDeployStep', () => {
       await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
       expect(mockCreate).not.toHaveBeenCalled();
       // Must update the existing SO with the latest ecfStacks.
-      expect(mockUpdate).toHaveBeenCalledWith('existing-dep-id', expect.objectContaining({ status: 'succeeded' }));
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'existing-dep-id',
+        expect.objectContaining({ status: 'succeeded' })
+      );
       // persistDeploymentId must not fire again (URL/context already set).
       expect(mockPersist).not.toHaveBeenCalled();
       expect(onContinue).toHaveBeenCalledTimes(1);

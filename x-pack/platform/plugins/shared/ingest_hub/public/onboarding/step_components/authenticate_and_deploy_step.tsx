@@ -48,8 +48,13 @@ interface AuthenticateAndDeployStepProps {
 
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod, detectAndReviewStep } =
-    useOnboardingFlow();
+  const {
+    servicesStep,
+    awsServicesMap,
+    deploymentMethod,
+    setDeploymentMethod,
+    detectAndReviewStep,
+  } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 

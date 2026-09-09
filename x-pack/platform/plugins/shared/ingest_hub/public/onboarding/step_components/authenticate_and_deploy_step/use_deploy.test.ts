@@ -1388,7 +1388,9 @@ describe('useDeploy', () => {
         mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts?.addDanger;
       expect(addDanger).toHaveBeenCalled();
       // onContinue must still fire — update failure is non-fatal.
-      expect(mockUseOnboardingFlow.mock.results[0].value.updateDetectAndReviewStep).toHaveBeenCalled();
+      expect(
+        mockUseOnboardingFlow.mock.results[0].value.updateDetectAndReviewStep
+      ).toHaveBeenCalled();
     });
   });
 });
