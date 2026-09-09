@@ -39,6 +39,7 @@ describe('Card', () => {
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
     expect(card.getAttribute('aria-label')).toBe('Test Card Title');
+    expect(card).toHaveAttribute('role', 'button');
   });
 
   it('calls onClick when card is clicked', () => {
@@ -56,6 +57,7 @@ describe('Card', () => {
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
     expect(card).not.toHaveAttribute('aria-pressed');
+    expect(card).not.toHaveAttribute('role');
   });
 
   it('does not call onClick when isDisabled is true', () => {
