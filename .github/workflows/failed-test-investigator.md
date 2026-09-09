@@ -123,6 +123,10 @@ safe-outputs:
     # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
     # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+    # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
+    # labels and parks the rest as pending suggestions, so a `medium` verdict added no
+    # labels and `ai:fix-flaky` never fired (https://github.com/github/gh-aw/issues/53654).
+    issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
@@ -144,6 +148,8 @@ safe-outputs:
     target: *issue_number
     required-labels: [failed-test]
     state-reason: not_planned
+    # Same gating as `add-labels`: a `medium` close is parked as a suggestion, not applied.
+    issue-intent: false
 
 strict: false
 timeout-minutes: 35
@@ -233,6 +239,8 @@ Every fix you propose is held to the same guardrails as the fixer and verifier w
 {{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
 
 ## Labels
+
+Label only when `confidence` is `medium` or `high`. A `low`-confidence verdict adds or removes no labels — except `failure:inconclusive` and `failure:insufficient-data`, which exist to record exactly that uncertainty. The comment already surfaces low confidence (see "Comment format").
 
 ### Classification label
 
