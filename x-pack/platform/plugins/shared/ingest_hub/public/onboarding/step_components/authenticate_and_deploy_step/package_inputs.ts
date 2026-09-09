@@ -14,7 +14,7 @@ import type {
   ServiceDataStreamVars,
 } from '../service_settings_step/use_service_settings';
 
-interface PackageInputEntry {
+export interface PackageInputEntry {
   enabled: boolean;
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }

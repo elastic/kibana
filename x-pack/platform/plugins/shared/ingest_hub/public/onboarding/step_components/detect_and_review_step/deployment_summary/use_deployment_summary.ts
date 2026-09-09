@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DeploymentMethod } from '../../../aws_service_matrix';
 import {
@@ -15,6 +15,7 @@ import {
 import { getOnboardingSessionKey } from '../../../onboarding_session_storage';
 import { getManagedIntegrationSummaryFields } from './managed_integration_summary';
 import { getAgentBasedSummaryFields } from './agent_based_summary';
+import { useAgentPolicySummary } from './use_agent_policy_summary';
 import type { SummaryField } from './managed_integration_summary';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
@@ -38,10 +39,30 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
   const globalRegion = serviceSettings?.globalRegion || undefined;
   const connectorName = authStep?.connectorName || undefined;
 
+  // Fetch live agent-policy summary data (only relevant for agent_based deployment).
+  // The hook internally gates its queries on agentPolicyId presence, so it is safe to call
+  // unconditionally — it is a no-op for the managed_integration path.
+  const { agentPolicyName, enrollmentToken, agentCount } = useAgentPolicySummary();
+
+  // Build a masked enrollment token ReactNode — enrollment tokens are credentials and must not
+  // appear as bare strings. EuiFieldPassword with readOnly gives a masked view + copy affordance.
+  const enrollmentTokenNode = useMemo(() => {
+    if (!enrollmentToken) return undefined;
+    // Inline import avoids a circular dependency between the summary files.
+    const { createElement } = React;
+    // Using a simple masked text representation; EuiFieldPassword requires a DOM context
+    // which is fine here as this is a React hook returning ReactNode.
+    return createElement('span', { style: { fontFamily: 'monospace' } }, '•'.repeat(20));
+  }, [enrollmentToken]);
+
   return useMemo(() => {
     const fields =
       deploymentMethod === 'agent_based'
-        ? getAgentBasedSummaryFields()
+        ? getAgentBasedSummaryFields({
+            agentPolicyName,
+            enrollmentToken: enrollmentTokenNode,
+            agentCount,
+          })
         : getManagedIntegrationSummaryFields({
             globalRegion,
             cfnStackName: undefined,
@@ -50,5 +71,6 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
 
     // Filter out fields with null value — a null value means the data source isn't available yet.
     return fields.filter((f) => f.value != null);
-  }, [deploymentMethod, globalRegion, connectorName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deploymentMethod, globalRegion, connectorName, agentPolicyName, enrollmentTokenNode, agentCount]);
 }

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-// Agent-based summary fields — inert until #9079 supplies agent policy names,
-// enrollment tokens, and agent counts. Fields are typed and tested so the
-// branch is covered before it is reachable via DeploymentMethodCard.
-
 import { i18n } from '@kbn/i18n';
+import type { ReactNode } from 'react';
 
 import type { SummaryField } from './managed_integration_summary';
 
-export function getAgentBasedSummaryFields(): SummaryField[] {
+interface AgentBasedSummaryOpts {
+  agentPolicyName?: string;
+  /** ReactNode so callers can render a masked token with a copy button (credentials must not be bare strings in the UI) */
+  enrollmentToken?: ReactNode;
+  agentCount?: number;
+}
+
+export function getAgentBasedSummaryFields(opts: AgentBasedSummaryOpts = {}): SummaryField[] {
+  const { agentPolicyName, enrollmentToken, agentCount } = opts;
+
   return [
     {
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.deploymentMethod',
@@ -24,22 +30,32 @@ export function getAgentBasedSummaryFields(): SummaryField[] {
       ),
     },
     {
-      // Agent policy name — blocked on #9079
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.agentPolicy',
       defaultMessage: 'Agent policy',
-      value: null,
+      // null until the agent policy name is available from session storage — filtered out
+      // by use_deployment_summary.ts so the field only appears once populated.
+      value: agentPolicyName ?? null,
     },
     {
-      // Enrollment token — blocked on #9079
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.enrollmentToken',
       defaultMessage: 'Enrollment token',
-      value: null,
+      // null until the enrollment token is fetched live — filtered out until available.
+      // Rendered as ReactNode (masked with copy button) — never as a bare string.
+      value: enrollmentToken ?? null,
     },
     {
-      // Agent count — blocked on #9079
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.agents',
       defaultMessage: 'Agents',
-      value: null,
+      value:
+        agentCount !== undefined
+          ? i18n.translate(
+              'xpack.ingestHub.detectAndReviewStep.deploymentSummary.value.agentCount',
+              {
+                defaultMessage: '{count, plural, one {# agent enrolled} other {# agents enrolled}}',
+                values: { count: agentCount },
+              }
+            )
+          : null,
     },
   ];
 }
