@@ -141,6 +141,7 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/observability-utils-server'
   - '@kbn/ui-callout'
+  - '@kbn/securitysolution-io-ts-utils'
 tags:
   - plugin
   - prod
