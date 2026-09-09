@@ -10,7 +10,11 @@ import { encode as encodeRison } from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
-import { clickLensAppMenuItem, revealLensAppMenuItem } from '../../app_menu';
+import {
+  clickLensAppMenuItem,
+  closeLensAppMenuOverflow,
+  openLensAppMenuOverflow,
+} from '../../app_menu';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -400,15 +404,17 @@ export class LensWorkspace {
 
   /** No-op — auto-apply is an inline AppMenu switch, not a settings popover. */
   async closeSettingsMenu() {}
-  /**
-   * Makes an AppMenu control visible, opening the overflow popover when needed.
-   * Share, Export, Inspect, and Open in Discover are overflow items on classic chrome.
-   */
-  async revealAppMenuItem(testId: string): Promise<Locator> {
-    return revealLensAppMenuItem(this.page, testId);
+  /** Opens the classic AppMenu overflow (Share, Export, Inspect, Open in Discover). */
+  async openAppMenuOverflow(): Promise<void> {
+    await openLensAppMenuOverflow(this.page);
   }
 
-  /** Clicks an AppMenu control, opening the overflow popover when needed. */
+  /** Closes the AppMenu overflow so the next step starts with a closed menu. */
+  async closeAppMenuOverflow(): Promise<void> {
+    await closeLensAppMenuOverflow(this.page);
+  }
+
+  /** Opens the overflow menu and clicks an overflow AppMenu item. */
   async clickAppMenuItem(testId: string): Promise<void> {
     await clickLensAppMenuItem(this.page, testId);
   }
@@ -418,11 +424,11 @@ export class LensWorkspace {
    * Dismisses save toasts first — they sit over the top nav and intercept the click.
    */
   async openShareModal() {
-    const shareButton = await this.revealAppMenuItem('lnsApp_shareButton');
-    await expect(shareButton).toBeEnabled({ timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
+    await this.openAppMenuOverflow();
+    await expect(this.shareButton).toBeEnabled({ timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
 
     await this.page.components.toast().closeAll();
-    await shareButton.click();
+    await this.shareButton.click();
     await this.shareModal.waitFor({ state: 'visible' });
     await this.copyShareUrlButton.waitFor({ state: 'visible' });
   }

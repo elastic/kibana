@@ -5,48 +5,31 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 /**
- * Makes an AppMenu item visible, opening the overflow popover when it is not inline.
- * Share, Export, Inspect, and Open in Discover live in the overflow on classic chrome.
+ * Opens the classic AppMenu overflow. Lens Share, Export, Inspect, and Open in
+ * Discover are overflow items — callers assert or click the item locators after this.
  */
-export async function revealLensAppMenuItem(page: ScoutPage, testId: string): Promise<Locator> {
-  const item = page.testSubj.locator(testId);
-  if (await item.isVisible()) {
-    return item;
-  }
-
+export async function openLensAppMenuOverflow(page: ScoutPage): Promise<void> {
   const overflowButton = page.testSubj.locator('app-menu-overflow-button');
   const popover = page.testSubj.locator('app-menu-popover');
 
-  if (await popover.isVisible()) {
-    await overflowButton.click();
-    await expect(popover).toBeHidden();
-  }
-
   await expect(overflowButton).toBeVisible();
   await overflowButton.click();
-
-  const popoverOpened = await popover
-    .waitFor({ state: 'visible', timeout: 2000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!popoverOpened) {
-    await overflowButton.click();
-  }
-
   await expect(popover).toBeVisible();
-  await expect(item).toBeVisible();
-  return item;
 }
 
-/**
- * Clicks an AppMenu item, opening the overflow popover when the control is not inline.
- * Mirrors Discover/Dashboard Scout `clickAppMenuItem` for Lens classic chrome.
- */
+/** Dismisses the AppMenu overflow so the next step starts with a closed menu. */
+export async function closeLensAppMenuOverflow(page: ScoutPage): Promise<void> {
+  const popover = page.testSubj.locator('app-menu-popover');
+  await page.keyboard.press('Escape');
+  await expect(popover).toBeHidden();
+}
+
+/** Opens the overflow menu and clicks an overflow AppMenu item. */
 export async function clickLensAppMenuItem(page: ScoutPage, testId: string): Promise<void> {
-  const item = await revealLensAppMenuItem(page, testId);
-  await item.click();
+  await openLensAppMenuOverflow(page);
+  await page.testSubj.locator(testId).click();
 }

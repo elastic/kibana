@@ -24,10 +24,14 @@ import {
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
 } from '../../fixtures/constants';
-import { revealLensAppMenuItem } from './app_menu';
+import { openLensAppMenuOverflow } from './app_menu';
 import type { ImportedSavedObject } from './saved_object_helpers';
 
-export { clickLensAppMenuItem, revealLensAppMenuItem } from './app_menu';
+export {
+  clickLensAppMenuItem,
+  closeLensAppMenuOverflow,
+  openLensAppMenuOverflow,
+} from './app_menu';
 
 export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
@@ -105,10 +109,10 @@ export async function createRuntimeFieldFromEditor(
  */
 export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
+  const exportButton = page.testSubj.locator('lnsApp_exportButton');
 
   // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
-  // Export sits in the overflow menu on classic chrome.
-  const exportButton = await revealLensAppMenuItem(page, 'lnsApp_exportButton');
+  await openLensAppMenuOverflow(page);
   await expect(exportButton).toBeEnabled();
   await exportButton.click();
 

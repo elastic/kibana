@@ -51,11 +51,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
     async ({ pageObjects, context, kbnUrl }) => {
       const { lens } = pageObjects;
 
-      await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+      await lens.workspace.openAppMenuOverflow();
+      await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
       const discoverPage = await openDiscoverFromPopup({
         context,
         kbnUrl,
-        click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+        click: () => lens.workspace.openInDiscoverButton.click(),
       });
       try {
         await expect(discoverPage.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
@@ -79,11 +80,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert columns are unchanged', async () => {
-        await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+        await lens.workspace.openAppMenuOverflow();
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
           kbnUrl,
-          click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+          click: () => lens.workspace.openInDiscoverButton.click(),
         });
         try {
           await expect(discoverPage.testSubj.locator('unifiedHistogramChart')).toBeVisible();
@@ -110,11 +112,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert columns are unchanged', async () => {
-        await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+        await lens.workspace.openAppMenuOverflow();
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
           kbnUrl,
-          click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+          click: () => lens.workspace.openInDiscoverButton.click(),
         });
         try {
           await expect(discoverPage.testSubj.locator('unifiedHistogramChart')).toBeVisible();
@@ -149,7 +152,9 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
       await lens.waitForVisualization(testData.XY_CHART);
 
-      await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeDisabled();
+      await lens.workspace.openAppMenuOverflow();
+      await expect(lens.workspace.openInDiscoverButton).toBeDisabled();
+      await lens.workspace.closeAppMenuOverflow();
     }
   );
 
@@ -166,11 +171,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover with an empty query', async () => {
-        await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+        await lens.workspace.openAppMenuOverflow();
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
           kbnUrl,
-          click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+          click: () => lens.workspace.openInDiscoverButton.click(),
         });
         try {
           await expect(discoverPage.testSubj.locator('unifiedHistogramChart')).toBeVisible();
@@ -198,11 +204,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert query plus Lucene pill', async () => {
-        await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+        await lens.workspace.openAppMenuOverflow();
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
           kbnUrl,
-          click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+          click: () => lens.workspace.openInDiscoverButton.click(),
         });
         try {
           await expect(discoverPage.testSubj.locator('unifiedHistogramChart')).toBeVisible();
@@ -248,11 +255,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert memory column plus combined KQL', async () => {
-        await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+        await lens.workspace.openAppMenuOverflow();
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
           kbnUrl,
-          click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+          click: () => lens.workspace.openInDiscoverButton.click(),
         });
         try {
           await expect(discoverPage.testSubj.locator('unifiedHistogramChart')).toBeVisible();
@@ -296,11 +304,12 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert combined KQL', async () => {
-        await expect(await lens.workspace.revealAppMenuItem('lnsApp_openInDiscover')).toBeEnabled();
+        await lens.workspace.openAppMenuOverflow();
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
           kbnUrl,
-          click: () => lens.workspace.clickAppMenuItem('lnsApp_openInDiscover'),
+          click: () => lens.workspace.openInDiscoverButton.click(),
         });
         try {
           await expect(discoverPage.testSubj.locator('unifiedHistogramChart')).toBeVisible();

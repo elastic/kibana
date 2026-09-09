@@ -52,14 +52,7 @@ export class Inspector {
   }
 
   async open(openButtonTestSubj: string = 'openInspectorButton') {
-    const openButton = this.page.testSubj.locator(openButtonTestSubj);
-    if (!(await openButton.isVisible())) {
-      const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-      if (await overflowButton.isVisible()) {
-        await overflowButton.click();
-      }
-    }
-    await openButton.click();
+    await this.page.testSubj.click(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
   }
 
