@@ -23,7 +23,7 @@ export const DeleteNoteRequestBody = lazySchema(() =>
         /**
          * Saved object ID of the note to delete.
          */
-        noteId: z.string(),
+        noteId: z.string().describe('Saved object ID of the note to delete.'),
       })
       .nullable(),
     z
@@ -31,7 +31,10 @@ export const DeleteNoteRequestBody = lazySchema(() =>
         /**
          * Saved object IDs of the notes to delete.
          */
-        noteIds: z.array(z.string()).nullable(),
+        noteIds: z
+          .array(z.string())
+          .nullable()
+          .describe('Saved object IDs of the notes to delete.'),
       })
       .nullable(),
   ])

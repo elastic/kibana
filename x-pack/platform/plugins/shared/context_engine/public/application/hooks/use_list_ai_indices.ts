@@ -15,29 +15,41 @@ import { createFindAiIndices } from '../utils/ai_index_content_list_utils';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-const getAiIndexListQueryOptions = (http: HttpStart) => ({
+export const getAiIndexListQueryOptions = (http: HttpStart) => ({
   queryKey: contextEngineQueryKeys.aiIndex.list(),
-  queryFn: ({ signal }: { signal?: AbortSignal }) => listAiIndices(http, { signal }),
+  queryFn: async ({ signal }: { signal?: AbortSignal }) => listAiIndices(http, { signal }),
 });
 
-export const useAiIndexFindItems = (): TableListViewFindItemsFn => {
+export interface ListAiIndicesResult {
+  findItems: TableListViewFindItemsFn;
+  hasCustomAiIndices: boolean;
+  isLoading: boolean;
+}
+
+export const useListAiIndices = (): ListAiIndicesResult => {
   const {
     services: { http },
   } = useKibana();
   const queryClient = useQueryClient();
 
-  useQuery<ListAiIndexResponse, Error>(getAiIndexListQueryOptions(http));
+  const { data, isLoading } = useQuery<ListAiIndexResponse, Error>(
+    getAiIndexListQueryOptions(http)
+  );
 
-  return useCallback(
-    async (searchQuery, _options, signal) => {
-      const { ai_indices } = await queryClient.ensureQueryData<ListAiIndexResponse>({
-        ...getAiIndexListQueryOptions(http),
-        queryFn: ({ signal: querySignal }) =>
-          listAiIndices(http, { signal: querySignal ?? signal }),
-      });
+  const findItems = useCallback<TableListViewFindItemsFn>(
+    async (searchQuery) => {
+      const { ai_indices } = await queryClient.ensureQueryData<ListAiIndexResponse>(
+        getAiIndexListQueryOptions(http)
+      );
 
       return createFindAiIndices(ai_indices)(searchQuery);
     },
     [queryClient, http]
   );
+
+  return {
+    findItems,
+    hasCustomAiIndices: (data?.ai_indices ?? []).some((aiIndex) => !aiIndex.managed),
+    isLoading,
+  };
 };

@@ -10,6 +10,7 @@ import type {
   ConversationListOptions,
   ConversationWithPermissions,
   ConversationListResult,
+  MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 
 /**
@@ -24,6 +25,14 @@ export interface ConversationCreatePublicRequest {
   title?: string;
   /** Defaults to `{ access_mode: 'private', entries: [] }`. */
   accessControl?: ConversationAccessControlInput;
+  /**
+   * Optional conversation template to apply.
+   */
+  templateId?: string;
+  /**
+   * Initial metadata values. Requires `templateId`.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
 }
 
 /**
