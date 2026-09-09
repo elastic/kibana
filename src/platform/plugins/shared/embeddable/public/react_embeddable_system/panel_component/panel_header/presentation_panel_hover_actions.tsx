@@ -97,6 +97,7 @@ export const PresentationPanelHoverActions = ({
   className,
   viewMode,
 }: PresentationPanelHoverActionsProps) => {
+  console.log({ viewMode });
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
@@ -343,7 +344,7 @@ export const PresentationPanelHoverActions = ({
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
 
-  return (
+  return viewMode === 'preview' ? null : (
     <>
       {api && (quickActionElements.length || showContextMenu) && (
         <div

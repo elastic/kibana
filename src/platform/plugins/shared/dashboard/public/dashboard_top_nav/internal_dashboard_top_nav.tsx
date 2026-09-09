@@ -521,6 +521,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
+          isDisabled={viewMode === 'preview'}
           showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}

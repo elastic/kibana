@@ -79,6 +79,7 @@ export function getDashboardApi({
   const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
 
   const viewModeManager = initializeViewModeManager({
+    creationOptions,
     incomingEmbeddables,
     isManaged,
     savedObjectId,
