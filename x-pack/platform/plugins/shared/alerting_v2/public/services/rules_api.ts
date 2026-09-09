@@ -23,7 +23,7 @@ import type {
   RuleTagsParams,
   TagsResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH, ALERTING_V2_INTERNAL_RULE_API_PATH } from '../constants';
 
 /**
  * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
@@ -42,7 +42,7 @@ export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
   public async listTags(params: RuleTagsParams = {}): Promise<TagsResponse> {
-    return this.http.get<TagsResponse>(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+    return this.http.get<TagsResponse>(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
       query: {
         search: params.search || undefined,
         kind: params.kind || undefined,
