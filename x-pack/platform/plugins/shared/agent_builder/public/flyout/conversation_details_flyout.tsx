@@ -106,6 +106,7 @@ const FlyoutFrame = ({ titleId, header, footer, tabs, children }: FlyoutFramePro
 };
 
 export interface ConversationDetailsFlyoutContentProps {
+  isOpenedFromChat: boolean;
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
@@ -113,6 +114,7 @@ export interface ConversationDetailsFlyoutContentProps {
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
 export const ConversationDetailsFlyoutContent = ({
+  isOpenedFromChat,
   conversation,
   conversationTemplatesService,
   titleId,
@@ -142,8 +144,8 @@ export const ConversationDetailsFlyoutContent = ({
   return (
     <FlyoutFrame
       titleId={titleId}
-      header={Header && <Header conversation={conversation} />}
-      footer={Footer && <Footer conversation={conversation} />}
+      header={Header && <Header conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
+      footer={Footer && <Footer conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
       tabs={
         shouldRenderTabs &&
         tabs.map((entry) => (
@@ -158,7 +160,11 @@ export const ConversationDetailsFlyoutContent = ({
       }
     >
       {selectedTab && SelectedTabContent && (
-        <SelectedTabContent key={selectedTab.id} conversation={conversation} />
+        <SelectedTabContent
+          key={selectedTab.id}
+          conversation={conversation}
+          isOpenedFromChat={isOpenedFromChat}
+        />
       )}
     </FlyoutFrame>
   );
@@ -207,6 +213,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
 
   return (
     <ConversationDetailsFlyoutContent
+      isOpenedFromChat={false}
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
@@ -241,6 +248,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent
+          isOpenedFromChat
           conversation={conversation}
           conversationTemplatesService={conversationTemplatesService}
           titleId={titleId}

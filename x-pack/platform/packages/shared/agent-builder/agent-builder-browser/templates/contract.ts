@@ -19,6 +19,8 @@ import type { AttachmentServiceStartContract } from '../attachments';
 export interface ConversationTemplateDetailsFlyoutRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
+  /** Whether the flyout was opened by the chat's details button rather than the public API. */
+  isOpenedFromChat: boolean;
 }
 
 /**

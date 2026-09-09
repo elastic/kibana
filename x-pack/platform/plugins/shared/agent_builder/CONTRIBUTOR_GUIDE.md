@@ -1066,8 +1066,12 @@ The registry does not fetch card data or provide a default card when none is reg
 
 ### Conversation details header and footer
 
+Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
+`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
+`openConversationDetails`. It is supplied at render time, not through registration context.
+
 Template UI definitions can provide optional `detailsFlyout.header` and
-`detailsFlyout.footer` React components. Both receive `{ conversation }` and can use
+`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
 hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
 only the content for each slot. Without a custom header, the default title remains.
 Without a custom footer, no footer is rendered.
