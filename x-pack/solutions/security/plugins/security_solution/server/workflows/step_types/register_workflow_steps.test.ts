@@ -6,7 +6,11 @@
  */
 
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { registerWorkflowSteps } from './register_workflow_steps';
+import { IsolateHostStepId } from '../../../common/workflows/step_types/isolate_host_step/isolate_host_step_common';
+import { KillProcessStepId } from '../../../common/workflows/step_types/kill_process_step/kill_process_step_common';
+import { SuspendProcessStepId } from '../../../common/workflows/step_types/suspend_process_step/suspend_process_step_common';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
@@ -31,10 +35,11 @@ const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 describe('registerWorkflowSteps (server)', () => {
   it('registers all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
+    const endpointAppContextService = createMockEndpointAppContextService();
 
-    registerWorkflowSteps(workflowsExtensions);
+    registerWorkflowSteps(workflowsExtensions, endpointAppContextService);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(18);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -86,6 +91,15 @@ describe('registerWorkflowSteps (server)', () => {
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       patchRuleStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: IsolateHostStepId })
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: KillProcessStepId })
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: SuspendProcessStepId })
     );
   });
 });

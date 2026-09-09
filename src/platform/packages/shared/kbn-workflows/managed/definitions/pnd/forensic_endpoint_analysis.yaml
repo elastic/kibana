@@ -1,0 +1,164 @@
+version: "1"
+name: Endpoint Forensic Analysis
+description: >
+  Invokable investigation worker: given an attack
+  discovery alert id it extracts the affected host, runs
+  endpoint-forensic-analysis and suggest recommended response
+  action remedation
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_alert_id:
+          type: string
+          description: The ID of the attack discovery alert to be analyzed
+        investigation_id:
+          type: string
+          description: The ID of an existing investigation
+
+outputs:
+  properties:
+    propose:
+      type: boolean
+    rationale:
+      type: string
+    proposal:
+      type: string
+    # Recommendations only. Nothing in this repo executes them: the Floor renders
+    # them on the promote gate so the analyst sees what containment the forensics
+    # justify before escalating.
+    recommendedActions:
+      type: array
+      # Deliberately only `object`, not the full action shape. The agent step's
+      # `schema` already constrains what the model emits; restating it here would
+      # fail the whole run over one missing field on a list that is advisory
+      # anyway. The UI validates each action's structure before rendering it.
+      items:
+        type: object
+
+steps:
+  - name: fetch_attack_discovery_alert
+    type: elasticsearch.search
+    on-failure:
+      continue: true
+    with:
+      index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}*,.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}*"
+      ignore_unavailable: true
+      size: 1
+      _source:
+        - host.name
+        - kibana.alert.attack_discovery.alert_ids
+      query:
+        bool:
+          should:
+            - ids:
+                values:
+                  - "{{ inputs.attack_discovery_alert_id }}"
+            - term:
+                kibana.alert.uuid: "{{ inputs.attack_discovery_alert_id }}"
+          minimum_should_match: 1
+
+  - name: extract_host_from_ad_constituent_alerts
+    type: elasticsearch.search
+    if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
+    on-failure:
+      continue: true
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      ignore_unavailable: true
+      size: 0
+      query:
+        ids:
+          values: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+      aggregations:
+        host_name:
+          terms:
+            field: host.name
+            size: 1
+  - name: resolve_host
+    type: data.set
+    with:
+      host_name: "{{ event.host.name | default: event['host.name'] | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_ad_constituent_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
+  - name: when_host_known
+    type: if
+    condition: "${{ steps.resolve_host.output.host_name != blank }}"
+    steps:
+      - name: forensic_analysis
+        type: ai.agent
+        agent-id: alertzero-thin-agent
+        timeout: "15m"
+        create-conversation: true
+        with:
+          # conversation_id: "{{ inputs.investigation_id }}"
+          configuration_overrides:
+            skill_ids:
+              - endpoint-forensic-analysis
+          message: >
+            I have an alert on {{ steps.resolve_host.output.host_name }}.
+            Perform forensic analysis and extract all IoCs.
+
+            After the forensic reconstruction,
+            - Assess whether this represents a real incident that warrants containment.
+            - Put the forensic narrative (timeline, IoCs, other affected host, data gaps) in `rationale`.
+            - If this reconstruction justifies containment, recommend specific containment actions in `recommendedActions.
+              Only recommend actions specified below in "Allowed actions". Do not invent actions. Each action requires
+              endpoint_ids taken from Elastic Defend agent.id on involved hosts. Recommend only what you can
+              tie to the findings in the forensic narrative.
+            - State plainly
+              (a) what you will propose for human approval
+              (b) the exact change or action that approval authorizes
+              (c) what happens if it is declined.
+              Return this statement in `proposal`.
+
+            Allowed actions (use exact actionID, do not invent IDs):
+            - endpoint.isolate_host - isolate the host Use when the host is compromised and no more specific process/path action fits.
+            - endpoint.kill_process - kill a malicious process. Requires pid or entity_id from evidence.
+            - endpoint.suspend_process - suspend a suspected malicious process. Use when the evidence is strong but you want a reversible action.Requires pid or entity_id from evidence.
+
+            Rules
+            - Pick the most specific action the evidence supports. Prefer kill/suspend when a process entity_id or pid is present; isolate when only the host is known.
+            - If no Elastic Defend endpoint_id is present, or required extra fields are missing, set propose=false. Do not guess ids, pids, paths, or commands.
+            - Cite hosts, process/path, tactics, and why this action now in rationale.
+
+          schema:
+            type: object
+            required:
+              - propose
+              - rationale
+              - proposal
+            properties:
+              propose:
+                type: boolean
+                description: >
+                  True only when the agent recommends one or more specific containment actions
+              rationale:
+                type: string
+                maxLength: 16000
+                description: >
+                  Forensic narrative: timeline, IoCs, other affected hosts,
+                  and why this is or is not a real incident.
+              proposal:
+                type: string
+                maxLength: 2000
+                description: >
+                  One short paragraph stating plainly (a) what you propose
+                  for human approval, (b) the exact change or action
+                  approval authorizes, and (c) what happens if it is
+                  declined.
+              recommendedActions:
+                type: array
+                maxItems: 8
+                description: >
+                  Containment this reconstruction justifies. Empty when the evidence justifies none.
+                items:
+                  type: object
+                  properties:
+                    agentId:
+                      type: string
+                    actionId:
+                      type: string
+                      enum:
+                        - endpoint.isolate_host
+                        - endpoint.kill_process
+                        - endpoint.suspend_process

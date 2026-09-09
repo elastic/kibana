@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
@@ -24,12 +25,16 @@ import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
+import { createIsolateHostStepDefinition } from './isolate_host_step/isolate_host_step';
+import { createKillProcessStepDefinition } from './kill_process_step/kill_process_step';
+import { createSuspendProcessStepDefinition } from './suspend_process_step/suspend_process_step';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  endpointAppContextService: EndpointAppContextService
 ): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
@@ -49,4 +54,7 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(updateNoteStepDefinition);
   workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
+  workflowsExtensions.registerStepDefinition(createIsolateHostStepDefinition(endpointAppContextService));
+  workflowsExtensions.registerStepDefinition(createKillProcessStepDefinition(endpointAppContextService));
+  workflowsExtensions.registerStepDefinition(createSuspendProcessStepDefinition(endpointAppContextService));
 };
