@@ -108,6 +108,20 @@ export function taskRunner(
                 type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
                 apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
               },
+              // A UIAM key is queued for invalidation under its own id in the pending SO's
+              // `apiKeyId`, but pending jobs record that id in `uiamApiKeyId`, so the paths above
+              // can never match it. Each path is queried separately and the in-use hits are
+              // unioned, so adding these can only move a key from "invalidate" to "in use":
+              // objects predating the field (or written by an older node mid-rolling-upgrade)
+              // simply keep today's behavior instead of becoming newly at risk.
+              {
+                type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
+              {
+                type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
             ],
           });
           totalInvalidated = result.totalInvalidated;

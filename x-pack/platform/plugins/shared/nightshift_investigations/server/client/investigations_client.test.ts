@@ -72,6 +72,7 @@ const makeClient = (
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
     investigationRepository: repository,
+    isAvailable: jest.fn().mockResolvedValue(true),
     ...overrides,
   });
 
@@ -285,6 +286,13 @@ describe('NightshiftInvestigationsClient.list()', () => {
     );
   });
 
+  it('maps concurrency_key onto the stored investigation filter', async () => {
+    await makeClient().list({ concurrency_key: 'alert-1' });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({ concurrencyKey: 'alert-1' })
+    );
+  });
+
   it('omits sortField when sort_field is not given so the store default applies', async () => {
     await makeClient().list({});
     expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ sortField: undefined }));
@@ -342,7 +350,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
 describe('NightshiftInvestigationsClient.start()', () => {
   const WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
-  const mockWorkflow = { id: WORKFLOW_ID, definition: { steps: [] } };
+  const mockWorkflow = { id: WORKFLOW_ID, enabled: true, valid: true, definition: { steps: [] } };
 
   const alertContext = {
     alerts: [
@@ -509,11 +517,21 @@ describe('NightshiftInvestigationsClient.start()', () => {
       logger: mockLogger,
       spaceIdOverride: SPACE_ID,
       investigationRepository: repository,
+      isAvailable: jest.fn().mockResolvedValue(true),
     });
 
     await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
       InvestigationUnavailableError
     );
+  });
+
+  it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
+    await expect(
+      makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).start({
+        subject: { type: 'significant_event', id: 'se-1' },
+      })
+    ).rejects.toThrow(InvestigationUnavailableError);
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
   // The route schema also enforces this, but the workflow step definition and the plugin start

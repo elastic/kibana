@@ -229,18 +229,18 @@ describe('AppHeader adapter', () => {
     const chrome = chromeServiceMock.createStartContract();
     const { unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(true);
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 
   it('does not claim the slot when only the view is rendered', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderAppHeader(<AppHeaderView title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.set).not.toHaveBeenCalled();
   });
 
   it('claims the inline slot for DiscoverAppHeader', () => {
@@ -250,11 +250,11 @@ describe('AppHeader adapter', () => {
       chrome
     );
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(true);
     expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 });

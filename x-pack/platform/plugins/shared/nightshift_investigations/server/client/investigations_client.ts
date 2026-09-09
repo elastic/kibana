@@ -234,6 +234,7 @@ export interface NightshiftInvestigationsClientDeps {
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
   investigationRepository: InvestigationRepository;
+  isAvailable: () => Promise<boolean>;
 }
 
 export class NightshiftInvestigationsClient {
@@ -244,6 +245,7 @@ export class NightshiftInvestigationsClient {
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly investigationRepository: InvestigationRepository;
+  private readonly checkAvailability: () => Promise<boolean>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -253,7 +255,10 @@ export class NightshiftInvestigationsClient {
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
     this.investigationRepository = deps.investigationRepository;
+    this.checkAvailability = deps.isAvailable;
   }
+
+  public isAvailable = (): Promise<boolean> => this.checkAvailability();
 
   private getSpaceId(): string {
     return (
@@ -309,6 +314,9 @@ export class NightshiftInvestigationsClient {
 
     if (!this.agentBuilder) {
       throw new InvestigationUnavailableError('agentBuilder is not available');
+    }
+    if (!(await this.isAvailable())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
     }
 
     const prepared = this.prepareAgentInput(subject, message, context);
@@ -631,6 +639,7 @@ export class NightshiftInvestigationsClient {
 
   async list({
     statuses,
+    concurrency_key,
     created_after,
     created_before,
     started_after,
@@ -644,6 +653,7 @@ export class NightshiftInvestigationsClient {
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
     const result = await this.investigationRepository.find({
       statuses,
+      concurrencyKey: concurrency_key,
       createdAfter: created_after,
       createdBefore: created_before,
       startedAfter: started_after,

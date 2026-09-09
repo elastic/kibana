@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: Cover with a unit test, then DELETE. The first two `it` blocks are
+ * setup written as tests, and the only assertion in the file is that the `ruleLinkedDashboards`
+ * section renders — static markup in
+ * x-pack/platform/packages/shared/response-ops/rule_form/src/rule_details/rule_dashboards.tsx,
+ * which has no test file yet while its siblings (rule_details.test.tsx,
+ * rule_investigation_guide_editor.test.tsx) do. A jest test there covers this for every consumer,
+ * not just Discover, and drops an esArchiver load plus a browser from CI.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { openDiscoverSearchThresholdRuleFlyout } from '../open_search_threshold_rule_flyout';
