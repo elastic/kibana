@@ -151,6 +151,10 @@ safe-outputs:
     target: *issue_number
     required-labels: [failed-test]
     state-reason: not_planned
+    # Same confidence gating as `add-labels` above: with issue intents on, a `medium`
+    # `ci-environment` verdict (which this prompt allows to close) is parked as a pending
+    # close suggestion while the handler still logs "closed successfully".
+    issue-intent: false
 
 strict: false
 timeout-minutes: 35
