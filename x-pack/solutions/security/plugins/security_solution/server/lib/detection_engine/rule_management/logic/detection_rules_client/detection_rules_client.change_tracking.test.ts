@@ -146,7 +146,7 @@ describe('DetectionRulesClient change tracking', () => {
     });
 
     describe('importRules', () => {
-      it('uses ruleImport action when overwriting an existing rule', async () => {
+      it('forwards caller-supplied changeTracking when overwriting an existing rule', async () => {
         const existingRule = getRulesSchemaMock();
         (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
           [existingRule.rule_id]: existingRule,
@@ -155,13 +155,18 @@ describe('DetectionRulesClient change tracking', () => {
         await detectionRulesClient.importRules({
           rules: [{ ...getValidatedRuleToImportMock(), rule_id: existingRule.rule_id }],
           overwriteRules: true,
+          changeTracking: {
+            action: SecurityRuleChangeTrackingAction.ruleImport,
+            metadata: { bulkCount: 5 },
+          },
         });
 
         expect(rulesClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            changeTracking: expect.objectContaining({
+            changeTracking: {
               action: SecurityRuleChangeTrackingAction.ruleImport,
-            }),
+              metadata: { bulkCount: 5 },
+            },
           })
         );
       });

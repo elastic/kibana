@@ -10,7 +10,6 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../../mergers/apply_rule_update';
 import { toggleRuleEnabledOnUpdate } from '../../utils';
@@ -65,10 +64,7 @@ export async function overwriteRules({
         const updatedRule = await rulesClient.update({
           id: existingRule.id,
           data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
-          changeTracking: {
-            action: SecurityRuleChangeTrackingAction.ruleImport,
-            ...changeTracking,
-          },
+          changeTracking,
         });
 
         await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);

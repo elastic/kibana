@@ -253,6 +253,35 @@ describe('detectionRulesClient.importRules', () => {
     expect(errors.every((e) => e.error.message === 'unauthorized')).toBe(true);
   });
 
+  it('forwards caller changeTracking to rulesClient.update verbatim on overwrite', async () => {
+    const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule' };
+    (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
+      'existing-rule': existingRule,
+    });
+    rulesClient.update.mockResolvedValueOnce(
+      getRuleMock({ ...getQueryRuleParams(), ruleId: 'existing-rule' })
+    );
+
+    await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [{ ...getImportRulesSchemaMock(), rule_id: 'existing-rule' }],
+      changeTracking: {
+        action: SecurityRuleChangeTrackingAction.ruleImport,
+        metadata: { bulkCount: 4200 },
+      },
+    });
+
+    expect(rulesClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        changeTracking: {
+          action: SecurityRuleChangeTrackingAction.ruleImport,
+          metadata: { bulkCount: 4200 },
+        },
+      })
+    );
+  });
+
   it('forwards caller changeTracking to rulesClient.bulkCreateRules verbatim', async () => {
     const rules = [
       { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
