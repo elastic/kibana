@@ -55,23 +55,20 @@ def to_entry(doc, sibling_docs):
     if isinstance(question, dict):
         question = question.get('question') or json.dumps(question)[:2000]
 
-    # The final answer lives in `messages[].message` as a plain string -- there is
-    # no `output.answer` field, so probing for one silently strips every card's
-    # conclusion ("No final answer message captured."). Upstream rule: the LAST
-    # message over MIN_ANSWER_CHARS wins; shorter trailing messages are tool
-    # chatter. Scan every sibling doc, not just the richest-steps one -- 22 of 759
-    # cells keep their steps and their final message in DIFFERENT documents.
+    # Both fields come from the sibling docs, not just the richest-steps one:
+    # 22 of 759 cells keep their steps and their final message in DIFFERENT
+    # documents. The answer lives at `messages[].message` as a plain string --
+    # there is no `output.answer` field, so probing for one silently strips
+    # every card's conclusion ("No final answer message captured."). Upstream
+    # rule: the LAST message over MIN_ANSWER_CHARS wins; shorter trailing
+    # messages are tool chatter.
     answer = None
-    for sibling in sibling_docs:
-        for msg in out_of(sibling).get('messages') or []:
-            if not isinstance(msg, dict):
-                continue
-            text = msg.get('message')
-            if isinstance(text, str) and len(text.strip()) > MIN_ANSWER_CHARS:
-                answer = text
-
     scores = {}
     for sibling in sibling_docs:
+        for msg in out_of(sibling).get('messages') or []:
+            text = msg.get('message') if isinstance(msg, dict) else None
+            if isinstance(text, str) and len(text.strip()) > MIN_ANSWER_CHARS:
+                answer = text
         evaluator = sibling.get('evaluator') or {}
         name, value = evaluator.get('name'), evaluator.get('score')
         if name is not None and isinstance(value, (int, float)):
