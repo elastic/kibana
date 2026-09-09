@@ -1429,7 +1429,6 @@
     "core.euiSelectable.noMatchingOptions": "{searchValue} stimmt mit keinen Optionen überein",
     "core.euiSelectable.placeholderName": "Filteroptionen",
     "core.euiSelectable.screenReaderInstructions": "Verwenden Sie die Pfeiltasten nach oben und unten, um den Fokus auf die Optionen zu verschieben. Drücken Sie zur Auswahl Enter. Drücken Sie die Escape-Taste, um die Optionen einzuklappen.",
-    "core.euiSelectableListItem.checkedOption": "Ausgewählte Option.",
     "core.euiSelectableListItem.checkOptionInstructions": "Um diese Option auszuwählen, drücken Sie die Eingabetaste.",
     "core.euiSelectableListItem.excludedOption": "Ausgeschlossene Option",
     "core.euiSelectableListItem.excludeOptionInstructions": "Um diese Option auszuschließen, drücken Sie die Eingabetaste.",
