@@ -163,7 +163,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...persistedAuthStepRef.current,
         ...(update.agentHostsMode !== undefined ? { agentHostsMode: update.agentHostsMode } : {}),
         ...(update.agentPolicyId !== undefined ? { agentPolicyId: update.agentPolicyId } : {}),
-        ...(update.agentPolicyName !== undefined ? { agentPolicyName: update.agentPolicyName } : {}),
+        ...(update.agentPolicyName !== undefined
+          ? { agentPolicyName: update.agentPolicyName }
+          : {}),
         ...(update.selectedAgentPolicyIds !== undefined
           ? { selectedAgentPolicyIds: update.selectedAgentPolicyIds }
           : {}),

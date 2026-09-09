@@ -103,22 +103,22 @@ export function renderOnboardingApp(
                 → useFlyoutContext(). The hook throws if the context is absent.
                 See: fleet/public/hooks/use_flyout_context.tsx */}
             <FlyoutContextProvider>
-            {/* KibanaVersionContext must wrap any Fleet component that calls useKibanaVersion().
+              {/* KibanaVersionContext must wrap any Fleet component that calls useKibanaVersion().
                 AgentEnrollmentFlyout reaches it via installation_message.tsx → useAgentVersion.
                 Without this provider the hook throws by design (null context → Error).
                 See: fleet/public/hooks/use_kibana_version.ts */}
-            <KibanaVersionContext.Provider value={kibanaVersion ?? ''}>
-              <OnboardingFlowProvider>
-                <Router history={params.history}>
-                  <Route exact path="/">
-                    <RootRedirect />
-                  </Route>
-                  <Route path="/:integrationId">
-                    <OnboardingShell />
-                  </Route>
-                </Router>
-              </OnboardingFlowProvider>
-            </KibanaVersionContext.Provider>
+              <KibanaVersionContext.Provider value={kibanaVersion ?? ''}>
+                <OnboardingFlowProvider>
+                  <Router history={params.history}>
+                    <Route exact path="/">
+                      <RootRedirect />
+                    </Route>
+                    <Route path="/:integrationId">
+                      <OnboardingShell />
+                    </Route>
+                  </Router>
+                </OnboardingFlowProvider>
+              </KibanaVersionContext.Provider>
             </FlyoutContextProvider>
           </FleetStatusProvider>
         </QueryClientProvider>
