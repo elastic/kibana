@@ -86,7 +86,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
     },
     async clickFilterItems(itemList: string[]) {
       for (const title of itemList) {
-        await find.clickByCssSelector(`li[title="${title}"]`);
+        await find.clickByCssSelector(`li span[title="${title}"]`);
       }
     },
     async applyFilterItems(filterType: string) {
