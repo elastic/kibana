@@ -346,6 +346,35 @@ describe('useServiceFlyoutTransactionData', () => {
 
       await waitFor(() => expect(result.current.maxCountExceeded).toBe(false));
     });
+
+    it('resets maxCountExceeded when projectRouting changes', async () => {
+      const http = {
+        get: jest
+          .fn()
+          .mockResolvedValueOnce({
+            transactionGroups: [],
+            maxCountExceeded: true,
+            hasActiveAlerts: false,
+          })
+          .mockResolvedValue({
+            transactionGroups: [],
+            maxCountExceeded: false,
+            hasActiveAlerts: false,
+          }),
+      } as unknown as HttpStart;
+
+      const { result, rerender } = renderHook(
+        ({ projectRouting }: { projectRouting?: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, projectRouting }),
+        { initialProps: { projectRouting: '_alias:*' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+
+      rerender({ projectRouting: '_alias:_origin' });
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(false));
+    });
   });
 
   describe('detailed statistics', () => {

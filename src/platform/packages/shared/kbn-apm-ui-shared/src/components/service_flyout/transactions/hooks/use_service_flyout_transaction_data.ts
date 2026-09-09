@@ -120,7 +120,7 @@ export function useServiceFlyoutTransactionData({
 
   useEffect(() => {
     setMaxCountExceeded(false);
-  }, [serviceName, environment, start, end, transactionType]);
+  }, [serviceName, environment, start, end, transactionType, projectRouting]);
 
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
