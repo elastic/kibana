@@ -909,22 +909,14 @@ function GraphInner({
             {!isEmbedded && (
               <Panel position="top-right" css={topLeftToolbarStyles}>
                 {ServiceMapInvestigateButton && (
-                  <EuiPanel
-                    hasBorder
-                    hasShadow={false}
-                    paddingSize="none"
-                    borderRadius="m"
-                    grow={false}
-                  >
-                    <ServiceMapInvestigateButton
-                      rangeFrom={rangeFrom ?? start}
-                      rangeTo={rangeTo ?? end}
-                      environment={isEnvironmentDefined(environment) ? environment : undefined}
-                      kuery={kuery || undefined}
-                      serviceGroupId={serviceGroupId}
-                      highlightedServiceNames={highlightedServiceNames}
-                    />
-                  </EuiPanel>
+                  <ServiceMapInvestigateButton
+                    rangeFrom={rangeFrom ?? start}
+                    rangeTo={rangeTo ?? end}
+                    environment={isEnvironmentDefined(environment) ? environment : undefined}
+                    kuery={kuery || undefined}
+                    serviceGroupId={serviceGroupId}
+                    highlightedServiceNames={highlightedServiceNames}
+                  />
                 )}
                 <EuiPanel
                   hasBorder

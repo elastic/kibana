@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createServiceMapAttachmentType } from './service_map';
 import { SERVICE_MAP_ATTACHMENT_TYPE } from '../../../common/agent_builder/attachments';
 
 describe('createServiceMapAttachmentType', () => {
   const attachmentType = createServiceMapAttachmentType();
+  const mockContext = {} as AttachmentFormatContext;
 
   it('exposes the correct attachment type id', () => {
     expect(attachmentType.id).toBe(SERVICE_MAP_ATTACHMENT_TYPE);
@@ -22,22 +24,22 @@ describe('createServiceMapAttachmentType', () => {
   };
 
   describe('validate', () => {
-    it('accepts a valid payload with one connection', () => {
-      const result = attachmentType.validate({ connections: [minimalConnection] });
+    it('accepts a valid payload with one connection', async () => {
+      const result = await attachmentType.validate({ connections: [minimalConnection] });
       expect(result.valid).toBe(true);
     });
 
-    it('rejects an empty connections array', () => {
-      const result = attachmentType.validate({ connections: [] });
+    it('rejects an empty connections array', async () => {
+      const result = await attachmentType.validate({ connections: [] });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects a payload without connections', () => {
-      const result = attachmentType.validate({});
+    it('rejects a payload without connections', async () => {
+      const result = await attachmentType.validate({});
       expect(result.valid).toBe(false);
     });
 
-    it('accepts a connection where span.type and span.subtype are absent (bug-fix)', () => {
+    it('accepts a connection where span.type and span.subtype are absent (bug-fix)', async () => {
       const connectionWithExternalNodeMissingSubtype = {
         source: { 'service.name': 'frontend' },
         target: {
@@ -46,14 +48,14 @@ describe('createServiceMapAttachmentType', () => {
         },
         metrics: undefined,
       };
-      const result = attachmentType.validate({
+      const result = await attachmentType.validate({
         connections: [connectionWithExternalNodeMissingSubtype],
       });
       expect(result.valid).toBe(true);
     });
 
-    it('accepts a connection where span.type is present but span.subtype is absent', () => {
-      const result = attachmentType.validate({
+    it('accepts a connection where span.type is present but span.subtype is absent', async () => {
+      const result = await attachmentType.validate({
         connections: [
           {
             source: { 'service.name': 'a' },
@@ -68,8 +70,8 @@ describe('createServiceMapAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('accepts nodeMetadata with alert/SLO/anomaly fields', () => {
-      const result = attachmentType.validate({
+    it('accepts nodeMetadata with alert/SLO/anomaly fields', async () => {
+      const result = await attachmentType.validate({
         connections: [minimalConnection],
         nodeMetadata: {
           frontend: {
@@ -84,8 +86,8 @@ describe('createServiceMapAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('accepts nodeMetadata with only some fields present', () => {
-      const result = attachmentType.validate({
+    it('accepts nodeMetadata with only some fields present', async () => {
+      const result = await attachmentType.validate({
         connections: [minimalConnection],
         nodeMetadata: {
           frontend: { alertsCount: 1 },
@@ -94,8 +96,8 @@ describe('createServiceMapAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('rejects nodeMetadata with an invalid sloStatus value', () => {
-      const result = attachmentType.validate({
+    it('rejects nodeMetadata with an invalid sloStatus value', async () => {
+      const result = await attachmentType.validate({
         connections: [minimalConnection],
         nodeMetadata: {
           frontend: { sloStatus: 'unknown-value' },
@@ -104,8 +106,8 @@ describe('createServiceMapAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('accepts nodeMetadata omitted entirely', () => {
-      const result = attachmentType.validate({
+    it('accepts nodeMetadata omitted entirely', async () => {
+      const result = await attachmentType.validate({
         connections: [minimalConnection],
       });
       expect(result.valid).toBe(true);
@@ -116,15 +118,17 @@ describe('createServiceMapAttachmentType', () => {
   });
 
   describe('format', () => {
-    it('returns a text representation with connections and nodeMetadata', () => {
+    it('returns a text representation with connections and nodeMetadata', async () => {
       const data = {
         connections: [minimalConnection],
         nodeMetadata: { frontend: { alertsCount: 1 } },
       };
-      if (!attachmentType.validate(data).valid) throw new Error('pre-condition failed');
-      const representation = attachmentType
-        .format({ id: 'test', type: attachmentType.id, data })
-        .getRepresentation();
+      if (!(await attachmentType.validate(data)).valid) throw new Error('pre-condition failed');
+      const formatted = await attachmentType.format(
+        { id: 'test', type: attachmentType.id, data },
+        mockContext
+      );
+      const representation = await formatted.getRepresentation!();
       expect(representation.type).toBe('text');
       const parsed = JSON.parse(representation.value as string);
       expect(parsed.nodeMetadata).toEqual({ frontend: { alertsCount: 1 } });
@@ -133,7 +137,7 @@ describe('createServiceMapAttachmentType', () => {
 
   describe('getAgentDescription', () => {
     it('mentions badge metadata fields', () => {
-      const description = attachmentType.getAgentDescription();
+      const description = attachmentType.getAgentDescription!();
       expect(description).toContain('alertsCount');
       expect(description).toContain('sloStatus');
       expect(description).toContain('nodeMetadata');

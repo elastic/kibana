@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
@@ -99,16 +100,18 @@ export function ServiceMapInvestigateButton({
   }
 
   return (
-    <AiButton
-      data-test-subj="observabilityAgentBuilderServiceMapInvestigateButton"
-      variant="empty"
-      size="s"
-      iconType="productAgent"
-      onClick={handleClick}
-    >
-      {i18n.translate('xpack.observabilityAgentBuilder.serviceMapInvestigateButton.label', {
-        defaultMessage: 'Investigate map',
-      })}
-    </AiButton>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m" grow={false}>
+      <AiButton
+        data-test-subj="observabilityAgentBuilderServiceMapInvestigateButton"
+        variant="empty"
+        size="s"
+        iconType="productAgent"
+        onClick={handleClick}
+      >
+        {i18n.translate('xpack.observabilityAgentBuilder.serviceMapInvestigateButton.label', {
+          defaultMessage: 'Investigate map',
+        })}
+      </AiButton>
+    </EuiPanel>
   );
 }
