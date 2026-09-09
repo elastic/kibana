@@ -4177,6 +4177,57 @@ describe('updatePackRoute', () => {
       expect(patchedAttributes.result_type).toBe('differential');
     });
 
+    // Regression: the body destructure pulled only min_osquery_version and
+    // result_type, so a pack-level `platform` was accepted by the request
+    // schema, silently dropped by the handler, and reverted on reload.
+    it('sets pack-level platform on the SO when provided', async () => {
+      const { mockClient } = setupV5Route();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { name: 'my-pack', platform: 'linux,darwin' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      expect(patchedAttributes.platform).toBe('linux,darwin');
+    });
+
+    it('clears pack-level platform when null is provided (explicit unset)', async () => {
+      const { mockClient } = setupV5Route({ platform: 'linux' }, { platform: null });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { name: 'my-pack', platform: null },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      expect(patchedAttributes.platform).toBeNull();
+    });
+
+    it('does not patch pack-level platform when it is absent from the request body', async () => {
+      const { mockClient } = setupV5Route({ platform: 'linux' });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'only updating description' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      expect(patchedAttributes).not.toHaveProperty('platform');
+    });
+
     it('clears min_osquery_version and result_type when null is provided (explicit unset)', async () => {
       const { mockClient } = setupV5Route(
         { min_osquery_version: '5.10.0', result_type: 'differential' as const },

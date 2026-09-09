@@ -36,6 +36,8 @@ export interface PackResponseData {
   min_osquery_version?: string;
   /** V5: Pack-level result type default. */
   result_type?: ResultType;
+  /** V5: Pack-level platform (OS) default. */
+  platform?: string;
 }
 
 export interface ReadPackResponseData {
@@ -69,4 +71,6 @@ export interface ReadPackResponseData {
   min_osquery_version?: string;
   /** V5: Pack-level result type default. */
   result_type?: ResultType;
+  /** V5: Pack-level platform (OS) default. */
+  platform?: string;
 }

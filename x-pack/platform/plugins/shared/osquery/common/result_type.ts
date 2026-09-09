@@ -40,3 +40,32 @@ export const mapResultTypeToWire = (
   // 'snapshot' → emit nothing; osquerybeat defaults to snapshot: true
   return {};
 };
+
+/**
+ * Inverse of {@link mapResultTypeToWire}: decodes the legacy
+ * `{ snapshot, removed }` boolean pair into a canonical {@link ResultType}.
+ *
+ * Returns `undefined` when neither boolean is stored, which is how a query
+ * that never carried an explicit result type is distinguished from one that
+ * explicitly stores snapshot mode. Callers use that distinction to tell an
+ * inheriting query from an overriding one.
+ *
+ * `snapshot: true` wins over `removed` because osquerybeat ignores `removed`
+ * in snapshot mode.
+ */
+export const mapWireToResultType = (wire: {
+  snapshot?: boolean;
+  removed?: boolean;
+}): ResultType | undefined => {
+  const { snapshot, removed } = wire;
+
+  if (snapshot === undefined && removed === undefined) {
+    return undefined;
+  }
+
+  if (snapshot !== false) {
+    return 'snapshot';
+  }
+
+  return removed ? 'differential' : 'differential_added_only';
+};

@@ -51,3 +51,17 @@ export type PackItem = PackSavedObject & {
   read_only?: boolean;
   shards?: Shard;
 };
+
+/**
+ * Pack-level execution defaults as sent on the wire.
+ *
+ * The update route distinguishes three states: absent means "preserve the
+ * stored value", `null` means "clear it", and a value means "set it". The
+ * stored ({@link PackSavedObject}) shape has no use for `null`, so the
+ * clearable form only exists at the request boundary.
+ */
+export interface ClearableExecutionDefaults {
+  min_osquery_version?: string | null;
+  result_type?: ResultType | null;
+  platform?: string | null;
+}

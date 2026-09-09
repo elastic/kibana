@@ -657,9 +657,53 @@ describe('QueryFlyout', () => {
       await waitFor(() => expect(onSave).toHaveBeenCalled());
 
       const saved = onSave.mock.calls[0][0];
+      // The pack defaults both of these, so turning the toggle off makes the
+      // query inherit them.
       expect(saved).not.toHaveProperty('version');
-      expect(saved).not.toHaveProperty('result_type');
       expect(saved).not.toHaveProperty('platform');
+    });
+
+    // Regression: the override-off branch used to delete `version`,
+    // `result_type` and `platform` unconditionally, while only the
+    // snapshot/removed delete was gated on the matching pack default. Because
+    // the toggle is shown when *any* pack default is set, turning it off wiped
+    // per-query values for fields the pack had no default for — the query
+    // inherited nothing and silently lost its own setting.
+    it('should keep a per-query value for a field the pack does not default when the toggle is off', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        // Only a result-type default: version and platform are NOT defaulted.
+        packResultType: 'snapshot',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          version: '5.12.0',
+          platform: 'windows',
+        },
+      });
+
+      // The query stores its own version and platform, so the toggle starts ON.
+      const toggle = screen.getByTestId('osquery-query-override-pack-defaults');
+      expect(toggle).toBeChecked();
+
+      act(() => {
+        fireEvent.click(toggle);
+      });
+      expect(toggle).not.toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      // The pack defaults neither of these, so the query's own values survive.
+      expect(saved.version).toBe('5.12.0');
+      expect(saved.platform).toBe('windows');
+      // The pack does default the result type, so that one is inherited.
+      expect(saved).not.toHaveProperty('result_type');
     });
 
     it('emits a per-query value that differs from the pack default', async () => {

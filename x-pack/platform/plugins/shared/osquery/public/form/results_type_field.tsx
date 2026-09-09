@@ -10,6 +10,7 @@ import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { useController, useFormState } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
+import type { ResultType } from '../../common/result_type';
 
 const SNAPSHOT_OPTION = {
   value: 'snapshot',
@@ -43,6 +44,17 @@ const DIFFERENTIAL_ADDED_ONLY_OPTION = {
 
 const FIELD_OPTIONS = [SNAPSHOT_OPTION, DIFFERENTIAL_OPTION, DIFFERENTIAL_ADDED_ONLY_OPTION];
 
+/**
+ * Select value → canonical {@link ResultType}. The two differential options use
+ * distinct `ResultType` names from their select values, so the mapping is
+ * explicit rather than a cast.
+ */
+const OPTION_TO_RESULT_TYPE: Record<string, ResultType> = {
+  [SNAPSHOT_OPTION.value]: 'snapshot',
+  [DIFFERENTIAL_OPTION.value]: 'differential',
+  [DIFFERENTIAL_ADDED_ONLY_OPTION.value]: 'differential_added_only',
+};
+
 interface ResultsTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
@@ -66,8 +78,24 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
     defaultValue: defaultValues?.removed,
   });
 
+  // `result_type` is the canonical field the serializer reads. The
+  // `snapshot`/`removed` booleans remain the display source (and the legacy
+  // wire encoding), but writing only those left `result_type` undefined, so a
+  // per-query Differential override was silently dropped on save.
+  const {
+    field: { onChange: onResultTypeChange },
+  } = useController({
+    name: 'result_type',
+    defaultValue: defaultValues?.result_type,
+  });
+
   const handleChange = useCallback(
     (newValue: any) => {
+      const resultType = OPTION_TO_RESULT_TYPE[newValue];
+      if (resultType !== undefined) {
+        onResultTypeChange(resultType);
+      }
+
       if (newValue === SNAPSHOT_OPTION.value) {
         onSnapshotChange(true);
         onRemovedChange(false);
@@ -83,7 +111,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
         onRemovedChange(false);
       }
     },
-    [onRemovedChange, onSnapshotChange]
+    [onRemovedChange, onSnapshotChange, onResultTypeChange]
   );
 
   useEffect(() => {

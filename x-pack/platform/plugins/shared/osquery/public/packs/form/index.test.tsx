@@ -1014,9 +1014,10 @@ describe('PackForm', () => {
       const submitted = mockCreateAsync.mock.calls[0][0];
       // Untouched optional fields are absent rather than empty strings.
       expect(submitted).not.toHaveProperty('min_osquery_version');
-      // A new pack defaults to Snapshot and persists it. (Existing packs keep
-      // whatever they had — see the legacy-pack test below.)
-      expect(submitted.result_type).toBe('snapshot');
+      // Pack-level defaults are opt-in. Persisting 'snapshot' on every new pack
+      // made `packHasDefaults` true everywhere, forcing the query flyout's
+      // "Override pack defaults" toggle on for a value the curator never chose.
+      expect(submitted).not.toHaveProperty('result_type');
     });
 
     it('does not force a result_type onto an existing pack that has none', async () => {

@@ -14,7 +14,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 import type { ResultType } from '../../../common/result_type';
-import { mapResultTypeToWire } from '../../../common/result_type';
+import { mapResultTypeToWire, mapWireToResultType } from '../../../common/result_type';
 import type { Shard } from '../../../common/utils/converters';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { DeserializeScheduleInput } from '../form/schedule_serializer';
@@ -194,14 +194,28 @@ const deserializer = (
   const hasOverride = payload.schedule_type !== undefined;
   const queryInterval = payload.interval ? parseInt(payload.interval, 10) : undefined;
 
-  // A per-query version/result_type is only meaningful as an "override" when
-  // the pack has a default for that field. Without a pack default, the per-query
-  // field is just the sole value — no override toggle is shown.
-  // The single override toggle is ON when the pack has any execution default
-  // and this query already stores its own value for at least one of them.
-  const hasVersionOverride = !!packMinOsqueryVersion && payload.version !== undefined;
-  const hasResultTypeOverride = !!packResultType && payload.result_type !== undefined;
-  const hasPlatformOverride = !!packPlatform && !!payload.platform;
+  // The single toggle is ON when this query stores its own value for any of
+  // the three execution defaults.
+  //
+  // Deliberately *not* gated on the matching pack default. The toggle governs
+  // all three fields at once, so a query that stores a platform while the pack
+  // only defaults a result type still holds a value the toggle is responsible
+  // for. Gating each predicate on its own pack default rendered the toggle OFF
+  // while the disabled controls displayed the query's real values — the state
+  // shown did not match the state stored.
+  //
+  // `result_type` is read alongside the legacy `snapshot`/`removed` pair so a
+  // pre-V5 query that only ever stored the booleans is still recognised as
+  // holding its own result type.
+  // A pre-V5 query stores its result type only as the `snapshot`/`removed`
+  // pair, so decode that into a canonical value before comparing.
+  const storedResultType =
+    payload.result_type ??
+    mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
+  const hasStoredResultType = storedResultType !== undefined;
+  const hasVersionOverride = payload.version !== undefined;
+  const hasResultTypeOverride = !!packResultType && hasStoredResultType;
+  const hasPlatformOverride = !!payload.platform;
   const hasAnyOverride = hasVersionOverride || hasResultTypeOverride || hasPlatformOverride;
 
   // Seed each execution-default field with the pack's value when the query has
@@ -211,7 +225,10 @@ const deserializer = (
   // inheriting query into an overriding one.
   const effectivePlatform = payload.platform || packPlatform || DEFAULT_PLATFORM;
   const effectiveVersion = payload.version ?? packMinOsqueryVersion;
-  const effectiveResultType = payload.result_type ?? packResultType;
+  // The query's own stored type (including a legacy boolean-only one) wins
+  // over the pack default, otherwise opening a legacy differential query in a
+  // pack that defaults to snapshot would display — and then save — snapshot.
+  const effectiveResultType = storedResultType ?? packResultType;
 
   // `ResultsTypeField` derives its display from the `snapshot`/`removed`
   // booleans, not from `result_type`, so the inherited value has to be
@@ -298,9 +315,20 @@ const serializer = (
       // has no defaults at all (the toggle is hidden), in which case the
       // per-query fields are the sole source and are emitted unconditionally.
       if (overridePackDefaults === false) {
-        delete draft.version;
-        delete draft.result_type;
-        delete draft.platform;
+        // Each delete is gated on the *matching* pack default. The toggle is
+        // shown when the pack has any one of the three defaults, so an
+        // ungated delete here would erase a per-query value for a field the
+        // pack has no default for — the query would inherit nothing and
+        // silently lose its own setting (an OS restriction or version floor
+        // dropped on a pack whose only default is a result type).
+        if (packDefaults.packMinOsqueryVersion) {
+          delete draft.version;
+        }
+
+        if (packDefaults.packPlatform) {
+          delete draft.platform;
+        }
+
         // The deserializer seeds `snapshot`/`removed` from the pack's result
         // type so the disabled control displays the inherited value. Those are
         // display-only for an inheriting query: leaving `snapshot: false` on
@@ -308,6 +336,7 @@ const serializer = (
         // (`snapshot === false ? { removed, snapshot } : {}`) and be read as an
         // explicit per-query differential override.
         if (packDefaults.packResultType) {
+          delete draft.result_type;
           delete draft.snapshot;
           delete draft.removed;
         }

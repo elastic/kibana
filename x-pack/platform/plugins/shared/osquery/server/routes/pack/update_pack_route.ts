@@ -131,6 +131,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           // V5: pack-level execution defaults (null = explicit clear)
           min_osquery_version: rawMinOsqueryVersion,
           result_type: rawResultType,
+          platform: rawPlatform,
         } = request.body;
 
         // Request-boundary feature-flag gate. Any RRULE-shaped field on the
@@ -374,6 +375,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         if (rawResultType !== undefined) {
           executionDefaultsPatch.result_type = rawResultType;
+        }
+
+        if (rawPlatform !== undefined) {
+          executionDefaultsPatch.platform = rawPlatform;
         }
 
         await spaceScopedClient.update<PackSavedObject>(

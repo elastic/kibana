@@ -1848,6 +1848,78 @@ describe('convertSOQueriesToPackConfig — V5 execution defaults fan-out', () =>
     });
   });
 
+  // Regression: `effectiveResultType` read the pack default before the stored
+  // legacy booleans, so setting any pack-level result type silently rewrote
+  // every legacy differential query to snapshot on the wire.
+  describe('legacy snapshot/removed precedence over the pack default', () => {
+    it('should keep a legacy differential query differential when the pack defaults to snapshot', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ snapshot: false, removed: true }),
+        { ...baseOpts, packExecutionDefaults: { result_type: 'snapshot' } }
+      );
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('should keep a legacy added-only query added-only when the pack defaults to snapshot', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ snapshot: false, removed: false }),
+        { ...baseOpts, packExecutionDefaults: { result_type: 'snapshot' } }
+      );
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(false);
+    });
+
+    it('should apply the pack default to a query that stores no result type at all', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'differential' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('should let an explicit per-query result_type win over the pack default', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ result_type: 'differential' }), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'snapshot' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+  });
+
+  // Regression: `DEFAULT_PLATFORM` is what the flyout seeds when a query has no
+  // platform of its own, so treating it as an override discarded the pack
+  // default and ran the query on every OS.
+  describe('DEFAULT_PLATFORM does not suppress the pack platform default', () => {
+    // Token order varies by how the value was produced (flyout seed, pack
+    // upload, hand-edited SO), so the check is set-based, not string equality.
+    it('should apply the pack platform default to a query storing DEFAULT_PLATFORM', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ platform: 'linux,darwin,windows' }),
+        { ...baseOpts, packExecutionDefaults: { platform: 'linux' } }
+      );
+      expect(queries.q1.platform).toBe('linux');
+    });
+
+    it('should still let a real per-query platform win over the pack default', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ platform: 'windows' }), {
+        ...baseOpts,
+        packExecutionDefaults: { platform: 'linux' },
+      });
+      expect(queries.q1.platform).toBe('windows');
+    });
+
+    it('should emit no platform when neither the query nor the pack restricts it', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ platform: 'linux,darwin,windows' }),
+        baseOpts
+      );
+      expect(queries.q1).not.toHaveProperty('platform');
+    });
+  });
+
   describe('result_type fan-out', () => {
     it('snapshot result_type emits no snapshot/removed keys', () => {
       const { queries } = convertSOQueriesToPackConfig(makeQuery(), {

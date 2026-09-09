@@ -35,7 +35,7 @@ import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import type { ResultType } from '../../../common/result_type';
-import { mapResultTypeToWire } from '../../../common/result_type';
+import { mapResultTypeToWire, mapWireToResultType } from '../../../common/result_type';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import { parseRRule } from '../../../common/utils/rrule_parser';
@@ -404,6 +404,33 @@ export interface PackConfigOutput {
 
 // Builds the Fleet packs.{key}.queries config plus pack-level defaults;
 // per-query fields only emitted when they override the pack default.
+/**
+ * True when a platform string names every OS in {@link DEFAULT_PLATFORM},
+ * regardless of token order or spacing.
+ *
+ * The comparison is set-based rather than a string equality check: the stored
+ * value's token order depends on how it was produced (the flyout's seeded
+ * default, a pack upload, or a hand-edited saved object), so
+ * `'linux,darwin,windows'` and `'linux,windows,darwin'` must be treated alike.
+ */
+const ALL_PLATFORM_TOKENS = new Set(DEFAULT_PLATFORM.split(',').map((token) => token.trim()));
+
+const isAllPlatforms = (value?: string): boolean => {
+  if (!value) {
+    return false;
+  }
+
+  const tokens = value
+    .split(',')
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+
+  return (
+    tokens.length === ALL_PLATFORM_TOKENS.size &&
+    tokens.every((token) => ALL_PLATFORM_TOKENS.has(token))
+  );
+};
+
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions
@@ -453,15 +480,22 @@ export const convertSOQueriesToPackConfig = (
         return null;
       }
 
-      // V5: Path A fan-out — compute effective result type (per-query override or pack default)
+      // V5: Path A fan-out — compute effective result type (per-query override
+      // or pack default).
+      //
+      // A pre-V5 query records its result type only as the stored
+      // `snapshot`/`removed` pair. That pair is an explicit per-query value, so
+      // it outranks the pack default exactly as `result_type` does. Reading the
+      // pack default first would silently rewrite every legacy differential
+      // query to snapshot the moment a curator set any pack-level result type —
+      // an unannounced data change on the agent wire.
       const packDefaultResultType = packExecutionDefaults?.result_type ?? undefined;
+      const storedResultType: ResultType | undefined =
+        queryResultType ?? mapWireToResultType({ snapshot, removed });
       const effectiveResultType: ResultType | undefined =
-        queryResultType ?? packDefaultResultType ?? undefined;
+        storedResultType ?? packDefaultResultType ?? undefined;
       const wireResultType: Record<string, unknown> = effectiveResultType
         ? mapResultTypeToWire(effectiveResultType)
-        : // Legacy path: honour stored snapshot/removed booleans directly
-        snapshot === false
-        ? { removed, snapshot }
         : {};
 
       const index = deriveEffectiveQueryKey({ id: queryId }, key);
@@ -516,8 +550,14 @@ export const convertSOQueriesToPackConfig = (
       // `DEFAULT_PLATFORM` (all three OSes) stays suppressed from the wire in
       // both cases: emitting it is a no-op for osquery and would bloat every
       // query in every pack.
+      // A per-query value naming every supported OS is not a restriction — it
+      // is what the flyout seeds when a query has no platform of its own, so it
+      // is common in stored data. Treating it as an override would discard the
+      // pack default and run the query everywhere, the opposite of what the
+      // curator configured.
       const packDefaultPlatform = packExecutionDefaults?.platform ?? undefined;
-      const effectivePlatform = platform ?? packDefaultPlatform;
+      const perQueryPlatform = isAllPlatforms(platform) ? undefined : platform;
+      const effectivePlatform = perQueryPlatform ?? packDefaultPlatform;
 
       queriesOut[index] = omitBy(
         {
@@ -532,7 +572,7 @@ export const convertSOQueriesToPackConfig = (
               ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
               : { ecs_mapping }
             : {}),
-          ...(effectivePlatform === DEFAULT_PLATFORM || effectivePlatform === undefined
+          ...(isAllPlatforms(effectivePlatform) || effectivePlatform === undefined
             ? {}
             : { platform: effectivePlatform }),
           ...wireResultType,

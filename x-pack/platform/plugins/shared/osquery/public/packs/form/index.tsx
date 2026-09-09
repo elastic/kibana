@@ -182,12 +182,17 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           pack_type: 'policy',
           schedule: deserializedSchedule,
           min_osquery_version: [],
-          // A brand-new pack defaults to Snapshot and persists it. Existing
-          // packs deliberately keep whatever they had (see `deserializer`):
-          // defaulting them to snapshot on open would silently rewrite the
-          // per-query `snapshot`/`removed` booleans of a legacy pack the first
-          // time a user saved it, converting differential queries to snapshot.
-          result_type: 'snapshot' as const,
+          // A brand-new pack starts with *no* pack-level result type.
+          //
+          // Persisting 'snapshot' by default made `packHasDefaults` true for
+          // every new pack, so every query flyout rendered the "Override pack
+          // defaults" toggle in the OFF position with all three controls
+          // disabled — a user wanting a differential query had to discover and
+          // flip a toggle to set a field that was previously plain. Pack-level
+          // defaults are opt-in: the toggle now appears only once a curator has
+          // actually set one. ('' is the field's first-class "No pack default"
+          // option.)
+          result_type: '' as const,
           platform: '',
         },
   });
@@ -333,14 +338,24 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             ? serializeSchedule(scheduleFormState)
             : {};
 
-        // V5: emit pack-level execution defaults. Empty array / empty string = not set.
+        // V5: emit pack-level execution defaults.
+        //
+        // The update route reads `undefined` as "not in the request — preserve
+        // existing" and `null` as "explicit clear". Omitting an emptied field
+        // made pack defaults impossible to remove: the server kept the old
+        // value and it reappeared on reload.
+        //
+        // `null` is emitted only for a field that *was* stored and is now
+        // empty — a real clear. A field that was never set stays omitted, so
+        // editing a legacy pack does not write nulls for defaults it never had.
+        const clearOf = (stored: string | undefined) => (editMode && stored ? null : undefined);
         const minOsqueryVersion =
           Array.isArray(minOsqueryVersionArr) && minOsqueryVersionArr.length > 0
             ? minOsqueryVersionArr[0]
-            : undefined;
-        const resultType = resultTypeValue || undefined;
+            : clearOf(defaultValue?.min_osquery_version);
+        const resultType = resultTypeValue || clearOf(defaultValue?.result_type);
         // Empty combo-box selection means "no pack default", not "clear to empty".
-        const platform = platformValue || undefined;
+        const platform = platformValue || clearOf(defaultValue?.platform);
 
         return {
           ...restPayload,
@@ -349,7 +364,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
-          // V5: only emit when set (undefined is cleaner than an empty string to the API)
+          // V5: omit when `undefined` (preserve existing); emit `null` to clear.
           ...(minOsqueryVersion !== undefined ? { min_osquery_version: minOsqueryVersion } : {}),
           ...(resultType !== undefined ? { result_type: resultType } : {}),
           ...(platform !== undefined ? { platform } : {}),
@@ -368,6 +383,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [
       createAsync,
       defaultValue?.saved_object_id,
+      defaultValue?.min_osquery_version,
+      defaultValue?.result_type,
+      defaultValue?.platform,
       dirtyFields.schedule,
       editMode,
       getShards,
@@ -426,18 +444,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   // (readPacks-only) users and prebuilt Elastic packs.
   const isContentDisabled = isReadOnly || isPrebuilt;
 
-  // V5: show migration advisory when editing a pack that has non-uniform per-query
-  // version or result-type pairs AND no pack-level default is set yet.
+  // V5: show migration advisory when editing a legacy pack whose per-query
+  // execution values would be worth reviewing before a pack-level default is
+  // introduced.
   const showMigrationAdvisory = useMemo(() => {
     if (!editMode || !defaultValue) return false;
     const queryList = Object.values(defaultValue.queries ?? {});
-    if (queryList.length < 2) return false;
+    if (queryList.length === 0) return false;
 
-    // Non-uniform per-query version
+    // Non-uniform per-query version (needs at least two queries to differ).
     const versions = new Set(queryList.map((q) => q.version?.[0] ?? ''));
     if (versions.size > 1) return true;
 
-    // Non-uniform per-query result type (derived from snapshot/removed booleans)
+    // Per-query result type, derived from the legacy snapshot/removed booleans.
     const resultTypes = new Set(
       queryList.map((q) => {
         if (q.snapshot === false && q.removed === true) return 'differential';
@@ -446,7 +465,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         return 'snapshot';
       })
     );
+
+    // Non-uniform values always warrant a heads-up.
     if (resultTypes.size > 1) return true;
+
+    // A *uniformly* non-snapshot legacy pack is the case most at risk: setting
+    // any pack-level result type here changes nothing about how these queries
+    // run today, but it is the pack a curator is most likely to "tidy up" by
+    // picking Snapshot — so surface the advisory rather than staying silent
+    // because the values happen to agree.
+    if (!defaultValue.result_type && !resultTypes.has('snapshot')) return true;
 
     return false;
   }, [editMode, defaultValue]);
