@@ -25,4 +25,4 @@ export const MAXIMUM_RULE_IDENTIFIER_LENGTH = 95;
  * Safe client-facing message when libyara/WASM throws. Do not interpolate engine internals.
  */
 export const YARA_ENGINE_INTERNAL_ERROR_MESSAGE =
-  'Unable to validate YARA rule due to an internal error. Please try again later.';
+  'Unable to validate YARA rule due to an internal error.';
