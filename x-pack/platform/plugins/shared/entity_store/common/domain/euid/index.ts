@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-export { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+export {
+  getEuidFromObject,
+  getEuidFromObjectForSearch,
+  getEntityIdentifiersFromDocument,
+} from './memory';
 export { getEuidFromTimelineNonEcsData, type NonEcsTimelineDataRow } from './non_ecs_timeline_data';
-export { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
+export {
+  getEuidPainlessEvaluation,
+  getEuidPainlessEvaluationForSearch,
+  getEuidPainlessRuntimeMapping,
+} from './painless';
 export {
   getEuidDslFilterBasedOnDocument,
   getEuidDslFilterBasedOnEntityRecord,
