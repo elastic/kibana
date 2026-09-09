@@ -6,10 +6,12 @@
  */
 
 import { useCallback } from 'react';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
-import { useHttp, useToasts } from '../../common/lib/kibana';
+import { useAppUrl, useHttp, useKibana, useToasts } from '../../common/lib/kibana';
 import { runCaseWorkflow } from './api';
+import { buildViewExecutionText } from './use_run_workflow_on_cases';
 import * as i18n from './translations';
 
 export interface UseCasesWorkflowExecutorParams {
@@ -22,8 +24,8 @@ export interface UseCasesWorkflowExecutorParams {
  * Cases-owned endpoint, ensuring authorization, audit logging, and activity
  * recording are all handled server-side.
  *
- * When the execution starts but the activity record fails to write, a warning
- * toast is shown without blocking or reporting a run failure to the caller.
+ * The executor owns the success or activity-write warning toast so the caller
+ * can suppress the panel's built-in success toast.
  */
 export const useCasesWorkflowExecutor = ({
   caseId,
@@ -31,6 +33,8 @@ export const useCasesWorkflowExecutor = ({
 }: UseCasesWorkflowExecutorParams): RunWorkflowExecutor => {
   const http = useHttp();
   const toasts = useToasts();
+  const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
+  const { rendering } = useKibana().services;
 
   return useCallback(
     async ({ workflowId, inputs }) => {
@@ -44,12 +48,21 @@ export const useCasesWorkflowExecutor = ({
         },
       });
 
+      const executionHref = response.workflowExecutionId
+        ? getAppUrl({ path: `${workflowId}?executionId=${response.workflowExecutionId}` })
+        : undefined;
+
+      const text =
+        executionHref && rendering ? buildViewExecutionText(executionHref, rendering) : undefined;
+
       if (response.activityStatus === 'failed') {
-        toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED });
+        toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED, text });
+      } else {
+        toasts.addSuccess({ title: i18n.RUN_WORKFLOW_STARTED(1), text });
       }
 
       return { workflowExecutionId: response.workflowExecutionId };
     },
-    [caseId, http, origin, toasts]
+    [caseId, getAppUrl, http, origin, rendering, toasts]
   );
 };
