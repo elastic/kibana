@@ -22,7 +22,6 @@ import {
   EuiIconTip,
   EuiLink,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -33,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DatasetMappings } from '../../../common';
+import { FieldMappingForm } from './field_mapping_form';
 
 export enum DataType {
   KEYWORD = 'keyword',
@@ -695,100 +695,16 @@ export const MappingEditor: FC<MappingEditorProps> = ({
 
       {value.fields.length === 0 ? (
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-          <EuiFlexGroup gutterSize="m" alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
-                  defaultMessage: 'Field type',
-                })}
-                helpText={getFieldTypeDocsHelpText(draftField.type)}
-                isInvalid={Boolean(draftFieldErrors.type)}
-                error={draftFieldErrors.type}
-                fullWidth
-              >
-                <EuiSelect
-                  isInvalid={Boolean(draftFieldErrors.type)}
-                  fullWidth
-                  options={TYPE_OPTIONS as unknown as Array<{ value: string; text: string }>}
-                  value={draftField.type}
-                  onChange={(e) => {
-                    const nextType = e.target.value as DataType;
-                    setDraftField((prev) => ({
-                      ...prev,
-                      type: nextType,
-                      ...(nextType === DataType.DATETIME ? {} : { format: '' }),
-                    }));
-                  }}
-                  data-test-subj="dataFederationMappingEditorDraftFieldType"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
-                  defaultMessage: 'Field name',
-                })}
-                isInvalid={Boolean(draftFieldErrors.name)}
-                error={draftFieldErrors.name}
-                fullWidth
-              >
-                <EuiFieldText
-                  isInvalid={Boolean(draftFieldErrors.name)}
-                  fullWidth
-                  value={draftField.name}
-                  onChange={(e) => setDraftField((prev) => ({ ...prev, name: e.target.value }))}
-                  data-test-subj="dataFederationMappingEditorDraftFieldName"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
-                  defaultMessage: 'Rename field to',
-                })}
-                fullWidth
-              >
-                <EuiFieldText
-                  fullWidth
-                  value={draftField.path}
-                  onChange={(e) => setDraftField((prev) => ({ ...prev, path: e.target.value }))}
-                  data-test-subj="dataFederationMappingEditorDraftFieldPath"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {draftField.type === DataType.DATETIME ? (
-                <EuiFormRow
-                  label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-                    defaultMessage: 'format (optional)',
-                  })}
-                  isInvalid={Boolean(draftFieldErrors.format)}
-                  error={draftFieldErrors.format}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    isInvalid={Boolean(draftFieldErrors.format)}
-                    fullWidth
-                    value={draftField.format}
-                    onChange={(e) => setDraftField((prev) => ({ ...prev, format: e.target.value }))}
-                    data-test-subj="dataFederationMappingEditorDraftFieldFormat"
-                  />
-                </EuiFormRow>
-              ) : (
-                // Keep layout alignment with the edit form shown for non-empty lists.
-                <div aria-hidden="true" style={{ visibility: 'hidden' }}>
-                  <EuiFormRow
-                    label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-                      defaultMessage: 'format (optional)',
-                    })}
-                    fullWidth
-                  >
-                    <EuiFieldText fullWidth value="" onChange={() => {}} />
-                  </EuiFormRow>
-                </div>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+          <FieldMappingForm
+            value={draftField}
+            onChange={(patch: Partial<MappingEditorField>) =>
+              setDraftField((prev) => ({ ...prev, ...patch }))
+            }
+            typeOptions={TYPE_OPTIONS}
+            typeHelpText={getFieldTypeDocsHelpText(draftField.type)}
+            errors={draftFieldErrors}
+            dateTypeValue={DataType.DATETIME}
+            actions={
               <EuiButton
                 iconType="plusCircle"
                 size="s"
@@ -799,8 +715,12 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                   defaultMessage: 'Add field',
                 })}
               </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            }
+            fieldTypeTestSubj="dataFederationMappingEditorDraftFieldType"
+            fieldNameTestSubj="dataFederationMappingEditorDraftFieldName"
+            fieldPathTestSubj="dataFederationMappingEditorDraftFieldPath"
+            fieldFormatTestSubj="dataFederationMappingEditorDraftFieldFormat"
+          />
         </EuiPanel>
       ) : filteredFields.length === 0 ? (
         <EuiText size="s" color="subdued">
@@ -825,143 +745,53 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                   <EuiFlexGroup gutterSize="m" alignItems="flexStart">
                     {isEditing ? (
                       <>
-                        <EuiFlexItem>
-                          <EuiFormRow
-                            label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
-                              defaultMessage: 'Field type',
-                            })}
-                            helpText={getFieldTypeDocsHelpText(f.type)}
-                            isInvalid={Boolean(rowErrors?.type)}
-                            error={rowErrors?.type}
-                            fullWidth
-                          >
-                            <EuiSelect
-                              isInvalid={Boolean(rowErrors?.type)}
-                              fullWidth
-                              options={
-                                TYPE_OPTIONS as unknown as Array<{ value: string; text: string }>
-                              }
-                              value={f.type}
-                              onChange={(e) => {
-                                const nextType = e.target.value as DataType;
-                                updateField(f.id, {
-                                  type: nextType,
-                                  ...(nextType === DataType.DATETIME ? {} : { format: '' }),
-                                });
-                              }}
-                              data-test-subj="dataFederationMappingEditorFieldType"
-                            />
-                          </EuiFormRow>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiFormRow
-                            label={i18n.translate(
-                              'xpack.dataFederation.mappingEditor.logicalName',
-                              {
-                                defaultMessage: 'Field name',
-                              }
-                            )}
-                            isInvalid={Boolean(rowErrors?.name)}
-                            error={rowErrors?.name}
-                            fullWidth
-                          >
-                            <EuiFieldText
-                              isInvalid={Boolean(rowErrors?.name)}
-                              fullWidth
-                              value={f.name}
-                              onChange={(e) => updateField(f.id, { name: e.target.value })}
-                              data-test-subj="dataFederationMappingEditorFieldName"
-                            />
-                          </EuiFormRow>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiFormRow
-                            label={i18n.translate(
-                              'xpack.dataFederation.mappingEditor.physicalPath',
-                              {
-                                defaultMessage: 'Rename field to',
-                              }
-                            )}
-                            helpText={i18n.translate(
-                              'xpack.dataFederation.mappingEditor.physicalPathHelp',
-                              {
-                                defaultMessage: 'Physical column name, if differs from name.',
-                              }
-                            )}
-                            fullWidth
-                          >
-                            <EuiFieldText
-                              fullWidth
-                              value={f.path}
-                              onChange={(e) => updateField(f.id, { path: e.target.value })}
-                              data-test-subj="dataFederationMappingEditorFieldPath"
-                            />
-                          </EuiFormRow>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          {isDate ? (
-                            <EuiFormRow
-                              label={i18n.translate(
-                                'xpack.dataFederation.mappingEditor.formatLabel',
-                                {
-                                  defaultMessage: 'format (optional)',
-                                }
-                              )}
-                              isInvalid={Boolean(rowErrors?.format)}
-                              error={rowErrors?.format}
-                              fullWidth
-                            >
-                              <EuiFieldText
-                                isInvalid={Boolean(rowErrors?.format)}
-                                fullWidth
-                                value={f.format}
-                                onChange={(e) => updateField(f.id, { format: e.target.value })}
-                                data-test-subj="dataFederationMappingEditorFieldFormat"
-                              />
-                            </EuiFormRow>
-                          ) : (
-                            <div aria-hidden="true" style={{ visibility: 'hidden' }}>
-                              <EuiFormRow
-                                label={i18n.translate(
-                                  'xpack.dataFederation.mappingEditor.formatLabel',
-                                  {
-                                    defaultMessage: 'format (optional)',
-                                  }
-                                )}
-                                fullWidth
-                              >
-                                <EuiFieldText fullWidth value="" onChange={() => {}} />
-                              </EuiFormRow>
-                            </div>
+                        <FieldMappingForm
+                          value={f}
+                          onChange={(patch: Partial<MappingEditorField>) => {
+                            updateField(f.id, patch);
+                          }}
+                          typeOptions={TYPE_OPTIONS}
+                          typeHelpText={getFieldTypeDocsHelpText(f.type)}
+                          pathHelpText={i18n.translate(
+                            'xpack.dataFederation.mappingEditor.physicalPathHelp',
+                            {
+                              defaultMessage: 'Physical column name, if differs from name.',
+                            }
                           )}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            direction="row"
-                            alignItems="center"
-                            responsive={false}
-                          >
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonEmpty
-                                iconType="check"
-                                size="s"
-                                onClick={() => {
-                                  const nextValidation = validateMappingEditorValue(value);
-                                  const fieldErrors = nextValidation.fieldErrorsById[f.id];
-                                  markFieldValidated(f.id);
-                                  if (fieldErrors) return;
-                                  setEditingFieldId(null);
-                                }}
-                                data-test-subj="dataFederationMappingEditorDoneField"
-                              >
-                                {i18n.translate('xpack.dataFederation.mappingEditor.doneField', {
-                                  defaultMessage: 'Done',
-                                })}
-                              </EuiButtonEmpty>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
+                          errors={rowErrors}
+                          dateTypeValue={DataType.DATETIME}
+                          actions={
+                            <EuiFlexGroup
+                              gutterSize="s"
+                              direction="row"
+                              alignItems="center"
+                              responsive={false}
+                            >
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  iconType="check"
+                                  size="s"
+                                  onClick={() => {
+                                    const nextValidation = validateMappingEditorValue(value);
+                                    const fieldErrors = nextValidation.fieldErrorsById[f.id];
+                                    markFieldValidated(f.id);
+                                    if (fieldErrors) return;
+                                    setEditingFieldId(null);
+                                  }}
+                                  data-test-subj="dataFederationMappingEditorDoneField"
+                                >
+                                  {i18n.translate('xpack.dataFederation.mappingEditor.doneField', {
+                                    defaultMessage: 'Done',
+                                  })}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          }
+                          fieldTypeTestSubj="dataFederationMappingEditorFieldType"
+                          fieldNameTestSubj="dataFederationMappingEditorFieldName"
+                          fieldPathTestSubj="dataFederationMappingEditorFieldPath"
+                          fieldFormatTestSubj="dataFederationMappingEditorFieldFormat"
+                        />
                       </>
                     ) : (
                       <>
@@ -1103,6 +933,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
+          {/* TODO remove */}
           <EuiCodeBlock language="json" isCopyable paddingSize="s">
             {previewJson ||
               '{\n  "mappings": {\n    "dynamic": "false",\n    "properties": {\n      "@timestamp": {\n        "type": "date",\n        "path": "event_time",\n        "format": "yyyy-MM-dd HH:mm:ss"\n      }\n    },\n    "_id": {\n      "path": "request_id"\n    }\n  }\n}'}
