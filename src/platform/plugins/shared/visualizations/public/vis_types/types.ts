@@ -143,10 +143,6 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    */
   readonly usesEsql?: (visParams: VisParams) => boolean;
 
-  /**
-   * ES|QL query surface for related-panel highlighting. When the vis uses ES|QL,
-   * return `{ esql }` so `apiPublishesESQLQuery` is true. Leave unset otherwise.
-   */
   readonly getEsqlQuery?: (visParams: VisParams) => AggregateQuery | undefined;
 
   readonly isAccessible?: boolean;
