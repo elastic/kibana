@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/287934
+issues:
+- https://github.com/elastic/kibana/issues/287889
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix Analyzer process labels disagreeing with Session View
+description: Fixes Event Analyzer labeling a process node with its newest executable name instead of the name in effect when the analyzed event happened, which made the graph disagree with Session View.

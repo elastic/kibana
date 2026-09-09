@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/287807
+issues:
+- https://github.com/elastic/kibana/issues/251014
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Discover and ES|QL
+title: "Fix filter buttons shown in Discover for values that violate `ignore_above`"
+description: "Fixes the Discover data table offering filter for and filter out buttons on a cell whose value was never indexed because it exceeds the `ignore_above` limit. Such a filter can never match a document."

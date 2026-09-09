@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/288644
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Fix alerting rules keeping an API key that was queued for invalidation
+description: Fixes an alerting rule continuing to present an API key that was already queued for invalidation. Rule updates now write the whole saved object, so credentials that the rotation strips are removed.

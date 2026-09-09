@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/287916
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix detection rule failures when event searches return oversized responses
+description: "Fixes detection rules failing with a raw transport error when an event search response exceeds `elasticsearch.maxResponseSize`. The rule now halves the search page size and retries."

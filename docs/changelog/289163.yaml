@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/289163
+issues:
+- https://github.com/elastic/kibana/issues/276158
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: "Fix the \"Update filter\" button being unreachable in a tall filter editor"
+description: Fixes the filter editor pushing its footer buttons off screen when its contents are taller than the browser window. The contents now scroll, and the loading state keeps the footer visible.

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/288475
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: "Add a \"Fix with AI Agent\" quick fix to workflow validation errors"
+description: Adds a Fix with AI Agent action to workflow YAML validation errors, available from the editor quick fix and from the validation error row. The action prefills the chat input instead of sending it.

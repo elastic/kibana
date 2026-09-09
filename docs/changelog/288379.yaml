@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/288379
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix duplicate endpoint metadata transforms after a stack upgrade
+description: "Fixes Fleet losing its record of installed legacy transforms on a same-version reinstall, which left duplicate `endpoint.metadata_current` and `endpoint.metadata_united` transforms in Elasticsearch after the next upgrade."

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/280600
+issues:
+- https://github.com/elastic/kibana/issues/241818
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Stop emitting default Synthetics monitor values in the agent policy
+description: Reduces the size of the generated agent policy. Synthetics no longer writes monitor configuration fields whose value already matches the Heartbeat default.

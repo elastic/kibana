@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/287796
+issues:
+- https://github.com/elastic/kibana/issues/287785
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+title: "Add the \"Show monitors from\" filter to Synthetics TLS Certificates"
+description: "Adds the cross-space \"Show monitors from\" control to the TLS Certificates page. The page shares the space preference used by Overview and Management."

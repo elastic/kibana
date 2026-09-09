@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/287946
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- AI and machine Learning
+title: Add send and update message actions to the Microsoft Teams connector
+description: Adds actions to send a new message and to update an existing channel or chat message from the Microsoft Teams connector.

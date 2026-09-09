@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/287547
+issues:
+- https://github.com/elastic/kibana/issues/284396
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Search and data
+title: Fix Console treating lines in unterminated triple-quoted strings as requests
+description: Console no longer treats request-like lines inside an unterminated triple-quoted string as standalone requests.

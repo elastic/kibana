@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/288529
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add a vulnerable driver abuse mitigation option to Elastic Defend policies
+description: "Adds the `windows.advanced.kernel.enable_sync_driver_loads` advanced policy option to Elastic Defend. The option enables additional vulnerable driver abuse mitigation and enriches driver load events."

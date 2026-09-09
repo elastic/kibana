@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/287214
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Search and data
+title: Fix document preview for query rule document IDs that contain slashes

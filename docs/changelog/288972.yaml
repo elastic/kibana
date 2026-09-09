@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/288972
+issues:
+- https://github.com/elastic/kibana/issues/288009
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Discover and ES|QL
+title: "Fix field suggestions and control types for `MV_CONTAINS`"
+description: "Fixes autocomplete not suggesting fields for the second argument of `MV_CONTAINS` when the first argument is a variable, and enables the multivalue type in the controls flyout."

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/288575
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: "Show \"View pack\" and \"View query\" labels for read-only Osquery users"
+description: Relabels the row action from Edit to View when the destination page renders read-only, so the Osquery pack and saved query menus match what the page allows.

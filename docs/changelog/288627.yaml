@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/288627
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix alert analysis crash on tactic-only MITRE threat mappings
+description: Fixes a crash in the Security alert analysis workflow when analysis runs on an alert from a rule whose MITRE ATT&CK threat mapping has a tactic but no technique. The workflow now skips technique enrichment for those entries.

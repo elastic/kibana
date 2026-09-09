@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/288962
+issues:
+- https://github.com/elastic/kibana/issues/288947
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Fix removing all tags from a rule not persisting
+description: Fixes an issue in Alerting v2 where removing all tags from a rule was not saved — the previous tags reappeared when the rule was reopened.

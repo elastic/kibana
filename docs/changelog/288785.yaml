@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/288785
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Fix ES|QL Identifier Controls dropped from Lens visualizations saved by API
+description: "Fixes Lens ES|QL visualizations losing an Identifier Control (`??field`) after an API round-trip, which dropped the mapped column when the visualization rendered."
