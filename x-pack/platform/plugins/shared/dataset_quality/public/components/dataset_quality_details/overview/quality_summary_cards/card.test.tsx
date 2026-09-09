@@ -51,6 +51,13 @@ describe('Card', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  it('does not set aria-pressed when card is non-interactive', () => {
+    render(<Card {...defaultProps} onClick={jest.fn()} isSelected />);
+
+    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
+    expect(card).not.toHaveAttribute('aria-pressed');
+  });
+
   it('does not call onClick when isDisabled is true', () => {
     const onClick = jest.fn();
     render(<Card {...defaultProps} onClick={onClick} isDisabled />);

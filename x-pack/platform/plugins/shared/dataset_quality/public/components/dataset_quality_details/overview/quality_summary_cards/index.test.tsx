@@ -185,12 +185,12 @@ describe('QualitySummaryCards', () => {
     expect(setSelectedCard).toHaveBeenCalledWith('failed');
   });
 
-  it('indicates when degraded card is selected', () => {
+  it('only applies aria-pressed to interactive cards', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
     expect(
       screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
-    ).toHaveAttribute('aria-pressed', 'true');
+    ).not.toHaveAttribute('aria-pressed');
     expect(
       screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')
     ).toHaveAttribute('aria-pressed', 'false');
