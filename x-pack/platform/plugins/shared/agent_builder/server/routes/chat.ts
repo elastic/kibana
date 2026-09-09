@@ -300,9 +300,9 @@ export const conversePayloadSchema = schema.object({
       ],
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.6.0' },
+          availability: { stability: 'experimental', since: '9.6.0' },
           description:
-            'Reasoning effort level forwarded to the LLM as `reasoning.effort`. Ignored when the fast model is selected. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model.',
+            'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.',
         },
       }
     )

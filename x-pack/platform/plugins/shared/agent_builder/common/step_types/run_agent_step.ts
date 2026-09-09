@@ -311,15 +311,13 @@ export const ConfigSchema = z
       .optional()
       .describe('Maximum response size for this workflow step.'),
     /**
-     * Reasoning effort level forwarded to the LLM as `reasoning.effort` for this step's calls.
-     * Ignored when the fast model is selected. Support depends on the underlying model.
-     * Tech preview — behavior and accepted values may change.
+     * Reasoning level the model should use.
      */
     'reasoning-level': z
       .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
       .optional()
       .describe(
-        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Ignored when the fast model is selected. Support depends on the underlying model."
+        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
       ),
   })
   .superRefine((cfg, ctx) => {

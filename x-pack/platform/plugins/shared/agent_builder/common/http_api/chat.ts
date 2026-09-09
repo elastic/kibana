@@ -37,10 +37,7 @@ export interface ChatRequestBodyPayload {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
   project_routing?: string;
-  /**
-   * Optional reasoning effort forwarded to the LLM as `reasoning.effort`. Ignored when the
-   * fast model is selected.
-   */
+  /** Optional reasoning level forwarded to the inference plugin. */
   reasoning_level?: ChatCompletionReasoningEffort;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';

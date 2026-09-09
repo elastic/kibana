@@ -57,8 +57,7 @@ export interface BaseExecutionParams {
    */
   maxContentLength?: number;
   /**
-   * Optional reasoning effort level forwarded to the LLM (`reasoning.effort`).
-   * Ignored when the fast model is selected (see {@link ModelProvider#selectModel}).
+   * Optional reasoning level forwarded to the inference plugin.
    */
   reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
