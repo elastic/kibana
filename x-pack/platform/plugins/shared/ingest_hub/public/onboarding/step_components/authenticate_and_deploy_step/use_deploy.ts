@@ -180,14 +180,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const globalRegion = serviceSettings?.globalRegion ?? '';
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
 
-      // Create the SO record before dispatch (best-effort; only on the connector path).
-      // On the static-keys path connectorId is undefined and resume isn't supported, so skip.
       const { connectorId } = authenticateAndDeployStep;
       let onboardingDeploymentId = isInitialDeploy
         ? undefined
         : detectAndReviewStep.onboardingDeploymentId;
 
-      if (isInitialDeploy && connectorId) {
+      if (isInitialDeploy) {
         const createResp = await sendCreateCloudOnboardingDeployment({
           provider: 'aws',
           connectorId,
@@ -199,6 +197,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           >,
           globalRegion,
           dataFormat,
+          authMethod: connectorId ? 'identity_federation' : 'static_keys',
         }).catch(() => null);
         onboardingDeploymentId = createResp?.item?.id;
         if (onboardingDeploymentId) {
@@ -275,6 +274,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.onboardingDeploymentId,
       selectedServiceIds,
       dataFormat,
+      servicesMap,
       history,
       integrationId,
     ]

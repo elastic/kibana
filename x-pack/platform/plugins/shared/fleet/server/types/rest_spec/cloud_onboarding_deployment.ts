@@ -76,9 +76,11 @@ const OnboardingDeploymentIdParamSchema = schema.object({
 const CloudOnboardingDeploymentItemSchema = schema.object({
   id: schema.string(),
   provider: CloudOnboardingDeploymentProviderSchema,
-  connectorId: schema.string({
-    meta: { description: 'ID of the fleet-cloud-connector this deployment belongs to.' },
-  }),
+  connectorId: schema.maybe(
+    schema.string({
+      meta: { description: 'ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.' },
+    })
+  ),
   mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, { maxSize: 10 }),
   deploymentId: schema.maybe(
     schema.string({
@@ -121,6 +123,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       meta: {
         description: 'Data format: ecs or otel. Used to hydrate the services step on resume.',
       },
+    })
+  ),
+  authMethod: schema.maybe(
+    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
+      meta: { description: 'Authentication method for managed integrations. Determines resume UX.' },
     })
   ),
   agentPolicyId: schema.maybe(
@@ -166,10 +173,12 @@ const SingleItemResponseSchema = schema.object({ item: CloudOnboardingDeployment
 export const CreateCloudOnboardingDeploymentRequestSchema = {
   body: schema.object({
     provider: CloudOnboardingDeploymentProviderSchema,
-    connectorId: schema.string({
-      minLength: 1,
-      meta: { description: 'ID of the fleet-cloud-connector to associate with this deployment.' },
-    }),
+    connectorId: schema.maybe(
+      schema.string({
+        minLength: 1,
+        meta: { description: 'ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.' },
+      })
+    ),
     mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
       maxSize: 10,
       meta: { description: 'Delivery mechanisms active in this deployment.' },
@@ -184,6 +193,11 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       schema.string({ meta: { description: 'Global AWS region from the Service Settings step.' } })
     ),
     dataFormat: schema.maybe(schema.string({ meta: { description: 'Data format: ecs or otel.' } })),
+    authMethod: schema.maybe(
+      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
+        meta: { description: 'Authentication method for managed integrations.' },
+      })
+    ),
   }),
 };
 
@@ -237,7 +251,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
       })
     ),
-    globalRegion: schema.maybe(schema.string()),
   }),
 };
 

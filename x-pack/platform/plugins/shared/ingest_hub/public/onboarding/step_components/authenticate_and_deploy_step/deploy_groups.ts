@@ -18,7 +18,7 @@ import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './pack
 /**
  * A deploy group is the unit of one `sendCreateAgentlessPolicy` call.
  *
- * - Bundled originals: one group per package, covering all non-duplicate agentless instances
+ * - Bundled originals: one group per package, covering all non-duplicate managed-integration instances
  *   of that package. This restores the pre-PR behaviour (one agent policy for all selected
  *   services of the same package) and keeps resource usage equivalent to a non-duplicate deploy.
  * - Duplicates: one group per instance, because duplicate instances of the same service would

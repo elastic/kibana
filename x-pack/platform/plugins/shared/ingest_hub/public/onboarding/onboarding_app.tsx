@@ -82,7 +82,9 @@ async function hydrateOnboardingSession(
     );
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'authenticateAndDeployStep'),
-      JSON.stringify({ connectorId: item.connectorId, authType: 'identity_federation' })
+      item.connectorId
+        ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
+        : JSON.stringify({ authMethod: 'static_keys' })
     );
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),

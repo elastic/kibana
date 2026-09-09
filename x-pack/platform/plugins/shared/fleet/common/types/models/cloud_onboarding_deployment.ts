@@ -35,7 +35,7 @@ export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 export interface CloudOnboardingDeployment {
   id: string;
   provider: CloudProvider;
-  connectorId: string;
+  connectorId?: string;
   mechanisms: CloudOnboardingDeploymentMechanism[];
   deploymentId?: string;
   deploymentName?: string;
@@ -55,6 +55,9 @@ export interface CloudOnboardingDeployment {
   apiKeyId?: string;
   /** ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch. */
   ecfStacks?: CloudOnboardingEcfStack[];
+  /** Non-secret AWS access key ID for static-keys deployments. Stored for display (hidden with Replace UX) on resume; secret_access_key is never persisted. */
+  /** Authentication method used for managed integrations. Determines resume UX. */
+  authMethod?: 'identity_federation' | 'static_keys';
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;
@@ -72,5 +75,5 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
 >;
 
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId'>
+  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion'>
 >;

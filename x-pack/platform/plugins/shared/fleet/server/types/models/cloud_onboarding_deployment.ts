@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
-  connectorId: schema.string({ minLength: 1 }),
+  connectorId: schema.maybe(schema.string({ minLength: 1 })),
   mechanisms: schema.arrayOf(
     schema.oneOf([
       schema.literal('agentless'),
@@ -38,6 +38,9 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   ),
   globalRegion: schema.maybe(schema.string()),
   dataFormat: schema.maybe(schema.string()),
+  authMethod: schema.maybe(
+    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+  ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),

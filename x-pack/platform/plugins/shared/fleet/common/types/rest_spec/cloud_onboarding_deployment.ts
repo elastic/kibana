@@ -14,12 +14,13 @@ import type {
 export interface CreateCloudOnboardingDeploymentRequest {
   body: {
     provider: 'aws' | 'azure' | 'gcp';
-    connectorId: string;
+    connectorId?: string;
     mechanisms: CloudOnboardingDeploymentMechanism[];
     services: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     globalRegion?: string;
     dataFormat?: string;
+    authMethod?: 'identity_federation' | 'static_keys';
   };
 }
 
@@ -39,7 +40,6 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     deploymentId?: string;
     deploymentName?: string;
     serviceVars?: Record<string, Record<string, unknown>>;
-    globalRegion?: string;
     attemptCount?: number;
     agentPolicyId?: string;
     packagePolicyIds?: string[];

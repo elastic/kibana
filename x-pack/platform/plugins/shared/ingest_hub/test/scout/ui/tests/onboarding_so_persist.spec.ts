@@ -196,7 +196,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     );
 
     // Wait for the app to mount (any step element is enough).
-    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-test-subj^="onboardingStep-"]');
 
     // ?deploymentId stays in the URL as an edit-mode indicator.
     // Re-hydration on reload is blocked by the hydratedDeploymentId session flag.

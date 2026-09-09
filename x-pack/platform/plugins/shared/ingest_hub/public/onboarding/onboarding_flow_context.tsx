@@ -36,7 +36,7 @@ export interface DetectAndReviewStepState {
 interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
   connectorName?: string;
-  authType?: 'identity_federation' | 'static_keys';
+  authMethod?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
 }
@@ -100,7 +100,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   // secret_access_key lives in memory only; access_key_id is restored from session storage.
   const [staticKeys, setStaticKeysState] = useState<AwsStaticKeyCredentials | undefined>(() =>
-    persistedAuthenticateAndDeployStep?.authType === 'static_keys' &&
+    persistedAuthenticateAndDeployStep?.authMethod === 'static_keys' &&
     persistedAuthenticateAndDeployStep.accessKeyId
       ? { access_key_id: persistedAuthenticateAndDeployStep.accessKeyId, secret_access_key: '' }
       : undefined
@@ -118,7 +118,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...persistedAuthStepRef.current,
         connectorId: id,
         connectorName: id ? name : undefined,
-        authType: id ? 'identity_federation' : undefined,
+        authMethod: id ? 'identity_federation' : undefined,
         accessKeyId: undefined,
       });
     },
@@ -132,7 +132,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...persistedAuthStepRef.current,
         connectorId: undefined,
         connectorName: undefined,
-        authType: keys ? 'static_keys' : undefined,
+        authMethod: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
