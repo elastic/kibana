@@ -26,34 +26,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
-export const validateAvailableCommands = () => {
-  cy.get('[data-test-subj^="command-type"]').should(
-    'have.length',
-    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
-  );
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
-    cy.getByTestSubj(`command-type-${command}`);
-  });
-};
-export const selectIsolateAndSaveWithoutEnabling = (ruleName: string) => {
-  cy.getByTestSubj(`command-type-isolate`).click();
-  cy.getByTestSubj('create-enabled-false').click();
-  cy.contains(`${ruleName} was created`);
-};
-
-export const addEndpointResponseAction = () => {
-  cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
-  });
-};
-export const focusAndOpenCommandDropdown = (number = 0) => {
-  cy.getByTestSubj(`response-actions-list-item-${number}`).within(() => {
-    cy.getByTestSubj('input').type(`example${number}`);
-    cy.getByTestSubj('commandTypeField').click();
-  });
-};
 export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   loadPage('app/security/rules/management');
   cy.getByTestSubj('create-new-rule').click();
@@ -69,32 +42,6 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   });
   cy.getByTestSubj('about-continue').click();
   cy.getByTestSubj('schedule-continue').click();
-};
-export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: string) => {
-  loadPage('app/security/rules/management');
-  cy.getByTestSubj('create-new-rule').click();
-  cy.getByTestSubj('stepDefineRule').within(() => {
-    cy.getByTestSubj('esqlRuleType').click();
-    cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
-      cy.getByTestSubj('globalQueryBar').click();
-      cy.getByTestSubj('kibanaCodeEditor').type(query);
-    });
-  });
-  cy.getByTestSubj('define-continue').click();
-  cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
-    cy.getByTestSubj('input').type(name);
-  });
-  cy.getByTestSubj('detectionEngineStepAboutRuleDescription').within(() => {
-    cy.getByTestSubj('input').type(description);
-  });
-  cy.getByTestSubj('about-continue').click();
-  cy.getByTestSubj('schedule-continue').click();
-};
-export const visitRuleActions = (ruleId: string) => {
-  loadPage(`app/security/rules/id/${ruleId}/edit`);
-  cy.getByTestSubj('edit-rule-actions-tab').should('exist');
-  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-  cy.getByTestSubj('stepPanelProgress').should('not.exist');
 };
 
 export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
@@ -116,17 +63,6 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
       // get pid
       return Number(cellContent.text());
     });
-};
-
-export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
-  cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
-  });
-  // Try adding new action, should not add list item.
-  cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({
-    force: true,
-  });
-  cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');
 };
 
 /**
