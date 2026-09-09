@@ -165,6 +165,9 @@ export const HomePageStatPanel = ({
           )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+        {/* EuiFlexGrid only accepts 1-4 columns, which TS can't infer from `metrics.length`.
+            Every card defines at most 4 metrics so we are safe to cast. If in future a card with more 
+            than 4 metrics was added, the count would need to be clamped. */}
         <EuiFlexGrid columns={metrics.length as EuiFlexGridProps['columns']} gutterSize="m">
           {metrics.map(({ key, label, value, isLoading }) => (
             <EuiFlexItem key={key}>
