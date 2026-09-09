@@ -166,6 +166,8 @@ function configureExperiment({
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   };
+  // MRR, NDCG, and MAP are excluded: multi-hop search concatenates results from multiple
+  // tool calls chronologically, not by relevance rank.
   const irEvaluators = getEffectiveK([10]).flatMap((k) => [
     createPrecisionAtKEvaluator({ ...irConfig, k }),
     createRecallAtKEvaluator({ ...irConfig, k }),

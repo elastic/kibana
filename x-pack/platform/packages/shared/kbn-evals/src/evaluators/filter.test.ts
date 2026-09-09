@@ -26,6 +26,18 @@ describe('evaluator filter', () => {
     createMockEvaluator('F1@5'),
     createMockEvaluator('F1@10'),
     createMockEvaluator('F1@20'),
+    createMockEvaluator('HitRate@5'),
+    createMockEvaluator('HitRate@10'),
+    createMockEvaluator('HitRate@20'),
+    createMockEvaluator('MRR@5'),
+    createMockEvaluator('MRR@10'),
+    createMockEvaluator('MRR@20'),
+    createMockEvaluator('NDCG@5'),
+    createMockEvaluator('NDCG@10'),
+    createMockEvaluator('NDCG@20'),
+    createMockEvaluator('MAP@5'),
+    createMockEvaluator('MAP@10'),
+    createMockEvaluator('MAP@20'),
     createMockEvaluator('Factuality'),
     createMockEvaluator('Relevance'),
     createMockEvaluator('Groundedness'),
@@ -102,7 +114,7 @@ describe('evaluator filter', () => {
       });
 
       it('should match all IR evaluators when all patterns are specified', () => {
-        process.env.SELECTED_EVALUATORS = 'Precision@K,Recall@K,F1@K';
+        process.env.SELECTED_EVALUATORS = 'Precision@K,Recall@K,F1@K,HitRate@K,MRR@K,NDCG@K,MAP@K';
         const result = selectEvaluators(allEvaluators);
         expect(result.map((e) => e.name)).toEqual([
           'Precision@5',
@@ -114,6 +126,18 @@ describe('evaluator filter', () => {
           'F1@5',
           'F1@10',
           'F1@20',
+          'HitRate@5',
+          'HitRate@10',
+          'HitRate@20',
+          'MRR@5',
+          'MRR@10',
+          'MRR@20',
+          'NDCG@5',
+          'NDCG@10',
+          'NDCG@20',
+          'MAP@5',
+          'MAP@10',
+          'MAP@20',
         ]);
       });
 

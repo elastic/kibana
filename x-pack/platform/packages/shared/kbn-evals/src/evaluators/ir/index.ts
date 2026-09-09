@@ -61,22 +61,16 @@ function parseIrEvalKEnvVar(envK: string, envVarName: string): number[] {
   return parsedValues;
 }
 
-/** Returns K values from the IR_EVAL_K env var (falling back to the deprecated RAG_EVAL_K) or config. */
+/** Returns deduplicated, sorted K values from IR_EVAL_K env var (falling back to the deprecated RAG_EVAL_K) or config. */
 export function getEffectiveK(configK: number | number[]): number[] {
+  let kValues: number[];
   if (process.env.IR_EVAL_K !== undefined) {
-    return parseIrEvalKEnvVar(process.env.IR_EVAL_K, 'IR_EVAL_K');
+    kValues = parseIrEvalKEnvVar(process.env.IR_EVAL_K, 'IR_EVAL_K');
+  } else if (process.env.RAG_EVAL_K !== undefined) {
+    kValues = parseIrEvalKEnvVar(process.env.RAG_EVAL_K, 'RAG_EVAL_K');
+  } else {
+    kValues = Array.isArray(configK) ? configK : [configK];
   }
-  if (process.env.RAG_EVAL_K !== undefined) {
-    return parseIrEvalKEnvVar(process.env.RAG_EVAL_K, 'RAG_EVAL_K');
-  }
-  return Array.isArray(configK) ? configK : [configK];
-}
-
-/**
- * Normalizes K values by removing duplicates and sorting in ascending order.
- */
-function normalizeKValues(configK: number | number[]): number[] {
-  const kValues = getEffectiveK(configK);
   return [...new Set(kValues)].sort((a, b) => a - b);
 }
 
@@ -353,7 +347,7 @@ export function createMapAtKEvaluator<TOutput = unknown, TReferenceOutput = unkn
 export function createIrEvaluators<TOutput = unknown, TReferenceOutput = unknown>(
   config: IrEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator[] {
-  const kValues = normalizeKValues(config.k);
+  const kValues = getEffectiveK(config.k);
 
   return kValues.flatMap((kValue) => [
     createPrecisionAtKEvaluator({ ...config, k: kValue }),
