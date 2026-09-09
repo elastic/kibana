@@ -20,4 +20,4 @@ export {
   SpaceAuditAction,
 } from './audit_events';
 export { computeJsonPatch } from './saved_object_diff';
-export type { ExtendedJsonPatch, JsonPatchOp, JsonPatchNoOp } from './saved_object_diff';
+export type { ExtendedJsonPatch } from './saved_object_diff';

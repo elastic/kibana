@@ -11,12 +11,8 @@ import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
+  SavedObjectDiffAuditAction,
 } from '@kbn/core-saved-objects-server';
-
-export type WriteAuditAction =
-  | 'saved_object_create'
-  | 'saved_object_update'
-  | 'saved_object_delete';
 
 /**
  * Handle for recording audit facts about a single saved object's write as they
@@ -32,8 +28,15 @@ export interface WriteAuditRecord {
   succeed(): void;
 }
 
+/** Tracked object identity; `name` is the fallback when the recorded attributes yield none. */
+export interface TrackedSavedObject {
+  type: string;
+  id: string;
+  name?: string;
+}
+
 interface InternalRecord {
-  savedObject: { type: string; id: string };
+  savedObject: TrackedSavedObject;
   before: Record<string, unknown>;
   after: Record<string, unknown>;
   outcome: 'success' | 'unknown';
@@ -41,7 +44,7 @@ interface InternalRecord {
 
 export interface SavedObjectAuditDiffRecorderConstructorParams {
   /** The mutation being audited. */
-  action: WriteAuditAction;
+  action: SavedObjectDiffAuditAction;
   /** The security extension responsible for emitting the audit events. */
   securityExtension: ISavedObjectsSecurityExtension;
   /** The encryption extension used to determine which attributes to redact. */
@@ -66,7 +69,7 @@ export interface SavedObjectAuditDiffRecorderConstructorParams {
  * {@link track} handles and stay free of audit control flow.
  */
 export class SavedObjectAuditDiffRecorder {
-  private readonly action: WriteAuditAction;
+  private readonly action: SavedObjectDiffAuditAction;
   private readonly securityExtension: ISavedObjectsSecurityExtension;
   private readonly encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
   private readonly logger: Logger;
@@ -95,17 +98,14 @@ export class SavedObjectAuditDiffRecorder {
   }
 
   /**
-   * Registers a saved object for auditing and returns a handle for recording its
-   * before/after attributes and outcome. Re-tracking the same object (e.g. on a
-   * conflict retry) replaces its previously recorded state, so the final attempt
-   * determines what is audited. `after` can only be recorded via
-   * {@link WriteAuditRecord.setAfter} — call it with the stored (post-encryption)
-   * attributes, never the caller's plaintext, so a record flushed before the write
-   * completes cannot leak unencrypted ESO attributes.
+   * Registers a saved object and returns a handle for recording its before/after state and
+   * outcome. Re-tracking the same key (default `type:id`) replaces the record, so conflict
+   * retries audit the final attempt; bulk ops pass a per-entry key so duplicate ids each get
+   * an event. Only ever `setAfter` the stored (post-encryption) attributes.
    */
   track(
-    savedObject: { type: string; id: string },
-    initial: { before?: Record<string, unknown> } = {}
+    savedObject: TrackedSavedObject,
+    initial: { before?: Record<string, unknown>; key?: string } = {}
   ): WriteAuditRecord {
     const record: InternalRecord = {
       savedObject,
@@ -113,7 +113,7 @@ export class SavedObjectAuditDiffRecorder {
       after: {},
       outcome: 'unknown',
     };
-    this.records.set(`${savedObject.type}:${savedObject.id}`, record);
+    this.records.set(initial.key ?? `${savedObject.type}:${savedObject.id}`, record);
 
     return {
       setBefore: (attributes) => {

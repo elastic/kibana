@@ -1,5 +1,5 @@
 {
-  "sha1": "c77afa2a886abef1ef351462ce1f07edeaad8d3b",
+  "sha1": "098fecdcbbcda234942549ffe82eb822eae8dc25",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 103,
-        "column": 25
+        "line": 57,
+        "column": 18
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 122,
-        "column": 51
+        "line": 75,
+        "column": 46
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 146,
-        "column": 48
+        "line": 98,
+        "column": 27
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 167,
-        "column": 47
+        "line": 118,
+        "column": 18
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 200,
-        "column": 37
+        "line": 151,
+        "column": 34
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 228,
-        "column": 48
+        "line": 180,
+        "column": 11
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 262,
-        "column": 20
+        "line": 212,
+        "column": 31
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 285,
-        "column": 60
+        "line": 239,
+        "column": 9
       }
     }
   ]

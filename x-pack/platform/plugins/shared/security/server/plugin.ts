@@ -329,11 +329,10 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
-      savedObjectDiffEnabled:
-        config.audit.enabled && (config.audit.savedObjectDiff?.enabled ?? false),
-      savedObjectDiffTypesToInclude: config.audit.savedObjectDiff?.typesToInclude,
-      savedObjectDiffFieldSizeLimit:
-        config.audit.savedObjectDiff?.fieldSizeLimit?.getValueInBytes(),
+      // The schema rejects savedObjectDiff.enabled without audit.enabled.
+      savedObjectDiffEnabled: config.audit.savedObjectDiff.enabled,
+      savedObjectDiffTypesToInclude: config.audit.savedObjectDiff.typesToInclude,
+      savedObjectDiffFieldSizeLimit: config.audit.savedObjectDiff.fieldSizeLimit.getValueInBytes(),
       logger: this.logger.get('saved-objects-audit'),
     });
 

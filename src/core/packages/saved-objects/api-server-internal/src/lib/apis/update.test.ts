@@ -25,10 +25,7 @@ import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
-import type {
-  ISavedObjectsSecurityExtension,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -58,7 +55,7 @@ describe('#update', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let securityExtension: ReturnType<typeof savedObjectsExtensionsMock.createSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -966,7 +963,7 @@ describe('#update', () => {
       });
 
       it('calls emitSavedObjectDiffAuditEvent with diff after successful update when savedObjectDiffEnabled', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
 
         await updateSuccess(client, repository, registry, type, id, { title: 'New Title' });
 
@@ -983,13 +980,13 @@ describe('#update', () => {
       });
 
       it('does not call emitSavedObjectDiffAuditEvent when savedObjectDiffEnabled is false', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = false;
+        securityExtension.savedObjectDiffEnabled = false;
         await updateSuccess(client, repository, registry, type, id, attributes);
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
       it('emits an unknown-outcome event without the requested attributes when the update fails after authorization', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         // Not-found without upsert throws after authorizeUpdate has run. The requested
         // attributes are deliberately absent: `after` is only recorded post-encryption,
         // so an early failure must not flush the caller's plaintext.
@@ -1003,7 +1000,8 @@ describe('#update', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_update',
-            savedObject: { type, id },
+            // resolved from the preflight read, so a failed update is still attributable
+            savedObject: { type, id, name: 'Testing' },
             outcome: 'unknown',
             before: {},
             after: {},
@@ -1012,13 +1010,39 @@ describe('#update', () => {
       });
 
       it('emits a single audit event per successful update', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         await updateSuccess(client, repository, registry, type, id, attributes);
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
       });
 
+      it('emits exactly one event, for the final attempt, when a conflict is retried', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+        client.index
+          .mockImplementationOnce(() => {
+            throw SavedObjectsErrorHelpers.createConflictError(type, id, 'conflict');
+          })
+          .mockResponseImplementation((params) => {
+            return { body: { _id: params.id, _seq_no: 1, _primary_term: 1 } } as any;
+          });
+
+        await repository.update(type, id, { title: 'New Title' }, { retryOnConflict: 3 });
+
+        expect(client.index).toHaveBeenCalledTimes(2);
+        // The retry re-tracks the object under the same key, replacing the failed attempt.
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'New Title' }),
+          })
+        );
+      });
+
       it('emits a diff for an upsert that creates the object', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
 
         await updateSuccess(

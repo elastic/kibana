@@ -1,5 +1,5 @@
 {
-  "sha1": "399f2bde519fb55cd4ecd4d32dc16c0dab5a18aa",
+  "sha1": "af52d90e80155e7bd8cbd0b325b312502966e6c1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
-        "line": 53,
-        "column": 13
+        "line": 66,
+        "column": 26
       }
     },
     {
@@ -28,8 +28,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
-        "line": 88,
+        "line": 97,
         "column": 18
+      }
+    },
+    {
+      "id": "552663f99e10481-2ffd5c6275b06dd",
+      "title": "Audit log — OTel appender on traditional (no Serverless transforms) saved_object_update: kibana.diff is a JSON string, other fields keep raw ECS names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
+        "line": 127,
+        "column": 28
       }
     },
     {
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 107,
-        "column": 32
+        "line": 105,
+        "column": 53
       }
     },
     {

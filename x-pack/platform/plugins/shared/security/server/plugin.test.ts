@@ -136,11 +136,13 @@ describe('Security Plugin', () => {
       });
     });
 
-    it('leaves enabled=false and the other params undefined when the block is absent', () => {
+    it('forwards enabled=false and the schema defaults when the block is absent', () => {
       const params = setupWithAudit({ enabled: true });
-      expect(params.savedObjectDiffEnabled).toBe(false);
-      expect(params.savedObjectDiffTypesToInclude).toBeUndefined();
-      expect(params.savedObjectDiffFieldSizeLimit).toBeUndefined();
+      expect(params).toMatchObject({
+        savedObjectDiffEnabled: false,
+        savedObjectDiffTypesToInclude: [],
+        savedObjectDiffFieldSizeLimit: 49152,
+      });
     });
 
     it('sets enabled=false when audit itself is disabled', () => {

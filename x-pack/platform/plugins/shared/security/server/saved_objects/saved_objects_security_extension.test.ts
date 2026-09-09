@@ -7184,13 +7184,20 @@ describe('#authorizeChangeAccessControl', () => {
 describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => {
   function setupForEmit(
     savedObjectDiffEnabled = true,
-    extra: { savedObjectDiffTypesToInclude?: string[]; savedObjectDiffFieldSizeLimit?: number } = {}
+    {
+      includeSavedObjectNames = false,
+      ...extra
+    }: {
+      includeSavedObjectNames?: boolean;
+      savedObjectDiffTypesToInclude?: string[];
+      savedObjectDiffFieldSizeLimit?: number;
+    } = {}
   ) {
     const actions = new Actions();
     jest
       .spyOn(actions.savedObject, 'get')
       .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
-    const auditLogger = auditLoggerMock.create();
+    const auditLogger = auditLoggerMock.create({ includeSavedObjectNames });
     const errors = {
       decorateForbiddenError: jest.fn().mockImplementation((err) => err),
       decorateGeneralError: jest.fn().mockImplementation((err) => err),
@@ -7505,8 +7512,9 @@ describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => 
   });
 
   it('keeps the name attribute in kibana.diff when includeSavedObjectNames is false', () => {
-    const { securityExtension, auditLogger } = setupForEmit();
-    auditLogger.includeSavedObjectNames = false;
+    const { securityExtension, auditLogger } = setupForEmit(true, {
+      includeSavedObjectNames: false,
+    });
 
     securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
@@ -7537,8 +7545,9 @@ describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => 
   });
 
   it('includes the saved object name on the event when includeSavedObjectNames is true', () => {
-    const { securityExtension, auditLogger } = setupForEmit();
-    auditLogger.includeSavedObjectNames = true;
+    const { securityExtension, auditLogger } = setupForEmit(true, {
+      includeSavedObjectNames: true,
+    });
 
     securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
@@ -7559,6 +7568,50 @@ describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => 
       path: '/name',
       value: 'New Title',
       oldValue: 'Old Title',
+    });
+  });
+
+  it('falls back to the tracked name when no attributes were recorded', () => {
+    const { securityExtension, auditLogger } = setupForEmit(true, {
+      includeSavedObjectNames: true,
+    });
+
+    // e.g. a create conflict flushed before any state was recorded
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_create',
+      savedObject: { type: 'dashboard', id: '1', name: 'Resolved Before Write' },
+      outcome: 'unknown',
+      before: {},
+      after: {},
+    });
+
+    const logged = auditLogger.log.mock.calls[0][0] as any;
+    expect(logged.kibana.saved_object).toEqual({
+      type: 'dashboard',
+      id: '1',
+      name: 'Resolved Before Write',
+    });
+  });
+
+  it('resolves the name from `before` when `after` lacks the name attribute', () => {
+    const { securityExtension, auditLogger } = setupForEmit(true, {
+      includeSavedObjectNames: true,
+    });
+
+    // a partial update whose payload does not carry the name attribute
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: { name: 'Existing Title', description: 'a' },
+      after: { description: 'b' },
+    });
+
+    const logged = auditLogger.log.mock.calls[0][0] as any;
+    expect(logged.kibana.saved_object).toEqual({
+      type: 'dashboard',
+      id: '1',
+      name: 'Existing Title',
     });
   });
 

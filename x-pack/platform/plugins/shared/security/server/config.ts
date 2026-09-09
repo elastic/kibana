@@ -304,13 +304,11 @@ export const ConfigSchema = schema.object({
     {
       enabled: schema.boolean({ defaultValue: false }),
       include_saved_object_names: schema.boolean({ defaultValue: true }),
-      savedObjectDiff: schema.maybe(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: false }),
-          typesToInclude: schema.arrayOf(schema.string(), { defaultValue: [] }),
-          fieldSizeLimit: schema.byteSize({ defaultValue: '48kb' }),
-        })
-      ),
+      savedObjectDiff: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        typesToInclude: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        fieldSizeLimit: schema.byteSize({ defaultValue: '48kb' }),
+      }),
       appender: schema.maybe(coreConfig.logging.appenders),
       ignore_filters: schema.maybe(
         schema.arrayOf(
@@ -327,7 +325,7 @@ export const ConfigSchema = schema.object({
     },
     {
       validate: (value) => {
-        if (value.savedObjectDiff?.enabled && !value.enabled) {
+        if (value.savedObjectDiff.enabled && !value.enabled) {
           return 'xpack.security.audit.savedObjectDiff.enabled requires xpack.security.audit.enabled to be true';
         }
       },

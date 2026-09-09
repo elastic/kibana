@@ -32,7 +32,6 @@ import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -66,7 +65,7 @@ describe('#bulkDelete', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let securityExtension: ReturnType<typeof savedObjectsExtensionsMock.createSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -607,7 +606,7 @@ describe('#bulkDelete', () => {
 
     describe('saved object diff audit events', () => {
       it('emits a per-object diff for single-namespace deletes via a gated before-attrs fetch', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         // obj1/obj2 are single-namespace, so there's no multi-namespace preflight — the only
         // mget is the feature-gated before-attributes fetch. `getMockMgetResponse` supplies
         // `_source[type] = { title: 'Testing' }`.
@@ -630,7 +629,7 @@ describe('#bulkDelete', () => {
       });
 
       it('reuses the preflight mget for multi-namespace before-state (no second fetch)', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         const multiObjs = [
           { id: 'diff_m1', type: MULTI_NAMESPACE_TYPE },
           { id: 'diff_m2', type: MULTI_NAMESPACE_ISOLATED_TYPE },
@@ -671,7 +670,7 @@ describe('#bulkDelete', () => {
       });
 
       it('fetches only single-namespace objects when mixed with multi-namespace deletes', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         const multiObj = { id: 'diff_m1', type: MULTI_NAMESPACE_TYPE };
         client.mget.mockResponseOnce(
           getMockMgetResponse(
@@ -711,7 +710,7 @@ describe('#bulkDelete', () => {
       });
 
       it('does not fetch before-attrs or emit a diff when savedObjectDiffEnabled is false', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = false;
+        securityExtension.savedObjectDiffEnabled = false;
 
         // bulkDeleteSuccess asserts mget is called 0 times for single-namespace objects, which
         // confirms the gated before-attrs fetch is skipped when the feature is off.
@@ -722,7 +721,7 @@ describe('#bulkDelete', () => {
       });
 
       it('does not fetch before-attrs when types are not on the allow list', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
 
         await bulkDeleteSuccess(client, repository, registry, [obj1, obj2]);
@@ -732,7 +731,7 @@ describe('#bulkDelete', () => {
       });
 
       it('fetches before-attrs only for allow-listed types', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         securityExtension.shouldComputeSavedObjectDiff.mockImplementation(
           (t: string) => t === obj1.type
         );
@@ -752,7 +751,7 @@ describe('#bulkDelete', () => {
       });
 
       it('emits unknown-outcome events for every object when the bulk request fails', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));
         client.bulk.mockImplementationOnce(() =>
           elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
@@ -773,7 +772,7 @@ describe('#bulkDelete', () => {
       });
 
       it('does not fail the bulk delete when the diff audit emit throws', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
           throw new Error('audit boom');
         });

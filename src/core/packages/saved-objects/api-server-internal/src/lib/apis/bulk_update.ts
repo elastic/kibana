@@ -82,8 +82,6 @@ type ExpectedBulkUpdateResult = Either<
     documentToSave: DocumentToSave;
     esRequestIndex: number;
     rawMigratedUpdatedDoc: SavedObjectsRawDoc;
-    beforeAttributes?: Record<string, unknown>;
-    afterAttributes?: Record<string, unknown>;
   }
 >;
 
@@ -254,19 +252,26 @@ export const performBulkUpdate = async <T>(
     'bulk_update'
   );
 
-  // Track each authorized object for auditing (flushed by the repository once the
-  // operation settles). `before`/`after` are only recorded during response mapping,
-  // from the preflight/merged (stored) attributes — never the caller's plaintext, so
-  // failures flushed before that point cannot leak unencrypted ESO attributes into
-  // the audit log. Objects rejected before authorization are not audited.
-  const auditRecordsByKey = new Map<string, WriteAuditRecord>();
+  // Audit handles, indexed by request position so duplicate `{type, id}` entries each get
+  // their own event. `before`/`after` are recorded in stored (encrypted) form below.
+  const auditRecords: Array<WriteAuditRecord | undefined> = [];
   if (auditDiffRecorder) {
-    for (const { value } of validObjects) {
-      auditRecordsByKey.set(
-        `${value.type}:${value.id}`,
-        auditDiffRecorder.track({ type: value.type, id: value.id })
+    expectedBulkGetResults.forEach((expectedResult, index) => {
+      if (isLeft(expectedResult)) {
+        return;
+      }
+      const { type, id, documentToSave } = expectedResult.value;
+      auditRecords[index] = auditDiffRecorder.track(
+        {
+          type,
+          id,
+          name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+            attributes: documentToSave[type] as SavedObject<T>,
+          }),
+        },
+        { key: String(index) }
       );
-    }
+    });
   }
 
   let bulkUpdateRequestIndexCounter = 0;
@@ -274,7 +279,7 @@ export const performBulkUpdate = async <T>(
 
   const expectedBulkUpdateResults = await Promise.all(
     (expectedAuthorizedResults ?? expectedBulkGetResults).map<Promise<ExpectedBulkUpdateResult>>(
-      async (expectedBulkGetResult) => {
+      async (expectedBulkGetResult, index) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
@@ -383,6 +388,11 @@ export const performBulkUpdate = async <T>(
         const namespaces =
           savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
 
+        // Recorded before the bulk call so a failed write still audits the attempt.
+        const auditRecord = auditRecords[index];
+        auditRecord?.setBefore(migrated.attributes as Record<string, unknown>);
+        auditRecord?.setAfter(updatedAttributes as Record<string, unknown>);
+
         const expectedResult = {
           type,
           id,
@@ -391,8 +401,6 @@ export const performBulkUpdate = async <T>(
           documentToSave: expectedBulkGetResult.value.documentToSave,
           rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
           migrationVersionCompatibility,
-          beforeAttributes: migrated.attributes as Record<string, unknown>,
-          afterAttributes: updatedAttributes as Record<string, unknown>,
         };
 
         bulkUpdateParams.push(
@@ -424,35 +432,23 @@ export const performBulkUpdate = async <T>(
   const result = {
     saved_objects: expectedBulkUpdateResults.map<
       SavedObjectsUpdateResponse<T> | SavedObjectErrorResult
-    >((expectedResult) => {
+    >((expectedResult, index) => {
       if (isLeft(expectedResult)) {
         return expectedResult.value as SavedObjectErrorResult;
       }
 
-      const {
-        type,
-        id,
-        documentToSave,
-        esRequestIndex,
-        rawMigratedUpdatedDoc,
-        beforeAttributes,
-        afterAttributes,
-      } = expectedResult.value;
+      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
+        expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
-
-      // Refine the audit record with the preflight/merged attributes; success is
-      // only recorded below, once ES confirms this object's write.
-      const auditRecord = auditRecordsByKey.get(`${type}:${id}`);
-      auditRecord?.setBefore((beforeAttributes ?? {}) as Record<string, unknown>);
-      auditRecord?.setAfter((afterAttributes ?? {}) as Record<string, unknown>);
 
       const error = getBulkOperationError(type, id, rawResponse);
       if (error) {
         return { type, id, error };
       }
 
-      auditRecord?.succeed();
+      // Success is only recorded once ES confirms this object's write.
+      auditRecords[index]?.succeed();
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 

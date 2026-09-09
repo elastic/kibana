@@ -9,8 +9,9 @@ import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
-  scanAuditLog,
-  waitForAuditEvent,
+  type SavedObjectDiff,
+  scanForDiff,
+  waitForDiffEvent,
 } from '../../../scout_security_audit/api/helpers/audit_log';
 
 // `index-pattern` is a standard, non-hidden type creatable through the public
@@ -24,58 +25,6 @@ const NON_INCLUDED_TYPE = 'visualization';
 
 // The public saved objects API is internal-origin gated and state-changing.
 const KBN_HEADERS = { 'kbn-xsrf': 'x', 'x-elastic-internal-origin': 'kibana' };
-
-interface JsonPatchOp {
-  op: 'add' | 'remove' | 'replace';
-  path: string;
-  value?: unknown;
-  oldValue?: unknown;
-}
-
-interface SavedObjectDiff {
-  format: string;
-  ops: JsonPatchOp[];
-  noOps: Array<{ path: string }>;
-}
-
-interface AuditEvent {
-  event?: { action?: string; outcome?: string };
-  kibana?: { saved_object?: { id?: string; type?: string }; diff?: SavedObjectDiff };
-}
-
-/**
- * Matches a mutation's result (`outcome: success`) audit event: it is the only event
- * for the operation, and it carries `kibana.diff` (unless the type is excluded from
- * diff generation), so filtering on diff presence selects it directly.
- */
-const isDiffEvent =
-  (action: string, id: string) =>
-  (event: Record<string, unknown>): boolean => {
-    const ev = event as AuditEvent;
-    return (
-      ev.event?.action === action && ev.kibana?.saved_object?.id === id && ev.kibana?.diff != null
-    );
-  };
-
-/**
- * Reads the audit log once and returns the diff of a mutation's result event, or
- * `undefined` if none is present. Useful for asserting the ABSENCE of a diff
- * (e.g. excluded types).
- */
-const scanForDiff = (action: string, id: string): SavedObjectDiff | undefined =>
-  (scanAuditLog(isDiffEvent(action, id)) as AuditEvent | undefined)?.kibana?.diff;
-
-/** Polls the audit log until the diff-bearing event for a mutation appears. */
-const waitForDiffEvent = async (action: string, id: string): Promise<SavedObjectDiff> => {
-  const event = (await waitForAuditEvent(isDiffEvent(action, id), {
-    description: `${action} diff event for ${id}`,
-  })) as AuditEvent;
-  const diff = event.kibana?.diff;
-  if (!diff) {
-    throw new Error(`Audit event for ${action} ${id} unexpectedly carries no kibana.diff`);
-  }
-  return diff;
-};
 
 const opAt = (diff: SavedObjectDiff, path: string) => diff.ops.find((op) => op.path === path);
 const noOpPaths = (diff: SavedObjectDiff) => diff.noOps.map((noOp) => noOp.path);

@@ -114,6 +114,35 @@ describe('SavedObjectAuditDiffRecorder', () => {
     expect(emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps separate records for the same object tracked under different keys', () => {
+    const recorder = setup();
+    recorder.track({ type: 'dashboard', id: '1' }, { key: '0' }).succeed();
+    recorder.track({ type: 'dashboard', id: '1' }, { key: '1' }).setAfter({ title: 'stale' });
+    recorder.flush();
+
+    expect(emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+    expect(emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ outcome: 'success', after: {} })
+    );
+    expect(emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ outcome: 'unknown', after: { title: 'stale' } })
+    );
+  });
+
+  it('forwards the tracked name to the emitted event', () => {
+    const recorder = setup();
+    recorder.track({ type: 'dashboard', id: '1', name: 'My Dashboard' });
+    recorder.flush();
+
+    expect(emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        savedObject: { type: 'dashboard', id: '1', name: 'My Dashboard' },
+      })
+    );
+  });
+
   it('swallows and logs emit failures without affecting other records', () => {
     const recorder = setup();
     emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {

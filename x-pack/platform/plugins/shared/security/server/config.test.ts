@@ -26,6 +26,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -84,6 +91,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -142,6 +156,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -199,6 +220,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -1950,13 +1978,16 @@ describe('audit.savedObjectDiff config', () => {
     const config = ConfigSchema.validate({
       audit: { enabled: true, savedObjectDiff: { enabled: true } },
     });
-    expect(config.audit.savedObjectDiff?.enabled).toBe(true);
-    expect(config.audit.savedObjectDiff?.typesToInclude).toEqual([]);
-    expect(config.audit.savedObjectDiff?.fieldSizeLimit?.getValueInBytes()).toBe(49152);
+    expect(config.audit.savedObjectDiff.enabled).toBe(true);
+    expect(config.audit.savedObjectDiff.typesToInclude).toEqual([]);
+    expect(config.audit.savedObjectDiff.fieldSizeLimit.getValueInBytes()).toBe(49152);
   });
 
-  it('is undefined when not configured', () => {
-    expect(ConfigSchema.validate({}).audit.savedObjectDiff).toBeUndefined();
+  it('applies defaults when not configured', () => {
+    const { savedObjectDiff } = ConfigSchema.validate({}).audit;
+    expect(savedObjectDiff.enabled).toBe(false);
+    expect(savedObjectDiff.typesToInclude).toEqual([]);
+    expect(savedObjectDiff.fieldSizeLimit.getValueInBytes()).toBe(49152);
   });
 
   it('throws when savedObjectDiff.enabled is true but audit.enabled is false', () => {

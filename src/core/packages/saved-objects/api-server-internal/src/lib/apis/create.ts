@@ -88,6 +88,10 @@ export const performCreate = async <T>(
   let existingOriginId: string | undefined;
   const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
 
+  // An overwrite can only replace an existing object when the caller supplied its id.
+  const captureBeforeState =
+    overwrite && !!options.id && !!auditDiffRecorder?.shouldComputeDiff(type);
+
   let preflightResult: PreflightCheckForCreateResult | undefined;
   if (registry.isSingleNamespace(type)) {
     savedObjectNamespace = initialNamespaces ? normalizeNamespace(initialNamespaces[0]) : namespace;
@@ -102,6 +106,8 @@ export const performCreate = async <T>(
             id,
             overwrite,
             namespaces: initialNamespaces ?? [namespaceString],
+            // Pull the attributes too so the diff's before-state needs no second read.
+            ...(captureBeforeState && { fields: [type] }),
           },
         ])
       )[0];
@@ -135,6 +141,12 @@ export const performCreate = async <T>(
       });
   }
 
+  const name = SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+    attributes: {
+      ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
+      ...attributes,
+    },
+  });
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,
     object: {
@@ -143,12 +155,7 @@ export const performCreate = async <T>(
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
       accessControl: accessControlToWrite,
-      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
-        attributes: {
-          ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
-          ...attributes,
-        },
-      }),
+      name,
     },
   });
 
@@ -156,7 +163,7 @@ export const performCreate = async <T>(
   // settles). `after` is only recorded once encryption/migration has produced the
   // stored form — never the caller's plaintext, so failures flushed before that
   // point cannot leak unencrypted ESO attributes into the audit log.
-  const auditRecord = auditDiffRecorder?.track({ type, id });
+  const auditRecord = auditDiffRecorder?.track({ type, id, name });
   if (preflightResult?.error) {
     // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
@@ -200,10 +207,12 @@ export const performCreate = async <T>(
 
   const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
-  // When overwriting, fetch the previous attributes so the diff is replace/remove ops
-  // rather than a full set of adds. Feature-gated and failure-isolated so a miss or
-  // get error degrades to before={} (create-shaped diff) instead of failing the write.
-  if (overwrite && auditDiffRecorder?.shouldComputeDiff(type)) {
+  // Before-state for the diff: multi-namespace types reuse the preflight read, other
+  // types need one `get`. Failure-isolated: a miss or error degrades to before={}.
+  if (captureBeforeState && preflightResult) {
+    const existingAttributes = preflightResult.existingDocument?._source?.[type];
+    auditRecord?.setBefore((existingAttributes ?? {}) as Record<string, unknown>);
+  } else if (captureBeforeState) {
     try {
       const existing = await client.get<SavedObjectsRawDocSource>(
         {

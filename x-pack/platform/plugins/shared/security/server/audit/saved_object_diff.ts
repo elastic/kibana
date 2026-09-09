@@ -5,47 +5,17 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { isEqual, isPlainObject } from 'lodash';
+
+import type { AuditKibana } from '@kbn/core-security-server';
 
 /** Placeholder written in place of redacted (e.g. encrypted) attribute values. */
 export const REDACTED = '[redacted]';
 
-/**
- * A single RFC 6902 operation, extended with the non-standard `oldValue` field
- * so audit consumers can see the prior value without correlating events.
- */
-export interface JsonPatchOp {
-  /** The operation performed on the field. */
-  op: 'add' | 'remove' | 'replace';
-  /** RFC 6901 JSON Pointer to the changed field. */
-  path: string;
-  /** The new value (present for `add` and `replace`). */
-  value?: unknown;
-  /** The previous value (present for `remove` and `replace`) — the `oldValue` extension. */
-  oldValue?: unknown;
-}
-
-/**
- * An unchanged field, emitted so consumers get a complete picture of the
- * object's field set alongside the changed `ops`.
- */
-export interface JsonPatchNoOp {
-  /** RFC 6901 JSON Pointer to the unchanged field. */
-  path: string;
-}
-
-/**
- * An Extended JSON Patch document (RFC 6902 + the `oldValue` extension), as
- * returned by `computeJsonPatch`.
- */
-export interface ExtendedJsonPatch {
-  /** Discriminator identifying the schema. */
-  format: 'json_patch_extended';
-  /** One operation per changed field. */
-  ops: JsonPatchOp[];
-  /** One entry per unchanged field. */
-  noOps: JsonPatchNoOp[];
-}
+/** The `kibana.diff` audit field: RFC 6902 ops (plus `oldValue`) and the unchanged `noOps`. */
+export type ExtendedJsonPatch = NonNullable<AuditKibana['diff']>;
+export type JsonPatchOp = ExtendedJsonPatch['ops'][number];
+export type JsonPatchNoOp = ExtendedJsonPatch['noOps'][number];
 
 export interface ComputeJsonPatchParams {
   /** The object state before the change. */
@@ -53,17 +23,9 @@ export interface ComputeJsonPatchParams {
   /** The object state after the change. */
   b: Record<string, unknown>;
   /**
-   * Dot-path keys to exclude from the diff entirely (e.g. system-managed fields
-   * like `updated_at`, `version`). Exact and prefix matches are both honoured:
-   * ignoring `"user"` also silences `"user.email"`.
-   */
-  fieldsToIgnore?: readonly string[];
-  /**
-   * Dot-path keys whose values must be redacted in the output (e.g. ESO
-   * encrypted attributes). The comparison still runs normally to detect whether
-   * the field changed; only the emitted `value` / `oldValue` is replaced with
-   * the `REDACTED` placeholder. Prefix matching applies the same way as
-   * `fieldsToIgnore`.
+   * Top-level attribute names whose values must be redacted (e.g. ESO encrypted
+   * attributes). Changes are still detected; only the emitted `value` /
+   * `oldValue` is replaced with `REDACTED`, for the attribute and its children.
    */
   fieldsToRedact?: readonly string[];
   /**
@@ -119,26 +81,14 @@ const matchesAnyPrefix = (pointer: string, prefixes: Set<string>): boolean => {
   return false;
 };
 
-/**
- * Converts the dot-notation config keys of `fieldsToIgnore` / `fieldsToRedact`
- * to JSON Pointer prefixes. Dots are treated as nesting separators (the
- * documented contract), but the whole key is ALSO added as a single literal
- * segment so a top-level key that happens to contain a dot (e.g. an ESO
- * attribute named `secret.key`) still matches. Over-matching is safe for both
- * options: at worst a value is ignored or redacted that need not have been.
- */
-const configKeysToPointerPrefixes = (keys: readonly string[]): Set<string> => {
-  const prefixes = new Set<string>();
-  for (const key of keys) {
-    prefixes.add(dotPathToJsonPointer(key));
-    prefixes.add(`/${escapeJsonPointerSegment(key)}`);
-  }
-  return prefixes;
-};
+/** Top-level attribute names as JSON Pointer prefixes (each name is one literal segment). */
+const attributeNamesToPointerPrefixes = (names: readonly string[]): Set<string> =>
+  new Set(names.map((name) => `/${escapeJsonPointerSegment(name)}`));
 
 const valuesEqual = (x: unknown, y: unknown): boolean => {
   if (Array.isArray(x) || Array.isArray(y)) {
-    return JSON.stringify(x) === JSON.stringify(y);
+    // Structural: element order matters, key order of nested objects does not.
+    return isEqual(x, y);
   }
   // Plain objects only reach here when empty (non-empty ones are recursed into),
   // so two of them are always equal.
@@ -163,13 +113,6 @@ const applyFieldSizeLimit = (value: unknown, limitBytes: number | undefined): un
   return value;
 };
 
-/**
- * Converts a dot-notation path (e.g. `"user.email"`) to an RFC 6901 JSON
- * Pointer (e.g. `"/user/email"`), escaping `~` → `~0` and `/` → `~1`.
- */
-export const dotPathToJsonPointer = (dotPath: string): string =>
-  '/' + dotPath.split('.').map(escapeJsonPointerSegment).join('/');
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -181,14 +124,13 @@ export const dotPathToJsonPointer = (dotPath: string): string =>
  * Both objects are flattened directly to JSON Pointer paths (each key escaped
  * as a single segment, so literal dots in keys cannot collide with nesting),
  * then every leaf pointer is classified in a single pass:
- * - keys matching `fieldsToIgnore` are dropped entirely
  * - unchanged keys are emitted into `noOps`
  * - changed keys become one op:
  *   - `add`     — present in `b` but not `a` (`value` only)
  *   - `remove`  — present in `a` but not `b` (`oldValue` only)
  *   - `replace` — present in both with a different value (`value` + `oldValue`)
  *
- * Arrays are compared as whole values via `JSON.stringify` (no element-level
+ * Arrays are compared as whole values, structurally (no element-level
  * diffing). Empty objects are leaves: a field changing between `undefined` and
  * `{}` diffs as an `add`/`remove` of `{}` rather than disappearing. Keys
  * matching `fieldsToRedact` still have their change detected but have the
@@ -215,22 +157,18 @@ export const dotPathToJsonPointer = (dotPath: string): string =>
 export const computeJsonPatch = ({
   a,
   b,
-  fieldsToIgnore = [],
   fieldsToRedact = [],
   fieldSizeLimit,
 }: ComputeJsonPatchParams): ExtendedJsonPatch => {
   const flatA = flattenToJsonPointers(a);
   const flatB = flattenToJsonPointers(b);
 
-  const ignoreSet = configKeysToPointerPrefixes(fieldsToIgnore);
-  const redactSet = configKeysToPointerPrefixes(fieldsToRedact);
+  const redactSet = attributeNamesToPointerPrefixes(fieldsToRedact);
 
   const ops: JsonPatchOp[] = [];
   const noOps: JsonPatchNoOp[] = [];
 
   for (const path of new Set([...Object.keys(flatA), ...Object.keys(flatB)])) {
-    if (matchesAnyPrefix(path, ignoreSet)) continue;
-
     const inA = Object.hasOwn(flatA, path);
     const inB = Object.hasOwn(flatB, path);
 

@@ -67,6 +67,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsExtensions,
   SavedObject,
+  SavedObjectDiffAuditAction,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -77,10 +78,7 @@ import {
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import type { RepositoryHelpers } from './apis/helpers';
-import {
-  SavedObjectAuditDiffRecorder,
-  type WriteAuditAction,
-} from './apis/utils/saved_object_audit_diff_recorder';
+import { SavedObjectAuditDiffRecorder } from './apis/utils/saved_object_audit_diff_recorder';
 import {
   type ApiExecutionContext,
   performCreate,
@@ -251,7 +249,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    * the operation settles.
    */
   private createSavedObjectAuditDiffRecorder(
-    action: WriteAuditAction
+    action: SavedObjectDiffAuditAction
   ): SavedObjectAuditDiffRecorder | undefined {
     const { extensions, logger } = this.apiExecutionContext;
     const { securityExtension, encryptionExtension } = extensions;

@@ -7,7 +7,7 @@
 
 import type { Attributes } from '@opentelemetry/api';
 
-import { applyAuditOtelFieldMap } from './audit_otel_transform';
+import { applyAuditOtelFieldMap, serializeAuditDiffAttribute } from './audit_otel_transform';
 
 describe('applyAuditOtelFieldMap', () => {
   it('renames attributes to their target keys', () => {
@@ -232,5 +232,40 @@ describe('applyAuditOtelFieldMap', () => {
       'user.id': 'jdoe',
       'user.name': 'jdoe',
     });
+  });
+});
+
+describe('serializeAuditDiffAttribute', () => {
+  it('reassembles flattened kibana.diff.* keys into one JSON string and leaves other keys alone', () => {
+    const ops = [{ op: 'replace', path: '/title', value: 'new', oldValue: 'old' }];
+    const input = {
+      'event.action': 'saved_object_update',
+      'kibana.space_id': 'default',
+      'kibana.diff.format': 'json_patch_extended',
+      'kibana.diff.ops': ops as unknown as Attributes[string],
+      'kibana.diff.noOps': ['/unchanged'],
+    };
+
+    const result = serializeAuditDiffAttribute(input);
+
+    expect(result).toEqual({
+      'event.action': 'saved_object_update',
+      'kibana.space_id': 'default',
+      'kibana.diff': JSON.stringify({
+        format: 'json_patch_extended',
+        ops,
+        noOps: ['/unchanged'],
+      }),
+    });
+    // Unlike the Serverless field map, nothing else is renamed or dropped.
+    expect(result).toHaveProperty(['kibana.space_id']);
+    // Does not mutate the input.
+    expect(input).toHaveProperty(['kibana.diff.ops']);
+  });
+
+  it('returns the attributes untouched when the record has no diff keys', () => {
+    const input = { 'event.action': 'user_login' };
+
+    expect(serializeAuditDiffAttribute(input)).toBe(input);
   });
 });

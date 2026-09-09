@@ -8,11 +8,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type {
-  AuthorizeCreateObject,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
+import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   errorContent,
@@ -36,7 +32,6 @@ import {
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
-  isMgetDoc,
   normalizeNamespace,
   setManaged,
 } from './utils';
@@ -46,6 +41,7 @@ import type {
   WriteAuditRecord,
   SavedObjectAuditDiffRecorder,
 } from './utils/saved_object_audit_diff_recorder';
+import { fetchBeforeAttrs } from './utils/saved_object_diff_before_state';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -198,7 +194,9 @@ export const performBulkCreate = async <T>(
     .map<PreflightCheckForCreateObject>(({ value }) => {
       const { type, id, initialNamespaces } = value.object;
       const namespaces = initialNamespaces ?? [namespaceString];
-      return { type, id, overwrite, namespaces };
+      // Pull the attributes too so the diff's before-state needs no second read.
+      const fields = overwrite && auditDiffRecorder?.shouldComputeDiff(type) ? [type] : undefined;
+      return { type, id, overwrite, namespaces, ...(fields && { fields }) };
     });
   const preflightCheckResponse = await preflightHelper.preflightCheckForCreate(
     preflightCheckObjects
@@ -247,14 +245,19 @@ export const performBulkCreate = async <T>(
   // before that point cannot leak unencrypted ESO attributes into the audit log;
   // `before` is populated by the overwrite preflight fetch. Objects rejected before
   // authorization are not audited.
-  const auditRecordsByKey = new Map<string, WriteAuditRecord>();
+  // Indexed by request position so duplicate `{type, id}` entries each get their own event.
+  const auditRecords: Array<WriteAuditRecord | undefined> = [];
   if (auditDiffRecorder) {
-    for (const { value } of validObjects) {
-      auditRecordsByKey.set(
-        `${value.type}:${value.id}`,
-        auditDiffRecorder.track({ type: value.type, id: value.id })
+    expectedResults.forEach((expectedResult, index) => {
+      if (isLeft(expectedResult)) {
+        return;
+      }
+      const { type, id, object } = expectedResult.value;
+      auditRecords[index] = auditDiffRecorder.track(
+        { type, id, name: SavedObjectsUtils.getName(registry.getNameAttribute(type), object) },
+        { key: String(index) }
       );
-    }
+    });
   }
 
   let bulkRequestIndexCounter = 0;
@@ -270,7 +273,7 @@ export const performBulkCreate = async <T>(
   >;
   const expectedBulkResults = await Promise.all(
     (expectedAuthorizedResults ?? expectedResults).map<Promise<ExpectedBulkResult>>(
-      async (expectedBulkGetResult) => {
+      async (expectedBulkGetResult, index) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
@@ -304,6 +307,11 @@ export const performBulkCreate = async <T>(
           versionProperties = getExpectedVersionProperties(version);
           existingOriginId = existingDocument?._source?.originId;
           accessControl = existingDocument?._source?.accessControl;
+          // Only present when the preflight was asked for the attributes (see `fields`).
+          const existingAttributes = existingDocument?._source?.[type];
+          if (existingAttributes) {
+            auditRecords[index]?.setBefore(existingAttributes as Record<string, unknown>);
+          }
         } else {
           if (registry.isSingleNamespace(object.type)) {
             savedObjectNamespace = initialNamespaces
@@ -383,51 +391,28 @@ export const performBulkCreate = async <T>(
     )
   );
 
-  // When overwriting, capture previous attributes for diffs. Feature-gated and
-  // failure-isolated so an mget error degrades to before={} instead of failing the write.
-  // Only allow-listed types are fetched — others still get a result event without a snapshot.
+  // Before-state for overwrite diffs of allow-listed types that had no preflight read
+  // (multi-namespace types took theirs from the preflight). Failure-isolated: an mget
+  // error degrades to before={} instead of failing the write.
   if (auditDiffRecorder) {
-    const overwriteRequests = expectedBulkResults.flatMap((expectedResult) => {
+    const overwriteRequests = expectedBulkResults.flatMap((expectedResult, index) => {
       if (isLeft(expectedResult) || !expectedResult.value.isOverwrite) {
         return [];
       }
-      const { requestedId, rawMigratedDoc } = expectedResult.value;
+      const { rawMigratedDoc } = expectedResult.value;
       const type = rawMigratedDoc._source.type;
-      if (!auditDiffRecorder.shouldComputeDiff(type)) {
+      if (registry.isMultiNamespace(type) || !auditDiffRecorder.shouldComputeDiff(type)) {
         return [];
       }
-      return [
-        {
-          rawId: rawMigratedDoc._id,
-          type,
-          id: requestedId,
-        },
-      ];
+      return [{ rawId: rawMigratedDoc._id, type, auditRecord: auditRecords[index] }];
     });
 
     if (overwriteRequests.length > 0) {
       try {
-        const objectByRawId = new Map(overwriteRequests.map((req) => [req.rawId, req]));
-        const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
-          {
-            docs: overwriteRequests.map(({ rawId, type }) => ({
-              _id: rawId,
-              _index: commonHelper.getIndexForType(type),
-              _source: [type],
-            })),
-          },
-          { ignore: [404] }
-        );
-        beforeDocs.docs?.forEach((doc) => {
-          if (!isMgetDoc(doc)) return;
-          const target = objectByRawId.get(doc._id);
-          if (!target) return;
-          const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
-          if (attrs) {
-            auditRecordsByKey
-              .get(`${target.type}:${target.id}`)
-              ?.setBefore(attrs as Record<string, unknown>);
-          }
+        await fetchBeforeAttrs({
+          client,
+          getIndexForType: (objectType) => commonHelper.getIndexForType(objectType),
+          requests: overwriteRequests,
         });
       } catch (error) {
         logger.error(
@@ -448,22 +433,24 @@ export const performBulkCreate = async <T>(
     : undefined;
 
   const result: SavedObjectsBulkResponse<T> = {
-    saved_objects: expectedBulkResults.map((expectedResult) => {
+    saved_objects: expectedBulkResults.map((expectedResult, index) => {
       if (isLeft(expectedResult)) {
         return expectedResult.value as SavedObjectErrorResult;
       }
 
       const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
       const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
+      const type = rawMigratedDoc._source.type;
 
-      const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
+      // Recorded before the item error check so a failed item still audits the attempt.
+      const auditRecord = auditRecords[index];
+      auditRecord?.setAfter((rawMigratedDoc._source[type] ?? {}) as Record<string, unknown>);
+
+      const error = getBulkOperationError(type, requestedId, rawResponse);
       if (error) {
-        return { type: rawMigratedDoc._source.type, id: requestedId, error };
+        return { type, id: requestedId, error };
       }
 
-      const type = rawMigratedDoc._source.type;
-      const auditRecord = auditRecordsByKey.get(`${type}:${requestedId}`);
-      auditRecord?.setAfter((rawMigratedDoc._source[type] ?? {}) as Record<string, unknown>);
       auditRecord?.succeed();
 
       // When method == 'index' the bulkResponse doesn't include the indexed

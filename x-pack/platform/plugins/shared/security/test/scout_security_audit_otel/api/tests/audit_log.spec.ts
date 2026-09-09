@@ -99,16 +99,16 @@ apiTest.describe(
       });
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.delete({ type: 'dashboard', id: TEST_DASHBOARD_ID });
-      await receiver.stop();
-    });
-
     apiTest.afterEach(async ({ kbnClient }) => {
       const leftover = savedObjectsToCleanUp.splice(0);
       for (const { type, id } of leftover) {
         await kbnClient.savedObjects.delete({ type, id });
       }
+    });
+
+    apiTest.afterAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.delete({ type: 'dashboard', id: TEST_DASHBOARD_ID });
+      await receiver.stop();
     });
 
     apiTest(

@@ -46,3 +46,47 @@ export const waitForAuditEvent = async (
   }
   throw new Error(`Timed out waiting for ${description} in ${AUDIT_LOG_PATH}`);
 };
+
+export interface JsonPatchOp {
+  op: 'add' | 'remove' | 'replace';
+  path: string;
+  value?: unknown;
+  oldValue?: unknown;
+}
+
+export interface SavedObjectDiff {
+  format: string;
+  ops: JsonPatchOp[];
+  noOps: Array<{ path: string }>;
+}
+
+interface SavedObjectAuditEvent {
+  event?: { action?: string; outcome?: string };
+  kibana?: { saved_object?: { id?: string; type?: string }; diff?: SavedObjectDiff };
+}
+
+/** Matches a mutation's result event for `id`: the only event for the operation, carrying `kibana.diff`. */
+export const isDiffEvent =
+  (action: string, id: string) =>
+  (event: Record<string, unknown>): boolean => {
+    const ev = event as SavedObjectAuditEvent;
+    return (
+      ev.event?.action === action && ev.kibana?.saved_object?.id === id && ev.kibana?.diff != null
+    );
+  };
+
+/** Reads the audit log once and returns the mutation's diff, or `undefined` (to assert its absence). */
+export const scanForDiff = (action: string, id: string): SavedObjectDiff | undefined =>
+  (scanAuditLog(isDiffEvent(action, id)) as SavedObjectAuditEvent | undefined)?.kibana?.diff;
+
+/** Polls the audit log until the diff-bearing event for a mutation appears. */
+export const waitForDiffEvent = async (action: string, id: string): Promise<SavedObjectDiff> => {
+  const event = (await waitForAuditEvent(isDiffEvent(action, id), {
+    description: `${action} diff event for ${id}`,
+  })) as SavedObjectAuditEvent;
+  const diff = event.kibana?.diff;
+  if (!diff) {
+    throw new Error(`Audit event for ${action} ${id} unexpectedly carries no kibana.diff`);
+  }
+  return diff;
+};

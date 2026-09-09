@@ -115,6 +115,9 @@ export const executeUpdate = async <T>(
 
   const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
   const accessControl = preflightDocNSResult.rawDocSource?._source.accessControl;
+  const name = SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+    attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
+  });
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: {
@@ -125,9 +128,7 @@ export const executeUpdate = async <T>(
         accessControl,
       }),
       objectNamespace: namespace && registry.isSingleNamespace(type) ? namespace : undefined,
-      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
-        attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
-      }),
+      name,
     },
   });
 
@@ -137,7 +138,7 @@ export const executeUpdate = async <T>(
   // plaintext, so failures flushed before that point cannot leak unencrypted ESO
   // attributes into the audit log. A conflict retry re-tracks the object, so the
   // final attempt determines what is audited.
-  const auditRecord = auditDiffRecorder?.track({ type, id });
+  const auditRecord = auditDiffRecorder?.track({ type, id, name });
   // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
   const docOutsideNamespace = preflightDocNSResult?.checkResult === 'found_outside_namespace';
   const docNotFound =

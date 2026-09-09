@@ -9,7 +9,7 @@ import { apiTest, tags } from '@kbn/scout';
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { waitForAuditEvent } from '../../../scout_security_audit/api/helpers/audit_log';
+import { waitForDiffEvent } from '../../../scout_security_audit/api/helpers/audit_log';
 
 const TYPE = 'index-pattern';
 const KBN_HEADERS = { 'kbn-xsrf': 'x', 'x-elastic-internal-origin': 'kibana' };
@@ -24,49 +24,11 @@ const DEEP_PANEL_COUNT = 800;
 const BULK_OBJECT_COUNT = 20;
 const BULK_PANEL_COUNT = 80;
 
-interface JsonPatchOp {
-  op: 'add' | 'remove' | 'replace';
-  path: string;
-  value?: unknown;
-  oldValue?: unknown;
-}
-
-interface SavedObjectDiff {
-  format: string;
-  ops: JsonPatchOp[];
-  noOps: Array<{ path: string }>;
-}
-
-interface AuditEvent {
-  event?: { action?: string; outcome?: string };
-  kibana?: { saved_object?: { id?: string; type?: string }; diff?: SavedObjectDiff };
-}
-
 interface HeapMetrics {
   usedBytes: number;
   sizeLimitBytes: number;
   usageRatio: number;
 }
-
-const isDiffEvent =
-  (action: string, id: string) =>
-  (event: Record<string, unknown>): boolean => {
-    const ev = event as AuditEvent;
-    return (
-      ev.event?.action === action && ev.kibana?.saved_object?.id === id && ev.kibana?.diff != null
-    );
-  };
-
-const waitForDiffEvent = async (action: string, id: string): Promise<SavedObjectDiff> => {
-  const event = (await waitForAuditEvent(isDiffEvent(action, id), {
-    description: `${action} diff event for ${id}`,
-  })) as AuditEvent;
-  const diff = event.kibana?.diff;
-  if (!diff) {
-    throw new Error(`Audit event for ${action} ${id} unexpectedly carries no kibana.diff`);
-  }
-  return diff;
-};
 
 const buildNestedAttributes = (title: string, panelCount: number) => {
   const panels: Record<string, unknown> = {};

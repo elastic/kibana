@@ -1,5 +1,5 @@
 {
-  "sha1": "8d30f465b387bcc72bc13147ec54d2549637e64e",
+  "sha1": "28253956301b6208bb62ca124e8eedd4a6d5b8a0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 152,
+        "line": 114,
         "column": 15
       }
     },
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 184,
+        "line": 146,
         "column": 31
       }
     }

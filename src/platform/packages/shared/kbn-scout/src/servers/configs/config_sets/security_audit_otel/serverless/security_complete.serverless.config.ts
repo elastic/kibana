@@ -16,10 +16,7 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    // savedObjectDiff is Serverless-only here: applyAuditOtelFieldMap (which
-    // JSON-stringifies kibana.diff for the OTel SDK) is injected only on the
-    // Serverless OTel appender. The traditional OTel spec must keep diffs off
-    // so it still asserts that Serverless transforms are not applied.
+    // Diffs on, so the spec can assert kibana.diff is serialized for the OTel SDK.
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       ...securityAuditOtelServerArgs,

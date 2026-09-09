@@ -5,41 +5,11 @@
  * 2.0.
  */
 
-import { computeJsonPatch, dotPathToJsonPointer } from './saved_object_diff';
+import { computeJsonPatch } from './saved_object_diff';
 import type { ExtendedJsonPatch } from './saved_object_diff';
 
 const opAt = (patch: ExtendedJsonPatch, path: string) => patch.ops.find((op) => op.path === path);
 const noOpPaths = (patch: ExtendedJsonPatch) => patch.noOps.map((noOp) => noOp.path);
-
-// ---------------------------------------------------------------------------
-// dotPathToJsonPointer
-// ---------------------------------------------------------------------------
-
-describe('dotPathToJsonPointer', () => {
-  it('converts a simple key to a JSON Pointer', () => {
-    expect(dotPathToJsonPointer('name')).toBe('/name');
-  });
-
-  it('converts a dot-path to a JSON Pointer', () => {
-    expect(dotPathToJsonPointer('user.email')).toBe('/user/email');
-  });
-
-  it('converts a deeply nested dot-path', () => {
-    expect(dotPathToJsonPointer('a.b.c.d')).toBe('/a/b/c/d');
-  });
-
-  it('escapes ~ as ~0', () => {
-    expect(dotPathToJsonPointer('a~b')).toBe('/a~0b');
-  });
-
-  it('escapes / as ~1', () => {
-    expect(dotPathToJsonPointer('a/b')).toBe('/a~1b');
-  });
-
-  it('escapes ~ before / to avoid double-processing', () => {
-    expect(dotPathToJsonPointer('a~/b')).toBe('/a~0~1b');
-  });
-});
 
 // ---------------------------------------------------------------------------
 // computeJsonPatch
@@ -191,6 +161,36 @@ describe('computeJsonPatch', () => {
 
       expect(opAt(patch, '/value')).toMatchObject({ value: 'flat', oldValue: [1, 2, 3] });
     });
+
+    it('treats arrays of objects whose keys are in a different order as equal', () => {
+      // e.g. dashboard panels re-serialized by the client, or a migration spread
+      const patch = computeJsonPatch({
+        a: { panels: [{ id: 'p1', gridData: { x: 0, y: 0 } }] },
+        b: { panels: [{ gridData: { y: 0, x: 0 }, id: 'p1' }] },
+      });
+
+      expect(patch.ops).toEqual([]);
+      expect(noOpPaths(patch)).toContain('/panels');
+    });
+
+    it('detects a changed value inside an array of objects', () => {
+      const patch = computeJsonPatch({
+        a: { panels: [{ id: 'p1', gridData: { x: 0, y: 0 } }] },
+        b: { panels: [{ id: 'p1', gridData: { x: 1, y: 0 } }] },
+      });
+
+      expect(opAt(patch, '/panels')).toMatchObject({
+        op: 'replace',
+        value: [{ id: 'p1', gridData: { x: 1, y: 0 } }],
+        oldValue: [{ id: 'p1', gridData: { x: 0, y: 0 } }],
+      });
+    });
+
+    it('does not treat an array as equal to a non-array with the same JSON shape', () => {
+      const patch = computeJsonPatch({ a: { value: [] }, b: { value: {} } });
+
+      expect(opAt(patch, '/value')).toMatchObject({ op: 'replace', value: {}, oldValue: [] });
+    });
   });
 
   describe('literal dots in keys', () => {
@@ -297,68 +297,6 @@ describe('computeJsonPatch', () => {
         value: [{}, {}],
         oldValue: [{}],
       });
-    });
-  });
-
-  describe('fieldsToIgnore', () => {
-    it('excludes exact-match top-level fields from ops and noOps', () => {
-      const patch = computeJsonPatch({
-        a: { name: 'old', updated_at: '2024-01-01' },
-        b: { name: 'new', updated_at: '2024-01-02' },
-        fieldsToIgnore: ['updated_at'],
-      });
-
-      expect(opAt(patch, '/updated_at')).toBeUndefined();
-      expect(noOpPaths(patch)).not.toContain('/updated_at');
-      expect(opAt(patch, '/name')).toBeDefined();
-    });
-
-    it('excludes nested fields that are children of an ignored prefix', () => {
-      const patch = computeJsonPatch({
-        a: { meta: { version: 1, hash: 'abc' } },
-        b: { meta: { version: 2, hash: 'xyz' } },
-        fieldsToIgnore: ['meta'],
-      });
-
-      expect(patch.ops).toEqual([]);
-      expect(patch.noOps).toEqual([]);
-    });
-
-    it('keeps an unchanged, non-ignored field in noOps', () => {
-      const patch = computeJsonPatch({
-        a: { name: 'same', version: 1 },
-        b: { name: 'same', version: 2 },
-        fieldsToIgnore: ['version'],
-      });
-
-      expect(noOpPaths(patch)).toEqual(['/name']);
-      expect(opAt(patch, '/version')).toBeUndefined();
-    });
-
-    it('ignores all RFC-proposed system fields correctly', () => {
-      const systemFields = [
-        'updated_at',
-        'updated_by',
-        'created_at',
-        'created_by',
-        'typeMigrationVersion',
-        'coreMigrationVersion',
-        'migrationVersion',
-        'version',
-        'managed',
-        'accessControl',
-        'missingReferences',
-      ];
-      const makeObj = (val: number) => Object.fromEntries(systemFields.map((f) => [f, val]));
-
-      const patch = computeJsonPatch({
-        a: makeObj(1),
-        b: makeObj(2),
-        fieldsToIgnore: systemFields,
-      });
-
-      expect(patch.ops).toEqual([]);
-      expect(patch.noOps).toEqual([]);
     });
   });
 

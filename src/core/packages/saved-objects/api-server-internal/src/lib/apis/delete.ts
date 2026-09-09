@@ -51,6 +51,7 @@ export const performDelete = async <T>(
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
   let deleteBeforeAttributes: Record<string, unknown> = {};
+  let savedObjectName: string | undefined;
 
   if (securityExtension) {
     const nameAttribute = registry.getNameAttribute(type);
@@ -75,9 +76,8 @@ export const performDelete = async <T>(
       string,
       unknown
     >;
-    const name = securityExtension.includeSavedObjectNames()
-      ? SavedObjectsUtils.getName(nameAttribute, saveObject)
-      : undefined;
+    savedObjectName = SavedObjectsUtils.getName(nameAttribute, saveObject);
+    const name = securityExtension.includeSavedObjectNames() ? savedObjectName : undefined;
     const accessControl = savedObjectResponse.body._source?.accessControl;
     // we don't need to pass existing namespaces in because we're only concerned with authorizing
     // the current space. This saves us from performing the preflight check if we're unauthorized
@@ -95,7 +95,7 @@ export const performDelete = async <T>(
   // recording them is deferred until the namespace preflight below confirms the
   // object is in scope, so out-of-space rejections audit without a snapshot.
   const auditRecord = auditDiffRecorder?.track(
-    { type, id },
+    { type, id, name: savedObjectName },
     registry.isMultiNamespace(type) ? {} : { before: deleteBeforeAttributes }
   );
   let preflightResult: PreflightCheckNamespacesResult | undefined;

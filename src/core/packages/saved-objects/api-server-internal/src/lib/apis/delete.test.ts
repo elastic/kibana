@@ -27,7 +27,6 @@ import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -52,7 +51,7 @@ describe('#delete', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let securityExtension: ReturnType<typeof savedObjectsExtensionsMock.createSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -461,7 +460,7 @@ describe('#delete', () => {
       });
 
       it('calls emitSavedObjectDiffAuditEvent with after={} and before=attributes when savedObjectDiffEnabled is true', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
 
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));
         client.delete.mockResponseOnce({
@@ -483,7 +482,7 @@ describe('#delete', () => {
       });
 
       it('emits a diff event even when before-state attributes are empty', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
 
         // get returns no attributes (e.g. object with an empty attribute bag)
         client.get.mockResponse({
@@ -508,7 +507,7 @@ describe('#delete', () => {
       });
 
       it('fetches full attributes for the diff only when savedObjectDiffEnabled is true', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));
         client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
         await repository.delete(type, id);
@@ -516,7 +515,7 @@ describe('#delete', () => {
       });
 
       it('does not fetch full attributes when savedObjectDiffEnabled is false', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = false;
+        securityExtension.savedObjectDiffEnabled = false;
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));
         client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
         await repository.delete(type, id);
@@ -524,7 +523,7 @@ describe('#delete', () => {
       });
 
       it('does not fetch full attributes when the type is not on the allow list', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));
         client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
@@ -534,7 +533,7 @@ describe('#delete', () => {
       });
 
       it('does not include before-attributes when a multi-namespace object exists only outside the current space', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
 
         // The object lives in `namespace`; the delete targets 'other-namespace'. The raw ID of a
         // multi-namespace type is not space-scoped, so the pre-authz get still returns the doc
@@ -556,7 +555,8 @@ describe('#delete', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_delete',
-            savedObject: { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
+            // the name still comes from the pre-delete read, as with the pre-operation event
+            savedObject: { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, name: 'Testing' },
             outcome: 'unknown',
             before: {},
             after: {},
@@ -565,7 +565,7 @@ describe('#delete', () => {
       });
 
       it('includes before-attributes for a multi-namespace object once the namespace preflight passes', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
 
         const response = getMockGetResponse(
           registry,
@@ -588,7 +588,7 @@ describe('#delete', () => {
       });
 
       it('emits an unknown-outcome event when the delete fails after authorization', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.savedObjectDiffEnabled = true;
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));
         // ES reports the document as already gone -> repository throws 404 post-authz
         client.delete.mockResponseOnce({ result: 'not_found' } as estypes.DeleteResponse);
@@ -599,7 +599,7 @@ describe('#delete', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_delete',
-            savedObject: { type, id },
+            savedObject: { type, id, name: 'Testing' },
             outcome: 'unknown',
             before: expect.objectContaining({ title: 'Testing' }),
             after: {},

@@ -8,12 +8,10 @@
  */
 
 import pMap from 'p-map';
-import type { estypes } from '@elastic/elasticsearch';
 import type {
   AuthorizeUpdateObject,
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
@@ -38,6 +36,11 @@ import type {
   WriteAuditRecord,
   SavedObjectAuditDiffRecorder,
 } from './utils/saved_object_audit_diff_recorder';
+import {
+  applyBeforeAttrsFromMgetDocs,
+  fetchBeforeAttrs,
+  type BeforeAttrsRequest,
+} from './utils/saved_object_diff_before_state';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import type {
@@ -103,10 +106,12 @@ export const performBulkDelete = async <T>(
   );
 
   let expectedResults: ExpectedBulkDeleteResult[];
+  // Reused below for audit names (resolved from the preflight for multi-namespace types).
+  let authObjects: AuthorizeUpdateObject[] = [];
 
   if (securityExtension) {
     // Perform Auth Check (on both L/R, we'll deal with that later)
-    const authObjects: AuthorizeUpdateObject[] = expectedMultiNamespaceResults.map((element) => {
+    authObjects = expectedMultiNamespaceResults.map((element) => {
       const index = (element.value as { esRequestIndex: number }).esRequestIndex;
       const { type, id } = element.value;
       const preflightResult =
@@ -153,16 +158,17 @@ export const performBulkDelete = async <T>(
   // operation settles); bulk delete authorizes both valid and already-errored objects.
   // `before` is populated by the feature-gated pre-delete fetch; empty attributes
   // still audit — the delete itself is the audit signal.
-  const auditRecordsByKey = new Map<string, WriteAuditRecord>();
+  // Indexed by request position so duplicate `{type, id}` entries each get their own event.
+  const auditRecords: Array<WriteAuditRecord | undefined> = [];
   if (auditDiffRecorder) {
-    for (const { value } of expectedResults) {
+    expectedResults.forEach(({ value }, index) => {
       if (value.id) {
-        auditRecordsByKey.set(
-          `${value.type}:${value.id}`,
-          auditDiffRecorder.track({ type: value.type, id: value.id })
+        auditRecords[index] = auditDiffRecorder.track(
+          { type: value.type, id: value.id, name: authObjects[index]?.name },
+          { key: String(index) }
         );
       }
-    }
+    });
   }
 
   // Filter valid objects
@@ -183,41 +189,34 @@ export const performBulkDelete = async <T>(
   // array position). Failure-isolated: an mget error must not fail the delete.
   if (auditDiffRecorder) {
     try {
-      const toBeforeRequest = ({ type, id }: { type: string; id: string }) => ({
-        rawId: serializer.generateRawId(namespace, type, id),
-        type,
-        id,
+      const toBeforeRequests = (multiNamespace: boolean): BeforeAttrsRequest[] =>
+        expectedResults.flatMap((expectedResult, index) => {
+          if (isLeft(expectedResult)) {
+            return [];
+          }
+          const { type, id } = expectedResult.value;
+          if (
+            registry.isMultiNamespace(type) !== multiNamespace ||
+            !auditDiffRecorder.shouldComputeDiff(type)
+          ) {
+            return [];
+          }
+          return [
+            {
+              rawId: serializer.generateRawId(namespace, type, id),
+              type,
+              auditRecord: auditRecords[index],
+            },
+          ];
+        });
+
+      applyBeforeAttrsFromMgetDocs(multiNamespaceDocsResponse?.body.docs, toBeforeRequests(true));
+
+      await fetchBeforeAttrs({
+        client,
+        getIndexForType: (objectType) => commonHelper.getIndexForType(objectType),
+        requests: toBeforeRequests(false),
       });
-
-      const multiNsRequests = validObjects.flatMap(({ value: { type, id } }) =>
-        registry.isMultiNamespace(type) && auditDiffRecorder.shouldComputeDiff(type)
-          ? [toBeforeRequest({ type, id })]
-          : []
-      );
-      applyBeforeAttrsFromMgetDocs(
-        multiNamespaceDocsResponse?.body.docs,
-        multiNsRequests,
-        auditRecordsByKey
-      );
-
-      const singleNsRequests = validObjects.flatMap(({ value: { type, id } }) =>
-        !registry.isMultiNamespace(type) && auditDiffRecorder.shouldComputeDiff(type)
-          ? [toBeforeRequest({ type, id })]
-          : []
-      );
-      if (singleNsRequests.length > 0) {
-        const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
-          {
-            docs: singleNsRequests.map(({ rawId, type }) => ({
-              _id: rawId,
-              _index: commonHelper.getIndexForType(type),
-              _source: [type],
-            })),
-          },
-          { ignore: [404] }
-        );
-        applyBeforeAttrsFromMgetDocs(beforeDocs.docs, singleNsRequests, auditRecordsByKey);
-      }
     } catch (error) {
       logger.error(
         `Failed to fetch before-state for saved object diff on bulk delete: ${String(error)}`
@@ -253,7 +252,7 @@ export const performBulkDelete = async <T>(
   let errorResult: BulkDeleteItemErrorResult;
   const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
 
-  const savedObjects = expectedResults.map((expectedResult) => {
+  const savedObjects = expectedResults.map((expectedResult, index) => {
     if (isLeft(expectedResult)) {
       return { ...expectedResult.value, success: false };
     }
@@ -285,7 +284,7 @@ export const performBulkDelete = async <T>(
     }
 
     if (rawResponse.result === 'deleted') {
-      auditRecordsByKey.get(`${type}:${id}`)?.succeed();
+      auditRecords[index]?.succeed();
 
       // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
       if (namespaces) {
@@ -363,28 +362,6 @@ function presortObjectsByNamespaceType(
       ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
     });
   });
-}
-
-function applyBeforeAttrsFromMgetDocs(
-  docs: Array<estypes.MgetResponseItem<unknown>> | undefined,
-  requests: Array<{ rawId: string; type: string; id: string }>,
-  auditRecordsByKey: Map<string, WriteAuditRecord>
-) {
-  if (!docs || requests.length === 0) {
-    return;
-  }
-  const objectByRawId = new Map(requests.map((req) => [req.rawId, req]));
-  for (const doc of docs) {
-    if (!isMgetDoc(doc)) continue;
-    const target = objectByRawId.get(doc._id);
-    if (!target) continue;
-    const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
-    if (attrs) {
-      auditRecordsByKey
-        .get(`${target.type}:${target.id}`)
-        ?.setBefore(attrs as Record<string, unknown>);
-    }
-  }
 }
 
 /**

@@ -927,17 +927,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       }
     }
 
-    // Resolve the object name from its attributes (create/update populate `after`,
-    // delete populates `before`) so the event is self-contained like the other audit
-    // events, falling back to the caller-provided name when the attributes don't
-    // yield one (or resolution fails). `addAuditEvent` handles name redaction.
+    // Name from `after`, then `before`, then the caller-resolved name (e.g. a failure
+    // flushed before any state was recorded). `addAuditEvent` handles redaction.
     let name = params.savedObject.name;
     try {
-      const attributesForName = Object.keys(params.after).length > 0 ? params.after : params.before;
+      const nameAttribute = this.typeRegistry.getNameAttribute(type);
       name =
-        SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
-          attributes: attributesForName,
-        }) ?? params.savedObject.name;
+        SavedObjectsUtils.getName(nameAttribute, { attributes: params.after }) ??
+        SavedObjectsUtils.getName(nameAttribute, { attributes: params.before }) ??
+        params.savedObject.name;
     } catch (error) {
       this.logger?.error(
         `Failed to resolve the saved object name for the ${

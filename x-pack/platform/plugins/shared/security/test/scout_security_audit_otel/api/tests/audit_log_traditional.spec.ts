@@ -15,13 +15,18 @@ import {
   OtlpLogReceiver,
 } from '../lib/otlp_log_receiver';
 
+const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
+// Allow-listed for diffs on this config set (see security_audit_so_diff/shared.ts).
+const DIFF_TYPE = 'index-pattern';
+
 const receiver = new OtlpLogReceiver();
 
 /**
  * Asserts the OTel envelope + resource on a non-Serverless (traditional) build. The audit OTel field
  * transforms and the minimal resource are gated on the Serverless build flavor, so on traditional
  * the OTel appender passes through unchanged: a full (auto-detected) resource and raw ECS field
- * names in the log-record attributes.
+ * names in the log-record attributes. The one exception is `kibana.diff`, which is serialized to a
+ * JSON string on every flavor because the OTel SDK drops array-of-object attributes.
  */
 const expectTraditionalEnvelope = (e: FlatAttributes) => {
   expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
@@ -50,8 +55,17 @@ apiTest.describe(
   // The transformed Serverless shape is covered by audit_log.spec.ts.
   { tag: [...tags.stateful.classic] },
   () => {
+    const savedObjectsToCleanUp: Array<{ type: string; id: string }> = [];
+
     apiTest.beforeAll(async () => {
       await receiver.start(OTEL_RECEIVER_PORT);
+    });
+
+    apiTest.afterEach(async ({ kbnClient }) => {
+      const leftover = savedObjectsToCleanUp.splice(0);
+      for (const { type, id } of leftover) {
+        await kbnClient.savedObjects.delete({ type, id });
+      }
     });
 
     apiTest.afterAll(async () => {
@@ -142,6 +156,62 @@ apiTest.describe(
         expect(e['source.address']).toBeUndefined();
         expect(e['http.request.headers.x-forwarded-for']).toBeDefined();
         expect(e['network.forwarded_ip']).toBeUndefined();
+      }
+    );
+
+    apiTest(
+      'saved_object_update: kibana.diff is a JSON string, other fields keep raw ECS names',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_XSRF };
+        const id = `otel-traditional-diff-${Date.now()}`;
+
+        const createRes = await apiClient.post(`api/saved_objects/${DIFF_TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'old' } },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: DIFF_TYPE, id });
+
+        const snap = receiver.snapshot();
+        const res = await apiClient.put(`api/saved_objects/${DIFF_TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'new' } },
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(200);
+
+        const e = await snap.waitForLogRecord(
+          (attrs) =>
+            attrs['event.action'] === 'saved_object_update' &&
+            attrs['kibana.saved_object.id'] === id
+        );
+
+        expectTraditionalEnvelope(e);
+        expect(e['event.outcome']).toBe('success');
+
+        // The diff is serialized on every flavor; the flattened keys must not leak through.
+        expect(e['kibana.diff.ops']).toBeUndefined();
+        expect(e['kibana.diff.format']).toBeUndefined();
+        expect(e['kibana.diff.noOps']).toBeUndefined();
+        expect(typeof e['kibana.diff']).toBe('string');
+        const diff = JSON.parse(e['kibana.diff'] as string) as {
+          format: string;
+          ops: Array<{ op: string; path: string; value?: unknown; oldValue?: unknown }>;
+        };
+        expect(diff.format).toBe('json_patch_extended');
+        expect(diff.ops.find((op) => op.path === '/title')).toStrictEqual({
+          op: 'replace',
+          path: '/title',
+          value: 'new',
+          oldValue: 'old',
+        });
+
+        // Serverless renames are still NOT applied around it.
+        expect(e['kibana.space_id']).toBeDefined();
+        expect(e['kibana.space.id']).toBeUndefined();
+        expect(e['kibana.saved_object.type']).toBe(DIFF_TYPE);
       }
     );
   }
