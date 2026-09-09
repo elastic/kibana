@@ -191,7 +191,7 @@
     },
     {
       "id": "security-persona-matrix-attack-discovery",
-      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "name": "Security Persona Matrix \u2014 Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
       "tags": [
@@ -351,6 +351,51 @@
       ],
       "ciLabels": [
         "evals:security-esql-generation-regression"
+      ]
+    },
+    {
+      "id": "security-watch-escalation-chain",
+      "name": "Security Watch Escalation Chain (Floor \u2192 Dark \u2192 Deep \u2192 Detection)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/playwright.config.ts",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
+      "tags": [
+        "security",
+        "watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-watch-escalation-chain"
+      ]
+    },
+    {
+      "id": "security-forensics-watch",
+      "name": "Security Forensics Watch",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch/playwright.config.ts",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
+      "tags": [
+        "security",
+        "forensics-watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-forensics-watch"
+      ]
+    },
+    {
+      "id": "security-forensics-watch-raw-log-corroboration",
+      "name": "Security Forensics Watch Raw Log Corroboration",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch-raw-log-corroboration/playwright.config.ts",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
+      "tags": [
+        "security",
+        "forensics-watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-forensics-watch-raw-log-corroboration"
       ]
     },
     {
