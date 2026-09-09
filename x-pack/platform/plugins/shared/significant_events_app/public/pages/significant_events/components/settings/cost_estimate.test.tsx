@@ -80,7 +80,7 @@ const period = (label: PeriodCost['label'], overrides: Partial<PeriodCost> = {})
   periodStart: label === 'today' ? '2026-09-09T00:00:00.000Z' : '2026-09-01T00:00:00.000Z',
   periodEnd: '2026-09-09T15:04:00.000Z',
   groups: [
-    group('detection', { estimatedCost: 1.2, totalTokens: 12 }),
+    group('discovery', { estimatedCost: 1.2, totalTokens: 12 }),
     group('investigation', { estimatedCost: 2.3, totalTokens: 23 }),
     group('ki_extraction', { estimatedCost: 3.4, totalTokens: 34 }),
     group('memory', { estimatedCost: 4.5, totalTokens: 45 }),
@@ -380,16 +380,16 @@ describe('CostEstimate', () => {
     );
     const groups = screen.getAllByTestId(/^significantEventsCostGroup-/);
     expect(groups.map((node) => node.getAttribute('data-test-subj'))).toEqual([
-      'significantEventsCostGroup-detection',
+      'significantEventsCostGroup-discovery',
       'significantEventsCostGroup-investigation',
       'significantEventsCostGroup-ki_extraction',
       'significantEventsCostGroup-memory',
     ]);
-    expect(screen.getByText('Detection')).toBeInTheDocument();
+    expect(screen.getByText('Discovery')).toBeInTheDocument();
     expect(screen.getByText('Investigation')).toBeInTheDocument();
     expect(screen.getByText('KI extraction')).toBeInTheDocument();
     expect(screen.getByText('Memory')).toBeInTheDocument();
-    expect(screen.getByTestId('significantEventsCostGroupToday-detection')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
       '~$1.20'
     );
     expect(screen.getByTestId('significantEventsCostGroupMonth-memory')).toHaveTextContent(
@@ -402,7 +402,7 @@ describe('CostEstimate', () => {
       data: costResponse({
         today: period('today', {
           groups: [
-            group('detection', {
+            group('discovery', {
               status: 'partial' as CostStatus,
               estimatedCost: 1.2,
               unpriceableTokens: 4,
@@ -417,11 +417,11 @@ describe('CostEstimate', () => {
       }),
     });
     renderCost();
-    expect(screen.getByTestId('significantEventsCostGroupToday-detection')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
       '~$1.20'
     );
     expect(
-      screen.getByTestId('significantEventsCostPartialBadge-detection-today')
+      screen.getByTestId('significantEventsCostPartialBadge-discovery-today')
     ).toHaveTextContent('Partial floor');
   });
 
@@ -432,7 +432,7 @@ describe('CostEstimate', () => {
           totalTokens: 5,
           totalEstimatedCost: null,
           groups: [
-            group('detection', { estimatedCost: null, totalTokens: 5, priceableTokens: 0 }),
+            group('discovery', { estimatedCost: null, totalTokens: 5, priceableTokens: 0 }),
             group('investigation', { estimatedCost: 0, totalTokens: 0 }),
             group('ki_extraction', { estimatedCost: 0, totalTokens: 0 }),
             group('memory', { estimatedCost: 0, totalTokens: 0 }),
@@ -442,7 +442,7 @@ describe('CostEstimate', () => {
           totalTokens: 0,
           totalEstimatedCost: 0,
           groups: [
-            group('detection', { estimatedCost: 0, totalTokens: 0 }),
+            group('discovery', { estimatedCost: 0, totalTokens: 0 }),
             group('investigation', { estimatedCost: 0, totalTokens: 0 }),
             group('ki_extraction', { estimatedCost: 0, totalTokens: 0 }),
             group('memory', { estimatedCost: 0, totalTokens: 0 }),
@@ -454,10 +454,10 @@ describe('CostEstimate', () => {
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent(
       'Unable to calculate today · No recorded calls this month (recorded calls)'
     );
-    expect(screen.getByTestId('significantEventsCostGroupToday-detection')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
       'Unable to calculate'
     );
-    expect(screen.getByTestId('significantEventsCostGroupMonth-detection')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsCostGroupMonth-discovery')).toHaveTextContent(
       'No recorded calls'
     );
   });
@@ -512,7 +512,7 @@ describe('CostEstimate', () => {
         caveats: [...ALWAYS_CAVEATS, 'prices_stale', 'tier_crossings_detected'],
         month: period('this_month', {
           groups: [
-            group('detection', { tierCrossingCount: 1 }),
+            group('discovery', { tierCrossingCount: 1 }),
             group('investigation', { tierCrossingCount: 0 }),
             group('ki_extraction', { tierCrossingCount: 0 }),
             group('memory', { tierCrossingCount: 0 }),
@@ -552,7 +552,7 @@ describe('CostEstimate', () => {
         caveats: [...ALWAYS_CAVEATS, 'tier_crossings_detected'],
         month: period('this_month', {
           groups: [
-            group('detection', { tierCrossingCount: 2 }),
+            group('discovery', { tierCrossingCount: 2 }),
             group('investigation', { tierCrossingCount: 3 }),
             group('ki_extraction', { tierCrossingCount: 0 }),
             group('memory', { tierCrossingCount: 0 }),

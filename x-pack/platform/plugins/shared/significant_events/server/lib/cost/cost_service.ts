@@ -416,7 +416,7 @@ const processPeriodAggregations = ({
   unmatchedModelIds: string[];
 } => {
   const groups: Record<CostBudgetGroup, GroupAccumulator> = {
-    detection: createEmptyAccumulator(),
+    discovery: createEmptyAccumulator(),
     investigation: createEmptyAccumulator(),
     ki_extraction: createEmptyAccumulator(),
     memory: createEmptyAccumulator(),

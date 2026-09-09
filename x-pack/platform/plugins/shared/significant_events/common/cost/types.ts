@@ -20,7 +20,7 @@ import {
 } from '@kbn/significant-events-schema';
 
 export const COST_BUDGET_GROUPS = [
-  'detection',
+  'discovery',
   'investigation',
   'ki_extraction',
   'memory',
@@ -88,8 +88,8 @@ export interface CostResponse {
 }
 
 export const FEATURE_ID_TO_COST_BUDGET_GROUP: Readonly<Record<string, CostBudgetGroup>> = {
-  [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: 'detection',
-  [SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID]: 'detection',
+  [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: 'discovery',
+  [SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID]: 'discovery',
   [SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID]: 'investigation',
   [SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID]: 'ki_extraction',
   [SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID]: 'ki_extraction',

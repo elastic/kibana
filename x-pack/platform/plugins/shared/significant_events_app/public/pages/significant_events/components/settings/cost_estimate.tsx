@@ -59,8 +59,8 @@ const isDisplayedCostCaveat = (caveat: CostCaveat): caveat is DisplayedCostCavea
   caveat !== 'usd_assumed';
 
 const GROUP_LABELS: Record<CostBudgetGroup, string> = {
-  detection: i18n.translate('xpack.significantEventsApp.settings.costEstimate.detectionRowTitle', {
-    defaultMessage: 'Detection',
+  discovery: i18n.translate('xpack.significantEventsApp.settings.costEstimate.discoveryRowTitle', {
+    defaultMessage: 'Discovery',
   }),
   investigation: i18n.translate(
     'xpack.significantEventsApp.settings.costEstimate.investigationRowTitle',

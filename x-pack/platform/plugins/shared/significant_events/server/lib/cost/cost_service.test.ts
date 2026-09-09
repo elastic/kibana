@@ -230,18 +230,18 @@ describe('calculateSignificantEventsCost', () => {
 
     const result = await calculate({ esClient });
     expect(FEATURE_ID_TO_COST_BUDGET_GROUP[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]).toBe(
-      'detection'
+      'discovery'
     );
     expect(FEATURE_ID_TO_COST_BUDGET_GROUP[SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID]).toBe(
-      'detection'
+      'discovery'
     );
     expect(result.today.groups.map((group) => group.group)).toEqual([
-      'detection',
+      'discovery',
       'investigation',
       'ki_extraction',
       'memory',
     ]);
-    expect(result.today.groups.find((group) => group.group === 'detection')?.totalTokens).toBe(20);
+    expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(20);
     expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
       10
     );
@@ -284,8 +284,8 @@ describe('calculateSignificantEventsCost', () => {
     });
 
     const result = await calculate({ esClient });
-    const detection = result.today.groups.find((group) => group.group === 'detection');
-    expect(detection?.estimatedCost).toBeCloseTo((800 * 3.75 + 200 * 0.375 + 350 * 21) / 1_000_000);
+    const discovery = result.today.groups.find((group) => group.group === 'discovery');
+    expect(discovery?.estimatedCost).toBeCloseTo((800 * 3.75 + 200 * 0.375 + 350 * 21) / 1_000_000);
     const investigation = result.month.groups.find((group) => group.group === 'investigation');
     expect(investigation?.estimatedCost).toBeGreaterThanOrEqual(0);
     expect(investigation?.estimatedCost).toBeCloseTo((0 * 4.5 + 150 * 0.45 + 50 * 21) / 1_000_000);
@@ -314,11 +314,11 @@ describe('calculateSignificantEventsCost', () => {
     });
 
     const result = await calculate({ esClient });
-    const today = result.today.groups.find((group) => group.group === 'detection');
+    const today = result.today.groups.find((group) => group.group === 'discovery');
     expect(today).toMatchObject({ status: 'complete', priceableTokens: 100, unpriceableTokens: 0 });
     expect(today?.estimatedCost).toBeCloseTo((40 * 1 + 60 * 2) / 1_000_000);
 
-    const month = result.month.groups.find((group) => group.group === 'detection');
+    const month = result.month.groups.find((group) => group.group === 'discovery');
     expect(month).toMatchObject({
       status: 'partial',
       priceableTokens: 90,
@@ -342,8 +342,8 @@ describe('calculateSignificantEventsCost', () => {
     }));
 
     const result = await calculate({ esClient });
-    const detection = result.today.groups.find((group) => group.group === 'detection');
-    expect(detection).toMatchObject({
+    const discovery = result.today.groups.find((group) => group.group === 'discovery');
+    expect(discovery).toMatchObject({
       status: 'partial',
       estimatedCost: null,
       totalTokens: 70,
@@ -391,13 +391,13 @@ describe('calculateSignificantEventsCost', () => {
     }));
 
     const result = await calculate({ esClient });
-    const detection = result.today.groups.find((group) => group.group === 'detection');
-    expect(detection).toMatchObject({
+    const discovery = result.today.groups.find((group) => group.group === 'discovery');
+    expect(discovery).toMatchObject({
       status: 'partial',
       unpriceableTokens: 40,
       priceableTokens: 60,
     });
-    expect(detection?.estimatedCost).not.toBeNull();
+    expect(discovery?.estimatedCost).not.toBeNull();
   });
 
   it('counts GPT-5.4 prompt crossings above 272,000 and ignores the same prompt on a flat model', async () => {
@@ -421,7 +421,7 @@ describe('calculateSignificantEventsCost', () => {
 
     const result = await calculate({ esClient });
     expect(
-      result.today.groups.find((group) => group.group === 'detection')?.tierCrossingCount
+      result.today.groups.find((group) => group.group === 'discovery')?.tierCrossingCount
     ).toBe(4);
     expect(
       result.today.groups.find((group) => group.group === 'investigation')?.tierCrossingCount
@@ -453,7 +453,7 @@ describe('calculateSignificantEventsCost', () => {
     const unpriceable = await calculate({ esClient: unpriceableClient });
     expect(unpriceable.today.totalEstimatedCost).toBeNull();
     expect(
-      unpriceable.today.groups.find((group) => group.group === 'detection')?.estimatedCost
+      unpriceable.today.groups.find((group) => group.group === 'discovery')?.estimatedCost
     ).toBeNull();
     expect(unpriceable.today.totalStatus).toBe('partial');
   });
