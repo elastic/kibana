@@ -8,12 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-<<<<<<< HEAD
 import { useDispatch, useSelector } from 'react-redux';
-import { useSyntheticsSettingsContext } from '../../contexts';
-=======
-import { useDispatch, useSelector } from 'react-redux-v7';
->>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { NoPermissionsTooltip } from '../common/components/permissions';
 import {
@@ -36,13 +31,9 @@ export const RunTestManually = () => {
 
   const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
 
-<<<<<<< HEAD
   const { space } = useKibanaSpace();
-  const { canSave } = useSyntheticsSettingsContext();
-=======
   // Manual test runs are allowed for write users OR run-only (`canRunTestManually`) users.
   const canRunTestManually = useCanRunTestManually();
->>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
 
   const content = testInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_ARIA_LABEL;
 
@@ -55,13 +46,9 @@ export const RunTestManually = () => {
       <EuiButton
         data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
-<<<<<<< HEAD
         iconType="beaker"
         isLoading={!Boolean(monitor) || testInProgress}
-        disabled={!canUsePublicLocations || !canSave}
-=======
         disabled={!canUsePublicLocations || !canRunTestManually}
->>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
         onClick={() => {
           if (monitor) {
             const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;

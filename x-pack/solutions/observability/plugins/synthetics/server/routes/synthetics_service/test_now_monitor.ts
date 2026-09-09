@@ -29,17 +29,13 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
     const { monitorId } = routeContext.request.params;
     return triggerTestNow(monitorId, routeContext);
   },
-<<<<<<< HEAD
-  writeAccess: true,
-=======
   // Running a monitor is read-plus-execute (it never mutates the monitor SO), so it
   // does not require `uptime-write`. Instead it needs EITHER `uptime-write` (so existing
   // write users keep working, non-breaking) OR the `monitor-run-manually` sub-feature privilege,
   // which grants manual runs to an otherwise read-only role.
   writeAccess: false,
   anyRequiredPrivileges: ['uptime-write', MONITOR_RUN_MANUALLY_API],
-  options: { availability: { since: '9.2.0' } },
->>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
+  options: { availability: { since: '8.19.0' } },
 });
 
 export const triggerTestNow = async (
