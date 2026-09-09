@@ -64,12 +64,26 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toMatch(/render the diff in chat first/);
   });
 
+  it('tells the agent to settle the strategy and corpus filter itself', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/Decide rather than ask/);
+    expect(description).toMatch(/Pick the strategy and the corpus filter yourself/);
+    expect(description).toMatch(/Ask only\s+when the evidence cannot settle a choice/);
+  });
+
+  it('suppresses the workflow preview, which other attachments ask the agent to render', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/Render the diff attachment only/);
+    expect(description).toMatch(/Never render the workflow attachment preview/);
+  });
+
   it('leaves the save decision to the tool confirmation rather than a chat question', () => {
     const description = attachmentType.getAgentDescription?.();
 
     expect(description).toMatch(/Never end a turn asking for permission to save/);
     expect(description).toMatch(/never offer saving and running as a choice/);
-    expect(description).toMatch(/Do not run a workflow, or offer to, unless the user asks/);
   });
 
   it('formats the attachment for the agent', async () => {
