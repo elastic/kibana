@@ -167,7 +167,7 @@ export const lensApiConfigSchema: ZodType<LensApiConfig> = z
     ])
   )
   .meta({
-    id: 'lensApiConfig',
+    id: 'visApiConfig',
     title: 'Visualizations',
     description:
       'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
@@ -228,7 +228,7 @@ export const lensApiConfigSchemaNoESQL: ZodType<LensApiConfigNoESQL> = z
       waffleConfigSchemaNoESQL,
     ])
   )
-  .meta({ id: 'lensApiConfigNoESQL', title: 'Visualizations (DSL)' });
+  .meta({ id: 'visApiConfigNoESQL', title: 'Visualizations (DSL)' });
 
 /**
  * Lens API configs (DSL)
@@ -267,7 +267,7 @@ export const lensApiConfigSchemaESQL: ZodType<LensApiConfigESQL> = z
       waffleConfigSchemaESQL,
     ])
   )
-  .meta({ id: 'lensApiConfigESQL', title: 'Visualizations (ES|QL)' });
+  .meta({ id: 'visApiConfigESQL', title: 'Visualizations (ES|QL)' });
 
 /**
  * Lens API configs (ES|QL)

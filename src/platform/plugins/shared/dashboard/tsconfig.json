@@ -87,6 +87,7 @@
     "@kbn/visualization-utils",
     "@kbn/core-rendering-browser",
     "@kbn/grid-layout",
+    "@kbn/rxjs-history",
     "@kbn/ui-actions-browser",
     "@kbn/esql-types",
     "@kbn/saved-objects-tagging-plugin",
@@ -133,7 +134,5 @@
     "@kbn/ui-callout",
     "@kbn/zod-helpers",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

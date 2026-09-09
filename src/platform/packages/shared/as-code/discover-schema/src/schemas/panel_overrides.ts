@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { DataGridDensity } from '@kbn/discover-session-constants';
-import { columnSettingsEntrySchema, sortSchema } from './data_table';
+import { columnSettingsEntrySchema, jsonModeSettingsSchema, sortSchema } from './data_table';
 
 export const panelOverridesSchema = z
   .object({
@@ -69,22 +69,7 @@ export const panelOverridesSchema = z
         description:
           'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.',
       }),
-    json_mode_settings: z
-      .object({
-        hide_nulls: z.boolean().optional().meta({
-          description: 'When true, fields with null values are hidden while in JSON mode.',
-        }),
-        wrap_lines: z.boolean().optional().meta({
-          description:
-            'When false, long values are truncated to a single line instead of wrapping while in JSON mode.',
-        }),
-      })
-      .strict()
-      .optional()
-      .meta({
-        description:
-          'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).',
-      }),
+    json_mode_settings: jsonModeSettingsSchema,
   })
   .strict()
   .default({});

@@ -352,7 +352,7 @@ describe('search embeddable transform utils', () => {
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
         documentsDisplayMode: 'json',
-        jsonModeSettings: { hideNulls: true, wrapLines: false },
+        jsonModeSettings: { hideNulls: true, wrapLines: false, defaultRenderedNodes: 2 },
         grid: {
           columns: {
             message: { width: 100 },
@@ -379,7 +379,11 @@ describe('search embeddable transform utils', () => {
           header_row_height: 3,
           density: DataGridDensity.COMPACT,
           documents_display_mode: 'json',
-          json_mode_settings: { hide_nulls: true, wrap_lines: false },
+          json_mode_settings: {
+            hide_nulls: true,
+            wrap_lines: false,
+            default_rendered_nodes: 2,
+          },
         },
       });
       expect(result).not.toHaveProperty('sort');
@@ -741,8 +745,8 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        jsonModeSettings: { hideNulls: true, wrapLines: false, defaultRenderedNodes: 2 },
         documentsDisplayMode: 'json',
-        jsonModeSettings: { hideNulls: true, wrapLines: false },
         grid: {
           columns: {
             message: { width: 100 },
@@ -763,8 +767,8 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
+        json_mode_settings: { hide_nulls: true, wrap_lines: false, default_rendered_nodes: 2 },
         documents_display_mode: 'json',
-        json_mode_settings: { hide_nulls: true, wrap_lines: false },
       });
     });
 
@@ -820,6 +824,7 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100 as const,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
+        json_mode_settings: { hide_nulls: true, wrap_lines: false, default_rendered_nodes: 2 },
       };
       const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result).toEqual({
@@ -830,6 +835,7 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        jsonModeSettings: { hideNulls: true, wrapLines: false, defaultRenderedNodes: 2 },
         grid: {
           columns: {
             '@timestamp': { width: 200 },

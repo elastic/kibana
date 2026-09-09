@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { dataTableSchema, dataTableLimitsSchema } from './data_table';
+export { dataTableSchema, dataTableLimitsSchema, jsonModeSettingsSchema } from './data_table';
 export { viewModeSchema } from './view_mode';
 export { panelOverridesSchema } from './panel_overrides';
 export { classicTabSchema, esqlTabSchema, tabSchema } from './tab';
