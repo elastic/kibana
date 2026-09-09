@@ -14,8 +14,15 @@ export interface TraceStep {
   toolId?: string;
   /** Tool call parameters (for `type: 'tool'`). */
   toolParams?: string;
-  /** Skill IDs selected (for `type: 'skill'`). */
-  skills?: string[];
+  /**
+   * Skills selected (for `type: 'skill'`).
+   *
+   * Agent Builder emits skill entries as objects (`{ id, name, path, description }`),
+   * not bare strings. This was typed `string[]`, so `.join()` in the renderer produced
+   * `[object Object]` for every skill step and TypeScript could not catch it. Accept
+   * both shapes and normalise at the render boundary via `skillLabel`.
+   */
+  skills?: Array<string | { id?: string; name?: string }>;
 }
 
 /** Trace data for a single (model, column) pair. */

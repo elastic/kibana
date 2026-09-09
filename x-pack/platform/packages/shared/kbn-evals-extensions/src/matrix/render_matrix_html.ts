@@ -321,6 +321,15 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
   }
 };
 
+/**
+ * Renders a skill entry as a human label.
+ *
+ * Agent Builder emits `{ id, name, path, description }` objects; older fixtures use
+ * bare strings. Interpolating an object yields `[object Object]`, so normalise here.
+ */
+const skillLabel = (skill: string | { id?: string; name?: string }): string =>
+  typeof skill === 'string' ? skill : skill?.name ?? skill?.id ?? '';
+
 const stepHtml = (step: TraceStep, index: number): string => {
   if (step.type === 'tool') {
     return `<div class="step tool"><span class="step-tag tool-tag">${index}</span><code class="tool-id">${esc(
@@ -329,7 +338,7 @@ const stepHtml = (step: TraceStep, index: number): string => {
   }
   if (step.type === 'skill') {
     return `<div class="step reasoning"><span class="step-tag">skill</span><span class="step-text">Selected: ${esc(
-      (step.skills ?? []).join(', ')
+      (step.skills ?? []).map(skillLabel).filter(Boolean).join(', ')
     )}</span></div>`;
   }
   return `<div class="step reasoning"><span class="step-tag">think</span><span class="step-text">${inlineMd(

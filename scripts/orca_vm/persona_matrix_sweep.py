@@ -30,6 +30,7 @@ Usage:
   python3 persona_matrix_sweep.py --teardown            # delete orca-sweep-* VMs
 """
 import argparse
+import hashlib
 import inspect
 import json
 import sys
@@ -661,6 +662,11 @@ def az(*args: str) -> str:
     return r.stdout.strip()
 
 
+def model_slug(model: str) -> str:
+    """The human-readable model slug (used for Azure tags, never the VM name)."""
+    return model.replace("eis-", "").replace(".", "-").replace("_", "-")
+
+
 def vm_name(model: str, shard: Optional[str] = None) -> str:
     # Azure Linux VM names allow 64 chars. Do NOT truncate harder than that —
     # a [:24] truncation collided gemini-2-5-flash-lite onto gemini-2-5-flash's
@@ -672,7 +678,14 @@ def vm_name(model: str, shard: Optional[str] = None) -> str:
     suffix_env = os.environ.get("VM_NAME_SUFFIX", "")
     if suffix_env:
         prefix = f"{prefix}-{suffix_env}"[:40]
-    slug = model.replace("eis-", "").replace(".", "-").replace("_", "-")
+    # JUDGE BLINDING: the VM name must NOT contain the model under test.
+    # The sweep VM enrols into the eval cluster as a host entity, so a
+    # model-derived hostname (orca-sweep-anthropic-claude-4-8-opus) was echoed
+    # back inside agent answers on entity-analytics columns and read by the
+    # LLM judges — the model identifying itself to its own grader. Hash instead;
+    # the readable model lives in the `model` Azure tag (see provision()).
+    digest = hashlib.sha1(model_slug(model).encode()).hexdigest()[:12]
+    slug = f"m{digest}"
     # Shard suffix keeps each slice on its own box. Two eval stacks on one VM
     # OOM each other and corrupt local ES, so the suffix is load-bearing.
     # Truncate the MODEL slug, never the suffix: appending first and clamping
@@ -820,6 +833,10 @@ def provision(model: str, shard: Optional[str] = None) -> str:
         args = ["vm", "create", "-g", RG, "-n", name, "--image", IMAGE,
                 "--size", VM_SIZE, "--admin-username", SSH_USER, "--ssh-key-values",
                 os.path.expanduser("~/.ssh/azure_eval_farm.pub"),
+                # The VM name is a blinding hash (see vm_name); keep the readable
+                # model on a tag so teardown/debugging can still identify the box
+                # without leaking the identity into cluster host entities.
+                "--tags", f"model={model_slug(model)}",
                 "--public-ip-sku", "Standard", "--os-disk-size-gb", "128", "--no-wait"]
         if priority == "Spot":
             args += ["--eviction-policy", "Deallocate", "--priority", "Spot"]
@@ -1374,6 +1391,25 @@ def self_test() -> int:
         # A shared name would put two eval stacks on one box (they OOM each
         # other and corrupt local ES) or overwrite the sibling's run.log.
         check("shard vm names differ",
+              vm_name("eis-openai-gpt-5-4", "1/4") != vm_name("eis-openai-gpt-5-4", "2/4"), True)
+
+        # JUDGE BLINDING — the VM name enrols as a host entity in the eval
+        # cluster, so a model-derived name lets the model identify itself to
+        # its own LLM judge. Measured: 14 agent answers echoed
+        # `orca-sweep-anthropic-claude-4-8-opus` back into judged text.
+        for _m in ["eis-anthropic-claude-4-8-opus", "anthropic-claude-4.8-opus",
+                   "eis-openai-gpt-5-4", "z-ai/glm-5.3-flash", "google-gemini-3-1-pro"]:
+            _n = vm_name(_m).lower()
+            for _token in ["anthropic", "claude", "openai", "gpt", "gemini",
+                           "google", "glm", "qwen", "kimi", "opus", "sonnet", "haiku"]:
+                check(f"vm name blinds {_token!r} for {_m}", _token in _n, False)
+        check("blinded name is still deterministic",
+              vm_name("eis-openai-gpt-5-4"), vm_name("eis-openai-gpt-5-4"))
+        check("distinct models get distinct blinded names",
+              vm_name("eis-openai-gpt-5-4") != vm_name("eis-openai-gpt-5-5"), True)
+        check("eis- prefix does not fork the blinded name",
+              vm_name("eis-openai-gpt-5-4"), vm_name("openai-gpt-5-4"))
+        check("blinded sharded names stay distinct",
               vm_name("eis-openai-gpt-5-4", "1/4") != vm_name("eis-openai-gpt-5-4", "2/4"), True)
         check("unsharded vm name unchanged",
               vm_name("eis-openai-gpt-5-4"), vm_name("eis-openai-gpt-5-4", None))
