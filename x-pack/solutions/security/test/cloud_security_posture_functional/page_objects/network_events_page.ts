@@ -43,8 +43,14 @@ export class NetworkEventsPageObject extends FtrService {
     return `timerange=(global:(linkTo:!(),timerange:(from:%27${from}%27,kind:absolute,to:%27${to}%27)))`;
   }
 
-  getFlyoutFilter(eventId: string) {
-    return `flyout=(preview:!(),right:(id:document-details-right,params:(id:%27${eventId}%27,indexName:logs-gcp.audit-default,scopeId:network-page-events)))`;
+  /**
+   * @param eventId the document `_id` (not `event.id`) to open the flyout on
+   * @param indexName the index or data stream the document lives in. Defaults to the GCP audit
+   *   stream that most fixtures use; pass it explicitly for documents from another integration,
+   *   otherwise the flyout looks them up in the wrong index and renders no content.
+   */
+  getFlyoutFilter(eventId: string, indexName: string = 'logs-gcp.audit-default') {
+    return `flyout=(preview:!(),right:(id:document-details-right,params:(id:%27${eventId}%27,indexName:${indexName},scopeId:network-page-events)))`;
   }
 
   /**

@@ -11,6 +11,7 @@ import React, { type ReactNode } from 'react';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type {
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeAiButton,
   ChromeNewsfeedHandler,
@@ -99,7 +100,22 @@ export function createChromeApi({
   };
   const inlineAppHeader: InternalChromeStart['inlineAppHeader'] = {
     get$: () => state.inlineAppHeader.$,
-    set: state.inlineAppHeader.set,
+    register: (title?: AppHeaderTitle) => {
+      const registrationId = ++state.inlineAppHeaderOwnerId;
+      state.inlineAppHeader.set(title === undefined ? {} : { title });
+      return {
+        update: (nextTitle?: AppHeaderTitle) => {
+          if (registrationId === state.inlineAppHeaderOwnerId) {
+            state.inlineAppHeader.set(nextTitle === undefined ? {} : { title: nextTitle });
+          }
+        },
+        unregister: () => {
+          if (registrationId === state.inlineAppHeaderOwnerId) {
+            state.inlineAppHeader.set(undefined);
+          }
+        },
+      };
+    },
   };
 
   const controls: InternalChromeStart['controls'] = {
