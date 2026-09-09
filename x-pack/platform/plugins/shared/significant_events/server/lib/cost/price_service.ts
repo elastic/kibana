@@ -319,7 +319,7 @@ const parseCatalog = ({
   }
 
   const scopedRows = payload.filter(
-    (row): row is Record<string, unknown> =>
+    (row): row is Record<string, unknown> & { id: string } =>
       isRecord(row) &&
       row.product_type === 'inference' &&
       typeof row.id === 'string' &&
@@ -331,11 +331,11 @@ const parseCatalog = ({
 
   const parsedRows: ParsedCatalogRow[] = [];
   for (const scopedRow of scopedRows) {
-    const row = validateScopedRow(scopedRow);
-    const operation = parseOperation(row.id);
+    const operation = parseOperation(scopedRow.id);
     if (operation.kind === 'unsupported' || operation.kind === 'ignore') {
       continue;
     }
+    const row = validateScopedRow(scopedRow);
     if (row.unit !== TOKEN_UNIT || row.unitAmount === null) {
       throw new PriceCatalogError(`Invalid unit or amount for ${row.id}`);
     }

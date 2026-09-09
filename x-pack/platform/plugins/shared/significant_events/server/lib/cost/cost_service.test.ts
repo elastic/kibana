@@ -113,11 +113,16 @@ const aggregations = ({
   features?: Record<string, ReturnType<typeof featureBucket> | undefined>;
   unknownTokens?: number;
   unknownDocs?: number;
-}) => ({
-  total_tokens: { value: total },
-  feature_buckets: { buckets: features },
-  unknown_features: { doc_count: unknownDocs, total_tokens: { value: unknownTokens } },
-});
+}) => {
+  const emptyFeatureBuckets = Object.fromEntries(
+    KNOWN_FEATURE_IDS.map((featureId) => [featureId, featureBucket({ featureTotal: 0 })])
+  );
+  return {
+    total_tokens: { value: total },
+    feature_buckets: { buckets: { ...emptyFeatureBuckets, ...features } },
+    unknown_features: { doc_count: unknownDocs, total_tokens: { value: unknownTokens } },
+  };
+};
 
 const createEsClient = (impl: (params: Record<string, unknown>) => unknown): ElasticsearchClient =>
   ({
@@ -220,11 +225,65 @@ describe('calculateSignificantEventsCost', () => {
         })
       );
       const aggs = params.aggs as {
-        feature_buckets: { filters: { filters: Record<string, unknown> } };
+        feature_buckets: {
+          filters: { keyed: boolean; filters: Record<string, unknown> };
+          aggs: {
+            tier_crossings: { filters: { keyed: boolean; filters: Record<string, unknown> } };
+          };
+        };
       };
-      expect(Object.keys(aggs.feature_buckets.filters.filters).sort()).toEqual(
-        [...KNOWN_FEATURE_IDS].sort()
-      );
+      expect(aggs.feature_buckets.filters).toEqual({
+        keyed: true,
+        filters: Object.fromEntries(
+          KNOWN_FEATURE_IDS.map((featureId) => [
+            featureId,
+            { term: { 'inference.feature_id': featureId } },
+          ])
+        ),
+      });
+      expect(params.aggs).toMatchObject({
+        total_tokens: { sum: { field: 'token_usage.total_tokens' } },
+        feature_buckets: {
+          aggs: {
+            feature_total_tokens: { sum: { field: 'token_usage.total_tokens' } },
+            models: {
+              terms: { field: 'model.model_id', size: 20 },
+              aggs: {
+                total_tokens: { sum: { field: 'token_usage.total_tokens' } },
+                prompt_tokens: { sum: { field: 'token_usage.prompt_tokens' } },
+                cached_tokens: { sum: { field: 'token_usage.cached_tokens' } },
+                completion_tokens: { sum: { field: 'token_usage.completion_tokens' } },
+                thinking_tokens: { sum: { field: 'token_usage.thinking_tokens' } },
+              },
+            },
+            missing_model: {
+              missing: { field: 'model.model_id' },
+              aggs: { total_tokens: { sum: { field: 'token_usage.total_tokens' } } },
+            },
+          },
+        },
+        unknown_features: {
+          filter: {
+            bool: {
+              must_not: [{ terms: { 'inference.feature_id': KNOWN_FEATURE_IDS } }],
+            },
+          },
+          aggs: { total_tokens: { sum: { field: 'token_usage.total_tokens' } } },
+        },
+      });
+      expect(aggs.feature_buckets.aggs.tier_crossings.filters).toEqual({
+        keyed: true,
+        filters: {
+          [GPT_54]: {
+            bool: {
+              filter: [
+                { term: { 'model.model_id': GPT_54 } },
+                { range: { 'token_usage.prompt_tokens': { gt: 272_000 } } },
+              ],
+            },
+          },
+        },
+      });
       return { aggregations: aggregations({ total: 110, features }) };
     });
 
@@ -251,13 +310,13 @@ describe('calculateSignificantEventsCost', () => {
     expect(result.today.groups.find((group) => group.group === 'memory')?.totalTokens).toBe(60);
   });
 
-  it('prices prompt, cached, completion, and thinking tokens and clamps cached > prompt', async () => {
+  it('prices prompt, cached, completion, and thinking tokens with conserved totals', async () => {
     const priced = featureBucket({
-      featureTotal: 1600,
+      featureTotal: 1350,
       models: [
         modelBucket({
           key: GPT_54,
-          total: 1550,
+          total: 1350,
           prompt: 1000,
           cached: 200,
           completion: 300,
@@ -265,30 +324,43 @@ describe('calculateSignificantEventsCost', () => {
         }),
       ],
     });
-    const clamped = featureBucket({
-      featureTotal: 200,
-      models: [modelBucket({ key: SONNET, total: 200, prompt: 100, cached: 150, completion: 50 })],
-    });
-    const esClient = createEsClient((params) => {
-      const { gte } = rangeOf(params);
-      const features =
-        gte === TODAY_START
-          ? { [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: priced }
-          : { [SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID]: clamped };
-      return {
-        aggregations: aggregations({
-          total: gte === TODAY_START ? 1550 : 200,
-          features,
-        }),
-      };
-    });
+    const esClient = createEsClient(() => ({
+      aggregations: aggregations({
+        total: 1350,
+        features: { [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: priced },
+      }),
+    }));
 
     const result = await calculate({ esClient });
     const discovery = result.today.groups.find((group) => group.group === 'discovery');
+    expect(discovery).toMatchObject({
+      totalTokens: 1350,
+      priceableTokens: 1350,
+      unpriceableTokens: 0,
+    });
     expect(discovery?.estimatedCost).toBeCloseTo((800 * 3.75 + 200 * 0.375 + 350 * 21) / 1_000_000);
-    const investigation = result.month.groups.find((group) => group.group === 'investigation');
-    expect(investigation?.estimatedCost).toBeGreaterThanOrEqual(0);
-    expect(investigation?.estimatedCost).toBeCloseTo((0 * 4.5 + 150 * 0.45 + 50 * 21) / 1_000_000);
+  });
+
+  it('clamps cached tokens to prompt tokens before pricing malformed usage', async () => {
+    const clamped = featureBucket({
+      featureTotal: 150,
+      models: [modelBucket({ key: SONNET, total: 150, prompt: 100, cached: 150, completion: 50 })],
+    });
+    const result = await calculate({
+      esClient: createEsClient(() => ({
+        aggregations: aggregations({
+          total: 150,
+          features: { [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: clamped },
+        }),
+      })),
+    });
+    const discovery = result.today.groups.find((group) => group.group === 'discovery');
+    expect(discovery).toMatchObject({
+      totalTokens: 150,
+      priceableTokens: 150,
+      unpriceableTokens: 0,
+    });
+    expect(discovery?.estimatedCost).toBeCloseTo((100 * 0.45 + 50 * 21) / 1_000_000);
   });
 
   it('keeps missing cache-read priceable when cached tokens are zero and partial when they are not', async () => {
@@ -298,7 +370,7 @@ describe('calculateSignificantEventsCost', () => {
     });
     const positiveCached = featureBucket({
       featureTotal: 100,
-      models: [modelBucket({ key: NO_CACHE, total: 100, prompt: 40, cached: 10, completion: 50 })],
+      models: [modelBucket({ key: NO_CACHE, total: 100, prompt: 40, cached: 10, completion: 60 })],
     });
     const esClient = createEsClient((params) => {
       const { gte } = rangeOf(params);
@@ -324,7 +396,7 @@ describe('calculateSignificantEventsCost', () => {
       priceableTokens: 90,
       unpriceableTokens: 10,
     });
-    expect(month?.estimatedCost).toBeCloseTo((30 * 1 + 50 * 2) / 1_000_000);
+    expect(month?.estimatedCost).toBeCloseTo((30 * 1 + 60 * 2) / 1_000_000);
   });
 
   it('treats missing and unmatched model IDs as unpriceable', async () => {
@@ -375,15 +447,15 @@ describe('calculateSignificantEventsCost', () => {
     expect(result.today.totalEstimatedCost).not.toBeNull();
   });
 
-  it('quantifies terms truncation without double-counting missing-model tokens', async () => {
+  it('accounts for returned, missing-model, and truncated tokens exactly once', async () => {
     const esClient = createEsClient(() => ({
       aggregations: aggregations({
         total: 100,
         features: {
           [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
             featureTotal: 100,
-            models: [modelBucket({ key: SONNET, total: 60, prompt: 60 })],
-            missing: 40,
+            models: [modelBucket({ key: SONNET, total: 50, prompt: 50 })],
+            missing: 20,
             sumOther: 3,
           }),
         },
@@ -394,25 +466,29 @@ describe('calculateSignificantEventsCost', () => {
     const discovery = result.today.groups.find((group) => group.group === 'discovery');
     expect(discovery).toMatchObject({
       status: 'partial',
-      unpriceableTokens: 40,
-      priceableTokens: 60,
+      totalTokens: 100,
+      unpriceableTokens: 50,
+      priceableTokens: 50,
     });
-    expect(discovery?.estimatedCost).not.toBeNull();
+    expect(discovery?.estimatedCost).toBeCloseTo((50 * 4.5) / 1_000_000);
+    expect((discovery?.priceableTokens ?? 0) + (discovery?.unpriceableTokens ?? 0)).toBe(
+      discovery?.totalTokens
+    );
   });
 
   it('counts GPT-5.4 prompt crossings above 272,000 and ignores the same prompt on a flat model', async () => {
     const esClient = createEsClient(() => ({
       aggregations: aggregations({
-        total: 20,
+        total: 600_020,
         features: {
           [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
-            featureTotal: 10,
-            models: [modelBucket({ key: GPT_54, total: 10, prompt: 300_000 })],
+            featureTotal: 300_010,
+            models: [modelBucket({ key: GPT_54, total: 300_010, prompt: 300_000, completion: 10 })],
             crossings: { [GPT_54]: { doc_count: 4 }, [SONNET]: { doc_count: 9 } },
           }),
           [SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID]: featureBucket({
-            featureTotal: 10,
-            models: [modelBucket({ key: SONNET, total: 10, prompt: 300_000 })],
+            featureTotal: 300_010,
+            models: [modelBucket({ key: SONNET, total: 300_010, prompt: 300_000, completion: 10 })],
             crossings: { [SONNET]: { doc_count: 9 } },
           }),
         },
@@ -426,10 +502,14 @@ describe('calculateSignificantEventsCost', () => {
     expect(
       result.today.groups.find((group) => group.group === 'investigation')?.tierCrossingCount
     ).toBe(0);
+    expect(result.today.groups.find((group) => group.group === 'discovery')?.status).toBe(
+      'partial'
+    );
+    expect(result.today.totalStatus).toBe('partial');
     expect(result.caveats).toContain('tier_crossings_detected');
   });
 
-  it('returns complete zero cost, partial numeric floors, and null when nothing is priceable', async () => {
+  it('returns complete zero cost and a partial null estimate when nothing is priceable', async () => {
     const emptyClient = createEsClient(() => ({ aggregations: aggregations({ total: 0 }) }));
     const empty = await calculate({ esClient: emptyClient });
     expect(empty.today).toMatchObject({
@@ -456,6 +536,53 @@ describe('calculateSignificantEventsCost', () => {
       unpriceable.today.groups.find((group) => group.group === 'discovery')?.estimatedCost
     ).toBeNull();
     expect(unpriceable.today.totalStatus).toBe('partial');
+  });
+
+  it.each([
+    ['missing root aggregations', () => ({})],
+    [
+      'missing known feature bucket',
+      () => {
+        const value = aggregations({ total: 0 });
+        delete value.feature_buckets.buckets[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID];
+        return { aggregations: value };
+      },
+    ],
+    [
+      'missing model subaggregation',
+      () => {
+        const value = aggregations({ total: 0 });
+        const bucket =
+          value.feature_buckets.buckets[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID];
+        return {
+          aggregations: {
+            ...value,
+            feature_buckets: {
+              buckets: {
+                ...value.feature_buckets.buckets,
+                [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: {
+                  ...bucket,
+                  models: undefined,
+                },
+              },
+            },
+          },
+        };
+      },
+    ],
+    ['unconserved period total', () => ({ aggregations: aggregations({ total: 1 }) })],
+  ])('returns usage-data unavailable for %s', async (_caseName, responseFactory) => {
+    const logger = loggerMock.create() as unknown as Logger;
+    const result = await calculate({
+      esClient: createEsClient(responseFactory),
+      logger,
+    });
+    expect(result.unavailableReason).toBe('usage_data');
+    expect(result.today.totalStatus).toBe('unavailable');
+    expect(result.today.totalEstimatedCost).toBeNull();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to read Significant Events token usage')
+    );
   });
 
   it('returns valid zero periods for a missing data stream and usage-data unavailable for other errors', async () => {
@@ -487,21 +614,42 @@ describe('calculateSignificantEventsCost', () => {
     expect(unavailable.today.totalEstimatedCost).toBeNull();
   });
 
-  it('keeps caveat order and appends conditional caveats', async () => {
+  it('returns unavailable when only one period reports a missing data stream', async () => {
+    const missingIndex = Object.assign(new Error('no such index'), {
+      statusCode: 404,
+      body: { error: { type: 'index_not_found_exception' } },
+    });
+    let searchCount = 0;
+    const result = await calculate({
+      esClient: createEsClient(() => {
+        searchCount += 1;
+        if (searchCount === 1) {
+          throw missingIndex;
+        }
+        return { aggregations: aggregations({ total: 0 }) };
+      }),
+    });
+    expect(searchCount).toBe(2);
+    expect(result.unavailableReason).toBe('usage_data');
+    expect(result.today.totalStatus).toBe('unavailable');
+    expect(result.month.totalStatus).toBe('unavailable');
+  });
+
+  it('includes every applicable caveat exactly once', async () => {
     const esClient = createEsClient(() => ({
       aggregations: aggregations({
-        total: 10,
+        total: 300_010,
         features: {
           [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
-            featureTotal: 10,
-            models: [modelBucket({ key: GPT_54, total: 10, prompt: 300_000 })],
+            featureTotal: 300_010,
+            models: [modelBucket({ key: GPT_54, total: 300_010, prompt: 300_000, completion: 10 })],
             crossings: { [GPT_54]: { doc_count: 1 } },
           }),
         },
       }),
     }));
     const result = await calculate({ esClient, pricesStale: true });
-    expect(result.caveats).toEqual([
+    const expectedCaveats = [
       'eis_pricing_assumed',
       'usd_assumed',
       'excludes_embeddings',
@@ -510,7 +658,9 @@ describe('calculateSignificantEventsCost', () => {
       'tracking_not_all_spaces',
       'prices_stale',
       'tier_crossings_detected',
-    ]);
+    ] as const;
+    expect(new Set(result.caveats)).toEqual(new Set(expectedCaveats));
+    expect(result.caveats).toHaveLength(expectedCaveats.length);
   });
 
   it('omits the incomplete-tracking caveat when every space is tracked', async () => {

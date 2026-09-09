@@ -98,7 +98,11 @@ describe('createPriceService', () => {
     expect(result).not.toBeNull();
     expect(result?.stale).toBe(false);
     expect(result?.fetchedAt).toBe(NOW.toISOString());
-    expect(result?.prices.has('anthropic-claude-4.6-sonnet')).toBe(true);
+    expect([...(result?.prices.keys() ?? [])].sort()).toEqual([
+      'anthropic-claude-4.6-sonnet',
+      'openai-gpt-5.4',
+      'openai-gpt-5.6-luna',
+    ]);
     expect(result?.prices.get('anthropic-claude-4.6-sonnet')).toEqual({
       input: 4.5,
       output: 21,
@@ -111,11 +115,39 @@ describe('createPriceService', () => {
       cacheRead: 0.375,
       tierThreshold: 272_000,
     });
-    expect(
-      [...(result?.prices.keys() ?? [])].some(
-        (key) => key.includes('embedding') || key.includes('rerank') || key.includes('jina')
-      )
-    ).toBe(false);
+  });
+
+  it('ignores malformed unsupported inference rows without discarding valid chat prices', async () => {
+    const fetchFn = mockFetchFn().mockResolvedValue(
+      jsonResponse([
+        catalogRow({
+          id: 'global.inference-chat-input_complete',
+          name: 'Complete Model - Chat Completion - Input',
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_complete',
+          name: 'Complete Model - Chat Completion - Output',
+          unit_amount: 2,
+        }),
+        {
+          id: 'global.inference-embed-text-dense_incomplete',
+          product_type: 'inference',
+        },
+        {
+          id: 'global.inference-rerank_incomplete',
+          product_type: 'inference',
+        },
+        {
+          id: 'global.inference-chat-cache-write-5m_incomplete',
+          product_type: 'inference',
+        },
+      ])
+    );
+
+    const result = await createService({ fetchFn }).getPrices();
+    expect(result?.prices).toEqual(
+      new Map([['complete-model', { input: 1, output: 2, cacheRead: null, tierThreshold: null }]])
+    );
   });
 
   it('parses the model key from name with a case-insensitive chat-completion delimiter', async () => {
@@ -181,6 +213,55 @@ describe('createPriceService', () => {
     });
   });
 
+  it('omits only a model whose lower and upper rows use different thresholds', async () => {
+    const fetchFn = mockFetchFn().mockResolvedValue(
+      jsonResponse([
+        catalogRow({
+          id: 'global.inference-chat-input_invalid_0-200k',
+          name: 'Invalid Pair - Chat Completion - Input',
+          token_tier: '<=200k',
+        }),
+        catalogRow({
+          id: 'global.inference-chat-input_invalid_272k-inf',
+          name: 'Invalid Pair - Chat Completion - Input',
+          token_tier: '>272k',
+          unit_amount: 2,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_invalid_0-200k',
+          name: 'Invalid Pair - Chat Completion - Output',
+          token_tier: '<=200k',
+          unit_amount: 3,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_invalid_200k-inf',
+          name: 'Invalid Pair - Chat Completion - Output',
+          token_tier: '>200k',
+          unit_amount: 4,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-input_valid',
+          name: 'Valid Model - Chat Completion - Input',
+          unit_amount: 4,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_valid',
+          name: 'Valid Model - Chat Completion - Output',
+          unit_amount: 5,
+        }),
+      ])
+    );
+
+    const result = await createService({ fetchFn }).getPrices();
+    expect(result?.prices.has('invalid-pair')).toBe(false);
+    expect(result?.prices.get('valid-model')).toEqual({
+      input: 4,
+      output: 5,
+      cacheRead: null,
+      tierThreshold: null,
+    });
+  });
+
   it('applies exclusive end and inclusive start effective-date bounds', async () => {
     const fetchFn = mockFetchFn().mockResolvedValue(
       jsonResponse([
@@ -221,46 +302,58 @@ describe('createPriceService', () => {
     });
   });
 
-  it('rejects a refresh when an effective chat row is not priced per 1M Token or has a null amount', async () => {
-    const fetchFn = mockFetchFn()
-      .mockResolvedValueOnce(
-        jsonResponse([
-          catalogRow({ unit: '1M Tokens' }),
-          catalogRow({
-            id: 'global.inference-chat-output_test-model',
-            name: 'Test Model - Chat Completion - Output',
-          }),
-        ])
-      )
-      .mockResolvedValueOnce(
-        jsonResponse([
-          catalogRow({ unit_amount: null }),
-          catalogRow({
-            id: 'global.inference-chat-output_test-model',
-            name: 'Test Model - Chat Completion - Output',
-          }),
-        ])
-      );
+  it.each([
+    ['wrong unit', { unit: '1M Tokens' }],
+    ['null amount', { unit_amount: null }],
+    ['negative amount', { unit_amount: -1 }],
+    ['invalid effective date', { start: 'not-a-date' }],
+    ['invalid token tier', { token_tier: 'first-200k' }],
+    ['overlong model name', { name: 'x'.repeat(513) }],
+  ])('rejects an effective chat row with %s', async (_caseName, overrides) => {
+    const fetchFn = mockFetchFn().mockResolvedValue(
+      jsonResponse([
+        catalogRow(overrides),
+        catalogRow({
+          id: 'global.inference-chat-output_test-model',
+          name: 'Test Model - Chat Completion - Output',
+        }),
+      ])
+    );
 
-    const service = createService({ fetchFn });
-    await expect(service.getPrices()).resolves.toBeNull();
-    await expect(service.getPrices()).resolves.toBeNull();
+    await expect(createService({ fetchFn }).getPrices()).resolves.toBeNull();
+    expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 
-  it('filters to global inference rows and rejects more than 10,000 scoped rows', async () => {
-    const padding = Array.from({ length: 9_998 }, (_, index) =>
-      catalogRow({
-        id: `global.inference-embed-text-dense_pad-${index}`,
-        name: `Pad ${index} - Dense Text Embedding`,
-        product_type: 'inference',
-      })
+  it('accepts zero as a valid price boundary', async () => {
+    const fetchFn = mockFetchFn().mockResolvedValue(
+      jsonResponse([
+        catalogRow({ unit_amount: 0 }),
+        catalogRow({
+          id: 'global.inference-chat-output_test-model',
+          name: 'Test Model - Chat Completion - Output',
+          unit_amount: 2,
+        }),
+      ])
     );
+
+    await expect(createService({ fetchFn }).getPrices()).resolves.toMatchObject({
+      prices: new Map([
+        ['test-model', { input: 0, output: 2, cacheRead: null, tierThreshold: null }],
+      ]),
+    });
+  });
+
+  it('applies product and scope filters before enforcing the scoped-row limit', async () => {
     const accepted = mockFetchFn().mockResolvedValue(
       jsonResponse([
         catalogRow({
           id: 'serverless.inference-chat-input_ignored',
           name: 'Ignored - Chat Completion - Input',
         }),
+        {
+          id: 'global.inference-chat-input_wrong-product',
+          product_type: 'storage',
+        },
         catalogRow({
           id: 'global.inference-chat-input_complete',
           name: 'Complete Flat - Chat Completion - Input',
@@ -270,56 +363,78 @@ describe('createPriceService', () => {
           name: 'Complete Flat - Chat Completion - Output',
           unit_amount: 2,
         }),
-        ...padding,
       ])
     );
-    await expect(createService({ fetchFn: accepted }).getPrices()).resolves.toMatchObject({
-      stale: false,
+    await expect(
+      createService({ fetchFn: accepted, maxScopedRows: 2 }).getPrices()
+    ).resolves.toMatchObject({
+      prices: new Map([
+        ['complete-flat', { input: 1, output: 2, cacheRead: null, tierThreshold: null }],
+      ]),
     });
 
     const tooMany = mockFetchFn().mockResolvedValue(
       jsonResponse([
         catalogRow({
-          id: 'serverless.inference-chat-input_ignored',
-          name: 'Ignored - Chat Completion - Input',
+          id: 'global.inference-chat-input_complete',
+          name: 'Complete Flat - Chat Completion - Input',
         }),
-        ...Array.from({ length: 10_001 }, (_, index) =>
-          catalogRow({
-            id: `global.inference-chat-input_row-${index}`,
-            name: `Row ${index} - Chat Completion - Input`,
-          })
-        ),
+        catalogRow({
+          id: 'global.inference-chat-output_complete',
+          name: 'Complete Flat - Chat Completion - Output',
+          unit_amount: 2,
+        }),
+        catalogRow({
+          id: 'global.inference-embed-text-dense_extra',
+          name: 'Extra - Dense Text Embedding',
+        }),
       ])
     );
-    await expect(createService({ fetchFn: tooMany }).getPrices()).resolves.toBeNull();
+    await expect(
+      createService({ fetchFn: tooMany, maxScopedRows: 2 }).getPrices()
+    ).resolves.toBeNull();
   });
 
-  it('accepts a catalog under the 4 MiB limit and rejects one over it', async () => {
-    const under = mockFetchFn().mockResolvedValue(jsonResponse(FIXTURE));
-    await expect(createService({ fetchFn: under }).getPrices()).resolves.toMatchObject({
-      stale: false,
-    });
-
-    const overHeader = mockFetchFn().mockResolvedValue(
-      jsonResponse([], { headers: { 'content-length': String(MAX_BODY_BYTES + 1) } })
-    );
-    await expect(createService({ fetchFn: overHeader }).getPrices()).resolves.toBeNull();
-
-    const chunk = new Uint8Array(1024 * 1024);
-    const overBody = mockFetchFn().mockResolvedValue({
+  it('accepts an exact body-size limit and rejects one byte over it', async () => {
+    const body = JSON.stringify(FIXTURE);
+    const bytes = new TextEncoder().encode(body);
+    const bodyResponse = () => ({
       ok: true,
       status: 200,
       headers: { get: () => null },
       body: new ReadableStream<Uint8Array>({
         start(controller) {
-          for (let i = 0; i < 5; i++) {
-            controller.enqueue(chunk);
-          }
+          controller.enqueue(bytes);
           controller.close();
         },
       }),
     });
-    await expect(createService({ fetchFn: overBody }).getPrices()).resolves.toBeNull();
+
+    await expect(
+      createService({
+        fetchFn: mockFetchFn().mockResolvedValue(bodyResponse()),
+        maxBodyBytes: bytes.byteLength,
+      }).getPrices()
+    ).resolves.toMatchObject({ stale: false });
+    await expect(
+      createService({
+        fetchFn: mockFetchFn().mockResolvedValue(bodyResponse()),
+        maxBodyBytes: bytes.byteLength - 1,
+      }).getPrices()
+    ).resolves.toBeNull();
+
+    const exactHeader = mockFetchFn().mockResolvedValue(
+      jsonResponse(FIXTURE, { headers: { 'content-length': String(bytes.byteLength) } })
+    );
+    await expect(
+      createService({ fetchFn: exactHeader, maxBodyBytes: bytes.byteLength }).getPrices()
+    ).resolves.toMatchObject({ stale: false });
+    const overHeader = mockFetchFn().mockResolvedValue(
+      jsonResponse(FIXTURE, { headers: { 'content-length': String(bytes.byteLength + 1) } })
+    );
+    await expect(
+      createService({ fetchFn: overHeader, maxBodyBytes: bytes.byteLength }).getPrices()
+    ).resolves.toBeNull();
   });
 
   it('keeps the timeout active while the body is still streaming', async () => {
@@ -365,7 +480,8 @@ describe('createPriceService', () => {
     });
     resolveFetch(jsonResponse(FIXTURE));
     const [firstResult, secondResult] = await Promise.all([first, second]);
-    expect(firstResult).toBe(secondResult);
+    expect(firstResult).toEqual(secondResult);
+    expect(firstResult?.prices.get('anthropic-claude-4.6-sonnet')?.input).toBe(4.5);
 
     await expect(service.getPrices()).resolves.toEqual(firstResult);
     expect(fetchFn).toHaveBeenCalledTimes(1);
@@ -380,10 +496,24 @@ describe('createPriceService', () => {
     );
   });
 
-  it('returns null on cold failure and stale prices with the original fetchedAt on warm failure', async () => {
+  it.each([
+    ['network rejection', () => Promise.reject(new Error('network down'))],
+    ['non-success response', () => Promise.resolve(jsonResponse(FIXTURE, { status: 503 }))],
+  ])('returns null on cold %s', async (_caseName, fetchImplementation) => {
+    const fetchFn = mockFetchFn().mockImplementation(fetchImplementation);
+    await expect(createService({ fetchFn }).getPrices()).resolves.toBeNull();
+  });
+
+  it('serves stale prices after a warm failure and recovers on the next refresh', async () => {
+    const refreshedFixture = (FIXTURE as Array<Record<string, unknown>>).map((row) =>
+      row.id === 'global.inference-chat-input_anthropic-claude-4-6-sonnet'
+        ? { ...row, unit_amount: 5 }
+        : row
+    );
     const fetchFn = mockFetchFn()
       .mockResolvedValueOnce(jsonResponse(FIXTURE))
-      .mockRejectedValueOnce(new Error('network down'));
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(jsonResponse(refreshedFixture));
     const getNow = jest.fn(() => new Date(NOW));
     const service = createService({ fetchFn, getNow });
 
@@ -398,6 +528,16 @@ describe('createPriceService', () => {
       fetchedAt: NOW.toISOString(),
       stale: true,
     });
+
+    const recoveredAt = new Date(NOW.getTime() + 7 * 60 * 60 * 1000);
+    getNow.mockReturnValue(recoveredAt);
+    const recovered = await service.getPrices();
+    expect(recovered).toMatchObject({
+      fetchedAt: recoveredAt.toISOString(),
+      stale: false,
+    });
+    expect(recovered?.prices.get('anthropic-claude-4.6-sonnet')?.input).toBe(5);
+    expect(fetchFn).toHaveBeenCalledTimes(3);
   });
 
   it('lets a newer coherent tier generation supersede an older flat generation', async () => {
@@ -425,7 +565,7 @@ describe('createPriceService', () => {
     expect(result?.prices.has('openai-gpt-5.6-luna')).toBe(false);
   });
 
-  it('rejects an operation when the latest generation has duplicate rows', async () => {
+  it('omits only the model whose latest operation generation has duplicate rows', async () => {
     const fetchFn = mockFetchFn().mockResolvedValue(
       jsonResponse([
         catalogRow({ unit_amount: 1 }),
@@ -435,9 +575,26 @@ describe('createPriceService', () => {
           name: 'Test Model - Chat Completion - Output',
           unit_amount: 2,
         }),
+        catalogRow({
+          id: 'global.inference-chat-input_valid-sibling',
+          name: 'Valid Sibling - Chat Completion - Input',
+          unit_amount: 3,
+        }),
+        catalogRow({
+          id: 'global.inference-chat-output_valid-sibling',
+          name: 'Valid Sibling - Chat Completion - Output',
+          unit_amount: 4,
+        }),
       ])
     );
-    await expect(createService({ fetchFn }).getPrices()).resolves.toBeNull();
+    const result = await createService({ fetchFn }).getPrices();
+    expect(result?.prices.has('test-model')).toBe(false);
+    expect(result?.prices.get('valid-sibling')).toEqual({
+      input: 3,
+      output: 4,
+      cacheRead: null,
+      tierThreshold: null,
+    });
   });
 
   it('omits a model that is missing input or output and accepts a missing cache-read price', async () => {
@@ -468,7 +625,19 @@ describe('createPriceService', () => {
     });
   });
 
-  it('rejects a model when operations mix flat and tiered prices or thresholds', async () => {
+  it('omits only models whose operations mix flat and tiered prices or thresholds', async () => {
+    const validSibling = [
+      catalogRow({
+        id: 'global.inference-chat-input_valid-sibling',
+        name: 'Valid Sibling - Chat Completion - Input',
+        unit_amount: 7,
+      }),
+      catalogRow({
+        id: 'global.inference-chat-output_valid-sibling',
+        name: 'Valid Sibling - Chat Completion - Output',
+        unit_amount: 8,
+      }),
+    ];
     const mixed = [
       catalogRow({
         id: 'global.inference-chat-input_mixed',
@@ -486,6 +655,7 @@ describe('createPriceService', () => {
         token_tier: '>200k',
         unit_amount: 4,
       }),
+      ...validSibling,
     ];
     const mismatched = [
       catalogRow({
@@ -511,18 +681,24 @@ describe('createPriceService', () => {
         token_tier: '>272k',
         unit_amount: 6,
       }),
+      ...validSibling,
     ];
 
-    await expect(
-      createService({
-        fetchFn: mockFetchFn().mockResolvedValue(jsonResponse(mixed)),
-      }).getPrices()
-    ).resolves.toBeNull();
-    await expect(
-      createService({
-        fetchFn: mockFetchFn().mockResolvedValue(jsonResponse(mismatched)),
-      }).getPrices()
-    ).resolves.toBeNull();
+    for (const [invalidModel, catalog] of [
+      ['mixed-model', mixed],
+      ['mismatch-model', mismatched],
+    ] as const) {
+      const result = await createService({
+        fetchFn: mockFetchFn().mockResolvedValue(jsonResponse(catalog)),
+      }).getPrices();
+      expect(result?.prices.has(invalidModel)).toBe(false);
+      expect(result?.prices.get('valid-sibling')).toEqual({
+        input: 7,
+        output: 8,
+        cacheRead: null,
+        tierThreshold: null,
+      });
+    }
   });
 
   it('accepts differing operation start dates', async () => {
@@ -530,17 +706,5 @@ describe('createPriceService', () => {
     const result = await createService({ fetchFn }).getPrices();
     expect(result?.prices.get('anthropic-claude-4.6-sonnet')?.cacheRead).toBe(0.45);
     expect(result?.prices.get('openai-gpt-5.4')?.cacheRead).toBe(0.375);
-  });
-
-  it('returns PriceResult with prices, fetchedAt, and stale', async () => {
-    const fetchFn = mockFetchFn().mockResolvedValue(jsonResponse(FIXTURE));
-    const result = await createService({ fetchFn }).getPrices();
-    expect(result).toEqual(
-      expect.objectContaining({
-        prices: expect.any(Map),
-        fetchedAt: NOW.toISOString(),
-        stale: false,
-      })
-    );
   });
 });

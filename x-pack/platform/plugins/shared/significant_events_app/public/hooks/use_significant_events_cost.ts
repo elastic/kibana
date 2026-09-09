@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { CostResponse } from '@kbn/significant-events-plugin/common';
@@ -14,6 +14,8 @@ import { useKibana } from './use_kibana';
 import { useRunQuotas } from './use_significant_events_run_quotas';
 
 export const SIGNIFICANT_EVENTS_COST_QUERY_KEY = ['significantEventsCost'] as const;
+
+const refreshSequenceByQueryClient = new WeakMap<object, number>();
 
 export const useSignificantEventsCost = ({
   enabled,
@@ -33,6 +35,7 @@ export const useSignificantEventsCost = ({
   const canManage = quotas.data?.canManage === true;
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [manualError, setManualError] = useState<Error | null>(null);
+  const activeRefreshes = useRef(0);
 
   const query = useQuery<CostResponse, Error>({
     queryKey: SIGNIFICANT_EVENTS_COST_QUERY_KEY,
@@ -40,7 +43,7 @@ export const useSignificantEventsCost = ({
       significantEventsRepositoryClient.fetch('GET /internal/significant_events/cost', {
         signal: signal ?? null,
       }),
-    enabled: canManage && enabled,
+    enabled: !quotas.isError && canManage && enabled,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -52,9 +55,13 @@ export const useSignificantEventsCost = ({
   }, [query]);
 
   const refreshCost = useCallback(async (): Promise<void> => {
+    const refreshId = (refreshSequenceByQueryClient.get(queryClient) ?? 0) + 1;
+    refreshSequenceByQueryClient.set(queryClient, refreshId);
+    activeRefreshes.current += 1;
     setIsRefreshing(true);
     setManualError(null);
     try {
+      await queryClient.cancelQueries({ queryKey: SIGNIFICANT_EVENTS_COST_QUERY_KEY });
       const response = await significantEventsRepositoryClient.fetch(
         'GET /internal/significant_events/cost',
         {
@@ -62,11 +69,16 @@ export const useSignificantEventsCost = ({
           params: { query: { refresh: true } },
         }
       );
-      queryClient.setQueryData(SIGNIFICANT_EVENTS_COST_QUERY_KEY, response);
+      if (refreshId === refreshSequenceByQueryClient.get(queryClient)) {
+        queryClient.setQueryData(SIGNIFICANT_EVENTS_COST_QUERY_KEY, response);
+      }
     } catch (error) {
-      setManualError(getFormattedError(error));
+      if (refreshId === refreshSequenceByQueryClient.get(queryClient)) {
+        setManualError(getFormattedError(error));
+      }
     } finally {
-      setIsRefreshing(false);
+      activeRefreshes.current -= 1;
+      setIsRefreshing(activeRefreshes.current > 0);
     }
   }, [queryClient, significantEventsRepositoryClient]);
 

@@ -10,12 +10,21 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SignificantEventsServer } from '../../types';
 import { resolveTokenTrackingCoverage } from './token_tracking_coverage';
 
-const request = { headers: {} } as KibanaRequest;
+jest.mock('@kbn/core-http-server-utils', () => ({
+  kibanaRequestFactory: jest.fn((rawRequest) => rawRequest),
+}));
+
+const request = { headers: { authorization: 'test' } } as unknown as KibanaRequest;
 const logger = loggerMock.create();
 const getAll = jest.fn();
 const getSetting = jest.fn();
-const getScopedClient = jest.fn().mockReturnValue({});
-const asScopedToClient = jest.fn().mockImplementation(() => ({ get: getSetting }));
+const enabledBySpace = new Map<string, boolean>();
+const getScopedClient = jest.fn((spaceRequest: { spaceId: string }) => ({
+  spaceId: spaceRequest.spaceId,
+}));
+const asScopedToClient = jest.fn((soClient: { spaceId: string }) => ({
+  get: () => getSetting(soClient.spaceId),
+}));
 
 const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } = {}) =>
   ({
@@ -35,13 +44,15 @@ const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } 
 describe('resolveTokenTrackingCoverage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getScopedClient.mockReturnValue({});
-    asScopedToClient.mockImplementation(() => ({ get: getSetting }));
+    enabledBySpace.clear();
+    getSetting.mockImplementation(async (spaceId: string) => enabledBySpace.get(spaceId) ?? false);
   });
 
   it('counts enabled settings across every space and deduplicates the default space', async () => {
     getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }, { id: 'security' }]);
-    getSetting.mockResolvedValueOnce(true).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    enabledBySpace.set('default', true);
+    enabledBySpace.set('engineering', false);
+    enabledBySpace.set('security', true);
 
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
@@ -50,12 +61,17 @@ describe('resolveTokenTrackingCoverage', () => {
       enabledSpaceCount: 2,
       totalSpaceCount: 3,
     });
-    expect(getSetting).toHaveBeenCalledTimes(3);
+    expect(getSetting.mock.calls.map(([spaceId]) => spaceId).sort()).toEqual([
+      'default',
+      'engineering',
+      'security',
+    ]);
   });
 
   it('reports full and empty coverage', async () => {
     getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }]);
-    getSetting.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
+    enabledBySpace.set('default', true);
+    enabledBySpace.set('engineering', true);
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({
@@ -64,7 +80,8 @@ describe('resolveTokenTrackingCoverage', () => {
       totalSpaceCount: 2,
     });
 
-    getSetting.mockResolvedValueOnce(false).mockResolvedValueOnce(false);
+    enabledBySpace.set('default', false);
+    enabledBySpace.set('engineering', false);
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({
@@ -75,7 +92,7 @@ describe('resolveTokenTrackingCoverage', () => {
   });
 
   it('checks only the default space when Spaces is unavailable', async () => {
-    getSetting.mockResolvedValue(true);
+    enabledBySpace.set('default', true);
     await expect(
       resolveTokenTrackingCoverage({
         request,
@@ -87,10 +104,23 @@ describe('resolveTokenTrackingCoverage', () => {
       enabledSpaceCount: 1,
       totalSpaceCount: 1,
     });
-    expect(getSetting).toHaveBeenCalledTimes(1);
+    expect(getSetting).toHaveBeenCalledWith('default');
   });
 
-  it('returns unavailable coverage when spaces or settings cannot be read', async () => {
+  it('checks the default space when enumeration returns no spaces', async () => {
+    getAll.mockResolvedValue([]);
+    enabledBySpace.set('default', true);
+    await expect(
+      resolveTokenTrackingCoverage({ request, server: createServer(), logger })
+    ).resolves.toEqual({
+      status: 'full',
+      enabledSpaceCount: 1,
+      totalSpaceCount: 1,
+    });
+    expect(getSetting).toHaveBeenCalledWith('default');
+  });
+
+  it('returns unavailable coverage when a space setting cannot be read', async () => {
     getAll.mockResolvedValue([{ id: 'default' }]);
     getSetting.mockRejectedValue(new Error('settings failed'));
     await expect(
@@ -102,6 +132,21 @@ describe('resolveTokenTrackingCoverage', () => {
     });
     expect(logger.warn).toHaveBeenCalledWith(
       'Unable to determine token tracking coverage: settings failed'
+    );
+  });
+
+  it('returns unavailable coverage when spaces cannot be enumerated', async () => {
+    getAll.mockRejectedValue(new Error('spaces failed'));
+    await expect(
+      resolveTokenTrackingCoverage({ request, server: createServer(), logger })
+    ).resolves.toEqual({
+      status: 'unavailable',
+      enabledSpaceCount: null,
+      totalSpaceCount: null,
+    });
+    expect(getSetting).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Unable to determine token tracking coverage: spaces failed'
     );
   });
 });

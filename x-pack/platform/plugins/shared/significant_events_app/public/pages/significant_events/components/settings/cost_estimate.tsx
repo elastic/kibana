@@ -75,6 +75,13 @@ const GROUP_LABELS: Record<CostBudgetGroup, string> = {
   }),
 };
 
+const PARTIAL_FLOOR_LABEL = i18n.translate(
+  'xpack.significantEventsApp.settings.costEstimate.partialFloorBadge',
+  {
+    defaultMessage: 'Partial floor',
+  }
+);
+
 const formatUsd = (value: number): string => `~$${value.toFixed(2)}`;
 
 const formatCostValue = (totalTokens: number, estimatedCost: number | null): string => {
@@ -249,9 +256,7 @@ const CostValue = ({
           color="warning"
           data-test-subj={`significantEventsCostPartialBadge-${group.group}-${period.label}`}
         >
-          {i18n.translate('xpack.significantEventsApp.settings.costEstimate.partialFloorBadge', {
-            defaultMessage: 'Partial floor',
-          })}
+          {PARTIAL_FLOOR_LABEL}
         </EuiBadge>
       </EuiFlexItem>
     )}
@@ -273,6 +278,9 @@ const CostData = ({
   });
   const todayText = formatCostValue(data.today.totalTokens, data.today.totalEstimatedCost);
   const monthText = formatCostValue(data.month.totalTokens, data.month.totalEstimatedCost);
+  const hasPartialNumericTotal =
+    (data.today.totalStatus === 'partial' && data.today.totalEstimatedCost !== null) ||
+    (data.month.totalStatus === 'partial' && data.month.totalEstimatedCost !== null);
   const headline = i18n.translate(
     'xpack.significantEventsApp.settings.costEstimate.headlineLabel',
     {
@@ -286,7 +294,17 @@ const CostData = ({
       <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m">
         <EuiFlexItem>
           <EuiText size="s">
-            <p data-test-subj="significantEventsCostHeadline">{headline}</p>
+            <p data-test-subj="significantEventsCostHeadline">
+              {headline}
+              {hasPartialNumericTotal ? (
+                <>
+                  {' '}
+                  <EuiBadge color="warning" data-test-subj="significantEventsCostTotalPartialBadge">
+                    {PARTIAL_FLOOR_LABEL}
+                  </EuiBadge>
+                </>
+              ) : null}
+            </p>
           </EuiText>
           <EuiText size="xs" color="subdued">
             <p data-test-subj="significantEventsCostAsOf">
@@ -460,18 +478,24 @@ const EnableTrackingButton = ({
           )
     }
   >
-    <EuiButton
-      fill
-      isLoading={isEnablingTracking}
-      isDisabled={!canSaveAdvancedSettings}
-      onClick={onEnable}
-      data-test-subj="significantEventsEnableTokenTrackingButton"
+    <span
+      tabIndex={canSaveAdvancedSettings ? undefined : 0}
+      css={{ display: 'inline-block' }}
+      data-test-subj="significantEventsEnableTokenTrackingTooltipAnchor"
     >
-      {i18n.translate(
-        'xpack.significantEventsApp.settings.costEstimate.enableTrackingButtonLabel',
-        { defaultMessage: 'Enable token tracking in this space' }
-      )}
-    </EuiButton>
+      <EuiButton
+        fill
+        isLoading={isEnablingTracking}
+        isDisabled={!canSaveAdvancedSettings}
+        onClick={onEnable}
+        data-test-subj="significantEventsEnableTokenTrackingButton"
+      >
+        {i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.enableTrackingButtonLabel',
+          { defaultMessage: 'Enable token tracking in this space' }
+        )}
+      </EuiButton>
+    </span>
   </EuiToolTip>
 );
 
@@ -510,7 +534,7 @@ export const CostEstimate = () => {
   const canManage = quotas.data?.canManage === true;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const cost = useSignificantEventsCost({
-    enabled: canManage,
+    enabled: canManage && !quotas.isError,
   });
 
   const enableTokenTracking = async (): Promise<void> => {
@@ -591,7 +615,7 @@ export const CostEstimate = () => {
       );
     }
 
-    if (cost.error) {
+    if (cost.error && !cost.data) {
       return renderWithEnableAction(
         <RetryCallout
           title={i18n.translate(
@@ -632,8 +656,19 @@ export const CostEstimate = () => {
       return enableAction;
     }
 
+    const refreshError = cost.error ? (
+      <RetryCallout
+        title={i18n.translate(
+          'xpack.significantEventsApp.settings.costEstimate.refreshFailedTitle',
+          { defaultMessage: 'Unable to refresh cost estimate' }
+        )}
+        body={getFormattedError(cost.error).message}
+        onRetry={() => void cost.refreshCost()}
+      />
+    ) : null;
+
     if (cost.data.trackingCoverage.status === 'none') {
-      return enableAction;
+      return renderWithEnableAction(refreshError);
     }
 
     return (
@@ -643,6 +678,8 @@ export const CostEstimate = () => {
         cost.data.trackingCoverage.status === 'unavailable' ? (
           <EuiSpacer size="m" />
         ) : null}
+        {refreshError}
+        {refreshError ? <EuiSpacer size="m" /> : null}
         {renderWithEnableAction(
           <CostData
             data={cost.data}

@@ -51,6 +51,13 @@ interface GroupAccumulator {
   hasTruncation: boolean;
 }
 
+class CostAggregationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CostAggregationError';
+  }
+}
+
 export const createUnavailableCostResponse = ({
   now,
   reason,
@@ -192,30 +199,24 @@ const createZeroPeriod = (
   unknownFeatureDocCount: 0,
 });
 
-const readSum = (aggregate: unknown, path: string, logger: Logger): number => {
-  if (!isRecord(aggregate)) {
-    return 0;
-  }
-  const value = aggregate.value;
-  if (value === null || value === undefined) {
-    return 0;
-  }
+const readSum = (aggregate: unknown, path: string): number => {
+  const value = isRecord(aggregate) ? aggregate.value : undefined;
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
-    logger.warn(`Clamping non-finite or negative aggregation ${path} to 0`);
-    return 0;
+    throw new CostAggregationError(`Invalid token sum aggregation at ${path}`);
   }
   return value;
 };
 
-const readDocCount = (value: unknown): number => {
+const readDocCount = (value: unknown, path: string): number => {
   if (
     !isRecord(value) ||
     typeof value.doc_count !== 'number' ||
-    !Number.isFinite(value.doc_count)
+    !Number.isFinite(value.doc_count) ||
+    value.doc_count < 0
   ) {
-    return 0;
+    throw new CostAggregationError(`Invalid document count aggregation at ${path}`);
   }
-  return Math.max(value.doc_count, 0);
+  return value.doc_count;
 };
 
 const buildCaveats = ({
@@ -423,27 +424,26 @@ const processPeriodAggregations = ({
   };
   const unmatchedModelIds = new Set<string>();
   if (!isRecord(aggregations)) {
-    return {
-      groups,
-      totalTokens: 0,
-      unknownFeatureTokens: 0,
-      unknownFeatureDocCount: 0,
-      unmatchedModelIds: [],
-    };
+    throw new CostAggregationError('Token usage response is missing aggregations');
   }
 
-  const totalTokens = readSum(aggregations.total_tokens, 'total_tokens', logger);
+  const totalTokens = readSum(aggregations.total_tokens, 'total_tokens');
   const unknownFeatures = aggregations.unknown_features;
-  const unknownFeatureTokens = isRecord(unknownFeatures)
-    ? readSum(unknownFeatures.total_tokens, 'unknown_features.total_tokens', logger)
-    : 0;
-  const unknownFeatureDocCount = readDocCount(unknownFeatures);
+  if (!isRecord(unknownFeatures)) {
+    throw new CostAggregationError('Token usage response is missing unknown feature aggregations');
+  }
+  const unknownFeatureTokens = readSum(
+    unknownFeatures.total_tokens,
+    'unknown_features.total_tokens'
+  );
+  const unknownFeatureDocCount = readDocCount(unknownFeatures, 'unknown_features');
 
   const featureBucketsParent = aggregations.feature_buckets;
-  const featureBuckets =
-    isRecord(featureBucketsParent) && isRecord(featureBucketsParent.buckets)
-      ? featureBucketsParent.buckets
-      : {};
+  if (!isRecord(featureBucketsParent) || !isRecord(featureBucketsParent.buckets)) {
+    throw new CostAggregationError('Token usage response is missing feature buckets');
+  }
+  const featureBuckets = featureBucketsParent.buckets;
+  const hasTieredPrices = [...prices.values()].some((price) => price.tierThreshold !== null);
 
   for (const featureId of KNOWN_FEATURE_IDS) {
     const groupName = FEATURE_ID_TO_COST_BUDGET_GROUP[featureId];
@@ -453,49 +453,51 @@ const processPeriodAggregations = ({
     const accumulator = groups[groupName];
     const bucket = featureBuckets[featureId];
     if (!isRecord(bucket)) {
-      continue;
+      throw new CostAggregationError(`Token usage response is missing bucket ${featureId}`);
     }
     const featureTotalTokens = readSum(
       bucket.feature_total_tokens,
-      `${featureId}.feature_total_tokens`,
-      logger
+      `${featureId}.feature_total_tokens`
     );
     accumulator.totalTokens += featureTotalTokens;
 
     const modelsAgg = bucket.models;
     let returnedModelBucketTotal = 0;
-    const modelBuckets =
-      isRecord(modelsAgg) && Array.isArray(modelsAgg.buckets) ? modelsAgg.buckets : [];
+    if (
+      !isRecord(modelsAgg) ||
+      !Array.isArray(modelsAgg.buckets) ||
+      typeof modelsAgg.sum_other_doc_count !== 'number' ||
+      !Number.isFinite(modelsAgg.sum_other_doc_count) ||
+      modelsAgg.sum_other_doc_count < 0
+    ) {
+      throw new CostAggregationError(`Invalid model buckets for ${featureId}`);
+    }
+    const modelBuckets = modelsAgg.buckets;
     for (const modelBucket of modelBuckets) {
       if (!isRecord(modelBucket) || typeof modelBucket.key !== 'string') {
-        continue;
+        throw new CostAggregationError(`Invalid model bucket for ${featureId}`);
       }
       const modelId = modelBucket.key;
       const modelTotalTokens = readSum(
         modelBucket.total_tokens,
-        `${featureId}.models.${modelId}.total_tokens`,
-        logger
+        `${featureId}.models.${modelId}.total_tokens`
       );
       returnedModelBucketTotal += modelTotalTokens;
       const promptTokens = readSum(
         modelBucket.prompt_tokens,
-        `${featureId}.models.${modelId}.prompt_tokens`,
-        logger
+        `${featureId}.models.${modelId}.prompt_tokens`
       );
       const cachedTokens = readSum(
         modelBucket.cached_tokens,
-        `${featureId}.models.${modelId}.cached_tokens`,
-        logger
+        `${featureId}.models.${modelId}.cached_tokens`
       );
       const completionTokens = readSum(
         modelBucket.completion_tokens,
-        `${featureId}.models.${modelId}.completion_tokens`,
-        logger
+        `${featureId}.models.${modelId}.completion_tokens`
       );
       const thinkingTokens = readSum(
         modelBucket.thinking_tokens,
-        `${featureId}.models.${modelId}.thinking_tokens`,
-        logger
+        `${featureId}.models.${modelId}.thinking_tokens`
       );
       const price = prices.get(modelId);
       if (!price) {
@@ -503,38 +505,43 @@ const processPeriodAggregations = ({
         unmatchedModelIds.add(modelId);
         continue;
       }
-      const inputTokens = Math.max(promptTokens - cachedTokens, 0);
+      const cacheReadTokens = Math.min(cachedTokens, promptTokens);
+      const inputTokens = promptTokens - cacheReadTokens;
       const outputTokens = completionTokens + thinkingTokens;
       if (price.cacheRead !== null) {
         accumulator.estimatedCost +=
           (inputTokens * price.input +
-            cachedTokens * price.cacheRead +
+            cacheReadTokens * price.cacheRead +
             outputTokens * price.output) /
           TOKENS_PER_MILLION;
         accumulator.priceableTokens += modelTotalTokens;
-      } else if (cachedTokens === 0) {
+      } else if (cacheReadTokens === 0) {
         accumulator.estimatedCost +=
           (inputTokens * price.input + outputTokens * price.output) / TOKENS_PER_MILLION;
         accumulator.priceableTokens += modelTotalTokens;
       } else {
         accumulator.estimatedCost +=
           (inputTokens * price.input + outputTokens * price.output) / TOKENS_PER_MILLION;
-        const unpriceableCached = Math.min(cachedTokens, modelTotalTokens);
+        const unpriceableCached = Math.min(cacheReadTokens, modelTotalTokens);
         accumulator.unpriceableTokens += unpriceableCached;
         accumulator.priceableTokens += Math.max(modelTotalTokens - unpriceableCached, 0);
       }
     }
 
     const missingModel = bucket.missing_model;
-    const missingModelTokens = isRecord(missingModel)
-      ? readSum(missingModel.total_tokens, `${featureId}.missing_model.total_tokens`, logger)
-      : 0;
+    if (!isRecord(missingModel)) {
+      throw new CostAggregationError(`Missing model aggregation for ${featureId}`);
+    }
+    const missingModelTokens = readSum(
+      missingModel.total_tokens,
+      `${featureId}.missing_model.total_tokens`
+    );
     accumulator.unpriceableTokens += missingModelTokens;
 
-    const sumOtherDocCount =
-      isRecord(modelsAgg) && typeof modelsAgg.sum_other_doc_count === 'number'
-        ? modelsAgg.sum_other_doc_count
-        : 0;
+    const sumOtherDocCount = modelsAgg.sum_other_doc_count;
+    if (returnedModelBucketTotal + missingModelTokens > featureTotalTokens) {
+      throw new CostAggregationError(`Model token totals exceed feature total for ${featureId}`);
+    }
     const truncatedTokens = Math.max(
       featureTotalTokens - returnedModelBucketTotal - missingModelTokens,
       0
@@ -542,17 +549,36 @@ const processPeriodAggregations = ({
     if (sumOtherDocCount > 0) {
       accumulator.unpriceableTokens += truncatedTokens;
       accumulator.hasTruncation = true;
+    } else if (truncatedTokens > 0) {
+      throw new CostAggregationError(`Feature token total is not fully accounted for ${featureId}`);
     }
 
     const tierCrossings = bucket.tier_crossings;
+    if (hasTieredPrices && (!isRecord(tierCrossings) || !isRecord(tierCrossings.buckets))) {
+      throw new CostAggregationError(`Missing tier crossing aggregation for ${featureId}`);
+    }
     const crossingBuckets =
       isRecord(tierCrossings) && isRecord(tierCrossings.buckets) ? tierCrossings.buckets : {};
     for (const [modelKey, crossingBucket] of Object.entries(crossingBuckets)) {
       if (prices.get(modelKey)?.tierThreshold == null) {
         continue;
       }
-      accumulator.tierCrossingCount += readDocCount(crossingBucket);
+      accumulator.tierCrossingCount += readDocCount(
+        crossingBucket,
+        `${featureId}.tier_crossings.${modelKey}`
+      );
     }
+  }
+
+  for (const [group, accumulator] of Object.entries(groups)) {
+    if (accumulator.priceableTokens + accumulator.unpriceableTokens !== accumulator.totalTokens) {
+      throw new CostAggregationError(`Token totals are not conserved for ${group}`);
+    }
+  }
+  const classifiedTokens =
+    Object.values(groups).reduce((sum, group) => sum + group.totalTokens, 0) + unknownFeatureTokens;
+  if (classifiedTokens !== totalTokens) {
+    throw new CostAggregationError('Period token total is not fully accounted for');
   }
 
   if (unknownFeatureDocCount > 0) {
@@ -625,9 +651,19 @@ export const calculateSignificantEventsCost = async ({
   const todayWindow = resolveDailyWindow(now);
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
   const periodEnd = now.toISOString();
+  const createZeroResponse = (): CostResponse => ({
+    today: createZeroPeriod('today', todayWindow.start, periodEnd),
+    month: createZeroPeriod('this_month', monthStart, periodEnd),
+    asOf: periodEnd,
+    pricesFetchedAt,
+    pricesStale,
+    unavailableReason: null,
+    caveats: buildCaveats({ pricesStale, groups: [], trackingCoverage }),
+    trackingCoverage,
+  });
 
   try {
-    const [todayAggregations, monthAggregations] = await Promise.all([
+    const [todayResult, monthResult] = await Promise.allSettled([
       searchPeriod({
         esClient,
         prices,
@@ -641,12 +677,27 @@ export const calculateSignificantEventsCost = async ({
         periodEnd,
       }),
     ]);
+    if (todayResult.status === 'rejected' || monthResult.status === 'rejected') {
+      const errors = [todayResult, monthResult]
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+        .map((result) => result.reason);
+      if (errors.length === 2 && errors.every(isMissingTokenUsageIndex)) {
+        return createZeroResponse();
+      }
+      const nonMissingIndexError = errors.find((error) => !isMissingTokenUsageIndex(error));
+      if (nonMissingIndexError) {
+        throw nonMissingIndexError;
+      }
+      throw new CostAggregationError(
+        'Token usage data stream was missing for only one requested period'
+      );
+    }
 
     const today = toPeriodCost({
       label: 'today',
       periodStart: todayWindow.start,
       periodEnd,
-      aggregations: todayAggregations,
+      aggregations: todayResult.value,
       prices,
       logger,
     });
@@ -654,7 +705,7 @@ export const calculateSignificantEventsCost = async ({
       label: 'this_month',
       periodStart: monthStart,
       periodEnd,
-      aggregations: monthAggregations,
+      aggregations: monthResult.value,
       prices,
       logger,
     });
@@ -674,18 +725,6 @@ export const calculateSignificantEventsCost = async ({
       trackingCoverage,
     };
   } catch (error) {
-    if (isMissingTokenUsageIndex(error)) {
-      return {
-        today: createZeroPeriod('today', todayWindow.start, periodEnd),
-        month: createZeroPeriod('this_month', monthStart, periodEnd),
-        asOf: periodEnd,
-        pricesFetchedAt,
-        pricesStale,
-        unavailableReason: null,
-        caveats: buildCaveats({ pricesStale, groups: [], trackingCoverage }),
-        trackingCoverage,
-      };
-    }
     logger.error(
       `Failed to read Significant Events token usage: ${
         error instanceof Error ? error.message : String(error)

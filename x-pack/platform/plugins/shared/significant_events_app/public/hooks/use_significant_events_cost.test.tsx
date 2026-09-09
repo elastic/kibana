@@ -79,7 +79,10 @@ const costResponse = (overrides: Partial<CostResponse> = {}): CostResponse => ({
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, staleTime: Number.POSITIVE_INFINITY },
+      mutations: { retry: false },
+    },
   });
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -90,6 +93,7 @@ const createWrapper = () => {
 describe('useSignificantEventsCost', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    fetch.mockReset();
     mockUseKibana.mockReturnValue({
       dependencies: {
         start: {
@@ -102,6 +106,10 @@ describe('useSignificantEventsCost', () => {
       isLoading: false,
       isError: false,
     } as never);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('disables the cost query while run-quota privilege is unknown', async () => {
@@ -128,7 +136,19 @@ describe('useSignificantEventsCost', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it('disables the cost query when the tracking gate is false', async () => {
+  it('disables the cost query when privilege data is stale after an error', async () => {
+    mockUseRunQuotas.mockReturnValue({
+      data: quotasResponse(true),
+      isLoading: false,
+      isError: true,
+    } as never);
+    const { wrapper } = createWrapper();
+    renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
+    await act(async () => undefined);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('disables the cost query when the caller disables it', async () => {
     const { wrapper } = createWrapper();
     renderHook(() => useSignificantEventsCost({ enabled: false }), { wrapper });
     await act(async () => undefined);
@@ -151,6 +171,7 @@ describe('useSignificantEventsCost', () => {
       .mockResolvedValueOnce(costResponse({ pricesFetchedAt: '2026-09-09T12:01:00.000Z' }));
     const { queryClient, wrapper } = createWrapper();
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const cancelSpy = jest.spyOn(queryClient, 'cancelQueries');
     const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
 
@@ -166,7 +187,154 @@ describe('useSignificantEventsCost', () => {
       costResponse({ pricesFetchedAt: '2026-09-09T12:01:00.000Z' })
     );
     expect(invalidateSpy).not.toHaveBeenCalled();
+    expect(cancelSpy).toHaveBeenCalledWith({ queryKey: SIGNIFICANT_EVENTS_COST_QUERY_KEY });
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not let an older normal request overwrite a forced refresh', async () => {
+    let resolveNormal: (value: CostResponse) => void = () => undefined;
+    let resolveRefresh: (value: CostResponse) => void = () => undefined;
+    fetch
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveNormal = resolve;
+          })
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveRefresh = resolve;
+          })
+      );
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+
+    let refreshDone: Promise<void> | undefined;
+    act(() => {
+      refreshDone = result.current.refreshCost();
+    });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+
+    const refreshed = costResponse({
+      pricesFetchedAt: '2026-09-09T12:01:00.000Z',
+      trackingCoverage: {
+        status: 'full',
+        enabledSpaceCount: 2,
+        totalSpaceCount: 2,
+      },
+    });
+    await act(async () => {
+      resolveRefresh(refreshed);
+      await refreshDone;
+    });
+    await act(async () => {
+      resolveNormal(
+        costResponse({
+          trackingCoverage: {
+            status: 'none',
+            enabledSpaceCount: 0,
+            totalSpaceCount: 2,
+          },
+        })
+      );
+      await Promise.resolve();
+    });
+    expect(result.current.data).toEqual(refreshed);
+  });
+
+  it('keeps the newest forced refresh authoritative when requests overlap', async () => {
+    let resolveOlderRefresh: (value: CostResponse) => void = () => undefined;
+    let resolveNewerRefresh: (value: CostResponse) => void = () => undefined;
+    fetch
+      .mockResolvedValueOnce(costResponse())
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveOlderRefresh = resolve;
+          })
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveNewerRefresh = resolve;
+          })
+      );
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+
+    let olderDone = Promise.resolve();
+    let newerDone = Promise.resolve();
+    act(() => {
+      olderDone = result.current.refreshCost();
+      newerDone = result.current.refreshCost();
+    });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
+
+    const newest = costResponse({ pricesFetchedAt: '2026-09-09T12:02:00.000Z' });
+    await act(async () => {
+      resolveNewerRefresh(newest);
+      await newerDone;
+    });
+    expect(result.current.data).toEqual(newest);
+    expect(result.current.isRefreshing).toBe(true);
+
+    await act(async () => {
+      resolveOlderRefresh(costResponse({ pricesFetchedAt: '2026-09-09T12:01:00.000Z' }));
+      await olderDone;
+    });
+    expect(result.current.data).toEqual(newest);
+    expect(result.current.isRefreshing).toBe(false);
+  });
+
+  it('keeps a remounted hook authoritative over an older forced refresh', async () => {
+    let resolveOlderRefresh: (value: CostResponse) => void = () => undefined;
+    let resolveNewerRefresh: (value: CostResponse) => void = () => undefined;
+    fetch
+      .mockResolvedValueOnce(costResponse())
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveOlderRefresh = resolve;
+          })
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveNewerRefresh = resolve;
+          })
+      );
+    const { wrapper } = createWrapper();
+    const firstHook = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
+    await waitFor(() => expect(firstHook.result.current.data).toBeDefined());
+
+    let olderDone = Promise.resolve();
+    act(() => {
+      olderDone = firstHook.result.current.refreshCost();
+    });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    firstHook.unmount();
+
+    const currentHook = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
+    let newerDone = Promise.resolve();
+    act(() => {
+      newerDone = currentHook.result.current.refreshCost();
+    });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
+
+    const newest = costResponse({ pricesFetchedAt: '2026-09-09T12:02:00.000Z' });
+    await act(async () => {
+      resolveNewerRefresh(newest);
+      await newerDone;
+    });
+    await waitFor(() => expect(currentHook.result.current.data).toEqual(newest));
+    await act(async () => {
+      resolveOlderRefresh(costResponse({ pricesFetchedAt: '2026-09-09T12:01:00.000Z' }));
+      await olderDone;
+    });
+    await waitFor(() => expect(currentHook.result.current.data).toEqual(newest));
   });
 
   it('sets isRefreshing for the entire forced request', async () => {
@@ -203,16 +371,21 @@ describe('useSignificantEventsCost', () => {
       await result.current.refreshCost();
     });
     expect(result.current.error).toEqual(new Error('refresh failed'));
+    expect(result.current.data).toEqual(costResponse());
   });
 
-  it('retries with a normal React Query refetch', async () => {
-    fetch.mockResolvedValue(costResponse());
+  it('retries a failed normal query and replaces the error with data', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    fetch.mockRejectedValueOnce(new Error('initial failure')).mockResolvedValueOnce(costResponse());
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await waitFor(() => expect(result.current.data).toBeDefined());
+    await waitFor(() => expect(result.current.error).toEqual(new Error('initial failure')));
     await act(async () => {
       await result.current.retryCost();
     });
+    await waitFor(() => expect(result.current.data).toEqual(costResponse()));
+    expect(result.current.error).toBeNull();
+    expect(consoleError).toHaveBeenCalled();
     expect(fetch).toHaveBeenLastCalledWith('GET /internal/significant_events/cost', {
       signal: expect.any(AbortSignal),
     });
