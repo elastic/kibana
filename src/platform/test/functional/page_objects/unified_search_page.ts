@@ -61,8 +61,10 @@ export class UnifiedSearchPageObject extends FtrService {
 
     await this.retry.waitFor('wait for updating switcher', async () => {
       const switchButton = await this.testSubjects.find(switchButtonSelector);
-      const fullText = await switchButton.findByTestSubject('fullText');
-      selectedDataView = await fullText.getVisibleText();
+      const fullText = await switchButton.findAllByTestSubject('fullText', 1);
+      selectedDataView = (
+        fullText.length ? await fullText[0].getVisibleText() : await switchButton.getVisibleText()
+      ).trim();
       return Boolean(selectedDataView);
     });
 
