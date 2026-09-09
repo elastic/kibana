@@ -186,7 +186,6 @@ describe('createChangePointDataSourceProfileProvider', () => {
 
   describe('getColumnsConfiguration', () => {
     it('customises the pvalue header and keeps Summary non-expandable', () => {
-      const cellAction = jest.fn();
       const getColumns = provider.profile.getColumnsConfiguration!(() => ({}), {
         context: buildContext({ pvalueColumnId: 'my_pvalue' }),
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
@@ -195,13 +194,13 @@ describe('createChangePointDataSourceProfileProvider', () => {
       expect(config).toHaveProperty('my_pvalue');
       expect(
         config[SOURCE_COLUMN]!({
-          column: { id: SOURCE_COLUMN, cellActions: [cellAction] } as never,
+          column: { id: SOURCE_COLUMN, cellActions: [jest.fn()] } as never,
           headerRowHeight: 1,
         })
       ).toEqual(
         expect.objectContaining({
           isExpandable: false,
-          cellActions: [cellAction],
+          cellActions: [],
         })
       );
     });
