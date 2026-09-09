@@ -253,7 +253,7 @@ describe('Custom Editor Commands', () => {
 
     it('does not call onQuerySubmit on CMD+Enter when query is empty', () => {
       const mockOnQuerySubmit = jest.fn();
-      (mockEditor.getValue as jest.Mock).mockReturnValue(' ');
+      (mockEditor.getValue as jest.Mock).mockReturnValue('   ');
       addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
 
       // eslint-disable-next-line no-bitwise
