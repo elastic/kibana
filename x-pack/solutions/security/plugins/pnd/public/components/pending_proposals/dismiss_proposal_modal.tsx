@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { DismissReason } from '@kbn/agentic-investigations-plugin/common';
-import { BaseActionModal } from '../modals';
+import { BaseActionModal } from '@kbn/agentic-investigations-common';
 import * as i18n from './translations';
 
 const DISMISS_REASONS: DismissReason[] = [
