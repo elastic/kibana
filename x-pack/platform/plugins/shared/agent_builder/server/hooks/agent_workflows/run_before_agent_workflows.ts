@@ -93,8 +93,10 @@ export async function runBeforeAgentWorkflows({
       workflowId,
       workflowParams: {
         prompt: currentNextInput.message ?? '',
-        ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
-        is_first_round: context.isFirstRound ?? false,
+      },
+      metadata: {
+        ...(context.conversationId ? { conversationId: context.conversationId } : {}),
+        isFirstRound: context.isFirstRound ?? false,
       },
       request: context.request,
       spaceId,

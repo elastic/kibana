@@ -220,7 +220,7 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
-  it('passes conversation_id and is_first_round in workflowParams on first round', async () => {
+  it('passes conversationId and isFirstRound in metadata on first round', async () => {
     const context = {
       ...createContext(),
       conversationId: 'conv-abc',
@@ -247,16 +247,13 @@ describe('runBeforeAgentWorkflows', () => {
 
     expect(executeWorkflowMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        workflowParams: {
-          prompt: 'hello',
-          conversation_id: 'conv-abc',
-          is_first_round: true,
-        },
+        workflowParams: { prompt: 'hello' },
+        metadata: { conversationId: 'conv-abc', isFirstRound: true },
       })
     );
   });
 
-  it('passes is_first_round: false and omits conversation_id when context has none', async () => {
+  it('passes isFirstRound: false and omits conversationId in metadata when context has none', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices } = createDeps();
     executeWorkflowMock.mockResolvedValue({
@@ -279,10 +276,8 @@ describe('runBeforeAgentWorkflows', () => {
 
     expect(executeWorkflowMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        workflowParams: {
-          prompt: 'hello',
-          is_first_round: false,
-        },
+        workflowParams: { prompt: 'hello' },
+        metadata: { isFirstRound: false },
       })
     );
   });
