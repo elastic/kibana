@@ -64,8 +64,7 @@ export function ManagedIntegrationsSection({
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
-  // In edit mode, auth method is inferred from the session: no connectorId → static-keys resume.
-  const isStaticKeysEditMode = isEditMode && !authenticateAndDeployStep.connectorId;
+  const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);

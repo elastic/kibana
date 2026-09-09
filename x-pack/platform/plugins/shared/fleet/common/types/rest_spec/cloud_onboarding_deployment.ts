@@ -7,6 +7,7 @@
 
 import type {
   CloudOnboardingDeployment,
+  CloudOnboardingDeploymentAuthMethod,
   CloudOnboardingDeploymentMechanism,
   CloudOnboardingDeploymentStatus,
 } from '../models/cloud_onboarding_deployment';
@@ -20,7 +21,7 @@ export interface CreateCloudOnboardingDeploymentRequest {
     serviceVars?: Record<string, Record<string, unknown>>;
     globalRegion?: string;
     dataFormat?: string;
-    authMethod?: 'identity_federation' | 'static_keys';
+    authMethod?: CloudOnboardingDeploymentAuthMethod;
   };
 }
 

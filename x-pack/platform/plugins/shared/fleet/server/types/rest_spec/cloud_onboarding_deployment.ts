@@ -127,7 +127,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   ),
   authMethod: schema.maybe(
     schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-      meta: { description: 'Authentication method for managed integrations. Determines resume UX.' },
+      meta: { description: 'Authentication method for managed integrations.' },
     })
   ),
   agentPolicyId: schema.maybe(

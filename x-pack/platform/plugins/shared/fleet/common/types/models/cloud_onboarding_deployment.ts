@@ -28,6 +28,8 @@ export type CloudOnboardingDeploymentMechanism =
   | 'cloud_forwarder'
   | 'agent_based';
 
+export type CloudOnboardingDeploymentAuthMethod = 'identity_federation' | 'static_keys';
+
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
@@ -55,9 +57,9 @@ export interface CloudOnboardingDeployment {
   apiKeyId?: string;
   /** ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch. */
   ecfStacks?: CloudOnboardingEcfStack[];
-  /** Non-secret AWS access key ID for static-keys deployments. Stored for display (hidden with Replace UX) on resume; secret_access_key is never persisted. */
-  /** Authentication method used for managed integrations. Determines resume UX. */
-  authMethod?: 'identity_federation' | 'static_keys';
+  // TODO: add agent-based auth methods
+  /** Authentication method used for managed integrations. */
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;

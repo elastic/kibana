@@ -65,8 +65,9 @@ function setupMocks({
   setConnectorId = jest.fn(),
   setStaticKeys = jest.fn(),
   connectorId = undefined,
+  authMethod = undefined,
   searchParams = '',
-}: { cloud?: object; setConnectorId?: jest.Mock; setStaticKeys?: jest.Mock; connectorId?: string; searchParams?: string } = {}) {
+}: { cloud?: object; setConnectorId?: jest.Mock; setStaticKeys?: jest.Mock; connectorId?: string; authMethod?: 'identity_federation' | 'static_keys'; searchParams?: string } = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
@@ -74,7 +75,7 @@ function setupMocks({
   mockUseOnboardingFlow.mockReturnValue({
     setConnectorId,
     setStaticKeys,
-    authenticateAndDeployStep: { connectorId },
+    authenticateAndDeployStep: { connectorId, authMethod },
   });
 
   MockIdentityFederation.mockImplementation(
@@ -398,7 +399,7 @@ describe('ManagedIntegrationsSection', () => {
 
   describe('static-keys edit mode (isStaticKeysEditMode)', () => {
     it('shows StaticKeysReplaceView when ?deploymentId= in URL and no connectorId', () => {
-      setupMocks({ searchParams: '?deploymentId=dep-123', connectorId: undefined });
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
       renderSection({ showIdentityFederation: true });
       expect(screen.getByTestId('static-keys-replace-view')).toBeInTheDocument();
       expect(screen.queryByTestId('static-keys')).not.toBeInTheDocument();
@@ -413,7 +414,7 @@ describe('ManagedIntegrationsSection', () => {
     });
 
     it('initialises preferredMethod to access_keys on static-keys resume', () => {
-      setupMocks({ searchParams: '?deploymentId=dep-123', connectorId: undefined });
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
       renderSection({ showIdentityFederation: true });
       const radio = screen.getByRole('radio', { name: /access keys/i }) as HTMLInputElement;
       expect(radio.checked).toBe(true);
@@ -421,7 +422,7 @@ describe('ManagedIntegrationsSection', () => {
 
     it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
       const setStaticKeys = jest.fn();
-      setupMocks({ searchParams: '?deploymentId=dep-123', connectorId: undefined, setStaticKeys });
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys', setStaticKeys });
       renderSection({ showIdentityFederation: true });
       fireEvent.click(screen.getByText('replace-fields'));
       expect(setStaticKeys).toHaveBeenCalledWith({ access_key_id: 'NEW', secret_access_key: 'newsecret' });

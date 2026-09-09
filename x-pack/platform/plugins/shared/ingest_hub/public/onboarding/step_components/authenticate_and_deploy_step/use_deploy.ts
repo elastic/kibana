@@ -131,7 +131,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // Flat list of all instanceIds being deployed this run.
         const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
 
-        // Non-agentless services are shown as gray chips but never deployed.
+        // Non-managed-integration services are shown as gray chips (ECF deployed on a different path).
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
         for (const service of nonAgentlessServices) {
           if (!(service.id in detectAndReviewStep.serviceStatuses)) {

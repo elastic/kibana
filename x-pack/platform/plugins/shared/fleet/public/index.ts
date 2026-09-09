@@ -137,6 +137,7 @@ export {
   sendGetCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
 } from './hooks/use_request/cloud_onboarding_deployment';
+export type { CloudOnboardingDeploymentAuthMethod } from '../common/types/models/cloud_onboarding_deployment';
 export { sendGetPackageInfoByKey } from './hooks/use_request/epm';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';

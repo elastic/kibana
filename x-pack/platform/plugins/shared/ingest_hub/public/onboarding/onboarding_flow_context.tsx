@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, useCallback, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
+import type { AwsStaticKeyCredentials, CloudOnboardingDeploymentAuthMethod } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
@@ -18,6 +18,7 @@ export interface AuthenticateAndDeployStepState {
   connectorId?: string;
   connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -36,7 +37,7 @@ export interface DetectAndReviewStepState {
 interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
   connectorName?: string;
-  authMethod?: 'identity_federation' | 'static_keys';
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
 }
@@ -272,6 +273,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
     connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
+    authMethod: persistedAuthenticateAndDeployStep?.authMethod,
   };
 
   const detectAndReviewStep: DetectAndReviewStepState = {
