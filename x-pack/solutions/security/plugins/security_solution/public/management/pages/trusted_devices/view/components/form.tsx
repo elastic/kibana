@@ -30,8 +30,7 @@ import {
   CONTROL_CHARACTER_ERROR,
   OperatingSystem,
   TrustedDeviceConditionEntryField,
-  getInputValueCharacterIssue,
-  InputValueCharacterIssue,
+  hasControlCharacters,
   isTrustedDeviceFieldAvailableForOs,
 } from '@kbn/securitysolution-utils';
 import type {
@@ -181,9 +180,7 @@ const validateEntries = (entries: ExceptionListItemSchema['entries']): EntryVali
 
       if (isEmpty) {
         anyEntryEmpty = true;
-      } else if (
-        getInputValueCharacterIssue(entry.value) === InputValueCharacterIssue.CONTROL_CHARACTER
-      ) {
+      } else if (hasControlCharacters(entry.value)) {
         characterErrors.push(CONTROL_CHARACTER_ERROR);
       } else if (
         typeof entry.value === 'string' &&
@@ -235,14 +232,9 @@ const computeValidation = (
     if (formData.entries?.length) {
       const entryValidation = validateEntries(formData.entries);
 
-      if (
-        entryValidation.duplicateErrors.length > 0 ||
-        entryValidation.characterErrors.length > 0
-      ) {
-        errors.entries = [
-          ...entryValidation.duplicateErrors,
-          ...entryValidation.characterErrors,
-        ];
+      const entryErrors = [...entryValidation.duplicateErrors, ...entryValidation.characterErrors];
+      if (entryErrors.length > 0) {
+        errors.entries = entryErrors;
       }
 
       if (entryValidation.anyEntryEmpty && hasVisitedAnyEntry) {

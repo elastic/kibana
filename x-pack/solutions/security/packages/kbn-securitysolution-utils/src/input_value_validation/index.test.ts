@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  getInputValueCharacterIssue,
-  InputValueCharacterIssue,
-  trimInputValue,
-  trimInputValues,
-} from '.';
+import { hasControlCharacters, trimInputValues } from '.';
 
-describe('getInputValueCharacterIssue', () => {
+describe('hasControlCharacters', () => {
   it.each([
     ['tab', 'value\twith-tab'],
     ['line feed', 'value\nwith-line-feed'],
@@ -20,23 +15,17 @@ describe('getInputValueCharacterIssue', () => {
     ['NUL', 'value\u0000with-nul'],
     ['DEL', 'value\u007Fwith-del'],
     ['C1', 'value\u0085with-c1'],
-  ])('classifies an interior %s as a control character', (_, value) => {
-    expect(getInputValueCharacterIssue(value)).toBe(InputValueCharacterIssue.CONTROL_CHARACTER);
+  ])('detects an interior %s', (_, value) => {
+    expect(hasControlCharacters(value)).toBe(true);
   });
 
-  it('gives a remaining control character precedence over edge whitespace', () => {
-    expect(getInputValueCharacterIssue(' value\u0000 ')).toBe(
-      InputValueCharacterIssue.CONTROL_CHARACTER
-    );
+  it('ignores edge whitespace but still detects a remaining control character', () => {
+    expect(hasControlCharacters(' value\u0000 ')).toBe(true);
   });
 
-  it('inspects every array member and prefers a control character', () => {
-    expect(getInputValueCharacterIssue([' whitespace ', 'ctl\u0000'])).toBe(
-      InputValueCharacterIssue.CONTROL_CHARACTER
-    );
-    expect(getInputValueCharacterIssue(['clean', 'also clean', 'bad\u007Fvalue'])).toBe(
-      InputValueCharacterIssue.CONTROL_CHARACTER
-    );
+  it('inspects every array member', () => {
+    expect(hasControlCharacters([' whitespace ', 'ctl\u0000'])).toBe(true);
+    expect(hasControlCharacters(['clean', 'also clean', 'bad\u007Fvalue'])).toBe(true);
   });
 
   it.each([
@@ -53,14 +42,14 @@ describe('getInputValueCharacterIssue', () => {
     ['edge non-breaking space', '\u00A0value\u00A0'],
     ['edge byte order mark', '\uFEFFvalue\uFEFF'],
     ['array of edge-whitespace members', ['clean', ' trailing ']],
-  ])('returns no issue for a clean %s', (_, value) => {
-    expect(getInputValueCharacterIssue(value)).toBeUndefined();
+  ])('returns false for a clean %s', (_, value) => {
+    expect(hasControlCharacters(value)).toBe(false);
   });
 });
 
 describe('trimInputValues', () => {
   it('trims a string', () => {
-    expect(trimInputValue('  /opt/app  ')).toBe('/opt/app');
+    expect(trimInputValues('  /opt/app  ')).toBe('/opt/app');
   });
 
   it('trims array members and drops empties', () => {

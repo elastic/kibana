@@ -36,8 +36,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import {
   CONTROL_CHARACTER_ERROR,
-  getInputValueCharacterIssue,
-  InputValueCharacterIssue,
+  hasControlCharacters,
   hasSimpleExecutableName,
   validateHasWildcardWithWrongOperator,
   isPathValid,
@@ -242,7 +241,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         return;
       }
 
-      if (getInputValueCharacterIssue(entryValue) === InputValueCharacterIssue.CONTROL_CHARACTER) {
+      if (hasControlCharacters(entryValue)) {
         isValid = false;
         addEntryResultToValidation(validation, index, 'errors', CONTROL_CHARACTER_ERROR);
         return;

@@ -177,12 +177,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     const handleCreateOption = useCallback(
       (option: string): boolean | undefined => {
-        const trimmedOption = option.trim();
-        if (!trimmedOption) {
-          return false;
-        }
-
-        const err = paramIsValid(trimmedOption, selectedField, isRequired, touched);
+        const err = paramIsValid(option, selectedField, isRequired, touched);
         handleError(err);
         handleWarning(warning);
 
@@ -192,8 +187,8 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           return false;
         }
 
-        handleSpacesWarning(trimmedOption);
-        onChange(trimmedOption);
+        handleSpacesWarning(option);
+        onChange(option);
         return undefined;
       },
       [

@@ -10,9 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  getInputValueCharacterIssue,
-  InputValueCharacterIssue,
   OperatingSystem,
+  hasControlCharacters,
   trimInputValues,
 } from '@kbn/securitysolution-utils';
 
@@ -199,6 +198,10 @@ export class BaseValidator {
     }
   }
 
+  /**
+   * Trims edge whitespace from `match`/`match_any`/`wildcard` entry values in place (the Endpoint
+   * matches these literally) and rejects values that still contain control characters.
+   */
   protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
     const controlCharacterFields = new Set<string>();
 
@@ -215,12 +218,9 @@ export class BaseValidator {
 
         entry.value = trimInputValues(entry.value);
 
-        const values = Array.isArray(entry.value) ? entry.value : [entry.value];
-        values.forEach((value) => {
-          if (getInputValueCharacterIssue(value) === InputValueCharacterIssue.CONTROL_CHARACTER) {
-            controlCharacterFields.add(entry.field);
-          }
-        });
+        if (hasControlCharacters(entry.value)) {
+          controlCharacterFields.add(entry.field);
+        }
       });
     };
 

@@ -73,9 +73,9 @@ describe('Endpoint Exceptions API validations', () => {
     });
 
     it('rejects a control character on create', async () => {
-      await expect(validator.validatePreCreateItem(buildCreateItem('10.0.0.1\u0000'))).rejects.toThrow(
-        /control characters in fields: destination\.ip/
-      );
+      await expect(
+        validator.validatePreCreateItem(buildCreateItem('10.0.0.1\u0000'))
+      ).rejects.toThrow(/control characters in fields: destination\.ip/);
     });
   });
 

@@ -140,6 +140,17 @@ describe('Blocklists API validations', () => {
       );
     });
 
+    it('deduplicates values that only differ by edge whitespace', async () => {
+      const item = buildItem(
+        filePathEntry([' C:\\Elastic\\endpoint.exe ', 'C:\\Elastic\\endpoint.exe'])
+      );
+
+      await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
+      expect(item.entries[0]).toEqual(
+        expect.objectContaining({ value: ['C:\\Elastic\\endpoint.exe'] })
+      );
+    });
+
     it('rejects a nested match_any control character on update', async () => {
       await expect(
         validator.validatePreUpdateItem(

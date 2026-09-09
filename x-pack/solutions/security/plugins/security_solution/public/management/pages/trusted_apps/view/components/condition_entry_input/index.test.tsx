@@ -20,7 +20,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { OPERATOR_TITLES } from '../../translations';
+import { ENTRY_PROPERTY_TITLES, OPERATOR_TITLES } from '../../translations';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
@@ -152,8 +152,10 @@ describe('Condition entry input', () => {
     render();
 
     const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
-    expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
+    const error = renderResult.getByText(CONTROL_CHARACTER_ERROR);
+    expect(error).toBeInTheDocument();
     expect(valueInput).toHaveAttribute('aria-invalid', 'true');
+    expect(valueInput).toHaveAccessibleDescription(CONTROL_CHARACTER_ERROR);
   });
 
   it('renders feedback for a repeated row without adding a visible label', () => {
@@ -165,7 +167,10 @@ describe('Condition entry input', () => {
     render();
 
     expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
-    expect(renderResult.container.querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0);
+    expect(renderResult.queryByText(ENTRY_PROPERTY_TITLES.value)).not.toBeInTheDocument();
+    expect(renderResult.getByTestId(`${formPrefix}-value`)).toHaveAccessibleDescription(
+      CONTROL_CHARACTER_ERROR
+    );
   });
 
   it('should not call on visited for field change if value is empty', async () => {

@@ -17,6 +17,7 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
@@ -35,15 +36,21 @@ import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/pa
 const ConditionEntryCell = memo<{
   showLabel: boolean;
   label?: string;
+  /** Ids of external elements describing the field; applied via `EuiFormRow` when labelled. */
+  describedByIds?: string[];
   children: React.ReactElement;
-}>(({ showLabel, label = '', children }) => {
-  return showLabel ? (
-    <EuiFormRow label={label} fullWidth>
-      {children}
-    </EuiFormRow>
-  ) : (
-    <>{children}</>
-  );
+}>(({ showLabel, label = '', describedByIds, children }) => {
+  if (showLabel) {
+    return (
+      <EuiFormRow label={label} fullWidth describedByIds={describedByIds}>
+        {children}
+      </EuiFormRow>
+    );
+  }
+
+  return describedByIds?.length
+    ? React.cloneElement(children, { 'aria-describedby': describedByIds.join(' ') })
+    : children;
 });
 
 ConditionEntryCell.displayName = 'ConditionEntryCell';
@@ -127,6 +134,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
     const warnings = validation?.warnings ?? [];
     const hasValueFeedback = visibleErrors.length > 0 || warnings.length > 0;
+    const valueFeedbackId = useGeneratedHtmlId({ prefix: 'conditionEntryValueFeedback' });
 
     const handleVisited = useCallback(() => {
       onVisited?.(entry);
@@ -257,7 +265,11 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="value">
-          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
+          <ConditionEntryCell
+            showLabel={showLabels}
+            label={ENTRY_PROPERTY_TITLES.value}
+            describedByIds={hasValueFeedback ? [valueFeedbackId] : undefined}
+          >
             <EuiFieldText
               name="value"
               value={entry.value}
@@ -301,7 +313,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
         </InputItem>
         {hasValueFeedback ? (
           <InputItem gridArea="feedback">
-            <ValueFeedback>
+            <ValueFeedback id={valueFeedbackId}>
               {visibleErrors.map((error, index) => (
                 <EuiText
                   key={`error-${index}`}

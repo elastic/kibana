@@ -163,9 +163,7 @@ describe('Trusted apps form', () => {
   };
   const getAllValidationErrors = (): HTMLElement[] => {
     return Array.from(
-      renderResult.container.querySelectorAll(
-        '.euiFormErrorText, [data-test-subj$="-valueError"]'
-      )
+      renderResult.container.querySelectorAll('.euiFormErrorText, [data-test-subj$="-valueError"]')
     );
   };
   const getAllValidationWarnings = (): HTMLElement[] => {

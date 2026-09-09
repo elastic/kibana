@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export enum InputValueCharacterIssue {
-  CONTROL_CHARACTER = 'control_character',
-}
-
 export const CONTROL_CHARACTER_ERROR = i18n.translate(
   'utils.inputValueValidation.controlCharacterErrorMessage',
   {
@@ -18,48 +14,25 @@ export const CONTROL_CHARACTER_ERROR = i18n.translate(
   }
 );
 
+// C0 controls (incl. tab, LF, CR), DEL and C1 controls.
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001F\u007F-\u009F]/;
 
-const getStringCharacterIssue = (value: string): InputValueCharacterIssue | undefined => {
-  const trimmedValue = value.trim();
-
-  if (trimmedValue.length && CONTROL_CHARACTER_PATTERN.test(trimmedValue)) {
-    return InputValueCharacterIssue.CONTROL_CHARACTER;
-  }
-};
-
-export const getInputValueCharacterIssue = (
-  value?: string | string[]
-): InputValueCharacterIssue | undefined => {
-  if (Array.isArray(value)) {
-    for (const arrayValue of value) {
-      const issue = getStringCharacterIssue(arrayValue);
-
-      if (issue) {
-        return issue;
-      }
-    }
-
-    return;
+/** Returns true when a value (or any array member) still contains a control character after trimming. */
+export const hasControlCharacters = (value?: string | string[]): boolean => {
+  if (value === undefined) {
+    return false;
   }
 
-  return value === undefined ? undefined : getStringCharacterIssue(value);
+  const values = Array.isArray(value) ? value : [value];
+
+  return values.some((member) => CONTROL_CHARACTER_PATTERN.test(member.trim()));
 };
 
-export const getInputValueCharacterIssueMessage = (
-  issue?: InputValueCharacterIssue
-): string | undefined => {
-  if (issue === InputValueCharacterIssue.CONTROL_CHARACTER) {
-    return CONTROL_CHARACTER_ERROR;
-  }
-};
-
-export const trimInputValue = (value: string): string => value.trim();
-
+/** Trims edge whitespace; array members that become empty are dropped. */
 export const trimInputValues = (value: string | string[]): string | string[] => {
   if (Array.isArray(value)) {
-    return value.map(trimInputValue).filter((member) => member.length > 0);
+    return value.map((member) => member.trim()).filter((member) => member.length > 0);
   }
 
-  return trimInputValue(value);
+  return value.trim();
 };
