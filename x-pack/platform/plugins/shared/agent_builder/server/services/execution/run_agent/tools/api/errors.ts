@@ -69,12 +69,6 @@ export const apiFailureToErrorResult = (
         message: `Failed to load API definition for "${api}": ${toMessage(failure.error)}`,
       });
 
-    case 'unsupported_api':
-      return createErrorResult({
-        message: `Cannot execute "${api}": ${failure.reason} Do not retry it.`,
-        metadata,
-      });
-
     case 'schema_unavailable':
       logger.error(
         `${toolId}: failed to build the params validator for "${api}" (target=${target}): ${failure.error}`

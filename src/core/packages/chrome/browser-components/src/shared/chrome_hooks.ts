@@ -272,7 +272,7 @@ export function useProjectPicker(): ReactNode {
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
-  const inlineAppHeader$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
+  const inlineAppHeader$ = useMemo(() => chrome.inlineAppHeader.get$(), [chrome]);
   return useObservable(inlineAppHeader$, false);
 }
 

@@ -126,7 +126,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
 
         // change the color to red
         await yDimensionTrigger.click();
-        const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
+        const colorPickerInput = lens.dimensions.dimensionColorPicker;
         // A disabled color picker means a split dimension is still present; fail
         // fast with a clear assertion instead of a fill-retry timeout.
         await expect(colorPickerInput).toBeEnabled();
@@ -154,8 +154,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
           await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
 
           await page.testSubj.click('lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased');
-          const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
-          await expect(colorPickerInput).toHaveValue('#FF0000');
+          await expect(lens.dimensions.dimensionColorPicker).toHaveValue('#FF0000');
         }
       );
     }
