@@ -299,6 +299,6 @@ export {
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
 
-export { apiPublishesEsql, type PublishesEsql } from './interfaces/publishes_esql';
+export { apiPublishesEsql, type PublishesEsql, useHasEsqlPanel } from './interfaces/publishes_esql';
 
 export { apiSupportsJsonExport, type SupportsJsonExport } from './interfaces/supports_json_export';

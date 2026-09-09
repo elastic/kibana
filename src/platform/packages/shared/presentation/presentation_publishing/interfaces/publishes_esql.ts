@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEffect, useState } from 'react';
+import { distinctUntilChanged, map } from 'rxjs';
+
 import type { AggregateQuery } from '@kbn/es-query';
 import type { PublishingSubject } from '../publishing_subject';
+import { combineCompatibleChildrenApis } from './containers/presentation_container';
 
 /**
  * For embeddables that can use ES|QL internally without necessarily publishing
@@ -27,3 +31,22 @@ export const apiPublishesEsql = (unknownApi: unknown): unknownApi is PublishesEs
       (unknownApi as PublishesEsql)?.esql$ !== undefined &&
       (unknownApi as PublishesEsql)?.approximationApplied$ !== undefined
   );
+
+export function useHasEsqlPanel(parentApi: unknown): boolean {
+  const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
+  useEffect(() => {
+    const subscription = combineCompatibleChildrenApis<PublishesEsql, AggregateQuery[]>(
+      parentApi,
+      'esql$',
+      apiPublishesEsql,
+      []
+    )
+      .pipe(
+        map((esqlValues) => esqlValues.length > 0),
+        distinctUntilChanged()
+      )
+      .subscribe(setHasEsqlPanel);
+    return () => subscription.unsubscribe();
+  }, [parentApi]);
+  return hasEsqlPanel;
+}

@@ -9,7 +9,6 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -25,15 +24,13 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
-  apiPublishesEsql,
-  combineCompatibleChildrenApis,
-  type PublishesEsql,
+  useHasEsqlPanel,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
@@ -206,21 +203,7 @@ export function InternalDashboardTopNav({
     return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
   }, [publishedEsqlVariables, unpublishedEsqlVariables]);
 
-  const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
-  useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<PublishesEsql, AggregateQuery[][]>(
-      dashboardApi,
-      'esql$',
-      apiPublishesEsql,
-      []
-    )
-      .pipe(
-        map((esqlValues) => esqlValues.some((v) => v.length > 0)),
-        distinctUntilChanged()
-      )
-      .subscribe(setHasEsqlPanel);
-    return () => subscription.unsubscribe();
-  }, [dashboardApi]);
+  const hasEsqlPanel = useHasEsqlPanel(dashboardApi);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

@@ -6,19 +6,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { isOfQueryType, type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  apiPublishesEsql,
-  combineCompatibleChildrenApis,
-  type PublishesEsql,
-} from '@kbn/presentation-publishing';
+import { useHasEsqlPanel } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_TIME_RANGE } from '@kbn/agent-builder-dashboards-common';
@@ -58,7 +53,7 @@ export const useDashboardPreviewUnifiedSearch = ({
   const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
   const [dataViews, setDataViews] = useState<DataView[]>([]);
   const [isApproximate, setIsApproximate] = useState(false);
-  const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
+  const hasEsqlPanel = useHasEsqlPanel(dashboardApi);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -112,26 +107,13 @@ export const useDashboardPreviewUnifiedSearch = ({
   useEffect(() => {
     if (!dashboardApi) {
       setIsApproximate(false);
-      setHasEsqlPanel(false);
       return;
     }
 
     const approximationSubscription = dashboardApi.isApproximate$.subscribe(setIsApproximate);
-    const esqlUsageSubscription = combineCompatibleChildrenApis<PublishesEsql, AggregateQuery[][]>(
-      dashboardApi,
-      'esql$',
-      apiPublishesEsql,
-      []
-    )
-      .pipe(
-        map((esqlValues) => esqlValues.some((v) => v.length > 0)),
-        distinctUntilChanged()
-      )
-      .subscribe(setHasEsqlPanel);
 
     return () => {
       approximationSubscription.unsubscribe();
-      esqlUsageSubscription.unsubscribe();
     };
   }, [dashboardApi]);
 
