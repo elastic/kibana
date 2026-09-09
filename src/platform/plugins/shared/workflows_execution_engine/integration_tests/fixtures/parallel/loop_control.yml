@@ -1,4 +1,4 @@
-name: "Audit 07 - Loop control and switch inside parallel"
+name: "Loop control and switch inside parallel"
 description: "Each branch emits foreach values 0,2 and while values 0,2. Switch chooses left or default. Both branches complete."
 enabled: true
 triggers:

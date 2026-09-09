@@ -1,4 +1,4 @@
-name: "Audit 25 - Unequal branch waits"
+name: "Unequal branch waits"
 description: "The short branch finishes after one second while the long branch stays waiting until three seconds; the join runs only after both."
 enabled: true
 triggers:

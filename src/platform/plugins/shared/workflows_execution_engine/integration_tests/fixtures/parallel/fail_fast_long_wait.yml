@@ -1,4 +1,4 @@
-name: "Audit 24 - Fail-fast parks until started sibling wakes"
+name: "Fail-fast parks until started sibling wakes"
 description: "Intentional HTTP 401 fails first branch. Already-started waiting sibling drains. Third branch must be skipped. Workflow fails and after_join must not run. A queued branch blocked by fail-fast must not cause repeated one-second wake-ups during the minute-long wait."
 enabled: true
 triggers:

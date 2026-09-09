@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_FAN_OUT,
@@ -65,12 +65,15 @@ export class BranchExecutor {
     { runtime: StepExecutionRuntime; done: Promise<void> }
   >();
 
+  private terminationCommit?: Promise<void>;
+
   public async requestTermination(
     runtime: StepExecutionRuntime,
     output: Record<string, unknown>,
     status: ExecutionStatus,
     error?: Error
   ): Promise<void> {
+    if (this.terminationCommit) return this.terminationCommit;
     if (this.params.workflowRuntime.getWorkflowExecution().pendingTermination) return;
     const decision = {
       nodeId: runtime.node.id,
@@ -78,15 +81,24 @@ export class BranchExecutor {
       stepExecutionId: runtime.stepExecutionId,
       status,
       output,
+      ...(runtime.stepExecution?.status === ExecutionStatus.FAILED && error
+        ? { stepError: { type: error.name, message: error.message } }
+        : {}),
       ...(error ? { error: { type: error.name, message: error.message } } : {}),
     };
-    outsideExecutionFence(() => {
-      this.params.workflowExecutionState.updateWorkflowExecution({ pendingTermination: decision });
-      completeTerminationPath(this.params, decision);
-      this.params.executionFailure?.stopForTermination();
-    });
+    this.terminationCommit = this.commitTermination(decision);
+    return this.terminationCommit;
+  }
+
+  private async commitTermination(
+    decision: NonNullable<EsWorkflowExecution['pendingTermination']>
+  ): Promise<void> {
     try {
-      await this.params.workflowExecutionState.flushWorkflowDoc();
+      await this.params.workflowExecutionState.persistTermination(decision);
+      outsideExecutionFence(() => {
+        completeTerminationPath(this.params, decision);
+        this.params.executionFailure?.stopForTermination();
+      });
     } catch (cause) {
       throw (
         this.params.executionFailure?.fail(
