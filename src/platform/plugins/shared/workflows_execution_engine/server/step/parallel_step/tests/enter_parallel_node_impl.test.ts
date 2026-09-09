@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_FAN_OUT,
@@ -15,6 +16,7 @@ import {
 import type { EnterParallelNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
+import type { WorkflowExecutionCursor } from '../../../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { NodeImplementation } from '../../node_implementation';
@@ -23,6 +25,7 @@ import { EnterParallelNodeImpl } from '../enter_parallel_node_impl';
 import type { ParallelStepState } from '../types';
 
 describe('EnterParallelNodeImpl', () => {
+  const cursors = new AsyncLocalStorage<WorkflowExecutionCursor>();
   let node: EnterParallelNode;
   let workflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let stepRuntime: jest.Mocked<StepExecutionRuntime>;
@@ -64,6 +67,8 @@ describe('EnterParallelNodeImpl', () => {
     branchOutcome = () => ExecutionStatus.COMPLETED;
 
     workflowRuntime = {
+      withExecutionCursor: jest.fn((cursor, run) => cursors.run(cursor, run)),
+      getWorkflowExecution: jest.fn(() => ({ status: ExecutionStatus.RUNNING })),
       navigateToNode: jest.fn(),
       getCurrentNodeScope: jest.fn().mockReturnValue([]),
       setScopeStack: jest.fn(),
@@ -133,6 +138,24 @@ describe('EnterParallelNodeImpl', () => {
     // Single-step branch body: the branch start node's only successor is the
     // parallel exit node, so each branch completes after one node runs.
     workflowGraph = {
+      getNode: jest.fn((nodeId: string) =>
+        nodeId === node.id ? node : { id: nodeId, stepId: nodeId, type: 'atomic' }
+      ),
+      getNodeStack: jest.fn(() => [node.id]),
+      get topologicalOrder() {
+        const order = new Set<string>();
+        const pending = node.branches?.map((branch) => branch.startNodeId) ?? ['branchStep'];
+        while (pending.length > 0) {
+          const nodeId = pending.shift();
+          if (nodeId !== undefined && !order.has(nodeId) && nodeId !== node.exitNodeId) {
+            order.add(nodeId);
+            pending.push(
+              ...workflowGraph.getDirectSuccessors(nodeId).map((successor) => successor.id)
+            );
+          }
+        }
+        return [...order, node.exitNodeId];
+      },
       getDirectSuccessors: jest.fn((nodeId: string) =>
         nodeId === 'branchStep' ? [{ id: 'exitParallel_fanOut' }] : []
       ),
@@ -147,8 +170,31 @@ describe('EnterParallelNodeImpl', () => {
       workflowRuntime,
       stepRuntime,
       logger,
-      factory,
-      nodesFactory,
+      {
+        createStepExecutionRuntime: (params) => {
+          const runtime = factory.createStepExecutionRuntime(params);
+          runtime.stepExecutionExists = () => false;
+          return runtime;
+        },
+      } as StepExecutionRuntimeFactory,
+      {
+        create: (runtime: StepExecutionRuntime) => {
+          const implementation = nodesFactory.create(runtime);
+          return {
+            ...implementation,
+            run: async () => {
+              await implementation.run();
+              // Atomic nodes normally set navigation/error through the runtime.
+              const cursor = cursors.getStore();
+              if (runtime.stepExecution?.status === ExecutionStatus.FAILED) {
+                cursor?.captureError(new Error('Branch failed'));
+              } else if (runtime.stepExecution?.status === ExecutionStatus.COMPLETED) {
+                cursor?.navigateToNextNode();
+              }
+            },
+          };
+        },
+      } as NodesFactory,
       workflowGraph
     );
 
@@ -880,9 +926,11 @@ describe('EnterParallelNodeImpl', () => {
 
     // Returns the subset of captured runtimes that went through runBranchNode —
     // identified by ensureContextReady having been called on them. Runtimes
-    // created by finish() or computeResumeAt() never call ensureContextReady.
+    // used by finish() pass true to rehydrate their own terminal output.
     const branchNodeRuntimes = (): CapturedRuntime[] =>
-      createdRuntimes.filter((rt) => rt.contextManager.ensureContextReady.mock.calls.length > 0);
+      createdRuntimes.filter((rt) =>
+        rt.contextManager.ensureContextReady.mock.calls.some((args) => args[0] !== true)
+      );
 
     it('calls releaseReadPins on each branch runtime when branches complete', async () => {
       makeCapturingFactory(() => ExecutionStatus.COMPLETED);

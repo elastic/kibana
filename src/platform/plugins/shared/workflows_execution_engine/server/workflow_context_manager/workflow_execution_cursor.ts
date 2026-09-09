@@ -15,6 +15,7 @@ export interface WorkflowExecutionCursorInit {
   nodeId?: string;
   stackFrames?: StackFrame[];
   workflowExecutionGraph: WorkflowGraph;
+  navigationOrder?: readonly string[];
 }
 
 /** Public surface of {@link WorkflowExecutionCursor} for typing mocks and loop params. */
@@ -42,6 +43,7 @@ export interface WorkflowExecutionCursorApi {
  */
 export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private readonly workflowGraph: WorkflowGraph;
+  private readonly navigationOrder: readonly string[];
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
@@ -50,6 +52,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.workflowGraph = init.workflowExecutionGraph;
+    this.navigationOrder = init.navigationOrder ?? this.workflowGraph.topologicalOrder;
     this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
     this.stackFrames = init.stackFrames ?? [];
   }
@@ -123,8 +126,12 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     return this.workflowGraph.getNode(this.nextNodeId);
   }
 
+  public clearPendingNavigation(): void {
+    this.nextNodeId = undefined;
+  }
+
   public navigateToNode(nodeId: string): void {
-    if (!this.workflowGraph.getNode(nodeId)) {
+    if (!this.navigationOrder.includes(nodeId)) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
     }
 
@@ -157,7 +164,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   private nodeAfter(nodeId: string | undefined): string | undefined {
-    const topologicalOrder = this.workflowGraph.topologicalOrder;
+    const topologicalOrder = this.navigationOrder;
     const index = topologicalOrder.findIndex((id) => id === nodeId);
     if (index >= 0 && index < topologicalOrder.length - 1) {
       return topologicalOrder[index + 1];

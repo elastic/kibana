@@ -25,9 +25,11 @@ import type {
 import { isTemplateExpression, parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
+import { WorkflowExecutionCursor } from '../../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { catchError } from '../../workflow_execution_loop/catch_error';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 import { isCancellableNode } from '../node_implementation';
 import type { NodesFactory } from '../nodes_factory';
@@ -62,13 +64,6 @@ type ParallelMode = 'fail-fast' | 'settled';
 const DEFAULT_PARALLEL_MODE: ParallelMode = 'fail-fast';
 
 export class EnterParallelNodeImpl implements NodeImplementation, CancellableNode {
-  /**
-   * True while a branch's scope is installed on the shared workflow runtime.
-   * Used by {@link withBranchScope} to detect re-entrant (overlapping) scope
-   * installs, which indicate a branch step read scope after an await.
-   */
-  private branchScopeActive = false;
-
   constructor(
     private node: EnterParallelNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
@@ -121,7 +116,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
   private async initParallel(): Promise<void> {
     this.stepExecutionRuntime.startStep();
 
-    const branches = this.isStatic ? this.initStaticBranches() : this.initDynamicBranches();
+    const branches = this.isStatic ? this.initStaticBranches() : await this.initDynamicBranches();
     if (branches === undefined) {
       // Empty dynamic fan-out: already finished with an empty aggregate.
       return;
@@ -160,7 +155,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    * Dynamic fan-out: one branch per resolved `foreach` item. Returns `undefined`
    * when the list is empty (the step is finished with an empty aggregate here).
    */
-  private initDynamicBranches(): ParallelBranchState[] | undefined {
+  private async initDynamicBranches(): Promise<ParallelBranchState[] | undefined> {
     const foreachConfig = this.node.configuration.foreach;
     // Persist the expression as input so the context builder can re-evaluate the
     // per-branch item without storing the whole list in state.
@@ -182,7 +177,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
         `Parallel step "${this.node.stepId}" has no items to fan out over. Skipping execution.`,
         { workflow: { step_id: this.node.stepId } }
       );
-      this.finish([]);
+      await this.finish([]);
       return undefined;
     }
 
@@ -211,7 +206,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
         `Parallel step "${this.node.stepId}" exceeded its overall timeout of ${this.node.configuration.timeout}.`,
         { workflow: { step_id: this.node.stepId } }
       );
-      this.finish(state.branches);
+      await this.finish(state.branches);
       return;
     }
 
@@ -264,11 +259,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     const overallDeadline =
       overallTimeoutMs !== undefined ? state.startedAt + overallTimeoutMs : undefined;
 
-    // Capture the base scope ONCE, synchronously, before any branch runs. Each
-    // branch's stack frames are derived from this stable base so concurrent
-    // branches never read a base that a sibling's `withBranchScope` mutation has
-    // temporarily changed. This keeps each branch's persisted scope (and thus
-    // its unique step-execution id) correct and distinct per fan-out index.
+    // Each cursor starts with the enclosing scope and keeps its own branch identity.
     const baseScope = this.wfExecutionRuntimeManager.getCurrentNodeScope();
 
     const advanced = await Promise.all(
@@ -278,7 +269,8 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
             ? branch.startedAt + branchTimeoutMs
             : undefined;
         const deadline = this.minDefined(overallDeadline, branchDeadline);
-        const branchStackFrames = this.buildBranchStackFramesFrom(baseScope, branch.index);
+        const branchStackFrames =
+          branch.stackFrames ?? this.buildBranchStackFramesFrom(baseScope, branch.index);
         const result = await this.advanceBranch(
           branch.index,
           branchStackFrames,
@@ -291,38 +283,22 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     // Apply the recorded statuses synchronously (no await between read and write).
     const advancedByIndex = new Map(advanced.map(({ index, result }) => [index, result]));
-    let branchFailedThisTick = false;
     for (const branch of state.branches) {
       const result = advancedByIndex.get(branch.index);
       if (result !== undefined) {
         branch.status = result.status;
         branch.currentNodeId = result.currentNodeId;
+        branch.stackFrames = result.stackFrames;
         // A branch that comes back `running` parked in a durable wait/poll; mark
         // it so `count-waiting: false` can free its slot for a queued branch.
         branch.waiting = result.status === 'running';
         if (result.status === 'timed_out') {
           branch.timedOut = true;
         }
-        if (result.status === 'failed') {
-          branchFailedThisTick = true;
-        }
         if (TERMINAL_BRANCH_STATUSES.has(result.status) && branch.finishedAt === undefined) {
           branch.finishedAt = Date.now();
         }
       }
-    }
-
-    // Contain branch failures. A branch body step that fails calls `failStep`,
-    // which sets the *workflow-level* error as a side effect. Left in place, the
-    // execution loop's `catchError` would escalate that to a whole-workflow
-    // failure the moment this parallel step parks — aborting after the FIRST
-    // failed branch and so breaking `settled` (and even fail-fast's drain) and
-    // leaving the aggregate output unwritten. The parallel step owns branch
-    // failure accounting itself (tracked in `state.branches` and surfaced via
-    // the aggregate `results[]` / `failed` / `status`), so we clear the leaked
-    // workflow error here. Final disposition is decided in `finish()`.
-    if (branchFailedThisTick) {
-      this.wfExecutionRuntimeManager.setWorkflowError(undefined);
     }
 
     // Catch poll/yield branches that exceeded their per-branch budget while
@@ -369,91 +345,78 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     const allTerminal = state.branches.every((b) => TERMINAL_BRANCH_STATUSES.has(b.status));
     if (allTerminal) {
-      this.finish(state.branches);
+      await this.finish(state.branches);
       return;
     }
 
-    // Some branch is still in flight (running its single step, possibly parked
-    // in a durable wait), or not-yet-started branches remain outside the current
-    // concurrency window. Re-enter a wait and let the resume task tick us again.
-    //
-    // Branch body steps run on the SHARED workflow runtime and advance its
-    // cursor (`nextNodeId`) as they complete, so after ticking branches the
-    // cursor points at a branch-body node. Reclaim it for the parallel enter
-    // node before parking, otherwise the resume would re-enter a leaked
-    // branch-body node instead of re-ticking the parallel — leaving the
-    // remaining branches unrun and the step silently "completing" early.
+    // Persist the branch cursors and resume through the enclosing parallel node.
     this.wfExecutionRuntimeManager.navigateToNode(this.node.id);
     const resumeAt = this.computeResumeAt(state);
     this.stepExecutionRuntime.enterWaitUntil(resumeAt, undefined, true);
   }
 
-  /**
-   * Advances a branch through its body subgraph for one tick. Starting from the
-   * branch's cursor (or the body start node on first run), it runs nodes and
-   * follows linear successors until the branch:
-   * - reaches the parallel exit node => the branch is `completed`, or
-   * - hits a node that fails => the branch is `failed`, or
-   * - parks in a durable wait (poll/wait step) => stays `running`, cursor kept
-   *   on that node so the next tick re-runs it.
-   *
-   * v1 supports a straight-line branch body (atomic/wait steps). Nested
-   * flow-control inside a branch (if/switch/foreach/while) is not yet supported
-   * and is rejected at graph-build time.
-   */
+  private getBranchNavigationOrder(index: number): string[] {
+    const reachable = new Set<string>();
+    const pending = [this.getBranchStartNodeId(index)];
+    while (pending.length > 0) {
+      const nodeId = pending.pop();
+      if (nodeId !== undefined && !reachable.has(nodeId)) {
+        reachable.add(nodeId);
+        if (nodeId !== this.node.exitNodeId) {
+          pending.push(...this.workflowGraph.getDirectSuccessors(nodeId).map((node) => node.id));
+        }
+      }
+    }
+    return this.workflowGraph.topologicalOrder.filter((nodeId) => reachable.has(nodeId));
+  }
+
   private async advanceBranch(
     index: number,
     branchStackFrames: StackFrame[],
-    cursor: string | undefined,
+    nodeId: string | undefined,
     deadline: number | undefined
-  ): Promise<{ status: ParallelBranchState['status']; currentNodeId: string | undefined }> {
-    let currentNodeId = cursor ?? this.getBranchStartNodeId(index);
-
-    // Run nodes in this branch until it waits, fails, times out, or reaches the
-    // exit. A single tick may complete several run-to-completion steps in a row.
-    // The visited set bounds the walk defensively against an unexpected cycle.
-    const visited = new Set<string>();
-    while (!visited.has(currentNodeId)) {
-      visited.add(currentNodeId);
-
-      // If the deadline has already passed before starting the next node, stop.
-      // This happens when the branch parked in a durable wait/poll on a prior
-      // tick and its `branch-timeout` elapsed before it was re-ticked. The parked
-      // step execution is still WAITING here, so transition it to TIMED_OUT —
-      // otherwise the per-branch record leaks in WAITING after the step finishes
-      // (the `runBranchNode` deadline path below marks its own record, but this
-      // early return never enters `runBranchNode`).
-      if (deadline !== undefined && Date.now() >= deadline) {
-        await this.markBranchNodeTimedOutAt(index, branchStackFrames, currentNodeId);
-        return { status: 'timed_out', currentNodeId };
+  ): Promise<Pick<ParallelBranchState, 'status' | 'currentNodeId' | 'stackFrames'>> {
+    const cursor = new WorkflowExecutionCursor({
+      workflowExecutionGraph: this.workflowGraph,
+      navigationOrder: this.getBranchNavigationOrder(index),
+      nodeId: nodeId ?? this.getBranchStartNodeId(index),
+      stackFrames: branchStackFrames,
+    });
+    return this.wfExecutionRuntimeManager.withExecutionCursor(cursor, async () => {
+      // Bound work per durable tick without treating legitimate loop revisits as completion.
+      for (let transitions = 0; transitions < 1000; transitions++) {
+        const currentNode = cursor.currentNode;
+        if (!currentNode || currentNode.id === this.node.exitNodeId) {
+          throw new Error('Parallel branch reached its join without recording a result.');
+        }
+        const stackFrames = cursor.currentStackFrames;
+        const currentNodeId = currentNode.id;
+        if (deadline !== undefined && Date.now() >= deadline) {
+          await this.markBranchNodeTimedOutAt(index, stackFrames, currentNodeId);
+          return { status: 'timed_out', currentNodeId, stackFrames };
+        }
+        cursor.clearPendingNavigation();
+        const status = await this.runBranchNode(stackFrames, currentNodeId, deadline, cursor);
+        if (status === 'failed' || status === 'timed_out') {
+          return { status, currentNodeId, stackFrames };
+        }
+        if (status === 'waiting') {
+          return { status: 'running', currentNodeId, stackFrames: cursor.currentStackFrames };
+        }
+        if (cursor.nextNode?.id === this.node.exitNodeId) {
+          return { status: 'completed', currentNodeId, stackFrames };
+        }
+        cursor.commitPendingNavigation();
+        if (!cursor.currentNode) {
+          throw new Error(`Parallel branch ${index} navigated outside its body.`);
+        }
       }
-
-      const runStatus = await this.runBranchNode(branchStackFrames, currentNodeId, deadline);
-
-      if (runStatus === 'timed_out') {
-        return { status: 'timed_out', currentNodeId };
-      }
-      if (runStatus === 'failed') {
-        return { status: 'failed', currentNodeId };
-      }
-      if (runStatus === 'waiting') {
-        // Durable wait: keep the cursor on this node and re-tick later. Allow
-        // the same node to run again on the next tick by not treating it as
-        // visited across ticks (the set is per-tick).
-        return { status: 'running', currentNodeId };
-      }
-
-      // Completed: move to the next node in the body. Reaching the parallel
-      // exit node (the body's only outgoing edge) means the branch is done.
-      const nextNodeId = this.getBranchSuccessor(currentNodeId);
-      if (nextNodeId === undefined || nextNodeId === this.node.exitNodeId) {
-        return { status: 'completed', currentNodeId };
-      }
-      currentNodeId = nextNodeId;
-    }
-
-    // Reached only if a cycle is detected; treat as completed to avoid spinning.
-    return { status: 'completed', currentNodeId };
+      return {
+        status: 'running',
+        currentNodeId: cursor.currentNode?.id,
+        stackFrames: cursor.currentStackFrames,
+      };
+    });
   }
 
   /**
@@ -479,27 +442,11 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     return Math.min(a, b);
   }
 
-  /** Resolves the single in-body successor of a branch node, or undefined. */
-  private getBranchSuccessor(nodeId: string): string | undefined {
-    const successors = this.workflowGraph.getDirectSuccessors(nodeId);
-    return successors[0]?.id;
-  }
-
-  /**
-   * Runs one branch-body node in the branch's own scope, returning a coarse
-   * status: `completed`, `failed`, `waiting` (still in flight / parked in a
-   * wait), or `timed_out` (the deadline elapsed while the node was running, so
-   * its in-flight work was aborted).
-   *
-   * Each branch runs against its own `StepExecutionRuntime` whose context
-   * manager resolves per-branch scope (e.g. {{ foreach.item }}) from its own
-   * stack frames — not the shared mutable workflow scope — so sibling branches
-   * can run concurrently without clobbering each other's context.
-   */
   private async runBranchNode(
     branchStackFrames: StackFrame[],
     nodeId: string,
-    deadline: number | undefined
+    deadline: number | undefined,
+    cursor: WorkflowExecutionCursor
   ): Promise<'completed' | 'failed' | 'waiting' | 'timed_out'> {
     const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId,
@@ -510,18 +457,23 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     const timedOut = await this.runWithDeadline(
       async () => {
-        // Pre-warm (rehydrate evicted outputs) — scope-independent, safe to run
-        // concurrently with sibling branches.
-        await branchRuntime.contextManager.ensureContextReady();
-        // Start the node with the branch's scope installed. The step's
-        // synchronous template rendering (getInput) reads the scope before the
-        // first await, so the scope only needs to be correct for this synchronous
-        // prefix; we restore it immediately so concurrent siblings are unaffected.
-        // The returned promise's awaited I/O does not read the global scope.
-        const runPromise = this.withBranchScope(branchStackFrames, () =>
-          Promise.resolve(branchImpl.run())
+        try {
+          await branchRuntime.contextManager.ensureContextReady();
+          await branchImpl.run();
+        } catch (error) {
+          cursor.captureError(error);
+        }
+        await catchError(
+          {
+            workflowExecutionCursor: cursor,
+            workflowRuntime: this.wfExecutionRuntimeManager,
+            workflowLogger: this.workflowLogger,
+            stepExecutionRuntimeFactory: this.stepExecutionRuntimeFactory,
+            nodesFactory: this.nodesFactory,
+          },
+          branchRuntime,
+          this.node.id
         );
-        await runPromise;
       },
       deadline,
       branchRuntime.abortController
@@ -546,14 +498,22 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       return 'timed_out';
     }
 
-    const status = branchRuntime.stepExecution?.status;
-    if (status === ExecutionStatus.COMPLETED) {
-      return 'completed';
-    }
-    if (status === ExecutionStatus.FAILED) {
+    if (cursor.error) {
       return 'failed';
     }
-    // WAITING / RUNNING / undefined: still in flight, retry on next tick.
+    const execution = branchRuntime.stepExecution;
+    if (
+      (execution?.status === ExecutionStatus.WAITING && execution.state?.resumeAt) ||
+      execution?.status === ExecutionStatus.WAITING_FOR_CHILD ||
+      execution?.status === ExecutionStatus.WAITING_FOR_INPUT
+    ) {
+      return 'waiting';
+    }
+    // Navigation written during this run also advances resumed control nodes whose
+    // shared step record stays WAITING until their matching exit node completes.
+    if (cursor.nextNode) {
+      return 'completed';
+    }
     return 'waiting';
   }
 
@@ -601,40 +561,6 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
   }
 
   /**
-   * Installs `branchStackFrames` as the global workflow scope, runs `fn`, then
-   * restores the previous scope. `fn` MUST complete all scope-dependent reads
-   * synchronously (e.g. template rendering in a step's `getInput()`), because
-   * the scope is restored as soon as `fn` returns — before any awaited I/O.
-   *
-   * The shared workflow scope is a single mutable slot, so two branches must
-   * never have their scope installed at the same time. `Promise.all` advances
-   * branches concurrently, but each `withBranchScope` window is purely
-   * synchronous, so the windows cannot overlap — unless a branch step reads
-   * scope *after* an `await` (then a sibling's window may be active). The
-   * re-entrancy guard turns that latent corruption into a loud, deterministic
-   * failure for the next step author instead of a silently wrong `foreach.item`.
-   */
-  private withBranchScope<T>(branchStackFrames: StackFrame[], fn: () => T): T {
-    if (this.branchScopeActive) {
-      throw new Error(
-        `Parallel step "${this.node.stepId}": re-entrant branch scope detected. A branch ` +
-          `step must read all scope-dependent values (e.g. {{ foreach.item }}) synchronously, ` +
-          `before its first await. Reading workflow scope after an await is unsafe under ` +
-          `concurrent fan-out and can leak a sibling branch's context.`
-      );
-    }
-    this.branchScopeActive = true;
-    const previousScope = this.wfExecutionRuntimeManager.getCurrentNodeScope();
-    this.wfExecutionRuntimeManager.setScopeStack(branchStackFrames);
-    try {
-      return fn();
-    } finally {
-      this.wfExecutionRuntimeManager.setScopeStack(previousScope);
-      this.branchScopeActive = false;
-    }
-  }
-
-  /**
    * Marks every non-terminal branch TIMED_OUT — both in the persisted parallel
    * state and on each branch's own step-execution record — so no branch leaks in
    * WAITING/RUNNING when the step is torn down by an overall timeout (whether via
@@ -670,7 +596,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     const nodeId = branch.currentNodeId ?? this.getBranchStartNodeId(branch.index);
     await this.markBranchNodeTimedOutAt(
       branch.index,
-      this.buildBranchStackFrames(branch.index),
+      branch.stackFrames ?? this.buildBranchStackFrames(branch.index),
       nodeId
     );
   }
@@ -743,12 +669,6 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     );
   }
 
-  /**
-   * Builds a branch's stack frames from an explicit base scope. Used during
-   * concurrent advancement so every branch derives from the SAME stable base
-   * captured before any branch ran, never a base mutated by a sibling branch's
-   * temporary scope install.
-   */
   private buildBranchStackFramesFrom(base: StackFrame[], index: number): StackFrame[] {
     return WorkflowScopeStack.fromStackFrames(base).enterScope({
       nodeId: this.node.id,
@@ -766,7 +686,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
     );
     for (const branch of inFlightBranches) {
-      const branchStackFrames = this.buildBranchStackFrames(branch.index);
+      const branchStackFrames = branch.stackFrames ?? this.buildBranchStackFrames(branch.index);
       const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
         nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
         stackFrames: branchStackFrames,
@@ -786,53 +706,57 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     return new Date(now + RETICK_FLOOR_MS);
   }
 
-  private finish(branches: ParallelBranchState[]): void {
-    const results: ParallelBranchResult[] = branches.map((branch) => {
-      const timing = {
-        ...(branch.startedAt !== undefined && { startedAt: branch.startedAt }),
-        ...(branch.finishedAt !== undefined && { finishedAt: branch.finishedAt }),
-        ...(branch.startedAt !== undefined &&
-          branch.finishedAt !== undefined && {
-            durationMs: branch.finishedAt - branch.startedAt,
-          }),
-      };
-      // `key` is the item snapshotted at init (per #17835), so correlation is
-      // stable regardless of whether `foreach` would re-resolve identically.
-      const correlation = {
-        index: branch.index,
-        ...(branch.key !== undefined && { key: branch.key }),
-      };
+  private async finish(branches: ParallelBranchState[]): Promise<void> {
+    const results: ParallelBranchResult[] = await Promise.all(
+      branches.map(async (branch): Promise<ParallelBranchResult> => {
+        const timing = {
+          ...(branch.startedAt !== undefined && { startedAt: branch.startedAt }),
+          ...(branch.finishedAt !== undefined && { finishedAt: branch.finishedAt }),
+          ...(branch.startedAt !== undefined &&
+            branch.finishedAt !== undefined && {
+              durationMs: branch.finishedAt - branch.startedAt,
+            }),
+        };
+        // `key` is the item snapshotted at init (per #17835), so correlation is
+        // stable regardless of whether `foreach` would re-resolve identically.
+        const correlation = {
+          index: branch.index,
+          ...(branch.key !== undefined && { key: branch.key }),
+        };
 
-      // Branches that never started (fail-fast short-circuit) carry no result.
-      if (branch.status === 'skipped') {
-        return { ...correlation, ...timing, status: 'skipped' };
-      }
-      if (branch.status === 'timed_out') {
+        // Branches that never started (fail-fast short-circuit) carry no result.
+        if (branch.status === 'skipped') {
+          return { ...correlation, ...timing, status: 'skipped' };
+        }
+        if (branch.status === 'timed_out') {
+          return {
+            ...correlation,
+            ...timing,
+            status: 'timed_out',
+            error: {
+              type: 'TimeoutError',
+              message: `Parallel branch ${branch.index} was terminated by a timeout.`,
+            },
+          };
+        }
+        const branchStackFrames = branch.stackFrames ?? this.buildBranchStackFrames(branch.index);
+        const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          // The terminal output/error lives on the last node the branch ran.
+          nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
+          stackFrames: branchStackFrames,
+        });
+        await branchRuntime.contextManager.ensureContextReady(true);
+        const branchResult = branchRuntime.getCurrentStepResult();
+        branchRuntime.contextManager.releaseReadPins();
         return {
           ...correlation,
           ...timing,
-          status: 'timed_out',
-          error: {
-            type: 'TimeoutError',
-            message: `Parallel branch ${branch.index} was terminated by a timeout.`,
-          },
+          status: branch.status === 'failed' ? 'failed' : 'completed',
+          output: branchResult?.output,
+          error: branchResult?.error,
         };
-      }
-      const branchStackFrames = this.buildBranchStackFrames(branch.index);
-      const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-        // The terminal output/error lives on the last node the branch ran.
-        nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
-        stackFrames: branchStackFrames,
-      });
-      const branchResult = branchRuntime.getCurrentStepResult();
-      return {
-        ...correlation,
-        ...timing,
-        status: branch.status === 'failed' ? 'failed' : 'completed',
-        output: branchResult?.output,
-        error: branchResult?.error,
-      };
-    });
+      })
+    );
 
     const succeeded = results.filter((r) => r.status === 'completed').length;
     // Timed-out branches count as failures for the aggregate status.

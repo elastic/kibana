@@ -1508,6 +1508,36 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
+    it('does not overwrite a new branch output with an older in-flight fetch', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      state.updateWorkflowExecution({ stepExecutionIds: ['step-1'] });
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([
+        {
+          id: 'step-1',
+          stepId: 'nested_parallel',
+          stepType: 'parallel',
+          status: ExecutionStatus.WAITING,
+        } as EsWorkflowStepExecution,
+      ]);
+      await service.load();
+      expect(service.hasEvictedOutputs()).toBe(true);
+      let releaseFetch = () => {};
+      stepExecutionRepository.getStepExecutionsByIds.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            releaseFetch = () =>
+              resolve([{ id: 'step-1', output: null } as EsWorkflowStepExecution]);
+          })
+      );
+      const rehydrating = service.rehydrateOutputs(['step-1']);
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(2);
+      const newOutput = { succeeded: 2, results: ['a', 'b'] };
+      service.setStepOutput('step-1', newOutput);
+      releaseFetch();
+      await rehydrating;
+      expect(service.getStepOutput('step-1')).toEqual(newOutput);
+    });
+
     it('preserves fresh output when a deferred step completes on resume before flush', async () => {
       const { state, service, stepExecutionRepository } = buildHarness();
       state.updateWorkflowExecution({ stepExecutionIds: ['exec-child'] });

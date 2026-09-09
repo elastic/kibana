@@ -56,8 +56,16 @@ import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_s
  *   used to update the step's status and identify the failure point
  */
 export async function catchError(
-  params: WorkflowExecutionLoopParams,
-  failedStepExecutionRuntime: StepExecutionRuntime
+  params: Pick<
+    WorkflowExecutionLoopParams,
+    | 'workflowExecutionCursor'
+    | 'workflowLogger'
+    | 'stepExecutionRuntimeFactory'
+    | 'nodesFactory'
+    | 'workflowRuntime'
+  >,
+  failedStepExecutionRuntime: StepExecutionRuntime,
+  boundaryNodeId?: string
 ) {
   const { workflowExecutionCursor, workflowLogger, stepExecutionRuntimeFactory, nodesFactory } =
     params;
@@ -109,6 +117,9 @@ export async function catchError(
     );
     while (workflowExecutionCursor.error && !workflowScopeStack.isEmpty()) {
       const scopeEntry = workflowScopeStack.getCurrentScope();
+      if (scopeEntry.nodeId === boundaryNodeId) {
+        break;
+      }
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
       const currentNode = workflowExecutionCursor.currentNode;
 

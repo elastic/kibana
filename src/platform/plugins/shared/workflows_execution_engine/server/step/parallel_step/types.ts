@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StackFrame } from '@kbn/workflows';
+
 /**
  * The terminal states a branch can settle in. `skipped` is reserved for branches
  * that never started because a prior branch failed under fail-fast mode.
@@ -44,6 +46,7 @@ export interface ParallelBranchState extends Record<string, unknown> {
    * start node on first run, then to each successor as nodes complete.
    */
   currentNodeId?: string;
+  stackFrames?: StackFrame[];
   /** Epoch ms when the branch first started; used for per-branch timeout. */
   startedAt?: number;
   /** Epoch ms when the branch reached a terminal state. */

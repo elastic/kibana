@@ -8,6 +8,7 @@
  */
 
 import agent from 'elastic-apm-node';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, SerializedError, StackFrame } from '@kbn/workflows';
@@ -72,7 +73,9 @@ export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
-  private readonly workflowExecutionCursor: WorkflowExecutionCursor;
+  private readonly rootExecutionCursor: WorkflowExecutionCursor;
+  private readonly branchExecutionCursor = new AsyncLocalStorage<WorkflowExecutionCursor>();
+
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
@@ -84,7 +87,7 @@ export class WorkflowExecutionRuntimeManager {
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
-    this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
+    this.rootExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
@@ -93,6 +96,14 @@ export class WorkflowExecutionRuntimeManager {
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
+  }
+
+  private get workflowExecutionCursor(): WorkflowExecutionCursor {
+    return this.branchExecutionCursor.getStore() ?? this.rootExecutionCursor;
+  }
+
+  public withExecutionCursor<T>(cursor: WorkflowExecutionCursor, run: () => T): T {
+    return this.branchExecutionCursor.run(cursor, run);
   }
 
   public get workflowExecution() {
