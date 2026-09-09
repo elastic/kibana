@@ -3003,6 +3003,11 @@ export const labels = {
     optionalLabel: i18n.translate('xpack.agentBuilder.aiIndices.optionalLabel', {
       defaultMessage: 'Optional',
     }),
+    unavailableIndicesHelpText: (ids: string) =>
+      i18n.translate('xpack.agentBuilder.aiIndices.unavailableIndicesHelpText', {
+        defaultMessage: 'Not available to you in this space: {ids}',
+        values: { ids },
+      }),
     loadErrorMessage: i18n.translate('xpack.agentBuilder.aiIndices.loadErrorMessage', {
       defaultMessage: 'Failed to fetch AI indices',
     }),
