@@ -19,9 +19,55 @@ import {
   type FlakyTestReport,
 } from '../reporting/flaky_tests';
 
-const TITLE_COL_WIDTH = 40;
-const FILE_COL_WIDTH = 40;
-const OWNERS_COL_WIDTH = 34;
+/**
+ * Width of the buildkite-agent PTY, which is also the screen width Buildkite's log renderer
+ * emulates: wider lines wrap in the log view. Used when stdout is not a terminal.
+ */
+export const DEFAULT_TERMINAL_WIDTH = 160;
+// Past this the flexible columns only get emptier; keep the table readable on wide terminals
+const MAX_LAYOUT_WIDTH = 220;
+// Border and padding the summary panel adds around the table
+const PANEL_OVERHEAD = 4;
+// Columns whose content barely varies get fixed widths so the remaining ones can be sized exactly
+const FIXED_COL_WIDTHS = {
+  rank: 5,
+  framework: 12, // `playwright`
+  failedBuilds: 15, // the header is the widest cell
+  flakiest: 15, // e.g. `8.19 (100.0%)`
+  latest: 13, // e.g. `interrupted`
+};
+const COLUMN_COUNT = 8;
+const MIN_FLEX_COL_WIDTH = 20;
+
+/** Widths of the columns that absorb whatever the terminal has left after the fixed ones. */
+export interface FlexColumnWidths {
+  owners: number;
+  title: number;
+  file: number;
+}
+
+/** `process.stdout.columns` when stdout is a terminal, otherwise the Buildkite width. */
+export const terminalWidth = (columns: number | undefined = process.stdout.columns): number =>
+  Number.isInteger(columns) && columns !== undefined && columns > 0
+    ? columns
+    : DEFAULT_TERMINAL_WIDTH;
+
+/**
+ * Splits the width left over by the fixed columns, borders and panel between owners, title and
+ * file so the whole panel fits in `width`. Columns never go below `MIN_FLEX_COL_WIDTH`, which
+ * on very narrow terminals means the table wraps rather than becoming unreadable.
+ */
+export const flexColumnWidths = (width: number): FlexColumnWidths => {
+  const fixed =
+    Object.values(FIXED_COL_WIDTHS).reduce((sum, colWidth) => sum + colWidth, 0) +
+    (COLUMN_COUNT + 1) + // vertical borders
+    PANEL_OVERHEAD;
+  const flexible = Math.max(Math.min(width, MAX_LAYOUT_WIDTH) - fixed, 3 * MIN_FLEX_COL_WIDTH);
+  const owners = Math.max(MIN_FLEX_COL_WIDTH, Math.floor(flexible * 0.3));
+  const title = Math.max(MIN_FLEX_COL_WIDTH, Math.floor((flexible - owners) / 2));
+  const file = Math.max(MIN_FLEX_COL_WIDTH, flexible - owners - title);
+  return { owners, title, file };
+};
 
 // cell padding takes 2 columns
 const contentWidth = (colWidth: number): number => colWidth - 2;
@@ -139,11 +185,21 @@ export const buildTopFailingTable = (
   top: readonly ClassifiedEntry[],
   all: readonly ClassifiedEntry[],
   minBuilds: number,
-  now: Date
+  now: Date,
+  widths: FlexColumnWidths = flexColumnWidths(terminalWidth())
 ): CliTable3.Table => {
   const table = new CliTable3({
     head: ['#', 'Framework', 'Owners', 'Failed builds', 'Flakiest', 'Latest', 'Test', 'File'],
-    colWidths: [null, null, OWNERS_COL_WIDTH, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
+    colWidths: [
+      FIXED_COL_WIDTHS.rank,
+      FIXED_COL_WIDTHS.framework,
+      widths.owners,
+      FIXED_COL_WIDTHS.failedBuilds,
+      FIXED_COL_WIDTHS.flakiest,
+      FIXED_COL_WIDTHS.latest,
+      widths.title,
+      widths.file,
+    ],
     // the default red header would clash with red meaning "consistently failing"
     style: { head: ['bold'] },
     wordWrap: true,
@@ -156,7 +212,7 @@ export const buildTopFailingTable = (
     const fileCell: CliTable3.Cell = {
       rowSpan: entries.length,
       content: [
-        wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
+        wrapOn(filePath, '/', contentWidth(widths.file)),
         notShown > 0 ? `(+${notShown} more in this file)` : '',
       ]
         .filter(Boolean)
@@ -169,9 +225,8 @@ export const buildTopFailingTable = (
       table.push([
         colorize(classification, rank),
         entry.framework,
-        entry.owners
-          .map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH)))
-          .join('\n') || '-',
+        entry.owners.map((owner) => wrapOn(owner, '-', contentWidth(widths.owners))).join('\n') ||
+          '-',
         `${entry.failedBuilds}/${entry.builds}`,
         formatFlakiestBranch(flakiest),
         formatLatestRun(entry, flakiest, now),
@@ -185,8 +240,16 @@ export const buildTopFailingTable = (
   return table;
 };
 
-/** Writes a panel with the report window, scope, totals and the top failing tests to the log. */
-export const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog): void => {
+/**
+ * Writes a panel with the report window, scope, totals and the top failing tests to the log,
+ * sized to fit `width` columns.
+ */
+export const displaySummary = (
+  report: FlakyTestReport,
+  limit: number,
+  log: ToolingLog,
+  width: number = terminalWidth()
+): void => {
   const { window, scope, thresholds, summary } = report;
   const flakyByFramework = Object.entries(summary.flakyByFramework)
     .map(([framework, count]) => `${framework}: ${count}`)
@@ -206,9 +269,10 @@ export const displaySummary = (report: FlakyTestReport, limit: number, log: Tool
     [
       dedent(`\
         Scope
-          Pipelines  : ${scope.pipelines.join(', ') || 'any'}
-          Branches   : ${scope.branches.join(', ') || 'any'}
-          Frameworks : ${scope.frameworks.join(', ')}
+          Pipelines       : ${scope.pipelines.join(', ') || 'any'}
+          Branches        : ${scope.branches.join(', ') || 'any'}
+          Frameworks      : ${scope.frameworks.join(', ')}
+          Classifications : ${scope.classifications.join(', ')}
         `),
     ],
     [
@@ -241,7 +305,8 @@ export const displaySummary = (report: FlakyTestReport, limit: number, log: Tool
         top,
         all,
         report.thresholds.minBuilds,
-        report.generatedAt
+        report.generatedAt,
+        flexColumnWidths(width)
       ).toString()}`,
     ]);
   }
