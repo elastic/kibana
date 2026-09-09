@@ -14,7 +14,10 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { fromStoredTab } from '../../../common/embeddable/transform_utils';
+import { discoverSessionApiDataSchema } from '../schema';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiData,
@@ -630,6 +633,85 @@ describe('discover session API transforms', () => {
   });
 
   describe('round-trip', () => {
+    it('round-trips legacy pinned filters as app filters', () => {
+      const pinnedFilter = {
+        meta: {
+          index: 'logs-data-view',
+          type: FILTERS.PHRASE,
+          key: 'service.name',
+          disabled: true,
+          negate: true,
+          alias: 'Saved condition',
+        },
+        query: { match_phrase: { 'service.name': 'checkout' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const appFilter = {
+        meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+        query: { exists: { field: 'bytes' } },
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+      const searchSourceJSON = JSON.stringify({
+        index: 'logs-data-view',
+        query: { language: 'kuery', query: '' },
+        filter: [pinnedFilter, appFilter],
+      });
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const storedTab = {
+        ...classicTab,
+        attributes: { ...classicTab.attributes, kibanaSavedObjectMeta: { searchSourceJSON } },
+      };
+
+      // The session API keeps both conditions, without exposing the pin marker.
+      const { sessionState, warnings } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [storedTab],
+      });
+      const expectedApiFilters = [
+        {
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'is', value: 'checkout', negate: true },
+          data_view_id: 'logs-data-view',
+          disabled: true,
+          negate: true,
+          label: 'Saved condition',
+        },
+        {
+          type: 'condition',
+          condition: { field: 'bytes', operator: 'exists' },
+          data_view_id: 'foreign-data-view',
+        },
+      ];
+
+      expect(warnings).toEqual([]);
+      expect(sessionState.tabs[0]).toMatchObject({ filters: expectedApiFilters });
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toEqual(sessionState);
+
+      const { attributes, references } = transformDiscoverSessionIn(sessionState);
+      const restoredSearchSource = injectReferences(
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+
+      expect(restoredSearchSource.filter).toMatchObject([
+        { meta: pinnedFilter.meta, query: pinnedFilter.query },
+        { meta: appFilter.meta, query: appFilter.query },
+      ]);
+      expect(restoredSearchSource.filter?.map((filter) => filter.$state)).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(transformDiscoverSessionOut(attributes, references).sessionState).toEqual(
+        sessionState
+      );
+
+      // Reading the session changes neither the source document nor the shared panel conversion.
+      expect(storedTab.attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(searchSourceJSON);
+      expect(fromStoredTab(storedTab.attributes)).toMatchObject({
+        filters: [expectedApiFilters[1]],
+      });
+    });
+
     it('round-trips fixture API data through persistence', () => {
       const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
       const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
