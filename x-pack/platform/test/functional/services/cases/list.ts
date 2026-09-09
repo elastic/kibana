@@ -172,6 +172,8 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseById(caseId: string) {
+      await this.ensureTableView();
+
       const targetCase = await find.allByCssSelector(
         `[data-test-subj*="cases-table-row-${caseId}"`,
         100
@@ -185,6 +187,8 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseByIndex(index: number) {
+      await this.ensureTableView();
+
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
       assertCaseExists(index, rows.length);

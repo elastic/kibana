@@ -866,6 +866,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await browser.clearLocalStorage();
+        await cases.navigation.navigateToApp();
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
@@ -882,6 +884,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      before(async () => {
+        await browser.clearLocalStorage();
+        await cases.navigation.navigateToApp();
+      });
+
       afterEach(async () => {
         await toasts.dismissAllWithChecks();
       });
