@@ -17,7 +17,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 
-const TEMPLATE_VERSION = 28;
+const TEMPLATE_VERSION = 29;
 
 const TEMPLATE_META = { managed_by: 'threat_intel', version: TEMPLATE_VERSION };
 
@@ -279,9 +279,18 @@ const threatReportsTemplate = {
             content_scrubbed_at: { type: 'date' as const },
           },
         },
-        // Environment hit rollup keyed by report (when attribution is written).
+        // Environment hit rollup, one element per Kibana space. Nested and keyed by
+        // `space_id` because a global (`space_id: '*'`) report is shared across spaces:
+        // a flat object let each space's hourly pass overwrite the others' counts.
+        // No migration is provided. `object` -> `nested` cannot be applied to an
+        // existing index, and the feature is pre-GA behind a default-off flag, so a
+        // stale index is expected to be dropped and recreated. The
+        // `attribution.space_id` entry in REQUIRED_REPORT_FIELDS makes that loud at
+        // bootstrap instead of silent at write time.
         attribution: {
+          type: 'nested' as const,
           properties: {
+            space_id: { type: 'keyword' as const },
             environment_hits: {
               properties: {
                 window: { type: 'keyword' as const },
@@ -1387,6 +1396,12 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
   { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
+  // v29 reshaped `attribution` from a flat object to a space-keyed nested array.
+  // That type change cannot be applied to an existing index, so this leaf is the
+  // signal that a report index predates the reshape: without it, `dynamic: strict`
+  // rejects every attribution write, and the workflow's `on-failure: continue`
+  // swallows the rejection, so attribution silently stops updating forever.
+  { path: 'attribution.space_id' },
   { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.reference', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },

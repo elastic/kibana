@@ -94,6 +94,29 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     );
   });
 
+  it('loads reports for the executing space plus the global catalog', () => {
+    const loadStep = findStepByName(workflow.steps, 'load_reports_with_extractions');
+    expect(loadStep).toBeDefined();
+    const filter = JSON.stringify(loadStep?.with);
+    // Space-keyed attribution is what makes including '*' safe: each space writes
+    // its own nested element instead of clobbering a shared flat object.
+    expect(filter).toContain('"space_id":["{{ variables.spaceId }}","*"]');
+  });
+
+  it('holds the attribution script in a data.set step as a block scalar', () => {
+    const scriptStep = findStepByName(workflow.steps, 'set_attribution_script');
+    expect(scriptStep).toBeDefined();
+    const source = scriptStep?.with?.attribution_script;
+    expect(typeof source).toBe('string');
+    // The per-space dedupe guard. A Liquid-mangled body would lose this.
+    expect(source as string).toContain('instanceof List');
+    // Liquid must not consume any of the script source.
+    expect(source as string).not.toContain('{{');
+    expect(source as string).not.toContain('{%');
+    // The attribution write must not advance the report revision.
+    expect(source as string).not.toContain('revision');
+  });
+
   /**
    * The bulk-op queueing steps used to pass an inline object literal to `push:`
    * (`push: {'update': {...}}`), which LiquidJS cannot tokenize: it has no object
@@ -107,11 +130,17 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
    */
   describe('bulk op queueing renders through the workflow Liquid engine', () => {
     const engine = createWorkflowLiquidEngine();
+    // The script source comes from the workflow's own set_attribution_script step,
+    // so the body op is rendered with the real script, not a test double.
+    const attributionScript = findStepByName(workflow.steps, 'set_attribution_script')?.with
+      ?.attribution_script as string;
     const context = {
       variables: {
         bulk_operations: [],
         layer1_count: 3,
         layer2_count: 4,
+        spaceId: 'space-a',
+        attribution_script: attributionScript,
       },
       foreach: { item: { _id: 'report-1', _index: '.kibana-threat-reports' } },
       now: '2024-06-01T00:00:00.000Z',
@@ -149,7 +178,7 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
       });
     };
 
-    it('renders the update-action queueing step into a bulk op', () => {
+    it('renders the update-action queueing step into a bulk op with retry_on_conflict', () => {
       const ops = renderQueueingStep(
         'build_bulk_update_meta',
         'update_meta',
@@ -157,29 +186,47 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
       ) as Array<Record<string, unknown>>;
       expect(Array.isArray(ops)).toBe(true);
       expect(ops).toHaveLength(1);
-      expect(ops[0].update).toEqual(
-        expect.objectContaining({ _index: '.kibana-threat-reports', _id: 'report-1' })
-      );
+      // retry_on_conflict covers cross-space concurrency on shared global docs;
+      // concurrency.key only serializes runs within a space.
+      expect(ops[0].update).toEqual({
+        _index: '.kibana-threat-reports',
+        _id: 'report-1',
+        retry_on_conflict: 3,
+      });
     });
 
-    it('renders the document queueing step into a bulk op carrying the hit counts', () => {
+    it('renders the body queueing step into a scripted per-space upsert', () => {
       const ops = renderQueueingStep(
-        'build_bulk_update_doc',
-        'update_doc',
-        'queue_bulk_update_doc'
+        'build_bulk_update_body',
+        'update_body',
+        'queue_bulk_update_body'
       ) as Array<Record<string, unknown>>;
       expect(Array.isArray(ops)).toBe(true);
       expect(ops).toHaveLength(1);
 
-      const attribution = (ops[0].doc as { attribution: Record<string, unknown> }).attribution;
-      expect(attribution.environment_hits).toEqual(
-        expect.objectContaining({
-          window: '7d',
-          layer_1_ioc_match: 3,
-          layer_2_behavioral: 4,
-        })
-      );
-      expect(attribution.environment_hits_total).toBe(7);
+      const op = ops[0] as {
+        script: { lang: string; source: string; params: Record<string, unknown> };
+        upsert?: unknown;
+        doc?: unknown;
+      };
+      // A scripted upsert, not a flat doc overwrite.
+      expect(op.doc).toBeUndefined();
+      expect(op.script.lang).toBe('painless');
+      // The real script from set_attribution_script, rendered intact.
+      expect(op.script.source).toBe(attributionScript);
+      expect(op.script.source).toContain('instanceof List');
+      // Params carry every per-report value; the source never interpolates.
+      expect(op.script.params).toEqual({
+        space_id: 'space-a',
+        window: '7d',
+        computed_at: '2024-06-01T00:00:00.000Z',
+        layer_1_ioc_match: 3,
+        layer_2_behavioral: 4,
+        environment_hits_total: 7,
+      });
+      // No upsert: the report doc always exists, so a missing doc must fail
+      // loudly rather than materialize a partial row.
+      expect(op.upsert).toBeUndefined();
     });
 
     it('appends to the existing bulk_operations array rather than replacing it', () => {

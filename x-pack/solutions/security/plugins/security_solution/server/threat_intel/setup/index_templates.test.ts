@@ -58,6 +58,8 @@ const fullyMigratedReportMappings = () => ({
       properties: {},
     },
     lineage: { properties: { content_scrubbed_at: {} } },
+    // v29: attribution is a space-keyed nested array; the guard checks the leaf.
+    attribution: { properties: { space_id: {} } },
     extracted: {
       properties: {
         diamond: {},
@@ -528,6 +530,34 @@ describe('index_templates — mapping coverage guard', () => {
     ).properties;
 
     expect(properties).toEqual(expect.objectContaining({ revision: { type: 'integer' } }));
+  });
+
+  it('reports template declares attribution as a space-keyed nested array (v29)', async () => {
+    const { byIndex } = await runInstall();
+
+    const properties = (
+      byIndex(THREAT_REPORTS_INDEX)?.template?.mappings as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+
+    expect(properties.attribution).toEqual(
+      expect.objectContaining({
+        type: 'nested',
+        properties: expect.objectContaining({ space_id: { type: 'keyword' } }),
+      })
+    );
+  });
+
+  it('attribution.space_id is a required report field so a stale index fails bootstrap loudly', () => {
+    // v29 flipped attribution from object to nested, which cannot be applied to an
+    // existing index. This entry is the only detection for a stale index: without it
+    // the write is rejected by dynamic: strict and swallowed by on-failure: continue.
+    expect(src).toContain("{ path: 'attribution.space_id' }");
+  });
+
+  it('TEMPLATE_VERSION is 29 for the attribution reshape', () => {
+    expect(src).toContain('const TEMPLATE_VERSION = 29;');
   });
 
   it('indicators template declares a top-level space_id keyword (v24 space isolation)', async () => {

@@ -3,9 +3,11 @@ version: "1"
 # alerts in the last 7d tie back to that report, then write the totals onto the doc.
 # IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
 # with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
-# Unlike enrich/ingest, this pass does not include space_id: "*" catalog rows:
-# environment_hits are per-space alert totals, and writing them onto a shared
-# global doc would let each space's hourly run clobber the others.
+# The pass includes `space_id: "*"` catalog rows. `attribution` is a nested array with
+# one element per space, so each space's counts live on their own element and a shared
+# global report cannot be clobbered by another space's run. `retry_on_conflict` covers
+# that cross-space concurrency: `concurrency.key` only serializes runs within a space,
+# so two spaces can update the same global doc at once.
 name: Attribute alerts to reports
 description: Count environment alerts linked to each threat report and store totals on the report
 tags:
@@ -37,8 +39,8 @@ steps:
             - range:
                 lineage.extracted_at:
                   gte: "now-30d"
-            - term:
-                space_id: "{{ variables.spaceId }}"
+            - terms:
+                space_id: ["{{ variables.spaceId }}", "*"]
           should:
             # nested `exists`; `exists` on the parent path matches nothing.
             - nested:
@@ -60,6 +62,31 @@ steps:
     type: data.set
     with:
       bulk_operations: []
+
+  # Static script, set once outside the loop. Held in a variable because `push:`
+  # cannot take an inline object literal (see build_bulk_update_meta below), so
+  # the op bodies reference it by name. Params carry every per-report value; the
+  # source never interpolates.
+  - name: set_attribution_script
+    type: data.set
+    with:
+      attribution_script: |
+        if (!(ctx._source.attribution instanceof List)) { ctx._source.attribution = new ArrayList(); }
+        boolean found = false;
+        for (int i = 0; i < ctx._source.attribution.size(); i++) {
+          if (ctx._source.attribution[i].space_id == params.space_id) {
+            ctx._source.attribution[i].environment_hits = ['window': params.window, 'computed_at': params.computed_at, 'layer_1_ioc_match': params.layer_1_ioc_match, 'layer_2_behavioral': params.layer_2_behavioral];
+            ctx._source.attribution[i].environment_hits_total = params.environment_hits_total;
+            found = true;
+          }
+        }
+        if (!found) {
+          Map el = new HashMap();
+          el.space_id = params.space_id;
+          el.environment_hits = ['window': params.window, 'computed_at': params.computed_at, 'layer_1_ioc_match': params.layer_1_ioc_match, 'layer_2_behavioral': params.layer_2_behavioral];
+          el.environment_hits_total = params.environment_hits_total;
+          ctx._source.attribution.add(el);
+        }
 
   # One search for all layer-1 counts. Per-report `term` queries inside foreach
   # were 100 sequential alert searches per hourly pass.
@@ -152,29 +179,38 @@ steps:
             update:
               _index: "{{ foreach.item._index }}"
               _id: "{{ foreach.item._id }}"
+              # Two spaces can update the same global (`space_id: '*'`) report in the
+              # same hour; `concurrency.key` only serializes runs within a space.
+              retry_on_conflict: 3
 
       - name: queue_bulk_update_meta
         type: data.set
         with:
           bulk_operations: "${{ variables.bulk_operations | push: variables.update_meta }}"
 
-      - name: build_bulk_update_doc
+      # Scripted per-space upsert into the nested `attribution` array. No `upsert`:
+      # the report doc always exists (it was just loaded), so a missing doc should
+      # fail loudly rather than materialize a partial row with no space_id or
+      # revision. The script never touches `revision`.
+      - name: build_bulk_update_body
         type: data.set
         with:
-          update_doc:
-            doc:
-              attribution:
-                environment_hits:
-                  window: "7d"
-                  computed_at: "${{ now }}"
-                  layer_1_ioc_match: "${{ variables.layer1_count }}"
-                  layer_2_behavioral: "${{ variables.layer2_count }}"
+          update_body:
+            script:
+              lang: painless
+              source: "${{ variables.attribution_script }}"
+              params:
+                space_id: "{{ variables.spaceId }}"
+                window: "7d"
+                computed_at: "${{ now }}"
+                layer_1_ioc_match: "${{ variables.layer1_count }}"
+                layer_2_behavioral: "${{ variables.layer2_count }}"
                 environment_hits_total: "${{ variables.layer1_count | plus: variables.layer2_count }}"
 
-      - name: queue_bulk_update_doc
+      - name: queue_bulk_update_body
         type: data.set
         with:
-          bulk_operations: "${{ variables.bulk_operations | push: variables.update_doc }}"
+          bulk_operations: "${{ variables.bulk_operations | push: variables.update_body }}"
 
   - name: write_attributions_bulk
     type: elasticsearch.bulk

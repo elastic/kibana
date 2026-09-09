@@ -201,8 +201,20 @@ export const loadSourceReportStatsByAdapterId = async ({
             last_ingested: {
               max: { field: 'lineage.ingested_at' },
             },
+            // `attribution` is a nested array with one element per space (v29).
+            // A plain `sum` on a nested field silently returns 0, and an
+            // unfiltered nested sum would count every space's element, so the
+            // total is taken inside a nested agg filtered to the caller's space.
             env_hits: {
-              sum: { field: 'attribution.environment_hits_total' },
+              nested: { path: 'attribution' },
+              aggs: {
+                this_space: {
+                  filter: { term: { 'attribution.space_id': spaceId } },
+                  aggs: {
+                    total: { sum: { field: 'attribution.environment_hits_total' } },
+                  },
+                },
+              },
             },
           },
         },
@@ -217,7 +229,7 @@ export const loadSourceReportStatsByAdapterId = async ({
                 key: string | number;
                 doc_count: number;
                 last_ingested?: { value?: number | null; value_as_string?: string };
-                env_hits?: { value?: number | null };
+                env_hits?: { this_space?: { total?: { value?: number | null } } };
               }>;
             }
           | undefined
@@ -243,7 +255,7 @@ export const loadSourceReportStatsByAdapterId = async ({
       statsByAdapterId.set(adapterId, {
         report_count: bucket.doc_count,
         ...(lastIngested ? { last_ingested_at: lastIngested } : {}),
-        env_hits_total: Math.round(bucket.env_hits?.value ?? 0),
+        env_hits_total: Math.round(bucket.env_hits?.this_space?.total?.value ?? 0),
       });
     }
   } catch (err) {
