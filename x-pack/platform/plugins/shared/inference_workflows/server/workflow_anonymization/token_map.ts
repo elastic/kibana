@@ -7,15 +7,14 @@
 
 import type { TokenMap } from '../../common/workflow_anonymization';
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const replaceStringValues = (text: string, replacements: Record<string, string>): string => {
   const keys = Object.keys(replacements).filter((k) => k.length > 0);
   if (keys.length === 0) return text;
   const sorted = [...keys].sort((a, b) => b.length - a.length);
-  let result = text;
-  for (const key of sorted) {
-    result = result.split(key).join(replacements[key]);
-  }
-  return result;
+  const pattern = new RegExp(sorted.map(escapeRegExp).join('|'), 'g');
+  return text.replace(pattern, (matched) => replacements[matched]);
 };
 
 export const restoreTokens = (value: string, tokenMap: TokenMap): string =>
