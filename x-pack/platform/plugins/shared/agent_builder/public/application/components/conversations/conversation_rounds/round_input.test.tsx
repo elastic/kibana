@@ -6,32 +6,95 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { RoundInput } from './round_input';
 import { RoundResponseActions } from './round_response/round_response_actions';
 
-jest.mock('./round_response/round_response_actions', () => ({
-  RoundResponseActions: jest.fn(() => null),
-}));
-jest.mock('./round_attachment_references', () => ({
-  RoundAttachmentReferences: () => null,
-}));
-jest.mock('./round_input_text', () => ({
-  RoundInputText: () => null,
+jest.mock('../../../hooks/use_current_user', () => ({
+  useCurrentUser: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_user_profiles', () => ({
+  useUserProfiles: jest.fn(),
+}));
+
+jest.mock('./round_response/round_response_actions', () => ({
+  RoundResponseActions: jest.fn(() => <div data-test-subj="agentBuilderRoundInputActions" />),
+}));
+
+jest.mock('./round_attachment_references', () => ({
+  RoundAttachmentReferences: () => <div data-test-subj="agentBuilderRoundInputAttachments" />,
+}));
+
+const mockUseCurrentUser = jest.mocked(useCurrentUser);
+const mockUseUserProfiles = jest.mocked(useUserProfiles);
 const MockRoundResponseActions = jest.mocked(RoundResponseActions);
+
+const currentUser = {
+  uid: 'current-user',
+  enabled: true,
+  user: {
+    username: 'alice',
+    full_name: 'Alice Maria',
+  },
+  data: {
+    avatar: {
+      initials: 'AM',
+    },
+  },
+} as UserProfileWithAvatar;
 
 describe('RoundInput', () => {
   beforeEach(() => {
     MockRoundResponseActions.mockClear();
+    mockUseCurrentUser.mockReturnValue({
+      currentUser,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useCurrentUser>);
+    mockUseUserProfiles.mockReturnValue({
+      data: [currentUser],
+    } as unknown as ReturnType<typeof useUserProfiles>);
   });
 
   it('tells RoundResponseActions to copy the prompt, not the response', () => {
-    render(<RoundInput input="hello agent" />);
+    render(
+      <RoundInput
+        input="hello agent"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+      />
+    );
 
     const [props] = MockRoundResponseActions.mock.calls[0];
     expect(props.content).toBe('hello agent');
     expect(props.copyTarget).toBe('prompt');
+  });
+
+  it('renders the avatar beside the authored input content', () => {
+    render(
+      <RoundInput
+        input="Show me the preview"
+        author={{ id: 'current-user', username: 'alice', full_name: 'Alice Maria' }}
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+        attachmentRefs={[{ attachment_id: 'attachment-1', version: 1 }]}
+      />
+    );
+
+    const layout = screen.getByTestId('agentBuilderRoundInputLayout');
+    const avatar = screen.getByTestId('agentBuilderRoundInputAvatar');
+    const content = screen.getByTestId('agentBuilderRoundInputContent');
+
+    expect(screen.getByText('AM')).toBeInTheDocument();
+    expect(content).toContainElement(screen.getByText('Alice Maria'));
+    expect(content).toContainElement(screen.getByText('Show me the preview'));
+    expect(content).toContainElement(screen.getByTestId('agentBuilderRoundInputAttachments'));
+    expect(content).toContainElement(screen.getByTestId('agentBuilderRoundInputActions'));
+    expect(layout.firstElementChild).toBe(avatar);
+    expect(avatar.nextElementSibling).toBe(content);
   });
 });

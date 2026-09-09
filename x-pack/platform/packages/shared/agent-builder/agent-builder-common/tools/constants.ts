@@ -72,6 +72,7 @@ export const platformCoreCasesTools = {
  */
 export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
+  searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,

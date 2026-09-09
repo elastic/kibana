@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { css, keyframes } from '@emotion/react';
-import { euiCanAnimate, euiTextTruncate, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiTextTruncate, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import {
   IMAGE_PLACEHOLDER_ATTRIBUTE,
   IMAGE_PLACEHOLDER_ICON_ATTRIBUTE,
   IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
 } from './image_placeholder';
-
-const progressSweep = keyframes`
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(250%); }
-`;
+import {
+  imageUploadProgressFillStyles,
+  imageUploadProgressTrackColorStyles,
+} from '../image_upload_styles';
 
 /** Returns CSS for the image placeholder chip inside the contenteditable editor. */
 export const useImagePlaceholderStyles = () => {
@@ -91,23 +90,12 @@ export const useImagePlaceholderStyles = () => {
       right: ${euiTheme.size.xs};
       height: ${euiTheme.border.width.thick};
       transform: translateY(-50%);
-      border-radius: 999px;
-      background: ${euiTheme.colors.backgroundLightText};
-      overflow: hidden;
+      ${imageUploadProgressTrackColorStyles(euiTheme)}
     }
     [${IMAGE_PLACEHOLDER_ATTRIBUTE}][data-uploading='true']
       > .image-placeholder-progress-track
       > .image-placeholder-progress-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 40%;
-      border-radius: 999px;
-      background: ${euiTheme.colors.backgroundFilledText};
-      ${euiCanAnimate} {
-        animation: ${progressSweep} 1.4s ease-in-out infinite;
-      }
+      ${imageUploadProgressFillStyles(euiTheme)}
     }
   `;
 };

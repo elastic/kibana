@@ -32,8 +32,6 @@ export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
-  onHoverStart?: () => void;
-  onHoverEnd?: () => void;
 }
 
 const DEFAULT_ICON = 'document';
@@ -42,8 +40,6 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
   isHighlighted = false,
-  onHoverStart,
-  onHoverEnd,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
@@ -62,8 +58,6 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         label={label}
         onRemoveAttachment={onRemoveAttachment}
         isHighlighted={isHighlighted}
-        onHoverStart={onHoverStart}
-        onHoverEnd={onHoverEnd}
       />
     );
   }

@@ -8,12 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { CHAT_ATTACHMENT_IMAGES_FILE_KIND } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 
 type ImageAttachment = UnknownAttachment & { data: ImageAttachmentData };
+
+const MAX_INLINE_IMAGE_HEIGHT = 400;
 
 const getImageSrc = (attachment: ImageAttachment, http: HttpStart): string | undefined => {
   const { file_id: fileId } = attachment.data;
@@ -23,21 +26,26 @@ const getImageSrc = (attachment: ImageAttachment, http: HttpStart): string | und
   );
 };
 
+const imageInlineStyles = (euiTheme: EuiThemeComputed) => css`
+  max-width: 100%;
+  max-height: ${MAX_INLINE_IMAGE_HEIGHT}px;
+  border-radius: ${euiTheme.border.radius.small};
+  display: block;
+`;
+
 const ImageInlineContent: React.FC<{ attachment: ImageAttachment; http: HttpStart }> = ({
   attachment,
   http,
-}) => (
-  <img
-    src={getImageSrc(attachment, http)}
-    alt={attachment.data.name ?? 'image'}
-    css={css`
-      max-width: 100%;
-      max-height: 400px;
-      border-radius: 4px;
-      display: block;
-    `}
-  />
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <img
+      src={getImageSrc(attachment, http)}
+      alt={attachment.data.name ?? 'image'}
+      css={imageInlineStyles(euiTheme)}
+    />
+  );
+};
 
 export const createImageAttachmentDefinition = ({
   http,
