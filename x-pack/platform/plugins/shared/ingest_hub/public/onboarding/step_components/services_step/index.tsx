@@ -29,6 +29,7 @@ import { useServicesStep } from './use_services_step';
 import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { DataFormatSelect } from './data_format_select';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -58,8 +59,14 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setDataFormat,
   } = useServicesStep({ onContinue });
 
+  const { detectAndReviewStep } = useOnboardingFlow();
   const location = useLocation();
-  const isFormatDisabled = new URLSearchParams(location.search).has('deploymentId');
+  // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
+  // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
+  const isFormatDisabled =
+    new URLSearchParams(location.search).has('deploymentId') ||
+    Object.keys(detectAndReviewStep.serviceStatuses).length > 0 ||
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0;
 
   return (
     <div data-test-subj="onboardingStep-services">
