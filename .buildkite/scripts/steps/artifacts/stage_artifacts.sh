@@ -7,11 +7,14 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Download and verify artifacts"
 
+ARTIFACT_FILES=()
+
 function download {
   download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   download_artifact "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   sha512sum -c "$1.sha512.txt"
   rm "$1.sha512.txt"
+  ARTIFACT_FILES+=("$1")
 }
 
 mkdir -p target
@@ -56,7 +59,9 @@ chmod -R a+w target
 
 echo "--- Stage artifacts for DRA"
 mkdir -p artifacts
-cp target/* artifacts/
+for f in "${ARTIFACT_FILES[@]}"; do
+  cp "target/$f" artifacts/
+done
 
 echo "Staged artifacts:"
 ls -1 artifacts/
