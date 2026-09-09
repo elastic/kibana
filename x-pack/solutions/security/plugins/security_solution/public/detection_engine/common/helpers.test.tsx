@@ -155,6 +155,13 @@ describe('rule helpers', () => {
         },
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        atlasThreat: [
+          {
+            framework: 'MITRE ATLAS',
+            tactic: { id: 'none', name: 'none', reference: 'none' },
+            technique: [],
+          },
+        ],
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
         investigationFields: [],

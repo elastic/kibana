@@ -211,6 +211,13 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
+  atlasThreat: [
+    {
+      framework: 'MITRE ATLAS',
+      tactic: { id: 'none', name: 'none', reference: 'none' },
+      technique: [],
+    },
+  ],
   note: '# this is some markdown documentation',
   setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],

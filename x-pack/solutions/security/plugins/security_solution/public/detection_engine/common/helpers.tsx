@@ -259,7 +259,25 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     },
     falsePositives,
     investigationFields: investigationFields?.field_names ?? [],
-    threat: threat as Threats,
+    // Empty threat arrays only render the "Add tactic" button (no section label).
+    // Keep the same default empty row used when creating a rule so ATT&CK chrome stays visible.
+    threat:
+      Array.isArray(threat) && threat.length > 0
+        ? (threat as Threats)
+        : [
+            {
+              framework: 'MITRE ATT&CK',
+              tactic: { id: 'none', name: 'none', reference: 'none' },
+              technique: [],
+            },
+          ],
+    atlasThreat: [
+      {
+        framework: 'MITRE ATLAS',
+        tactic: { id: 'none', name: 'none', reference: 'none' },
+        technique: [],
+      },
+    ],
     threatIndicatorPath,
     maxSignals,
     setup,
