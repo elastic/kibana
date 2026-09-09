@@ -14,6 +14,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReactNode } from 'react';
 import type {
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
@@ -21,6 +22,7 @@ import type {
   GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type {
+  InlineAppHeaderState,
   InternalChromeSetup,
   InternalChromeStart,
 } from '@kbn/core-chrome-browser-internal-types';
@@ -41,10 +43,13 @@ const createStartContractMock = () => {
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<ChromeAppHeaderConfig | undefined>(undefined);
-  const inlineAppHeaderState$ = new BehaviorSubject(false);
+  const inlineAppHeaderState$ = new BehaviorSubject<InlineAppHeaderState | undefined>(undefined);
+  const docTitleBase = 'Elastic';
+  const docTitleParts$ = new BehaviorSubject<readonly string[]>([docTitleBase]);
   const nextFeedbackHandler$ = new BehaviorSubject<(() => void) | undefined>(undefined);
   const nextNewsfeedHandler$ = new BehaviorSubject<ChromeNewsfeedHandler | undefined>(undefined);
   let appHeaderRegistrationId = 0;
+  let inlineAppHeaderRegistrationId = 0;
 
   const aiButton = lazyObject({
     get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
@@ -78,6 +83,37 @@ const createStartContractMock = () => {
   const getFeedbackHandler$ = jest.fn().mockReturnValue(nextFeedbackHandler$);
   const registerNewsfeedHandler = jest.fn().mockReturnValue(() => {});
   const getNewsfeedHandler$ = jest.fn().mockReturnValue(nextNewsfeedHandler$);
+  const inlineAppHeader = lazyObject({
+    get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
+    register: jest.fn((title?: AppHeaderTitle) => {
+      const registrationId = ++inlineAppHeaderRegistrationId;
+      inlineAppHeaderState$.next(title === undefined ? {} : { title });
+      return {
+        update: (nextTitle?: AppHeaderTitle) => {
+          if (registrationId === inlineAppHeaderRegistrationId) {
+            inlineAppHeaderState$.next(nextTitle === undefined ? {} : { title: nextTitle });
+          }
+        },
+        unregister: () => {
+          if (registrationId === inlineAppHeaderRegistrationId) {
+            inlineAppHeaderState$.next(undefined);
+          }
+        },
+      };
+    }),
+  });
+  const appHeader = lazyObject({
+    get$: jest.fn().mockReturnValue(nextAppHeaderState$),
+    set: jest.fn((config: ChromeAppHeaderConfig) => {
+      const registrationId = ++appHeaderRegistrationId;
+      nextAppHeaderState$.next(config);
+      return () => {
+        if (registrationId === appHeaderRegistrationId) {
+          nextAppHeaderState$.next(undefined);
+        }
+      };
+    }),
+  });
 
   const controls = lazyObject({
     aiButton,
@@ -119,6 +155,7 @@ const createStartContractMock = () => {
         management: {},
         catalogue: {},
       }),
+      docTitleParts$: docTitleParts$ as unknown as DeeplyMockedKeys<Observable<readonly string[]>>,
     }),
     sidebar: lazyObject(sidebar),
     navLinks: lazyObject({
@@ -133,8 +170,13 @@ const createStartContractMock = () => {
       get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     docTitle: lazyObject({
-      change: jest.fn(),
-      reset: jest.fn(),
+      change: jest.fn((title: string | string[]) => {
+        const parts = (Array.isArray(title) ? title : [title]).filter(Boolean);
+        docTitleParts$.next([...parts, docTitleBase]);
+      }),
+      reset: jest.fn(() => {
+        docTitleParts$.next([docTitleBase]);
+      }),
     }),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
@@ -188,28 +230,16 @@ const createStartContractMock = () => {
     }),
     controls,
     help,
+    appHeader,
+    inlineAppHeader,
     next: lazyObject({
       aiButton,
       globalSearch,
       userMenu,
       contextSwitcher,
       projectPicker,
-      inlineAppHeader: lazyObject({
-        get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
-        set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
-      }),
-      appHeader: lazyObject({
-        get$: jest.fn().mockReturnValue(nextAppHeaderState$),
-        set: jest.fn((config: ChromeAppHeaderConfig) => {
-          const registrationId = ++appHeaderRegistrationId;
-          nextAppHeaderState$.next(config);
-          return () => {
-            if (registrationId === appHeaderRegistrationId) {
-              nextAppHeaderState$.next(undefined);
-            }
-          };
-        }),
-      }),
+      inlineAppHeader,
+      appHeader,
       getFeedbackHandler$,
       registerFeedbackHandler,
       getNewsfeedHandler$,

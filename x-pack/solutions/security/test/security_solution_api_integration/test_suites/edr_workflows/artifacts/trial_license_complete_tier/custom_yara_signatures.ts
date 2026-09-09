@@ -1227,9 +1227,11 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`should accept item on [${customYaraSignatureApiCall.method}] if more than one OS is set`, async () => {
-            const body = customYaraSignatureApiCall.getBody();
+            const body = customYaraSignatureApiCall.getBody(
+              `rule rule1 { meta: os = "Linux, Windows, MacOS" condition: true }`,
+              ['linux', 'windows', 'macos']
+            );
 
-            body.os_types = ['linux', 'windows', 'macos'];
             await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
               customYaraSignatureApiCall.path
             )
