@@ -50,11 +50,26 @@ const getMetadata = (endpoint: InferenceInferenceEndpointInfo): EndpointMetadata
   hasMetadata(endpoint) ? endpoint.metadata : undefined;
 
 const isEligibleEndpoint = (endpoint: InferenceInferenceEndpointInfo): boolean => {
-  if (endpoint.task_type !== 'chat_completion') return false;
+  if (endpoint.task_type !== 'chat_completion') {
+    return false;
+  }
   const meta = getMetadata(endpoint);
-  if (meta == null) return false;
-  if (!(meta.heuristics?.properties ?? []).includes('kibana-connector')) return false;
-  return !meta.heuristics?.end_of_life_date;
+  if (meta == null) {
+    return false;
+  }
+  if (!(meta.heuristics?.properties ?? []).includes('kibana-connector')) {
+    return false;
+  }
+  if (meta.heuristics?.end_of_life_date) {
+    return false;
+  }
+  if (meta.capability == null) {
+    return false;
+  }
+  if (meta.family == null) {
+    return false;
+  }
+  return true;
 };
 
 /** Returns true when `a` has a more recent release_date than `b`. */
@@ -75,11 +90,11 @@ const pickBestPerFamily = (
   capabilities: string[]
 ): string[] => {
   const byFamily = new Map<string, InferenceInferenceEndpointInfo>();
-  for (const endpoint of endpoints) {
-    const meta = getMetadata(endpoint);
-    const capability = meta?.capability;
-    const family = meta?.family;
-    if (!capability || !family || !capabilities.includes(capability)) continue;
+  const candidates = endpoints.filter((ep) =>
+    capabilities.includes(getMetadata(ep)?.capability ?? '')
+  );
+  for (const endpoint of candidates) {
+    const family = getMetadata(endpoint)!.family!;
     const current = byFamily.get(family);
     if (!current || isNewer(endpoint, current)) {
       byFamily.set(family, endpoint);
@@ -98,10 +113,7 @@ export const deriveRecommendations = (
 ): DerivedRecommendations | null => {
   const eligible = endpoints.filter(isEligibleEndpoint);
 
-  if (!eligible.some((ep) => getMetadata(ep)?.capability != null)) {
-    return null;
-  }
-  if (!eligible.some((ep) => getMetadata(ep)?.family != null)) {
+  if (eligible.length === 0) {
     return null;
   }
 
@@ -249,8 +261,8 @@ export class RecommendedEndpointsPoller {
     // Log at warn, not error: this handler fires on every retry attempt (catchError is
     // inside the retry scope), so a transient ES outage would otherwise flood error logs.
     // Persistent failures are visible through the warn cadence (one entry per 5-minute retry).
-    this.logger.warn('Error polling EIS for recommended model updates; will retry.');
-    this.logger.warn(Error.isError(error) ? error : JSON.stringify(error));
+    const detail = Error.isError(error) ? error.message : JSON.stringify(error);
+    this.logger.warn(`Error polling EIS for recommended model updates; will retry. ${detail}`);
     return Rx.throwError(() => error);
   }
 }

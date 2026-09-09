@@ -177,9 +177,6 @@ describe('InferenceFeatureRegistry', () => {
 
     it('throws and does not update for an unknown featureId', () => {
       expect(() => registry.updateRecommendedEndpoints('unknown', ['ep-1'])).toThrow('"unknown"');
-      expect(mockLogger.get().error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to update recommended endpoints')
-      );
     });
 
     it('throws and does not update when endpoints array is empty', () => {

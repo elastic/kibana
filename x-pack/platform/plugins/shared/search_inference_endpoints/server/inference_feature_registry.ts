@@ -82,19 +82,13 @@ export class InferenceFeatureRegistry {
   updateRecommendedEndpoints(featureId: string, endpoints: string[]): void {
     const feature = this.features.get(featureId);
     if (!feature) {
-      const error = `Feature "${featureId}" not found.`;
-      this.logger.error(`Failed to update recommended endpoints: ${error}`);
-      throw new Error(error);
+      throw new Error(`feature "${featureId}" not found.`);
     }
     if (endpoints.length === 0) {
-      const error = 'endpoints must not be empty.';
-      this.logger.error(`Failed to update recommended endpoints: ${error}`);
-      throw new Error(error);
+      throw new Error('endpoints must not be empty.');
     }
-    if (endpoints.some((ep) => !ep.trim())) {
-      const error = 'endpoints must not contain empty strings.';
-      this.logger.error(`Failed to update recommended endpoints: ${error}`);
-      throw new Error(error);
+    if (endpoints.some((endpoint) => !endpoint.trim())) {
+      throw new Error('endpoints must not contain empty strings.');
     }
     this.features.set(featureId, { ...feature, recommendedEndpoints: endpoints });
     this.logger.debug(
