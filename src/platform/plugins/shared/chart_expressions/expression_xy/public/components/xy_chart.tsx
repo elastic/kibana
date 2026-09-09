@@ -1178,7 +1178,8 @@ export function XYChart({
                             shape: PointShape.Diamond,
                             strokeWidth: 1,
                             stroke: pointStroke,
-                            radius: 6,
+                            fill: pointFill,
+                            radius: 5,
                           },
                         }}
                         xScaleType="time"
