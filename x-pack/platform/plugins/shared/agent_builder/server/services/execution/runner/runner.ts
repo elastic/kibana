@@ -245,6 +245,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     defaultConnectorId,
     projectRouting,
     telemetryMetadata,
+    agentId,
     maxContentLength,
     conversation,
     nextInput,
@@ -258,6 +259,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     defaultConnectorId?: string;
     projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
+    agentId?: string;
     maxContentLength?: number;
     conversation?: Conversation;
     nextInput?: ConverseInput;
@@ -284,6 +286,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       request,
       defaultConnectorId,
       telemetryMetadata,
+      agentId,
       maxContentLength,
     });
 
@@ -389,6 +392,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         defaultConnectorId,
         projectRouting,
         telemetryMetadata,
+        agentId: otherParams.agentId,
         maxContentLength,
         conversation,
         nextInput,
