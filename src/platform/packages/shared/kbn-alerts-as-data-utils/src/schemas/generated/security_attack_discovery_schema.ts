@@ -150,6 +150,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.updated_by.user.name': schemaString,
   'kibana.alert.url': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
+  'kibana.alert.workflow_reason': schemaString,
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
