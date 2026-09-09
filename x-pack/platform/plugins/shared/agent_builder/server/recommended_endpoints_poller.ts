@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import { type Observable, type Subscription, of, from } from 'rxjs';
 import * as Rx from 'rxjs';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -42,29 +43,28 @@ interface EndpointWithMetadata extends InferenceInferenceEndpointInfo {
   metadata: EndpointMetadata;
 }
 
-const hasMetadata = (ep: InferenceInferenceEndpointInfo): ep is EndpointWithMetadata =>
-  'metadata' in ep && typeof ep.metadata === 'object' && ep.metadata !== null;
+const hasMetadata = (endpoint: InferenceInferenceEndpointInfo): endpoint is EndpointWithMetadata =>
+  'metadata' in endpoint && typeof endpoint.metadata === 'object' && endpoint.metadata !== null;
 
 const getMetadata = (endpoint: InferenceInferenceEndpointInfo): EndpointMetadata | undefined =>
   hasMetadata(endpoint) ? endpoint.metadata : undefined;
 
 const isEligibleEndpoint = (endpoint: InferenceInferenceEndpointInfo): boolean => {
+  if (endpoint.task_type !== 'chat_completion') return false;
   const meta = getMetadata(endpoint);
-  return (
-    endpoint.task_type === 'chat_completion' &&
-    meta != null &&
-    (meta.heuristics?.properties ?? []).includes('kibana-connector') &&
-    !meta.heuristics?.end_of_life_date
-  );
+  if (meta == null) return false;
+  if (!(meta.heuristics?.properties ?? []).includes('kibana-connector')) return false;
+  if (meta.heuristics?.end_of_life_date) return false;
+  return true;
 };
 
 /** Returns true when `a` has a more recent release_date than `b`. */
 const isNewer = (a: InferenceInferenceEndpointInfo, b: InferenceInferenceEndpointInfo): boolean => {
-  const dateA = getMetadata(a)?.heuristics?.release_date;
-  const dateB = getMetadata(b)?.heuristics?.release_date;
-  if (!dateA) return false;
-  if (!dateB) return true;
-  return dateA > dateB; // ISO strings compare correctly lexicographically
+  const momentA = dateMath.parse(getMetadata(a)?.heuristics?.release_date ?? '');
+  const momentB = dateMath.parse(getMetadata(b)?.heuristics?.release_date ?? '');
+  if (!momentA?.isValid()) return false;
+  if (!momentB?.isValid()) return true;
+  return momentA.isAfter(momentB);
 };
 
 /**
@@ -76,17 +76,17 @@ const pickBestPerFamily = (
   capabilities: string[]
 ): string[] => {
   const byFamily = new Map<string, InferenceInferenceEndpointInfo>();
-  for (const ep of endpoints) {
-    const meta = getMetadata(ep);
+  for (const endpoint of endpoints) {
+    const meta = getMetadata(endpoint);
     const capability = meta?.capability;
     const family = meta?.family;
     if (!capability || !family || !capabilities.includes(capability)) continue;
     const current = byFamily.get(family);
-    if (!current || isNewer(ep, current)) {
-      byFamily.set(family, ep);
+    if (!current || isNewer(endpoint, current)) {
+      byFamily.set(family, endpoint);
     }
   }
-  return [...byFamily.values()].map((ep) => ep.inference_id);
+  return [...byFamily.values()].map((endpoint) => endpoint.inference_id);
 };
 
 /**
@@ -181,28 +181,16 @@ export class RecommendedEndpointsPoller {
 
   private createPollingObservable() {
     return of({}).pipe(
-      Rx.tap(this.pollBegin.bind(this)),
-      Rx.mergeMap(this.fetchEndpoints.bind(this)),
-      Rx.map(this.handleResponse.bind(this)),
-      Rx.map(this.deriveRecommendationsWithLogging.bind(this)),
-      Rx.tap(this.applyRecommendations.bind(this)),
+      Rx.tap(() => this.logger.debug('Polling EIS for recommended model updates...')),
+      Rx.mergeMap(() => from(this.esClient.inference.get())),
+      Rx.map((response: InferenceGetResponse) => response.endpoints ?? []),
+      Rx.map((endpoints) => this.deriveRecommendationsWithLogging(endpoints)),
+      Rx.tap((result) => this.applyRecommendations(result)),
       Rx.delay(this.pollingIntervalMs),
       Rx.repeat(),
-      Rx.catchError(this.handleError.bind(this)),
+      Rx.catchError((error, caught$) => this.handleError(error, caught$)),
       Rx.retry({ delay: this.errorRetryIntervalMs })
     );
-  }
-
-  private pollBegin() {
-    this.logger.debug('Polling EIS for recommended model updates...');
-  }
-
-  private fetchEndpoints() {
-    return from(this.esClient.inference.get());
-  }
-
-  private handleResponse(response: InferenceGetResponse): InferenceInferenceEndpointInfo[] {
-    return response.endpoints ?? [];
   }
 
   /**
@@ -257,13 +245,7 @@ export class RecommendedEndpointsPoller {
     // inside the retry scope), so a transient ES outage would otherwise flood error logs.
     // Persistent failures are visible through the warn cadence (one entry per 5-minute retry).
     this.logger.warn('Error polling EIS for recommended model updates; will retry.');
-    if (Error.isError(error)) {
-      this.logger.warn(error.message);
-    } else if (typeof error === 'string') {
-      this.logger.warn(error);
-    } else if (error !== null && typeof error === 'object') {
-      this.logger.warn(JSON.stringify(error));
-    }
+    this.logger.warn(Error.isError(error) ? error : JSON.stringify(error));
     return Rx.throwError(() => error);
   }
 }

@@ -78,7 +78,6 @@ export class AgentBuilderPlugin
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
   private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
-  private pollerStartTimer?: ReturnType<typeof setTimeout>;
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -375,10 +374,7 @@ export class AgentBuilderPlugin
       esClient: elasticsearch.client.asInternalUser,
       features: searchInferenceEndpoints.features,
     });
-    this.pollerStartTimer = setTimeout(() => {
-      this.pollerStartTimer = undefined;
-      this.recommendedEndpointsPoller?.start();
-    }, 5_000);
+    this.recommendedEndpointsPoller.start();
 
     return {
       agents: {
@@ -417,10 +413,6 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
-    if (this.pollerStartTimer !== undefined) {
-      clearTimeout(this.pollerStartTimer);
-      this.pollerStartTimer = undefined;
-    }
     this.recommendedEndpointsPoller?.stop();
     await this.teardownTracing?.();
   }
