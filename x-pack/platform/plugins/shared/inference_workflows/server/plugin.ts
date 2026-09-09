@@ -27,6 +27,7 @@ import {
   createInferenceAnonymizationManagedWorkflowInstaller,
   type InferenceAnonymizationManagedWorkflowInstaller,
 } from './workflow_anonymization/managed_workflow_installer';
+import { registerRoutes } from './routes';
 
 const MANAGED_WORKFLOW_OWNER = 'inferenceWorkflows';
 
@@ -77,6 +78,21 @@ export class InferenceWorkflowsPlugin
         },
       })
     );
+
+    const router = core.http.createRouter();
+    // deps.spaces is SpacesPluginSetup; .spacesService is SpacesServiceSetup which has getSpaceId.
+    registerRoutes({
+      router,
+      spaces: deps.spaces.spacesService,
+      management: deps.workflowsManagement.management,
+      getClient: () => {
+        if (!this.managedWorkflowClientPromise) {
+          throw new Error('Managed workflow client is not yet available');
+        }
+        return this.managedWorkflowClientPromise;
+      },
+      baseFailureMode: deps.inference.anonymizationConfig.failureMode,
+    });
 
     if (deps.searchInferenceEndpoints) {
       registerInferenceFeatures(deps.searchInferenceEndpoints);

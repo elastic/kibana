@@ -168,6 +168,7 @@ export class InferencePlugin
       anonymizationConfig: {
         triggerCacheTtlMs: Math.round(this.config.anonymization.triggerCacheTtlSeconds * 1000),
         workflowDrivenEnabled: this.config.anonymization.workflowDriven,
+        failureMode: this.config.anonymization.failureMode,
       },
     };
   }

@@ -62,6 +62,9 @@ export interface InferenceServerSetup {
     /** Whether workflow-driven anonymization is enabled. Consumer plugins should use this
      *  to gate any unconditional startup work (e.g. managed workflow installation). */
     workflowDrivenEnabled: boolean;
+    /** Cluster-level failure mode from kibana.yml. Per-space overrides are stored in
+     *  templateValues and override this value at request time. */
+    failureMode: 'block' | 'allow_unsafe';
   };
 }
 

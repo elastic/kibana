@@ -117,6 +117,7 @@ export {
   INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
   INFERENCE_PII_ANONYMIZATION_WORKFLOW,
   INFERENCE_PII_ANONYMIZATION_DEFAULTS,
+  BUILT_IN_PATTERNS,
   type InferencePiiAnonymizationTemplateValues,
   type InferencePiiBuiltInRule,
   type InferencePiiCustomRule,

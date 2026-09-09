@@ -63,7 +63,7 @@ export interface InferencePiiAnonymizationTemplateValues extends ManagedWorkflow
  * Elastic-authored regex patterns for each built-in entity class.
  * Keys match BuiltInEntityClass values.
  */
-const BUILT_IN_PATTERNS: Record<BuiltInEntityClass, string> = {
+export const BUILT_IN_PATTERNS: Record<BuiltInEntityClass, string> = {
   EMAIL: String.raw`([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})`,
   IP: String.raw`\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b`,
   HOST_NAME: String.raw`\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}\b`,
