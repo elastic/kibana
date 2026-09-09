@@ -19,6 +19,7 @@ export * from './datasets/get_dataset_route.gen';
 export * from './datasets/update_dataset_route.gen';
 export * from './datasets/delete_dataset_route.gen';
 export * from './datasets/add_examples_route.gen';
+export * from './datasets/copy_dataset_route.gen';
 export * from './datasets/update_example_route.gen';
 export * from './datasets/delete_example_route.gen';
 export * from './datasets/upsert_dataset_route.gen';
