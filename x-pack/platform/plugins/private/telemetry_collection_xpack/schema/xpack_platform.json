@@ -9168,6 +9168,664 @@
               "type": "long"
             }
           }
+        },
+        "templates": {
+          "properties": {
+            "featureEnabled": {
+              "type": "boolean",
+              "_meta": {
+                "description": "Whether xpack.cases.templates.enabled is on. When it is off the template counts are not queried and report zero"
+              }
+            },
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
