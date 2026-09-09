@@ -11,7 +11,7 @@
  * layer in
  * src/platform/plugins/shared/discover/public/embeddable/get_search_embeddable_factory.test.tsx.
  * Migration target is
- * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts,
+ * src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts,
  * which already holds the ported first test.
  */
 
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     /**
      * Migration recommendation: DELETE. Already ported to Scout under the same name in
-     * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts,
+     * src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts,
      * including the inline saved-search creation via `kbnClient`.
      */
     it('should allow removing the dashboard panel after the underlying saved search has been deleted', async () => {

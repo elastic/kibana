@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/alerting
 dependsOn:
   - '@kbn/core'
+  - '@kbn/lock-manager'
   - '@kbn/actions-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'

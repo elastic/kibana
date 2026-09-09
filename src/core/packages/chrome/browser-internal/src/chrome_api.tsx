@@ -85,6 +85,23 @@ export function createChromeApi({
 
   let appHeaderRegistrationId = 0;
 
+  const appHeader: InternalChromeStart['appHeader'] = {
+    get$: () => state.appHeader.$,
+    set: (config: ChromeAppHeaderConfig) => {
+      const registrationId = ++appHeaderRegistrationId;
+      state.appHeader.set(config);
+      return () => {
+        if (registrationId === appHeaderRegistrationId) {
+          state.appHeader.set(undefined);
+        }
+      };
+    },
+  };
+  const inlineAppHeader: InternalChromeStart['inlineAppHeader'] = {
+    get$: () => state.inlineAppHeader.$,
+    set: state.inlineAppHeader.set,
+  };
+
   const controls: InternalChromeStart['controls'] = {
     aiButton: {
       get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
@@ -234,28 +251,16 @@ export function createChromeApi({
     project,
     controls,
     help,
+    appHeader,
+    inlineAppHeader,
     next: {
       aiButton: controls.aiButton,
       globalSearch: controls.globalSearch,
       contextSwitcher: controls.contextSwitcher,
       projectPicker: controls.projectPicker,
       userMenu: controls.userMenu,
-      inlineAppHeader: {
-        get$: () => state.inlineAppHeader.$,
-        set: state.inlineAppHeader.set,
-      },
-      appHeader: {
-        get$: () => state.appHeader.$,
-        set: (config: ChromeAppHeaderConfig) => {
-          const registrationId = ++appHeaderRegistrationId;
-          state.appHeader.set(config);
-          return () => {
-            if (registrationId === appHeaderRegistrationId) {
-              state.appHeader.set(undefined);
-            }
-          };
-        },
-      },
+      inlineAppHeader,
+      appHeader,
       registerFeedbackHandler: help.registerFeedbackHandler,
       getFeedbackHandler$: help.getFeedbackHandler$,
       registerNewsfeedHandler: help.registerNewsfeedHandler,
