@@ -356,7 +356,13 @@ describe('Expanded mode', () => {
        * THEN hovering it no longer shows a New tooltip
        */
       it('should hide new tooltip after visiting the item and navigating away', async () => {
-        render(<TestComponent isCollapsed={false} items={observabilityMock.navItems} />);
+        render(
+          <TestComponent
+            isCollapsed={false}
+            items={observabilityMock.navItems}
+            logo={observabilityMock.logo}
+          />
+        );
 
         const alertsLink = screen.getByTestId(primaryItemId('alerts'));
 

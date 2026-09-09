@@ -984,7 +984,7 @@ describe('Both modes', () => {
        * THEN hovering it shows the label without a New badge
        */
       it('should hide new badge from tooltip after visiting the item and navigating away', async () => {
-        render(<TestComponent items={observabilityMock.navItems} />);
+        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
 
         const whatsNewLink = screen.getByTestId(footerItemId('whats_new'));
 
