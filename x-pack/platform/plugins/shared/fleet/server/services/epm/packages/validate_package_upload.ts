@@ -24,7 +24,11 @@ import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../error
 import { appContextService } from '../../app_context';
 import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
-import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
+import {
+  getNameAndExtension,
+  getPipelineNameForInstallation,
+  isTopLevelPipeline,
+} from '../elasticsearch/ingest_pipeline/helpers';
 import * as Registry from '../registry';
 
 import { getBundledPackageByName } from './bundled_packages';
@@ -54,6 +58,7 @@ interface UploadPolicyTemplate {
 
 interface UploadPackageInfo {
   name: string;
+  version: string;
   type?: string;
   elasticsearch?: {
     privileges?: { cluster?: string[]; indices?: string[] };
@@ -94,6 +99,7 @@ export async function validatePackageUpload({
   // Residual: Kibana saved objects in the archive are still imported with overwrite: true.
   // Preflight only; an upload can race any first install (upload, registry, or setup).
   await assertNoOwnedDatasetCollision(packageInfo, savedObjectsClient);
+  await assertNoOwnedTopLevelPipelineCollision(packageInfo, paths, savedObjectsClient);
   await assertNoUnownedLiveDataStreams(packageInfo, esClient, installedPkg);
 }
 
@@ -120,7 +126,7 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
     }
 
     const { type } = getPathParts(path);
-    if (FORBIDDEN_ARCHIVE_TYPES.has(type) || isTopLevelPipeline(path)) {
+    if (FORBIDDEN_ARCHIVE_TYPES.has(type)) {
       throw new PackageInvalidArchiveError(
         i18n.translate('xpack.fleet.packageUpload.forbiddenArchiveAsset', {
           defaultMessage: 'Uploaded package contains a forbidden asset: {path}',
@@ -290,6 +296,56 @@ async function assertNoOwnedDatasetCollision(
             'Uploaded package declares dataset "{dataset}" that is already owned by installed package "{packageName}".',
           values: {
             dataset: conflict,
+            packageName: installation.attributes.name,
+          },
+        })
+      );
+    }
+  }
+}
+
+// Top-level pipeline IDs (`<version>-<name>`) carry no package name, so an upload
+// could otherwise overwrite a pipeline installed by a different package.
+async function assertNoOwnedTopLevelPipelineCollision(
+  packageInfo: UploadPackageInfo,
+  paths: string[],
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<void> {
+  const requestedPipelineIds = paths
+    .filter((path) => !path.endsWith('/') && isTopLevelPipeline(path))
+    .map((path) =>
+      getPipelineNameForInstallation({
+        pipelineName: getNameAndExtension(path).name,
+        packageVersion: packageInfo.version,
+      })
+    );
+
+  if (requestedPipelineIds.length === 0) {
+    return;
+  }
+
+  const { saved_objects: installations } = await getPackageSavedObjects(savedObjectsClient);
+
+  for (const installation of installations) {
+    if (installation.attributes.name === packageInfo.name) {
+      continue;
+    }
+
+    const ownedPipelineIds = new Set(
+      (installation.attributes.installed_es ?? [])
+        .filter((asset) => asset.type === ElasticsearchAssetType.ingestPipeline)
+        .map((asset) => asset.id)
+    );
+
+    const conflict = requestedPipelineIds.find((pipelineId) => ownedPipelineIds.has(pipelineId));
+
+    if (conflict) {
+      throw new PackageInvalidArchiveError(
+        i18n.translate('xpack.fleet.packageUpload.ingestPipelineOwned', {
+          defaultMessage:
+            'Uploaded package declares ingest pipeline "{pipelineId}" that is already owned by installed package "{packageName}".',
+          values: {
+            pipelineId: conflict,
             packageName: installation.attributes.name,
           },
         })
