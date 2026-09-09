@@ -137,7 +137,8 @@ describe('AiIndexDeleteConfirmModal', () => {
     expect(screen.getByTestId('contextAiIndexDeleteAutomationsCheckbox')).toBeEnabled();
   });
 
-  it('disables the automations checkbox when user lacks deleteWorkflow capability', () => {
+  it('does not request automation deletion when the user lacks deleteWorkflow capability', async () => {
+    mockDeleteAiIndex.mockResolvedValue({ acknowledged: true, errors: [] });
     const onClose = jest.fn();
     const services = coreMock.createStart();
     services.application.capabilities = {
@@ -162,5 +163,15 @@ describe('AiIndexDeleteConfirmModal', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexDeleteAutomationsCheckbox')).toBeDisabled();
+
+    fireEvent.click(screen.getByText('Delete AI index'));
+
+    await waitFor(() => {
+      expect(mockDeleteAiIndex).toHaveBeenCalledWith({
+        aiIndexId: 'my-ai-index',
+        deleteKnowledgeIndicators: true,
+        deleteAutomations: false,
+      });
+    });
   });
 });

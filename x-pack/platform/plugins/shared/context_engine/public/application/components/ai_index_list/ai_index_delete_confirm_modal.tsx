@@ -35,10 +35,12 @@ export const AiIndexDeleteConfirmModal = ({
     services: { notifications, application },
   } = useKibana();
   const { deleteAiIndex, isDeleting } = useDeleteAiIndex();
-  const canDeleteWorkflows = application.capabilities.workflowsManagement?.deleteWorkflow ?? false;
+  const canDeleteWorkflows = Boolean(application.capabilities.workflowsManagement?.deleteWorkflow);
   const automationsCount = aiIndex.automations.length;
   const [deleteKnowledgeIndicators, setDeleteKnowledgeIndicators] = useState(true);
-  const [deleteAutomations, setDeleteAutomations] = useState(true);
+  const [deleteAutomations, setDeleteAutomations] = useState(
+    automationsCount > 0 && canDeleteWorkflows
+  );
   const [error, setError] = useState<string | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const kiCheckboxId = useGeneratedHtmlId();
@@ -50,7 +52,7 @@ export const AiIndexDeleteConfirmModal = ({
       const result = await deleteAiIndex({
         aiIndexId: aiIndex.id,
         deleteKnowledgeIndicators,
-        deleteAutomations,
+        deleteAutomations: deleteAutomations && canDeleteWorkflows,
       });
 
       if (result.errors.length > 0) {

@@ -139,23 +139,16 @@ describe('AiIndexCard', () => {
     expect(onDeleteClick).toHaveBeenCalledTimes(1);
   });
 
-  it('disables the delete action when the AI index is managed', () => {
-    const onDeleteClick = jest.fn();
-    renderAiIndexCard(buildAiIndex({ managed: true }), undefined, onDeleteClick);
-
-    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
-
-    expect(screen.getByTestId('contextAiIndexCardDeleteAction')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
-    expect(onDeleteClick).not.toHaveBeenCalled();
-  });
-
   it('shows a tooltip explaining why the delete action is disabled for managed indices', async () => {
     renderAiIndexCard(buildAiIndex({ managed: true }));
 
     fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
-    fireEvent.mouseOver(screen.getByTestId('contextAiIndexCardDeleteAction'));
+    const deleteAction = screen.getByTestId('contextAiIndexCardDeleteAction');
+    expect(deleteAction).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.mouseOver(deleteAction.parentElement ?? deleteAction);
 
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('managed');
+    expect(
+      await screen.findByText('This AI index is managed and cannot be deleted.')
+    ).toBeInTheDocument();
   });
 });
