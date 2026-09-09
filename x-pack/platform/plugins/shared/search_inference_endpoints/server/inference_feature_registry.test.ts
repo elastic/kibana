@@ -196,7 +196,9 @@ describe('InferenceFeatureRegistry', () => {
         createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
       );
 
-      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', ''])).toThrow('empty strings');
+      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', ''])).toThrow(
+        'empty strings'
+      );
       expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
     });
 
@@ -205,7 +207,9 @@ describe('InferenceFeatureRegistry', () => {
         createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
       );
 
-      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   '])).toThrow('empty strings');
+      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   '])).toThrow(
+        'empty strings'
+      );
       expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
     });
 

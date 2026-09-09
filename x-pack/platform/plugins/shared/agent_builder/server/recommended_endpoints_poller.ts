@@ -54,8 +54,7 @@ const isEligibleEndpoint = (endpoint: InferenceInferenceEndpointInfo): boolean =
   const meta = getMetadata(endpoint);
   if (meta == null) return false;
   if (!(meta.heuristics?.properties ?? []).includes('kibana-connector')) return false;
-  if (meta.heuristics?.end_of_life_date) return false;
-  return true;
+  return !meta.heuristics?.end_of_life_date;
 };
 
 /** Returns true when `a` has a more recent release_date than `b`. */
