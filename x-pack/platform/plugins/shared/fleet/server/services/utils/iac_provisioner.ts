@@ -37,7 +37,9 @@ export const isIacProvisionerEnabled = (): boolean => {
 // also widen the `provider` literal in server/types/rest_spec/iac_provisioner.ts,
 // server/services/iac_provisioner.ts, common/types/rest_spec/iac_provisioner.ts, and the
 // `cloudProvider !== AWS_CLOUD_PROVIDER` narrowing in
-// server/services/cloud_connectors/iac_key_verification.ts.
+// server/services/cloud_connectors/iac_key_verification.ts, and the per-provider launch
+// URL in public/components/cloud_connector/utils.ts (getIacLaunchUrl). The browser hook
+// takes `provider` from each provider's form and is typed off the request, so it follows.
 const IAC_PROVISIONER_SUPPORTED_PROVIDERS: readonly CloudProvider[] = [AWS_CLOUD_PROVIDER];
 
 /**

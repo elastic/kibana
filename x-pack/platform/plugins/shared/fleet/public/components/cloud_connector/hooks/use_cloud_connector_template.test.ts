@@ -35,6 +35,7 @@ const IAC_TEMPLATE_URL =
   'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ftemplate.yml&param_ElasticResourceId=RESOURCE_ID';
 
 const HOOK_PARAMS = {
+  provider: 'aws' as const,
   cloud: CLOUD,
   accountType: 'single-account' as const,
   iacTemplateUrl: IAC_TEMPLATE_URL,
@@ -101,6 +102,11 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(result.current.isDisabled).toBe(true);
     });
+
+    it('exposes isIacProvisionerEnabled as false', () => {
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      expect(result.current.isIacProvisionerEnabled).toBe(false);
+    });
   });
 
   describe('when the IaC Provisioner is enabled', () => {
@@ -114,6 +120,11 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.launchButtonProps).toHaveProperty('onClick');
       expect(result.current.launchButtonProps).not.toHaveProperty('href');
       expect(result.current.isDisabled).toBe(false);
+    });
+
+    it('exposes isIacProvisionerEnabled as true', () => {
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      expect(result.current.isIacProvisionerEnabled).toBe(true);
     });
 
     it('renders just-in-time and opens the quick-create URL with the artifactUrl', async () => {
@@ -231,6 +242,21 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.templateGenerationError).toBeUndefined();
     });
 
+    it('does not call onTemplateRendered when the render fails', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: null,
+        error: { message: 'unrenderable', statusCode: 422 },
+      } as any);
+
+      const onTemplateRendered = jest.fn();
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
+      );
+      await launch(result);
+
+      expect(onTemplateRendered).not.toHaveBeenCalled();
+    });
+
     it('does not attempt a render when no static scaffold exists', async () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
@@ -291,6 +317,119 @@ describe('useCloudConnectorTemplate', () => {
       expect(windowOpenSpy).toHaveBeenCalledTimes(2);
       expect(windowOpenSpy.mock.calls[1][0]).toContain(
         `templateURL=${encodeURIComponent('https://s3.example/rendered?sig=SECRET')}`
+      );
+    });
+
+    it('calls onTemplateRendered with the key returned by IaCP', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: {
+          artifactUrl: 'https://s3.example/rendered?sig=SECRET',
+          expiresAt: '2026-07-28T12:00:00Z',
+          key: 'sha256:abc',
+        },
+        error: null,
+      } as any);
+
+      const onTemplateRendered = jest.fn();
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
+      );
+      await launch(result);
+
+      expect(onTemplateRendered).toHaveBeenCalledWith({ key: 'sha256:abc' });
+    });
+
+    it('navigates to the stack-update deep link when a deploymentId is provided', async () => {
+      const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+      const ARTIFACT_URL = 'https://s3.example/rendered?sig=SECRET';
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: {
+          artifactUrl: ARTIFACT_URL,
+          expiresAt: '2026-07-28T12:00:00Z',
+        },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, deploymentId: STACK_ARN })
+      );
+      await launch(result);
+
+      const openedUrl = cloudFormationTab.location.href;
+      expect(openedUrl).toMatch(
+        /^https:\/\/console\.aws\.amazon\.com\/cloudformation\/home\?region=us-east-1#\/stacks\/update\/template\?stackId=/
+      );
+      expect(openedUrl).toContain(encodeURIComponent(STACK_ARN));
+      expect(openedUrl).toContain(`&templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
+    });
+
+    it('closes the pre-opened tab and surfaces an error when the launch URL cannot be built (malformed ARN)', async () => {
+      const MALFORMED_ARN = 'not-an-arn';
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: {
+          artifactUrl: 'https://s3.example/rendered?sig=SECRET',
+          expiresAt: '2026-07-28T12:00:00Z',
+        },
+        error: null,
+      } as any);
+
+      const onTemplateRendered = jest.fn();
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          deploymentId: MALFORMED_ARN,
+          iacTemplateUrl: undefined,
+          onTemplateRendered,
+        })
+      );
+      await launch(result);
+
+      expect(cloudFormationTab.close).toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toBe('');
+      expect(result.current.templateGenerationError).toBeDefined();
+      // onTemplateRendered must not fire when the console was never opened.
+      expect(onTemplateRendered).not.toHaveBeenCalled();
+    });
+
+    it('closes the pre-opened tab and surfaces an error when deploymentId is set but no static URL and the render fails', async () => {
+      const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: null,
+        error: { message: 'unrenderable', statusCode: 422 },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: undefined,
+          deploymentId: STACK_ARN,
+        })
+      );
+      await launch(result);
+
+      expect(cloudFormationTab.close).toHaveBeenCalled();
+      // The tab should not have been navigated anywhere.
+      expect(cloudFormationTab.location.href).toBe('');
+      expect(result.current.templateGenerationError).toBeDefined();
+    });
+
+    it('uses integrations override instead of packageName/policyTemplates when provided', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: { artifactUrl: 'https://s3.example/rendered', expiresAt: '2026-07-28T12:00:00Z' },
+        error: null,
+      } as any);
+
+      const customIntegrations = [
+        { name: 'aws', policyTemplates: ['guardduty', 's3'] },
+        { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+      ];
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, integrations: customIntegrations })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ integrations: customIntegrations })
       );
     });
   });

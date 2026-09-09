@@ -25,6 +25,7 @@ import {
   getNormalizedDataStreams,
   getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  getEnabledPolicyTemplates,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
@@ -1118,6 +1119,27 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
       },
     ]);
+  });
+});
+
+describe('getEnabledPolicyTemplates', () => {
+  it('returns the distinct templates of enabled inputs in first-appearance order', () => {
+    expect(
+      getEnabledPolicyTemplates({
+        inputs: [
+          { enabled: true, policy_template: 'cspm' },
+          { enabled: true, policy_template: 'cspm' },
+          { enabled: false, policy_template: 'kspm' },
+          { enabled: true },
+          { enabled: true, policy_template: 'cloudtrail' },
+        ],
+      })
+    ).toEqual(['cspm', 'cloudtrail']);
+  });
+
+  it('returns an empty array for an undefined policy or missing inputs', () => {
+    expect(getEnabledPolicyTemplates(undefined)).toEqual([]);
+    expect(getEnabledPolicyTemplates({})).toEqual([]);
   });
 });
 

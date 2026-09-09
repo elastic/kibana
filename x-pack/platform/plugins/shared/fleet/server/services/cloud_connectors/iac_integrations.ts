@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common/constants/cloud_connector';
+import { getEnabledPolicyTemplates } from '../../../common/services/policy_template';
 import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 import type { RenderIacTemplateIntegration } from '../../../common/types/rest_spec/iac_provisioner';
 import { appContextService } from '../app_context';
@@ -62,10 +63,7 @@ export const getCloudConnectorIntegrationSelections = async (
     if (!name) {
       return [];
     }
-    const policyTemplates = (attributes.inputs ?? [])
-      .filter(({ enabled }) => enabled)
-      .map(({ policy_template: policyTemplate }) => policyTemplate)
-      .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate));
+    const policyTemplates = getEnabledPolicyTemplates(attributes);
     return policyTemplates.length > 0 ? [{ name, policyTemplates }] : [];
   });
 

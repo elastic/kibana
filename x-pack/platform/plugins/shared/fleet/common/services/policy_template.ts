@@ -351,15 +351,23 @@ export const getPolicyTemplateDataStreamPaths = (
     ? policyTemplate.data_streams ?? []
     : [createDefaultDatasetName(packageInfo, policyTemplate)];
 
-export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
-  const enabledPolicyTemplates = new Set(
-    packagePolicy?.inputs
-      .filter((input) => input.enabled)
+/**
+ * Distinct policy templates of the policy's enabled inputs, in first-appearance order.
+ * Accepts any policy-like shape (package policy, SO attributes, wizard draft).
+ */
+export const getEnabledPolicyTemplates = (
+  policy: { inputs?: Array<{ enabled: boolean; policy_template?: string }> } | undefined
+): string[] => [
+  ...new Set(
+    policy?.inputs
+      ?.filter((input) => input.enabled)
       .map((input) => input.policy_template)
-      .filter((policyTemplate): policyTemplate is string => !!policyTemplate) ?? []
-  );
-  return enabledPolicyTemplates.size > 1;
-};
+      .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate)) ?? []
+  ),
+];
+
+export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean =>
+  getEnabledPolicyTemplates(packagePolicy).length > 1;
 
 export function filterPolicyTemplatesTiles<T>(
   templatesBehavior: string | undefined,
