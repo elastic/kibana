@@ -44,8 +44,6 @@ const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager a
  * - The execution cursor's `stop()` is called while the workflow remains RUNNING
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
-  if (params.workflowRuntime.getWorkflowExecution().executionMode !== 'parallel_v4')
-    return runWorkflowExecutionLoop(params);
   const executionFailure = new ExecutionFailure();
   const executionParams = { ...params, executionFailure };
   try {
@@ -80,7 +78,9 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   );
 }
 
-async function runWorkflowExecutionLoop(params: WorkflowExecutionLoopParams) {
+async function runWorkflowExecutionLoop(
+  params: WorkflowExecutionLoopParams & { executionFailure: ExecutionFailure }
+) {
   const { workflowExecutionCursor, workflowRuntime } = params;
   // Create an abort controller to signal the persistence loop to exit immediately
   // when execution completes (instead of waiting for the next 500ms flush cycle)
@@ -149,13 +149,9 @@ async function runWorkflowExecutionLoop(params: WorkflowExecutionLoopParams) {
       runDriver(() => executionFlowLoop(params).finally(() => persistenceAbortController.abort())),
       runDriver(() => persistenceLoop(params, persistenceAbortController.signal)),
     ];
-    if (params.executionFailure) {
-      const results = await Promise.allSettled(drivers);
-      for (const result of results) if (result.status === 'rejected') throw result.reason;
-      params.executionFailure.throwIfFailed();
-    } else {
-      await Promise.all(drivers);
-    }
+    const results = await Promise.allSettled(drivers);
+    for (const result of results) if (result.status === 'rejected') throw result.reason;
+    params.executionFailure.throwIfFailed();
   } catch (error) {
     workflowExecutionCursor.captureError(error);
     workflowExecutionCursor.stop();

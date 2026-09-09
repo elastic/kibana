@@ -25,10 +25,10 @@ const outputs = (fixture: WorkflowRunFixture, stepId: string) =>
   executions(fixture, stepId)
     .map((step) => step.output)
     .sort();
-const drain = async (fixture: WorkflowRunFixture) => {
+const drain = async (fixture: WorkflowRunFixture, advanceMs = 2000) => {
   let now = Date.now();
   for (let tick = 0; tick < 20 && workflow(fixture)?.status === ExecutionStatus.WAITING; tick++) {
-    now += 2000;
+    now += advanceMs;
     const date = jest.spyOn(Date, 'now').mockReturnValue(now);
     try {
       await fixture.resumeWorkflow();
@@ -222,8 +222,8 @@ describe('parallel failure handling at the join', () => {
 
   it('drains already-started siblings but never admits queued branches after fail-fast', async () => {
     const fixture = new WorkflowRunFixture();
-    await fixture.runWorkflow({ workflowYaml: failingExample('12_fail_fast_queue') });
-    await drain(fixture);
+    await fixture.runWorkflow({ workflowYaml: failingExample('24_fail_fast_long_wait') });
+    await drain(fixture, 61_000);
     expect(workflow(fixture)?.status).toBe(ExecutionStatus.FAILED);
     expect(outputs(fixture, 'active_result')).toEqual(['drained']);
     expect(executions(fixture, 'never_queued')).toHaveLength(0);

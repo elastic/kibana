@@ -10,18 +10,15 @@
 import apm from 'elastic-apm-node';
 import { BranchExecutor } from './branch_executor';
 import { runNode } from './run_node';
-import { runV1Node } from './run_v1_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
 /**
  * Runs nodes until the cursor stops (terminal, parked wait, or cancel).
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
-  const legacy = params.workflowRuntime.getWorkflowExecution().executionMode === 'legacy';
-  if (!legacy) params.workflowRuntime.branchExecutor = new BranchExecutor(params);
+  params.workflowRuntime.branchExecutor = new BranchExecutor(params);
   while (params.workflowExecutionCursor.isExecuting) {
-    if (legacy) await runV1Node(params);
-    else await runNode(params);
+    await runNode(params);
     if (params.workflowRuntime.getWorkflowExecution().pendingTermination) {
       params.workflowExecutionCursor.stop();
       return;
