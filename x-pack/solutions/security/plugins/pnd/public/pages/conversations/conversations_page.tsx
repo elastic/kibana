@@ -19,18 +19,23 @@ import {
   type Investigation,
   type RecommendedAction,
 } from '@kbn/pnd-common';
+import {
+  ConversationQueue,
+  type ConversationsActionsGroupProps,
+  type BaseActionsProps,
+  type CardActionType,
+  ConversationDetailsFlyout,
+  BlastRadius,
+  AssignActionModal,
+  BaseActionModal,
+  MODAL_TRANSLATIONS,
+  ApprovalModal,
+} from '@kbn/agentic-investigations-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
-import { ConversationQueue } from '../../components/conversation_queue';
-import { type ConversationsActionsGroupProps } from '../../components/conversation_card';
-import { type BaseActionsProps, type CardActionType } from '../../components/actions';
-import { BlastRadius } from '../../components/filters/blast_radius';
-import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
-import { ApprovalModal } from '../../components/modals/approval_modal';
-import { ConversationDetailsFlyout } from '../../components/details';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
