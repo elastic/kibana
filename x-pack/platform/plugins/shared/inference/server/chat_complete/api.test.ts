@@ -40,6 +40,7 @@ import {
   createInferenceConnectorMock,
   createInferenceExecutorMock,
   createRegexWorkerServiceMock,
+  createPiiRegexWorkerServiceMock,
   chunkEvent,
   tokensEvent,
 } from '../test_utils';
@@ -198,7 +199,12 @@ describe('createChatCompleteApi', () => {
       esClient: mockEsClient,
       endpointIdCache,
       anonymization: { saltPromise: Promise.resolve('server-managed-salt') },
-      workflowAnonymization: { provider, failureMode: 'block', preLLMTimeoutMs: 0 },
+      workflowAnonymization: {
+        provider,
+        failureMode: 'block',
+        preLLMTimeoutMs: 0,
+        piiRegexWorker: createPiiRegexWorkerServiceMock(),
+      },
     });
     const workflowChatComplete = createChatCompleteApi({ callbackApi: workflowCallbackApi });
 
@@ -246,7 +252,12 @@ describe('createChatCompleteApi', () => {
         esClient: mockEsClient,
         endpointIdCache,
         anonymization: { saltPromise: Promise.resolve('server-managed-salt') },
-        workflowAnonymization: { provider, failureMode: 'allow_unsafe', preLLMTimeoutMs: 0 },
+        workflowAnonymization: {
+          provider,
+          failureMode: 'allow_unsafe',
+          preLLMTimeoutMs: 0,
+          piiRegexWorker: createPiiRegexWorkerServiceMock(),
+        },
       }),
     });
 
