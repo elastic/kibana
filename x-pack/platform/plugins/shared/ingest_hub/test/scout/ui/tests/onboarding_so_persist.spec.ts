@@ -86,7 +86,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
         );
         sessionStorage.setItem(
           authKey,
-          JSON.stringify({ connectorId: 'connector-test-123', authType: 'identity_federation' })
+          JSON.stringify({ connectorId: 'connector-test-123', authMethod: 'identity_federation' })
         );
       },
       {
@@ -241,5 +241,142 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     expect(sessionState.stepState?.['service-settings']).toBe('complete');
     expect(sessionState.stepState?.['authenticate-and-deploy']).toBe('complete');
     expect(sessionState.stepState?.['detect-and-review']).toBe('incomplete');
+  });
+
+  test('static-keys deploy fires POST without connectorId and with authMethod: static_keys', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Mock SO GET so ?deploymentId= hydration resolves before we override session.
+    await page.route(
+      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-static-seed$/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: {
+              id: 'dep-static-seed',
+              provider: 'aws',
+              authMethod: 'static_keys',
+              mechanisms: ['agentless'],
+              services: ['elb'],
+              status: 'failed',
+              attemptCount: 1,
+              globalRegion: 'us-east-1',
+              serviceVars: {},
+            },
+          }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    // Use ?deploymentId= so isEditMode=true and StaticKeysReplaceView renders.
+    await page.goto(
+      page.url().replace(/\/app\/.*/, '/app/onboarding/aws?deploymentId=dep-static-seed#authenticate-and-deploy')
+    );
+
+    await page.route(
+      (url) => /\/api\/fleet\/cloud_onboarding_deployments$/.test(url.pathname),
+      (route) => {
+        if (route.request().method() === 'POST') {
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: { id: 'dep-static-001' } }),
+          });
+        }
+        return route.continue();
+      }
+    );
+
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ item: { id: 'p-static-001', name: 'test-policy' } }),
+        })
+    );
+
+    const soCreatePromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'POST' &&
+        /\/api\/fleet\/cloud_onboarding_deployments$/.test(new URL(req.url()).pathname)
+    );
+
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+    // Both fields start hidden — click Replace then enter values.
+    await page.getByText(/replace access key id/i).click();
+    await page.testSubj.locator('staticKeysReplace-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
+    await page.getByText(/replace secret access key/i).click();
+    await page.testSubj.locator('staticKeysReplace-secretAccessKey').fill('wJalrXUtnFEMI/K7MDENG');
+    await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
+
+    const soCreateReq = await soCreatePromise;
+    const soCreateBody = soCreateReq.postDataJSON() as {
+      connectorId?: string;
+      authMethod: string;
+      provider: string;
+      services: string[];
+    };
+    expect(soCreateBody.authMethod).toBe('static_keys');
+    expect(soCreateBody.provider).toBe('aws');
+    expect(soCreateBody.services).toContain('elb');
+    // connectorId must be absent or undefined — credentials are never persisted in the SO.
+    expect(soCreateBody.connectorId).toBeUndefined();
+  });
+
+  test('static-keys ?deploymentId= resume hydrates authMethod: static_keys with no connectorId', async ({
+    browserAuth,
+    page,
+  }) => {
+    const soPayload = {
+      item: {
+        id: 'dep-static-resume',
+        provider: 'aws',
+        authMethod: 'static_keys',
+        mechanisms: ['agentless'],
+        services: ['elb'],
+        status: 'succeeded',
+        attemptCount: 1,
+        globalRegion: 'us-west-2',
+        serviceVars: {},
+      },
+    };
+    await page.route(
+      (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-static-resume$/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(soPayload),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.goto(
+      page.url().replace(/\/app\/.*/, '/app/onboarding/aws?deploymentId=dep-static-resume')
+    );
+
+    await page.waitForSelector('[data-test-subj^="onboardingStep-"]');
+
+    const sessionState = await page.evaluate(
+      ({ authKey }: { authKey: string }) => ({
+        auth: JSON.parse(sessionStorage.getItem(authKey) ?? 'null'),
+      }),
+      { authKey: AUTHENTICATE_AND_DEPLOY_SESSION_KEY }
+    );
+
+    // Session must reflect static_keys auth with no connectorId.
+    expect(sessionState.auth?.authMethod).toBe('static_keys');
+    expect(sessionState.auth?.connectorId).toBeUndefined();
+
+    // StaticKeysReplaceView should be visible — both fields start hidden.
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+    // The hidden-field panels are present (Replace buttons visible, no inputs).
+    await expect(page.getByText(/replace access key id/i)).toBeVisible();
+    await expect(page.getByText(/replace secret access key/i)).toBeVisible();
   });
 });
