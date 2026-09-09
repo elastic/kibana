@@ -68,17 +68,12 @@ describe('deriveRecommendations', () => {
       ).toBeNull();
     });
 
-    it('returns null when both lists are empty after AB gate', () => {
+    it('returns null when all endpoints have unrecognised capability', () => {
       expect(
         deriveRecommendations([
-          makeEndpoint('.unvalidated-main', {
-            capability: 'capable',
-            family: 'x',
-            releaseDate: '2025-01-01',
-          }),
-          makeEndpoint('.unvalidated-fast', {
-            capability: 'efficient',
-            family: 'y',
+          makeEndpoint(SONNET, {
+            capability: 'multilingual',
+            family: 'claude-sonnet',
             releaseDate: '2025-01-01',
           }),
         ])
@@ -87,16 +82,11 @@ describe('deriveRecommendations', () => {
   });
 
   describe('partial results — independent list application', () => {
-    it('returns only recommended when no fast-tier model is validated', () => {
+    it('returns only recommended when no efficient model is present', () => {
       const result = deriveRecommendations([
         makeEndpoint(SONNET, {
           capability: 'capable',
           family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint('.unvalidated-fast', {
-          capability: 'efficient',
-          family: 'z',
           releaseDate: '2025-01-01',
         }),
       ]);
@@ -104,13 +94,8 @@ describe('deriveRecommendations', () => {
       expect(result?.fast).toBeUndefined();
     });
 
-    it('returns only fast when no main-tier model is validated', () => {
+    it('returns only fast when no capable/balanced model is present', () => {
       const result = deriveRecommendations([
-        makeEndpoint('.unvalidated-main', {
-          capability: 'capable',
-          family: 'x',
-          releaseDate: '2025-01-01',
-        }),
         makeEndpoint(HAIKU, {
           capability: 'efficient',
           family: 'claude-haiku',
@@ -306,52 +291,6 @@ describe('deriveRecommendations', () => {
       ]);
       expect(result?.recommended).toHaveLength(2);
       expect(result?.fast).toHaveLength(2);
-    });
-  });
-
-  describe('AB validation gate', () => {
-    it('excludes unvalidated models', () => {
-      const result = deriveRecommendations([
-        makeEndpoint('.unvalidated-model', {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2024-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
-      ]);
-      expect(result?.recommended).not.toContain('.unvalidated-model');
-      expect(result?.recommended).toContain(SONNET);
-    });
-
-    it('does not allow an unvalidated newer model to displace a validated older one in the same family', () => {
-      const result = deriveRecommendations([
-        makeEndpoint('.unvalidated-new', {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2026-01-01',
-        }),
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
-      ]);
-      expect(result?.recommended).toContain(SONNET);
-      expect(result?.recommended).not.toContain('.unvalidated-new');
     });
   });
 
