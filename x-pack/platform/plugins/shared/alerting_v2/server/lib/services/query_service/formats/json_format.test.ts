@@ -7,9 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import { NON_STREAMING_MAX_ROWS } from '../../../../config';
 import { createMockEsClient } from '../../../test_utils';
-import { jsonFormat } from './json_format';
+import { jsonFormat, NON_STREAMING_MAX_ROWS } from './json_format';
 import { collectBatches } from './test_utils';
 
 describe('jsonFormat', () => {

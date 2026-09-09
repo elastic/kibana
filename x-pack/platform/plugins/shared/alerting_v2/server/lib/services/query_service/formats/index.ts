@@ -17,3 +17,4 @@ export {
   getEsqlResponseFormat,
   type EsqlResponseFormatName,
 } from './registry';
+export { NON_STREAMING_MAX_ROWS } from './json_format';

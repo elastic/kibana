@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { NON_STREAMING_MAX_ROWS } from '../../../../config';
 import type { EsqlRow } from '../row_coercion';
 import { toRows } from '../row_coercion';
 import type {
@@ -16,6 +15,12 @@ import type {
   EsqlResponseFormat,
   EsqlRowBatchSource,
 } from './types';
+
+/**
+ * Row cap for the JSON format. The whole result set is held in memory, so this
+ * is deliberately far below the product-level `rules.run.alerts.max` ceiling.
+ */
+export const NON_STREAMING_MAX_ROWS = 1000;
 
 async function* yieldSingleBatch(response: EsqlQueryResponse): AsyncIterable<EsqlRow[]> {
   yield toRows(response, { normalizeDates: true });

@@ -6,9 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import type { Type, TypeOf } from '@kbn/config-schema';
 import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, MIN_SCHEDULE_INTERVAL } from '@kbn/alerting-v2-schemas';
 import { parseDurationToMs, validateDuration } from './lib/duration';
+import {
+  DEFAULT_ESQL_RESPONSE_FORMAT,
+  ESQL_RESPONSE_FORMAT_NAMES,
+  getEsqlResponseFormat,
+  type EsqlResponseFormatName,
+} from './lib/services/query_service/formats';
 
 /** Default value of `xpack.alerting_v2.rules.minimumScheduleInterval`. */
 const MINIMUM_SCHEDULE_INTERVAL_DEFAULT = DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
@@ -27,10 +33,6 @@ const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 const MAX_ALERTS_PER_RUN = 10000;
 /** Default cap on the ES response body size for non-streaming rule queries (50 MB). */
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
-/**
- * Max for the non-streaming (JSON) ES|QL path.
- */
-export const NON_STREAMING_MAX_ROWS = 1000;
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
@@ -92,9 +94,15 @@ const rulesSchema = schema.object({
 });
 
 const esqlSchema = schema.object({
-  responseFormat: schema.oneOf([schema.literal('json'), schema.literal('arrow')], {
-    defaultValue: 'json',
-  }),
+  // `schema.oneOf` only declares fixed-arity tuple overloads, so the mapped
+  // array is asserted into the single-branch one; the resulting type is the
+  // full `EsqlResponseFormatName` union.
+  responseFormat: schema.oneOf(
+    ESQL_RESPONSE_FORMAT_NAMES.map((name) => schema.literal(name)) as [
+      Type<EsqlResponseFormatName>
+    ],
+    { defaultValue: DEFAULT_ESQL_RESPONSE_FORMAT }
+  ),
 });
 
 export const configSchema = schema.object({
@@ -111,10 +119,14 @@ export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type EsqlConfig = TypeOf<typeof esqlSchema>;
 
+/**
+ * Rows a single execution may request: the product-level `alerts.max` ceiling,
+ * further capped by the configured response format when that format declares a
+ * limit of its own.
+ */
 export const getQueryRowLimit = (config: PluginConfig): number => {
   const maxAlerts = config.rules.run.alerts.max;
-  if (config.esql.responseFormat === 'json') {
-    return Math.min(maxAlerts, NON_STREAMING_MAX_ROWS);
-  }
-  return maxAlerts;
+  const { maxRows } = getEsqlResponseFormat(config.esql.responseFormat);
+
+  return maxRows === undefined ? maxAlerts : Math.min(maxAlerts, maxRows);
 };
