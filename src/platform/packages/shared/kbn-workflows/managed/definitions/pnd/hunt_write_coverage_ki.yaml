@@ -1,0 +1,76 @@
+version: "1"
+name: Hunt write coverage KI
+description: >
+  POC Hunt → Detection handoff. Writes a compact security.coverage knowledge
+  indicator instead of tagging an Investigation with needs-coverage.
+enabled: true
+tags:
+  - security
+  - coverage-ki-poc
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        subject:
+          type: string
+          description: Stable coverage-subject slug used as ki_id (e.g. forti-vpn-admin).
+        title:
+          type: string
+          description: Short gap title shown in CE and used as the Detection investigation title.
+        technique:
+          type: string
+          description: MITRE ATT&CK technique id the gap maps to.
+        gap_description:
+          type: string
+          description: Why coverage is missing. Copied into the KI content.
+        investigation_id:
+          type: string
+          description: Hunt investigation conversation id to link back to.
+        evidence:
+          type: string
+          description: Optional compact hunt evidence. Keep SSE dumps on the Investigation.
+        ai_index_id:
+          type: string
+          default: security-investigations
+          description: Context Engine AI index id. createKi creates it if missing.
+      required:
+        - subject
+        - title
+        - technique
+      additionalProperties: false
+outputs:
+  - name: ki_id
+    type: string
+  - name: ai_index_id
+    type: string
+steps:
+  - name: write_coverage_ki
+    type: context-engine.createKi
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "ki-cov-{{ inputs.subject }}"
+      ki:
+        type: security.coverage
+        title: "{{ inputs.title }}"
+        description: "Coverage gap {{ inputs.technique }}. Hunt investigation {{ inputs.investigation_id }}."
+        content: >-
+          {{ inputs.gap_description }}
+          Evidence: {{ inputs.evidence }}
+        tags:
+          - consumer:detection
+          - status:pending
+          - watch:hunt
+        attributes:
+          status: pending
+          subject: "{{ inputs.subject }}"
+          technique: "{{ inputs.technique }}"
+          investigation_id: "{{ inputs.investigation_id }}"
+          watch_id: hunt
+          producer: hunt.write_coverage_ki.v1
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      ki_id: "{{ steps.write_coverage_ki.output.id }}"
+      ai_index_id: "{{ inputs.ai_index_id }}"
