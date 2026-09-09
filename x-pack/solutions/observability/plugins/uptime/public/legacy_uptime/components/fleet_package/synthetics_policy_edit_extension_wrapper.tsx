@@ -8,8 +8,8 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FleetStartServices } from '@kbn/fleet-plugin/public';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEditMonitorLocator } from './use_edit_monitor_locator';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
@@ -53,16 +53,18 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 
     if (currentPolicy.is_managed) {
       return (
-        <EuiCallOut announceOnMount>
-          <p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>
-          <EuiButton
-            isLoading={!url}
-            href={url + `?packagePolicyId=${currentPolicy.id}`}
-            data-test-subj="syntheticsEditMonitorButton"
-          >
-            {EDIT_IN_SYNTHETICS_LABEL}
-          </EuiButton>
-        </EuiCallOut>
+        <KbnInfoCallout
+          announceOnMount
+          title={<p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>}
+          actionProps={{
+            primary: {
+              isLoading: !url,
+              href: url + `?packagePolicyId=${currentPolicy.id}`,
+              'data-test-subj': 'syntheticsEditMonitorButton',
+              children: EDIT_IN_SYNTHETICS_LABEL,
+            },
+          }}
+        />
       );
     } else {
       return <DeprecateNoticeModal onCancel={onCancel} />;
