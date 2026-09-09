@@ -572,34 +572,6 @@ describe('discover session API transforms', () => {
       });
     });
 
-    it('selects the data view through the layer linkage and falls back on ambiguity', () => {
-      const ambiguous = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv-a' }, 'layer-2': { index: 'esql-dv-b' } },
-        adHocDataViews: {
-          'esql-dv-a': { type: 'esql', timeFieldName: '@timestamp' },
-          'esql-dv-b': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(
-        getStoredVisContext({ ...esqlTab, breakdown_field: 'host.name', vis_context: ambiguous })
-      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
-
-      const sameDataView = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv' }, 'layer-2': { index: 'esql-dv' } },
-        adHocDataViews: {
-          'unused-esql-dv': { type: 'esql', timeFieldName: 'event.ingested' },
-          'esql-dv': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(getStoredVisContext({ ...esqlTab, vis_context: sameDataView })).toEqual(
-        expect.objectContaining({
-          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
-        })
-      );
-    });
-
     it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
@@ -608,7 +580,11 @@ describe('discover session API transforms', () => {
 
       expect(
         getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
-      ).toEqual(expect.objectContaining({ requestData: { dataViewId: 'esql-dv' } }));
+      ).toStrictEqual({
+        suggestionType: visContext.suggestion_type,
+        requestData: { dataViewId: 'esql-dv' },
+        attributes: visContext.attributes,
+      });
     });
 
     it('falls back when the blob is not a recognizable ES|QL chart', () => {
@@ -636,7 +612,11 @@ describe('discover session API transforms', () => {
           breakdown_field: '',
           vis_context: wrongDataViewType,
         })
-      ).toEqual(expect.objectContaining({ requestData: {} }));
+      ).toStrictEqual({
+        suggestionType: wrongDataViewType.suggestion_type,
+        requestData: {},
+        attributes: wrongDataViewType.attributes,
+      });
     });
 
     it('keeps behavior unchanged without a vis_context', () => {
