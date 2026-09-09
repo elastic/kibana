@@ -122,7 +122,7 @@ export const PREVIEW_TITLE = i18n.translate('xpack.evals.importDatasetFlyout.pre
 });
 export const PREVIEW_DESCRIPTION = i18n.translate(
   'xpack.evals.importDatasetFlyout.previewDescription',
-  { defaultMessage: 'Showing up to the first 1,000 valid rows.' }
+  { defaultMessage: 'Showing up to the first 50 valid rows.' }
 );
 export const PREVIEW_TABLE_LABEL = i18n.translate(
   'xpack.evals.importDatasetFlyout.previewTableLabel',

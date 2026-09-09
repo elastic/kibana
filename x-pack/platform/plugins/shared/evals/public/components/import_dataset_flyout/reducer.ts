@@ -12,6 +12,8 @@ export type ImportFileFormat = 'csv' | 'jsonl';
 export type ImportDatasetMode = 'existing' | 'new';
 export type ImportWizardStep = 'file' | 'map' | 'validate' | 'result';
 
+export const MAX_PREVIEW_ROWS = 50;
+
 export interface SelectedImportFile {
   name: string;
   size: number;
@@ -125,7 +127,7 @@ export const importWizardReducer = (
         ...state,
         file: action.file,
         columns: action.preview.columns,
-        previewRows: action.preview.rows.slice(0, 1000),
+        previewRows: action.preview.rows.slice(0, MAX_PREVIEW_ROWS),
         mapping: action.mapping,
         examples: [],
         validationErrors: [],

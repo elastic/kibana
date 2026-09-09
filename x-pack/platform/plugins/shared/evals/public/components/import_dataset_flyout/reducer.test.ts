@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { canAdvance, createInitialState, importWizardReducer } from './reducer';
+import { canAdvance, createInitialState, importWizardReducer, MAX_PREVIEW_ROWS } from './reducer';
 
 const selectedFile = {
   name: 'examples.csv',
@@ -74,6 +74,23 @@ describe('import dataset flyout reducer', () => {
     expect(canAdvance(mapState)).toBe(true);
     expect(validateState.step).toBe('validate');
     expect(canAdvance(validateState)).toBe(true);
+  });
+
+  it('keeps only the first preview rows when selecting a file', () => {
+    const rows = Array.from({ length: MAX_PREVIEW_ROWS + 1 }, (_, index) => ({
+      rowNumber: index + 1,
+      values: { prompt: `row-${index + 1}` },
+    }));
+    const state = importWizardReducer(createInitialState('dataset-1'), {
+      type: 'selectFile',
+      file: selectedFile,
+      preview: { columns: ['prompt'], rows, errors: [] },
+      mapping: { prompt: 'input' },
+    });
+
+    expect(state.previewRows).toHaveLength(MAX_PREVIEW_ROWS);
+    expect(state.previewRows[0].rowNumber).toBe(1);
+    expect(state.previewRows[MAX_PREVIEW_ROWS - 1].rowNumber).toBe(MAX_PREVIEW_ROWS);
   });
 
   it('does not import when validation has a blocking error', () => {
