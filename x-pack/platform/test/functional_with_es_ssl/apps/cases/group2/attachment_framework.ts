@@ -436,14 +436,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
         await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
-        await testSubjects.click('cases-table-add-case-filter-bar');
-
-        await cases.create.createCase({
+        await cases.create.createCaseFromModal({
           title: caseTitle,
           description: 'test description',
           owner: 'cases',
         });
-        await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
