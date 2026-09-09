@@ -51,11 +51,6 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
-    iacProvisioner: {
-      // Kept so existing kibana.yml / Cloud injects still parse. Runtime
-      // activation is `fleet.enableIacProvisioner`, not this key.
-      enabled: true,
-    },
     enableExperimental: true,
     experimentalFeatures: true,
     developer: {
@@ -283,7 +278,7 @@ export const config: PluginConfigDescriptor = {
       ),
       iacProvisioner: schema.maybe(
         schema.object({
-          // Ignored at runtime. Use fleet.enableIacProvisioner (LaunchDarkly).
+          // Schema-only. Runtime activation is fleet.enableIacProvisioner.
           enabled: schema.boolean({ defaultValue: false }),
           api: schema.maybe(
             schema.object({

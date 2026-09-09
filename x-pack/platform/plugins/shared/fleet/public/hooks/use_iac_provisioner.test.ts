@@ -23,16 +23,14 @@ const mockEnvironment = ({
   isCloudEnabled = false,
   isServerlessEnabled = false,
   agentlessEnabled = false,
-  launchDarklyEnabled = false,
-  iacProvisionerConfigEnabled = false,
+  iacProvisionerEnabled = false,
 }) => {
   mockedUseConfig.mockReturnValue({
     agentless: { enabled: agentlessEnabled },
-    iacProvisioner: { enabled: iacProvisionerConfigEnabled },
   } as any);
   mockedUseStartServices.mockReturnValue({
     cloud: { isCloudEnabled, isServerlessEnabled },
-    featureFlags: { getBooleanValue: jest.fn().mockReturnValue(launchDarklyEnabled) },
+    featureFlags: { getBooleanValue: jest.fn().mockReturnValue(iacProvisionerEnabled) },
   } as any);
 };
 
@@ -43,29 +41,29 @@ describe('useIacProvisioner', () => {
 
   it.each([
     [
-      'cloud + agentless + LD on',
+      'cloud + agentless + flag on',
       {
         isCloudEnabled: true,
         agentlessEnabled: true,
-        launchDarklyEnabled: true,
+        iacProvisionerEnabled: true,
       },
       true,
     ],
     [
-      'serverless + agentless + LD on',
+      'serverless + agentless + flag on',
       {
         isServerlessEnabled: true,
         agentlessEnabled: true,
-        launchDarklyEnabled: true,
+        iacProvisionerEnabled: true,
       },
       true,
     ],
     [
-      'LD off',
+      'flag off',
       {
         isCloudEnabled: true,
         agentlessEnabled: true,
-        launchDarklyEnabled: false,
+        iacProvisionerEnabled: false,
       },
       false,
     ],
@@ -74,21 +72,11 @@ describe('useIacProvisioner', () => {
       {
         isCloudEnabled: true,
         agentlessEnabled: false,
-        launchDarklyEnabled: true,
+        iacProvisionerEnabled: true,
       },
       false,
     ],
-    ['self-managed', { agentlessEnabled: true, launchDarklyEnabled: true }, false],
-    [
-      'kibana.yml enabled true does not override LD off',
-      {
-        isCloudEnabled: true,
-        agentlessEnabled: true,
-        launchDarklyEnabled: false,
-        iacProvisionerConfigEnabled: true,
-      },
-      false,
-    ],
+    ['self-managed', { agentlessEnabled: true, iacProvisionerEnabled: true }, false],
   ])('%s => %s', (_label, environment, expected) => {
     mockEnvironment(environment);
 
@@ -101,7 +89,6 @@ describe('useIacProvisioner', () => {
     const getBooleanValue = jest.fn().mockReturnValue(true);
     mockedUseConfig.mockReturnValue({
       agentless: { enabled: true },
-      iacProvisioner: { enabled: false },
     } as any);
     mockedUseStartServices.mockReturnValue({
       cloud: { isCloudEnabled: true, isServerlessEnabled: false },

@@ -68,7 +68,6 @@ function mockConfig(overrides: Record<string, unknown> = {}) {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: true },
     iacProvisioner: {
-      enabled: true,
       api: {
         url: 'https://iac-provisioner.example',
         tls: { certificate: '/path/tls.crt', key: '/path/tls.key', ca: '/path/ca.crt' },

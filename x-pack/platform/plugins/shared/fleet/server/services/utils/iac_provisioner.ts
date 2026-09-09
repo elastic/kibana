@@ -11,7 +11,6 @@ import { appContextService } from '..';
 import { isAgentlessEnabled } from './agentless';
 
 export interface IacProvisionerConfig {
-  enabled?: boolean;
   api?: {
     url?: string;
     tls?: {
@@ -28,8 +27,8 @@ export interface IacProvisionerConfig {
  * https://github.com/elastic/security-team/issues/18240.
  *
  * Runtime activation is the LaunchDarkly flag `fleet.enableIacProvisioner`
- * (fallback false). `xpack.fleet.iacProvisioner.enabled` is ignored so Cloud
- * can inject URL/TLS in every environment without turning the feature on.
+ * (fallback false). URL and TLS stay in kibana.yml; do not read
+ * `xpack.fleet.iacProvisioner.enabled`.
  */
 export const isIacProvisionerEnabled = async (): Promise<boolean> => {
   if (!isAgentlessEnabled()) {
