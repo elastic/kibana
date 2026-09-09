@@ -29,7 +29,7 @@ export function prepareCallbacks(
   const disableTriggers = apiHasDisableTriggers(parentApi)
     ? parentApi.disableTriggers.getValue()
     : undefined;
-  console.log({ disableTriggers, parentApi });
+
   return {
     disableTriggers,
     onRender: prepareOnRender(

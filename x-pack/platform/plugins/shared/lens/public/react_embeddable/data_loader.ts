@@ -307,11 +307,17 @@ export function loadEmbeddableData(
     const hasBlockingErrors = dispatchBlockingErrorIfAny();
 
     if (params?.expression != null && !hasBlockingErrors) {
+      console.log({ params });
       internalApi.updateExpressionParams(params);
     }
 
     internalApi.updateAbortController(abortController ?? new AbortController());
   }
+
+  // parentApi.disabledTriggers.subscribe(async () => {
+  //   console.log('!!!!!! HEERE');
+  //   await reload();
+  // });
 
   // Build a custom operator to be resused for various observables
   function waitUntilChanged() {

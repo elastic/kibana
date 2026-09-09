@@ -467,6 +467,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
                 const disableTriggers = apiHasDisableTriggers(parentApi)
                   ? parentApi.disableTriggers.getValue()
                   : undefined;
+                console.log({ disableTriggers });
                 if (!disableTriggers) {
                   const triggerId: string = get(
                     VIS_EVENT_TO_TRIGGER,
