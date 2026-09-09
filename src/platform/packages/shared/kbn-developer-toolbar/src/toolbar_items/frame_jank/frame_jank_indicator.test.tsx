@@ -139,16 +139,14 @@ describe('FrameJankIndicator warnings', () => {
   it('keeps the graph full without padding measured statistics', () => {
     render(<FrameJankIndicator />);
     expect(screen.getAllByTestId('performanceGraphBar')).toHaveLength(20);
-    expect(screen.getByText('Jank 0%')).toBeTruthy();
+    expect(screen.getByText('Jank —')).toBeTruthy();
 
     emit({ perf: { ...neutralPerf, history: [60] } });
     expect(screen.getAllByTestId('performanceGraphBar')).toHaveLength(20);
 
     fireEvent.focus(screen.getByLabelText('Performance monitor'));
     expect(screen.getByRole('tooltip').textContent).toContain('Samples: 1');
-    expect(screen.getByRole('tooltip').textContent).toContain(
-      'Frame warnings use at least 3 measured samples.'
-    );
+    expect(screen.getByRole('tooltip').textContent).not.toContain('Measuring frame rate…');
   });
 
   it('selects a danger worst interaction even when p75 and frames are normal', () => {
@@ -195,7 +193,7 @@ describe('FrameJankIndicator warnings', () => {
       taskCallback({ ...neutralTask, worstTaskDuration: 300, worstTaskStartTime: 8_000 });
     });
     expect(warningTrigger().getAttribute('aria-label')).toBe(
-      'Performance warning: Main-thread stall'
+      'Performance warning: Long task'
     );
     expect(screen.getByText('Jank 15%').getAttribute('data-color')).toBe('danger');
   });
@@ -217,13 +215,13 @@ describe('FrameJankIndicator warnings', () => {
     );
     act(() => inpCallback(neutralInp));
     expect(warningTrigger().getAttribute('aria-label')).toBe(
-      'Performance warning: Elevated blocking time'
+      'Performance warning: Blocking time'
     );
     expect(screen.getByText('Jank 0%').getAttribute('data-color')).toBe('warning');
     fireEvent.focus(warningTrigger());
     const blockingTooltip = screen.getByRole('tooltip').textContent ?? '';
-    expect(blockingTooltip.match(/Blocking:/g)).toHaveLength(1);
-    expect(blockingTooltip).not.toContain('Blocking ·');
+    expect(blockingTooltip.match(/Blocking time:/g)).toHaveLength(1);
+    expect(blockingTooltip).not.toContain('Blocking time ·');
     fireEvent.blur(warningTrigger());
     act(() => taskCallback(neutralTask));
     expect(screen.getByLabelText('Performance monitor')).toBeTruthy();
@@ -252,31 +250,28 @@ describe('FrameJankIndicator warnings', () => {
     const worst = screen.getByText('Worst: 100ms · 1s ago');
     expect(worst.getAttribute('data-color')).toBe('warning');
     expect(getComputedStyle(worst.parentElement as HTMLElement).fontWeight).toBe('bold');
-    expect(screen.getByRole('tooltip').textContent).toContain(
-      'Record the same action in browser DevTools → Performance.'
-    );
     expect(screen.getByRole('tooltip').textContent).not.toContain('Slow interaction ·');
   });
 
   it('shows frame startup and unsupported states without fabricating measurements', () => {
     const { unmount } = render(<FrameJankIndicator />);
     fireEvent.focus(screen.getByLabelText('Performance monitor'));
-    expect(screen.getByText('Jank 0%')).toBeTruthy();
+    expect(screen.getByText('Jank —')).toBeTruthy();
     const measuringTooltip = screen.getByRole('tooltip').textContent ?? '';
     expect(measuringTooltip).toContain('FPS: —');
     expect(measuringTooltip).toContain('Range: —');
-    expect(measuringTooltip).toContain('Slow samples: —');
+    expect(measuringTooltip).toContain('Jank: —');
     expect(measuringTooltip).toContain('Samples: 0');
-    expect(measuringTooltip).toContain('Measuring frames… Initial 0% is a placeholder.');
+    expect(measuringTooltip).toContain('Measuring frame rate…');
+    expect(measuringTooltip).not.toContain('placeholder');
 
     act(() => perfCallback(neutralPerf));
     const measuredTooltip = screen.getByRole('tooltip').textContent ?? '';
     expect(measuredTooltip).toContain('FPS: 60');
     expect(measuredTooltip).toContain('Range: 60–60');
-    expect(measuredTooltip).toContain('Slow samples: 0%');
+    expect(measuredTooltip).toContain('Jank: 0%');
     expect(measuredTooltip).toContain('Samples: 3');
-    expect(measuredTooltip).toContain('Frame warnings use at least 3 measured samples.');
-    expect(measuredTooltip).not.toContain('Measuring frames…');
+    expect(measuredTooltip).not.toContain('Measuring frame rate…');
     unmount();
 
     jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(false);
@@ -294,7 +289,7 @@ describe('FrameJankIndicator warnings', () => {
       })
     );
     expect(warningTrigger().getAttribute('aria-label')).toBe(
-      'Performance warning: Main-thread stall'
+      'Performance warning: Long task'
     );
   });
 
@@ -308,15 +303,17 @@ describe('FrameJankIndicator warnings', () => {
     expect(screen.getByRole('tooltip').textContent).not.toContain(
       'No interactions ≥100 ms recorded in this window.'
     );
+    expect(screen.getByRole('tooltip').textContent).not.toContain('Checking timing support…');
     unmount();
 
     jest.spyOn(INPMonitor.prototype, 'isSupported').mockReturnValue(true);
     render(<FrameJankIndicator />);
     fireEvent.focus(screen.getByLabelText('Performance monitor'));
-    expect(screen.getByRole('tooltip').textContent).toContain(
+    expect(screen.getByRole('tooltip').textContent).toContain('Slow interactions (≥100ms): 0');
+    expect(screen.getByRole('tooltip').textContent).not.toContain(
       'No interactions ≥100 ms recorded in this window.'
     );
-    expect(screen.getByRole('tooltip').textContent).not.toContain('Slow-interaction p75');
+    expect(screen.getByRole('tooltip').textContent).not.toContain('p75:');
     act(() =>
       inpCallback({
         ...neutralInp,
@@ -326,7 +323,7 @@ describe('FrameJankIndicator warnings', () => {
         worstInteractionStartTime: 9_000,
       })
     );
-    expect(screen.getByRole('tooltip').textContent).toContain('Slow-interaction p75: 120ms');
+    expect(screen.getByRole('tooltip').textContent).toContain('p75: 120ms');
     expect(screen.getByRole('tooltip').textContent).toContain('Worst: 120ms');
   });
   it('updates age only while hovered or focused and clears its timer on inactivity and unmount', () => {

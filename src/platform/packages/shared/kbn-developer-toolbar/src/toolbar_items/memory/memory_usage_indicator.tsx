@@ -50,7 +50,7 @@ export const MemoryUsageIndicator: React.FC = () => {
 
   if (memoryInfo === undefined || memoryInfo === null) {
     const tooltipContent =
-      memoryInfo === undefined ? 'Measuring JavaScript heap…' : 'JavaScript heap unavailable.';
+      memoryInfo === undefined ? 'Measuring heap…' : 'Heap size unavailable.';
 
     return (
       <EuiToolTip content={<div>{tooltipContent}</div>}>
@@ -71,17 +71,15 @@ export const MemoryUsageIndicator: React.FC = () => {
       : null;
   const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
   const trendText =
-    sampleCount < TREND_MIN_SAMPLES
-      ? 'Recent trend: collecting samples…'
-      : !Number.isFinite(shortTrendPerMin)
-      ? 'Recent trend unavailable.'
-      : `Recent trend: ${formatTrend(shortTrendPerMin)} MiB/min`;
+    sampleCount >= TREND_MIN_SAMPLES && Number.isFinite(shortTrendPerMin)
+      ? `Trend: ${formatTrend(shortTrendPerMin)} MB/min`
+      : null;
   const heapUtilizationPercentage = Math.round(heapUsageRatio * 100);
 
   const tooltipContent = (
     <div css={tooltipContentStyles}>
       <div>
-        <div>Heap: {memoryGiB} GiB</div>
+        <div>JS heap: {memoryGiB} GiB</div>
         {isUnderHeapPressure ? (
           <div css={emphasisStyles}>
             <EuiTextColor color={warningSeverity ?? 'warning'}>
@@ -92,29 +90,21 @@ export const MemoryUsageIndicator: React.FC = () => {
           <div>Heap limit used: {heapUtilizationPercentage}%</div>
         )}
       </div>
-      <div>
-        <div>{trendText}</div>
-        {growthDetected && (
-          <div css={emphasisStyles}>
-            <EuiTextColor color={warningSeverity ?? 'warning'}>
-              Sustained heap growth; possible leak.
-            </EuiTextColor>
-          </div>
-        )}
-        {isUnderHeapPressure && (
-          <div>More than 85% of the browser-reported heap limit is in use.</div>
-        )}
-      </div>
-      <div>
+      {(trendText || growthDetected) && (
         <div>
-          Approximate JavaScript heap; sampled every 20 s while visible. Growth can include
-          allocations awaiting garbage collection.
+          {trendText && <div>{trendText}</div>}
+          {growthDetected && (
+            <div css={emphasisStyles}>
+              <EuiTextColor color={warningSeverity ?? 'warning'}>
+                Heap growing steadily.
+              </EuiTextColor>
+            </div>
+          )}
         </div>
-        {warningSeverity && (
-          <div>
-            Compare heap snapshots in browser DevTools → Memory after repeating the same action.
-          </div>
-        )}
+      )}
+      <div>
+        Chrome’s JS heap estimate, sampled every 20s while visible. Steady growth vs baseline, not
+        a confirmed leak.
       </div>
     </div>
   );

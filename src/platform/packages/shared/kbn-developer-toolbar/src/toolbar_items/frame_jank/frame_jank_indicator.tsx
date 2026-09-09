@@ -269,11 +269,11 @@ export const FrameJankIndicator: React.FC = () => {
     warning?.kind === 'input'
       ? 'Slow interaction'
       : warning?.kind === 'stall'
-      ? 'Main-thread stall'
+      ? 'Long task'
       : warning?.kind === 'blocking'
-      ? 'Elevated blocking time'
+      ? 'Blocking time'
       : warning?.kind === 'frames'
-      ? 'Frame slowdown'
+      ? 'Frame jank'
       : null;
   const selectedIncidentAge =
     timingStartTime === null ? null : Math.max(0, Math.floor((ageClock - timingStartTime) / 1000));
@@ -300,7 +300,7 @@ export const FrameJankIndicator: React.FC = () => {
             </div>
             <div>Range: {perfInfo ? `${perfInfo.minFps}–${perfInfo.maxFps}` : '—'}</div>
             <div css={warning?.kind === 'frames' ? selectedMetricStyles : undefined}>
-              Slow samples:{' '}
+              Jank:{' '}
               {perfInfo ? (
                 <>
                   <SeverityValue metricType="jankPercentage" value={perfInfo.jankPercentage}>
@@ -314,14 +314,10 @@ export const FrameJankIndicator: React.FC = () => {
             </div>
             <div>Samples: {perfInfo?.history.length ?? 0}</div>
             <div>
-              Jank counts slow one-second samples against this visible session’s high-water target
-              (at least 60 FPS), not dropped frames.
+              Percent of 1-second samples below 85% of this tab’s best FPS this session (floor 60).
+              Not dropped frames.
             </div>
-            <div>
-              {perfInfo
-                ? 'Frame warnings use at least 3 measured samples.'
-                : 'Measuring frames… Initial 0% is a placeholder.'}
-            </div>
+            {!perfInfo && <div>Measuring frame rate…</div>}
           </>
         )}
       </div>
@@ -329,20 +325,18 @@ export const FrameJankIndicator: React.FC = () => {
         <div>
           <strong>Main thread · 30s</strong>
         </div>
-        {longTaskSupported === null ? (
-          <div>Checking timing support…</div>
-        ) : longTaskSupported === false ? (
-          <div>Long-task timing unavailable in this browser.</div>
-        ) : (
+        {longTaskSupported === false ? (
+          <div>Long tasks unavailable in this browser.</div>
+        ) : longTaskSupported ? (
           <>
             <div>
-              Tasks ≥100ms:{' '}
+              Long tasks (≥100ms):{' '}
               <SeverityValue metricType="longTasks" value={longTaskStats.tasksInLast30Seconds}>
                 {longTaskStats.tasksInLast30Seconds}
               </SeverityValue>
             </div>
             <div css={warning?.kind === 'blocking' ? selectedMetricStyles : undefined}>
-              Blocking:{' '}
+              Blocking time:{' '}
               <SeverityValue metricType="blockingTime" value={longTaskStats.totalBlockingTime}>
                 {Math.round(longTaskStats.totalBlockingTime)}ms
               </SeverityValue>
@@ -350,34 +344,30 @@ export const FrameJankIndicator: React.FC = () => {
             {longTaskStats.worstTaskDuration > 0 && (
               <div css={warning?.kind === 'stall' ? selectedMetricStyles : undefined}>
                 <SeverityValue metricType="stall" value={longTaskStats.worstTaskDuration}>
-                  Worst: {Math.round(longTaskStats.worstTaskDuration)}ms
+                  Worst task: {Math.round(longTaskStats.worstTaskDuration)}ms
                   {warning?.kind === 'stall' && selectedIncidentAge !== null
                     ? ` · ${selectedIncidentAge}s ago`
                     : ''}
                 </SeverityValue>
               </div>
             )}
-            <div>Blocking counts time beyond 50 ms in tasks lasting at least 100 ms.</div>
+            <div>Blocking time sums each long task past its first 50ms (TBT-style).</div>
           </>
-        )}
+        ) : null}
       </div>
       <div>
         <div>
-          <strong>Slow interactions · 30 s</strong>
+          <strong>Interactions · 30s</strong>
         </div>
-        {inpSupported === null ? (
-          <div>Checking timing support…</div>
-        ) : inpSupported === false ? (
+        {inpSupported === false ? (
           <div>Interaction timing unavailable in this browser.</div>
-        ) : (
+        ) : inpSupported ? (
           <>
-            <div>Interactions ≥100 ms: {inpStats.slowInteractionsCount}</div>
-            {inpStats.slowInteractionsCount === 0 ? (
-              <div>No interactions ≥100 ms recorded in this window.</div>
-            ) : (
+            <div>Slow interactions (≥100ms): {inpStats.slowInteractionsCount}</div>
+            {inpStats.slowInteractionsCount > 0 && (
               <>
                 <div>
-                  Slow-interaction p75:{' '}
+                  p75:{' '}
                   <SeverityValue metricType="inp" value={inpStats.currentINP}>
                     {Math.round(inpStats.currentINP)}ms
                   </SeverityValue>
@@ -390,13 +380,12 @@ export const FrameJankIndicator: React.FC = () => {
                       : ''}
                   </SeverityValue>
                 </div>
-                <div>Only interactions ≥100 ms; not the page’s INP.</div>
+                <div>p75 of slow click/key interactions in this window. Not Chrome’s INP.</div>
               </>
             )}
           </>
-        )}
+        ) : null}
       </div>
-      {warning && <div>Record the same action in browser DevTools → Performance.</div>}
     </div>
   );
 
@@ -406,8 +395,7 @@ export const FrameJankIndicator: React.FC = () => {
   const measuredHistory = perfInfo?.history ?? [];
   const placeholderCount = Math.max(0, GRAPH_SAMPLE_COUNT - measuredHistory.length);
   const graphBaseline = perfInfo?.baselineFps ?? 60;
-  const badgeValue =
-    frameSupported === false ? '—' : perfInfo ? `${perfInfo.jankPercentage}%` : '0%';
+  const badgeValue = frameSupported === false || !perfInfo ? '—' : `${perfInfo.jankPercentage}%`;
 
   return (
     <EuiToolTip content={tooltipContent}>
