@@ -205,6 +205,9 @@ export const createAppContextStartContractMock = (
       getRulesClientWithRequestInSpace: jest.fn(),
     } as any,
     reportingStart: reportingMock.createStart(),
+    featureFlags: {
+      getBooleanValue: jest.fn().mockResolvedValue(false),
+    } as FleetAppContext['featureFlags'],
     lockManagerService: {
       withLock: jest
         .fn()

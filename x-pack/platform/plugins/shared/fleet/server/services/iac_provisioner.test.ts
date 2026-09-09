@@ -58,6 +58,12 @@ const jsonResponse = (status: number, body: unknown) =>
     json: async () => body,
   } as any);
 
+function mockFeatureFlag(enabled = true) {
+  jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
+    getBooleanValue: jest.fn().mockResolvedValue(enabled),
+  } as any);
+}
+
 function mockConfig(overrides: Record<string, unknown> = {}) {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: true },
@@ -71,6 +77,7 @@ function mockConfig(overrides: Record<string, unknown> = {}) {
     },
   } as any);
   jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+  mockFeatureFlag(true);
 }
 
 function mockLogger() {
@@ -91,17 +98,15 @@ describe('IacProvisionerService', () => {
     jest.clearAllMocks();
   });
 
-  it('throws IacProvisionerConfigError when the feature is not enabled', async () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
-      agentless: { enabled: true },
-      iacProvisioner: { enabled: false },
-    } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+  it('throws IacProvisionerConfigError when the feature flag is off', async () => {
+    mockConfig();
+    mockFeatureFlag(false);
     mockLogger();
 
     await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
     );
+    expect(mockedFetch).not.toHaveBeenCalled();
   });
 
   it('throws IacProvisionerConfigError when the API url is missing', async () => {

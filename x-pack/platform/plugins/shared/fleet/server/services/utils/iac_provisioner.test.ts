@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { appContextService } from '../app_context';
 
 import { isIacProvisionerEnabled } from './iac_provisioner';
@@ -15,15 +16,30 @@ const mockEnvironment = ({
   isCloudEnabled = false,
   isServerlessEnabled = false,
   agentlessEnabled = false,
-  iacProvisionerEnabled = false,
+  launchDarklyEnabled,
+  iacProvisionerConfigEnabled = false,
+}: {
+  isCloudEnabled?: boolean;
+  isServerlessEnabled?: boolean;
+  agentlessEnabled?: boolean;
+  launchDarklyEnabled?: boolean;
+  iacProvisionerConfigEnabled?: boolean;
 }) => {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: agentlessEnabled },
-    iacProvisioner: { enabled: iacProvisionerEnabled },
+    iacProvisioner: { enabled: iacProvisionerConfigEnabled },
   } as any);
   jest
     .spyOn(appContextService, 'getCloud')
     .mockReturnValue({ isCloudEnabled, isServerlessEnabled } as any);
+
+  if (launchDarklyEnabled === undefined) {
+    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);
+  } else {
+    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
+      getBooleanValue: jest.fn().mockResolvedValue(launchDarklyEnabled),
+    } as any);
+  }
 };
 
 // Mirrors the client-side gate table in
@@ -35,29 +51,51 @@ describe('isIacProvisionerEnabled', () => {
 
   it.each([
     [
-      'cloud + agentless + flag',
-      { isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true },
+      'cloud + agentless + LD on',
+      { isCloudEnabled: true, agentlessEnabled: true, launchDarklyEnabled: true },
       true,
     ],
     [
-      'serverless + agentless + flag',
-      { isServerlessEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true },
+      'serverless + agentless + LD on',
+      { isServerlessEnabled: true, agentlessEnabled: true, launchDarklyEnabled: true },
       true,
     ],
-    [
-      'flag off',
-      { isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: false },
-      false,
-    ],
+    ['LD off', { isCloudEnabled: true, agentlessEnabled: true, launchDarklyEnabled: false }, false],
+    ['LD unset (fallback)', { isCloudEnabled: true, agentlessEnabled: true }, false],
     [
       'agentless off',
-      { isCloudEnabled: true, agentlessEnabled: false, iacProvisionerEnabled: true },
+      { isCloudEnabled: true, agentlessEnabled: false, launchDarklyEnabled: true },
       false,
     ],
-    ['self-managed', { agentlessEnabled: true, iacProvisionerEnabled: true }, false],
-  ])('%s => %s', (_label, environment, expected) => {
+    ['self-managed', { agentlessEnabled: true, launchDarklyEnabled: true }, false],
+    [
+      'kibana.yml enabled true does not override LD off',
+      {
+        isCloudEnabled: true,
+        agentlessEnabled: true,
+        launchDarklyEnabled: false,
+        iacProvisionerConfigEnabled: true,
+      },
+      false,
+    ],
+  ])('%s => %s', async (_label, environment, expected) => {
     mockEnvironment(environment);
 
-    expect(isIacProvisionerEnabled()).toBe(expected);
+    await expect(isIacProvisionerEnabled()).resolves.toBe(expected);
+  });
+
+  it('evaluates fleet.enableIacProvisioner with fallback false', async () => {
+    mockEnvironment({
+      isCloudEnabled: true,
+      agentlessEnabled: true,
+      launchDarklyEnabled: true,
+    });
+
+    await isIacProvisionerEnabled();
+
+    expect(appContextService.getFeatureFlags()?.getBooleanValue).toHaveBeenCalledWith(
+      ENABLE_IAC_PROVISIONER_FLAG,
+      false
+    );
   });
 });
