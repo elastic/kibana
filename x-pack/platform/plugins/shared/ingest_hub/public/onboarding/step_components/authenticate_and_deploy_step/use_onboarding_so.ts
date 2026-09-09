@@ -62,10 +62,7 @@ export function useOnboardingSO(): UseOnboardingSOResult {
   );
 
   const updateDeployment = useCallback(
-    async (
-      id: string,
-      update: UpdateCloudOnboardingDeploymentRequest['body']
-    ): Promise<void> => {
+    async (id: string, update: UpdateCloudOnboardingDeploymentRequest['body']): Promise<void> => {
       await sendUpdateCloudOnboardingDeployment(id, update).catch(() => {
         services.notifications.toasts.addDanger(
           i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soUpdateError', {

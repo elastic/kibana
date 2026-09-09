@@ -179,19 +179,20 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         : detectAndReviewStep.onboardingDeploymentId;
 
       if (isInitialDeploy) {
-        onboardingDeploymentId = (await createDeployment({
-          provider: 'aws',
-          connectorId,
-          mechanisms: ['agentless'],
-          services: selectedServiceIds,
-          serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
-            string,
-            Record<string, unknown>
-          >,
-          globalRegion,
-          dataFormat,
-          authMethod: connectorId ? 'identity_federation' : 'static_keys',
-        })) ?? undefined;
+        onboardingDeploymentId =
+          (await createDeployment({
+            provider: 'aws',
+            connectorId,
+            mechanisms: ['agentless'],
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+              string,
+              Record<string, unknown>
+            >,
+            globalRegion,
+            dataFormat,
+            authMethod: connectorId ? 'identity_federation' : 'static_keys',
+          })) ?? undefined;
         if (onboardingDeploymentId) {
           // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
           // and any reload identifies this as a resumable deployment.

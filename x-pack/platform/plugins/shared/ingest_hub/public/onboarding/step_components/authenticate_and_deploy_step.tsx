@@ -25,10 +25,7 @@ import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
-import {
-  useEcfDeployment,
-  EcfDeploymentSection,
-} from './ecf_deployment_section';
+import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import {
   ECF_UNIFIED_STACK_NAME,
   ECF_OTEL_STACK_NAME,
@@ -51,7 +48,8 @@ interface AuthenticateAndDeployStepProps {
 
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod } = useOnboardingFlow();
+  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod } =
+    useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
