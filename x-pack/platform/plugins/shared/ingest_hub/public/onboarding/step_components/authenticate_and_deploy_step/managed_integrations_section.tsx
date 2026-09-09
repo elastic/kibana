@@ -36,7 +36,10 @@ import {
   useGetPackageInfoByKeyQuery,
   getAnyCloudConnectorIacTemplateUrl,
 } from '@kbn/fleet-plugin/public';
-import type { AwsStaticKeyCredentials, CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
+import type {
+  AwsStaticKeyCredentials,
+  CloudSetupForCloudConnector,
+} from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 
@@ -69,7 +72,11 @@ export function ManagedIntegrationsSection({
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
-    isStaticKeysEditMode ? 'access_keys' : showIdentityFederation ? 'identity_federation' : 'access_keys'
+    isStaticKeysEditMode
+      ? 'access_keys'
+      : showIdentityFederation
+      ? 'identity_federation'
+      : 'access_keys'
   );
 
   useEffect(() => {

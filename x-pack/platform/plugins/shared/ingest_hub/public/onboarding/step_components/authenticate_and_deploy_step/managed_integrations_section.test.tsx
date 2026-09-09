@@ -67,7 +67,14 @@ function setupMocks({
   connectorId = undefined,
   authMethod = undefined,
   searchParams = '',
-}: { cloud?: object; setConnectorId?: jest.Mock; setStaticKeys?: jest.Mock; connectorId?: string; authMethod?: 'identity_federation' | 'static_keys'; searchParams?: string } = {}) {
+}: {
+  cloud?: object;
+  setConnectorId?: jest.Mock;
+  setStaticKeys?: jest.Mock;
+  connectorId?: string;
+  authMethod?: 'identity_federation' | 'static_keys';
+  searchParams?: string;
+} = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
@@ -98,19 +105,39 @@ function setupMocks({
   );
 
   MockStaticKeys.mockImplementation(
-    ({ onReadyChange, onFieldsChange }: { onReadyChange?: (v: boolean) => void; onFieldsChange?: (f: unknown) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="static-keys">
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
-        <button onClick={() => onFieldsChange?.({ access_key_id: 'AKIA', secret_access_key: 'secret' })}>fire-fields</button>
+        <button
+          onClick={() => onFieldsChange?.({ access_key_id: 'AKIA', secret_access_key: 'secret' })}
+        >
+          fire-fields
+        </button>
       </div>
     )
   );
 
   MockStaticKeysReplaceView.mockImplementation(
-    ({ onReadyChange, onFieldsChange }: { onReadyChange?: (v: boolean) => void; onFieldsChange?: (f: unknown) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="static-keys-replace-view">
         <button onClick={() => onReadyChange?.(true)}>replace-ready</button>
-        <button onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}>replace-fields</button>
+        <button
+          onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}
+        >
+          replace-fields
+        </button>
       </div>
     )
   );
@@ -422,10 +449,17 @@ describe('ManagedIntegrationsSection', () => {
 
     it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
       const setStaticKeys = jest.fn();
-      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys', setStaticKeys });
+      setupMocks({
+        searchParams: '?deploymentId=dep-123',
+        authMethod: 'static_keys',
+        setStaticKeys,
+      });
       renderSection({ showIdentityFederation: true });
       fireEvent.click(screen.getByText('replace-fields'));
-      expect(setStaticKeys).toHaveBeenCalledWith({ access_key_id: 'NEW', secret_access_key: 'newsecret' });
+      expect(setStaticKeys).toHaveBeenCalledWith({
+        access_key_id: 'NEW',
+        secret_access_key: 'newsecret',
+      });
     });
 
     it('onFieldsChange on LazyAwsStaticKeysForm calls setStaticKeys', () => {
@@ -433,7 +467,10 @@ describe('ManagedIntegrationsSection', () => {
       setupMocks({ searchParams: '', connectorId: undefined, setStaticKeys });
       renderSection({ showIdentityFederation: false });
       fireEvent.click(screen.getByText('fire-fields'));
-      expect(setStaticKeys).toHaveBeenCalledWith({ access_key_id: 'AKIA', secret_access_key: 'secret' });
+      expect(setStaticKeys).toHaveBeenCalledWith({
+        access_key_id: 'AKIA',
+        secret_access_key: 'secret',
+      });
     });
   });
 });

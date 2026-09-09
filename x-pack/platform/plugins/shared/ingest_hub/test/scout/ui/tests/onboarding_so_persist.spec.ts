@@ -273,7 +273,12 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     await browserAuth.loginAsAdmin();
     // Use ?deploymentId= so isEditMode=true and StaticKeysReplaceView renders.
     await page.goto(
-      page.url().replace(/\/app\/.*/, '/app/onboarding/aws?deploymentId=dep-static-seed#authenticate-and-deploy')
+      page
+        .url()
+        .replace(
+          /\/app\/.*/,
+          '/app/onboarding/aws?deploymentId=dep-static-seed#authenticate-and-deploy'
+        )
     );
 
     await page.route(

@@ -1215,7 +1215,9 @@ describe('useDeploy', () => {
     it('passes authMethod: identity_federation when connectorId is set', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
-      await act(async () => { await result.current.handleDeploy(); });
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
       expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
         expect.objectContaining({ authMethod: 'identity_federation' })
       );
@@ -1228,7 +1230,9 @@ describe('useDeploy', () => {
         staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
-      await act(async () => { await result.current.handleDeploy(); });
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
       expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
         expect.objectContaining({ authMethod: 'static_keys' })
       );

@@ -7,7 +7,10 @@
 
 import React, { createContext, useContext, useCallback, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { AwsStaticKeyCredentials, CloudOnboardingDeploymentAuthMethod } from '@kbn/fleet-plugin/public';
+import type {
+  AwsStaticKeyCredentials,
+  CloudOnboardingDeploymentAuthMethod,
+} from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';

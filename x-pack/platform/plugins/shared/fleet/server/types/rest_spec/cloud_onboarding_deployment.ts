@@ -78,7 +78,10 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   provider: CloudOnboardingDeploymentProviderSchema,
   connectorId: schema.maybe(
     schema.string({
-      meta: { description: 'ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.' },
+      meta: {
+        description:
+          'ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.',
+      },
     })
   ),
   mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, { maxSize: 10 }),
@@ -176,7 +179,10 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     connectorId: schema.maybe(
       schema.string({
         minLength: 1,
-        meta: { description: 'ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.' },
+        meta: {
+          description:
+            'ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.',
+        },
       })
     ),
     mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {

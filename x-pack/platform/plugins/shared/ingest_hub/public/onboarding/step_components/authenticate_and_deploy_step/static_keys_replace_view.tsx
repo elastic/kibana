@@ -21,13 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
-function HiddenFieldPanel({
-  varName,
-  onReplace,
-}: {
-  varName: string;
-  onReplace: () => void;
-}) {
+function HiddenFieldPanel({ varName, onReplace }: { varName: string; onReplace: () => void }) {
   return (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <EuiText size="s" color="subdued">
@@ -129,10 +123,7 @@ export function StaticKeysReplaceView({
             </EuiFlexGroup>
           </>
         ) : (
-          <HiddenFieldPanel
-            varName={accessKeyIdLabel}
-            onReplace={() => setIsReplacingAKID(true)}
-          />
+          <HiddenFieldPanel varName={accessKeyIdLabel} onReplace={() => setIsReplacingAKID(true)} />
         )}
       </EuiFormRow>
 
