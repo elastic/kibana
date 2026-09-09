@@ -43,13 +43,13 @@ export const getTermsConversionFailure = (
     return 'terms_not_supported';
   }
 
-  // Lens defaults otherBucket to true when unset
+  // Lens defaults otherBucket to true when unset.
+  // No dedicated missingBucket failure: the UI only enables "Include documents without
+  // the selected field" when Other is on, and toEsAggsFn forces
+  // missingBucket = otherBucket && missingBucket. So Other-off implies missing is off
+  // for real configs; a separate reason would never surface in the happy-path UI.
   if (params.otherBucket !== false) {
     return 'terms_other_bucket_not_supported';
-  }
-
-  if (params.missingBucket === true) {
-    return 'terms_missing_bucket_not_supported';
   }
 
   if (UNSUPPORTED_ORDER_BY_TYPES.has(params.orderBy.type)) {

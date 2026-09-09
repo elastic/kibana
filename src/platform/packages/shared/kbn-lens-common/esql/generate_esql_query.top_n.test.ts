@@ -110,26 +110,6 @@ describe('generateEsqlQuery top N', () => {
     });
   });
 
-  it('should return terms_missing_bucket_not_supported when missing bucket is enabled', () => {
-    const terms = createTermsColumn({ missingBucket: true });
-    const result = generateEsqlQuery(
-      [
-        ['1', terms],
-        ['2', createAverageColumn()],
-      ],
-      buildLayer(terms),
-      mockIndexPattern,
-      uiSettings,
-      mockDateRange,
-      new Date()
-    );
-
-    expect(result).toEqual({
-      success: false,
-      reason: 'terms_missing_bucket_not_supported',
-    });
-  });
-
   it('should return terms_order_by_not_supported for rare ranking', () => {
     const terms = createTermsColumn({ orderBy: { type: 'rare', maxDocCount: 3 } });
     const result = generateEsqlQuery(

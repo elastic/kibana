@@ -24,7 +24,6 @@ export type EsqlConversionFailureReason =
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
   | 'terms_other_bucket_not_supported'
-  | 'terms_missing_bucket_not_supported'
   | 'terms_order_by_not_supported'
   | 'saved_to_library_not_supported'
   | 'trendline_not_supported'
@@ -91,13 +90,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: "Group other values as Other" is not supported. Disable it to convert.',
-    }
-  ),
-  terms_missing_bucket_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTermsMissingBucketTooltip',
-    {
-      defaultMessage:
-        'Cannot convert to ES|QL: Including missing values in Top values is not supported.',
     }
   ),
   terms_order_by_not_supported: i18n.translate(

@@ -88,14 +88,6 @@ describe('getTermsConversionFailure', () => {
     );
   });
 
-  it('returns terms_missing_bucket_not_supported when missing bucket is enabled', () => {
-    expect(
-      getTermsConversionFailure(createTermsColumn({ missingBucket: true }), {
-        hasDateHistogram: false,
-      })
-    ).toBe('terms_missing_bucket_not_supported');
-  });
-
   it.each([
     { type: 'rare' as const, maxDocCount: 3 },
     { type: 'significant' as const },
