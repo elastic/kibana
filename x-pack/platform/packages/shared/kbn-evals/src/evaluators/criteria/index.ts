@@ -159,6 +159,7 @@ export function createCriteriaEvaluator({
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: 'criteria',
   };
 }

@@ -14,7 +14,6 @@ import type { TimeRange } from '@kbn/es-query';
 import type {
   DrawState,
   EditState,
-  Goto,
   LayerDescriptor,
   MapCenter,
   MapExtent,
@@ -55,9 +54,7 @@ export type MapContext = Partial<MapViewContext> & {
 
 export type MapState = {
   executionContext: KibanaExecutionContext;
-  ready: boolean;
   mapInitError?: string | null;
-  goto?: Goto | null;
   openTooltips: TooltipState[];
   mapState: MapContext;
   selectedLayerId: string | null;

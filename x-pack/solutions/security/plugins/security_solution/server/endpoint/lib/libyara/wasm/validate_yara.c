@@ -9,7 +9,7 @@
  * Compile-only libyara wrapper for Kibana Custom YARA validation.
  *
  * Exposes:
- *   - validate_yara(source) -> JSON string { errors, warnings }
+ *   - validate_yara(source) -> JSON string { errors, warnings, rules, errorCount, warningCount }
  *   - validate_yara_free(ptr)
  *   - yara_engine_version() -> version string (from -DYARA_ENGINE_VERSION)
  *
@@ -31,11 +31,21 @@
 
 #define MAX_DIAGNOSTICS 64
 #define MAX_MESSAGE_LEN 512
+#define MAX_RULES 256
+/* libyara identifiers are capped at 128 chars (lexer.l). */
+#define MAX_RULE_IDENTIFIER_LEN 129
+/* The exported meta fields (os, arch, scan_type) are quite short when valid, so 32 bytes is enough. */
+#define MAX_META_VALUE_LEN 32
 /* Escaped messages can be ~2x source length; budget both error and warning arrays. */
 #define MAX_JSON_ITEM_LEN (MAX_MESSAGE_LEN * 2 + 80)
-#define MAX_JSON_LEN (MAX_DIAGNOSTICS * MAX_JSON_ITEM_LEN * 2 + 64)
-/* Bytes needed to terminate with "]}" (NUL is written into the final byte). */
-#define JSON_CLOSE_LEN 2
+#define MAX_RULE_JSON_LEN (MAX_RULE_IDENTIFIER_LEN * 2 + MAX_META_VALUE_LEN * 2 * 3 + 104)
+#define MAX_JSON_LEN \
+  (MAX_DIAGNOSTICS * MAX_JSON_ITEM_LEN * 2 + MAX_RULES * MAX_RULE_JSON_LEN + 128)
+/* Bytes reserved so errorCount/warningCount always fit after the arrays. */
+#define JSON_COUNTS_MAX 64
+
+static const char EMPTY_JSON[] =
+    "{\"errors\":[],\"warnings\":[],\"rules\":[],\"errorCount\":0,\"warningCount\":0}";
 
 typedef struct {
   char severity[16];
@@ -44,10 +54,23 @@ typedef struct {
 } yara_diagnostic_t;
 
 typedef struct {
+  char identifier[MAX_RULE_IDENTIFIER_LEN];
+  char os[MAX_META_VALUE_LEN];
+  char arch[MAX_META_VALUE_LEN];
+  char scan_type[MAX_META_VALUE_LEN];
+  /* 0 = absent, 1 = unique value stored, 2 = duplicated (value ignored). */
+  int os_count;
+  int arch_count;
+  int scan_type_count;
+} yara_compiled_rule_t;
+
+typedef struct {
   yara_diagnostic_t errors[MAX_DIAGNOSTICS];
   int error_count;
   yara_diagnostic_t warnings[MAX_DIAGNOSTICS];
   int warning_count;
+  yara_compiled_rule_t rules[MAX_RULES];
+  int rule_count;
 } yara_validate_ctx_t;
 
 static int g_yara_initialized = 0;
@@ -89,6 +112,10 @@ static void json_escape(const char* src, char* dst, size_t dst_len) {
   dst[di] = '\0';
 }
 
+static int stored_diagnostic_count(int count) {
+  return count < MAX_DIAGNOSTICS ? count : MAX_DIAGNOSTICS;
+}
+
 static void append_diagnostic(
     yara_diagnostic_t* list,
     int* count,
@@ -96,6 +123,7 @@ static void append_diagnostic(
     const char* message,
     int line) {
   if (*count >= MAX_DIAGNOSTICS) {
+    (*count)++;
     return;
   }
   yara_diagnostic_t* d = &list[*count];
@@ -156,23 +184,178 @@ static int append_fmt(char* out, size_t cap, size_t* offset, const char* fmt, ..
   return 1;
 }
 
+static void copy_bounded(char* dst, size_t dst_len, const char* src) {
+  if (dst_len == 0) {
+    return;
+  }
+  if (src == NULL) {
+    dst[0] = '\0';
+    return;
+  }
+  strncpy(dst, src, dst_len - 1);
+  dst[dst_len - 1] = '\0';
+}
+
+static void copy_meta_value(char* dst, size_t dst_len, const YR_META* meta) {
+  if (dst_len == 0) {
+    return;
+  }
+  dst[0] = '\0';
+  switch (meta->type) {
+    case META_TYPE_STRING:
+      copy_bounded(dst, dst_len, meta->string);
+      break;
+    case META_TYPE_INTEGER:
+      snprintf(dst, dst_len, "%lld", (long long)meta->integer);
+      break;
+    case META_TYPE_BOOLEAN:
+      copy_bounded(dst, dst_len, meta->integer ? "true" : "false");
+      break;
+    default:
+      break;
+  }
+}
+
+static void note_first_meta_key(char* value, int* count, const YR_META* meta) {
+  if (*count == 0) {
+    copy_meta_value(value, MAX_META_VALUE_LEN, meta);
+  }
+  (*count)++;
+}
+
+static void collect_compiled_rules(yara_validate_ctx_t* ctx, YR_RULES* rules) {
+  YR_RULE* rule;
+
+  yr_rules_foreach(rules, rule) {
+    if (ctx->rule_count >= MAX_RULES) {
+      break;
+    }
+
+    yara_compiled_rule_t* out = &ctx->rules[ctx->rule_count];
+    memset(out, 0, sizeof(*out));
+    copy_bounded(out->identifier, sizeof(out->identifier), rule->identifier);
+
+    YR_META* meta;
+    yr_rule_metas_foreach(rule, meta) {
+      if (meta->identifier == NULL) {
+        continue;
+      }
+
+      if (strcmp(meta->identifier, "os") == 0) {
+        note_first_meta_key(out->os, &out->os_count, meta);
+      } else if (strcmp(meta->identifier, "arch") == 0) {
+        note_first_meta_key(out->arch, &out->arch_count, meta);
+      } else if (strcmp(meta->identifier, "scan_type") == 0) {
+        note_first_meta_key(out->scan_type, &out->scan_type_count, meta);
+      }
+    }
+
+    ctx->rule_count++;
+  }
+}
+
+static int append_meta_field(
+    char* out,
+    size_t cap,
+    size_t* offset,
+    const char* key,
+    const char* value,
+    int first) {
+  char escaped[MAX_META_VALUE_LEN * 2];
+  json_escape(value, escaped, sizeof(escaped));
+  return append_fmt(out, cap, offset, "%s\"%s\":\"%s\"", first ? "" : ",", key, escaped);
+}
+
+static int append_duplicate_meta_key(
+    char* out,
+    size_t cap,
+    size_t* offset,
+    const char* key,
+    int first) {
+  return append_fmt(out, cap, offset, "%s\"%s\"", first ? "" : ",", key);
+}
+
+static int append_compiled_rule(
+    char* out,
+    size_t cap,
+    size_t* offset,
+    const yara_compiled_rule_t* rule,
+    int first) {
+  char identifier_escaped[MAX_RULE_IDENTIFIER_LEN * 2];
+  json_escape(rule->identifier, identifier_escaped, sizeof(identifier_escaped));
+
+  if (append_fmt(
+          out,
+          cap,
+          offset,
+          "%s{\"identifier\":\"%s\",\"meta\":{",
+          first ? "" : ",",
+          identifier_escaped) <= 0) {
+    return 0;
+  }
+
+  int meta_first = 1;
+  if (rule->os_count == 1) {
+    if (append_meta_field(out, cap, offset, "os", rule->os, meta_first) <= 0) {
+      return 0;
+    }
+    meta_first = 0;
+  }
+  if (rule->arch_count == 1) {
+    if (append_meta_field(out, cap, offset, "arch", rule->arch, meta_first) <= 0) {
+      return 0;
+    }
+    meta_first = 0;
+  }
+  if (rule->scan_type_count == 1) {
+    if (append_meta_field(out, cap, offset, "scan_type", rule->scan_type, meta_first) <= 0) {
+      return 0;
+    }
+  }
+
+  if (append_fmt(out, cap, offset, "},\"duplicateMeta\":[") <= 0) {
+    return 0;
+  }
+
+  int dup_first = 1;
+  if (rule->os_count > 1) {
+    if (append_duplicate_meta_key(out, cap, offset, "os", dup_first) <= 0) {
+      return 0;
+    }
+    dup_first = 0;
+  }
+  if (rule->arch_count > 1) {
+    if (append_duplicate_meta_key(out, cap, offset, "arch", dup_first) <= 0) {
+      return 0;
+    }
+    dup_first = 0;
+  }
+  if (rule->scan_type_count > 1) {
+    if (append_duplicate_meta_key(out, cap, offset, "scan_type", dup_first) <= 0) {
+      return 0;
+    }
+  }
+
+  return append_fmt(out, cap, offset, "]}");
+}
+
 static char* build_json(const yara_validate_ctx_t* ctx) {
   char* out = (char*)malloc(MAX_JSON_LEN);
   if (out == NULL) {
     return NULL;
   }
 
-  /* Reserve tail bytes so we can always close with "]}". */
-  const size_t content_cap = MAX_JSON_LEN - JSON_CLOSE_LEN;
+  /* Reserve tail so errorCount/warningCount always fit. */
+  const size_t content_cap = MAX_JSON_LEN - JSON_COUNTS_MAX;
   size_t offset = 0;
 
   if (append_fmt(out, content_cap, &offset, "{\"errors\":[") <= 0) {
-    memcpy(out, "{\"errors\":[],\"warnings\":[]}", 27);
-    out[27] = '\0';
+    memcpy(out, EMPTY_JSON, sizeof(EMPTY_JSON));
     return out;
   }
 
-  for (int i = 0; i < ctx->error_count; i++) {
+  const int stored_errors = stored_diagnostic_count(ctx->error_count);
+  for (int i = 0; i < stored_errors; i++) {
     char escaped[MAX_MESSAGE_LEN * 2];
     json_escape(ctx->errors[i].message, escaped, sizeof(escaped));
     if (append_fmt(
@@ -188,7 +371,8 @@ static char* build_json(const yara_validate_ctx_t* ctx) {
   }
 
   if (append_fmt(out, content_cap, &offset, "],\"warnings\":[") > 0) {
-    for (int i = 0; i < ctx->warning_count; i++) {
+    const int stored_warnings = stored_diagnostic_count(ctx->warning_count);
+    for (int i = 0; i < stored_warnings; i++) {
       char escaped[MAX_MESSAGE_LEN * 2];
       json_escape(ctx->warnings[i].message, escaped, sizeof(escaped));
       if (append_fmt(
@@ -204,8 +388,21 @@ static char* build_json(const yara_validate_ctx_t* ctx) {
     }
   }
 
-  /* Guaranteed: content_cap leaves room for "]}" + NUL within MAX_JSON_LEN. */
-  memcpy(out + offset, "]}", JSON_CLOSE_LEN + 1);
+  if (append_fmt(out, content_cap, &offset, "],\"rules\":[") > 0) {
+    for (int i = 0; i < ctx->rule_count; i++) {
+      if (append_compiled_rule(out, content_cap, &offset, &ctx->rules[i], i == 0) <= 0) {
+        break;
+      }
+    }
+  }
+
+  append_fmt(
+      out,
+      MAX_JSON_LEN,
+      &offset,
+      "],\"errorCount\":%d,\"warningCount\":%d}",
+      ctx->error_count,
+      ctx->warning_count);
   return out;
 }
 
@@ -221,27 +418,23 @@ static int ensure_initialized(yara_validate_ctx_t* ctx) {
   return 1;
 }
 
-EMSCRIPTEN_KEEPALIVE
-char* validate_yara(const char* source) {
-  yara_validate_ctx_t ctx;
-  memset(&ctx, 0, sizeof(ctx));
-
+static char* validate_yara_impl(yara_validate_ctx_t* ctx, const char* source) {
   if (source == NULL || source[0] == '\0') {
-    append_diagnostic(ctx.errors, &ctx.error_count, "error", "YARA rule source is empty", 0);
-    return build_json(&ctx);
+    append_diagnostic(ctx->errors, &ctx->error_count, "error", "YARA rule source is empty", 0);
+    return build_json(ctx);
   }
 
-  if (!ensure_initialized(&ctx)) {
-    return build_json(&ctx);
+  if (!ensure_initialized(ctx)) {
+    return build_json(ctx);
   }
 
   YR_COMPILER* compiler = NULL;
   if (yr_compiler_create(&compiler) != ERROR_SUCCESS) {
-    append_diagnostic(ctx.errors, &ctx.error_count, "error", "yr_compiler_create failed", 0);
-    return build_json(&ctx);
+    append_diagnostic(ctx->errors, &ctx->error_count, "error", "yr_compiler_create failed", 0);
+    return build_json(ctx);
   }
 
-  yr_compiler_set_callback(compiler, compiler_callback, &ctx);
+  yr_compiler_set_callback(compiler, compiler_callback, ctx);
 
   /* Disable #include — custom signatures must be self-contained. */
   yr_compiler_set_include_callback(compiler, NULL, NULL, NULL);
@@ -249,36 +442,61 @@ char* validate_yara(const char* source) {
   int add_result = yr_compiler_add_string(compiler, source, NULL);
   if (add_result != 0) {
     /* Errors already collected via callback; if none, add a generic one. */
-    if (ctx.error_count == 0) {
+    if (ctx->error_count == 0) {
       append_diagnostic(
-          ctx.errors,
-          &ctx.error_count,
+          ctx->errors,
+          &ctx->error_count,
           "error",
           "YARA rule failed to compile",
           0);
     }
     yr_compiler_destroy(compiler);
-    return build_json(&ctx);
+    return build_json(ctx);
   }
 
   YR_RULES* rules = NULL;
   int get_result = yr_compiler_get_rules(compiler, &rules);
   if (get_result != ERROR_SUCCESS) {
-    if (ctx.error_count == 0) {
+    if (ctx->error_count == 0) {
       append_diagnostic(
-          ctx.errors,
-          &ctx.error_count,
+          ctx->errors,
+          &ctx->error_count,
           "error",
           "yr_compiler_get_rules failed",
           0);
     }
     yr_compiler_destroy(compiler);
-    return build_json(&ctx);
+    return build_json(ctx);
+  }
+
+  if (rules->num_rules > MAX_RULES) {
+    char message[MAX_MESSAGE_LEN];
+    snprintf(
+        message,
+        sizeof(message),
+        "YARA source contains %u rules; maximum is %u",
+        rules->num_rules,
+        MAX_RULES);
+    append_diagnostic(ctx->errors, &ctx->error_count, "error", message, 0);
+  } else {
+    collect_compiled_rules(ctx, rules);
   }
 
   yr_rules_destroy(rules);
   yr_compiler_destroy(compiler);
-  return build_json(&ctx);
+  return build_json(ctx);
+}
+
+EMSCRIPTEN_KEEPALIVE
+char* validate_yara(const char* source) {
+  yara_validate_ctx_t* ctx = (yara_validate_ctx_t*)calloc(1, sizeof(*ctx));
+  if (ctx == NULL) {
+    return NULL;
+  }
+
+  char* json = validate_yara_impl(ctx, source);
+  free(ctx);
+  return json;
 }
 
 EMSCRIPTEN_KEEPALIVE
