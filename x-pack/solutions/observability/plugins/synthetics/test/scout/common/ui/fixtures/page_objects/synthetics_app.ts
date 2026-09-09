@@ -318,8 +318,7 @@ export class SyntheticsAppPage {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
       if (selector.includes('codeEditorContainer')) {
-        // Monaco wraps long scripts across .view-line nodes, and Advanced
-        // options adds a second codeEditorContainer for params.
+        // Monaco innerText includes the gutter line number and may wrap tokens.
         await expect(this.page.locator(selector)).toContainText(expected);
       } else {
         await expect(this.page.locator(selector)).toHaveValue(expected);

@@ -122,8 +122,7 @@ export const monitorConfigurations = (locationLabel: string) => {
       monitorConfig: {
         schedule: '10',
         name: apiName,
-        inlineScript:
-          'step("ping", async ({ request }) => { await request.get("https://elastic.co"); })',
+        inlineScript: 'step("ping", async ({ request }) => {})',
         locations: [locationLabel],
         apmServiceName,
       },
@@ -137,7 +136,7 @@ export const monitorConfigurations = (locationLabel: string) => {
         ['[data-test-subj=syntheticsMonitorConfigName]', apiName],
         [
           'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"]',
-          'step("ping", async ({ request }) => { await request.get("https://elastic.co"); })',
+          'step("ping", async ({ request }) => {})',
         ],
         ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
       ] as Array<[string, string]>,
