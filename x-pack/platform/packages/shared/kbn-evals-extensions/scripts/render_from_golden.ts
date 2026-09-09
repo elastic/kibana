@@ -55,6 +55,106 @@ const matrix = buildMatrix(aggregated, config, {
   warning: (message: string) => warnings.push(message),
 });
 
+// --- Fidelity guard -------------------------------------------------------
+// This driver renders from a golden EXTRACT and bypasses `queryMatrixScores`,
+// the transport that (a) mints synthetic `prefix:` dataset ids for
+// `examplePrefixes` columns and (b) applies the scoring policy
+// (useVerdictLadder / requireEisJudge / excludeSelfJudged).
+//
+// Both were silent failures: an `examplePrefixes` config matched almost
+// nothing yet still exited 0 with an empty warnings array (measured: covered
+// 1 of 24 columns), and policy-filtered configs re-rendered from mixed-judge
+// data with no signal that the filters never ran. Fail loudly instead.
+const allRows = [...(matrix.proprietary ?? []), ...(matrix.openSource ?? [])];
+const totalCols = (config.columns ?? []).length;
+const scoredCells = allRows.reduce(
+  (n, row) =>
+    n +
+    Object.values(row.cells ?? {}).filter(
+      (c: any) => c?.kind === 'score' && c?.value !== null && c?.value !== undefined
+    ).length,
+  0
+);
+const fidelityErrors: string[] = [];
+
+if (allRows.length > 0 && totalCols > 0) {
+  const possible = allRows.length * totalCols;
+  const filled = scoredCells / possible;
+  if (filled < 0.5) {
+    fidelityErrors.push(
+      `only ${scoredCells}/${possible} cells (${(filled * 100).toFixed(
+        1
+      )}%) resolved to a score. ` +
+        `The extract's dataset keys likely do not match this config's column selectors.`
+    );
+  }
+}
+
+const usesPrefixes = (config.columns ?? []).some(
+  (c: any) => Array.isArray(c.examplePrefixes) && c.examplePrefixes.length > 0
+);
+if (usesPrefixes) {
+  const hasPrefixKeys = aggregated.some((m: any) =>
+    (m.suites ?? []).some((s: any) =>
+      (s.datasets ?? []).some((d: any) => String(d.datasetId ?? '').startsWith('prefix:'))
+    )
+  );
+  if (!hasPrefixKeys) {
+    fidelityErrors.push(
+      `config declares examplePrefixes columns but the extract contains no ` +
+        `\`prefix:\` dataset ids. Re-run extract_golden_aggregate.ts (it emits ` +
+        `prefix aliases); an older extract cannot satisfy this config.`
+    );
+  }
+}
+
+const policy = (config as any).scoring ?? {};
+const activePolicy = ['useVerdictLadder', 'requireEisJudge', 'excludeSelfJudged'].filter(
+  (k) => policy[k]
+);
+if (activePolicy.length > 0 && process.env.ALLOW_UNENFORCED_SCORING !== '1') {
+  // extract_golden_aggregate stamps the policy it applied beside the extract.
+  // No stamp means the extract predates the policy port, and its scores are not
+  // comparable to the published board.
+  const stampPath = `${aggregatedPath}.policy.json`;
+  const stamp = fs.existsSync(stampPath)
+    ? (JSON.parse(fs.readFileSync(stampPath, 'utf8')).scoringPolicy as Record<string, boolean>)
+    : undefined;
+  const missing = activePolicy.filter((k) => !stamp?.[k]);
+  if (!stamp) {
+    fidelityErrors.push(
+      `config sets scoring policy [${activePolicy.join(', ')}] but the extract carries no ` +
+        `policy stamp (${stampPath}), so it predates the policy port and its scores are not ` +
+        `comparable to the published board. Re-run extract_golden_aggregate.ts, or set ` +
+        `ALLOW_UNENFORCED_SCORING=1 to override.`
+    );
+  } else if (missing.length > 0) {
+    fidelityErrors.push(
+      `config requires scoring policy [${missing.join(', ')}] but the extract was built ` +
+        `without it (SCORING_POLICY=raw?). Re-run the extract with the default policy.`
+    );
+  }
+}
+
+const tracesConfigured = Boolean(process.env.TRACES_JSON);
+if (!tracesConfigured && process.env.ALLOW_NO_TRACES !== '1') {
+  fidelityErrors.push(
+    `TRACES_JSON is not set, so every cell would publish a score with no ` +
+      `transcript behind it. Build a cache first ` +
+      `(scripts/orca_vm/build_trace_cache.py --out <file>) and pass it as ` +
+      `TRACES_JSON. Set ALLOW_NO_TRACES=1 only for a deliberately score-only board.`
+  );
+}
+
+if (fidelityErrors.length > 0) {
+  process.stderr.write(
+    `\nrender_from_golden: refusing to emit a misleading board.\n` +
+      fidelityErrors.map((e) => `  - ${e}`).join('\n') +
+      `\n\n`
+  );
+  process.exit(2);
+}
+
 // Which judge actually graded the admitted runs, counted from the aggregated
 // input rather than asserted. A hardcoded id here silently survives a rejudge
 // that never landed: the board then claims one shared instrument while the
@@ -62,9 +162,53 @@ const matrix = buildMatrix(aggregated, config, {
 // figures below assume is safe.
 const { judgeModelId, judgeBreakdown } = deriveJudgeProvenance(aggregated);
 
+// Judge-mix figures are COUNTED from the extract, never asserted. The previous
+// version hardcoded "ZERO models are graded by more than one judge" alongside a
+// fixed per-judge model census; both silently went stale and the board then
+// published a disclosure its own data contradicted (measured: 24 of 42 models
+// carry more than one judge). A stale caveat is worse than none -- it reads as
+// verified.
+const judgeCensus = (() => {
+  const judgesPerModel = new Map<string, Set<string>>();
+  for (const model of aggregated as any[]) {
+    const set = new Set<string>();
+    for (const suite of model.suites ?? []) {
+      for (const judge of suite.judgeModelIds ?? (suite.judgeModelId ? [suite.judgeModelId] : [])) {
+        set.add(judge);
+      }
+    }
+    if (set.size > 0) judgesPerModel.set(model.modelId, set);
+  }
+  const multi = [...judgesPerModel.values()].filter((s) => s.size > 1).length;
+  const single = [...judgesPerModel.values()].filter((s) => s.size === 1).length;
+  const singleBlocks = new Map<string, number>();
+  for (const set of judgesPerModel.values()) {
+    if (set.size === 1) {
+      const j = [...set][0];
+      singleBlocks.set(j, (singleBlocks.get(j) ?? 0) + 1);
+    }
+  }
+  return { multi, single, graded: judgesPerModel.size, singleBlocks };
+})();
+
 const JUDGE_NOTES: string[] = [
-  `THERE IS NO SINGLE JUDGE OF RECORD, and judge assignment is CONFOUNDED with model identity. Measured over the golden extract (30,534 score documents, 41 models): the persona columns were graded by anthropic-claude-4.5-haiku (25 models), anthropic-claude-4.6-sonnet (9), google-gemini-3.1-pro (2) and openai-gpt-5.4 (1). ZERO models are graded by more than one judge, so judge severity cannot be separated from model quality and any comparison ACROSS judge blocks is invalid. The judge shown per row is derived from the data, not asserted.`,
-  `Within the one block large enough to check (25 models graded by claude-4.5-haiku), the LLM-judged composite correlates only Spearman 0.483 / Pearson 0.505 with the judge-independent deterministic evaluators (ExpectedToolCalled, MinExpectedSteps, FinalAnswerPresent, SkillInvoked). The judge explains about a quarter of the variance in objectively checkable behaviour: gpt-5.5 ranks 1st by judge but 11th of 25 deterministically. Treat the judged axis as a separate instrument from what the model actually did, not as a refinement of it.`,
+  `${
+    judgeBreakdown.length === 1
+      ? `SINGLE JUDGE OF RECORD: every admitted suite was graded by ${judgeBreakdown[0].judgeModelId}.`
+      : 'THERE IS NO SINGLE JUDGE OF RECORD.'
+  } Counted over this extract (${judgeCensus.graded} graded models): ${judgeBreakdown
+    .map((j) => `${j.judgeModelId} ${j.share.toFixed(1)}% of suites`)
+    .join(', ')}. ${judgeCensus.multi} model(s) were graded by more than one judge and ${
+    judgeCensus.single
+  } by exactly one${
+    judgeCensus.singleBlocks.size > 0
+      ? ` (${[...judgeCensus.singleBlocks.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([j, n]) => `${n} under ${j}`)
+          .join(', ')})`
+      : ''
+  }. Where a model sits in a single-judge block, judge severity cannot be separated from model quality, so comparisons ACROSS blocks are not safe. Every figure here is derived from the data, not asserted.`,
+  `Judge identity is not cosmetic: re-scoring identical trajectories with a different judge reorders this board (Spearman rho 0.55), which is more movement than the model-quality differences being read off it. A board aggregated over several judges is measuring the grader mix as well as the models.`,
 ];
 
 const provenance = {
@@ -117,10 +261,13 @@ const provenance = {
               `floor, including all ${e.separablePairs} "separable" and the ${
                 e.separablePairs - e.borderlinePairs
               } once called robust. The persona column orders nothing yet.`,
-            `That noise floor is an upper bound, not a clean seed-only estimate: n=7 pairs, and the two runs ` +
-              `differ in more than seed (one pair drew different judges). It is the only re-run evidence in ` +
-              `the dataset and it points the wrong way for a ranking claim, so the claim is withdrawn rather ` +
-              `than the caveat. A seed-only re-run of 2-3 models would tighten it.`,
+            `That noise floor has now been MEASURED directly rather than inferred. A seed-only re-run of three ` +
+              `models (identical suite, examples and judge; 9/9 shards, 882 score docs, 2026-09-09) gives a ` +
+              `mean absolute difference of 0.0963 over 582 cells, with only ~64% of cells reproducing exactly ` +
+              `-- within 0.003 of the 0.099 upper bound, so the naming-convention confounds contributed ` +
+              `almost nothing and this is genuine sampling variance. Zero of 15 ensemble gaps clear it. ` +
+              `Averaging more judges cannot recover the loss, because the variance originates in the model's ` +
+              `own sampling rather than in judge disagreement.`,
             `Per-model judge spread is published next to every ensemble score. ${widest.modelId} has the widest ` +
               `at ${widest.judgeSpread.toFixed(
                 3

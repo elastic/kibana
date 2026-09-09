@@ -10,7 +10,7 @@ import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/
 import { MAX_LIST_EXPERIMENTS, type EvalsClient, type ExperimentStats } from '@kbn/evals';
 import { mergeShardDatasets, pickShardExperiments } from './merge_shard_experiments';
 import { isEisBacked, describeJudge } from './judge_provenance';
-import { VERDICT_LADDERS, scoreVerdict } from './jury';
+import { resolveVerdictScore } from './scoring_policy';
 
 /**
  * Counts of score documents dropped by the provenance/verdict policy, so the
@@ -38,54 +38,6 @@ export interface ScoreAggregationOptions {
    */
   useVerdictLadder?: boolean;
   onExcluded?: (counts: ExcludedScoreCounts) => void;
-}
-
-/**
- * Where each judged evaluator stores its categorical verdict. These paths are
- * taken from live score documents, not inferred: Groundedness writes
- * `groundednessAnalysis.summary_verdict`, while Factuality and Relevance both
- * hang off the shared `correctnessAnalysis.summary` block under different keys.
- */
-const VERDICT_PATHS: Record<string, [string, string]> = {
-  Groundedness: ['groundednessAnalysis', 'summary_verdict'],
-  Factuality: ['correctnessAnalysis', 'factual_accuracy_summary'],
-  Relevance: ['correctnessAnalysis', 'relevance_summary'],
-};
-
-/**
- * Ladder score for a judged evaluator, or the stored continuous score for
- * evaluators with no verdict vocabulary (contract evaluators are already
- * deterministic and have nothing to gain from the ladder).
- */
-function resolveVerdictScore(
-  evaluatorName: string,
-  doc: EvaluationScoreDocument
-): number | null | undefined {
-  const ladder = VERDICT_LADDERS[evaluatorName];
-  const path = VERDICT_PATHS[evaluatorName];
-  if (!ladder || !path) {
-    return doc.evaluator?.score;
-  }
-
-  const [blockKey, verdictKey] = path;
-  const metadata = doc.evaluator?.metadata as Record<string, unknown> | undefined;
-  // The scores route strips `evaluator.metadata` server-side (it is in
-  // UNBOUNDED_SCORE_FIELDS, added upstream in #286691). When the block is
-  // absent there is no verdict to ladder, but the numeric grade is still
-  // trustworthy — fall back to it rather than rejecting a valid score.
-  // Treating this as "unmapped" silently blanked per-prefix columns and
-  // reported every successful grade as excluded.
-  if (metadata === undefined) {
-    return doc.evaluator?.score;
-  }
-  const block = metadata?.[blockKey] as Record<string, unknown> | undefined;
-  // Groundedness puts its verdict at the top of the block; the correctness
-  // evaluators nest theirs one level deeper under `summary`.
-  const summary = (block?.summary as Record<string, unknown> | undefined) ?? block;
-  const verdict = summary?.[verdictKey];
-
-  const mapped = scoreVerdict(typeof verdict === 'string' ? verdict : undefined, ladder);
-  return mapped ?? undefined;
 }
 
 /** Aggregated evaluator score for a single dataset within a suite. */

@@ -168,6 +168,59 @@ SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
 
 
+def _golden_env_local():
+    """Parse the golden cluster env file once for driver-side queries."""
+    env = {}
+    try:
+        with open(GOLDEN_ENV_LOCAL) as fh:
+            for line in fh:
+                line = line.strip()
+                if line.startswith("export "):
+                    line = line[len("export "):]
+                if "=" in line and not line.startswith("#"):
+                    k, _, v = line.partition("=")
+                    env[k.strip()] = v.strip().strip('"').strip("'")
+    except OSError:
+        return None, None
+    return env.get("GOLDEN_ES_URL"), env.get("GOLDEN_ES_API_KEY")
+
+
+def _golden_post(path: str, body: str):
+    """POST a query to golden from the driver. None when unreachable."""
+    url, key = _golden_env_local()
+    if not url or not key:
+        return None
+    try:
+        return json.loads(subprocess.run(
+            ["curl", "-sS", "-m", "60", "-H", f"Authorization: ApiKey {key}",
+             f"{url}/.evaluation-scores/{path}",
+             "-H", "Content-Type: application/json", "-d", body],
+            capture_output=True, text=True, timeout=90,
+        ).stdout)
+    except Exception:
+        return None
+
+
+def _golden_datasets_local(exec_id: str):
+    """Dataset ids written under an execution id, queried FROM THE DRIVER.
+
+    Same rationale as _golden_count_local: units are parked before the gate
+    runs, so this must not go over ssh. Returns None when golden is
+    unreachable so the caller can distinguish "cannot verify" from "wrong".
+    """
+    res = _golden_post("_search", json.dumps({
+        "size": 0,
+        "query": {"term": {"metadata.execution_id": exec_id}},
+        "aggs": {"ds": {"terms": {"field": "example.dataset.id", "size": 50}}},
+    }))
+    if res is None:
+        return None
+    try:
+        return {b["key"] for b in res["aggregations"]["ds"]["buckets"]}
+    except Exception:
+        return None
+
+
 def _golden_count_local(exec_id: str, phrase: bool = False):
     """Count docs for an execution id by querying golden FROM THE DRIVER.
 
@@ -180,19 +233,7 @@ def _golden_count_local(exec_id: str, phrase: bool = False):
     Golden is reachable from the driver, so ask it directly. Returns None when
     the driver cannot reach golden, letting the caller fall back to the VM.
     """
-    env = {}
-    try:
-        with open(GOLDEN_ENV_LOCAL) as fh:
-            for line in fh:
-                line = line.strip()
-                if line.startswith("export "):
-                    line = line[len("export "):]
-                if "=" in line and not line.startswith("#"):
-                    k, _, v = line.partition("=")
-                    env[k.strip()] = v.strip().strip('"').strip("'")
-    except OSError:
-        return None
-    url, key = env.get("GOLDEN_ES_URL"), env.get("GOLDEN_ES_API_KEY")
+    url, key = _golden_env_local()
     if not url or not key:
         return None
     op = "match_phrase" if phrase else "term"
@@ -1050,6 +1091,32 @@ def build_env_prefix(model: str, environ: Optional[Mapping[str, str]] = None) ->
     return prefix
 
 
+def check_expected_datasets(seen: set, expected: set) -> Optional[str]:
+    """Reject a run whose docs landed under datasets the sweep did not ask for.
+
+    A doc-count gate cannot catch running the WRONG SUITE. Measured 2026-09-09:
+    `--suite security-automatic-migrations` passed 8/8 units at docs=86/80 while
+    writing every doc under standard-dashboards / qradar / splunk-spl -- none of
+    which are the board's migrations columns (those come from the separate
+    `agent-builder` suite). The floor gate was structurally blind to it: 86 >= 80
+    holds no matter which datasets produced the 86.
+
+    Returns None when the run is acceptable, else a human-readable reason.
+    """
+    if not expected:
+        return None  # no declared identity -> nothing to assert against
+    if not seen:
+        return "no dataset ids observed in golden"
+    unexpected = seen - expected
+    missing = expected - seen
+    parts = []
+    if unexpected:
+        parts.append("unexpected datasets " + ",".join(sorted(unexpected)))
+    if missing:
+        parts.append("missing datasets " + ",".join(sorted(missing)))
+    return "; ".join(parts) or None
+
+
 def self_test() -> int:
     """Offline checks for the pure helpers, run via `--self-test` in the verify
     manifest. Covers the two defects that made a judge-panel sweep lie: a dropped
@@ -1061,6 +1128,30 @@ def self_test() -> int:
     def check(name, got, want):
         if got != want:
             failures.append(f"{name}: expected {want!r}, got {got!r}")
+
+    # A doc-count gate cannot catch a wrong-suite run: the mig2 sweep passed
+    # 8/8 at docs=86/80 while writing three datasets the board never plots.
+    _MIG = {"05fd1e03-0e35-5abf-bfc6-c07118da0b28", "07a6c75d-7b4b-5150-ab32-7b66a93ac910"}
+    check("wrong-suite datasets rejected",
+          bool(check_expected_datasets({"4de2d8a5-x", "03855b50-y"}, _MIG)), True)
+    # Isolate the unexpected-only path: a superset covers every expected dataset
+    # (so `missing` is empty) and must STILL fail on the extra one. Without this
+    # case, deleting the unexpected-check entirely still passed the suite --
+    # the wrong-suite test above was passing via `missing`, not `unexpected`.
+    check("extra dataset alone fails",
+          "unexpected datasets" in (check_expected_datasets(_MIG | {"da87a6b7-z"}, _MIG) or ""),
+          True)
+    check("exact dataset match accepted",
+          check_expected_datasets(set(_MIG), _MIG), None)
+    check("partial coverage reported",
+          "missing datasets" in (check_expected_datasets({"05fd1e03-0e35-5abf-bfc6-c07118da0b28"}, _MIG) or ""),
+          True)
+    check("empty golden rejected", check_expected_datasets(set(), _MIG),
+          "no dataset ids observed in golden")
+    # No declared identity must stay permissive: suites predating the gate
+    # (persona, AD) have no expected-set and must not start failing.
+    check("undeclared identity stays permissive",
+          check_expected_datasets({"anything"}, set()), None)
 
     # ssh_checked must distinguish a transport failure from a content verdict.
     # Reporting exit-255-with-empty-output as "checks failed" skipped 6/6 units
@@ -1722,6 +1813,19 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
         result["expected"] = n_examples * n_evaluators * reps
         result["gate"] = "exact"
     result["execution_id"] = exec_id
+    # Dataset-identity gate. A doc count cannot tell "ran the right suite" from
+    # "ran a different suite that also writes ~86 docs" -- see
+    # check_expected_datasets. Only enforced for suites that declare the
+    # identity, so persona/AD keep their existing behaviour.
+    _want = set(prof.get("expected_dataset_ids") or ())
+    if _want and exec_id:
+        _seen = _golden_datasets_local(exec_id)
+        if _seen is None:
+            return {**result, "count": -1,
+                    "error": "cannot verify dataset identity (golden unreachable)"}
+        _bad = check_expected_datasets(_seen, _want)
+        if _bad:
+            return {**result, "count": -1, "error": f"wrong suite: {_bad}"}
     return result
 
 

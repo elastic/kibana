@@ -19,6 +19,21 @@
  * reinventing the extraction, and the artifact's provenance cannot be checked
  * against the data it claims to summarise.
  *
+ * Scoring policy:
+ *   Applies the CLI transport's policy -- verdict ladder, EIS-only judges, no
+ *   self-judged scores -- through the shared `scoring_policy` module, so this
+ *   driver and `queryMatrixScores` cannot drift.
+ *
+ *   SCORING_POLICY=raw returns unfiltered stored scores (debugging only).
+ *
+ *   Applying the policy does NOT reproduce the 2026-09-07 board: measured mean
+ *   |delta| per cell moved 1.998 -> 2.361. The residual is judge mix. That
+ *   artifact declares `judgeModelId: google-gemini-3.1-pro`, but golden shows
+ *   its persona scores were graded 3842 by claude-4.5-haiku, 2122 by
+ *   claude-4.6-sonnet and only 420 by gemini-3.1-pro -- it is a mixed-judge
+ *   aggregate labelled single-judge. JUDGE_MODEL_ID pins one grader, which is
+ *   the honest shape, but it will not match that board.
+ *
  * Usage:
  *   source ~/.elastic/golden-cluster-env.sh
  *   node --require ../../../../../src/setup_node_env \
@@ -27,10 +42,29 @@
 
 import fs from 'fs';
 
+import {
+  applyScoringPolicy,
+  emptyExclusionCounts,
+  tallyRejection,
+} from '../src/matrix/scoring_policy';
+import { DEFAULT_EXCLUDED_EVALUATORS } from '../src/matrix/load_matrix_config';
+
 const ES_URL = process.env.GOLDEN_ES_URL!;
 const ES_KEY = process.env.GOLDEN_ES_API_KEY!;
 const SINCE = process.env.SINCE ?? '2026-09-01';
 const OUT = process.env.OUT_JSON;
+// Mirror the CLI's scoring policy by default; SCORING_POLICY=raw opts out.
+const POLICY_RAW = process.env.SCORING_POLICY === 'raw';
+// Pin the grader. Unpinned, a cell averages every judge that ever graded it,
+// which compares models across different grader panels -- and judge choice
+// reorders this board more than model quality does (Spearman rho 0.55).
+const JUDGE_MODEL_ID = process.env.JUDGE_MODEL_ID;
+const POLICY = POLICY_RAW
+  ? {}
+  : { useVerdictLadder: true, requireEisJudge: true, excludeSelfJudged: true };
+const isExcludedName = (name: string) =>
+  DEFAULT_EXCLUDED_EVALUATORS.some((p) => name.startsWith(p));
+const policyExclusions = emptyExclusionCounts();
 
 if (!ES_URL || !ES_KEY) {
   throw new Error('GOLDEN_ES_URL and GOLDEN_ES_API_KEY must be set (source golden-cluster-env.sh)');
@@ -55,7 +89,14 @@ interface ScoreDoc {
   '@timestamp': string;
   example?: { id?: string; dataset?: { id?: string; name?: string } };
   task?: { model?: { id?: string; family?: string; provider?: string } };
-  evaluator?: { name?: string; score?: number; model?: { id?: string } };
+  evaluator?: {
+    name?: string;
+    score?: number;
+    label?: string;
+    direction?: string;
+    metadata?: unknown;
+    model?: { id?: string };
+  };
 }
 
 const search = async (body: unknown): Promise<{ hits: { hits: Array<{ _source: ScoreDoc }> } }> => {
@@ -118,6 +159,12 @@ async function main() {
           'evaluator.name',
           'evaluator.score',
           'evaluator.model.id',
+          // Needed by the shared scoring policy (verdict ladder + provenance
+          // filters). Without these the golden driver silently disagreed
+          // with the CLI-rendered board by ~2 points per cell.
+          'evaluator.label',
+          'evaluator.direction',
+          'evaluator.metadata',
         ],
         sort: [{ '@timestamp': 'asc' }, { _doc: 'asc' }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
@@ -193,14 +240,41 @@ async function main() {
         byDataset.get(datasetId)!.push(doc);
       }
 
+      // Columns match either by `datasetIds` (raw id) or by `examplePrefixes`,
+      // which build_matrix resolves against SYNTHETIC `prefix:<name>` dataset
+      // ids. The CLI mints those in queryMatrixScores; this driver bypasses
+      // that transport, so an examplePrefixes config used to match nothing and
+      // still render exit-0 with zero warnings (measured: covered 1 of 24).
+      // Emit both keys so either config shape resolves.
+      interface DatasetRow {
+        datasetId: string;
+        datasetName: string;
+        evaluators: unknown[];
+      }
+      const withPrefixAliases = (rows: DatasetRow[]): DatasetRow[] =>
+        rows.flatMap((row: DatasetRow) =>
+          String(row.datasetId).startsWith('prefix:')
+            ? [row]
+            : [row, { ...row, datasetId: `prefix:${row.datasetId}` }]
+        );
+
       const datasets = [...byDataset.entries()].map(([datasetId, datasetDocs]) => {
         const byEvaluator = new Map<string, number[]>();
         for (const doc of datasetDocs) {
           const name = doc.evaluator?.name;
-          const score = doc.evaluator?.score;
-          if (!name || typeof score !== 'number') continue;
+          if (!name) continue;
+          if (JUDGE_MODEL_ID && doc.evaluator?.model?.id !== JUDGE_MODEL_ID) {
+            continue;
+          }
+          // Single source of truth with query_matrix_scores: the CLI and this
+          // driver must reach the same verdict on the same document.
+          const decision = applyScoringPolicy(doc, POLICY, isExcludedName);
+          if (decision.score === null) {
+            tallyRejection(policyExclusions, decision.rejected);
+            continue;
+          }
           if (!byEvaluator.has(name)) byEvaluator.set(name, []);
-          byEvaluator.get(name)!.push(score);
+          byEvaluator.get(name)!.push(decision.score);
         }
         return {
           datasetId,
@@ -233,7 +307,7 @@ async function main() {
         judgeModelId,
         judgeModelIds,
         selfJudged: judgeModelIds.includes(modelId),
-        datasets,
+        datasets: withPrefixAliases(datasets),
       };
     });
 
@@ -248,6 +322,28 @@ async function main() {
   const json = JSON.stringify(aggregated, null, 2);
   if (OUT) {
     fs.writeFileSync(OUT, json);
+    // Sidecar rather than a wrapper object: the artifact must stay a bare
+    // `AggregatedModelScores[]` for existing readers. render_from_golden reads
+    // this stamp to tell a policy-applied extract from a pre-port one.
+    fs.writeFileSync(
+      `${OUT}.policy.json`,
+      JSON.stringify(
+        {
+          scoringPolicy: POLICY,
+          judgeModelId: JUDGE_MODEL_ID ?? null,
+          excludedEvaluators: DEFAULT_EXCLUDED_EVALUATORS,
+          exclusions: policyExclusions,
+        },
+        null,
+        2
+      )
+    );
+    // eslint-disable-next-line no-console
+    console.error(
+      `policy exclusions: ${JSON.stringify(policyExclusions)} (policy=${
+        POLICY_RAW ? 'raw' : 'default'
+      })`
+    );
     // eslint-disable-next-line no-console
     console.error(`wrote ${aggregated.length} model(s) to ${OUT}`);
   } else {
