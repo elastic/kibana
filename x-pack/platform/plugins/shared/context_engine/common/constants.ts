@@ -90,9 +90,6 @@ export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
 export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
 export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
 
-/** Cap on the signal documents a single analysis run reads. */
-export const MAX_ANALYSIS_SIGNALS = 500;
-
 /** Cap on the ranked pattern groups handed to a run. */
 export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
 

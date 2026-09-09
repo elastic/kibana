@@ -36,6 +36,38 @@ const GROUP: SignalPatternGroup = {
   example: { query: 'FROM logs-orders | LIMIT 10', row_count: 10 },
 };
 
+const improvement = ({
+  id,
+  title,
+  action = 'edit_workflow',
+  status = 'suggested',
+  workflowId,
+  kiId,
+  subject,
+  reason,
+}: {
+  id: string;
+  title: string;
+  action?: Improvement['action'];
+  status?: Improvement['status'];
+  workflowId?: string;
+  kiId?: string;
+  subject?: string;
+  reason?: string;
+}): Improvement =>
+  ({
+    improvement_id: id,
+    action,
+    title,
+    status,
+    target: {
+      ...(workflowId ? { workflow_id: workflowId } : {}),
+      ...(kiId ? { ki_id: kiId } : {}),
+      ...(subject ? { subject } : {}),
+    },
+    ...(reason ? { resolution: { reason } } : {}),
+  } as unknown as Improvement);
+
 const render = (overrides: Partial<Parameters<typeof renderBriefing>[0]> = {}) =>
   renderBriefing({
     aiIndex: AI_INDEX,
@@ -129,34 +161,72 @@ describe('renderBriefing', () => {
   it('lists prior proposals with their outcome so they are not raised again', () => {
     const briefing = render({
       history: [
-        {
-          improvement_id: 'imp-1',
+        improvement({
+          id: 'imp-1',
           action: 'add_ki',
           title: 'Add a KI for refunds',
           status: 'rejected',
-          resolution: { reason: 'Refunds are out of scope for this index.' },
-        } as unknown as Improvement,
+          subject: 'refunds',
+          reason: 'Refunds are out of scope for this index.',
+        }),
       ],
     });
 
     expect(briefing).toContain('**rejected** — `add_ki`: Add a KI for refunds');
     expect(briefing).toContain('Refunds are out of scope for this index.');
-    expect(briefing).toContain('Do not propose any of these again');
+    expect(briefing).toContain('1 proposal(s) across 1 target(s) — 1 rejected.');
   });
 
-  it('summarises the tail when the history is long', () => {
-    const history = Array.from(
-      { length: 45 },
-      (_, index) =>
-        ({
-          improvement_id: `imp-${index}`,
-          action: 'add_ki',
-          title: `Proposal ${index}`,
-          status: 'suggested',
-        } as unknown as Improvement)
+  it('groups the history by what each proposal would change, not by when it was made', () => {
+    const briefing = render({
+      history: [
+        improvement({ id: 'a', workflowId: 'sync-orders', title: 'Widen the window' }),
+        improvement({ id: 'b', workflowId: 'sync-orders', title: 'Run it hourly' }),
+        improvement({ id: 'c', kiId: 'ki-7', title: 'Correct the refund policy' }),
+      ],
+    });
+
+    expect(briefing).toContain('### workflow `sync-orders` — 2 proposal(s)');
+    expect(briefing).toContain('### knowledge indicator `ki-7` — 1 proposal(s)');
+    expect(briefing).toContain('3 proposal(s) across 2 target(s)');
+  });
+
+  it('orders targets by how often they were rejected, so the most settled question comes first', () => {
+    const briefing = render({
+      history: [
+        improvement({ id: 'a', workflowId: 'quiet', title: 'Untouched' }),
+        improvement({ id: 'b', workflowId: 'contested', title: 'First try', status: 'rejected' }),
+        improvement({ id: 'c', workflowId: 'contested', title: 'Second try', status: 'rejected' }),
+      ],
+    });
+
+    expect(briefing.indexOf('workflow `contested`')).toBeLessThan(
+      briefing.indexOf('workflow `quiet`')
+    );
+  });
+
+  it('keeps the running total honest when it cuts the tail of a long history', () => {
+    // One proposal per target, so every target ties on rejections and the cut falls on the tail.
+    const history = Array.from({ length: 25 }, (_, index) =>
+      improvement({ id: `imp-${index}`, workflowId: `wf-${index}`, title: `Proposal ${index}` })
     );
 
-    expect(render({ history })).toContain('…and 5 more.');
+    const briefing = render({ history });
+
+    expect(briefing).toContain('25 proposal(s) across 25 target(s)');
+    expect(briefing).toContain('…and 5 more target(s) carrying 5 proposal(s)');
+  });
+
+  it('summarises a target whose own history is longer than the briefing spells out', () => {
+    const history = Array.from({ length: 8 }, (_, index) =>
+      improvement({ id: `imp-${index}`, workflowId: 'busy', title: `Proposal ${index}` })
+    );
+
+    expect(render({ history })).toContain('…and 3 more on this target.');
+  });
+
+  it('tells the run to look its own conclusion up before proposing it', () => {
+    expect(render()).toContain('Check the target’s history once you know what you want to change');
   });
 
   it('says so when there is no history yet', () => {

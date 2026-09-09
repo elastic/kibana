@@ -8,45 +8,40 @@
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
-import type { Signal } from '../../common/http_api/signals';
 import { rawIndexExpressionsFor, selectSignals } from './select_signals';
 
 const NOW = new Date('2026-09-01T12:00:00.000Z');
 
-const buildSignal = (overrides: {
+/** One `top_hits` hit, carrying only the `_source` fields the evidence projection asks for. */
+const evidenceHit = (overrides: {
   id: string;
-  queryKind?: 'ki_retrieval' | 'raw_access';
-  targetIndex?: string;
-  conversationId?: string;
-  timestamp?: string;
-  tags?: string[];
-  tool?: string;
+  query?: string;
   error?: string;
-}): Signal =>
-  ({
+  rowCount?: number;
+  conversationId?: string;
+}) => ({
+  _source: {
     signal_id: overrides.id,
-    '@timestamp': overrides.timestamp ?? '2026-09-01T11:00:00.000Z',
-    signal_type: 'tool_call',
-    tags: overrides.tags ?? [],
     data: {
-      tool: overrides.tool ?? 'execute_esql',
-      query_kind: overrides.queryKind ?? 'ki_retrieval',
-      target_index: overrides.targetIndex ?? 'ai-index-idx-orders',
-      status: 'Ok',
-      returned: { row_count: 0 },
+      returned: { row_count: overrides.rowCount ?? 0 },
+      ...(overrides.query ? { query: overrides.query } : {}),
       ...(overrides.error ? { error: overrides.error } : {}),
       ...(overrides.conversationId ? { conversation_id: overrides.conversationId } : {}),
     },
-  } as unknown as Signal);
-
-const patternBucket = (tag: string, target: string, tool: string, count: number) => ({
-  key: tag,
-  doc_count: count,
-  targets: {
-    buckets: [
-      { key: target, doc_count: count, tools: { buckets: [{ key: tool, doc_count: count }] } },
-    ],
   },
+});
+
+// A `multi_terms` bucket is keyed by the ordered tuple of its term values.
+const patternBucket = (
+  tag: string,
+  target: string,
+  tool: string,
+  count: number,
+  evidence: Array<ReturnType<typeof evidenceHit>> = []
+) => ({
+  key: [tag, target, tool],
+  doc_count: count,
+  evidence: { hits: { hits: evidence } },
 });
 
 // `spaces` keys are backing index names, which is what a `_index` terms agg buckets on.
@@ -54,21 +49,12 @@ const mainResponse = ({
   patterns = [],
   spaces = ['context-engine-signals-default-000001'],
   total = 0,
-  signals = [],
 }: {
   patterns?: ReturnType<typeof patternBucket>[];
   spaces?: string[];
   total?: number;
-  signals?: Signal[];
 } = {}) => ({
-  hits: {
-    total: { value: total, relation: 'eq' },
-    hits: signals.map((signal) => ({
-      _index: 'context-engine-signals-default-000001',
-      _id: signal.signal_id,
-      _source: signal,
-    })),
-  },
+  hits: { total: { value: total, relation: 'eq' }, hits: [] },
   aggregations: {
     spaces: { buckets: spaces.map((key) => ({ key, doc_count: 1 })) },
     patterns: { buckets: patterns },
@@ -112,7 +98,6 @@ describe('selectSignals', () => {
     selectSignals(esClient, {
       destValue: 'ai-index-idx-orders',
       sources: [],
-      sampleSize: 50,
       now: NOW,
       ...options,
     });
@@ -241,7 +226,7 @@ describe('selectSignals', () => {
     });
   });
 
-  it('buckets patterns on tags, so an untagged signal forms no pattern and a multi-tagged one forms several', async () => {
+  it('buckets patterns on the whole (tag, target index, tool) triple in one aggregation', async () => {
     esClient.search
       .mockResolvedValueOnce(conversationsResponse([]) as never)
       .mockResolvedValueOnce(mainResponse() as never);
@@ -250,29 +235,65 @@ describe('selectSignals', () => {
 
     expect(requestFor(MAIN).aggs).toMatchObject({
       patterns: {
-        terms: { field: 'tags' },
+        multi_terms: {
+          terms: [{ field: 'tags' }, { field: 'data.target_index' }, { field: 'data.tool' }],
+          order: { _count: 'desc' },
+        },
+      },
+    });
+  });
+
+  it('leaves signals that carry no target index or tool out of the patterns entirely', async () => {
+    esClient.search
+      .mockResolvedValueOnce(conversationsResponse([]) as never)
+      .mockResolvedValueOnce(mainResponse() as never);
+
+    await run();
+
+    // `multi_terms` drops a document missing any of its terms unless that term declares a
+    // `missing` placeholder. That is the intended behaviour: the triple is the shape of a tool
+    // call, and a signal without one belongs to no pattern rather than to an invented one.
+    expect(JSON.stringify(requestFor(MAIN).aggs)).not.toContain('missing');
+  });
+
+  it('reads no documents outside the aggregation, so nothing depends on a sample', async () => {
+    esClient.search
+      .mockResolvedValueOnce(conversationsResponse([]) as never)
+      .mockResolvedValueOnce(mainResponse() as never);
+
+    await run();
+
+    expect(requestFor(MAIN).size).toBe(0);
+    expect(requestFor(MAIN).aggs).toMatchObject({
+      patterns: {
         aggs: {
-          targets: {
-            terms: { field: 'data.target_index' },
-            aggs: { tools: { terms: { field: 'data.tool' } } },
+          evidence: {
+            top_hits: {
+              size: 20,
+              sort: [{ '@timestamp': { order: 'desc' } }, { signal_id: { order: 'desc' } }],
+              _source: {
+                includes: [
+                  'signal_id',
+                  'data.query',
+                  'data.error',
+                  'data.returned.row_count',
+                  'data.conversation_id',
+                ],
+              },
+            },
           },
         },
       },
     });
-    expect(JSON.stringify(requestFor(MAIN).aggs)).not.toContain('missing');
   });
 
   it('counts patterns from the aggregation rather than from the documents it read', async () => {
     esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
       mainResponse({
-        patterns: [patternBucket('coverage_gap', 'logs-app-1', 'execute_esql', 4200)],
-        signals: [
-          buildSignal({
-            id: 'a',
-            tags: ['coverage_gap'],
-            targetIndex: 'logs-app-1',
-            queryKind: 'raw_access',
-          }),
+        patterns: [
+          patternBucket('coverage_gap', 'logs-app-1', 'execute_esql', 4200, [
+            evidenceHit({ id: 'a' }),
+          ]),
         ],
         total: 4200,
       }) as never
@@ -293,35 +314,40 @@ describe('selectSignals', () => {
     expect(result.signalCount).toBe(4200);
   });
 
-  it('still reports a pattern whose signals all fall outside the sample, without an example', async () => {
+  it('gives a rare pattern the same evidence as a common one, since each bucket carries its own', async () => {
     esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
       mainResponse({
-        patterns: [patternBucket('query_error', 'logs-app-1', 'execute_esql', 7)],
-        signals: [],
-        total: 7,
+        patterns: [
+          patternBucket('query_error', 'logs-app-1', 'execute_esql', 4200, [
+            evidenceHit({ id: 'common', error: 'syntax' }),
+          ]),
+          patternBucket('coverage_gap', 'logs-app-2', 'execute_esql', 1, [
+            evidenceHit({ id: 'rare', query: 'FROM logs-app-2' }),
+          ]),
+        ],
+        total: 4201,
       }) as never
     );
 
     const result = await run();
 
-    expect(result.patterns).toEqual([
-      {
-        tag: 'query_error',
-        target_index: 'logs-app-1',
-        tool: 'execute_esql',
-        count: 7,
-        signal_ids: [],
-      },
+    // The rare pattern would previously have lost its evidence to the draw: one document in a
+    // window whose sample was capped well below its size.
+    expect(result.patterns.map(({ count, signal_ids: ids }) => ({ count, ids }))).toEqual([
+      { count: 4200, ids: ['common'] },
+      { count: 1, ids: ['rare'] },
     ]);
+    expect(result.patterns[1].example).toEqual({ query: 'FROM logs-app-2', row_count: 0 });
   });
 
   it('prefers an example carrying an error message over a more recent one without', async () => {
     esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
       mainResponse({
-        patterns: [patternBucket('query_error', 'ai-index-idx-orders', 'execute_esql', 2)],
-        signals: [
-          buildSignal({ id: 'newest', tags: ['query_error'] }),
-          buildSignal({ id: 'with-error', tags: ['query_error'], error: 'boom' }),
+        patterns: [
+          patternBucket('query_error', 'ai-index-idx-orders', 'execute_esql', 2, [
+            evidenceHit({ id: 'newest' }),
+            evidenceHit({ id: 'with-error', error: 'boom' }),
+          ]),
         ],
         total: 2,
       }) as never

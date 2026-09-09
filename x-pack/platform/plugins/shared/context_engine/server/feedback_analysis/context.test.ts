@@ -7,7 +7,6 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { MAX_ANALYSIS_SIGNALS } from '../../common/constants';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { SignalTag } from '../../common/http_api/signals';
@@ -112,7 +111,6 @@ describe('buildFeedbackContext', () => {
       sources: [{ type: 'esql', value: 'FROM logs-orders' }],
       signalTimeRange: { type: 'relative', from: 'now-2d' },
       signalFilter: 'tags: coverage_gap',
-      sampleSize: MAX_ANALYSIS_SIGNALS,
     });
   });
 

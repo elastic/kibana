@@ -7,11 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  KI_SUMMARY_PAGE_SIZE,
-  MAX_ANALYSIS_SIGNALS,
-  MAX_IMPROVEMENTS_HISTORY_SIZE,
-} from '../../common/constants';
+import { KI_SUMMARY_PAGE_SIZE, MAX_IMPROVEMENTS_HISTORY_SIZE } from '../../common/constants';
 import type { FeedbackAnalysisContext } from '../../common/http_api/feedback_context';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -50,7 +46,6 @@ export const buildFeedbackContext = async (
       sources: aiIndex.sources,
       signalTimeRange: feedbackAnalysis?.signal_time_range,
       signalFilter: feedbackAnalysis?.signal_filter,
-      sampleSize: MAX_ANALYSIS_SIGNALS,
       ...(now ? { now } : {}),
     }),
     getKis(esClient, { destValue: aiIndex.dest.value, size: KI_SUMMARY_PAGE_SIZE }),

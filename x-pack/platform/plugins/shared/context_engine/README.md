@@ -257,8 +257,18 @@ a forced output schema, record the result.
 
 The briefing is handed over as the agent's `message`. It instructs the agent to
 load the `analyze-and-improve` skill before reading anything, so the run carries
-the analysis playbook whichever agent the index is configured with. The
-`platform.context_engine.ai_index` attachment is not used: it carries the
+the analysis playbook whichever agent the index is configured with.
+
+Prior proposals go into the briefing grouped by what they would change — the
+workflow, knowledge indicator or source named in `target` — rather than listed by
+date. A run cannot be handed the history that matters to it, because until it has
+read the signals it does not know what it is about to suggest; grouping by target
+lets it look its own conclusion up once it has one. Targets are ordered by how
+often they were rejected, so a long history is cut from the end that carries the
+least settled decisions, and the totals above the list stay exact whether or not
+it was cut.
+
+The `platform.context_engine.ai_index` attachment is not used: it carries the
 `save_automation` tool and instructions to ask the user questions, which belong
 to the interactive setup conversation.
 
@@ -307,16 +317,18 @@ per-space. The spaces a run drew from are recorded on each improvement's
 `provenance.signal_spaces`.
 
 Signals are folded into ranked patterns — grouped by tag, target index and tool,
-and scored by frequency weighted by tag. The grouping is an aggregation over the
-whole window, so a pattern's count is the number of signals that occurred, not
-the number a run read. The example query and provenance ids attached to each
-pattern come from documents, of which a run reads at most
-`MAX_ANALYSIS_SIGNALS`; a pattern occurring only outside that sample still gets
-its true count, with no example.
+and scored by frequency weighted by tag. The grouping is a `multi_terms`
+aggregation over the whole window, so a pattern's count is the number of signals
+that occurred, not the number a run read. Each bucket carries its own `top_hits`,
+so the example query and provenance ids attached to a pattern are drawn from the
+signals in that pattern: a group that has a count always has evidence to go with
+it. No documents are read outside the aggregation.
 
 Bucketing is on the multi-valued `tags` field, so a signal tagged both
 `query_error` and `coverage_gap` counts in both patterns, and an untagged signal
-produces no bucket.
+produces no bucket. The evidence hits arrive newest first, but an errored signal
+is preferred as the example where the bucket has one, since a failing query
+describes a pattern better than a successful one.
 
 A run happens only when there are patterns, not merely signals.
 

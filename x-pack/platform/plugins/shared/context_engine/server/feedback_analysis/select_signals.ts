@@ -21,15 +21,24 @@ const LENIENT_INDEX_OPTIONS = {
   allow_no_indices: true,
 } as const;
 
-const SIGNAL_SOURCE_EXCLUDES = ['data.returned.columns'] as const;
+/** The only `_source` fields an evidence hit needs; the rest of a signal is never read here. */
+const EVIDENCE_SOURCE_INCLUDES = [
+  'signal_id',
+  'data.query',
+  'data.error',
+  'data.returned.row_count',
+  'data.conversation_id',
+] as const;
 
 /** Cap on the conversations carried from the retrieval pass into the co-occurrence pass. */
 const MAX_COOCCURRENCE_CONVERSATIONS = 1000;
 
-/** Bucket caps for the pattern aggregation. */
-const MAX_TAG_BUCKETS = 10;
-const MAX_TARGET_INDEX_BUCKETS = 30;
-const MAX_TOOL_BUCKETS = 5;
+/**
+ * Cap on the (tag, target index, tool) combinations the pattern aggregation returns, ordered by
+ * count. Ranking narrows this to `MAX_ANALYSIS_SIGNAL_GROUPS`, so this only has to be wide enough
+ * that the ranking sees every group that could plausibly win.
+ */
+const MAX_PATTERN_BUCKETS = 300;
 
 /** Cap on the per-space signal indices reported for one run. */
 const MAX_SPACE_BUCKETS = 100;
@@ -42,8 +51,6 @@ export interface SelectSignalsOptions {
   signalTimeRange?: AiIndexSignalTimeRange;
   /** KQL from `feedback_analysis.signal_filter`, applied on top of the window. */
   signalFilter?: string;
-  /** Cap on the documents sampled for examples and provenance ids. */
-  sampleSize: number;
   /** Current time, defaulting to the wall clock. */
   now?: Date;
 }
@@ -63,17 +70,27 @@ interface TermsBucket {
   doc_count: number;
 }
 
+/** The projection of a signal that `EVIDENCE_SOURCE_INCLUDES` returns. */
+interface EvidenceSource {
+  signal_id: string;
+  data: {
+    query?: string;
+    error?: string;
+    returned: { row_count: number };
+    conversation_id?: string;
+  };
+}
+
+/** A `multi_terms` bucket is keyed by the ordered tuple of its term values. */
+interface PatternBucket {
+  key: [SignalTag, string, string];
+  doc_count: number;
+  evidence: { hits: { hits: Array<{ _source?: EvidenceSource }> } };
+}
+
 interface PatternAggregations {
   spaces: { buckets: TermsBucket[] };
-  patterns: {
-    buckets: Array<
-      { key: SignalTag; doc_count: number } & {
-        targets: {
-          buckets: Array<TermsBucket & { tools: { buckets: TermsBucket[] } }>;
-        };
-      }
-    >;
-  };
+  patterns: { buckets: PatternBucket[] };
 }
 
 interface ConversationAggregations {
@@ -158,14 +175,7 @@ const buildBaseQuery = ({
 
 const TOOL_CALL_CLAUSE: QueryDslQueryContainer = { term: { signal_type: 'tool_call' } };
 
-/** Keys a pattern by the triple that defines it. */
-const PATTERN_KEY_SEPARATOR = '\u0000';
-const patternKey = (tag: SignalTag, targetIndex: string, tool: string): string =>
-  [tag, targetIndex, tool].join(PATTERN_KEY_SEPARATOR);
-
-type PatternEvidence = Pick<SignalPatternCandidate, 'example' | 'signal_ids'>;
-
-const toExample = (signal: Signal): SignalPatternCandidate['example'] => ({
+const toExample = (signal: EvidenceSource): SignalPatternCandidate['example'] => ({
   ...(signal.data.query !== undefined ? { query: signal.data.query } : {}),
   ...(signal.data.error !== undefined ? { error: signal.data.error } : {}),
   row_count: signal.data.returned.row_count,
@@ -174,62 +184,39 @@ const toExample = (signal: Signal): SignalPatternCandidate['example'] => ({
     : {}),
 });
 
-/** Collects one example and a few signal ids per pattern from the sampled documents. */
-const collectEvidence = (signals: Signal[], maxIds: number): Map<string, PatternEvidence> => {
-  const evidence = new Map<string, PatternEvidence>();
-
-  for (const signal of signals) {
-    for (const tag of signal.tags) {
-      const key = patternKey(tag, signal.data.target_index, signal.data.tool);
-      let entry = evidence.get(key);
-      if (!entry) {
-        entry = { signal_ids: [] };
-        evidence.set(key, entry);
-      }
-
-      if (entry.signal_ids.length < maxIds) {
-        entry.signal_ids.push(signal.signal_id);
-      }
-      if (!entry.example || (!entry.example.error && signal.data.error)) {
-        entry.example = toExample(signal);
-      }
-    }
-  }
-
-  return evidence;
+/**
+ * Picks the signal a pattern is illustrated by. The hits arrive newest first, but recency is not
+ * what makes an example useful: a failing query says more about a pattern than a successful one,
+ * so an errored hit wins when the bucket has one.
+ */
+const toExampleFrom = (hits: EvidenceSource[]): SignalPatternCandidate['example'] | undefined => {
+  const chosen = hits.find(({ data }) => data.error !== undefined) ?? hits[0];
+  return chosen ? toExample(chosen) : undefined;
 };
 
 /** Turns the aggregation into one candidate per (tag, target index, tool). */
-const buildPatterns = (
-  aggregations: PatternAggregations | undefined,
-  sampled: Signal[]
-): SignalPatternCandidate[] => {
-  const evidence = collectEvidence(sampled, MAX_GROUP_SIGNAL_IDS);
-  const patterns: SignalPatternCandidate[] = [];
+const buildPatterns = (aggregations: PatternAggregations | undefined): SignalPatternCandidate[] =>
+  (aggregations?.patterns.buckets ?? []).map((bucket) => {
+    const [tag, targetIndex, tool] = bucket.key;
+    const hits = bucket.evidence.hits.hits
+      .map((hit) => hit._source)
+      .filter((source): source is EvidenceSource => source != null);
+    const example = toExampleFrom(hits);
 
-  for (const tagBucket of aggregations?.patterns.buckets ?? []) {
-    for (const targetBucket of tagBucket.targets.buckets) {
-      for (const toolBucket of targetBucket.tools.buckets) {
-        const found = evidence.get(patternKey(tagBucket.key, targetBucket.key, toolBucket.key));
-        patterns.push({
-          tag: tagBucket.key,
-          target_index: targetBucket.key,
-          tool: toolBucket.key,
-          count: toolBucket.doc_count,
-          signal_ids: found?.signal_ids ?? [],
-          ...(found?.example ? { example: found.example } : {}),
-        });
-      }
-    }
-  }
-
-  return patterns;
-};
+    return {
+      tag,
+      target_index: targetIndex,
+      tool,
+      count: bucket.doc_count,
+      signal_ids: hits.map(({ signal_id: signalId }) => signalId),
+      ...(example ? { example } : {}),
+    };
+  });
 
 /** Selects the signals that describe one AI index's retrieval quality. */
 export const selectSignals = async (
   esClient: ElasticsearchClient,
-  { destValue, sources, signalTimeRange, signalFilter, sampleSize, now }: SelectSignalsOptions
+  { destValue, sources, signalTimeRange, signalFilter, now }: SelectSignalsOptions
 ): Promise<SelectSignalsResult> => {
   const window = resolveSignalWindow(signalTimeRange, now);
   const baseFilter = buildBaseQuery({ ...window, signalFilter });
@@ -295,9 +282,9 @@ export const selectSignals = async (
   const response = await esClient.search<Signal, PatternAggregations>({
     index: `${SIGNAL_INDEX_PREFIX}*`,
     ...LENIENT_INDEX_OPTIONS,
-    size: sampleSize,
+    // Every pattern carries its own evidence, so no documents are read outside the aggregation.
+    size: 0,
     track_total_hits: true,
-    _source: { excludes: [...SIGNAL_SOURCE_EXCLUDES] },
     query: {
       bool: {
         filter: baseFilter,
@@ -305,16 +292,30 @@ export const selectSignals = async (
         minimum_should_match: 1,
       },
     },
-    // Signals are written in trace batches and share timestamps, so `signal_id` breaks ties.
-    sort: [{ '@timestamp': { order: 'desc' } }, { signal_id: { order: 'desc' } }],
     aggs: {
       spaces: { terms: { field: '_index', size: MAX_SPACE_BUCKETS } },
       patterns: {
-        terms: { field: 'tags', size: MAX_TAG_BUCKETS },
+        // A signal is bucketed once per tag it carries, so one tagged both `query_error` and
+        // `coverage_gap` counts towards both patterns. Signals missing `data.target_index` or
+        // `data.tool` form no pattern at all: the triple is the shape of a tool call, and
+        // `signal_type: tool_call` is the only type that exists. A second signal type would need
+        // its own pattern key rather than a `missing` placeholder here.
+        multi_terms: {
+          terms: [{ field: 'tags' }, { field: 'data.target_index' }, { field: 'data.tool' }],
+          size: MAX_PATTERN_BUCKETS,
+          order: { _count: 'desc' },
+        },
         aggs: {
-          targets: {
-            terms: { field: 'data.target_index', size: MAX_TARGET_INDEX_BUCKETS },
-            aggs: { tools: { terms: { field: 'data.tool', size: MAX_TOOL_BUCKETS } } },
+          // Evidence comes from inside the bucket, so a pattern cannot end up counted but
+          // unillustrated. The `_source` projection keeps this to a handful of small fields per
+          // hit, which is what makes it affordable across every bucket.
+          evidence: {
+            top_hits: {
+              size: MAX_GROUP_SIGNAL_IDS,
+              // Signals are written in trace batches and share timestamps, so `signal_id` breaks ties.
+              sort: [{ '@timestamp': { order: 'desc' } }, { signal_id: { order: 'desc' } }],
+              _source: { includes: [...EVIDENCE_SOURCE_INCLUDES] },
+            },
           },
         },
       },
@@ -322,12 +323,7 @@ export const selectSignals = async (
   });
 
   return {
-    patterns: buildPatterns(
-      response.aggregations,
-      response.hits.hits
-        .map((hit) => hit._source)
-        .filter((source): source is Signal => source != null)
-    ),
+    patterns: buildPatterns(response.aggregations),
     spaces: [
       ...new Set(
         (response.aggregations?.spaces.buckets ?? [])

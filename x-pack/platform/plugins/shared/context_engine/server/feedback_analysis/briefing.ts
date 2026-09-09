@@ -26,8 +26,13 @@ export interface BriefingInput {
 
 const MAX_EXAMPLE_LENGTH = 500;
 
-/** How many prior improvements to spell out individually before summarising the rest by status. */
-const MAX_HISTORY_DETAIL = 40;
+/** How many targets to spell out before summarising the rest as a count. */
+const MAX_HISTORY_TARGETS = 20;
+
+/** How many proposals to name within one target. */
+const MAX_HISTORY_ENTRIES_PER_TARGET = 5;
+
+const MAX_REASON_LENGTH = 200;
 
 const truncate = (value: string, max: number = MAX_EXAMPLE_LENGTH): string =>
   value.length <= max ? value : `${value.slice(0, max)}…`;
@@ -106,6 +111,98 @@ const renderGroups = (groups: SignalPatternGroup[], run: FeedbackAnalysisRunCont
   return [header, '', ...groups.map((group, index) => renderGroup(group, index + 1))].join('\n\n');
 };
 
+/**
+ * What a proposal would change, which is the key its history is worth reading by. `add_*` actions
+ * name no existing object, so they group under the subject whose gap they would close, and failing
+ * that under the action itself.
+ */
+const targetKeyOf = ({ action, target }: Improvement): string => {
+  if (target?.workflow_id) {
+    return `workflow \`${target.workflow_id}\``;
+  }
+  if (target?.ki_id) {
+    return `knowledge indicator \`${target.ki_id}\``;
+  }
+  if (target?.source_value) {
+    return `source \`${target.source_value}\``;
+  }
+  if (target?.subject) {
+    return `subject \`${target.subject}\``;
+  }
+  return `\`${action}\` (no target named)`;
+};
+
+interface TargetHistory {
+  key: string;
+  improvements: Improvement[];
+  rejected: number;
+}
+
+/** Groups the history by what each proposal would change, most-contested target first. */
+const groupHistoryByTarget = (history: Improvement[]): TargetHistory[] => {
+  const byTarget = new Map<string, TargetHistory>();
+
+  for (const improvement of history) {
+    const key = targetKeyOf(improvement);
+    let entry = byTarget.get(key);
+    if (!entry) {
+      entry = { key, improvements: [], rejected: 0 };
+      byTarget.set(key, entry);
+    }
+    entry.improvements.push(improvement);
+    if (improvement.status === 'rejected') {
+      entry.rejected += 1;
+    }
+  }
+
+  // Most-rejected first, so that what gets cut from the tail is the least decision-relevant.
+  return [...byTarget.values()].sort(
+    (a, b) =>
+      b.rejected - a.rejected ||
+      b.improvements.length - a.improvements.length ||
+      a.key.localeCompare(b.key)
+  );
+};
+
+const countByStatus = (history: Improvement[]): string =>
+  (['rejected', 'suggested', 'applied', 'failed'] as const)
+    .map((status) => ({
+      status,
+      count: history.filter((improvement) => improvement.status === status).length,
+    }))
+    .filter(({ count }) => count > 0)
+    .map(
+      ({ status, count }) =>
+        `${count} ${status}${status === 'suggested' ? ' (awaiting review)' : ''}`
+    )
+    .join(', ');
+
+const renderTargetHistory = ({ key, improvements }: TargetHistory): string => {
+  const lines = [`### ${key} — ${improvements.length} proposal(s): ${countByStatus(improvements)}`];
+
+  for (const improvement of improvements.slice(0, MAX_HISTORY_ENTRIES_PER_TARGET)) {
+    const reason = improvement.resolution?.reason ?? improvement.resolution?.error;
+    lines.push(
+      `- **${improvement.status}** — \`${improvement.action}\`: ${improvement.title}${
+        reason ? ` (${truncate(reason, MAX_REASON_LENGTH)})` : ''
+      }`
+    );
+  }
+
+  const remaining = improvements.length - MAX_HISTORY_ENTRIES_PER_TARGET;
+  if (remaining > 0) {
+    lines.push(`- …and ${remaining} more on this target.`);
+  }
+
+  return lines.join('\n');
+};
+
+/**
+ * Prior proposals, grouped by what they would change rather than listed by date. A run does not
+ * know what it is about to suggest until it has read the signals, so the briefing cannot pick out
+ * the history that will turn out to be relevant. Grouping by target lets the run look its own
+ * conclusion up once it has one.
+ */
 const renderHistory = (history: Improvement[]): string => {
   if (history.length === 0) {
     return [
@@ -115,26 +212,27 @@ const renderHistory = (history: Improvement[]): string => {
     ].join('\n');
   }
 
-  const detailed = history.slice(0, MAX_HISTORY_DETAIL);
+  const targets = groupHistoryByTarget(history);
+  const detailed = targets.slice(0, MAX_HISTORY_TARGETS);
   const lines = [
     '## What was proposed before',
     '',
-    'Do not propose any of these again. A rejection is a decision that has already been made; re-proposing it wastes a reviewer’s time and it will be de-duplicated onto the same record anyway.',
+    `${history.length} proposal(s) across ${targets.length} target(s) — ${countByStatus(history)}.`,
     '',
+    'Grouped by what each would change, most-rejected first. **Before you propose anything, find its target below.** A rejection is a decision that has already been made: re-proposing it wastes a reviewer’s time and it will be de-duplicated onto the same record anyway. A target rejected more than once needs no further proposals unless these signals show something the earlier ones did not, and one already carrying several suggestions awaiting review does not need another.',
+    '',
+    detailed.map(renderTargetHistory).join('\n\n'),
   ];
 
-  for (const improvement of detailed) {
-    const reason = improvement.resolution?.reason ?? improvement.resolution?.error;
+  const remainingTargets = targets.length - detailed.length;
+  if (remainingTargets > 0) {
+    const remainingProposals = targets
+      .slice(MAX_HISTORY_TARGETS)
+      .reduce((total, { improvements }) => total + improvements.length, 0);
     lines.push(
-      `- **${improvement.status}** — \`${improvement.action}\`: ${improvement.title}${
-        reason ? ` (${truncate(reason, 200)})` : ''
-      }`
+      '',
+      `…and ${remainingTargets} more target(s) carrying ${remainingProposals} proposal(s), none of them rejected more often than those above.`
     );
-  }
-
-  const remaining = history.length - detailed.length;
-  if (remaining > 0) {
-    lines.push(`- …and ${remaining} more.`);
   }
 
   return lines.join('\n');
@@ -169,6 +267,7 @@ const renderTask = (allowedActions: ImprovementAction[]): string => {
       .map((action) => `\`${action}\``)
       .join(', ')}. Anything else is rejected on write.`,
     '- **Ground every proposal.** Cite the `signal_ids` you took it from, using the ids listed with each group above. A proposal you cannot attach to signals is one you should not make.',
+    '- **Check the target’s history once you know what you want to change.** Look it up under "What was proposed before". Reviewers have already ruled on some of these, and their reasons apply to your proposal as much as to the one they rejected.',
     '- **Propose nothing rather than something weak.** An empty list is a valid, useful answer when the signals do not point anywhere. Padding the list costs a reviewer more than it gains.',
     '- **One proposal per distinct problem.** Two groups with the same underlying cause are one fix.',
     '',
