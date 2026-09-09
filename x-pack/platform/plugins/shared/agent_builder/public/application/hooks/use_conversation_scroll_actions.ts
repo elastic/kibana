@@ -14,10 +14,8 @@ const isAtBottom = (el: HTMLElement) =>
   el.scrollHeight - el.scrollTop - el.clientHeight <= AT_BOTTOM_THRESHOLD;
 
 export const useConversationScrollActions = ({
-  conversationId,
   scrollContainer,
 }: {
-  conversationId: string;
   scrollContainer: HTMLDivElement | null;
 }) => {
   const stuckToBottomRef = useRef(true);
@@ -127,11 +125,6 @@ export const useConversationScrollActions = ({
     if (inner) observer.observe(inner);
     return () => observer.disconnect();
   }, [scrollContainer, doSmoothScroll]);
-
-  useEffect(() => {
-    if (!scrollContainer || !conversationId) return;
-    stickToBottom();
-  }, [conversationId, scrollContainer, stickToBottom]);
 
   const smoothScrollToBottom = useCallback(() => {
     if (!scrollContainer) return;

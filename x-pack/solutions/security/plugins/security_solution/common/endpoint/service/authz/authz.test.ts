@@ -132,6 +132,26 @@ describe('Endpoint Authz service', () => {
             .canReadActionsLogManagement
         ).toBe(false);
       });
+
+      it('should set `canAccessEndpointActionsLogManagement` to false on a basic license', () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+        licenseService.isEnterprise.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canAccessEndpointActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canAccessEndpointActionsLogManagement` to true on platinum but not enterprise', () => {
+        licenseService.isPlatinumPlus.mockReturnValue(true);
+        licenseService.isEnterprise.mockReturnValue(false);
+
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false);
+
+        expect(authz.canAccessEndpointActionsLogManagement).toBe(true);
+        expect(authz.canReadActionsLogManagement).toBe(false);
+      });
     });
 
     it('should set `canUnIsolateHost` to true even if not proper license', () => {

@@ -103,8 +103,6 @@ export const WatchCallableRef = lazySchema(() =>
     name: z.string(),
     kind: z.enum(['skill', 'workflow']),
     summary: z.string(),
-    gated: z.boolean(),
-    enabled: z.boolean(),
     /**
      * ISO 8601 timestamp of last invocation, or null
      */
@@ -198,7 +196,7 @@ export const Watch = lazySchema(() =>
     coverage: z.array(z.array(z.number()).min(2).max(2)),
     scopeSummary: z.string(),
     scopes: z.array(WatchScope),
-    callables: z.array(WatchCallableRef),
+    skills: z.array(WatchCallableRef),
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
   })

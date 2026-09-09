@@ -96,8 +96,6 @@ components:
         - name
         - kind
         - summary
-        - gated
-        - enabled
         - lastRun
       properties:
         id:
@@ -109,10 +107,6 @@ components:
           enum: [skill, workflow]
         summary:
           type: string
-        gated:
-          type: boolean
-        enabled:
-          type: boolean
         lastRun:
           type: string
           nullable: true
@@ -197,7 +191,7 @@ components:
         - coverage
         - scopeSummary
         - scopes
-        - callables
+        - skills
         - metrics
         - recentRuns
       properties:
@@ -252,7 +246,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchScope'
-        callables:
+        skills:
           type: array
           items:
             $ref: '#/components/schemas/WatchCallableRef'

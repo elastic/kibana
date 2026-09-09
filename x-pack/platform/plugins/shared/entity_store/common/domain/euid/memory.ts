@@ -8,6 +8,7 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import type { EuidGateOptions } from './commons';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -18,6 +19,43 @@ import {
   isEuidField,
 } from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
+
+/**
+ * Applies the calculated-identity evaluation pipeline to a document,
+ * returning a fresh object — `doc` itself is never mutated. Shared by {@link getEuidFromObject}
+ * and {@link getEntityIdentifiersFromDocument}, and by callers (e.g. the creation gate) that need
+ * to evaluate a `requires` condition against fields derived at identity-evaluation time
+ * (e.g. `entity.namespace`), not just raw document fields.
+ *
+ * For single-field identities there is nothing to evaluate, so `doc` is returned unchanged.
+ */
+export function buildEvaluatedDoc(entityType: EntityType, doc: any): any {
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
+
+  if (isSingleFieldIdentity(identityField)) {
+    return doc;
+  }
+
+  let evaluatedDoc = { ...doc };
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    evaluatedDoc = { ...evaluatedDoc, ...evaluated };
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(
+      evaluatedDoc,
+      entityDefinition.whenConditionTrueSetFieldsPreAgg
+    );
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(
+      evaluatedDoc,
+      entityDefinition.whenConditionTrueSetFieldsAfterStats
+    );
+  }
+  return evaluatedDoc;
+}
 
 /**
  * Constructs an entity id from the provided entity type and document.
@@ -34,11 +72,15 @@ import { applyFieldEvaluations } from './field_evaluations';
  * // 'host:server1.example.com'
  * ```
  *
+ * Applies the creation gate: a document that may not put an entity in the store yields `undefined`.
+ * For entities that already exist, use {@link getEuidFromObjectForSearch}.
+ *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
+ * @param options - See {@link EuidGateOptions}.
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidFromObject(entityType: EntityType, doc: any) {
+export function getEuidFromObject(entityType: EntityType, doc: any, options?: EuidGateOptions) {
   if (!doc) {
     return undefined;
   }
@@ -58,24 +100,14 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return `${entityType}:${value}`;
   }
 
-  const fieldEvaluations = identityField.fieldEvaluations ?? [];
-  if (fieldEvaluations.length > 0) {
-    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
-    doc = { ...doc, ...evaluated };
-  }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
-  }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
-  }
+  const evaluatedDoc = buildEvaluatedDoc(entityType, doc);
 
-  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+  if (!documentPassesCalculatedIdentityPipelineGate(evaluatedDoc, entityDefinition, options)) {
     return undefined;
   }
 
-  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
-  const composedId = getComposedFieldValues(doc, effectiveRanking);
+  const effectiveRanking = getEffectiveEuidRanking(evaluatedDoc, identityField);
+  const composedId = getComposedFieldValues(evaluatedDoc, effectiveRanking);
   if (composedId.length === 0) {
     return undefined;
   }
@@ -85,6 +117,21 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return rawId;
   }
   return `${entityType}:${rawId}`;
+}
+
+/**
+ * Like {@link getEuidFromObject} without the creation gate, so IdP and shared-account documents
+ * still resolve to an entity that already exists.
+ *
+ * For risk scoring and enrichment. The caller checks store membership; this only answers which
+ * entity a document refers to.
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param doc - The document to derive entity id from. May be a flattened or nested shape.
+ * @returns An entity id string, or undefined if the document does not contain enough identifying information.
+ */
+export function getEuidFromObjectForSearch(entityType: EntityType, doc: any) {
+  return getEuidFromObject(entityType, doc, { applyPostAggFilter: false });
 }
 
 /**
@@ -99,8 +146,9 @@ export function getEntityIdentifiersFromDocument(
     return undefined;
   }
 
-  let workingDoc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const workingDoc = getDocument(doc);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(workingDoc, identityField.singleField);
@@ -110,28 +158,15 @@ export function getEntityIdentifiersFromDocument(
     return { [identityField.singleField]: value };
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(workingDoc, identityField.fieldEvaluations);
-    workingDoc = { ...workingDoc, ...evaluated };
-  }
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(workingDoc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
-  }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(
-      workingDoc,
-      entityDefinition.whenConditionTrueSetFieldsAfterStats
-    );
-  }
+  const evaluatedDoc = buildEvaluatedDoc(entityType, workingDoc);
 
-  if (!documentPassesCalculatedIdentityPipelineGate(workingDoc, entityDefinition)) {
+  if (!documentPassesCalculatedIdentityPipelineGate(evaluatedDoc, entityDefinition)) {
     return undefined;
   }
 
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(
-    workingDoc,
-    getEffectiveEuidRanking(workingDoc, identityField)
+    evaluatedDoc,
+    getEffectiveEuidRanking(evaluatedDoc, identityField)
   );
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;

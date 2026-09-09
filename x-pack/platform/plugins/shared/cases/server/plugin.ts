@@ -77,6 +77,7 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
@@ -223,6 +224,28 @@ export class CasePlugin
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     this.usageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+    const workflowRunService =
+      this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
+        ? new CasesWorkflowRunService({
+            management: plugins.workflowsManagement.management,
+            logger: this.logger,
+            audit: plugins.security.audit,
+            getWorkflowRunAuthorizer: async (request) => {
+              const [{ savedObjects }] = await core.getStartServices();
+              return this.clientFactory.createWorkflowRunAuthorizer({
+                request,
+                savedObjectsService: savedObjects,
+              });
+            },
+          })
+        : undefined;
 
     registerRoutes({
       router,
@@ -232,7 +255,11 @@ export class CasePlugin
           docLinks: core.docLinks,
           config: this.caseConfig,
         }),
-        ...getInternalRoutes(this.userProfileService, this.caseConfig),
+        ...getInternalRoutes(
+          this.userProfileService,
+          this.caseConfig,
+          workflowRunService ? { service: workflowRunService, getSpaceId } : undefined
+        ),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -254,14 +281,6 @@ export class CasePlugin
     const getActionsClient = async (request: KibanaRequest) => {
       const [, pluginsStart] = await core.getStartServices();
       return pluginsStart.actions.getActionsClientWithRequest(request);
-    };
-
-    const getSpaceId = (request?: KibanaRequest) => {
-      if (!request) {
-        return DEFAULT_SPACE_ID;
-      }
-
-      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
     const serverlessProjectType = this.isServerless

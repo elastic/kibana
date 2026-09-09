@@ -139,8 +139,8 @@ export const registerCompareExperimentsRoute = ({
                   totalPairs: 0,
                   skippedMissingPairs: 0,
                   skippedNullScores: 0,
-                  truncatedA: truncatedBaseline,
-                  truncatedB: truncatedTarget,
+                  truncatedBaseline,
+                  truncatedTarget,
                 },
               },
             });
@@ -167,8 +167,8 @@ export const registerCompareExperimentsRoute = ({
                 totalPairs: pairs.length,
                 skippedMissingPairs,
                 skippedNullScores,
-                truncatedA: truncatedBaseline,
-                truncatedB: truncatedTarget,
+                truncatedBaseline,
+                truncatedTarget,
               },
             },
           });

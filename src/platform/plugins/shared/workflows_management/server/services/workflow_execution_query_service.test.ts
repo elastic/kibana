@@ -1349,16 +1349,14 @@ describe('WorkflowExecutionQueryService', () => {
         expect.arrayContaining([
           { term: { workflowRunId: 'run-1' } },
           { term: { spaceId: 'default' } },
-          { term: { stepType: 'waitForInput' } },
+          { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
           { term: { status: 'waiting_for_input' } },
         ])
       );
-      expect(args.query.bool.must_not).toEqual(
-        expect.arrayContaining([
-          { exists: { field: 'finishedAt' } },
-          { exists: { field: 'hitl.respondedAt' } },
-        ])
-      );
+      // Already-claimed steps are intentionally NOT excluded: the loser of a
+      // concurrent resume must still land on the step so the atomic claim can
+      // reject it, keeping `markStepAsResponded` the single first-writer-wins gate.
+      expect(args.query.bool.must_not).toEqual([{ exists: { field: 'finishedAt' } }]);
     });
 
     it('returns null when no claimable step is found', async () => {
@@ -1405,7 +1403,9 @@ describe('WorkflowExecutionQueryService', () => {
       expect(args.script).toContain('ctx._source.hitl.respondedAt != null');
       expect(args.script).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
       expect(args.script).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
-      expect(args.script).toContain('ctx._source.hitl.channel = params.channel');
+      expect(args.script).toContain(
+        'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }'
+      );
       expect(args.script).toContain('ctx._source.input.remove(params.tokenHashField)');
       expect(args.script).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
       expect(args.params).toEqual({
