@@ -35,6 +35,19 @@ const setupModeState: ISetupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
+type SetupModeListener = () => void;
+const setupModeListeners = new Set<SetupModeListener>();
+
+/**
+ * Subscribe to setup-mode state changes without replacing the renderer callback.
+ */
+export const subscribeSetupModeState = (listener: SetupModeListener): (() => void) => {
+  setupModeListeners.add(listener);
+  return () => {
+    setupModeListeners.delete(listener);
+  };
+};
+
 export const setNewlyDiscoveredClusterUuid = (clusterUuid: string) => {
   globalState.cluster_uuid = clusterUuid;
   globalState.save?.();
@@ -66,7 +79,10 @@ export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid
   }
 };
 
-const notifySetupModeDataChange = () => setupModeState.callback && setupModeState.callback();
+const notifySetupModeDataChange = () => {
+  setupModeState.callback?.();
+  notifySetupModeListeners();
+};
 
 export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
@@ -135,12 +151,18 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   }
 };
 
+const notifySetupModeListeners = () => {
+  setupModeListeners.forEach((listener) => listener());
+};
+
 export const markSetupModeSupported = () => {
   setupModeState.supported = true;
+  notifySetupModeListeners();
 };
 
 export const markSetupModeUnsupported = () => {
   setupModeState.supported = false;
+  notifySetupModeListeners();
 };
 
 export const initSetupModeState = async (
