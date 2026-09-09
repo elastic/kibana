@@ -11,7 +11,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
+import {
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+} from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 
@@ -97,10 +100,10 @@ describe('createSuggestAutomationProvider', () => {
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
-        autoSendInitialMessage: false,
+        autoSendInitialMessage: true,
         initialMessage: expect.stringMatching(
           new RegExp(
-            `\\[\\/${KI_AUTOMATION_GENERATION_SKILL_ID}\\]\\(skill://${KI_AUTOMATION_GENERATION_SKILL_ID}\\).*When an ai_index attachment is present`,
+            `\\[\\/${ANALYZE_AND_IMPROVE_SKILL_ID}\\]\\(skill://${ANALYZE_AND_IMPROVE_SKILL_ID}\\).*\\[\\/${AI_INDEX_AUTOMATIONS_SKILL_ID}\\]\\(skill://${AI_INDEX_AUTOMATIONS_SKILL_ID}\\)`,
             's'
           )
         ),

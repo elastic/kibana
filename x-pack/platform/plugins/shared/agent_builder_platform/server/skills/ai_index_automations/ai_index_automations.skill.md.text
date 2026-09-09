@@ -1,0 +1,147 @@
+## When to Use This Skill
+
+Load this skill to **read, draft or change the workflow automations attached to a Context Engine AI
+index** — the Kibana Workflows that turn its sources into knowledge indicators.
+
+Reach for it when an index needs an automation it does not have, when a proposal names a step that
+has to change, or when you need to know what an existing automation actually does before saying
+anything about it.
+
+Deciding what the index should contain and whether a change is warranted is `analyze-and-improve`.
+Choosing the data an automation draws on is `ai-index-sources`.
+
+## Read the automation before you say anything about it
+
+`platform.workflows.get_workflow` returns a workflow's definition. Read it for a specific step,
+because a useful change names one: what it samples and how much, what it asks the model for, how
+many indicators it can emit, and what it writes into which fields.
+
+A pipeline's *shape* often bounds what it could ever produce, however well its prompts are worded —
+an automation that samples twenty documents cannot describe a corpus of ten thousand, no matter how
+the prompt is phrased. Look for that before looking at wording.
+
+Misquoting what an automation does is the most expensive mistake available here: every claim built
+on it inherits the error, and a reviewer who catches one stops trusting the rest. When several
+automations write to the same index, attribute an indicator to one by reading the definitions and
+seeing which writes to that destination and id pattern. If that does not settle it, say attribution
+was not established rather than guessing.
+
+For the semantics of a step type, Liquid templating, trigger schemas or `on-failure` handling, load
+`workflow-authoring` rather than inferring them from the YAML.
+
+## What every automation must do
+
+Whatever the strategy, a generated workflow has to:
+
+- **Read its source** through `elasticsearch.esql.query` or a connector step, applying the agreed
+  corpus filter.
+- **Ground the model on real data** before asking it for anything — a sample of documents, and for
+  detections a distribution aggregation whose observed counts every threshold must quote. Sample
+  with `function_score` + `random_score` so repeated runs see different records rather than always
+  the first-ingested ones.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required.
+- **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and gate every
+  write on `context-engine.verifyKi` so an indicator whose ES|QL fails to parse is reported rather
+  than persisted.
+- **Set a stable, normalized `ki_id`** derived from the indicator's own identifying data, so a
+  re-run replaces rather than duplicates. This is the whole dedup mechanism; get it wrong and every
+  run grows the index.
+- **Put every ES|QL the indicator carries into `attributes.esql`**, and mirror structured values
+  into both `content` and `attributes`.
+
+A complete worked example — grounding steps, prompt, verified sink — is in the
+`index-selection-reference-workflow` resource attached to this skill. Read it as the reference for
+what a finished automation looks like, whether you are drafting one or judging one.
+
+## Shapes for each strategy
+
+`analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow. Describe
+the workflow to `platform.core.generate_workflow` in natural language using these as the spec — do
+not submit YAML to it directly.
+
+**Index/Table Metadata** (`type: index_metadata`) — a `foreach` over a list of index names. Per
+iteration: fetch the mapping, sample documents, then an `ai.prompt` producing purpose, what the
+index does not contain, key fields, joins, when-to-use, and access patterns (each with a question
+type, an ES|QL template, a runnable example, params and returns). Sink with `ki_id` set to the index
+name and `attributes.esql` set to the runnable examples so the verifiers check them.
+
+**Bottom-Up** (`type: document`) — an ES|QL query pulling id, title and body, with the body
+truncated (`SUBSTRING(body, 1, 12000)`). A `foreach` over the results, an `ai.prompt` per document,
+and a sink with `ki_id` of `<index>/<doc_id>`. When the pass yields many near-identically-titled
+entries, emit one indicator per logical cluster and enumerate the members inside its `content`
+instead of one per record.
+
+**Selective / Outlier** (`type: event`) — an ES|QL query filtered to notable records, an
+`ai.prompt` returning a significance verdict alongside the indicator, and an `if` step that only
+sinks when the verdict is positive.
+
+**Atomic Facts** (`type: fact`) — an ES|QL query over documents, an `ai.prompt` extracting a list of
+discrete claims, then a `foreach` sinking one indicator per claim with `ki_id` of
+`<index>/<doc_id>-fact-<n>`.
+
+**Cumulative / Wiki-style** (`type: entity`) — a `foreach` over entity ids. Per entity: a query
+finding every document referencing it, an `ai.prompt` synthesizing a profile, and a sink keyed on
+the entity id. Re-runs read the stored indicator and merge through `context-engine.updateKi`,
+enriching it over time rather than replacing it.
+
+**Connector** — call `platform.workflows.get_step_definitions` for the connector type first. A
+connector step to list records, a `foreach`, a second connector step to fetch each body, an
+`ai.prompt` producing access patterns in `execute_connector_sub_action` form, and a sink keyed on
+the source record id. Any of the strategies above can run over a connector.
+
+**Detection / Feature** (`type: detection`, `feature`) — two complementary passes in one workflow,
+over shared grounding: an error sample, a `CATEGORIZE` pass clustering messages into templates, and
+a distribution aggregation. One `ai.prompt` emits detections (each a complete runnable query, not a
+template, with a severity score); a separate one emits features (inventory entries with a subtype
+and a stable slug). Every threshold and every evidence string must quote a value from the grounding
+— no invented numbers. Guard ratio detections with a denominator floor so they cannot fire on a
+handful of documents, set thresholds above the observed baseline with margin, and cap detections
+per signal rather than emitting near-duplicate conditions. Derive `query_type` by parsing the ES|QL
+for a `STATS` command rather than asking the model for it.
+
+## Validate before you propose
+
+When a proposal carries workflow YAML — an edited step, a rewritten query, a new field mapping —
+**it must pass `platform.workflows.validate_workflow` first.** A proposal that does not parse, or
+that names a step type which does not exist, costs a reviewer the entire round trip and teaches
+them to distrust the next one.
+
+- **Validate the whole definition, not the fragment you changed.** Validation is defined over a
+  complete workflow. A step in isolation cannot tell you whether its references resolve or whether
+  the name it depends on still exists after your edit.
+- **Read the failure rather than working around it.** When validation fails it returns the step
+  definitions for every step type the workflow references. That is usually enough to see whether
+  you misremembered a parameter or the step type is genuinely wrong. Never resolve a failure by
+  swapping in a step type you did not verify.
+- **Say that it validated.** A reviewer has no way to tell a checked proposal from an unchecked
+  one. If you could not validate — the tool was unavailable, or the change is prose rather than
+  YAML — say that instead. Do not imply a check you did not run.
+
+Validation establishes that the workflow parses, that its step types exist and that its references
+resolve. It does **not** establish that a query inside it returns anything. Where the change is to
+an ES|QL step, check the query itself with `platform.core.execute_esql`, which reads and writes
+nothing. Where a step's ES|QL is being repaired, `platform.core.generate_esql` will rewrite it
+given the failing query, the reason and the mapping.
+
+`platform.workflows.get_examples` shows working definitions when you are unsure of a shape.
+
+## Running one is a separate decision
+
+Validating a workflow and running it are different authorities. Running one writes indicators into
+the index and costs model calls on every document it touches.
+
+Do not execute a workflow unless the run you are in has told you to. When it has, start with a
+pilot: bound the corpus filter to a handful of documents, run that, and read what it produced
+before widening. `platform.core.execute_workflow` starts a run and
+`platform.core.get_workflow_execution_status` reports on it.
+
+Read the indicators a pilot produced rather than assuming a successful run means a good one. A
+workflow can complete cleanly and emit indicators with empty `content`, missing `attributes`, or
+titles that will never differentiate under retrieval.
+
+## Corpora larger than 10,000 documents
+
+ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs offset-based
+pagination, or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
+the cap rather than drafting a workflow that silently truncates — this fails quietly, and the index
+looks under-covered for reasons no one will connect back to here.

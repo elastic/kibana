@@ -7,7 +7,9 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
-  KI_AUTOMATION_GENERATION_SKILL_ID,
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
@@ -44,15 +46,23 @@ describe('createAiIndexAttachmentType', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('describes neutral attachment usage without forcing automation skill load', () => {
+  it('names the skill for each thing the conversation might do', () => {
     const description = attachmentType.getAgentDescription?.();
 
     expect(description).toContain(KI_RETRIEVAL_SKILL_ID);
-    expect(description).toContain(KI_AUTOMATION_GENERATION_SKILL_ID);
-    expect(description).not.toMatch(
-      new RegExp(`Load the \`${KI_AUTOMATION_GENERATION_SKILL_ID}\` skill and follow`)
-    );
+    expect(description).toContain(ANALYZE_AND_IMPROVE_SKILL_ID);
+    expect(description).toContain(AI_INDEX_AUTOMATIONS_SKILL_ID);
+    expect(description).toContain(AI_INDEX_SOURCES_SKILL_ID);
     expect(description).toContain(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
+  });
+
+  it('carries the interaction choreography the skills leave out', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toContain('ask_user_question');
+    expect(description).toMatch(/pilot limited to 1–3 KIs/);
+    expect(description).toMatch(/render the diff in chat first/);
+    expect(description).toMatch(/Do not run a workflow until it has been saved/);
   });
 
   it('formats the attachment for the agent', async () => {

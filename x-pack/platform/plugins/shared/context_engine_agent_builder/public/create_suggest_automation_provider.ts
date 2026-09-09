@@ -12,7 +12,10 @@ import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/publi
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
+import {
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+} from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
@@ -21,12 +24,20 @@ const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
   CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
 ]);
 
+/**
+ * This entry point exists to produce an automation, so it asks for the authoring skill up front
+ * rather than leaving the agent to notice partway through that it cannot write one. Naming a skill
+ * as a markdown link is what the agent reads as an explicit request to load it.
+ */
 const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',
   {
     defaultMessage:
-      "Load [/{skillId}](skill://{skillId}) and follow its **When an ai_index attachment is present** section for the attached AI index. Skip discovery and only use the attachment's destination, sources, and automations.",
-    values: { skillId: KI_AUTOMATION_GENERATION_SKILL_ID },
+      "Load [/{analysisSkillId}](skill://{analysisSkillId}) and [/{automationsSkillId}](skill://{automationsSkillId}), then suggest an automation for the attached AI index. Skip discovery and only use the attachment's destination, sources, and automations.",
+    values: {
+      analysisSkillId: ANALYZE_AND_IMPROVE_SKILL_ID,
+      automationsSkillId: AI_INDEX_AUTOMATIONS_SKILL_ID,
+    },
   }
 );
 
@@ -62,7 +73,9 @@ export const createSuggestAutomationProvider = ({
 
     agentBuilder.openChat({
       newConversation: true,
-      autoSendInitialMessage: false,
+      // Sent rather than pre-filled: the message is what names the skills to load, and an edited
+      // or cleared one leaves the agent without the authoring skill it needs.
+      autoSendInitialMessage: true,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
       sessionTag: `context-engine-ai-index-${aiIndex.id}`,
       attachments: [
