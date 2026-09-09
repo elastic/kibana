@@ -42,11 +42,13 @@ export const MapStep = ({ columns, rows, mapping, onMappingChange }: MapStepProp
       field: 'rowNumber',
       name: translations.ROW_NUMBER_LABEL,
       width: '80px',
+      valign: 'top',
     },
     ...columns.map(
       (column): EuiBasicTableColumn<ImportRow> => ({
         field: 'values',
         name: column,
+        valign: 'top',
         render: (values: ImportRow['values']) => formatPreviewValue(values[column]),
       })
     ),

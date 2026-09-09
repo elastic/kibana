@@ -866,6 +866,38 @@ describe('DatasetClient', () => {
     expect(examplesStorage.client.bulk).not.toHaveBeenCalled();
   });
 
+  it('keeps numeric and boolean metadata values when adding examples', async () => {
+    const { client } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+
+    await client.addExamples(created.id, [
+      {
+        input: { question: 'How do I upgrade Elasticsearch?' },
+        output: { expected: 'Follow the upgrade docs' },
+        metadata: {
+          example_id: 'RGF0YXNldA==',
+          metadata_num_hops: 2,
+          metadata_query_id: 0,
+          enabled: false,
+          blank: '',
+          emptyObject: {},
+        },
+      },
+    ]);
+
+    const dataset = await client.get(created.id);
+    expect(dataset?.examples[0]?.metadata).toEqual({
+      example_id: 'RGF0YXNldA==',
+      metadata_num_hops: 2,
+      metadata_query_id: 0,
+      enabled: false,
+    });
+  });
+
   it('stamps imported examples with their source', async () => {
     const { client, examplesStorage } = createClient();
     const created = await client.create({

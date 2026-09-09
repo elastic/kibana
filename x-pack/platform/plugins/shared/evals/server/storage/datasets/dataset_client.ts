@@ -1406,6 +1406,9 @@ const parseFacets = (aggregations: Record<string, unknown> | undefined): Dataset
 
 const EMPTY_EXAMPLE_METADATA = { description: 'empty-example' } as const;
 
+const isEmptyMetadataValue = (value: unknown): boolean =>
+  typeof value !== 'number' && typeof value !== 'boolean' && isEmpty(value);
+
 const normalizeExample = (example: DatasetExampleInput): NormalizedExample => {
   const hasInput = example.input != null;
   const hasOutput = example.output != null;
@@ -1418,7 +1421,7 @@ const normalizeExample = (example: DatasetExampleInput): NormalizedExample => {
   return {
     ...(hasInput ? { input: example.input } : {}),
     ...(hasOutput ? { output: example.output } : {}),
-    ...(hasMetadata ? { metadata: omitBy(example.metadata!, isEmpty) } : {}),
+    ...(hasMetadata ? { metadata: omitBy(example.metadata!, isEmptyMetadataValue) } : {}),
   };
 };
 
