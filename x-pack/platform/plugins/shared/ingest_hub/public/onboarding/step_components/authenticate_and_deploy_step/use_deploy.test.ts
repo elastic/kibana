@@ -26,6 +26,11 @@ function makeVarDef(
   return { name, type, title: name, ...opts } as RegistryVarsEntry;
 }
 
+jest.mock('react-router-dom', () => ({
+  useHistory: jest.fn(),
+  useParams: jest.fn(),
+}));
+
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
@@ -141,6 +146,7 @@ import {
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useHistory, useParams } from 'react-router-dom';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
@@ -148,6 +154,8 @@ const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeploym
 const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockUseHistory = useHistory as jest.Mock;
+const mockUseParams = useParams as jest.Mock;
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -694,6 +702,9 @@ function setupMocks({
   detectAndReviewStep?: Record<string, unknown>;
   instances?: Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>;
 } = {}) {
+  mockUseHistory.mockReturnValue({ location: { search: '', hash: '' }, replace: jest.fn() });
+  mockUseParams.mockReturnValue({ integrationId: 'aws' });
+
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
     authenticateAndDeployStep: { connectorId, staticKeys },
@@ -1181,7 +1192,7 @@ describe('useDeploy', () => {
       expect(mockSendCreateAgentlessPolicy).toHaveBeenCalled();
     });
 
-    it('skips SO creation on static-keys path (no connectorId)', async () => {
+    it('creates SO with authMethod: static_keys when no connectorId', async () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
         connectorId: undefined,
@@ -1193,7 +1204,36 @@ describe('useDeploy', () => {
         await result.current.handleDeploy();
       });
 
-      expect(mockSendCreateCloudOnboardingDeployment).not.toHaveBeenCalled();
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ authMethod: 'static_keys', provider: 'aws' })
+      );
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.not.objectContaining({ connectorId: expect.anything() })
+      );
+    });
+
+    it('passes authMethod: identity_federation when connectorId is set', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await act(async () => { await result.current.handleDeploy(); });
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ authMethod: 'identity_federation' })
+      );
+    });
+
+    it('passes authMethod: static_keys and omits connectorId when no connector', async () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: undefined,
+        staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await act(async () => { await result.current.handleDeploy(); });
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ authMethod: 'static_keys' })
+      );
+      const callArg = mockSendCreateCloudOnboardingDeployment.mock.calls[0][0];
+      expect(callArg.connectorId).toBeUndefined();
     });
 
     it('saves onboardingDeploymentId to session via updateDetectAndReviewStep', async () => {
