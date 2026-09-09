@@ -790,6 +790,36 @@ describe('start', () => {
       service.stop();
     });
   });
+
+  describe('app header', () => {
+    it('aliases deprecated next members onto the canonical objects', async () => {
+      const { chrome, service } = await start();
+
+      expect(chrome.next.appHeader).toBe(chrome.appHeader);
+      expect(chrome.next.inlineAppHeader).toBe(chrome.inlineAppHeader);
+
+      service.stop();
+    });
+
+    it('observes registrations through either path', async () => {
+      const { chrome, service } = await start();
+      const config = { title: 'Dashboards' };
+
+      const unregisterFromNext = chrome.next.appHeader.set(config);
+      expect(await firstValueFrom(chrome.appHeader.get$())).toEqual(config);
+
+      unregisterFromNext();
+      expect(await firstValueFrom(chrome.appHeader.get$())).toBeUndefined();
+
+      const unregisterFromCanonical = chrome.appHeader.set(config);
+      expect(await firstValueFrom(chrome.next.appHeader.get$())).toEqual(config);
+
+      unregisterFromCanonical();
+      expect(await firstValueFrom(chrome.next.appHeader.get$())).toBeUndefined();
+
+      service.stop();
+    });
+  });
 });
 
 describe('stop', () => {
