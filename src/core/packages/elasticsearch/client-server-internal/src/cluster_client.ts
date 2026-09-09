@@ -232,11 +232,13 @@ export class ClusterClient implements ICustomClusterClient {
     // provider's post-authentication headers override the one that came in on the wire. If the
     // credential is an internal UIAM credential, it might require client authentication.
     let clientAuthentication: string | undefined | null;
-    if (this.security?.uiam && scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER] === undefined) {
+    if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      clientAuthentication =
-        credential &&
-        this.security.uiam.getElasticsearchClientAuthentication(
+      const hasBearerClientAuthentication =
+        credential?.scheme.toLowerCase() === 'bearer' &&
+        scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER] !== undefined;
+      if (credential && !hasBearerClientAuthentication) {
+        clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
             ? { credentialSource: 'inbound', credential, requestHeaders }
             : {
@@ -244,6 +246,7 @@ export class ClusterClient implements ICustomClusterClient {
                 credential,
               }
         );
+      }
     }
 
     return {
@@ -255,9 +258,6 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
-    const requestHeaders = isRealRequest(request)
-      ? ensureRawRequest(request).headers ?? {}
-      : undefined;
     const authHeaders = isRealRequest(request)
       ? this.authHeaders?.get(request) ?? {}
       : request.headers;
@@ -270,12 +270,15 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // Keep supplied client authentication paired with the authenticated credential, falling back
-    // to Kibana's secret for UIAM bearer tokens and trusted internally created credentials.
+    // Preserve inbound bearer client authentication, including its absence. API keys keep their
+    // existing internal/external client-authentication rules.
+    const isBearerToken = authorizationHeader.scheme.toLowerCase() === 'bearer';
+    const requestHeaders =
+      isBearerToken && isRealRequest(request) ? ensureRawRequest(request).headers ?? {} : undefined;
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
     const clientAuthentication =
-      authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER] ??
+      (isBearerToken ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER] : undefined) ??
       this.security?.uiam?.getElasticsearchClientAuthentication(
         requestHeaders
           ? { credentialSource: 'inbound', credential: authorizationHeader, requestHeaders }

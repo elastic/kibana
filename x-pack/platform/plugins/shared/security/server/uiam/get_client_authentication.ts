@@ -6,21 +6,27 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
-/** Client authentication supplied by the caller. */
+/** Client authentication supplied by the caller; an empty object preserves its absence. */
 export interface UiamClientAuthentication {
   readonly sharedSecret?: string;
 }
 
-/** Preserves supplied client authentication and defaults to Kibana's secret when absent. */
+/** Preserves client authentication for inbound bearer tokens, including a missing header. */
 export const getUiamClientAuthentication = (
   request: KibanaRequest
 ): UiamClientAuthentication | undefined => {
+  const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+  if (authorization?.scheme.toLowerCase() !== 'bearer') {
+    return undefined;
+  }
+
   const sharedSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
   if (typeof sharedSecret === 'string') {
     return { sharedSecret };
   }
-  return undefined;
+  return request.isFakeRequest ? undefined : {};
 };

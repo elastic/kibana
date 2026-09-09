@@ -27,19 +27,6 @@ describe('createCoreUiamService', () => {
   });
 
   describe('getElasticsearchClientAuthentication', () => {
-    it.each(['Bearer', 'bearer'])(
-      'defaults inbound UIAM %s tokens to the shared secret without an attestation',
-      (scheme) => {
-        expect(
-          uiam.getElasticsearchClientAuthentication({
-            credentialSource: 'inbound',
-            credential: new HTTPAuthorizationHeader(scheme, 'essu_ephemeral_token'),
-            requestHeaders: {},
-          })
-        ).toBe(SHARED_SECRET);
-      }
-    );
-
     it('returns undefined for a non-UIAM credential, whatever its source', () => {
       const credential = new HTTPAuthorizationHeader('ApiKey', 'regular_key');
       expect(

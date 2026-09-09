@@ -349,7 +349,7 @@ describe('UiamService', () => {
       name: string;
       run: (
         service: UiamService,
-        authentication: UiamClientAuthentication | undefined
+        authentication: UiamClientAuthentication
       ) => Promise<object | void>;
     }> = [
       {
@@ -436,12 +436,12 @@ describe('UiamService', () => {
         async (sharedSecret) => {
           fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
 
-          await run(uiamService, sharedSecret === undefined ? undefined : { sharedSecret });
+          await run(uiamService, sharedSecret === undefined ? {} : { sharedSecret });
 
           expect(fetchSpy).toHaveBeenCalledTimes(1);
           const headers = fetchSpy.mock.calls[0][1].headers;
           if (sharedSecret === undefined) {
-            expect(headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe('secret');
+            expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
           } else {
             expect(headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe(sharedSecret);
           }

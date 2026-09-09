@@ -108,7 +108,7 @@ apiTest.describe(
       },
     ]) {
       apiTest(
-        `rejects ${description} gateway client authentication when the Kibana secret is invalid`,
+        `rejects an ephemeral token with ${description} gateway client authentication`,
         async ({ apiClient, ephemeralToken }) => {
           const response = await apiClient.get('internal/security/me', {
             headers: {

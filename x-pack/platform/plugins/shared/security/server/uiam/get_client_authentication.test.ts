@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServerMock } from '@kbn/core/server/mocks';
+
+import { getUiamClientAuthentication } from './get_client_authentication';
+
+describe('getUiamClientAuthentication', () => {
+  it.each(['Bearer', 'bearer'])(
+    'preserves supplied or absent client authentication for %s tokens',
+    (scheme) => {
+      for (const sharedSecret of ['upstream-secret', '', undefined]) {
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `${scheme} essu_token`,
+            ...(sharedSecret === undefined ? {} : { 'x-client-authentication': sharedSecret }),
+          },
+        });
+        expect(getUiamClientAuthentication(request)).toEqual(
+          sharedSecret === undefined ? {} : { sharedSecret }
+        );
+      }
+    }
+  );
+
+  it.each(['ApiKey', 'apikey', 'Basic'])(
+    'retains the default client authentication behavior for %s',
+    (scheme) => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `${scheme} essu_credential`,
+          'x-client-authentication': 'upstream-secret',
+        },
+      });
+      expect(getUiamClientAuthentication(request)).toBeUndefined();
+    }
+  );
+
+  it('uses Kibana client authentication for internally created bearer tokens', () => {
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_token' },
+    });
+    expect(getUiamClientAuthentication(request)).toBeUndefined();
+  });
+});

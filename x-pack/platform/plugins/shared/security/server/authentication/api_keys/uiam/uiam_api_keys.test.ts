@@ -220,7 +220,7 @@ describe('UiamAPIKeys', () => {
 
           expect(await grantWith(request)).toEqual({
             includeClientAuthentication: true,
-            clientAuthentication: sharedSecret === undefined ? undefined : { sharedSecret },
+            clientAuthentication: sharedSecret === undefined ? {} : { sharedSecret },
           });
         }
       );
@@ -243,10 +243,10 @@ describe('UiamAPIKeys', () => {
         });
       });
 
-      it('is included for a session access token', async () => {
+      it('preserves missing client authentication for an inbound access token', async () => {
         expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toEqual({
           includeClientAuthentication: true,
-          clientAuthentication: undefined,
+          clientAuthentication: {},
         });
       });
 
@@ -316,7 +316,7 @@ describe('UiamAPIKeys', () => {
           name: 'test-bearer-key',
           expiration: '30d',
         },
-        { includeClientAuthentication: true, clientAuthentication: undefined }
+        { includeClientAuthentication: true, clientAuthentication: {} }
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });

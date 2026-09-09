@@ -685,10 +685,6 @@ describe('API Keys', () => {
         'preserves client authentication %s in an ES API key grant',
         async (sharedSecret) => {
           const mockUiam = uiamServiceMock.create();
-          mockUiam.getClientAuthentication.mockReturnValue({
-            scheme: 'SharedSecret',
-            value: 'kibana-secret',
-          });
           const apiKeysWithUiam = new APIKeys({
             clusterClient: mockClusterClient,
             logger,
@@ -715,17 +711,14 @@ describe('API Keys', () => {
             role_descriptors: {},
           });
 
-          expect(mockUiam.getClientAuthentication).toHaveBeenCalledTimes(
-            sharedSecret === undefined ? 1 : 0
-          );
+          expect(mockUiam.getClientAuthentication).not.toHaveBeenCalled();
           expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
             api_key: { name: 'test-key', role_descriptors: {} },
             grant_type: 'access_token',
             access_token: 'essu_ephemeral_token',
-            client_authentication: {
-              scheme: 'SharedSecret',
-              value: sharedSecret ?? 'kibana-secret',
-            },
+            ...(sharedSecret === undefined
+              ? {}
+              : { client_authentication: { scheme: 'SharedSecret', value: sharedSecret } }),
           });
         }
       );
