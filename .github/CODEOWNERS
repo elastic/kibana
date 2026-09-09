@@ -1396,6 +1396,7 @@ x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
 x-pack/solutions/security/packages/features @elastic/security-pds-deployment
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-alert-zero-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
@@ -1417,7 +1418,6 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-alert-zero-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
@@ -1444,6 +1444,7 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/alert_zero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
@@ -1453,7 +1454,6 @@ x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/securi
 x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/mitre_attack @elastic/security-detection-engineering
-x-pack/solutions/security/plugins/alert_zero @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
