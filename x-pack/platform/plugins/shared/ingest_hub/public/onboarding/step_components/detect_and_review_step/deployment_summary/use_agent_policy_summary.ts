@@ -29,7 +29,7 @@ interface PersistedAuthStep {
 
 export interface AgentPolicySummaryData {
   agentPolicyName?: string;
-  /** Raw API key string — callers are responsible for rendering it masked */
+  /** Human-readable token name (e.g. "Default") — not the raw API key value */
   enrollmentToken?: string;
   agentCount?: number;
 }
@@ -53,7 +53,7 @@ export function useAgentPolicySummary(): AgentPolicySummaryData {
 
   const enrollmentToken = useMemo(() => {
     const key = enrollmentKeysData?.items?.[0];
-    return key?.api_key as string | undefined;
+    return key?.name as string | undefined;
   }, [enrollmentKeysData]);
 
   // Agent count — polled on the same 10s cadence used by use_service_data_detection.ts.

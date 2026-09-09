@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
 
 import type { SummaryField } from './managed_integration_summary';
 
 interface AgentBasedSummaryOpts {
   agentPolicyName?: string;
-  /** ReactNode so callers can render a masked token with a copy button (credentials must not be bare strings in the UI) */
-  enrollmentToken?: ReactNode;
+  /** Token name (e.g. "Default") — displayed as plain text, not the raw API key value */
+  enrollmentToken?: string;
   agentCount?: number;
 }
 
@@ -39,8 +38,7 @@ export function getAgentBasedSummaryFields(opts: AgentBasedSummaryOpts = {}): Su
     {
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.enrollmentToken',
       defaultMessage: 'Enrollment token',
-      // null until the enrollment token is fetched live — filtered out until available.
-      // Rendered as ReactNode (masked with copy button) — never as a bare string.
+      // null until the enrollment token name is fetched live — filtered out until available.
       value: enrollmentToken ?? null,
     },
     {

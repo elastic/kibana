@@ -15,7 +15,7 @@
  * duplicated in managed_integrations_section.tsx and ecf_deployment_section.tsx.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -56,10 +56,17 @@ export function SectionAccordion({
 }: SectionAccordionProps) {
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'sectionAccordionContent' });
-  const [isOpen, setIsOpen] = useState(!isDone);
-
+  // Start open always. Auto-collapse only when isDone transitions false → true in this session
+  // (i.e. the deploy just completed). When the component mounts already-done (session storage
+  // retained from a previous run), stay open so the user can still see and interact with the
+  // section content (e.g. the "Add agent" button in AgentBasedSection).
+  const [isOpen, setIsOpen] = useState(true);
+  const prevIsDoneRef = useRef(isDone);
   useEffect(() => {
-    if (isDone) setIsOpen(false);
+    if (isDone && !prevIsDoneRef.current) {
+      setIsOpen(false);
+    }
+    prevIsDoneRef.current = isDone;
   }, [isDone]);
 
   const headerButtonCss = css`

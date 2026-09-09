@@ -19,6 +19,7 @@
 import {
   sendCreateAgentPolicyWithPackagePolicies,
   sendCreatePackagePolicy,
+  sendGetAgentPolicies,
 } from '@kbn/fleet-plugin/public';
 import { sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
@@ -97,12 +98,43 @@ interface BuildPackagePolicyOpts {
   pkgVersion: string;
 }
 
+interface PkgInfo {
+  vars?: Array<{ name: string }>;
+  version?: string;
+  /** All policy templates from the package manifest — used to disable unrelated inputs. */
+  policy_templates?: Array<{
+    name: string;
+    inputs?: Array<{ type: string; id?: string }>;
+  }>;
+}
+
+/**
+ * Build the set of input keys belonging to policy templates OTHER than this service's PT.
+ *
+ * Fleet's simplified-to-legacy expansion calls packageToPackagePolicy(pkgInfo, ...) which expands
+ * ALL policy templates' inputs and enables them according to their manifest defaults. Unrelated
+ * inputs that default to enabled will then be validated — and fail if their required vars are
+ * absent. Explicitly marking them disabled prevents validation (Fleet skips disabled inputs/streams).
+ *
+ * Input key format: `<ptName>-<inputType>` — the same format buildPackageInputs uses.
+ */
+function buildDisabledInputsForOtherTemplates(
+  pkgInfo: PkgInfo,
+  servicePolicyTemplate: string
+): Record<string, { enabled: false }> {
+  const disabled: Record<string, { enabled: false }> = {};
+  for (const pt of pkgInfo.policy_templates ?? []) {
+    if (pt.name === servicePolicyTemplate) continue;
+    for (const input of pt.inputs ?? []) {
+      const inputType = input.id ?? input.type;
+      disabled[`${pt.name}-${inputType}`] = { enabled: false };
+    }
+  }
+  return disabled;
+}
+
 /**
  * Build the package-policy body for a single target instance.
- *
- * NOTE: we do NOT replicate the "explicitly disable non-selected inputs" loop from
- * deploy_groups.ts:181-197. That loop exists solely to dodge "not allowed for agentless" errors.
- * Agent policies have no such restriction, and adding it would bloat N request bodies.
  *
  * NOTE: cloud_connector is NOT included — it is an agentless-only auth mechanism.
  * Any connectorId on authenticateAndDeployStep is intentionally ignored here.
@@ -112,7 +144,7 @@ interface BuildPackagePolicyOpts {
  */
 async function buildInstancePackagePolicy(
   target: AgentBasedTarget,
-  pkgInfo: { vars?: Array<{ name: string }>; version?: string },
+  pkgInfo: PkgInfo,
   opts: BuildPackagePolicyOpts
 ): Promise<{
   name: string;
@@ -153,8 +185,7 @@ async function buildInstancePackagePolicy(
     // ever diverge again, a generic message sends the user to a form that already looks complete.
     const missing = describeMissingRequiredVars(allInputs, service);
     throw new Error(
-      `No fully configured input for ${service.name}` +
-        (missing ? ` — missing ${missing}.` : '.')
+      `No fully configured input for ${service.name}` + (missing ? ` — missing ${missing}.` : '.')
     );
   }
 
@@ -162,11 +193,21 @@ async function buildInstancePackagePolicy(
   // staticKeys may be undefined if the user chose a different credential method.
   const vars = buildPackageVars(globalRegion, authenticateAndDeployStep.staticKeys, pkgVarNames);
 
+  // Disable all inputs from other policy templates in the package. Fleet's simplified-to-legacy
+  // expansion (simplifiedPackagePolicytoNewPackagePolicy → packageToPackagePolicy) adds ALL policy
+  // templates' inputs using their manifest defaults, then validates required vars for every enabled
+  // input. Without this, sending only `config-cel` for AWS Config would leave securityhub-httpjson,
+  // guardduty-httpjson, etc. enabled with no vars → 400 "aws_region is required". Fleet skips
+  // validation for disabled inputs, so marking unrelated ones disabled is the correct gate.
+  const servicePt = service.policyTemplate ?? service.id;
+  const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePt);
+
   return {
     name: buildPackagePolicyName(instance),
     package: { name: service.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
-    inputs,
+    // disabled entries first so our enabled inputs win if there's any key overlap
+    inputs: { ...disabledOtherInputs, ...inputs },
   };
 }
 
@@ -196,10 +237,7 @@ function getInputType(inputKey: string, service: AwsServiceMatrixEntry): string 
 }
 
 /** Required user-facing var names for one input — the same narrowing step 2 applies. */
-function getRequiredVarNamesForInput(
-  service: AwsServiceMatrixEntry,
-  inputType: string
-): string[] {
+function getRequiredVarNamesForInput(service: AwsServiceMatrixEntry, inputType: string): string[] {
   return Object.entries(service.varDefsByInput?.[inputType] ?? {})
     .filter(([name, rawDef]) => {
       const def = rawDef as { required?: boolean; show_user?: boolean; type?: string };
@@ -226,10 +264,7 @@ function pruneUnsatisfiedInputs(
   const kept: Record<string, PackageInputEntry> = {};
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
-    const requiredVarNames = getRequiredVarNamesForInput(
-      service,
-      getInputType(inputKey, service)
-    );
+    const requiredVarNames = getRequiredVarNamesForInput(service, getInputType(inputKey, service));
 
     if (requiredVarNames.length === 0) {
       kept[inputKey] = entry;
@@ -329,6 +364,35 @@ export function extractErrorMessage(reason: unknown): string {
 
 // ── New Agent Policy path ─────────────────────────────────────────────────────────────────────
 
+const POLICY_NAME_PREFIX = 'AWS Onboarding';
+
+/**
+ * Returns the next available agent policy name using Fleet's numbering pattern:
+ * "AWS Onboarding 1", "AWS Onboarding 2", …
+ *
+ * Fetches existing policies matching the prefix and picks max(existing numbers) + 1.
+ * Falls back to "AWS Onboarding 1" if the fetch fails or no matches exist.
+ */
+export async function buildAgentPolicyName(): Promise<string> {
+  try {
+    const resp = await sendGetAgentPolicies({
+      kuery: `name: "${POLICY_NAME_PREFIX}*"`,
+      perPage: 100,
+    });
+    const existing = resp.data?.items ?? [];
+    const numbers = existing
+      .map((p) => {
+        const match = p.name.match(/^AWS Onboarding (\d+)$/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter((n) => n > 0);
+    const next = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+    return `${POLICY_NAME_PREFIX} ${next}`;
+  } catch {
+    return `${POLICY_NAME_PREFIX} 1`;
+  }
+}
+
 interface DeployNewAgentPolicyOpts extends BuildPackagePolicyOpts {
   agentPolicyName: string;
 }
@@ -359,13 +423,13 @@ export async function deployNewAgentPolicy(
   // In practice all selected AWS services share the aws package, so this is one fetch.
   const packageNames = [...new Set(targets.map((t) => t.service.packageName))];
   const pkgVersionByPackage: Record<string, string> = {};
-  const pkgInfoByPackage: Record<string, { vars?: Array<{ name: string }> }> = {};
+  const pkgInfoByPackage: Record<string, PkgInfo> = {};
   for (const pkgName of packageNames) {
     const resp = await sendGetPackageInfoByKey(pkgName);
     const version = resp.data?.item?.version;
     if (!version) throw new Error(`Package ${pkgName} is not installed`);
     pkgVersionByPackage[pkgName] = version;
-    pkgInfoByPackage[pkgName] = resp.data?.item ?? {};
+    pkgInfoByPackage[pkgName] = (resp.data?.item ?? {}) as PkgInfo;
   }
 
   const packagePoliciesWithTargets: Array<{

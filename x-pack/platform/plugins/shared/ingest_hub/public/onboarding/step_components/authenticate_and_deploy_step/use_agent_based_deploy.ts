@@ -17,6 +17,7 @@ import {
   deployToExistingAgentPolicies,
   buildAgentBasedInstanceStatuses,
   extractErrorMessage,
+  buildAgentPolicyName,
 } from './agent_based_deploy';
 import type { AgentBasedTarget } from './agent_based_deploy';
 
@@ -129,7 +130,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         } else {
           // New Agent Policy path — one-shot transactional call.
           try {
-            const agentPolicyName = `AWS Onboarding - ${new Date().toISOString().slice(0, 10)}`;
+            const agentPolicyName = await buildAgentPolicyName();
             const result = await deployNewAgentPolicy(targetsToDeploy, {
               ...baseOpts,
               agentPolicyName,

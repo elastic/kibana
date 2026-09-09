@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DeploymentMethod } from '../../../aws_service_matrix';
 import {
@@ -44,23 +44,12 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
   // unconditionally — it is a no-op for the managed_integration path.
   const { agentPolicyName, enrollmentToken, agentCount } = useAgentPolicySummary();
 
-  // Build a masked enrollment token ReactNode — enrollment tokens are credentials and must not
-  // appear as bare strings. EuiFieldPassword with readOnly gives a masked view + copy affordance.
-  const enrollmentTokenNode = useMemo(() => {
-    if (!enrollmentToken) return undefined;
-    // Inline import avoids a circular dependency between the summary files.
-    const { createElement } = React;
-    // Using a simple masked text representation; EuiFieldPassword requires a DOM context
-    // which is fine here as this is a React hook returning ReactNode.
-    return createElement('span', { style: { fontFamily: 'monospace' } }, '•'.repeat(20));
-  }, [enrollmentToken]);
-
   return useMemo(() => {
     const fields =
       deploymentMethod === 'agent_based'
         ? getAgentBasedSummaryFields({
             agentPolicyName,
-            enrollmentToken: enrollmentTokenNode,
+            enrollmentToken,
             agentCount,
           })
         : getManagedIntegrationSummaryFields({
@@ -71,6 +60,5 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
 
     // Filter out fields with null value — a null value means the data source isn't available yet.
     return fields.filter((f) => f.value != null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deploymentMethod, globalRegion, connectorName, agentPolicyName, enrollmentTokenNode, agentCount]);
+  }, [deploymentMethod, globalRegion, connectorName, agentPolicyName, enrollmentToken, agentCount]);
 }

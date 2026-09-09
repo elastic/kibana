@@ -101,7 +101,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       isAgentBased
         ? [] // suppress MI section in agent-based mode
         : selectedServiceIds.filter((id) =>
-            awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
+            awsServicesMap
+              ?.get(id)
+              ?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
           ),
     [isAgentBased, selectedServiceIds, awsServicesMap]
   );
@@ -147,12 +149,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   }, [miServiceIds, awsServicesMap]);
 
   // ── Elastic Cloud Forwarder ───────────────────────────────────────────────────
+  // ECF is suppressed in agent-based mode — agent-based services are deployed via the agent policy,
+  // not via CloudFormation. Passing an empty instance list makes useEcfDeployment return
+  // hasAnyEcf=false so the section is hidden and Next is not gated on ECF completion.
   const {
     hasAnyEcf,
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
   } = useEcfDeployment({
-    instances: ecfInstances,
+    instances: isAgentBased ? [] : ecfInstances,
     serviceVars,
     globalRegion,
     otlpEndpoint,
@@ -166,9 +171,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
   const isNextDisabled =
-    (showMiSection && !isMiDone) ||
-    (showAgentSection && !isAgentDone) ||
-    (hasAnyEcf && !isEcfDone);
+    (showMiSection && !isMiDone) || (showAgentSection && !isAgentDone) || (hasAnyEcf && !isEcfDone);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">

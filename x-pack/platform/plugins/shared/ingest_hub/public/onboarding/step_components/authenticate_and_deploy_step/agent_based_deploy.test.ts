@@ -466,6 +466,63 @@ describe('deployNewAgentPolicy', () => {
   });
 });
 
+describe('disabled inputs for other policy templates', () => {
+  // Regression: Fleet's simplified-to-legacy expansion (simplifiedPackagePolicytoNewPackagePolicy
+  // → packageToPackagePolicy) adds ALL policy templates' inputs using manifest defaults, then
+  // validates required vars for every enabled input. Sending only `config-cel` for AWS Config
+  // left securityhub-httpjson, guardduty-httpjson, etc. enabled with no vars → 400.
+  // We must include { enabled: false } for every other template's inputs.
+  it('marks inputs from other policy templates disabled when pkgInfo has policy_templates', async () => {
+    // makeSimpleService('config') has inputs: ['aws-s3'], so buildPackageInputs emits 'config-aws-s3'.
+    const svc = makeSimpleService('config');
+    const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+
+    // Simulate a package with two templates: 'config' (ours) and 'securityhub' (other).
+    mockSendGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '3.0.0',
+          vars: [],
+          policy_templates: [
+            {
+              name: 'config',
+              inputs: [{ type: 'aws-s3' }],
+            },
+            {
+              name: 'securityhub',
+              inputs: [{ type: 'httpjson' }],
+            },
+          ],
+        },
+      },
+    });
+
+    await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+
+    const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
+    // Our template's input is present and enabled (from buildPackageInputs).
+    expect(inputs['config-aws-s3']).toBeDefined();
+    expect(inputs['config-aws-s3'].enabled).toBe(true);
+    // The other template's input is present but explicitly disabled.
+    expect(inputs['securityhub-httpjson']).toEqual({ enabled: false });
+  });
+
+  it('does not add disabled entries when pkgInfo has no policy_templates', async () => {
+    // Packages with a single template or no template list — disabled-inputs map is empty and
+    // the request body is unchanged.
+    const svc = makeSimpleService('config');
+    const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+
+    // Default mock: { version: '3.0.0', vars: [] } — no policy_templates.
+    await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+
+    const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
+    // Only our service's input is present.
+    const keys = Object.keys(inputs);
+    expect(keys.every((k) => k.startsWith('config-'))).toBe(true);
+  });
+});
+
 describe('deployToExistingAgentPolicies', () => {
   it('sends policy_ids with every selected id on each body — no cross product', async () => {
     const svc = makeSimpleService();

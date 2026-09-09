@@ -13,7 +13,11 @@ import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { FleetStatusProvider, KibanaVersionContext } from '@kbn/fleet-plugin/public';
+import {
+  FleetStatusProvider,
+  FlyoutContextProvider,
+  KibanaVersionContext,
+} from '@kbn/fleet-plugin/public';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -95,6 +99,10 @@ export function renderOnboardingApp(
       >
         <QueryClientProvider client={queryClient}>
           <FleetStatusProvider>
+            {/* FlyoutContextProvider is required by AgentEnrollmentFlyout → EnrollmentRecommendation
+                → useFlyoutContext(). The hook throws if the context is absent.
+                See: fleet/public/hooks/use_flyout_context.tsx */}
+            <FlyoutContextProvider>
             {/* KibanaVersionContext must wrap any Fleet component that calls useKibanaVersion().
                 AgentEnrollmentFlyout reaches it via installation_message.tsx → useAgentVersion.
                 Without this provider the hook throws by design (null context → Error).
@@ -111,6 +119,7 @@ export function renderOnboardingApp(
                 </Router>
               </OnboardingFlowProvider>
             </KibanaVersionContext.Provider>
+            </FlyoutContextProvider>
           </FleetStatusProvider>
         </QueryClientProvider>
       </KibanaContextProvider>

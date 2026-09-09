@@ -189,6 +189,12 @@ export { getAnyCloudConnectorIacTemplateUrl } from './components/cloud_connector
 // See: public/hooks/use_kibana_version.ts
 export { KibanaVersionContext } from './hooks/use_kibana_version';
 
+// FlyoutContextProvider — required by AgentEnrollmentFlyout → EnrollmentRecommendation →
+// useFlyoutContext(). The hook throws if the context is absent. Add this provider alongside
+// FleetStatusProvider and KibanaVersionContext in any host app that renders the flyout.
+// See: public/hooks/use_flyout_context.tsx
+export { FlyoutContextProvider } from './hooks/use_flyout_context';
+
 // AgentEnrollmentFlyout — ingest_hub is the first plugin to render this outside Fleet.
 // Justification: ~1500 lines of platform-tab / enroll-command / root-privileges /
 // confirmation logic that must stay bit-identical; duplicating it guarantees drift.
@@ -222,6 +228,9 @@ export type { AwsTemporaryKeysFormProps } from './components/cloud_connector/aws
 
 // Agent policies query — used by the agent-based policy selector in ingest_hub
 export { useGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
+
+// Imperative agent policies fetcher — used to resolve the next available policy name
+export { sendGetAgentPolicies } from './hooks/use_request/agent_policy';
 
 // Agent status — used by step 4 agent count summary field
 export { useGetAgentStatus } from './hooks/use_request/agents';
