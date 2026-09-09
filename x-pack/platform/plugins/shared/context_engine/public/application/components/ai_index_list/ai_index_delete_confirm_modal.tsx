@@ -79,8 +79,6 @@ export const AiIndexDeleteConfirmModal = ({
     }
   };
 
-
-
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}

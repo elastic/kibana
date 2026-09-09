@@ -118,7 +118,9 @@ describe('AiIndexDeleteConfirmModal', () => {
 
     fireEvent.click(screen.getByText('Delete AI index'));
 
-    expect(await screen.findByTestId('contextAiIndexDeleteError')).toHaveTextContent('Server error');
+    expect(await screen.findByTestId('contextAiIndexDeleteError')).toHaveTextContent(
+      'Server error'
+    );
     expect(onSuccess).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
