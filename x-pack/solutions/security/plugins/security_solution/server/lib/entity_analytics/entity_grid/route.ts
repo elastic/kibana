@@ -852,35 +852,55 @@ export const registerEntityGridRoute = ({
             ...(profileEnabled ? { profile: true } : {}),
           };
           const rawOpts = profileEnabled ? { profile: true as const } : {};
-          const query = (q: string) =>
-            esClient.esql.query({ query: q, drop_null_columns: true, ...esqlOpts }).then((r) => {
-              if (profileEnabled)
-                logger.info(`[entity-grid profile] ${q}\n${JSON.stringify(r.profile, null, 2)}`);
+
+          const makeQuery =
+            (opts: Record<string, unknown>, label: string) =>
+            async (q: string): Promise<Array<Record<string, unknown>>> => {
+              const t0 = Date.now();
+              const r = await esClient.esql.query({ query: q, drop_null_columns: true, ...opts });
+              const wall = Date.now() - t0;
+              if (profileEnabled) {
+                logger.info(
+                  `[entity-grid perf] ${label} took=${r.took}ms wall=${wall}ms\n${JSON.stringify(
+                    r.profile,
+                    null,
+                    2
+                  )}`
+                );
+              } else {
+                logger.debug(`[entity-grid perf] ${label} took=${r.took}ms wall=${wall}ms`);
+              }
               return toRows(r);
-            });
-          const rawQuery = (q: string) =>
-            esClient.esql.query({ query: q, drop_null_columns: true, ...rawOpts }).then((r) => {
-              if (profileEnabled)
-                logger.info(`[entity-grid profile] ${q}\n${JSON.stringify(r.profile, null, 2)}`);
-              return toRows(r);
-            });
+            };
+
+          const query = makeQuery(esqlOpts, 'entity');
+          const rawQuery = makeQuery(rawOpts, 'raw');
 
           const riskWindow = riskDateWindow();
           const deps: QueryDeps = { entityAlias, alertsIndex, riskScoreIndex, riskWindow };
           const [coreStart] = await getStartServices();
           const soClient = coreStart.savedObjects.createInternalRepository(['cases-attachments']);
 
+          const requestStart = Date.now();
+
           // ── standard sort: ES|QL-based pagination ────────────────────────────
           const { dataQuery, countQuery } = buildPageQueries(sort, cursor, pageSize, deps);
 
+          const t0Sort = Date.now();
           const [allRows, [countRow]] = await Promise.all([query(dataQuery), query(countQuery)]);
           const hasNextPage = allRows.length > pageSize;
           const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
           const total = (countRow?.total as number) ?? 0;
+          if (profileEnabled)
+            logger.info(`[entity-grid perf] sort+count wall=${Date.now() - t0Sort}ms`);
 
+          const t0Enrich = Date.now();
           await enrichPageRows(pageRows, sort.field, deps, rawQuery, logger);
+          if (profileEnabled)
+            logger.info(`[entity-grid perf] enrich wall=${Date.now() - t0Enrich}ms`);
 
           // Batch case count enrichment — one SO aggregation for the whole page.
+          const t0Cases = Date.now();
           const pageCaseCounts = await batchCaseCounts(
             soClient,
             pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean),
@@ -889,6 +909,13 @@ export const registerEntityGridRoute = ({
           for (const row of pageRows) {
             row[CASE_COUNT_FIELD] = pageCaseCounts.get(row[ENTITY_ID_FIELD] as string) ?? 0;
           }
+          if (profileEnabled)
+            logger.info(`[entity-grid perf] cases wall=${Date.now() - t0Cases}ms`);
+
+          if (profileEnabled)
+            logger.info(
+              `[entity-grid perf] total wall=${Date.now() - requestStart}ms rows=${pageRows.length}`
+            );
 
           const lastRow = pageRows[pageRows.length - 1];
           const nextCursor =
