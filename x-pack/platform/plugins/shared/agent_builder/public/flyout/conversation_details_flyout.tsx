@@ -76,7 +76,7 @@ const FlyoutFrame = ({ titleId, header, footer, tabs, children }: FlyoutFramePro
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder={Boolean(tabs)}>
         {header ? (
           <div id={titleId}>{header}</div>
         ) : (
@@ -137,20 +137,25 @@ export const ConversationDetailsFlyoutContent = ({
   const Header = definition?.detailsFlyout?.header;
   const Footer = definition?.detailsFlyout?.footer;
 
+  const shouldRenderTabs = tabs.length > 1;
+
   return (
     <FlyoutFrame
       titleId={titleId}
       header={Header && <Header conversation={conversation} />}
       footer={Footer && <Footer conversation={conversation} />}
-      tabs={tabs.map((entry) => (
-        <EuiTab
-          key={entry.id}
-          isSelected={entry.id === effectiveSelectedTabId}
-          onClick={() => setSelectedTabId(entry.id)}
-        >
-          {entry.label}
-        </EuiTab>
-      ))}
+      tabs={
+        shouldRenderTabs &&
+        tabs.map((entry) => (
+          <EuiTab
+            key={entry.id}
+            isSelected={entry.id === effectiveSelectedTabId}
+            onClick={() => setSelectedTabId(entry.id)}
+          >
+            {entry.label}
+          </EuiTab>
+        ))
+      }
     >
       {selectedTab && SelectedTabContent && (
         <SelectedTabContent key={selectedTab.id} conversation={conversation} />
