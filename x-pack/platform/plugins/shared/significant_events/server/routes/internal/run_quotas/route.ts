@@ -58,7 +58,7 @@ const settingsUpdateSchema = z
 const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('detection') }).strict(),
   z.object({ group: z.literal('ki_extraction') }).strict(),
-  z.object({ group: z.literal('investigation'), critical: z.boolean() }).strict(),
+  z.object({ group: z.literal('investigation') }).strict(),
 ]);
 
 const CONSUME_GROUP_PRIVILEGES = {
@@ -181,12 +181,9 @@ const consumeRoute = createServerRoute({
     if (request.authzResult?.[requiredPrivilege] !== true) {
       throw forbidden(`Consuming ${params.body.group} run quota requires ${requiredPrivilege}`);
     }
-    const allowOverLimit = params.body.group === 'investigation' && params.body.critical;
-
     return consumeRunQuota({
       internalRepository: createRunQuotaInternalRepository(server),
       group: params.body.group,
-      allowOverLimit,
     });
   },
 });

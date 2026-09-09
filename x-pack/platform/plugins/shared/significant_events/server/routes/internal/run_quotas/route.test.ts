@@ -150,17 +150,17 @@ describe('Significant Events run quota routes', () => {
     for (const body of [
       { group: 'detection' },
       { group: 'ki_extraction' },
-      { group: 'investigation', critical: false },
-      { group: 'investigation', critical: true },
+      { group: 'investigation' },
     ]) {
       expect(consumeRoute.params.safeParse({ body }).success).toBe(true);
     }
 
     for (const body of [
-      { group: 'investigation' },
+      { group: 'investigation', critical: false },
+      { group: 'investigation', critical: true },
       { group: 'detection', critical: false },
       { group: 'detection', executionId: 'execution' },
-      { group: 'investigation', critical: true, eventId: 'event' },
+      { group: 'investigation', eventId: 'event' },
       { group: 'memory' },
     ]) {
       expect(consumeRoute.params.safeParse({ body }).success).toBe(false);
@@ -250,28 +250,23 @@ describe('Significant Events run quota routes', () => {
     });
   });
 
-  it.each<{ body: RunQuotaConsumeRequest; allowOverLimit: boolean }>([
-    { body: { group: 'detection' }, allowOverLimit: false },
-    { body: { group: 'ki_extraction' }, allowOverLimit: false },
-    { body: { group: 'investigation', critical: false }, allowOverLimit: false },
-    { body: { group: 'investigation', critical: true }, allowOverLimit: true },
-  ])(
-    'maps $body.group admission policy at the route boundary',
-    async ({ body, allowOverLimit }) => {
-      await expect(
-        consumeRoute.handler({
-          ...handlerParams,
-          params: { body },
-        } as never)
-      ).resolves.toEqual({ allowed: true });
+  it.each<RunQuotaConsumeRequest>([
+    { group: 'detection' },
+    { group: 'ki_extraction' },
+    { group: 'investigation' },
+  ])('maps $group admission policy at the route boundary', async (body) => {
+    await expect(
+      consumeRoute.handler({
+        ...handlerParams,
+        params: { body },
+      } as never)
+    ).resolves.toEqual({ allowed: true });
 
-      expect(consumeRunQuota).toHaveBeenCalledWith({
-        internalRepository: repository,
-        group: body.group,
-        allowOverLimit,
-      });
-    }
-  );
+    expect(consumeRunQuota).toHaveBeenCalledWith({
+      internalRepository: repository,
+      group: body.group,
+    });
+  });
 
   it('rejects consume when the caller lacks the engine that owns that group', async () => {
     await expect(

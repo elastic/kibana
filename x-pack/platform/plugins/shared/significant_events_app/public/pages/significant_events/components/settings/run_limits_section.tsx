@@ -269,7 +269,7 @@ export const RunLimitsSection = () => {
                         'xpack.significantEventsApp.settings.runLimits.enabledDescription',
                         {
                           defaultMessage:
-                            'Enforcement is on. Finite limits can deny new non-critical scheduled admissions after their count reaches the limit.',
+                            'Enforcement is on. Finite limits can deny new scheduled admissions after their count reaches the limit.',
                         }
                       )
                     : i18n.translate(
@@ -464,7 +464,7 @@ export const RunLimitsSection = () => {
                 'xpack.significantEventsApp.settings.runLimits.enableReachedConfirmDescription',
                 {
                   defaultMessage:
-                    'Enabling enforcement will immediately allow these reached limits to deny new non-critical scheduled admissions: {groups}. Critical scheduled investigations will continue.',
+                    'Enabling enforcement will immediately allow these reached limits to deny new scheduled admissions: {groups}.',
                   values: {
                     groups: i18n.formatList(
                       'conjunction',
@@ -509,17 +509,6 @@ export const RunLimitsSection = () => {
               </p>
             ) : null;
           })}
-          {warnings.loweringGroups.includes('investigation') && (
-            <p>
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.runLimits.loweringInvestigationCriticalContinuationDescription',
-                {
-                  defaultMessage:
-                    'Critical scheduled investigations will continue beyond the lower limit.',
-                }
-              )}
-            </p>
-          )}
         </EuiConfirmModal>
       )}
     </>
