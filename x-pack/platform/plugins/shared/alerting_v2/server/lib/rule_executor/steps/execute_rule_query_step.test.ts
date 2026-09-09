@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { ruleExecutionTelemetry } from '../otel/rule_execution_telemetry';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { QueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
@@ -57,6 +58,10 @@ const createPluginConfigAccessor = ({
 
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 };
+
+jest.mock('../otel/rule_execution_telemetry', () => ({
+  ruleExecutionTelemetry: { recordQueryResponseSizeExceeded: jest.fn() },
+}));
 
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
@@ -277,10 +282,10 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-    // The test config sets maxResponseSize to 50 MB; the message must name the limit and the fix.
-    expect(error!.message).toContain('exceeded the maximum allowed size of 50mb');
-    expect(error!.message).toContain('xpack.alerting_v2.rules.run.query.maxResponseSize');
-    expect(error!.message).toContain('KEEP');
+    expect(ruleExecutionTelemetry.recordQueryResponseSizeExceeded).toHaveBeenCalledWith({
+      queryType: 'breach',
+      ruleKind: expect.any(String),
+    });
   });
 
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {

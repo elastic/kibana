@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { ruleExecutionTelemetry } from './otel/rule_execution_telemetry';
 import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -24,6 +25,10 @@ const hostHash = buildGroupHash({
   groupKeyFields: groupingFields,
   fallbackSeed: 'unused',
 });
+
+jest.mock('./otel/rule_execution_telemetry', () => ({
+  ruleExecutionTelemetry: { recordQueryResponseSizeExceeded: jest.fn() },
+}));
 
 describe('detectDataPresence', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -210,10 +215,10 @@ describe('detectDataPresence', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
-    expect((error as Error).message).toContain(
-      'ES|QL query response exceeded the maximum allowed size'
-    );
-    expect((error as Error).message).toContain('KEEP');
+    expect(ruleExecutionTelemetry.recordQueryResponseSizeExceeded).toHaveBeenCalledWith({
+      queryType: 'data_presence',
+      ruleKind: expect.any(String),
+    });
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

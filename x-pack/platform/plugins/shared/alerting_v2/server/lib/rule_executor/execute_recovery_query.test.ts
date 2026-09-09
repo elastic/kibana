@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { ruleExecutionTelemetry } from './otel/rule_execution_telemetry';
 import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -17,6 +18,10 @@ import { buildGroupHash } from './build_alert_events';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
+
+jest.mock('./otel/rule_execution_telemetry', () => ({
+  ruleExecutionTelemetry: { recordQueryResponseSizeExceeded: jest.fn() },
+}));
 
 describe('executeRecoveryQuery', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -185,10 +190,10 @@ describe('executeRecoveryQuery', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
-    expect((error as Error).message).toContain(
-      'ES|QL query response exceeded the maximum allowed size'
-    );
-    expect((error as Error).message).toContain('KEEP');
+    expect(ruleExecutionTelemetry.recordQueryResponseSizeExceeded).toHaveBeenCalledWith({
+      queryType: 'recovery',
+      ruleKind: 'alert',
+    });
   });
 
   it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {

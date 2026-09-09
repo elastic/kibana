@@ -12,6 +12,7 @@ import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import { ruleExecutionTelemetry } from './otel/rule_execution_telemetry';
 import type { RuleExecutionInput } from './types';
 import { buildExecutionUuid, buildGroupHash } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
@@ -77,6 +78,10 @@ export const detectDataPresence = async ({
         message: `Data-presence query: ${sizeError.message}`,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
         labels: { rule_id: input.ruleId, space_id: input.spaceId },
+      });
+      ruleExecutionTelemetry.recordQueryResponseSizeExceeded({
+        queryType: 'data_presence',
+        ruleKind: rule.kind,
       });
       throw createTaskRunError(sizeError, TaskErrorSource.USER);
     }
