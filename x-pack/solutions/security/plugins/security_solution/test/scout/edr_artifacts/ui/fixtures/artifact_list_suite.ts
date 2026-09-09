@@ -51,7 +51,7 @@ export const describeArtifactListPage = (
       });
 
       spaceTest(
-        `NONE user sees no privileges on the list page`,
+        `T1 analyst sees no privileges on the list page`,
         async ({ browserAuth, pageObjects }) => {
           await browserAuth.loginAsT1Analyst();
 
