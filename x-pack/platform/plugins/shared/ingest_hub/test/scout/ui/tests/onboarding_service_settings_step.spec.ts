@@ -293,7 +293,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['cloudtrail'],
-      detectAndReviewStep: { serviceStatuses: { cloudtrail: 'success' } },
+      detectAndReviewStep: { serviceStatuses: { cloudtrail: 'receiving' } },
     });
 
     const comboBox = page.testSubj.locator('serviceSettingsStep-globalRegion');

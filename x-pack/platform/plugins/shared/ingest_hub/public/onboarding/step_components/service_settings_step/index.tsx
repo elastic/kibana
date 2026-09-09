@@ -444,7 +444,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                     'xpack.ingestHub.serviceSettingsStep.globalRegion.disabledTooltip',
                     {
                       defaultMessage:
-                        'Region cannot be changed after services have been deployed. To use a different region, restart the onboarding flow.',
+                        'Region cannot be changed after services have been deployed. To use a different region, start a new session.',
                     }
                   )}
                 >
