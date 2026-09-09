@@ -12,7 +12,12 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-utils';
-import { isFilterPinned, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  COMPARE_ALL_OPTIONS,
+  dedupFilters,
+  isFilterPinned,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
@@ -70,7 +75,7 @@ export const fromSavedObjectTabToTabState = ({
   initialAppState?: DiscoverAppState;
   profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
-  const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
+  let appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
   // Global filters are pinned filters. They can arrive mixed with unpinned filters, so separate them.
   // See FilterManager.partitionFilters in data/public/query/filter_manager/filter_manager.ts:80.
@@ -80,6 +85,17 @@ export const fromSavedObjectTabToTabState = ({
   let pinnedFilters = existingTab?.globalState.filters;
   if (pinnedFilters === undefined && incomingPinnedFilters?.length) {
     pinnedFilters = incomingPinnedFilters;
+  }
+
+  if (pinnedFilters?.length && appState.filters?.length) {
+    // A filter pinned after saving is still unpinned in the saved copy. Restore it only once.
+    appState = {
+      ...appState,
+      filters: dedupFilters(pinnedFilters, appState.filters, {
+        ...COMPARE_ALL_OPTIONS,
+        state: false,
+      }),
+    };
   }
 
   const globalState = {
