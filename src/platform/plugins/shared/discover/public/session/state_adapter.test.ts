@@ -17,7 +17,11 @@ import { FilterStateStore } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { DiscoverSessionApiClassicTab, DiscoverSessionApiResponse } from '../../server';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiResponse,
+  DiscoverSessionApiTab,
+} from '../../server';
 import { discoverSessionApiDataSchema } from '../../server/api/schema';
 import { prepareDiscoverSession } from './prepare_session';
 import {
@@ -541,3 +545,133 @@ describe('Discover session conversion and UI preparation', () => {
     );
   });
 });
+
+type ApiVisContext = NonNullable<DiscoverSessionApiTab['vis_context']>;
+
+const esqlTab: DiscoverSessionApiTab = {
+  id: 'esql-tab',
+  label: 'ES|QL',
+  data_source: { type: 'esql', query: 'FROM logs-*' },
+  sort: [],
+  hide_chart: false,
+  hide_table: false,
+};
+
+describe('chart state from API responses', () => {
+  it.each([
+    UnifiedHistogramSuggestionType.histogramForESQL,
+    UnifiedHistogramSuggestionType.lensSuggestion,
+  ] as const)('assembles %s with the extracted fingerprint and breakdown', (suggestionType) => {
+    const visContext = createVisContext({
+      suggestionType,
+      layers: { 'layer-1': { index: 'esql-dv' } },
+      dataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
+    });
+
+    expect(
+      getTabVisContext({ ...esqlTab, vis_context: visContext, breakdown_field: 'host.name' })
+    ).toStrictEqual({
+      suggestionType,
+      attributes: visContext.attributes,
+      requestData: {
+        dataViewId: 'esql-dv',
+        timeField: '@timestamp',
+        breakdownField: 'host.name',
+      },
+    });
+  });
+
+  it.each([undefined, ''])('omits an absent or empty breakdown (%s)', (breakdownField) => {
+    const visContext = createVisContext({
+      layers: { 'layer-1': { index: 'esql-dv' } },
+      dataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
+    });
+
+    expect(
+      getTabVisContext({ ...esqlTab, vis_context: visContext, breakdown_field: breakdownField })
+    ).toStrictEqual({
+      suggestionType: visContext.suggestion_type,
+      attributes: visContext.attributes,
+      requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
+    });
+  });
+
+  it('uses the tab breakdown without adding a classic interval to an ES|QL fallback', () => {
+    const visContext: ApiVisContext = {
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
+      attributes: { visualizationType: 'lnsXY', state: { foo: 'bar' } },
+    };
+
+    expect(
+      getTabVisContext({
+        ...esqlTab,
+        vis_context: visContext,
+        breakdown_field: 'host.name',
+        chart_interval: 'h',
+      })
+    ).toStrictEqual({
+      suggestionType: visContext.suggestion_type,
+      attributes: visContext.attributes,
+      requestData: { breakdownField: 'host.name' },
+    });
+  });
+
+  it('uses the inline time field and classic interval without inventing a data view ID', () => {
+    const visContext: ApiVisContext = {
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: { visualizationType: 'lnsXY' },
+    };
+
+    expect(
+      getTabVisContext({
+        id: 'inline-tab',
+        label: 'Inline',
+        data_source: {
+          type: 'data_view_spec',
+          index_pattern: 'logs-*',
+          time_field: '@timestamp',
+        },
+        filters: [],
+        sort: [],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        hide_chart: false,
+        hide_table: false,
+        chart_interval: 'h',
+        vis_context: visContext,
+      })
+    ).toStrictEqual({
+      suggestionType: visContext.suggestion_type,
+      attributes: visContext.attributes,
+      requestData: { timeField: '@timestamp', timeInterval: 'h' },
+    });
+  });
+
+  it('returns undefined when the tab has no chart', () => {
+    expect(getTabVisContext({ ...esqlTab, breakdown_field: 'host.name' })).toBeUndefined();
+  });
+});
+
+const createVisContext = ({
+  layers,
+  dataViews,
+  suggestionType = UnifiedHistogramSuggestionType.histogramForESQL,
+}: {
+  layers: Record<string, { index: string }>;
+  dataViews: Record<string, { type: string; timeFieldName?: string }>;
+  suggestionType?: ApiVisContext['suggestion_type'];
+}): ApiVisContext => ({
+  suggestion_type: suggestionType,
+  attributes: {
+    visualizationType: 'lnsXY',
+    state: {
+      datasourceStates: { textBased: { layers } },
+      adHocDataViews: dataViews,
+    },
+  },
+});
+
+const getTabVisContext = (tab: DiscoverSessionApiTab) =>
+  fromDiscoverSessionApiResponse({
+    ...response,
+    data: { ...response.data, tabs: [tab] },
+  }).tabs[0].visContext;

@@ -493,7 +493,7 @@ describe('discover session API transforms', () => {
     });
   });
 
-  describe('visContext requestData assembly', () => {
+  describe('visContext requestData extraction', () => {
     const [classicTab, esqlTab] = apiData.tabs;
 
     const buildEsqlVisContext = ({
@@ -521,7 +521,7 @@ describe('discover session API transforms', () => {
       transformDiscoverSessionIn({ ...apiData, tabs: [tab] }).attributes.tabs[0].attributes
         .visContext;
 
-    it('stores ES|QL charts with the extracted fingerprint and tab breakdown', () => {
+    it('extracts the fingerprint from the chart blob for ES|QL tabs', () => {
       const layers = { 'layer-1': { index: 'esql-dv' } };
       const adHocDataViews = { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } };
 
@@ -574,19 +574,19 @@ describe('discover session API transforms', () => {
       });
     });
 
-    it('omits an empty tab breakdown from the stored fingerprint', () => {
+    it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
-        adHocDataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
+        adHocDataViews: { 'esql-dv': { type: 'esql' } },
       });
 
       expect(
         getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
-      ).toEqual(
-        expect.objectContaining({
-          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
-        })
-      );
+      ).toStrictEqual({
+        suggestionType: visContext.suggestion_type,
+        requestData: { dataViewId: 'esql-dv' },
+        attributes: visContext.attributes,
+      });
     });
 
     it('falls back when the blob is not a recognizable ES|QL chart', () => {
@@ -603,13 +603,22 @@ describe('discover session API transforms', () => {
         })
       ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
 
+      const wrongDataViewType = buildEsqlVisContext({
+        layers: { 'layer-1': { index: 'a-persisted-dv' } },
+        adHocDataViews: { 'a-persisted-dv': { type: 'index-pattern' } },
+      });
+
       expect(
         getStoredVisContext({
           ...esqlTab,
           breakdown_field: '',
-          vis_context: unrecognizable,
+          vis_context: wrongDataViewType,
         })
-      ).toEqual(expect.objectContaining({ requestData: {} }));
+      ).toStrictEqual({
+        suggestionType: wrongDataViewType.suggestion_type,
+        requestData: {},
+        attributes: wrongDataViewType.attributes,
+      });
     });
 
     it('keeps behavior unchanged without a vis_context', () => {

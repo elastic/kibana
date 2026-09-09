@@ -8,7 +8,7 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { serializeEsqlControls } from './control_panels';
+import { convertControlGroupEntryToApi, serializeEsqlControls } from './control_panels';
 
 describe('serializeEsqlControls', () => {
   it('maps API control_panels to stored flattened controlGroupJson', () => {
@@ -50,5 +50,37 @@ describe('serializeEsqlControls', () => {
   it('returns undefined for empty control arrays', () => {
     expect(serializeEsqlControls(undefined)).toBeUndefined();
     expect(serializeEsqlControls([])).toBeUndefined();
+  });
+});
+
+describe('convertControlGroupEntryToApi', () => {
+  it('converts config and removes order while leaving the legacy type for the caller to normalize', () => {
+    const result = convertControlGroupEntryToApi('service-control', {
+      order: 2,
+      type: 'esqlControl',
+      width: 'small',
+      grow: false,
+      controlType: 'STATIC_VALUES',
+      variableName: 'service',
+      variableType: 'values',
+      availableOptions: ['api', 'web'],
+      selectedOptions: ['api'],
+      singleSelect: true,
+    });
+
+    expect(result).toStrictEqual({
+      id: 'service-control',
+      type: 'esqlControl',
+      width: 'small',
+      grow: false,
+      config: {
+        control_type: 'STATIC_VALUES',
+        variable_name: 'service',
+        variable_type: 'values',
+        available_options: ['api', 'web'],
+        selected_options: ['api'],
+        single_select: true,
+      },
+    });
   });
 });

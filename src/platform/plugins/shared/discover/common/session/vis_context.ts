@@ -8,11 +8,8 @@
  */
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import { isPlainObject } from 'lodash';
 import type { DiscoverSessionApiTab } from '../../server';
-import { getVisContextRequestData } from './get_vis_context_request_data';
 
 type StoredVisContext = DiscoverSessionTabAttributes['visContext'];
 type ApiVisContext = DiscoverSessionApiTab['vis_context'];
@@ -25,22 +22,8 @@ export interface StoredVisContextRequestData {
   breakdownField?: string;
 }
 
-/** Converts an API chart and rebuilds its compatibility fingerprint from the tab. */
-export const fromApiVisContext = (tab: DiscoverSessionApiTab) =>
-  transformVisContextIn(tab.vis_context, getVisContextRequestData(tab));
-
-/** Removes runtime-only chart values before sending a tab to the API. */
-export const toApiVisContext = (visContext: DiscoverSessionTab['visContext']) => {
-  // Keep the client check for chart attributes before calling the shared conversion.
-  if (!visContext || !('attributes' in visContext) || !isPlainObject(visContext.attributes)) {
-    return undefined;
-  }
-
-  return transformVisContextOut(visContext);
-};
-
 /** Converts stored chart state to API fields, omitting the runtime fingerprint. */
-export const transformVisContextOut = (visContext: StoredVisContext) => {
+export const toApiVisContext = (visContext: StoredVisContext): ApiVisContext | undefined => {
   if (
     !visContext ||
     !('suggestionType' in visContext) ||
@@ -62,10 +45,10 @@ export const transformVisContextOut = (visContext: StoredVisContext) => {
 };
 
 /** Converts API chart fields to stored state with the supplied fingerprint. */
-export const transformVisContextIn = (
+export const fromApiVisContext = (
   visContext: ApiVisContext,
   requestData: StoredVisContextRequestData = {}
-) => {
+): StoredVisContext => {
   if (!visContext) {
     return undefined;
   }

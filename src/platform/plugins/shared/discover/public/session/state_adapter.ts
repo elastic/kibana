@@ -9,6 +9,7 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
+import { isPlainObject } from 'lodash';
 import {
   injectReferences,
   parseSearchSourceJSON,
@@ -31,6 +32,7 @@ import type {
   DiscoverSessionResolve,
 } from './api_client';
 import { fromApiVisContext, toApiVisContext } from '../../common/session/vis_context';
+import { getVisContextRequestData } from '../../common/session/get_vis_context_request_data';
 
 // The HTTP path uses this adapter because Discover still works with saved-search-shaped state.
 // Removing the legacy persistence path does not remove the need for these conversions.
@@ -112,7 +114,7 @@ const fromApiTab = (apiTab: DiscoverSessionApiTab) => {
     refreshInterval: apiTab.refresh_interval,
     breakdownField: apiTab.breakdown_field,
     chartInterval: apiTab.chart_interval,
-    visContext: fromApiVisContext(apiTab),
+    visContext: fromApiVisContext(apiTab.vis_context, getVisContextRequestData(apiTab)),
     controlGroupJson: serializeEsqlControls(apiTab.control_panels),
   };
 
@@ -130,7 +132,7 @@ const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionRequestTab => {
     kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(toApiSearchSource(tab)) },
   };
   const apiTab = fromStoredTab(storedTab);
-  const visContext = toApiVisContext(tab.visContext);
+  const visContext = getApiVisContext(tab.visContext);
   const controlPanels = deserializeEsqlControls(tab.controlGroupJson);
 
   return {
@@ -153,6 +155,15 @@ const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionRequestTab => {
     ...(tab.isTextBasedQuery &&
       tab.esqlApproximation !== undefined && { esql_approximation: tab.esqlApproximation }),
   };
+};
+
+/** Keeps the browser's chart attribute check before using the shared conversion. */
+const getApiVisContext = (visContext: DiscoverSessionTab['visContext']) => {
+  if (!visContext || !('attributes' in visContext) || !isPlainObject(visContext.attributes)) {
+    return undefined;
+  }
+
+  return toApiVisContext(visContext);
 };
 
 /** Removes the ID only from filters targeting the tab's inline Data View. */
