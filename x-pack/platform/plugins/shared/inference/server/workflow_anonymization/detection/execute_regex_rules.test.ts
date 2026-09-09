@@ -68,9 +68,10 @@ describe('executeRegexRules', () => {
     // field — this verifies the correct `continue` (advance-one-char) behavior.
 
     it('finds ALL non-zero occurrences of a pattern that can match zero characters', () => {
-      // a* matches "" (zero-length) between chars AND "aaa" as a run.
-      // After advancing past zero-length matches, both "aaa" runs must be found.
-      const rules = [r('A_RUN', 'a+')];
+      // a* matches "" (zero-length) between non-'a' chars AND "aaa" as a run.
+      // The advance-one-char guard must skip the zero-length hits so both "aaa"
+      // runs are still found.
+      const rules = [r('A_RUN', 'a*')];
       const records = [{ content: 'aaa hello aaa world' }];
       const results = executeRegexRules({ rules, records });
 
