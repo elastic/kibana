@@ -110,12 +110,13 @@ export class WorkflowExecutionCursorTestHarness
 {
   public setCurrentNodeId(nodeId: string | undefined): void {
     const internalCursor = this as unknown as {
-      currentNodeId: string | undefined;
-      nextNodeId: string | undefined;
+      _currentNode: GraphNodeUnion | undefined;
+      _nextNode: GraphNodeUnion | undefined;
+      workflowGraph: { getNode: (id: string) => GraphNodeUnion | undefined };
     };
-    internalCursor.currentNodeId = nodeId;
+    internalCursor._currentNode = nodeId ? internalCursor.workflowGraph.getNode(nodeId) : undefined;
     if (nodeId === undefined) {
-      internalCursor.nextNodeId = undefined;
+      internalCursor._nextNode = undefined;
     }
   }
 }

@@ -138,16 +138,21 @@ describe('WorkflowExecutionCursor synthetic scope', () => {
   let workflowExecutionGraph: WorkflowGraph;
   let cursor: WorkflowExecutionCursor;
 
+  const getNodeStack = (nodeId: string) => {
+    if (!graphNodes[nodeId]) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
+    if (nodeId === 'body') {
+      return ['enter-owner'];
+    }
+    return [];
+  };
+
   beforeEach(() => {
     workflowExecutionGraph = {
       topologicalOrder: ['enter-owner', 'body', 'exit-owner'],
       getNode: jest.fn((nodeId: string) => graphNodes[nodeId]),
-      getNodeStack: jest.fn((nodeId: string) => {
-        if (nodeId === 'body') {
-          return ['enter-owner'];
-        }
-        return [];
-      }),
+      getNodeStack: jest.fn(getNodeStack),
     } as unknown as WorkflowGraph;
 
     cursor = new WorkflowExecutionCursor({
@@ -156,37 +161,36 @@ describe('WorkflowExecutionCursor synthetic scope', () => {
     });
   });
 
-  it('keeps currentNode on the compiled enter until commit', () => {
+  const mintSynthetic = () => {
     cursor.navigateToSynthetic({
       stepId: 'a',
       nodeType: 'synthetic',
       nodeId: 'synthetic:a',
     });
+  };
+
+  it('keeps currentNode on the compiled enter until commit', () => {
+    mintSynthetic();
 
     expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'enter-owner' }));
-    expect(cursor.nextNode).toEqual(
-      expect.objectContaining({ id: 'synthetic:a', type: 'synthetic', stepId: 'a' })
-    );
-    expect(cursor.currentStackFrames).toEqual([
-      {
-        stepId: 'owner',
-        nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
-      },
-    ]);
+    expect(cursor.nextNode).toBeNull();
   });
 
-  it('sits on the synthetic node after commit without calling getNodeStack', () => {
-    cursor.navigateToSynthetic({
-      stepId: 'a',
-      nodeType: 'synthetic',
-      nodeId: 'synthetic:a',
-    });
+  it('sits on the prefixed synthetic after commit and rebuilds the stack from the owner', () => {
+    mintSynthetic();
     cursor.commitPendingNavigation();
 
     expect(cursor.currentNode).toEqual(
-      expect.objectContaining({ id: 'synthetic:a', type: 'synthetic' })
+      expect.objectContaining({
+        id: 'enter-synthetic-synthetic:a',
+        type: 'enter-synthetic',
+        stepId: 'a',
+      })
     );
-    expect(workflowExecutionGraph.getNodeStack).not.toHaveBeenCalled();
+    expect(workflowExecutionGraph.getNodeStack).toHaveBeenCalledWith('enter-owner');
+    expect(workflowExecutionGraph.getNodeStack).not.toHaveBeenCalledWith(
+      'enter-synthetic-synthetic:a'
+    );
     expect(cursor.currentStackFrames).toEqual([
       {
         stepId: 'owner',
@@ -194,19 +198,23 @@ describe('WorkflowExecutionCursor synthetic scope', () => {
       },
       {
         stepId: 'a',
-        nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+        nestedScopes: [{ nodeId: 'enter-synthetic-synthetic:a', nodeType: 'enter-synthetic', scopeId: 'a' }],
       },
     ]);
   });
 
-  it('reattaches the synthetic frame when committing to a compiled body node', () => {
-    cursor.navigateToSynthetic({
-      stepId: 'a',
-      nodeType: 'synthetic',
-      nodeId: 'synthetic:a',
-    });
+  it('advances from the synthetic enter to the node after the owner', () => {
+    mintSynthetic();
     cursor.commitPendingNavigation();
-    cursor.navigateToAfterNode('enter-owner');
+    cursor.navigateToNextNode();
+
+    expect(cursor.nextNode).toEqual(expect.objectContaining({ id: 'body' }));
+  });
+
+  it('reattaches the synthetic frame when committing to a compiled body node', () => {
+    mintSynthetic();
+    cursor.commitPendingNavigation();
+    cursor.navigateToNextNode();
     cursor.commitPendingNavigation();
 
     expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'body' }));
@@ -217,14 +225,14 @@ describe('WorkflowExecutionCursor synthetic scope', () => {
       },
       {
         stepId: 'a',
-        nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+        nestedScopes: [{ nodeId: 'enter-synthetic-synthetic:a', nodeType: 'enter-synthetic', scopeId: 'a' }],
       },
     ]);
   });
 
-  it('hydrates a live synthetic from persisted stack frames on resume', () => {
+  it('resumes a compiled owner from the graph even when a synthetic is open', () => {
     const resumed = new WorkflowExecutionCursor({
-      nodeId: 'synthetic:a',
+      nodeId: 'enter-owner',
       stackFrames: [
         {
           stepId: 'owner',
@@ -232,15 +240,267 @@ describe('WorkflowExecutionCursor synthetic scope', () => {
         },
         {
           stepId: 'a',
-          nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+          nestedScopes: [{ nodeId: 'enter-synthetic-synthetic:a', nodeType: 'enter-synthetic', scopeId: 'a' }],
+        },
+      ],
+      workflowExecutionGraph,
+    });
+
+    expect(resumed.currentNode).toEqual(expect.objectContaining({ id: 'enter-owner' }));
+  });
+
+  it('hydrates a live synthetic from persisted stack frames on resume', () => {
+    const resumed = new WorkflowExecutionCursor({
+      nodeId: 'enter-synthetic-synthetic:a',
+      stackFrames: [
+        {
+          stepId: 'owner',
+          nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+        },
+        {
+          stepId: 'a',
+          nestedScopes: [{ nodeId: 'enter-synthetic-synthetic:a', nodeType: 'enter-synthetic', scopeId: 'a' }],
         },
       ],
       workflowExecutionGraph,
     });
 
     expect(resumed.currentNode).toEqual(
-      expect.objectContaining({ id: 'synthetic:a', type: 'synthetic' })
+      expect.objectContaining({ id: 'enter-synthetic-synthetic:a', type: 'enter-synthetic' })
     );
-    expect(() => resumed.navigateToNode('synthetic:a')).not.toThrow();
+    expect(resumed.currentStackFrames).toEqual([
+      {
+        stepId: 'owner',
+        nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+      },
+      {
+        stepId: 'a',
+        nestedScopes: [{ nodeId: 'enter-synthetic-synthetic:a', nodeType: 'enter-synthetic', scopeId: 'a' }],
+      },
+    ]);
+  });
+});
+
+describe('WorkflowExecutionCursor synthetic enter/exit pair', () => {
+  const graphNodes: Record<string, GraphNodeUnion> = {
+    'enter-foreach': {
+      id: 'enter-foreach',
+      stepId: 'loop',
+      type: 'enter-foreach',
+      stepType: 'foreach',
+    } as GraphNodeUnion,
+    body: { id: 'body', stepId: 'console', type: 'atomic', stepType: 'console' } as GraphNodeUnion,
+    'exit-foreach': {
+      id: 'exit-foreach',
+      stepId: 'loop',
+      type: 'exit-foreach',
+      stepType: 'foreach',
+    } as GraphNodeUnion,
+  };
+
+  let workflowExecutionGraph: WorkflowGraph;
+  let cursor: WorkflowExecutionCursor;
+
+  beforeEach(() => {
+    workflowExecutionGraph = {
+      topologicalOrder: ['enter-foreach', 'body', 'exit-foreach'],
+      getNode: jest.fn((nodeId: string) => graphNodes[nodeId]),
+      getNodeStack: jest.fn((nodeId: string) => {
+        if (!graphNodes[nodeId]) {
+          throw new Error(`Node not found for node id: ${nodeId}`);
+        }
+        if (nodeId === 'body') {
+          return ['enter-foreach'];
+        }
+        return [];
+      }),
+    } as unknown as WorkflowGraph;
+
+    cursor = new WorkflowExecutionCursor({
+      nodeId: 'enter-foreach',
+      workflowExecutionGraph,
+    });
+  });
+
+  const mintIteration = () => {
+    cursor.navigateToSynthetic({
+      stepId: '0',
+      nodeType: 'iteration',
+      nodeId: 'iteration:0',
+      stepType: 'iteration',
+    });
+    cursor.commitPendingNavigation();
+  };
+
+  it('keeps body navigation inside the open iteration', () => {
+    mintIteration();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'body' }));
+    expect(cursor.currentStackFrames).toEqual([
+      {
+        stepId: 'loop',
+        nestedScopes: [{ nodeId: 'enter-foreach', nodeType: 'enter-foreach' }],
+      },
+      {
+        stepId: '0',
+        nestedScopes: [
+          { nodeId: 'enter-synthetic-iteration:0', nodeType: 'enter-iteration', scopeId: '0' },
+        ],
+      },
+    ]);
+  });
+
+  it('visits the paired synthetic exit before the compiled owner exit', () => {
+    mintIteration();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(
+      expect.objectContaining({
+        id: 'exit-synthetic-iteration:0',
+        type: 'exit-iteration',
+        stepId: '0',
+        stepType: 'iteration',
+      })
+    );
+    expect(cursor.currentStackFrames).toEqual([
+      {
+        stepId: 'loop',
+        nestedScopes: [{ nodeId: 'enter-foreach', nodeType: 'enter-foreach' }],
+      },
+    ]);
+  });
+
+  it('keys the minted synthetic as enter-synthetic-iteration so navigateToNode can resolve it', () => {
+    cursor.navigateToSynthetic({
+      stepId: '0',
+      nodeType: 'iteration',
+      nodeId: 'iteration:0',
+      stepType: 'iteration',
+    });
+
+    expect(() => cursor.navigateToNode('enter-synthetic-iteration:0')).not.toThrow();
+    expect(cursor.nextNode).toEqual(
+      expect.objectContaining({ id: 'enter-synthetic-iteration:0', type: 'enter-iteration' })
+    );
+  });
+
+  it('resolves a synthetic id through navigateToNode', () => {
+    mintIteration();
+
+    expect(() => cursor.navigateToNode('enter-synthetic-iteration:0')).not.toThrow();
+    expect(cursor.nextNode).toEqual(
+      expect.objectContaining({ id: 'enter-synthetic-iteration:0', type: 'enter-iteration' })
+    );
+  });
+
+  it('commits from enter-synthetic-iteration with next unset to the node after the owner', () => {
+    mintIteration();
+
+    expect(cursor.nextNode).toBeNull();
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'body' }));
+  });
+
+  it('continues from the synthetic exit to the compiled owner exit', () => {
+    mintIteration();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+    cursor.navigateToNextNode();
+
+    expect(cursor.nextNode).toEqual(expect.objectContaining({ id: 'exit-foreach' }));
+  });
+
+  it('commits from exit-synthetic-iteration with next unset to the compiled owner exit and drops the synthetic', () => {
+    mintIteration();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'exit-synthetic-iteration:0' }));
+    expect(cursor.nextNode).toBeNull();
+
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'exit-foreach' }));
+    expect(() => cursor.navigateToNode('enter-synthetic-iteration:0')).toThrow(
+      'Node with ID enter-synthetic-iteration:0 is not part of the workflow graph'
+    );
+    expect(() => cursor.navigateToNode('exit-synthetic-iteration:0')).toThrow(
+      'Node with ID exit-synthetic-iteration:0 is not part of the workflow graph'
+    );
+  });
+});
+
+describe('WorkflowExecutionCursor synthetic ownership uses compiled type not id prefix', () => {
+  const graphNodes: Record<string, GraphNodeUnion> = {
+    enterForeach_loop: {
+      id: 'enterForeach_loop',
+      stepId: 'loop',
+      type: 'enter-foreach',
+      stepType: 'foreach',
+      exitNodeId: 'exitForeach_loop',
+    } as GraphNodeUnion,
+    body: { id: 'body', stepId: 'console', type: 'atomic', stepType: 'console' } as GraphNodeUnion,
+    exitForeach_loop: {
+      id: 'exitForeach_loop',
+      stepId: 'loop',
+      type: 'exit-foreach',
+      stepType: 'foreach',
+      startNodeId: 'enterForeach_loop',
+    } as GraphNodeUnion,
+  };
+
+  it('mints and leaves through the pair when compiled ids are camelCase', () => {
+    const workflowExecutionGraph = {
+      topologicalOrder: ['enterForeach_loop', 'body', 'exitForeach_loop'],
+      getNode: jest.fn((nodeId: string) => graphNodes[nodeId]),
+      getNodeStack: jest.fn((nodeId: string) => {
+        if (!graphNodes[nodeId]) {
+          throw new Error(`Node not found for node id: ${nodeId}`);
+        }
+        if (nodeId === 'body') {
+          return ['enterForeach_loop'];
+        }
+        return [];
+      }),
+    } as unknown as WorkflowGraph;
+
+    const cursor = new WorkflowExecutionCursor({
+      nodeId: 'enterForeach_loop',
+      workflowExecutionGraph,
+    });
+
+    cursor.navigateToSynthetic({
+      stepId: '0',
+      nodeType: 'iteration',
+      nodeId: 'iteration:0',
+      stepType: 'iteration',
+    });
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(
+      expect.objectContaining({ id: 'enter-synthetic-iteration:0', type: 'enter-iteration' })
+    );
+
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+    cursor.navigateToNextNode();
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(
+      expect.objectContaining({ id: 'exit-synthetic-iteration:0', type: 'exit-iteration' })
+    );
+
+    cursor.navigateToNextNode();
+    expect(cursor.nextNode).toEqual(expect.objectContaining({ id: 'exitForeach_loop' }));
   });
 });

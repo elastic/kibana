@@ -140,8 +140,10 @@ export class WorkflowExecutionRuntimeManager {
   public navigateToSynthetic(params: {
     stepId: string;
     nodeType: string;
-    nodeId?: string;
+    nodeId: string;
     scopeId?: string;
+    exitNodeId?: string;
+    stepType?: string;
   }): void {
     this.workflowExecutionCursor.navigateToSynthetic(params);
   }

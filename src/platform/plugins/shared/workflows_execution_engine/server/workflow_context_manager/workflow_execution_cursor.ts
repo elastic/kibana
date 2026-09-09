@@ -11,17 +11,22 @@ import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 
+const SYNTHETIC_ENTER_PREFIX = 'enter-synthetic-';
+const SYNTHETIC_EXIT_PREFIX = 'exit-synthetic-';
+
 export interface WorkflowExecutionCursorInit {
   nodeId?: string;
   stackFrames?: StackFrame[];
   workflowExecutionGraph: WorkflowGraph;
 }
 
-interface SyntheticNodeData {
-  nodeId: string;
-  nodeType: string;
+export interface NavigateToSyntheticParams {
   stepId: string;
-  stackFrame: StackFrame;
+  nodeType: string;
+  nodeId: string;
+  scopeId?: string;
+  exitNodeId?: string;
+  stepType?: string;
 }
 
 /** Public surface of {@link WorkflowExecutionCursor} for typing mocks and loop params. */
@@ -38,35 +43,35 @@ export interface WorkflowExecutionCursorApi {
   navigateToNode(nodeId: string): void;
   navigateToNextNode(): void;
   navigateToAfterNode(nodeId: string): void;
+  navigateToSynthetic(params: NavigateToSyntheticParams): void;
   readonly currentStackFrames: StackFrame[];
   setCurrentScopeId(scopeId?: string): void;
-  navigateToSynthetic(params: {
-    stepId: string;
-    nodeType: string;
-    nodeId?: string;
-    scopeId?: string;
-  }): void;
 }
 
 /**
  * In-memory cursor for workflow graph iteration: pending node navigation (`nextNodeId`),
  * whether the execution and persistence loops keep running (`isExecuting`), controlled with
  * {@link WorkflowExecutionCursor.start} and {@link WorkflowExecutionCursor.stop}.
+ *
+ * Synthetics are stack annotations owned by a compiled enter node. The cursor prefixes
+ * `enter-synthetic-` / `exit-synthetic-` when sitting on one. Leave visits the paired
+ * synthetic exit before the compiled owner exit.
  */
 export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private readonly workflowGraph: WorkflowGraph;
-  private currentNodeId: string | undefined;
-  private nextNodeId: string | undefined;
   private executing = true;
   private stackFrames: StackFrame[];
   private workflowError: Error | undefined;
-  private syntheticStackFramesMap = new Map<string, SyntheticNodeData>();
+  private syntheticsMap = new Map<string, string>();
+  private syntheticNodesMap = new Map<string, GraphNodeUnion>();
+  private _currentNode: GraphNodeUnion | undefined;
+  private _nextNode: GraphNodeUnion | undefined;
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.workflowGraph = init.workflowExecutionGraph;
-    this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
-    this.stackFrames = init.stackFrames ?? [];
-    this.hydrateSyntheticMapFromStack(this.stackFrames);
+    this.hydrateSyntheticsFromStack(init.stackFrames ?? []);
+    this.stackFrames = [];
+    this.restoreCurrentNode(init.nodeId, init.stackFrames ?? []);
   }
 
   /**
@@ -114,65 +119,91 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   /**
-   * Promotes `nextNodeId` to `currentNodeId` and rebuilds the scope stack from the graph.
-   * Used after a normal `runNode` cycle and after each error-bubbling step once `navigateToNode` has set `nextNodeId`.
+   * Promotes `nextNode` to `currentNode` and rebuilds the scope stack from the graph.
+   * Used after a normal `runNode` cycle and after each error-bubbling step once `navigateToNode` has set `nextNode`.
    */
   commitPendingNavigation(): void {
-    this.currentNodeId = this.nextNodeId;
-    this.syncScopeStack();
+    const ownedSynthetic = this.getOwnedSynthetic();
+
+    if (ownedSynthetic) {
+      this._nextNode = ownedSynthetic;
+    } else if (this.currentNode?.id) {
+      this._nextNode = this.nodeAfter(this.currentNode.id);
+    }
+
+    this._currentNode = this._nextNode;
+    this._nextNode = undefined;
+
+    if (this._currentNode) {
+      this.stackFrames = this.buildScopeStack(this.stackFrames, this._currentNode).stackFrames;
+    }
   }
 
   public get currentNode(): GraphNodeUnion | null {
-    return this.resolveNode(this.currentNodeId);
+    if (!this._currentNode) {
+      return null;
+    }
+
+    return this._currentNode;
   }
 
   public get nextNode(): GraphNodeUnion | null {
-    return this.resolveNode(this.nextNodeId);
+    if (!this._nextNode) {
+      return null;
+    }
+
+    return this._nextNode;
   }
 
   public navigateToNode(nodeId: string): void {
-    if (!this.resolveNode(nodeId)) {
+    const syntheticNode = this.resolveSyntheticNode(nodeId);
+
+    if (syntheticNode) {
+      this._nextNode = syntheticNode;
+      return;
+    }
+
+    const node = this.workflowGraph.getNode(nodeId);
+
+    if (!node) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
     }
 
-    this.nextNodeId = nodeId;
+    this._nextNode = node;
   }
 
   public navigateToNextNode(): void {
-    this.nextNodeId = this.nodeAfter(this.currentNodeId);
+    const ownerId = this.ownerIdOfSynthetic(this._currentNode);
+
+    if (ownerId && this._currentNode) {
+      if (this._currentNode.id.startsWith(SYNTHETIC_EXIT_PREFIX)) {
+        this.deleteSynthetic(ownerId);
+        this._nextNode = this.compiledExitNode(ownerId);
+        return;
+      }
+
+      this._nextNode = this.nodeAfter(ownerId);
+      return;
+    }
+
+    this._nextNode = this.nodeAfter(this._currentNode?.id);
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.nextNodeId = this.nodeAfter(nodeId);
+    this._nextNode = this.nodeAfter(nodeId);
   }
 
-  public navigateToSynthetic(params: {
-    stepId: string;
-    nodeType: string;
-    nodeId?: string;
-    scopeId?: string;
-  }): void {
-    const ownerStack = this.ensureOwnerScope();
-    const nextNodeId = params.nodeId ?? params.stepId;
-    const scopeId = params.scopeId ?? params.stepId;
-    const syntheticNodeData: SyntheticNodeData = {
-      nodeId: nextNodeId,
-      nodeType: params.nodeType,
-      stepId: params.stepId,
-      stackFrame: {
-        stepId: params.stepId,
-        nestedScopes: [
-          {
-            nodeId: nextNodeId,
-            nodeType: params.nodeType,
-            scopeId,
-          },
-        ],
-      },
-    };
+  public navigateToSynthetic(params: NavigateToSyntheticParams): void {
+    if (!this._currentNode || !this.isCompiledEnter(this._currentNode)) {
+      throw new Error('Only enter node can enter synthetic scopes');
+    }
 
-    this.syntheticStackFramesMap.set(ownerStack.hash, syntheticNodeData);
-    this.nextNodeId = nextNodeId;
+    this.setSynthetic(this._currentNode.id, {
+      id: params.nodeId,
+      type: params.nodeType,
+      stepId: params.stepId,
+      stepType: params.stepType ?? params.nodeType,
+    } as GraphNodeUnion);
   }
 
   public get currentStackFrames(): StackFrame[] {
@@ -192,127 +223,232 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     }).stackFrames;
   }
 
-  /**
-   * The compiled node that minted the synthetic is the owner prefix on the stack.
-   */
-  private ensureOwnerScope(): WorkflowScopeStack {
-    if (!this.currentNode) {
-      throw new Error('Current scope is not set');
-    }
-
-    let stack = WorkflowScopeStack.fromStackFrames(this.stackFrames);
-    if (stack.isEmpty() || stack.getCurrentScope().nodeId !== this.currentNode.id) {
-      stack = stack.enterScope({
-        nodeId: this.currentNode.id,
-        nodeType: this.currentNode.type,
-        stepId: this.currentNode.stepId,
-      });
-      this.stackFrames = stack.stackFrames;
-    }
-
-    return stack;
-  }
-
-  private nodeAfter(nodeId: string | undefined): string | undefined {
-    const topologicalOrder = this.workflowGraph.topologicalOrder;
-    const index = topologicalOrder.findIndex((id) => id === nodeId);
-    if (index >= 0 && index < topologicalOrder.length - 1) {
-      return topologicalOrder[index + 1];
-    }
-    return undefined;
-  }
-
-  private resolveNode(nodeId: string | undefined): GraphNodeUnion | null {
+  private restoreCurrentNode(nodeId: string | undefined, stackFrames: StackFrame[]): void {
     if (!nodeId) {
+      const firstNodeId = this.workflowGraph.topologicalOrder[0];
+      this._currentNode = firstNodeId ? this.workflowGraph.getNode(firstNodeId) : undefined;
+    } else {
+      this._currentNode =
+        this.workflowGraph.getNode(nodeId) ?? this.syntheticNodeForPersistedId(nodeId);
+    }
+
+    if (this._currentNode) {
+      this.stackFrames = this.buildScopeStack(stackFrames, this._currentNode).stackFrames;
+    }
+  }
+
+  /**
+   * If the current compiled node owns a synthetic, return that node.
+   * Enter: the minted synthetic. Exit: the paired synthetic.
+   */
+  private getOwnedSynthetic(): GraphNodeUnion | null {
+    if (!this._currentNode) {
       return null;
     }
 
-    const syntheticNodeData = this.findSyntheticByNodeId(nodeId);
-    if (syntheticNodeData) {
-      return this.toSyntheticGraphNode(syntheticNodeData);
+    if (this.currentNode.id.startsWith(SYNTHETIC_ENTER_PREFIX)) {
+      const ownerId = this.ownerIdOfSynthetic(this._currentNode);
+      const node = this.nodeAfter(ownerId);
+
+      if (node) {
+        return node;
+      }
     }
 
-    return this.workflowGraph.getNode(nodeId) ?? null;
+    if (this.currentNode.id.startsWith(SYNTHETIC_EXIT_PREFIX)) {
+      const ownerId = this.ownerIdOfSynthetic(this._currentNode);
+      const syb = ownerId?.substring('enter'.length);
+      const node = this.nodeAfter(`exit${syb}`);
+      if (node) {
+        return node;
+      }
+    }
+
+    if (this._currentNode.type?.startsWith('enter-')) {
+      const synthetic = this.getSyntheticNodeForOwner(this._currentNode.id);
+      return synthetic ? this.asEnter(synthetic) : null;
+    }
+
+    if (this._currentNode.type?.startsWith('exit-')) {
+      const ownerId = this.ownerIdForCompiledExit(this._currentNode);
+      const synthetic = this.getSyntheticNodeForOwner(ownerId);
+      return synthetic ? this.asExit(synthetic) : null;
+    }
+
+    return null;
   }
 
-  private findSyntheticByNodeId(nodeId: string): SyntheticNodeData | undefined {
-    for (const syntheticNodeData of this.syntheticStackFramesMap.values()) {
-      if (syntheticNodeData.nodeId === nodeId) {
-        return syntheticNodeData;
+  private syntheticExitIfLeavingOwner(next: GraphNodeUnion | undefined): GraphNodeUnion | null {
+    if (!next || !this.isCompiledNode(next) || !next.type?.startsWith('exit-')) {
+      return null;
+    }
+
+    const ownerId = this.ownerIdForCompiledExit(next);
+    const synthetic = this.getSyntheticNodeForOwner(ownerId);
+    return synthetic ? this.asExit(synthetic) : null;
+  }
+
+  private resolveSyntheticNode(nodeId: string): GraphNodeUnion | undefined {
+    const stored = this.syntheticNodesMap.get(this.enterSyntheticId(nodeId));
+
+    if (!stored) {
+      return undefined;
+    }
+
+    if (nodeId.startsWith(SYNTHETIC_EXIT_PREFIX) || nodeId.startsWith('exit-')) {
+      return this.asExit(stored);
+    }
+
+    return this.asEnter(stored);
+  }
+
+  private hasSyntheticNode(nodeId: string): boolean {
+    return this.syntheticNodesMap.has(this.enterSyntheticId(nodeId));
+  }
+
+  private enterSyntheticId(nodeId: string): string {
+    return `${SYNTHETIC_ENTER_PREFIX}${this.bareSyntheticId(nodeId)}`;
+  }
+
+  private syntheticNodeForPersistedId(nodeId: string): GraphNodeUnion | undefined {
+    return this.resolveSyntheticNode(nodeId);
+  }
+
+  private getSyntheticNodeForOwner(ownerId: string | undefined): GraphNodeUnion | undefined {
+    if (!ownerId) {
+      return undefined;
+    }
+
+    const syntheticId = this.syntheticsMap.get(ownerId);
+    return syntheticId ? this.syntheticNodesMap.get(syntheticId) : undefined;
+  }
+
+  private setSynthetic(ownerId: string, synthetic: GraphNodeUnion): void {
+    const previousSyntheticId = this.syntheticsMap.get(ownerId);
+    if (previousSyntheticId) {
+      this.syntheticNodesMap.delete(previousSyntheticId);
+    }
+
+    const enterId = this.enterSyntheticId(synthetic.id);
+    this.syntheticsMap.set(ownerId, enterId);
+    this.syntheticNodesMap.set(enterId, {
+      ...synthetic,
+      id: this.bareSyntheticId(synthetic.id),
+    } as GraphNodeUnion);
+  }
+
+  private deleteSynthetic(ownerId: string): void {
+    const syntheticId = this.syntheticsMap.get(ownerId);
+    this.syntheticsMap.delete(ownerId);
+    if (syntheticId) {
+      this.syntheticNodesMap.delete(syntheticId);
+    }
+  }
+
+  private asEnter(synthetic: GraphNodeUnion): GraphNodeUnion {
+    return {
+      ...synthetic,
+      id: `${SYNTHETIC_ENTER_PREFIX}${this.bareSyntheticId(synthetic.id)}`,
+      type: `enter-${this.bareSyntheticId(synthetic.type)}`,
+    } as GraphNodeUnion;
+  }
+
+  private asExit(synthetic: GraphNodeUnion): GraphNodeUnion {
+    return {
+      ...synthetic,
+      id: `${SYNTHETIC_EXIT_PREFIX}${this.bareSyntheticId(synthetic.id)}`,
+      type: `exit-${this.bareSyntheticId(synthetic.type)}`,
+    } as GraphNodeUnion;
+  }
+
+  private isCompiledNode(node: GraphNodeUnion): boolean {
+    return Boolean(this.workflowGraph.getNode(node.id));
+  }
+
+  private isCompiledEnter(node: GraphNodeUnion): boolean {
+    return this.isCompiledNode(node) && Boolean(node.type?.startsWith('enter-'));
+  }
+
+  private ownerIdOfSynthetic(node: GraphNodeUnion | undefined): string | undefined {
+    if (!node || this.isCompiledNode(node)) {
+      return undefined;
+    }
+
+    const enterId = this.enterSyntheticId(node.id);
+
+    for (const [ownerId, syntheticId] of this.syntheticsMap) {
+      if (syntheticId === node.id || syntheticId === enterId) {
+        return ownerId;
       }
+    }
+
+    return undefined;
+  }
+
+  private ownerIdForCompiledExit(node: GraphNodeUnion): string | undefined {
+    if ('startNodeId' in node && typeof node.startNodeId === 'string') {
+      return node.startNodeId;
+    }
+
+    if (node.id.startsWith('exit-')) {
+      return node.id.replace(/^exit-/, 'enter-');
+    }
+
+    return undefined;
+  }
+
+  private compiledExitNode(ownerId: string): GraphNodeUnion | undefined {
+    const owner = this.workflowGraph.getNode(ownerId);
+
+    if (owner && 'exitNodeId' in owner && typeof owner.exitNodeId === 'string') {
+      return this.workflowGraph.getNode(owner.exitNodeId);
+    }
+
+    if (ownerId.startsWith('enter-')) {
+      return this.workflowGraph.getNode(ownerId.replace(/^enter-/, 'exit-'));
+    }
+
+    return undefined;
+  }
+
+  private nodeAfter(nodeId: string | undefined): GraphNodeUnion | undefined {
+    const topologicalOrder = this.workflowGraph.topologicalOrder;
+    const index = topologicalOrder.findIndex((id) => id === nodeId);
+    if (index >= 0 && index < topologicalOrder.length - 1) {
+      return this.workflowGraph.getNode(topologicalOrder[index + 1]);
     }
     return undefined;
   }
 
-  private toSyntheticGraphNode(syntheticNodeData: SyntheticNodeData): GraphNodeUnion {
-    return {
-      id: syntheticNodeData.nodeId,
-      type: syntheticNodeData.nodeType,
-      stepId: syntheticNodeData.stepId,
-      stepType: syntheticNodeData.nodeType,
-    } as unknown as GraphNodeUnion;
+  private compiledAncestorIds(currentNode: GraphNodeUnion): string[] {
+    const ownerId = this.ownerIdOfSynthetic(currentNode);
+
+    if (ownerId) {
+      return [...this.workflowGraph.getNodeStack(ownerId), ownerId];
+    }
+
+    return this.workflowGraph.getNodeStack(currentNode.id);
   }
 
-  /**
-   * Rebuild the in-memory synthetic map from persisted stack frames.
-   * A scope whose nodeId is not in the compiled graph is a synthetic.
-   */
-  private hydrateSyntheticMapFromStack(stackFrames: StackFrame[]): void {
-    let compiled = new WorkflowScopeStack();
-
-    for (const frame of stackFrames) {
-      for (const nested of frame.nestedScopes) {
-        if (!this.workflowGraph.getNode(nested.nodeId)) {
-          this.syntheticStackFramesMap.set(compiled.hash, {
-            nodeId: nested.nodeId,
-            nodeType: nested.nodeType,
-            stepId: frame.stepId,
-            stackFrame: {
-              stepId: frame.stepId,
-              nestedScopes: [{ ...nested }],
-            },
-          });
-        } else {
-          compiled = compiled.enterScope({
-            nodeId: nested.nodeId,
-            nodeType: nested.nodeType,
-            stepId: frame.stepId,
-            scopeId: nested.scopeId,
-          });
-        }
-      }
-    }
-  }
-
-  private syncScopeStack(): void {
-    if (!this.currentNodeId) {
-      return;
-    }
-
-    const syntheticNodeData = this.findSyntheticByNodeId(this.currentNodeId);
-    if (syntheticNodeData) {
-      this.stackFrames = WorkflowScopeStack.fromStackFrames(this.stackFrames).enterScope({
-        nodeId: syntheticNodeData.nodeId,
-        nodeType: syntheticNodeData.nodeType,
-        stepId: syntheticNodeData.stepId,
-        scopeId: syntheticNodeData.stackFrame.nestedScopes[0].scopeId,
-      }).stackFrames;
-      return;
-    }
-
+  private buildScopeStack(
+    stackFrames: StackFrame[],
+    currentNode: GraphNodeUnion
+  ): WorkflowScopeStack {
     const scopesMap = new Map<string, string | undefined>();
 
-    for (const scope of this.stackFrames) {
+    for (const scope of stackFrames) {
       for (const nestedScope of scope.nestedScopes) {
         scopesMap.set(nestedScope.nodeId, nestedScope.scopeId);
       }
     }
 
-    const nodesStack = this.workflowGraph.getNodeStack(this.currentNodeId);
+    const sittingOnSyntheticExit =
+      Boolean(this.ownerIdOfSynthetic(currentNode)) &&
+      currentNode.id.startsWith(SYNTHETIC_EXIT_PREFIX);
 
     let currentNodeScope = new WorkflowScopeStack();
 
-    for (const nodeId of nodesStack) {
+    for (const nodeId of this.compiledAncestorIds(currentNode)) {
       const nodeFromGraph = this.workflowGraph.getNode(nodeId);
 
       currentNodeScope = currentNodeScope.enterScope({
@@ -322,17 +458,47 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
         scopeId: scopesMap.get(nodeFromGraph.id),
       });
 
-      const attachedSynthetic = this.syntheticStackFramesMap.get(currentNodeScope.hash);
-      if (attachedSynthetic) {
+      const synthetic = this.getSyntheticNodeForOwner(nodeFromGraph.id);
+
+      if (synthetic && !sittingOnSyntheticExit) {
+        const enterSynthetic = this.asEnter(synthetic);
         currentNodeScope = currentNodeScope.enterScope({
-          nodeId: attachedSynthetic.stackFrame.nestedScopes[0].nodeId,
-          nodeType: attachedSynthetic.stackFrame.nestedScopes[0].nodeType,
-          stepId: attachedSynthetic.stackFrame.stepId,
-          scopeId: attachedSynthetic.stackFrame.nestedScopes[0].scopeId,
+          nodeId: enterSynthetic.id,
+          nodeType: enterSynthetic.type,
+          stepId: synthetic.stepId,
+          scopeId:
+            scopesMap.get(enterSynthetic.id) ?? scopesMap.get(synthetic.id) ?? synthetic.stepId,
         });
       }
     }
 
-    this.stackFrames = currentNodeScope.stackFrames;
+    return currentNodeScope;
+  }
+
+  private hydrateSyntheticsFromStack(stackFrames: StackFrame[]): void {
+    this.syntheticsMap.clear();
+    this.syntheticNodesMap.clear();
+    let scopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
+
+    while (!scopeStack.isEmpty()) {
+      const currentScope = scopeStack.getCurrentScope();
+      const previousStack = scopeStack.exitScope();
+
+      if (!this.workflowGraph.getNode(currentScope.nodeId) && !previousStack.isEmpty()) {
+        const previousScope = previousStack.getCurrentScope();
+        this.setSynthetic(previousScope.nodeId, {
+          id: this.bareSyntheticId(currentScope.nodeId),
+          type: this.bareSyntheticId(currentScope.nodeType),
+          stepId: currentScope.stepId,
+          stepType: this.bareSyntheticId(currentScope.nodeType),
+        } as GraphNodeUnion);
+      }
+
+      scopeStack = previousStack;
+    }
+  }
+
+  private bareSyntheticId(value: string): string {
+    return value.replace(/^(enter|exit)-synthetic-/, '').replace(/^(enter|exit)-/, '');
   }
 }
