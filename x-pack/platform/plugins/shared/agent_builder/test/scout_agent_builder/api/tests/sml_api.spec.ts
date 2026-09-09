@@ -35,11 +35,7 @@ import { postConverse } from '../fixtures/converse_http';
 
 const SML_FIXTURE_NOW = '2024-06-01T12:00:00.000Z';
 
-/**
- * Build an SML document in the shape actually written to the index: the bookkeeping fields live
- * under the `flattened` `attributes` root, while `permissions` stays top-level (it must be
- * `nested` for the read path's authorization filter).
- */
+/** An SML document as written to the index: bookkeeping lives under the flattened `attributes`. */
 const indexedDocument = ({
   id,
   type,

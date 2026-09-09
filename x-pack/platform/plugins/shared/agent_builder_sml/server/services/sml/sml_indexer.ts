@@ -348,9 +348,8 @@ class SmlIndexerImpl implements SmlIndexer {
 
     const now = new Date().toISOString();
 
-    // Producer attributes go in first so the SML-owned keys below always win: `origin.uri` and
-    // `ingestion_method` gate deletion and manual-entry protection, so a type writer must not be
-    // able to forge them.
+    // SML-owned keys are spread last so a producer cannot forge `origin.uri` or `ingestion_method`,
+    // which gate deletion and manual-entry protection.
     const attributes: SmlDocumentAttributes = {
       ...entry.attributes,
       id: entryId,

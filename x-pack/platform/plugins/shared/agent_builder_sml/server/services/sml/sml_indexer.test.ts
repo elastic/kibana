@@ -207,7 +207,6 @@ describe('createSmlIndexer', () => {
             ],
           },
         },
-        // Bookkeeping lives under the flattened `attributes` root.
         attributes: {
           id: 'mock-uuid-1',
           origin: { uri: 'lens://att-2' },
@@ -267,7 +266,6 @@ describe('createSmlIndexer', () => {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
-        // The type writer's own attributes sit alongside the SML-owned keys.
         attributes: {
           owner_team: 'sales-ops',
           fields: [{ name: 'revenue', type: 'currency' }],
@@ -317,7 +315,6 @@ describe('createSmlIndexer', () => {
       expect(attributes.origin).toEqual({ uri: 'dashboard://dash-1' });
       expect(attributes.ingestion_method).toBe('crawled');
       expect(attributes.id).toBe('mock-uuid-1');
-      // Non-reserved producer keys survive.
       expect(attributes.owner_team).toBe('sales-ops');
     });
 

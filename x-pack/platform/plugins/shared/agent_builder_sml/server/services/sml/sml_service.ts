@@ -669,9 +669,8 @@ const buildSmlEsqlQuery = ({
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
 
-  // `attributes` is a `flattened` field: ES|QL exposes it as a single column and cannot address
-  // its keys as `attributes.x`, so pull the SML bookkeeping out with FIELD_EXTRACT up front. Every
-  // later WHERE / SORT / KEEP then works on plain keyword columns.
+  // ES|QL cannot address keys of a `flattened` field as `attributes.x`; FIELD_EXTRACT them into
+  // plain keyword columns up front so the WHERE / SORT / KEEP below can use them.
   lines.push(
     '| EVAL id = FIELD_EXTRACT(attributes, "id"), origin_uri = FIELD_EXTRACT(attributes, "origin.uri")'
   );

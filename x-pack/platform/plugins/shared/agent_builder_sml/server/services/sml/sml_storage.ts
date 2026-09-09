@@ -13,9 +13,8 @@ import { isResponseError } from '@kbn/es-errors';
 export const smlIndexName = '.ai-index-idx-sml-data';
 
 /**
- * Elasticsearch-managed index template that owns the SML data index mappings: `ai-index@mappings`
- * (shared AI index fields) plus `ai-index-managed@mappings` (`permissions`, `dynamic: strict`).
- * SML has no template of its own; its bookkeeping lives under the `flattened` `attributes` field.
+ * Elasticsearch-managed index template that owns the SML data index mappings (`ai-index@mappings`
+ * plus `ai-index-managed@mappings`). SML has no template of its own.
  */
 const smlIndexTemplateName = 'ai-index-idx-managed';
 

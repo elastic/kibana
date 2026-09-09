@@ -480,7 +480,6 @@ describe('SmlService', () => {
       const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
       expect(esql).not.toContain('FORK');
       expect(esql).not.toContain('FUSE');
-      // `attributes` is `flattened`, so its keys are only reachable through FIELD_EXTRACT.
       expect(esql).toContain(
         '| EVAL id = FIELD_EXTRACT(attributes, "id"), origin_uri = FIELD_EXTRACT(attributes, "origin.uri")'
       );
@@ -2190,7 +2189,6 @@ describe('SmlService', () => {
       });
 
       expect(result.size).toBe(2);
-      // Documents come back exactly as stored — no re-shaping on read.
       expect(result.get('doc-1')).toEqual({
         type: 'lens',
         title: 'Doc 1',

@@ -197,13 +197,9 @@ export type SmlIngestionMethod = 'manual' | 'crawled';
  * An SML document, exactly as stored in the index and as handed to consumers (notably
  * {@link SmlTypeDefinition.toAttachment}).
  *
- * The SML bookkeeping fields live under `attributes` (a `flattened` field) rather than at the
- * top level: the index is `dynamic: strict` and its mappings come from the shared AI index
- * templates, which only map `type`, `title`, `description`, `content`, `tags`, `references`,
- * `attributes` and `permissions` (`nested`, for the read path's authorization filter).
- *
- * Every `attributes` key is an untyped keyword. Query DSL can address them as `attributes.x`;
- * ES|QL cannot, and needs `FIELD_EXTRACT(attributes, "x")` — see `buildSmlEsqlQuery`.
+ * The index is `dynamic: strict` with mappings owned by the shared AI index templates, so SML's
+ * own bookkeeping lives under the `flattened` `attributes` field. Query DSL can address those
+ * keys as `attributes.x`; ES|QL needs `FIELD_EXTRACT(attributes, "x")` — see `buildSmlEsqlQuery`.
  */
 export interface SmlDocument {
   /** SML type (e.g., 'visualization', 'dashboard') */
