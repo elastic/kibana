@@ -567,7 +567,7 @@ export const Mattermost: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {
@@ -642,7 +642,7 @@ Permissions and safety:
 - createPost needs create_post. Existing fileIds also need upload_file. Priority is root-post-only and needs PostPriority; requestedAck also needs an eligible Professional or Enterprise plan.
 - createReaction and deleteReaction always derive the authenticated connector user to prevent reaction impersonation. They need add_reaction and remove_reaction respectively.
 - deactivateUser needs self access or edit_other_users; deactivating a system administrator also needs manage_system and revokes sessions.
-- createUser is intentionally unavailable. Mattermost email-auth creation requires a password, but Workflow action inputs and execution records do not provide protected per-run secret storage or redaction. If this action is enabled in the future, its password must come only from protected Workflow secret material and must never be hardcoded or placed in workflow YAML.`,
+- createUser is not supported. Never put passwords or other per-run credentials in workflow action inputs.`,
 
   actions: {
     listTeams: {

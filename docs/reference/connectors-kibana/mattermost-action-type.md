@@ -9,17 +9,15 @@ applies_to:
 
 # Mattermost connector [mattermost-action-type]
 
-The Mattermost connector calls the Mattermost REST API v4. Its initial registration exposes read
-actions to Agent Builder. State-changing actions are defined as workflow-only, but they are not
-available until a follow-up PR adds the `workflows` feature after the connector reaches every
-Production-NonCanary version.
+The Mattermost connector supports chat-based investigations with Elastic Agent Builder
+and automated incident response with Workflows. Its read actions retrieve teams, channels, users,
+posts, threads, and reactions. Its state-changing actions can post incident updates, add users to
+channels, and archive or restore channels.
 
-The connector defines 22 actions. Its 11 read actions are available to Agent Builder in the initial
-registration. The 11 state-changing actions become available after the `workflows` feature
-follow-up. **Create user** is not available because email-auth user creation requires a password,
-while Workflow action inputs and execution records do not provide protected per-run secret storage
-or redaction. If this action is enabled in the future, its password must come only from protected
-Workflow secret material and must never be hardcoded in workflow YAML.
+:::{note}
+Workflows can use all 22 actions. Agent Builder can use the 11 read actions. Actions that change
+Mattermost data are not available as Agent Builder tools.
+:::
 
 ## Create connectors in {{kib}} [define-mattermost-ui]
 
@@ -52,7 +50,8 @@ You can test the connector while creating or editing it in {{kib}}. The test cal
 
 ## Connector actions [mattermost-connector-actions]
 
-The Mattermost connector has the following actions.
+The connector defines 22 actions: 11 read actions and 11 state-changing actions. Creating users is
+not supported.
 
 ### Team and channel discovery [mattermost-discovery-actions]
 

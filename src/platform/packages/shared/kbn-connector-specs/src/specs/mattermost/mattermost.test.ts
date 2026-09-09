@@ -170,7 +170,7 @@ describe('Mattermost connector', () => {
         displayName: 'Mattermost',
         minimumLicense: 'enterprise',
         isTechnicalPreview: true,
-        supportedFeatureIds: ['agentBuilder'],
+        supportedFeatureIds: ['agentBuilder', 'workflows'],
       });
     });
 
@@ -205,8 +205,10 @@ describe('Mattermost connector', () => {
         'searchPosts',
       ]);
       expect(Mattermost.actions).not.toHaveProperty('createUser');
-      expect(Mattermost.skill).toContain('createUser is intentionally unavailable');
-      expect(Mattermost.skill).toContain('must never be hardcoded');
+      expect(Mattermost.skill).toContain('createUser is not supported');
+      expect(Mattermost.skill).toContain(
+        'Never put passwords or other per-run credentials in workflow action inputs'
+      );
     });
 
     it('documents conditional write permissions and message-priority requirements', () => {
