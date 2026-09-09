@@ -24,11 +24,9 @@ jest.mock('./visualize_custom_content', () => ({
 const services = {} as VisualizationServices;
 
 /**
- * Dispatch is the failure mode this component has: every renderer added so far has been
- * matched as "not the previous one", so an unhandled renderer silently rendered through
- * Lens — a broken chart rather than an error. Each case is pinned explicitly, including
- * the undefined one, which is load-bearing for attachments created before the
- * discriminator existed.
+ * Every renderer added so far was first matched as "not the previous one", which routes an
+ * unhandled renderer through Lens: a broken chart rather than an error. Each case is pinned,
+ * including `undefined`, which is how attachments predating the discriminator render.
  */
 const cases: Array<[string, VisualizationRenderer | undefined, string]> = [
   ['lens', 'lens', 'lens-renderer'],

@@ -9,8 +9,5 @@ export type {
   CustomContentTemplateResolverDeps,
   ResolvedCustomContentTemplate,
 } from './src/custom_content_resolver';
-export {
-  createCustomContentTemplateResolver,
-  extractDeclaredHeight,
-} from './src/custom_content_resolver';
+export { createCustomContentTemplateResolver } from './src/custom_content_resolver';
 export { sanitizeCellValue } from './src/sanitize_cell_value';

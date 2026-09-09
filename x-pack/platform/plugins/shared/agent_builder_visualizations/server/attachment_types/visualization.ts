@@ -68,8 +68,6 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
     resolve: async (
       origin: string,
       context: AttachmentResolveContext
-      // Resolving a Lens saved object always yields a chart payload; custom content
-      // has no by-reference form.
     ): Promise<ChartVisualizationAttachmentData | undefined> => {
       if (!context.savedObjectsClient) return undefined;
 

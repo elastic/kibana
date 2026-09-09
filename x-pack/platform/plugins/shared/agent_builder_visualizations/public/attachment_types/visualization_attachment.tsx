@@ -11,7 +11,6 @@ import type {
   VISUALIZATION_ATTACHMENT_TYPE,
   VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
-import { isCustomContentVisualization } from '@kbn/agent-builder-visualizations-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import {
@@ -46,11 +45,6 @@ export const createVisualizationAttachmentDefinition = (
     getIcon: () => 'lensApp',
     getMaxWidth: (attachment) => {
       const { data } = attachment;
-      // The Lens config reader would find no dimensions in an HTML template and fall
-      // back to its default anyway; skipping it keeps custom content off that path.
-      if (isCustomContentVisualization(data)) {
-        return undefined;
-      }
       return getVisualizationDimensionsFromLensConfig(data.visualization as Record<string, unknown>)
         .width;
     },

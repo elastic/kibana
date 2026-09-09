@@ -23,14 +23,13 @@ const timeRangeSchema = z.object({
 });
 
 /**
- * A Lens or Vega payload. `renderer` is optional for backwards compatibility:
- * attachments created before the discriminator existed are implicitly Lens.
- *
- * `esql` stays required here — a chart is always query-backed, and only custom
- * content may be static.
+ * A Lens or Vega payload. `renderer` is optional because attachments predating the
+ * discriminator are Lens; `esql` is required because a chart is always query-backed.
  */
 const chartVisualizationSchema = z
   .object({
+    // Optional for backwards compatibility: attachments created before the Vega
+    // renderer existed have no `renderer` field and are implicitly Lens.
     renderer: z.enum(['lens', 'vega']).optional(),
     query: z.string().max(2048),
     visualization: z.record(z.string().max(1024), z.unknown()),
@@ -59,11 +58,9 @@ const chartVisualizationSchema = z
   });
 
 /**
- * A custom content payload: an LLM-authored HTML/Liquid template.
- *
- * The iframe sandbox and DOMPurify are what make the template safe at render
- * time; rejecting scripts and oversized markup here keeps the stored payload
- * clean too, matching what the dashboard generation path enforces.
+ * A custom content payload: an LLM-authored HTML/Liquid template. The sandbox and DOMPurify
+ * are what make it safe at render time; rejecting scripts and oversized markup here keeps the
+ * stored payload clean too, matching what the dashboard generation path enforces.
  */
 const customContentVisualizationSchema = z.object({
   renderer: z.literal('custom_content'),
@@ -96,14 +93,9 @@ const customContentVisualizationSchema = z.object({
 });
 
 /**
- * Runtime validation for visualization attachment data. The matching type
- * contract (`VisualizationAttachmentData`) lives in
- * `@kbn/agent-builder-visualizations-common` because it is shared across the
- * browser and server; this schema is server-only (attachment validation).
- *
- * A union rather than one object with conditional refinements, so the per-renderer
- * guarantees the type expresses — a template for custom content, an `esql` for the
- * chart renderers — are the ones the parser actually enforces.
+ * Runtime validation for visualization attachment data; the matching type contract is
+ * `VisualizationAttachmentData`. A union rather than conditional refinements, so the parser
+ * enforces the same per-renderer guarantees the type expresses.
  */
 export const visualizationAttachmentDataSchema = z.union([
   customContentVisualizationSchema,

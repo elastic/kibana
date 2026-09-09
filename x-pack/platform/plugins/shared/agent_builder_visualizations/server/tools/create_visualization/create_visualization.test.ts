@@ -679,9 +679,8 @@ describe('createVisualizationTool handler', () => {
       return attachments;
     };
 
-    // A stored panel with no query is static by construction. `renderer` cannot be passed
-    // on an update, so without this the agent has no way to say "still static" and a
-    // wording tweak would either invent a query or fail outright.
+    // `renderer` cannot be passed on an update, so without this a wording tweak to a
+    // static panel would either invent a query or fail outright.
     it('does not generate a query when editing a panel that is already static', async () => {
       const { result } = await runHandler(
         { query: 'make the subtitle smaller', attachment_id: 'banner' },

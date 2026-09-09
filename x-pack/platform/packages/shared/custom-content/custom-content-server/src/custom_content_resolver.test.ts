@@ -6,12 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import {
-  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
-  CUSTOM_CONTENT_DEFAULT_HEIGHT,
-  CUSTOM_CONTENT_MIN_HEIGHT,
-  CUSTOM_CONTENT_MAX_HEIGHT,
-} from '@kbn/custom-content-common';
+import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -140,6 +135,7 @@ describe('createCustomContentTemplateResolver — output validation', () => {
     expect(result.template).toBe('<div>hello</div>');
   });
 
+  // Fences are stripped by the resolver, so the declaration is only reachable through it.
   it('reads the declared height through a markdown fence', async () => {
     mockChatComplete.mockResolvedValue({
       content: '```html\n<!-- cc-height: 400 -->\n<div>hello</div>\n```',
@@ -149,43 +145,6 @@ describe('createCustomContentTemplateResolver — output validation', () => {
 
     expect(result.height).toBe(400);
     expect(result.template).toBe('<div>hello</div>');
-  });
-
-  it('reads the height and strips the arithmetic the model shows after it', async () => {
-    mockChatComplete.mockResolvedValue({
-      content: '<!-- cc-height: 368 = 32 + 130 + 4x30 -->\n<div>hello</div>',
-    });
-
-    const result = await resolve({ prompt: 'Show a KPI' });
-
-    expect(result.height).toBe(368);
-    expect(result.template).toBe('<div>hello</div>');
-  });
-
-  it('falls back to the default height when none is declared', async () => {
-    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
-
-    const result = await resolve({ prompt: 'Show a KPI' });
-
-    expect(result.height).toBe(CUSTOM_CONTENT_DEFAULT_HEIGHT);
-    expect(result.template).toBe('<div>hello</div>');
-  });
-
-  // The value is model-authored, so it is clamped rather than trusted.
-  it('clamps a declared height above the maximum', async () => {
-    mockChatComplete.mockResolvedValue({
-      content: '<!-- cc-height: 99999 -->\n<div>hello</div>',
-    });
-
-    expect((await resolve({ prompt: 'Show a KPI' })).height).toBe(CUSTOM_CONTENT_MAX_HEIGHT);
-  });
-
-  it('clamps a declared height below the minimum', async () => {
-    mockChatComplete.mockResolvedValue({
-      content: '<!-- cc-height: 5 -->\n<div>hello</div>',
-    });
-
-    expect((await resolve({ prompt: 'Show a KPI' })).height).toBe(CUSTOM_CONTENT_MIN_HEIGHT);
   });
 });
 

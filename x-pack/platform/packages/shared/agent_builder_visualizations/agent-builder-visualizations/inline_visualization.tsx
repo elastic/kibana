@@ -26,16 +26,9 @@ const LazyVisualizeCustomContent = React.lazy(() =>
 
 export interface InlineVisualizationProps {
   services: VisualizationServices;
-  /**
-   * Which renderer to use. Attachments created before the discriminator existed
-   * have no renderer and are implicitly Lens, so Lens stays the fallback — but
-   * every other renderer is matched explicitly.
-   */
+  /** Absent on attachments predating the discriminator, which are Lens. */
   renderer?: VisualizationRenderer;
-  /**
-   * Renderer-specific payload: a Lens config, a Vega spec under `spec`, or a
-   * custom content HTML template under `template`.
-   */
+  /** A Lens config, a Vega spec under `spec`, or a custom content template under `template`. */
   visualization: Record<string, unknown>;
   /** ES|QL backing the payload. Only the custom content renderer fetches its own data. */
   esql?: string;

@@ -50,13 +50,8 @@ const saveModalObjectType = i18n.translate(
   { defaultMessage: 'Custom panel' }
 );
 
-/**
- * Must be a flex column with a definite height, not just a height: the panel's own
- * root is `flex: 1 1 100%` and its iframe container `flex: 1 1 0%`, so in a block
- * parent both collapse to the container's min-height and the frame renders 200px
- * tall inside a correctly sized wrapper. A dashboard panel body is already a flex
- * container, which is why this only shows up in the conversation.
- */
+// Must be a flex column, not just a height: the panel root is `flex: 1 1 100%` and
+// collapses to its 200px min-height in a block parent.
 const customContentContainerCss = (height: number) =>
   css({
     display: 'flex',
@@ -68,7 +63,7 @@ const customContentContainerCss = (height: number) =>
 
 export interface VisualizeCustomContentProps {
   services: VisualizationServices;
-  /** The stored custom content payload: an HTML/Liquid template and its declared height. */
+  /** The HTML/Liquid template and its declared height. */
   visualization: Record<string, unknown> & { template?: string; height?: number };
   /** ES|QL query backing the template. Absent for static content. */
   esql?: string;
@@ -82,9 +77,6 @@ export interface VisualizeCustomContentProps {
  * The template is untrusted, LLM-authored markup: `CustomContentComponent` is what
  * makes it safe (DOMPurify, a `sandbox=""` iframe and a CSP meta tag), so this must
  * stay the only path a custom content payload reaches the DOM through.
- *
- * There is deliberately no "edit" action to match the Lens renderer's: editing here
- * means asking the agent, which updates the attachment in place and re-renders this.
  */
 export const VisualizeCustomContent = ({
   services,
@@ -185,8 +177,6 @@ export const VisualizeCustomContent = ({
       <div css={customContentContainerCss(height)}>
         <CustomContentComponent
           services={services.customContent}
-          // The conversation has no embeddable; the attachment is the identity here, and
-          // the id only keys the fetch effect.
           embeddableId="agent-builder-custom-content"
           esqlQuery={esql}
           timeRange={effectiveTimeRange}

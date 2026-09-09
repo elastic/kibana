@@ -14,11 +14,11 @@ import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
-  CUSTOM_CONTENT_DEFAULT_HEIGHT,
   CUSTOM_CONTENT_MIN_HEIGHT,
   CUSTOM_CONTENT_MAX_HEIGHT,
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
+import { extractDeclaredHeight } from './extract_declared_height';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
@@ -183,33 +183,6 @@ CONTENT RULES:
   </div>
   {% endfor %}`;
 }
-
-/**
- * Reads and removes the `<!-- cc-height: N -->` declaration the model is asked to emit
- * as its first line.
- *
- * Stripped rather than left in place so the stored template is exactly the markup the
- * panel renders — the declaration is metadata about the template, not part of it.
- * Missing or unparseable falls back to the default: a wrong-but-reasonable height is
- * always better than failing a template that is otherwise fine.
- */
-export const extractDeclaredHeight = (
-  rawTemplate: string
-): { template: string; height: number } => {
-  // Anything after the number is the model's own arithmetic, which it is asked to show so
-  // each term has to correspond to something it wrote. Only the leading number is read.
-  const match = rawTemplate.match(/^\s*<!--\s*cc-height:\s*(\d+)[^>]*-->\s*/i);
-  if (!match) {
-    return { template: rawTemplate, height: CUSTOM_CONTENT_DEFAULT_HEIGHT };
-  }
-
-  const declared = Number.parseInt(match[1], 10);
-  const height = Number.isFinite(declared)
-    ? Math.min(CUSTOM_CONTENT_MAX_HEIGHT, Math.max(CUSTOM_CONTENT_MIN_HEIGHT, declared))
-    : CUSTOM_CONTENT_DEFAULT_HEIGHT;
-
-  return { template: rawTemplate.slice(match[0].length), height };
-};
 
 export interface CustomContentTemplateResolverDeps {
   modelProvider: ModelProvider;

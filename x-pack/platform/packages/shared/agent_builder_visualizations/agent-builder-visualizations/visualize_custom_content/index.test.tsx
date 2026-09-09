@@ -47,7 +47,6 @@ const renderComponent = (
   props: Partial<React.ComponentProps<typeof VisualizeCustomContent>> = {}
 ) => {
   const buttons: ActionButton[] = [];
-  // The wrapper styles are theme functions, so the css prop needs a theme in context.
   render(
     <EuiProvider>
       <VisualizeCustomContent
@@ -68,8 +67,6 @@ beforeEach(() => {
 });
 
 describe('VisualizeCustomContent', () => {
-  // A `timeRange` in the serialized state is a per-panel override, so saving the preview's
-  // range would land the panel pinned and permanently ignoring the dashboard's picker.
   it('saves without a time range so the panel follows the dashboard', async () => {
     const buttons = renderComponent();
     buttons.find((button) => button.icon === 'save')!.handler();

@@ -20,8 +20,8 @@ interface VisualizationAttachmentDataBase {
 }
 
 /**
- * A chart payload rendered by Lens or Vega. `esql` is required here rather than on the
- * union: a chart is always query-backed, and only custom content can be static.
+ * A chart payload rendered by Lens or Vega. `esql` is required on this member because a
+ * chart is always query-backed; only custom content can be static.
  */
 export interface ChartVisualizationAttachmentData extends VisualizationAttachmentDataBase {
   renderer?: 'lens' | 'vega';
@@ -34,13 +34,13 @@ export interface ChartVisualizationAttachmentData extends VisualizationAttachmen
 }
 
 /**
- * A custom content payload: an LLM-authored HTML/Liquid template. Untrusted markup rather
- * than a structured config, so consumers must reach it through the `renderer`
- * discriminator and never through a generic "render the payload" path.
+ * A custom content payload: LLM-authored HTML rendered in a sandboxed iframe. Always branch
+ * on `renderer` before touching `visualization` — unlike the chart members this is markup,
+ * not a config, and it is only safe in the renderer that sanitizes and sandboxes it.
  */
 export interface CustomContentVisualizationAttachmentData extends VisualizationAttachmentDataBase {
   renderer: 'custom_content';
-  /** `height` is the model's own estimate — see the height constants for why. */
+  /** The model's own estimate of the content height; see `CUSTOM_CONTENT_DEFAULT_HEIGHT`. */
   visualization: { template: string; title?: string; height?: number };
   /** Optional: a custom content panel with no query renders static content. */
   esql?: string;
@@ -51,9 +51,9 @@ export type VisualizationAttachmentData =
   | CustomContentVisualizationAttachmentData;
 
 /**
- * The renderer an attachment actually renders with. `renderer` is absent on attachments
- * created before the field existed, and those are Lens. Resolve through this rather than
- * defaulting inline, so a new renderer cannot be mistaken for the legacy case.
+ * The renderer an attachment renders with. Attachments predating the field have none and are
+ * Lens. Use this rather than defaulting inline: an inline `renderer !== 'vega' ? 'lens'`
+ * check silently routes any new renderer into the Lens branch.
  */
 export const getEffectiveRenderer = (data: VisualizationAttachmentData): VisualizationRenderer =>
   data.renderer ?? 'lens';
