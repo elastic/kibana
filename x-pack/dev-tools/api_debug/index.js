@@ -8,8 +8,10 @@
 import { resolve } from 'path';
 import { globby } from 'globby';
 import { bold } from 'chalk';
-import { argv } from 'yargs';
+import yargs from 'yargs';
 import { requestFromApi } from './request_from_api';
+
+const argv = yargs(process.argv.slice(2)).parseSync();
 
 async function listFiles() {
   const pattern = resolve(__dirname, './apis/*/index.js');

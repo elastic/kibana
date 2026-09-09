@@ -109,7 +109,7 @@ const generateIndices = (
 };
 
 const main = () => {
-  const { argv } = yargs(process.argv.slice(2))
+  const argv = yargs(process.argv.slice(2))
     .option('fieldsCount', {
       demandOption: true,
       type: 'number',
@@ -157,7 +157,8 @@ const main = () => {
         return true;
       }
     })
-    .help();
+    .help()
+    .parseSync();
 
   const {
     fieldsCount,

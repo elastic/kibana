@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import yargs from 'yargs';
+import yargs, { type Argv } from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { TaskConfig, OpenAPITaskConfig } from './types';
@@ -14,7 +14,7 @@ import { buildArtifacts } from './build_artifacts';
 import { buildOpenAPIArtifacts } from './build_openapi_artifacts';
 import { DEFAULT_ELSER } from './tasks/create_index';
 
-function options(y: yargs.Argv) {
+function options(y: Argv) {
   return y
     .option('productName', {
       describe: 'name of products to generate documentation for',
@@ -89,7 +89,7 @@ function options(y: yargs.Argv) {
     .locale('en');
 }
 
-function openApiOptions(y: yargs.Argv) {
+function openApiOptions(y: Argv) {
   return y
     .option('stackVersion', {
       describe: 'The stack version to generate documentation for',

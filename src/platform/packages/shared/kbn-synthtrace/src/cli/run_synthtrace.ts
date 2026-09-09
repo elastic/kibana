@@ -35,6 +35,10 @@ function options(y: Argv) {
       describe: 'Kibana API key',
       string: true,
     })
+    .option('versionOverride', {
+      describe: 'Override the Elasticsearch version used by scenarios',
+      string: true,
+    })
     .option('from', {
       description: 'The start of the time window',
     })
@@ -166,7 +170,7 @@ async function run(argv: RunCliFlags) {
   }
 }
 
-export type RunCliFlags = ReturnType<typeof options>['argv'];
+export type RunCliFlags = ReturnType<ReturnType<typeof options>['parseSync']>;
 
 export function runSynthtrace() {
   yargs(process.argv.slice(2))
@@ -177,5 +181,5 @@ export function runSynthtrace() {
         process.exit(1);
       });
     })
-    .parse();
+    .parseSync();
 }

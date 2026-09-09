@@ -66,7 +66,7 @@ const {
   _,
   $0,
   ...otherArgs
-} = yargs(process.argv.slice(2)).argv;
+} = yargs(process.argv.slice(2)).parseSync();
 
 const statusesArg = (statusArg as string).split(',') as AgentStatus[];
 const inactivityTimeout = inactivityTimeoutArg

@@ -34,7 +34,8 @@ async function cli(): Promise<void> {
     )
     .demandOption('role')
     .version(false)
-    .help(false).argv;
+    .help(false)
+    .parseSync();
   const selectedRoleDefinition = KNOWN_ROLE_DEFINITIONS[role];
   const userName = role;
   const ELASTICSEARCH_URL = getEnvVariableOrDefault('ELASTICSEARCH_URL', 'http://127.0.0.1:9200');

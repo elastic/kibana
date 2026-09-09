@@ -146,178 +146,181 @@ function validateConfig(config: GeneratorConfig): GeneratorConfig {
 // new CLI flag means adding both a yargs option here and a field on
 // GeneratorConfig in types.ts.
 function parseCliConfig(): GeneratorConfig {
-  const argv = yargs.help().options({
-    interactive: {
-      alias: 'i',
-      describe: 'Run in interactive mode with step-by-step prompts',
-      type: 'boolean',
-      default: false,
-    },
-    username: {
-      alias: 'u',
-      describe: 'Username for Kibana/ES authentication',
-      type: 'string',
-      default: 'elastic',
-    },
-    password: {
-      alias: 'p',
-      describe: 'Password for Kibana/ES authentication',
-      type: 'string',
-      default: 'changeme',
-    },
-    kibana: {
-      alias: 'k',
-      describe: 'Kibana URL',
-      default: 'http://127.0.0.1:5601',
-      type: 'string',
-    },
-    node: {
-      alias: 'n',
-      describe: 'Elasticsearch node URL',
-      default: 'http://elastic:changeme@127.0.0.1:9200',
-      type: 'string',
-    },
-    count: {
-      alias: 'c',
-      describe: 'Number of cases to generate',
-      type: 'number',
-      default: 10,
-    },
-    comments: {
-      alias: 'm',
-      describe: 'Number of user comments per case',
-      type: 'number',
-      default: 0,
-    },
-    alerts: {
-      alias: 'a',
-      describe: 'Number of alert attachments per case (indexed into ES)',
-      type: 'number',
-      default: 0,
-    },
-    events: {
-      alias: 'e',
-      describe: 'Number of event attachments per case (process events)',
-      type: 'number',
-      default: 0,
-    },
-    apiKey: {
-      describe: 'API key for authorization (required for serverless)',
-      type: 'string',
-      default: '',
-    },
-    owners: {
-      alias: 'o',
-      describe: 'Case owners (securitySolution, observability, cases)',
-      default: ['securitySolution', 'observability', 'cases'],
-      type: 'array',
-    },
-    space: {
-      alias: 's',
-      describe: 'Kibana space ID',
-      default: '',
-      type: 'string',
-    },
-    ssl: {
-      describe: 'Use HTTPS with certificate verification',
-      type: 'boolean',
-      default: false,
-    },
-    templates: {
-      alias: 't',
-      describe: 'Number of auto-generated templates to create per owner (max 10)',
-      type: 'number',
-      default: 0,
-    },
-    templateOwners: {
-      describe: 'Owner(s) to create templates for (defaults to --owners)',
-      type: 'array',
-    },
-    templateFieldTypes: {
-      describe: `Comma-separated field types for each auto-generated template, in order. Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(
-        ', '
-      )}. Example: "integer,keyword,boolean".`,
-      type: 'string',
-      default: '',
-    },
-    numSpaces: {
-      describe: 'Number of spaces to create before generating cases (uses --space-name-pattern)',
-      type: 'number',
-      default: 0,
-    },
-    spaceNamePattern: {
-      describe: 'Pattern for generated space IDs — {i} is replaced with 1-based index',
-      type: 'string',
-      default: 'space-{i}',
-    },
-    ownerDistribution: {
-      describe:
-        'Weighted owner distribution as "owner:weight,..." e.g. "securitySolution:50,observability:30,cases:20"',
-      type: 'string',
-      default: '',
-    },
-    analyticsOwners: {
-      describe:
-        'Solutions that should have analytics indices enabled (comma-separated or array). Applied to every target space.',
-      type: 'array',
-    },
-    dryRun: {
-      describe: 'Show detailed execution plan without writing to Kibana or Elasticsearch',
-      type: 'boolean',
-      default: false,
-    },
-    seed: {
-      describe: 'Optional deterministic seed for repeatable generation plans and owner selection',
-      type: 'string',
-      default: '',
-    },
-    kibanaVersion: {
-      describe: 'Kibana version stamped into generated alert and event documents',
-      type: 'string',
-      default: DEFAULT_KIBANA_VERSION,
-    },
-    cleanup: {
-      describe:
-        'Delete previously generated cases and templates (matched by --cleanupTag) in the target space(s) and exit. Skips case/alert/event/template generation entirely. Global by default; pass --cleanupSpaces to scope.',
-      type: 'boolean',
-      default: false,
-    },
-    cleanupTag: {
-      describe: 'Tag used to identify auto-generated cases and templates during cleanup',
-      type: 'string',
-      default: AUTO_GENERATED_TAG,
-    },
-    cleanupSpaces: {
-      describe:
-        'Comma-separated space IDs to scope --cleanup to (e.g. "default,analytics-1"). Blank = clean every Kibana space (global).',
-      type: 'string',
-      default: '',
-    },
-    templateUsagePercent: {
-      describe:
-        'Percentage of generated cases (0-100) that should be created from one of the available templates for their owner. Has no effect when no templates are configured for an owner.',
-      type: 'number',
-      default: DEFAULT_TEMPLATE_USAGE_PERCENT,
-    },
-    legacyTemplates: {
-      describe:
-        'Register a small set of legacy templates on the cases-configure SO for every --owners value. Visible in the Cases UI under "Create from template"; not auto-applied to generated cases. Combine with --legacyCustomFields so the legacy templates pre-fill typed customField values.',
-      type: 'boolean',
-      default: false,
-    },
-    legacyCustomFields: {
-      describe:
-        'Register typed (text/toggle/number) customFields on the cases-configure SO for every --owners value and have every generated case POST matching customField values. Independent of --legacyTemplates.',
-      type: 'boolean',
-      default: false,
-    },
-    concurrency: {
-      describe:
-        'Concurrent case-create requests. Defaults adapt to whether attachments are configured (~10 with attachments, ~30 without). Bump to ~50 for large seeds.',
-      type: 'number',
-      default: 0,
-    },
-  }).argv;
+  const argv = yargs()
+    .help()
+    .options({
+      interactive: {
+        alias: 'i',
+        describe: 'Run in interactive mode with step-by-step prompts',
+        type: 'boolean',
+        default: false,
+      },
+      username: {
+        alias: 'u',
+        describe: 'Username for Kibana/ES authentication',
+        type: 'string',
+        default: 'elastic',
+      },
+      password: {
+        alias: 'p',
+        describe: 'Password for Kibana/ES authentication',
+        type: 'string',
+        default: 'changeme',
+      },
+      kibana: {
+        alias: 'k',
+        describe: 'Kibana URL',
+        default: 'http://127.0.0.1:5601',
+        type: 'string',
+      },
+      node: {
+        alias: 'n',
+        describe: 'Elasticsearch node URL',
+        default: 'http://elastic:changeme@127.0.0.1:9200',
+        type: 'string',
+      },
+      count: {
+        alias: 'c',
+        describe: 'Number of cases to generate',
+        type: 'number',
+        default: 10,
+      },
+      comments: {
+        alias: 'm',
+        describe: 'Number of user comments per case',
+        type: 'number',
+        default: 0,
+      },
+      alerts: {
+        alias: 'a',
+        describe: 'Number of alert attachments per case (indexed into ES)',
+        type: 'number',
+        default: 0,
+      },
+      events: {
+        alias: 'e',
+        describe: 'Number of event attachments per case (process events)',
+        type: 'number',
+        default: 0,
+      },
+      apiKey: {
+        describe: 'API key for authorization (required for serverless)',
+        type: 'string',
+        default: '',
+      },
+      owners: {
+        alias: 'o',
+        describe: 'Case owners (securitySolution, observability, cases)',
+        default: ['securitySolution', 'observability', 'cases'],
+        type: 'array',
+      },
+      space: {
+        alias: 's',
+        describe: 'Kibana space ID',
+        default: '',
+        type: 'string',
+      },
+      ssl: {
+        describe: 'Use HTTPS with certificate verification',
+        type: 'boolean',
+        default: false,
+      },
+      templates: {
+        alias: 't',
+        describe: 'Number of auto-generated templates to create per owner (max 10)',
+        type: 'number',
+        default: 0,
+      },
+      templateOwners: {
+        describe: 'Owner(s) to create templates for (defaults to --owners)',
+        type: 'array',
+      },
+      templateFieldTypes: {
+        describe: `Comma-separated field types for each auto-generated template, in order. Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(
+          ', '
+        )}. Example: "integer,keyword,boolean".`,
+        type: 'string',
+        default: '',
+      },
+      numSpaces: {
+        describe: 'Number of spaces to create before generating cases (uses --space-name-pattern)',
+        type: 'number',
+        default: 0,
+      },
+      spaceNamePattern: {
+        describe: 'Pattern for generated space IDs — {i} is replaced with 1-based index',
+        type: 'string',
+        default: 'space-{i}',
+      },
+      ownerDistribution: {
+        describe:
+          'Weighted owner distribution as "owner:weight,..." e.g. "securitySolution:50,observability:30,cases:20"',
+        type: 'string',
+        default: '',
+      },
+      analyticsOwners: {
+        describe:
+          'Solutions that should have analytics indices enabled (comma-separated or array). Applied to every target space.',
+        type: 'array',
+      },
+      dryRun: {
+        describe: 'Show detailed execution plan without writing to Kibana or Elasticsearch',
+        type: 'boolean',
+        default: false,
+      },
+      seed: {
+        describe: 'Optional deterministic seed for repeatable generation plans and owner selection',
+        type: 'string',
+        default: '',
+      },
+      kibanaVersion: {
+        describe: 'Kibana version stamped into generated alert and event documents',
+        type: 'string',
+        default: DEFAULT_KIBANA_VERSION,
+      },
+      cleanup: {
+        describe:
+          'Delete previously generated cases and templates (matched by --cleanupTag) in the target space(s) and exit. Skips case/alert/event/template generation entirely. Global by default; pass --cleanupSpaces to scope.',
+        type: 'boolean',
+        default: false,
+      },
+      cleanupTag: {
+        describe: 'Tag used to identify auto-generated cases and templates during cleanup',
+        type: 'string',
+        default: AUTO_GENERATED_TAG,
+      },
+      cleanupSpaces: {
+        describe:
+          'Comma-separated space IDs to scope --cleanup to (e.g. "default,analytics-1"). Blank = clean every Kibana space (global).',
+        type: 'string',
+        default: '',
+      },
+      templateUsagePercent: {
+        describe:
+          'Percentage of generated cases (0-100) that should be created from one of the available templates for their owner. Has no effect when no templates are configured for an owner.',
+        type: 'number',
+        default: DEFAULT_TEMPLATE_USAGE_PERCENT,
+      },
+      legacyTemplates: {
+        describe:
+          'Register a small set of legacy templates on the cases-configure SO for every --owners value. Visible in the Cases UI under "Create from template"; not auto-applied to generated cases. Combine with --legacyCustomFields so the legacy templates pre-fill typed customField values.',
+        type: 'boolean',
+        default: false,
+      },
+      legacyCustomFields: {
+        describe:
+          'Register typed (text/toggle/number) customFields on the cases-configure SO for every --owners value and have every generated case POST matching customField values. Independent of --legacyTemplates.',
+        type: 'boolean',
+        default: false,
+      },
+      concurrency: {
+        describe:
+          'Concurrent case-create requests. Defaults adapt to whether attachments are configured (~10 with attachments, ~30 without). Bump to ~50 for large seeds.',
+        type: 'number',
+        default: 0,
+      },
+    })
+    .parseSync();
 
   const templateCount = Math.min(Number(argv.templates) || 0, 10);
   // Default to the rich kitchen-sink YAML template (display rules, validation,

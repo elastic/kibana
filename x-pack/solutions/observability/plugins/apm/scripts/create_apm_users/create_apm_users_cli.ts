@@ -7,13 +7,14 @@
 
 /* eslint-disable no-console */
 
-import { argv } from 'yargs';
+import yargs from 'yargs';
 import {
   AbortError,
   isAxiosError,
 } from '../../server/test_helpers/create_apm_users/helpers/call_kibana';
 import { createApmUsers } from '../../server/test_helpers/create_apm_users/create_apm_users';
 import { getKibanaVersion } from '../../server/test_helpers/create_apm_users/helpers/get_version';
+const argv = yargs(process.argv.slice(2)).parseSync();
 
 async function init() {
   const esUserName = (argv.username as string) || 'elastic';
