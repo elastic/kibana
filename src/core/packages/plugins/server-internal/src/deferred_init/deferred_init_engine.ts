@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, firstValueFrom, type Observable } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { withLock, isLockAcquisitionError } from '@kbn/lock-manager';
 import { DeferredInitializationError } from '@kbn/core-deferred-init-common';
 import type { InitState, LazyInitContext } from '@kbn/core-plugins-server';
-import { readDeferredInitState, writeDeferredInitOutcome } from './deferred_init_state';
 import {
   DEFERRED_INIT_BACKOFF_BASE_MS,
   DEFERRED_INIT_BACKOFF_FACTOR,
@@ -32,10 +30,6 @@ interface DeferredInitRecord {
   failedAttempts: number;
 }
 
-const LOCK_ID_PREFIX = 'deferred-init:';
-
-type GuardedRunOutcome = 'available' | 'retry';
-
 /**
  * Per-instance engine that tracks per-plugin deferred-init state and runs the work
  * lazily on demand. Nothing executes at construction or boot: the work runs only when
@@ -43,20 +37,26 @@ type GuardedRunOutcome = 'available' | 'retry';
  * is called, which happens on the first gated request (or an explicit trigger), never
  * during `start()`.
  *
- * Re-entrancy, two layers:
- * - Same instance: a single in-flight promise per plugin id is shared across concurrent
- *   triggers (`record.inFlight`).
- * - Across instances behind a load balancer: {@link DeferredInitEngine.runGuarded} checks a
- *   cluster-global state doc first (skips the runner entirely if a peer already finished),
- *   then serializes the actual runner invocation with a distributed lock so at most one
- *   instance in the deployment runs it concurrently. A `failed` run, or one that lost the
- *   lock race, is retried after a jittered cooldown (see {@link scheduleCooldown}).
+ * State is per Kibana instance and in memory only, exactly like the `/status` entry of any
+ * non-lazy plugin: nothing is persisted, and no cross-instance lock or shared document is
+ * involved. Every instance behind a load balancer therefore runs each lazy plugin's
+ * `lazyInitialize` once, on its own first trigger. That is deliberate — deferred init routinely
+ * has to establish *instance-local* preconditions (downloading a browser binary, warming an
+ * in-process cache, populating module-scoped state), which a run on some other instance cannot
+ * satisfy. The cost is that `lazyInitialize` may run once per instance rather than once per
+ * deployment, so it must be safe to execute concurrently on several instances against the same
+ * Elasticsearch cluster (create-if-missing rather than blind create, idempotent writes).
+ *
+ * Within a single instance, concurrent triggers for the same plugin id share one in-flight
+ * promise (`record.inFlight`), so a burst of requests produces exactly one run. A `failed` run
+ * becomes retriable again after a jittered, exponentially-backed-off cooldown (see
+ * {@link scheduleCooldown}), which also keeps instances that fail against the same unhealthy
+ * cluster from retrying in lockstep.
  *
  * @internal
  */
 export class DeferredInitEngine {
   private readonly records = new Map<string, DeferredInitRecord>();
-  private readonly retryAttempts = new Map<string, number>();
   /**
    * True only while the standard plugins' `start()` loop is running. While set,
    * {@link waitUntilAvailable} refuses to block (see the guard there): awaiting a lazy plugin's
@@ -65,7 +65,7 @@ export class DeferredInitEngine {
    */
   private startCycleActive = false;
 
-  constructor(private readonly log: Logger, private readonly kibanaVersion: string) {}
+  constructor(private readonly log: Logger) {}
 
   /**
    * Mark the standard `start()` loop as in progress. Called by
@@ -188,20 +188,12 @@ export class DeferredInitEngine {
     record.state$.next('initializing');
     this.log.info(`Deferred init for "${pluginId}" started.`);
 
-    record.inFlight = this.runGuarded(pluginId, runner, ctx).then(
-      (outcome) => {
+    record.inFlight = runner(ctx).then(
+      () => {
         record.inFlight = undefined;
-        if (outcome === 'available') {
-          this.retryAttempts.delete(pluginId);
-          record.failedAttempts = 0;
-          record.state$.next('available');
-          this.log.info(`Deferred init for "${pluginId}" completed; routes are now available.`);
-        } else {
-          // Another instance holds the lock (or just finished). Nothing went wrong here,
-          // so stay `initializing` and let a cooldown flip us back to `idle` so the next
-          // gated request (or status poll) re-checks, instead of retrying instantly.
-          this.scheduleCooldown(pluginId, record);
-        }
+        record.failedAttempts = 0;
+        record.state$.next('available');
+        this.log.info(`Deferred init for "${pluginId}" completed; routes are now available.`);
       },
       (error: unknown) => {
         record.inFlight = undefined;
@@ -210,17 +202,15 @@ export class DeferredInitEngine {
         record.state$.next('failed');
         const message = error instanceof Error ? error.message : String(error);
         this.log.error(`Deferred init for "${pluginId}" failed: ${message}`);
-        this.scheduleCooldown(pluginId, record);
+        this.scheduleCooldown(record);
       }
     );
   }
 
   /**
    * Wait until a plugin's deferred init is `available`, kicking (or re-kicking) it as needed.
-   * Unlike {@link trigger}, this rejects on a terminal `failed` state instead of resolving —
-   * `trigger`'s `inFlight` promise never rejects (failures are swallowed into state `failed`),
-   * and on a lost-lock race it can resolve while state is still `initializing` (the run only
-   * truly completes once a later cooldown flips it back to `idle` and it's re-kicked). Used by
+   * Unlike {@link trigger}, this rejects on a `failed` run instead of resolving — `trigger`'s
+   * `inFlight` promise never rejects (failures are swallowed into state `failed`). Used by
    * `RuntimePluginContractResolver.loadPluginContract` to gate cross-plugin, in-process access to
    * a lazy plugin's `start()` contract.
    */
@@ -241,135 +231,54 @@ export class DeferredInitEngine {
     }
 
     const record = this.ensureRecord(pluginId);
+    const state = record.state$.value;
 
-    while (true) {
-      const state = record.state$.value;
-      if (state === 'available') {
-        return;
-      }
-      if (!record.runner || !record.ctx) {
-        // A misconfiguration (the plugin never called `setRunner`), not a transient failure of
-        // the runner itself — retrying won't make a runner appear, so callers shouldn't spend
-        // their retry budget on it.
-        throw new DeferredInitializationError(pluginId, {
-          message: `Deferred init for "${pluginId}" has no runner attached.`,
-          retriable: false,
-          status: record.state$.value,
-        });
-      }
-      if (state === 'idle' || state === 'failed') {
-        this.kick(pluginId, record);
-      }
-      await (record.inFlight ?? Promise.resolve());
-
-      const settled = record.state$.value;
-      if (settled === 'available') {
-        return;
-      }
-      if (settled === 'failed') {
-        throw new DeferredInitializationError(pluginId, {
-          cause: record.lastError,
-          status: 'failed',
-        });
-      }
-      // `settled === 'initializing'`: lost the cross-instance lock race. Wait past the
-      // cooldown (which flips this back to `idle`) before looping to retry.
-      await firstValueFrom(record.state$.pipe(filter((s) => s !== 'initializing')));
+    if (state === 'available') {
+      return;
     }
+    if (!record.runner || !record.ctx) {
+      // A misconfiguration (the plugin never called `setRunner`), not a transient failure of
+      // the runner itself — retrying won't make a runner appear, so callers shouldn't spend
+      // their retry budget on it.
+      throw new DeferredInitializationError(pluginId, {
+        message: `Deferred init for "${pluginId}" has no runner attached.`,
+        retriable: false,
+        status: state,
+      });
+    }
+    if (state === 'idle' || state === 'failed') {
+      this.kick(pluginId, record);
+    }
+    // Either the run this call kicked, or one a concurrent caller already had in flight.
+    await (record.inFlight ?? Promise.resolve());
+
+    // Annotated rather than inferred: TypeScript would otherwise carry the pre-`await` narrowing
+    // of `state` through to here, even though the run we just awaited is what changed it.
+    const settled: InitState = record.state$.value;
+    if (settled === 'available') {
+      return;
+    }
+    throw new DeferredInitializationError(pluginId, {
+      cause: record.lastError,
+      status: settled,
+    });
   }
 
   /**
-   * Cross-instance-aware wrapper around a single run of a plugin's deferred init:
-   *
-   * 1. Read the shared state doc. If another instance already finished, adopt `available`
-   *    without touching the plugin's runner at all (the common case once a plugin is warm).
-   * 2. Otherwise, acquire a per-plugin distributed lock (`@kbn/lock-manager`) before running
-   *    the plugin's (possibly expensive, not-safe-under-true-concurrency) work, so at most one
-   *    instance in the cluster executes it at a time. Losing the race returns `'retry'` rather
-   *    than running unlocked.
-   * 3. On success, persist `available`. On failure, re-check the state doc first so a slow
-   *    failure can never clobber a peer's already-recorded success.
+   * Jittered, exponentially-backed-off cooldown before a failed plugin becomes retriable again
+   * (flipping it from `failed` back to `idle`). Full jitter, rather than a fixed delay, so a set
+   * of instances that all failed against the same unhealthy Elasticsearch cluster don't retry in
+   * lockstep, mirroring Fleet's `backOff({ jitter: 'full' })` rationale.
    */
-  private async runGuarded(
-    pluginId: string,
-    runner: DeferredInitRunner,
-    ctx: LazyInitContext
-  ): Promise<GuardedRunOutcome> {
-    const { savedObjects, elasticsearch, logger } = ctx;
-
-    const existing = await readDeferredInitState(savedObjects, logger, pluginId);
-    // Only trust a stored `available` result if it was written by the same Kibana version.
-    // On upgrade the SO is migrated but attributes persist, so a stale `available` from the
-    // previous version must be treated as unknown and the runner re-executed.
-    if (existing?.status === 'available' && existing.kibanaVersion === this.kibanaVersion) {
-      return 'available';
-    }
-
-    try {
-      // No explicit `LockManagerService.setup()` is needed before the first deferred-init trigger:
-      // `withLock` acquires via `LockManager.acquire`, which lazily and idempotently bootstraps the
-      // `.kibana_locks` index (`runSetupIndexAssetOnce`) on first use. So the very first trigger on
-      // a fresh cluster creates the index itself. (See kbn-lock-manager's setup_lock_manager_index.)
-      await withLock(
-        { esClient: elasticsearch.client, logger, lockId: LOCK_ID_PREFIX + pluginId },
-        () => runner(ctx)
-      );
-    } catch (error) {
-      if (isLockAcquisitionError(error)) {
-        this.log.debug(
-          `Deferred init for "${pluginId}": lock held by another instance; will retry.`
-        );
-        return 'retry';
-      }
-
-      // The runner threw. Before recording a cluster-wide failure, make sure a peer that
-      // raced us to completion didn't already succeed in the meantime.
-      const latest = await readDeferredInitState(savedObjects, logger, pluginId);
-      if (latest?.status === 'available' && latest.kibanaVersion === this.kibanaVersion) {
-        return 'available';
-      }
-      await writeDeferredInitOutcome(
-        savedObjects,
-        logger,
-        pluginId,
-        'failed',
-        latest?.attempts ?? existing?.attempts ?? 0,
-        this.kibanaVersion,
-        error
-      );
-      throw error;
-    }
-
-    // Always safe to write `available` here even under a race: every concurrent writer
-    // converges on the same value.
-    await writeDeferredInitOutcome(
-      savedObjects,
-      logger,
-      pluginId,
-      'available',
-      existing?.attempts ?? 0,
-      this.kibanaVersion
-    );
-    return 'available';
-  }
-
-  /**
-   * Jittered, exponentially-backed-off cooldown before a plugin becomes retriable again.
-   * Full jitter (not just a fixed delay) so instances that all lost the same lock race don't
-   * retry in lockstep, mirroring Fleet's `backOff({ jitter: 'full' })` rationale.
-   */
-  private scheduleCooldown(pluginId: string, record: DeferredInitRecord): void {
-    const attempt = (this.retryAttempts.get(pluginId) ?? 0) + 1;
-    this.retryAttempts.set(pluginId, attempt);
-    // Capped well under the lock's ~30s TTL.
+  private scheduleCooldown(record: DeferredInitRecord): void {
     const upperBoundMs = Math.min(
-      DEFERRED_INIT_BACKOFF_BASE_MS * DEFERRED_INIT_BACKOFF_FACTOR ** (attempt - 1),
+      DEFERRED_INIT_BACKOFF_BASE_MS * DEFERRED_INIT_BACKOFF_FACTOR ** (record.failedAttempts - 1),
       DEFERRED_INIT_BACKOFF_MAX_MS
     );
     const delayMs = Math.random() * upperBoundMs;
 
     const timer = setTimeout(() => {
-      if (record.state$.value === 'initializing' || record.state$.value === 'failed') {
+      if (record.state$.value === 'failed') {
         record.state$.next('idle');
       }
     }, delayMs);

@@ -16,11 +16,16 @@ import type { InitState } from '@kbn/core-plugins-server';
  *
  * Deferring work is a healthy, expected state, so `idle` and `initializing` report `available`:
  * a lazy plugin that simply hasn't run its deferred work yet must NOT drag Kibana's overall
- * status (the worst of all plugin statuses) to `unavailable`, which would break load-balancer /
- * health-check gating and the FTR/Scout "wait until ready" check. Only a genuine `failed`
- * deferred initialization reports `unavailable`; the descriptive summary still conveys the
- * precise lifecycle state, and the browser reads the detailed state from the deferred-init status
- * route rather than this level.
+ * status (the worst of all plugin statuses) down, which would break the FTR/Scout "wait until
+ * ready" check.
+ *
+ * A `failed` deferred initialization reports `degraded` ("some features may not be working")
+ * rather than `unavailable`. Deferred init runs once per Kibana instance, so a failure is local
+ * to this instance and scoped to this one plugin: its own routes 503, and nothing else on the
+ * instance is affected. `degraded` says exactly that, and keeps one lazy plugin's failed init
+ * from pinning the reported `overall` status to `unavailable`. The descriptive summary still
+ * conveys the precise lifecycle state, and the browser reads the detailed state from the
+ * deferred-init status route rather than this level.
  *
  * @internal
  */
@@ -35,7 +40,7 @@ export const toServiceStatus = (pluginId: string, state: InitState): ServiceStat
       };
     case 'failed':
       return {
-        level: ServiceStatusLevels.unavailable,
+        level: ServiceStatusLevels.degraded,
         summary: `${pluginId} deferred initialization failed`,
       };
     case 'idle':

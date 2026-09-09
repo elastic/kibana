@@ -13,6 +13,10 @@ opts in) and the user experience (what someone sees when they hit a not-yet-init
   gating code.
 - **Observable state.** An always-available core endpoint and the plugin's `/status` entry reflect
   `idle → initializing → available | failed`.
+- **Per-instance, idempotent init.** Core tracks the state in memory per Kibana instance (like any
+  plugin's `/status` entry), so each instance behind a load balancer runs `lazyInitialize` once, on
+  its own first trigger. The Elasticsearch work here is written to tolerate that — the index create
+  swallows `resource_already_exists_exception` instead of failing the run.
 - **Clean UX, zero plugin code.** Core automatically wraps this app's `mount()` behind
   `<AppInitializingGate>`: a full-page "Initializing…" interface that resolves to the real content
   (or an error + retry on failure). `public/app.tsx` contains no polling, triggering, or gating
@@ -38,9 +42,9 @@ automatically as well, driven by the same manifest flag.
 > The deferred work here is a **stand-in** for "migrations + ES init", run in four phases: (1) a
 > fake ~3s "saved object migrations" delay, (2) a configurable "default state" delay
 > (`initDelayMs`), (3) loading `deferredInitExampleDependency`'s start contract (see below), (4) a
-> small, real, direct ES write (create index + mapping, write one doc, including the greeting
-> from step 3). It does **not** touch core saved-object migrations. The app lists these phases
-> once init completes.
+> small, real, direct ES write (create index + mapping tolerating a concurrent peer, write one doc,
+> including the greeting from step 3). It does **not** touch core saved-object migrations. The app
+> lists these phases once init completes.
 
 ## Calling another plugin's start contract from inside `lazyInitialize`
 
@@ -140,12 +144,15 @@ Config namespace is `deferred_init_example` (set in `kibana.yml` / `kibana.dev.y
    is served by core, not by the plugin's API routes.
 
 4. **Watch `/status`.** While initializing, `GET /api/status` shows `plugin:deferredInitExample` as
-   `unavailable` with summary "deferredInitExample is initializing"; once done it is `available`.
+   `available`, with the lifecycle state in the summary ("deferredInitExample is initializing
+   (deferred initialization in progress)"). Deferring work is a healthy state, so it must not drag
+   the reported `overall` status down; once done, the summary changes but the level does not.
 
 5. **Failure path.** Set `deferred_init_example.forceFailure: true`, restart the dev server, open the
    app (or hit the data route). After the delay the gate shows its error panel with a **Retry**
-   button, the state endpoint reports `failed`, and `/status` shows `unavailable`
-   ("deferred initialization failed"). Clicking **Retry** re-triggers the run.
+   button, the state endpoint reports `failed`, and `/status` shows `degraded`
+   ("deferred initialization failed") — scoped to this plugin on this instance, so other plugins
+   stay `available`. Clicking **Retry** re-triggers the run.
 
 ## Triggering paths
 

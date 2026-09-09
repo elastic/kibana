@@ -52,9 +52,6 @@ dependsOn:
   - '@kbn/core-di-internal'
   - '@kbn/core-di-server'
   - '@kbn/core-http-request-handler-context-server-internal'
-  - '@kbn/core-saved-objects-api-server'
-  - '@kbn/core-saved-objects-server'
-  - '@kbn/lock-manager'
   - '@kbn/core-deferred-init-common'
   - '@kbn/core-http-router-server-mocks'
 tags:

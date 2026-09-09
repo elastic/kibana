@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFERRED_INIT_STATE_TYPE } from './src/deferred_init_state_type';
 export {
   DeferredInitializationError,
   isDeferredInitializationError,

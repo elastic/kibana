@@ -87,8 +87,10 @@ export class DeferredInitExampleServerPlugin
     logger.info('[deferredInitExample] step: creating index and writing default document');
     const { client } = elasticsearch;
 
-    const indexExists = await client.indices.exists({ index: INDEX_NAME });
-    if (!indexExists) {
+    // `lazyInitialize` runs once per Kibana instance, so several instances can reach this point
+    // concurrently against the same cluster: tolerate a peer having created the index between the
+    // check and the create, rather than failing the whole run on the loser of that race.
+    try {
       await client.indices.create({
         index: INDEX_NAME,
         mappings: {
@@ -99,6 +101,11 @@ export class DeferredInitExampleServerPlugin
           },
         },
       });
+    } catch (error) {
+      if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw error;
+      }
+      logger.debug('[deferredInitExample] index already exists; continuing');
     }
 
     await client.index({

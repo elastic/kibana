@@ -98,10 +98,7 @@ export class PluginsService
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
-    this.deferredInitEngine = new DeferredInitEngine(
-      coreContext.logger.get('deferred-init'),
-      coreContext.env.packageInfo.version
-    );
+    this.deferredInitEngine = new DeferredInitEngine(coreContext.logger.get('deferred-init'));
     this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
     this.standardPluginsSystem = new PluginsSystem(
       this.coreContext,

@@ -321,8 +321,16 @@ export interface Plugin<
    * enabled, core does not run this at boot; it defers the work until the first time any of the
    * plugin's HTTP routes is hit (or an explicit/programmatic trigger fires), gates those routes
    * with `503` while pending, and reflects the init state into the plugin's `/status` entry.
-   * Treated as idempotent: a `failed` run may be re-triggered, and concurrent triggers share a
-   * single in-flight run.
+   *
+   * @remarks
+   * Runs once per Kibana instance, not once per deployment: core tracks the state in memory, the
+   * same way it tracks any plugin's `/status` entry, so every instance behind a load balancer
+   * runs this on its own first trigger. That is what lets deferred init set up instance-local
+   * preconditions (downloading a binary, warming an in-process cache) — but it also means the
+   * implementation must tolerate several instances running it concurrently against the same
+   * cluster, so make any Elasticsearch work idempotent (create-if-missing rather than blind
+   * create). Within an instance a `failed` run may be re-triggered, and concurrent triggers
+   * share a single in-flight run.
    *
    * @public
    */

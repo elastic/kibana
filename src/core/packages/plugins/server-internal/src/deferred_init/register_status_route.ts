@@ -21,15 +21,15 @@ import type { DeferredInitEngine } from './deferred_init_engine';
  * reachable while a plugin is still initializing.
  *
  * Deliberately calls `ensureInitialized` rather than the read-only `getState`: after a plugin
- * cools down from a failed run or a lost cross-instance lock race (see `DeferredInitEngine`),
- * something has to flip it back to trying again. Gated routes provide that nudge for plugins
- * that are actively receiving traffic, but a plugin with no gated request in flight would
- * otherwise stall forever waiting on traffic that never arrives. The initializing UI is
- * already polling this route once a user is on the loading screen, so reusing that poll as the
- * nudge covers that gap without introducing an unconditional background retry loop that would
- * spend Elasticsearch calls on plugins nobody is waiting on. `ensureInitialized` itself only
- * auto-kicks an `idle` plugin, not a `failed` one, so a genuine failure is actually observable
- * here instead of being silently re-kicked away before this handler ever reads it.
+ * cools down from a failed run (see `DeferredInitEngine`), something has to flip it back to trying
+ * again. Gated routes provide that nudge for plugins that are actively receiving traffic, but a
+ * plugin with no gated request in flight would otherwise stall forever waiting on traffic that
+ * never arrives. The initializing UI is already polling this route once a user is on the loading
+ * screen, so reusing that poll as the nudge covers that gap without introducing an unconditional
+ * background retry loop that would spend Elasticsearch calls on plugins nobody is waiting on.
+ * `ensureInitialized` itself only auto-kicks an `idle` plugin, not a `failed` one, so a genuine
+ * failure is actually observable here instead of being silently re-kicked away before this
+ * handler ever reads it.
  *
  * @internal
  */

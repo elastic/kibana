@@ -20,8 +20,8 @@ describe('toServiceStatus', () => {
   });
 
   // `idle`/`initializing` are healthy, expected states for a lazy plugin: they must NOT pin
-  // Kibana's overall status (the worst plugin status) to `unavailable`, which would break
-  // health-check gating and the FTR/Scout "wait until ready" check.
+  // Kibana's overall status (the worst plugin status) below `available`, which would break the
+  // FTR/Scout "wait until ready" check.
   it.each<InitState>(['idle', 'initializing'])(
     'reports `available` (with a descriptive summary) while %s',
     (state) => {
@@ -31,9 +31,12 @@ describe('toServiceStatus', () => {
     }
   );
 
-  it('reports `unavailable` only when the deferred init has failed', () => {
+  // `degraded`, not `unavailable`: the failure is local to this instance and scoped to this one
+  // plugin (its own routes 503), so it should not pin the reported `overall` status to
+  // `unavailable`.
+  it('reports `degraded` only when the deferred init has failed', () => {
     expect(toServiceStatus('myPlugin', 'failed')).toEqual({
-      level: ServiceStatusLevels.unavailable,
+      level: ServiceStatusLevels.degraded,
       summary: 'myPlugin deferred initialization failed',
     });
   });

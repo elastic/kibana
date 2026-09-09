@@ -10,26 +10,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { LazyInitContext } from '@kbn/core-plugins-server';
 import { isDeferredInitializationError } from '@kbn/core-deferred-init-common';
-import { withLock, LockAcquisitionError } from '@kbn/lock-manager';
-import { readDeferredInitState, writeDeferredInitOutcome } from './deferred_init_state';
 import { DeferredInitEngine } from './deferred_init_engine';
-
-jest.mock('@kbn/lock-manager', () => {
-  const actual = jest.requireActual('@kbn/lock-manager');
-  return {
-    ...actual,
-    withLock: jest.fn(),
-  };
-});
-
-jest.mock('./deferred_init_state', () => ({
-  readDeferredInitState: jest.fn(),
-  writeDeferredInitOutcome: jest.fn(),
-}));
-
-const withLockMock = withLock as jest.Mock;
-const readDeferredInitStateMock = readDeferredInitState as jest.Mock;
-const writeDeferredInitOutcomeMock = writeDeferredInitOutcome as jest.Mock;
 
 const PLUGIN_ID = 'myPlugin';
 
@@ -39,14 +20,20 @@ const createCtx = (): LazyInitContext => ({
   logger: loggingSystemMock.create().get(),
 });
 
+/** A promise a test can hold open, to keep a run in flight while asserting on the engine. */
+const deferred = () => {
+  let resolve!: () => void;
+  const promise = new Promise<void>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+};
+
 describe('DeferredInitEngine', () => {
   let engine: DeferredInitEngine;
 
   beforeEach(() => {
-    engine = new DeferredInitEngine(loggingSystemMock.create().get(), '9.0.0');
-    readDeferredInitStateMock.mockReset().mockResolvedValue(undefined);
-    writeDeferredInitOutcomeMock.mockReset().mockResolvedValue(undefined);
-    withLockMock.mockReset();
+    engine = new DeferredInitEngine(loggingSystemMock.create().get());
   });
 
   describe('isRegistered', () => {
@@ -65,7 +52,6 @@ describe('DeferredInitEngine', () => {
       const runner = jest.fn().mockResolvedValue(undefined);
       engine.register(PLUGIN_ID);
       engine.setRunner(PLUGIN_ID, runner, createCtx());
-      withLockMock.mockImplementation((_opts, cb) => cb());
 
       engine.beginStartCycle();
 
@@ -81,7 +67,6 @@ describe('DeferredInitEngine', () => {
       const runner = jest.fn().mockResolvedValue(undefined);
       engine.register(PLUGIN_ID);
       engine.setRunner(PLUGIN_ID, runner, createCtx());
-      withLockMock.mockImplementation((_opts, cb) => cb());
 
       engine.beginStartCycle();
       engine.endStartCycle();
@@ -94,14 +79,15 @@ describe('DeferredInitEngine', () => {
 
   describe('waitUntilAvailable', () => {
     it('resolves immediately if already available', async () => {
+      const runner = jest.fn().mockResolvedValue(undefined);
       engine.register(PLUGIN_ID);
-      engine.setRunner(PLUGIN_ID, jest.fn(), createCtx());
-      withLockMock.mockImplementation((_opts, cb) => cb());
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
 
       await engine.trigger(PLUGIN_ID);
       expect(engine.getState(PLUGIN_ID)).toBe('available');
 
       await expect(engine.waitUntilAvailable(PLUGIN_ID)).resolves.toBeUndefined();
+      expect(runner).toHaveBeenCalledTimes(1);
     });
 
     it('throws a non-retriable DeferredInitializationError if no runner is attached', async () => {
@@ -118,18 +104,16 @@ describe('DeferredInitEngine', () => {
       const runner = jest.fn().mockResolvedValue(undefined);
       engine.register(PLUGIN_ID);
       engine.setRunner(PLUGIN_ID, runner, createCtx());
-      withLockMock.mockImplementation((_opts, cb) => cb());
 
       await expect(engine.waitUntilAvailable(PLUGIN_ID)).resolves.toBeUndefined();
       expect(runner).toHaveBeenCalledTimes(1);
       expect(engine.getState(PLUGIN_ID)).toBe('available');
     });
 
-    it('rejects with a DeferredInitializationError (cause = last error) on terminal failure', async () => {
+    it('rejects with a DeferredInitializationError (cause = last error) on failure', async () => {
       const runError = new Error('boom');
       engine.register(PLUGIN_ID);
-      engine.setRunner(PLUGIN_ID, jest.fn(), createCtx());
-      withLockMock.mockRejectedValue(runError);
+      engine.setRunner(PLUGIN_ID, jest.fn().mockRejectedValue(runError), createCtx());
 
       const error = await engine.waitUntilAvailable(PLUGIN_ID).catch((e) => e);
       expect(isDeferredInitializationError(error)).toBe(true);
@@ -140,88 +124,54 @@ describe('DeferredInitEngine', () => {
       expect(engine.getState(PLUGIN_ID)).toBe('failed');
     });
 
-    it('retries past a lost cross-instance lock race, then succeeds', async () => {
-      jest.useFakeTimers();
-      try {
-        const runner = jest.fn().mockResolvedValue(undefined);
-        engine.register(PLUGIN_ID);
-        engine.setRunner(PLUGIN_ID, runner, createCtx());
+    it('shares a single in-flight run across concurrent callers', async () => {
+      const run = deferred();
+      const runner = jest.fn().mockReturnValue(run.promise);
+      engine.register(PLUGIN_ID);
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
 
-        // First attempt: another instance holds the lock.
-        withLockMock.mockRejectedValueOnce(new LockAcquisitionError('lock held'));
-        // Second attempt (after the cooldown flips back to idle): succeeds.
-        withLockMock.mockImplementationOnce((_opts, cb) => cb());
+      const first = engine.waitUntilAvailable(PLUGIN_ID);
+      const second = engine.waitUntilAvailable(PLUGIN_ID);
+      run.resolve();
 
-        const waitPromise = engine.waitUntilAvailable(PLUGIN_ID);
-
-        // Flush the first (losing) attempt and advance past its jittered cooldown, which
-        // flips state `initializing` -> `idle` and lets the loop re-kick the runner.
-        await jest.advanceTimersByTimeAsync(60_000);
-
-        await expect(waitPromise).resolves.toBeUndefined();
-        expect(withLockMock).toHaveBeenCalledTimes(2);
-        expect(runner).toHaveBeenCalledTimes(1);
-        expect(engine.getState(PLUGIN_ID)).toBe('available');
-      } finally {
-        jest.useRealTimers();
-      }
+      await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
+      expect(runner).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('version-aware SO fast path', () => {
-    it('skips the lock and runner when the stored state is available and version matches', async () => {
-      const runner = jest.fn().mockResolvedValue(undefined);
-      engine.register(PLUGIN_ID);
-      engine.setRunner(PLUGIN_ID, runner, createCtx());
-      readDeferredInitStateMock.mockResolvedValue({
-        status: 'available',
-        kibanaVersion: '9.0.0',
-        updatedAt: new Date().toISOString(),
-        attempts: 1,
-      });
+  describe('per-instance execution', () => {
+    it('runs the plugin runner on every engine instance (no shared cluster state)', async () => {
+      const runnerA = jest.fn().mockResolvedValue(undefined);
+      const engineA = new DeferredInitEngine(loggingSystemMock.create().get());
+      engineA.register(PLUGIN_ID);
+      engineA.setRunner(PLUGIN_ID, runnerA, createCtx());
 
-      await engine.waitUntilAvailable(PLUGIN_ID);
+      const runnerB = jest.fn().mockResolvedValue(undefined);
+      const engineB = new DeferredInitEngine(loggingSystemMock.create().get());
+      engineB.register(PLUGIN_ID);
+      engineB.setRunner(PLUGIN_ID, runnerB, createCtx());
 
-      expect(runner).not.toHaveBeenCalled();
-      expect(withLockMock).not.toHaveBeenCalled();
-      expect(engine.getState(PLUGIN_ID)).toBe('available');
+      await engineA.waitUntilAvailable(PLUGIN_ID);
+      await engineB.waitUntilAvailable(PLUGIN_ID);
+
+      // Each instance must do the work itself: `lazyInitialize` can establish instance-local
+      // preconditions that a peer's run cannot satisfy.
+      expect(runnerA).toHaveBeenCalledTimes(1);
+      expect(runnerB).toHaveBeenCalledTimes(1);
+      expect(engineA.getState(PLUGIN_ID)).toBe('available');
+      expect(engineB.getState(PLUGIN_ID)).toBe('available');
     });
 
-    it('falls through to the lock and runner when the stored version does not match (upgrade scenario)', async () => {
+    it('runs the runner once per instance, not once per trigger', async () => {
       const runner = jest.fn().mockResolvedValue(undefined);
       engine.register(PLUGIN_ID);
       engine.setRunner(PLUGIN_ID, runner, createCtx());
-      readDeferredInitStateMock.mockResolvedValue({
-        status: 'available',
-        kibanaVersion: '8.99.0',
-        updatedAt: new Date().toISOString(),
-        attempts: 1,
-      });
-      withLockMock.mockImplementation((_opts, cb) => cb());
 
-      await engine.waitUntilAvailable(PLUGIN_ID);
+      await engine.trigger(PLUGIN_ID);
+      await engine.trigger(PLUGIN_ID);
+      engine.ensureInitialized(PLUGIN_ID);
 
       expect(runner).toHaveBeenCalledTimes(1);
-      expect(engine.getState(PLUGIN_ID)).toBe('available');
-    });
-
-    it('falls through to the lock and runner when the stored state is failed regardless of version', async () => {
-      const runner = jest.fn().mockResolvedValue(undefined);
-      engine.register(PLUGIN_ID);
-      engine.setRunner(PLUGIN_ID, runner, createCtx());
-      readDeferredInitStateMock.mockResolvedValue({
-        status: 'failed',
-        kibanaVersion: '9.0.0',
-        updatedAt: new Date().toISOString(),
-        attempts: 1,
-        lastError: 'previous run blew up',
-      });
-      withLockMock.mockImplementation((_opts, cb) => cb());
-
-      await engine.waitUntilAvailable(PLUGIN_ID);
-
-      expect(runner).toHaveBeenCalledTimes(1);
-      expect(engine.getState(PLUGIN_ID)).toBe('available');
     });
   });
 
@@ -233,16 +183,14 @@ describe('DeferredInitEngine', () => {
     it('kicks an idle plugin into initializing', () => {
       engine.register(PLUGIN_ID);
       engine.setRunner(PLUGIN_ID, jest.fn().mockResolvedValue(undefined), createCtx());
-      withLockMock.mockImplementation((_opts, cb) => cb());
 
       expect(engine.ensureInitialized(PLUGIN_ID)).toBe('initializing');
     });
 
     it('does not re-kick a failed plugin, so the failure is actually observable', async () => {
-      const runner = jest.fn().mockResolvedValue(undefined);
+      const runner = jest.fn().mockRejectedValue(new Error('boom'));
       engine.register(PLUGIN_ID);
       engine.setRunner(PLUGIN_ID, runner, createCtx());
-      withLockMock.mockRejectedValue(new Error('boom'));
 
       await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
       expect(engine.getState(PLUGIN_ID)).toBe('failed');
@@ -250,17 +198,18 @@ describe('DeferredInitEngine', () => {
       // A poll (or a gated route hit) reading the status right after the failure must see
       // `failed`, not silently re-kick and hide it behind `initializing`.
       expect(engine.ensureInitialized(PLUGIN_ID)).toBe('failed');
-      expect(withLockMock).toHaveBeenCalledTimes(1);
+      expect(runner).toHaveBeenCalledTimes(1);
     });
 
     it('auto-kicks again once a cooldown flips a failed plugin back to idle', async () => {
       jest.useFakeTimers();
       try {
-        const runner = jest.fn().mockResolvedValue(undefined);
+        const runner = jest
+          .fn()
+          .mockRejectedValueOnce(new Error('boom'))
+          .mockResolvedValueOnce(undefined);
         engine.register(PLUGIN_ID);
         engine.setRunner(PLUGIN_ID, runner, createCtx());
-        withLockMock.mockRejectedValueOnce(new Error('boom'));
-        withLockMock.mockImplementationOnce((_opts, cb) => cb());
 
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         expect(engine.getState(PLUGIN_ID)).toBe('failed');
@@ -270,7 +219,8 @@ describe('DeferredInitEngine', () => {
 
         expect(engine.ensureInitialized(PLUGIN_ID)).toBe('initializing');
         await jest.advanceTimersByTimeAsync(0);
-        expect(withLockMock).toHaveBeenCalledTimes(2);
+        expect(runner).toHaveBeenCalledTimes(2);
+        expect(engine.getState(PLUGIN_ID)).toBe('available');
       } finally {
         jest.useRealTimers();
       }
@@ -286,11 +236,12 @@ describe('DeferredInitEngine', () => {
     it('is undefined once state moves past failed (e.g. back to initializing)', async () => {
       jest.useFakeTimers();
       try {
-        const runner = jest.fn().mockResolvedValue(undefined);
+        const runner = jest
+          .fn()
+          .mockRejectedValueOnce(new Error('boom'))
+          .mockResolvedValueOnce(undefined);
         engine.register(PLUGIN_ID);
         engine.setRunner(PLUGIN_ID, runner, createCtx());
-        withLockMock.mockRejectedValueOnce(new Error('boom'));
-        withLockMock.mockImplementationOnce((_opts, cb) => cb());
 
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         await jest.advanceTimersByTimeAsync(60_000);
@@ -303,10 +254,8 @@ describe('DeferredInitEngine', () => {
     });
 
     it('reports the error message and attempt count once failed', async () => {
-      const runner = jest.fn().mockResolvedValue(undefined);
       engine.register(PLUGIN_ID);
-      engine.setRunner(PLUGIN_ID, runner, createCtx());
-      withLockMock.mockRejectedValue(new Error('boom'));
+      engine.setRunner(PLUGIN_ID, jest.fn().mockRejectedValue(new Error('boom')), createCtx());
 
       await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
 
@@ -316,23 +265,22 @@ describe('DeferredInitEngine', () => {
     it('increments across repeated failures and resets to 0 once a later attempt succeeds', async () => {
       jest.useFakeTimers();
       try {
-        const runner = jest.fn().mockResolvedValue(undefined);
+        const runner = jest
+          .fn()
+          .mockRejectedValueOnce(new Error('first'))
+          .mockRejectedValueOnce(new Error('second'))
+          .mockResolvedValueOnce(undefined);
         engine.register(PLUGIN_ID);
         engine.setRunner(PLUGIN_ID, runner, createCtx());
 
-        withLockMock.mockRejectedValueOnce(new Error('first'));
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         expect(engine.getFailureDetails(PLUGIN_ID)).toEqual({ message: 'first', attempts: 1 });
 
         await jest.advanceTimersByTimeAsync(60_000);
-        withLockMock.mockRejectedValueOnce(new Error('second'));
-        engine.ensureInitialized(PLUGIN_ID);
         await engine.waitUntilAvailable(PLUGIN_ID).catch(() => {});
         expect(engine.getFailureDetails(PLUGIN_ID)).toEqual({ message: 'second', attempts: 2 });
 
         await jest.advanceTimersByTimeAsync(60_000);
-        withLockMock.mockImplementationOnce((_opts, cb) => cb());
-        engine.ensureInitialized(PLUGIN_ID);
         await engine.waitUntilAvailable(PLUGIN_ID);
 
         expect(engine.getState(PLUGIN_ID)).toBe('available');

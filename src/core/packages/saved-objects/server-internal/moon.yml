@@ -53,7 +53,6 @@ dependsOn:
   - '@kbn/core-http-router-server-internal'
   - '@kbn/logging-mocks'
   - '@kbn/std'
-  - '@kbn/core-deferred-init-common'
 tags:
   - shared-server
   - package

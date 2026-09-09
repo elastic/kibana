@@ -737,7 +737,7 @@ describe('start', () => {
   });
 
   it('attaches the deferred-init runner for lazy plugins before the loop moves on', async () => {
-    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    const engine = new DeferredInitEngine(logger.get());
     jest.spyOn(engine, 'setRunner');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
@@ -762,7 +762,7 @@ describe('start', () => {
   });
 
   it('does not attach a runner for plugins that did not opt into lazy init', async () => {
-    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    const engine = new DeferredInitEngine(logger.get());
     jest.spyOn(engine, 'setRunner');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
@@ -781,7 +781,7 @@ describe('start', () => {
 
 describe('start - deferred-init start-cycle guard', () => {
   it('brackets the start loop with begin/endStartCycle on the engine', async () => {
-    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    const engine = new DeferredInitEngine(logger.get());
     jest.spyOn(engine, 'beginStartCycle');
     jest.spyOn(engine, 'endStartCycle');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
@@ -802,7 +802,7 @@ describe('start - deferred-init start-cycle guard', () => {
   });
 
   it('clears the start cycle even when a plugin start() throws', async () => {
-    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    const engine = new DeferredInitEngine(logger.get());
     jest.spyOn(engine, 'endStartCycle');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
@@ -837,7 +837,7 @@ describe('start - deferred-init start-cycle guard', () => {
 
 describe('deferred-init engine wiring', () => {
   it('registers the deferred-init engine with the runtime contract resolver, when present', async () => {
-    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    const engine = new DeferredInitEngine(logger.get());
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
     const plugin = createPlugin('somePlugin');
     jest.spyOn(plugin, 'setup').mockReturnValue({});
@@ -894,11 +894,7 @@ describe('loadPluginContractFor', () => {
 
 describe('setup - lazy plugins cannot be injected dependencies', () => {
   const createSystemWithEngine = () =>
-    new PluginsSystem(
-      coreContext,
-      PluginType.standard,
-      new DeferredInitEngine(logger.get(), '9.0.0')
-    );
+    new PluginsSystem(coreContext, PluginType.standard, new DeferredInitEngine(logger.get()));
 
   const addLazyPlugin = (system: PluginsSystem<PluginType.standard>, id = 'lazyPlugin') => {
     const lazyPlugin = createPlugin(id);
