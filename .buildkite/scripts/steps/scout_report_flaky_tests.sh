@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Runs `node scripts/scout discover-flaky-tests` against the AppEx QA cluster and publishes the
-# JSON report as a Buildkite artifact, with a short annotation on the build page.
+# JSON report as a Buildkite artifact, linked from a short annotation on the build page.
 #
 # Every input is an env var so one pipeline can host several scheduled variants (e.g. flaky tests
 # on kibana-on-merge, consistently failing tests on Cloud pipelines) by overriding them per
@@ -20,8 +20,6 @@ FLAKY_TESTS_CLASSIFICATIONS="${FLAKY_TESTS_CLASSIFICATIONS:-flaky}"
 # Optional; no filter when empty
 FLAKY_TESTS_BRANCHES="${FLAKY_TESTS_BRANCHES:-}"
 FLAKY_TESTS_FRAMEWORKS="${FLAKY_TESTS_FRAMEWORKS:-}"
-# Tests rendered in the build annotation
-FLAKY_TESTS_ANNOTATION_LIMIT="${FLAKY_TESTS_ANNOTATION_LIMIT:-50}"
 
 REPORT_DIR="target/flaky_tests"
 REPORT_PATH="$REPORT_DIR/flaky_tests.json"
@@ -43,7 +41,6 @@ args=(
   --lookbackDays "$FLAKY_TESTS_LOOKBACK_DAYS"
   --classifications "$FLAKY_TESTS_CLASSIFICATIONS"
   --outputPath "$REPORT_PATH"
-  --summaryLimit "$FLAKY_TESTS_ANNOTATION_LIMIT"
 )
 if [[ -n "$FLAKY_TESTS_BRANCHES" ]]; then
   args+=(--branches "$FLAKY_TESTS_BRANCHES")
@@ -61,32 +58,13 @@ echo "--- Upload flaky test report"
 buildkite-agent artifact upload "$REPORT_PATH"
 
 echo "--- Annotate build"
-total_flaky=$(jq -r '.summary.totalFlaky' "$REPORT_PATH")
-total_consistently_failing=$(jq -r '.summary.totalConsistentlyFailing' "$REPORT_PATH")
-window_from=$(jq -r '.window.from' "$REPORT_PATH")
-window_to=$(jq -r '.window.to' "$REPORT_PATH")
-
-# Top tests across both lists by failed builds, as a markdown table. Pipes in titles/paths would
-# break the table, so escape them.
-top_rows=$(jq -r --argjson limit "$FLAKY_TESTS_ANNOTATION_LIMIT" '
-  def cell: tostring | gsub("\\|"; "\\|");
-  [(.flaky[] | . + {kind: "flaky"}), (.consistentlyFailing[] | . + {kind: "consistently failing"})]
-  | sort_by(-.failedBuilds, -.buildFailRate)
-  | .[:$limit]
-  | to_entries[]
-  | "| \(.key + 1) | \(.value.kind) | \(.value.framework) | `\(.value.filePath | cell)` | \(.value.title | cell) | \(.value.failedBuilds)/\(.value.builds) | \((.value.buildFailRate * 100 * 10 | round) / 10)% | \(.value.owners | join(", ") | cell) |"
-' "$REPORT_PATH")
+counts="**$(jq -r '.summary.totalFlaky' "$REPORT_PATH")** flaky"
+if [[ "$FLAKY_TESTS_CLASSIFICATIONS" == *consistently-failing* ]]; then
+  counts+=" and **$(jq -r '.summary.totalConsistentlyFailing' "$REPORT_PATH")** consistently failing"
+fi
 
 {
-  echo "#### Flaky test report"
+  echo "${counts} tests on \`${FLAKY_TESTS_PIPELINES}\` over the last ${FLAKY_TESTS_LOOKBACK_DAYS} days."
   echo
-  echo "**${total_flaky}** flaky and **${total_consistently_failing}** consistently failing tests on \`${FLAKY_TESTS_PIPELINES}\` between \`${window_from}\` and \`${window_to}\` (classifications: \`${FLAKY_TESTS_CLASSIFICATIONS}\`, branches: \`${FLAKY_TESTS_BRANCHES:-any}\`, frameworks: \`${FLAKY_TESTS_FRAMEWORKS:-all}\`)."
-  echo
-  echo "Full report: <a href=\"artifact://${REPORT_PATH}\">${REPORT_PATH}</a>"
-  if [[ -n "$top_rows" ]]; then
-    echo
-    echo "| # | Kind | Framework | File | Test | Failed builds | Fail rate | Owners |"
-    echo "|---|------|-----------|------|------|---------------|-----------|--------|"
-    echo "$top_rows"
-  fi
+  echo "Report: <a href=\"artifact://${REPORT_PATH}\">${REPORT_PATH}</a>"
 } | buildkite-agent annotate --style info --context flaky-test-report
