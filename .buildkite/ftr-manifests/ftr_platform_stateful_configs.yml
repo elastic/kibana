@@ -349,7 +349,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
-  - x-pack/platform/test/api_integration/apis/spaces/config.ts
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
