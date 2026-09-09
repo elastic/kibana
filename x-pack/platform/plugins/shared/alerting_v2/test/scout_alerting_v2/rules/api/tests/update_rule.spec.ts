@@ -232,6 +232,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'update: persists a conditionless composed query without a breach block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-conditionless-composed' } })
+      );
+      const query = {
+        format: 'composed' as const,
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      };
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual(query);
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.query).toStrictEqual(query);
+    }
+  );
+
+  apiTest(
     'update: should update query to composed format with a recovery segment',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
@@ -306,6 +330,65 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
 
       const persisted = await apiServices.alertingV2.rules.get(created.id);
       expect(persisted.grouping).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'update: should clear all tags when metadata.tags is set to null',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-with-tags', tags: ['prod', 'infra'] },
+        })
+      );
+      expect(created.metadata.tags).toStrictEqual(['prod', 'infra']);
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.tags).toBeUndefined();
+
+      // The cleared tags must survive a re-read (the original bug: they came back).
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.tags).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'update: should replace tags when metadata.tags is a non-empty array',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-retag', tags: ['old'] } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: ['prod', 'infra'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.tags).toStrictEqual(['prod', 'infra']);
+    }
+  );
+
+  apiTest(
+    'validation: should reject metadata.tags as an empty array (null clears tags)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-empty-tags', tags: ['keep'] } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: [] } },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+      // The rejected update must not have persisted.
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.tags).toStrictEqual(['keep']);
     }
   );
 
@@ -514,6 +597,85 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: should reject recovery_strategy "query" without a recovery block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'recovery-strategy-no-block' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'query' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
+    'validation: should reject a composed rule setting recovery_strategy "query" without a recovery segment',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'composed-recovery-no-segment' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'query' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
+    'validation: should reject clearing recovery_strategy while a composed recovery segment remains',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'composed-recovery-stale-segment' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+            recovery: { segment: 'WHERE count < 5' },
+          },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'no_breach' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+      // The rejected update must not have persisted: the strategy stays "query".
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.recovery_strategy).toBe('query');
+    }
+  );
+
+  apiTest(
+    'validation: should reject a no_data_strategy without a no_data block (standalone)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'no-data-strategy-no-block' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { no_data_strategy: 'last_known_status' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
     'authorization: should return 200 for a user with full alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
@@ -562,6 +724,48 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response).toHaveStatusCode(403);
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.metadata.name).toBe('noaccess-cannot-update');
+    }
+  );
+
+  apiTest(
+    'builder_type: should reject query change on a builder rule without explicit builder_type clear',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'builder-rule', builder_type: 'threshold' },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BUILDER_TYPE_NOT_CLEARED');
+      // Rule should remain unchanged
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.builder_type).toBe('threshold');
+    }
+  );
+
+  apiTest(
+    'builder_type: should allow query change on a builder rule when builder_type is explicitly cleared',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'builder-rule-clear', builder_type: 'threshold' },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+          metadata: { builder_type: null },
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.builder_type).toBeUndefined();
     }
   );
 });

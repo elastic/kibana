@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,7 @@ import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { useLocatorUrl } from '@kbn/share-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
@@ -22,6 +23,7 @@ import {
   getSeverityColor,
   isNoAnomalyScore,
 } from '../../../../../common/anomaly_detection';
+import type { APMLocatorPayload } from '../../../../locator/helpers';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
 const COMPARISON_ENABLED_DEFAULT = true;
@@ -171,23 +173,33 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
       })
     : formatLabelWithScore(getI18nLabel(severity), score);
 
-  const href =
-    navigationProps && score !== undefined && !isNone
-      ? navigationProps.locators.get(APM_APP_LOCATOR_ID)?.getRedirectUrl({
-          serviceName: navigationProps.serviceName,
-          isMobileAgentName: isMobileAgentName(navigationProps.agentName),
-          query: {
-            environment: navigationProps.anomalyEnvironment,
-            rangeFrom: navigationProps.rangeFrom,
-            rangeTo: navigationProps.rangeTo,
-            kuery: '',
-            transactionType: navigationProps.transactionType,
-            anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
-            comparisonEnabled: navigationProps.comparisonEnabled ?? COMPARISON_ENABLED_DEFAULT,
-            offset: 'expected_bounds',
-          },
-        })
-      : undefined;
+  const isInteractive = Boolean(navigationProps && score !== undefined && !isNone);
+  const locator = isInteractive ? navigationProps?.locators.get(APM_APP_LOCATOR_ID) ?? null : null;
+
+  // `getRedirectUrl` points at `/app/r` (share redirect) and causes a full Kibana reload
+  // that can drop comparison query params. `getUrl` (via useLocatorUrl) is the in-app path.
+  const locatorParams = useMemo<APMLocatorPayload>(() => {
+    if (!navigationProps) {
+      return {};
+    }
+    return {
+      serviceName: navigationProps.serviceName,
+      isMobileAgentName: isMobileAgentName(navigationProps.agentName),
+      query: {
+        environment: navigationProps.anomalyEnvironment,
+        rangeFrom: navigationProps.rangeFrom,
+        rangeTo: navigationProps.rangeTo,
+        kuery: '',
+        transactionType: navigationProps.transactionType,
+        anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
+        comparisonEnabled: navigationProps.comparisonEnabled ?? COMPARISON_ENABLED_DEFAULT,
+        offset: 'expected_bounds',
+      },
+    };
+  }, [navigationProps, severity]);
+
+  const locatorUrl = useLocatorUrl(locator, locatorParams, undefined, [locator, locatorParams]);
+  const href = isInteractive && locatorUrl ? locatorUrl : undefined;
 
   const tooltipContent = getTooltipContent({
     isNone,

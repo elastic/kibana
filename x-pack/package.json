@@ -19,8 +19,5 @@
         "plugins/*/target"
       ]
     }
-  },
-  "engines": {
-    "yarn": "^1.21.1"
   }
 }

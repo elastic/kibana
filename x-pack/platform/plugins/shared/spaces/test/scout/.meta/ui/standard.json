@@ -1,8 +1,7 @@
 {
-  "sha1": "c8c020743becc36cb062adcf3e6570df2e2bc270",
+  "sha1": "0d32a88681c7c649be9dc9871b5d774a923b4ace",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -305,6 +304,48 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_nondefault_space.spec.ts",
         "line": 39,
         "column": 75
+      }
+    },
+    {
+      "id": "7bf445453bc0eb8-8748608e7c7ba6a",
+      "title": "last selected space recollection records the last selected space when a space is entered from the nav",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 39,
+        "column": 48
+      }
+    },
+    {
+      "id": "7bf445453bc0eb8-56b99c91425fafd",
+      "title": "last selected space recollection redirects to the last selected space when the preference is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 50,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bf445453bc0eb8-87dcf17fb3a5f7b",
+      "title": "last selected space recollection shows the space selector when the preference is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 77,
+        "column": 11
       }
     },
     {

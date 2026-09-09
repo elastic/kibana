@@ -76,13 +76,8 @@ if ! node -e "require('yaml')" 2>/dev/null; then
   .buildkite/scripts/bootstrap.sh
 fi
 
-echo "--- Preparing model connector for triage summary"
-if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-  source .buildkite/scripts/steps/evals/setup_connectors.sh || {
-    echo "WARNING: setup_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
-  }
-else
-  echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
+if [[ -z "${KBN_EVALS_CONFIG_B64:-}" && ( -z "${OPENROUTER_BASE_URL:-}" || -z "${OPENROUTER_API_KEY:-}" ) ]]; then
+  echo "WARNING: KBN_EVALS_CONFIG_B64 and OPENROUTER_* are unset; triage requires vault OpenRouter credentials"
 fi
 
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"

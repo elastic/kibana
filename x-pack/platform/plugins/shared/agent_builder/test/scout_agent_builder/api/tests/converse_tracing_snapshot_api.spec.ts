@@ -63,6 +63,7 @@ const PLACEHOLDER_ATTRIBUTES: Record<string, string> = {
   'user.hash': '[USER_HASH]',
   'user.id': '[USER_ID]',
   'user.name': '[USER_NAME]',
+  'elastic.cache_control.session_id': '[CONVERSATION_ID]',
 };
 
 interface SpanEvent {

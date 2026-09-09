@@ -1,8 +1,7 @@
 {
-  "sha1": "104ea793874be97e44d7f6548cbb43f1b2f1aaee",
+  "sha1": "7125a1dd8f8602eee79848dbd4dc9625d00d82f1",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -253,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts",
-        "line": 86,
+        "line": 89,
         "column": 39
       }
     },
@@ -267,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts",
-        "line": 107,
+        "line": 110,
         "column": 75
       }
     },
@@ -281,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts",
-        "line": 203,
+        "line": 206,
         "column": 24
       }
     },
@@ -295,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts",
-        "line": 226,
+        "line": 229,
         "column": 11
       }
     },
@@ -309,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts",
-        "line": 307,
+        "line": 310,
         "column": 13
       }
     },
@@ -323,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts",
-        "line": 333,
+        "line": 336,
         "column": 13
       }
     },
@@ -337,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_opsgenie.spec.ts",
-        "line": 85,
+        "line": 88,
         "column": 39
       }
     },
@@ -351,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_opsgenie.spec.ts",
-        "line": 106,
+        "line": 109,
         "column": 75
       }
     },
@@ -365,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_opsgenie.spec.ts",
-        "line": 202,
+        "line": 205,
         "column": 17
       }
     },
@@ -379,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_opsgenie.spec.ts",
-        "line": 225,
+        "line": 228,
         "column": 11
       }
     },
@@ -393,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_opsgenie.spec.ts",
-        "line": 306,
+        "line": 309,
         "column": 13
       }
     },
@@ -407,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_opsgenie.spec.ts",
-        "line": 332,
+        "line": 335,
         "column": 13
       }
     },
@@ -477,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_tines.spec.ts",
-        "line": 128,
+        "line": 131,
         "column": 21
       }
     },
@@ -491,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_tines.spec.ts",
-        "line": 155,
+        "line": 158,
         "column": 82
       }
     },
@@ -505,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_tines.spec.ts",
-        "line": 274,
+        "line": 277,
         "column": 15
       }
     },

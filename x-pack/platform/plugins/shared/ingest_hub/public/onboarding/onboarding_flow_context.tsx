@@ -9,16 +9,20 @@ import React, { createContext, useContext, useCallback, useMemo, useRef, useStat
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
-import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
+import { useAwsServiceMatrix } from './use_aws_service_matrix';
+import { useDefaultDataFormat } from './use_default_data_format';
+import { getOnboardingSessionKey } from './onboarding_session_storage';
 
-export interface DeploySettingsStepState {
+export interface AuthenticateAndDeployStepState {
   connectorId?: string;
+  connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
 
-export interface DeployAndDetectStepState {
+export interface DetectAndReviewStepState {
   isDeploying: boolean;
   serviceStatuses: Record<string, ServiceChipState>;
   policyIdsByInstance: Record<string, string>;
@@ -27,21 +31,26 @@ export interface DeployAndDetectStepState {
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
-interface PersistedDeploySettingsStep {
+interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
+  connectorName?: string;
   authType?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
+  deploymentMethod?: DeploymentMethod;
 }
 
 export interface ServicesStepState {
   selectedServiceIds: string[];
+  dataFormat: DataFormat;
 }
 
 interface PersistedServicesStep {
   selectedServiceIds: string[];
+  /** Undefined when not yet explicitly chosen; resolved against the solution default at read time. */
+  dataFormat?: DataFormat;
 }
 
-interface PersistedDeployAndDetectStep {
+interface PersistedDetectAndReviewStep {
   serviceStatuses: Record<string, ServiceChipState>;
   policyIdsByInstance: Record<string, string>;
   failedInstances: string[];
@@ -51,58 +60,80 @@ interface PersistedDeployAndDetectStep {
 const DEFAULT_SELECTED_IDS: string[] = [];
 
 interface OnboardingFlowState {
-  deploySettingsStep: DeploySettingsStepState;
-  setConnectorId: (id: string | undefined) => void;
+  authenticateAndDeployStep: AuthenticateAndDeployStepState;
+  setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  deploymentMethod: DeploymentMethod;
+  setDeploymentMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
-  deployAndDetectStep: DeployAndDetectStepState;
-  updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
+  setDataFormat: (format: DataFormat) => void;
+  detectAndReviewStep: DetectAndReviewStepState;
+  updateDetectAndReviewStep: (update: Partial<DetectAndReviewStepState>) => void;
   removeDeployInstance: (instanceId: string) => void;
   getLatestFailedInstances: () => string[];
-  registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
-  retryDeploy: (instanceIds?: string[]) => void;
+  awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
+  awsServiceMatrixError: boolean;
+  refetchAwsServiceMatrix: () => void;
+  /** False while the default data format is being resolved (async spaces lookup). */
+  isDataFormatResolved: boolean;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
 
 export function OnboardingFlowProvider({ children }: { children: React.ReactNode }) {
-  const [persistedDeploySettingsStep, setPersistedDeploySettingsStep] =
-    useSessionStorage<PersistedDeploySettingsStep>('onboarding.aws.deploySettingsStep', {});
+  const [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep] =
+    useSessionStorage<PersistedAuthenticateAndDeployStep>(
+      // Key hardcoded to 'aws'; threading integrationId through the provider is deferred to #8099
+      getOnboardingSessionKey('aws', 'authenticateAndDeployStep'),
+      {}
+    );
 
   const [persistedServices, setPersistedServices] = useSessionStorage<PersistedServicesStep>(
-    'onboarding.aws.servicesStep',
+    getOnboardingSessionKey('aws', 'servicesStep'),
     { selectedServiceIds: DEFAULT_SELECTED_IDS }
   );
 
   // secret_access_key lives in memory only; access_key_id is restored from session storage.
   const [staticKeys, setStaticKeysState] = useState<AwsStaticKeyCredentials | undefined>(() =>
-    persistedDeploySettingsStep?.authType === 'static_keys' &&
-    persistedDeploySettingsStep.accessKeyId
-      ? { access_key_id: persistedDeploySettingsStep.accessKeyId, secret_access_key: '' }
+    persistedAuthenticateAndDeployStep?.authType === 'static_keys' &&
+    persistedAuthenticateAndDeployStep.accessKeyId
+      ? { access_key_id: persistedAuthenticateAndDeployStep.accessKeyId, secret_access_key: '' }
       : undefined
   );
 
+  // Ref holds the latest persisted value so setConnectorId/setStaticKeys can spread it
+  // without closing over the state value — keeping both callbacks stable across renders.
+  const persistedAuthStepRef = useRef(persistedAuthenticateAndDeployStep);
+  persistedAuthStepRef.current = persistedAuthenticateAndDeployStep;
+
   const setConnectorId = useCallback(
-    (id: string | undefined) => {
+    (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
-      setPersistedDeploySettingsStep({
+      setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthStepRef.current,
         connectorId: id,
+        connectorName: id ? name : undefined,
         authType: id ? 'identity_federation' : undefined,
+        accessKeyId: undefined,
       });
     },
-    [setPersistedDeploySettingsStep]
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
-      setPersistedDeploySettingsStep({
+      setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthStepRef.current,
+        connectorId: undefined,
+        connectorName: undefined,
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
-    [setPersistedDeploySettingsStep]
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const setSelectedServiceIds = useCallback(
@@ -112,33 +143,43 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
-  const [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep] =
-    useSessionStorage<PersistedDeployAndDetectStep>('onboarding.aws.deployAndDetectStep', {
-      serviceStatuses: {},
-      policyIdsByInstance: {},
-      failedInstances: [],
-      deployErrors: {},
-    });
+  const setDataFormat = useCallback(
+    (format: DataFormat) => {
+      // Clear selection atomically with the format change in one write — two separate
+      // setPersistedServices calls would race because each closes over the same persistedServices.
+      setPersistedServices({ ...persistedServices, dataFormat: format, selectedServiceIds: [] });
+    },
+    [persistedServices, setPersistedServices]
+  );
+
+  const [persistedDetectAndReviewStep, setPersistedDetectAndReviewStep] =
+    useSessionStorage<PersistedDetectAndReviewStep>(
+      getOnboardingSessionKey('aws', 'detectAndReviewStep'),
+      {
+        serviceStatuses: {},
+        policyIdsByInstance: {},
+        failedInstances: [],
+        deployErrors: {},
+      }
+    );
 
   // isDeploying is intentionally not persisted — it resets to false on page reload
   const [isDeploying, setIsDeploying] = useState(false);
 
-  const deployHandlerRef = useRef<((instanceIds?: string[]) => void) | null>(null);
-
-  // Ref always holds the latest persisted value so updateDeployAndDetectStep
+  // Ref always holds the latest persisted value so updateDetectAndReviewStep
   // reads current state even when called after an await (stale closure prevention).
-  const persistedDeployAndDetectStepRef = useRef(persistedDeployAndDetectStep);
-  persistedDeployAndDetectStepRef.current = persistedDeployAndDetectStep;
+  const persistedDetectAndReviewStepRef = useRef(persistedDetectAndReviewStep);
+  persistedDetectAndReviewStepRef.current = persistedDetectAndReviewStep;
 
-  const updateDeployAndDetectStep = useCallback(
-    (update: Partial<DeployAndDetectStepState>) => {
+  const updateDetectAndReviewStep = useCallback(
+    (update: Partial<DetectAndReviewStepState>) => {
       if (update.isDeploying !== undefined) {
         setIsDeploying(update.isDeploying);
       }
       const { isDeploying: _, ...rest } = update;
       if (Object.keys(rest).length > 0) {
-        const prev = persistedDeployAndDetectStepRef.current;
-        setPersistedDeployAndDetectStep({
+        const prev = persistedDetectAndReviewStepRef.current;
+        setPersistedDetectAndReviewStep({
           serviceStatuses: { ...(prev?.serviceStatuses ?? {}), ...(rest.serviceStatuses ?? {}) },
           policyIdsByInstance: {
             ...(prev?.policyIdsByInstance ?? {}),
@@ -150,17 +191,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         });
       }
     },
-    [setPersistedDeployAndDetectStep]
+    [setPersistedDetectAndReviewStep]
   );
 
   const removeDeployInstance = useCallback(
     (instanceId: string) => {
-      const prev = persistedDeployAndDetectStepRef.current;
+      const prev = persistedDetectAndReviewStepRef.current;
       const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
       delete nextStatuses[instanceId];
       const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
       delete nextPolicyIds[instanceId];
-      setPersistedDeployAndDetectStep({
+      setPersistedDetectAndReviewStep({
         serviceStatuses: nextStatuses,
         policyIdsByInstance: nextPolicyIds,
         failedInstances: (prev?.failedInstances ?? []).filter((id) => id !== instanceId),
@@ -169,59 +210,90 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ),
       });
     },
-    [setPersistedDeployAndDetectStep]
+    [setPersistedDetectAndReviewStep]
   );
 
   const getLatestFailedInstances = useCallback(
-    () => persistedDeployAndDetectStepRef.current?.failedInstances ?? [],
+    () => persistedDetectAndReviewStepRef.current?.failedInstances ?? [],
     []
   );
 
-  const registerDeployHandler = useCallback((fn: (instanceIds?: string[]) => void) => {
-    deployHandlerRef.current = fn;
-  }, []);
+  const {
+    matrix: awsServiceMatrix,
+    isError: awsServiceMatrixError,
+    refetch: refetchAwsServiceMatrix,
+  } = useAwsServiceMatrix();
+  const awsServicesMap = useMemo(
+    () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
+    [awsServiceMatrix]
+  );
 
-  const retryDeploy = useCallback((instanceIds?: string[]) => {
-    deployHandlerRef.current?.(instanceIds);
-  }, []);
+  const { defaultFormat, isResolved: isDataFormatResolved } = useDefaultDataFormat();
+  const dataFormat: DataFormat = persistedServices?.dataFormat ?? defaultFormat;
 
   const selectedServiceIds = useMemo(
     () =>
-      (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
-        (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
-      ),
-    [persistedServices]
+      (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter((id) => {
+        const entry = awsServicesMap?.get(id);
+        // Keep all ids while awsServicesMap is loading — useInvalidateDownstreamSteps runs before
+        // the !awsServiceMatrix spinner gate (onboarding_shell.tsx:80 vs :191), so dropping ids
+        // during the load window would change the sorted signature and wrongly mark downstream
+        // steps incomplete on every reload.
+        if (!entry) return true;
+        return entry.showInUI !== false && (entry.dataFormat ?? 'ecs') === dataFormat;
+      }),
+    [persistedServices, awsServicesMap, dataFormat]
   );
 
   const servicesStep: ServicesStepState = useMemo(
-    () => ({ selectedServiceIds }),
-    [selectedServiceIds]
+    () => ({ selectedServiceIds, dataFormat }),
+    [selectedServiceIds, dataFormat]
   );
 
-  const deploySettingsStep: DeploySettingsStepState = {
-    connectorId: persistedDeploySettingsStep?.connectorId,
+  const deploymentMethod: DeploymentMethod =
+    persistedAuthenticateAndDeployStep?.deploymentMethod ?? 'managed_integration';
+
+  const setDeploymentMethod = useCallback(
+    (method: DeploymentMethod) => {
+      setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthenticateAndDeployStep,
+        deploymentMethod: method,
+      });
+    },
+    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
+  );
+
+  const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
+    connectorId: persistedAuthenticateAndDeployStep?.connectorId,
+    connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
   };
 
-  const deployAndDetectStep: DeployAndDetectStepState = {
+  const detectAndReviewStep: DetectAndReviewStepState = {
     isDeploying,
-    ...persistedDeployAndDetectStep,
+    ...persistedDetectAndReviewStep,
   };
 
   return (
     <OnboardingFlowContext.Provider
       value={{
-        deploySettingsStep,
+        authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        deploymentMethod,
+        setDeploymentMethod,
         servicesStep,
         setSelectedServiceIds,
-        deployAndDetectStep,
-        updateDeployAndDetectStep,
+        setDataFormat,
+        detectAndReviewStep,
+        updateDetectAndReviewStep,
         removeDeployInstance,
         getLatestFailedInstances,
-        registerDeployHandler,
-        retryDeploy,
+        awsServiceMatrix,
+        awsServicesMap,
+        awsServiceMatrixError,
+        refetchAwsServiceMatrix,
+        isDataFormatResolved,
       }}
     >
       {children}

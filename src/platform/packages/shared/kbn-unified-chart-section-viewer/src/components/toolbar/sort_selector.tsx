@@ -25,7 +25,7 @@ interface SortSelectorProps {
 export const SortSelector = ({ sort, onChange, fullWidth = false }: SortSelectorProps) => {
   const { options, buttonLabel, selectedValue, handleSortByChange, handleDirectionChange } =
     useSortSelector({ sort, onChange });
-  const [, direction] = sort;
+  const { sortDirection: direction } = sort;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

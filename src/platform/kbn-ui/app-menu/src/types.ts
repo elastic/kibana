@@ -315,7 +315,7 @@ export type AppMenuPopoverItem = Omit<
 export interface AppMenuSwitch {
   id: string;
   label: string;
-  labelProps: EuiSwitchProps['labelProps'];
+  labelProps?: Omit<NonNullable<EuiSwitchProps['labelProps']>, 'css'>;
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
@@ -395,4 +395,17 @@ export interface AppMenuConfig {
    * and it is rendered to the left of the menu items.
    */
   switch?: AppMenuSwitch;
+  /**
+   * Displays history buttons to the left of the menu items.
+   */
+  historyConfig?: {
+    undo?: {
+      onClick: () => void;
+      disabled?: boolean;
+    };
+    redo?: {
+      onClick: () => void;
+      disabled?: boolean;
+    };
+  };
 }

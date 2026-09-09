@@ -19,6 +19,7 @@ export const createAttackDiscoveryCriteriaEvaluator = ({
   return {
     name: 'Criteria',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ expected, output, input, metadata }) => {
       const criteria = expected?.criteria ?? [];
       if (criteria.length === 0) {

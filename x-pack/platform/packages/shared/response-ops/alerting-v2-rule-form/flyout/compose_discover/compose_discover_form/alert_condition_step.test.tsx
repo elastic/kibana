@@ -19,6 +19,7 @@ import { AlertConditionStep } from './alert_condition_step';
 import { QueryFieldRules } from './query_field_rules';
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getEsqlColumns: jest.fn(async () => []),
 }));
 
@@ -291,6 +292,40 @@ describe('AlertConditionStep', () => {
       renderStep({ queryCommitted: true });
 
       expect(screen.getByTestId('composeDiscoverGroupFields')).toBeInTheDocument();
+    });
+  });
+
+  describe('query-dependent field gating', () => {
+    it('disables time field and group fields when no query is committed', () => {
+      renderStep({ queryCommitted: false });
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    });
+
+    it('disables time field and group fields when the committed query is empty', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: '', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    });
+
+    it('enables time field and group fields once a usable query is committed', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeEnabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeEnabled();
     });
   });
 

@@ -29,13 +29,14 @@ import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
 jest.mock('@kbn/discover-utils', () => {
-  const { METRICS_GRID_SETTINGS_DEFAULTS } = jest.requireActual(
+  const { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } = jest.requireActual(
     '@kbn/discover-utils/src/data_types/metrics'
   );
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
     METRICS_GRID_SETTINGS_DEFAULTS,
+    METRICS_GRID_SORT_DEFAULTS,
     dismissAllFlyoutsExceptFor: jest.fn(),
   };
 });
@@ -172,6 +173,34 @@ describe('MetricsGrid', () => {
         expect.anything()
       );
     });
+  });
+
+  it('passes the effective aggregation label as yAxisTitle to each chart', () => {
+    renderMetricsGrid();
+
+    // Both metric items are counters; the default counter aggregation is SUM.
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ yAxisTitle: 'Sum' }),
+        expect.anything()
+      );
+    });
+  });
+
+  it.each([
+    ['system util', ['system', 'util']],
+    ['system*util', ['system', 'util']],
+    ['utilizaton', ['utilization']],
+    ['not-a-match', []],
+  ])('passes precise title highlights for the search term %s', (searchTerm, titleHighlight) => {
+    renderMetricsGrid({ searchTerm });
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ titleHighlight }),
+      expect.anything()
+    );
   });
 
   it('passes the correct size prop', () => {
@@ -1062,6 +1091,8 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
+            searchTerm: '',
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1078,6 +1109,8 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p95',
+            dimensions: [],
+            searchTerm: '',
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1097,6 +1130,8 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
+            searchTerm: '',
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1109,6 +1144,8 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
+            searchTerm: '',
           },
         })
       );

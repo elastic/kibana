@@ -1,8 +1,7 @@
 {
-  "sha1": "505fd4efb3098742baaaf744a4d3ebcada66b455",
+  "sha1": "a289d348c6e19e6038ce05bcc16ba14a7299be48",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,8 +16,8 @@
       }
     },
     {
-      "id": "4af243bafb1397a-6aa72bb9f1bb47b",
-      "title": "/internal/transform/transforms/{transformId} create with project routing should save the selected project routing value",
+      "id": "4af243bafb1397a-e82b7e3556d7f06",
+      "title": "/internal/transform/transforms/{transformId} create with project routing should save and update the selected project routing value",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -26,8 +25,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/tests/transforms_create_project_routing.spec.ts",
-        "line": 43,
-        "column": 13
+        "line": 70,
+        "column": 9
+      }
+    },
+    {
+      "id": "4af243bafb1397a-eba17d683f498a8",
+      "title": "/internal/transform/transforms/{transformId} create with project routing should update project routing for multiple selected transforms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/tests/transforms_create_project_routing.spec.ts",
+        "line": 125,
+        "column": 12
       }
     }
   ]
