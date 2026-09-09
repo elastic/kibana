@@ -33,7 +33,7 @@ export class WorkflowUserActionBuilder extends UserActionBuilder {
     const eventDetails: EventDetails = {
       getMessage,
       action,
-      descriptiveAction: 'case_user_action_workflow',
+      descriptiveAction: 'case_user_action_run_workflow',
       savedObjectId: caseId,
       savedObjectType: CASE_SAVED_OBJECT,
     };
