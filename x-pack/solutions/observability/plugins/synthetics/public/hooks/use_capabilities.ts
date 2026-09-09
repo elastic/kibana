@@ -17,11 +17,11 @@ export const useCanEditSynthetics = () => {
 
 /**
  * Whether the current user can trigger manual test runs. True when they can edit
- * Synthetics (write) OR have been granted the run-only `canRunTest` sub-feature.
+ * Synthetics (write) OR have been granted the run-only `canRunTestManually` sub-feature.
  */
-export const useCanRunTest = () => {
+export const useCanRunTestManually = () => {
   const capabilities = useKibana().services?.application?.capabilities.uptime;
-  return !!(capabilities?.save || capabilities?.canRunTest);
+  return !!(capabilities?.save || capabilities?.canRunTestManually);
 };
 
 export const useCanUsePublicLocationsPermission = (): boolean =>

@@ -59,7 +59,7 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
       : '[uptime-read,private-location-write,uptime-write]';
   }
 
-  // Routes with an OR-set (e.g. run-test: `uptime-write` OR `monitor-run`). A read
+  // Routes with an OR-set (e.g. run-test: `uptime-write` OR `monitor-run-manually`). A read
   // user is missing every OR member; a no-access user is additionally missing `uptime-read`.
   if (route.anyRequiredPrivileges?.length) {
     const anyPrivs = route.anyRequiredPrivileges.join(',');

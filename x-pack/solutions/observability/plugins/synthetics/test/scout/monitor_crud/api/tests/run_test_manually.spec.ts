@@ -13,9 +13,9 @@ import { testNowMonitor } from '../../../common/fixtures/monitors';
 
 /**
  * "Run test manually" (`POST /api/synthetics/monitor/test/{monitorId}`) is gated by an
- * OR-set: `uptime-read` AND (`uptime-write` OR `monitor-run`). This verifies:
+ * OR-set: `uptime-read` AND (`uptime-write` OR `monitor-run-manually`). This verifies:
  *  - a plain `read` role is rejected (403) — no change from today,
- *  - a `read` role WITH the `can_run_test` sub-feature is authorized (not 403),
+ *  - a `read` role WITH the `can_run_test_manually` sub-feature is authorized (not 403),
  *  - a base `all` role is still authorized via `uptime-write` (non-breaking),
  *  - a user with no Synthetics access is rejected.
  *
@@ -33,7 +33,7 @@ const ROLE_CONFIGS = {
   },
   SYNTHETICS_READ_WITH_RUN: {
     elasticsearch: { cluster: [], indices: [{ names: ['synthetics-*'], privileges: ['read'] }] },
-    kibana: [{ base: [], spaces: ['*'], feature: { uptime: ['read', 'can_run_test'] } }],
+    kibana: [{ base: [], spaces: ['*'], feature: { uptime: ['read', 'can_run_test_manually'] } }],
   },
   NO_SYNTHETICS: {
     elasticsearch: { cluster: [], indices: [{ names: ['log-*'], privileges: ['read'] }] },
@@ -61,7 +61,7 @@ apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'
   apiTest('read-only role cannot run tests (403)', async ({ apiClient }) => {
     const res = await testNowMonitor(apiClient, readOnlyHeaders, uuidv4(), { statusCode: 403 });
     expect(decodeURIComponent((res.body as { message?: string }).message ?? '')).toContain(
-      '[uptime-write,monitor-run]'
+      '[uptime-write,monitor-run-manually]'
     );
   });
 
@@ -69,7 +69,7 @@ apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'
     await testNowMonitor(apiClient, noSyntheticsHeaders, uuidv4(), { statusCode: 403 });
   });
 
-  apiTest('read + can_run_test role is authorized to run tests', async ({ apiClient }) => {
+  apiTest('read + can_run_test_manually role is authorized to run tests', async ({ apiClient }) => {
     // Passes authz; the dummy monitor does not exist → 404, not 403.
     await testNowMonitor(apiClient, readWithRunHeaders, uuidv4(), { statusCode: 404 });
   });
