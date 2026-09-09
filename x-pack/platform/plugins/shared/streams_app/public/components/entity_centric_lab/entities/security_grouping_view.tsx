@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -101,13 +101,18 @@ const AccordionBadges = ({
 // CSS — minimal styling with subtle dividers only
 // ---------------------------------------------------------------------------
 
-const groupAccordionCss = (borderThin: string) => css`
+const groupAccordionBaseCss = (borderThin: string) => css`
   border: ${borderThin};
   border-radius: 6px;
   padding: 16px;
 
   .euiAccordion__triggerWrapper {
     padding: 0;
+  }
+`;
+
+const groupAccordionOpenCss = (borderThin: string) => css`
+  .euiAccordion__triggerWrapper {
     padding-bottom: 12px;
     margin-bottom: 12px;
     border-bottom: ${borderThin};
@@ -208,11 +213,15 @@ const GroupAccordion = ({
   }, [bucket.entities]);
 
   const hasChildren = bucket.children.length > 0;
+  const [isOpen, setIsOpen] = useState(true);
+
+  const handleToggle = useCallback((open: boolean) => setIsOpen(open), []);
 
   return (
     <EuiAccordion
       id={accordionId}
       initialIsOpen
+      onToggle={handleToggle}
       buttonContent={
         <EuiTitle size="s">
           <h3>{bucket.label}</h3>
@@ -225,7 +234,10 @@ const GroupAccordion = ({
         />
       }
       paddingSize="m"
-      css={groupAccordionCss(euiTheme.border.thin)}
+      css={[
+        groupAccordionBaseCss(euiTheme.border.thin),
+        isOpen && groupAccordionOpenCss(euiTheme.border.thin),
+      ]}
       data-test-subj={`securityGrouping-accordion-${index}`}
     >
       {hasChildren ? (
