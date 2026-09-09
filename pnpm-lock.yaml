@@ -1586,6 +1586,9 @@ importers:
       '@kbn/data-service-server':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service-server
+      '@kbn/data-source':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-data-source
       '@kbn/data-stream-adapter':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/data-stream-adapter
@@ -7699,6 +7702,8 @@ importers:
   src/platform/packages/shared/kbn-data-service: {}
 
   src/platform/packages/shared/kbn-data-service-server: {}
+
+  src/platform/packages/shared/kbn-data-source: {}
 
   src/platform/packages/shared/kbn-data-view-utils: {}
 
