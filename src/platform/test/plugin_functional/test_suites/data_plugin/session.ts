@@ -7,6 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT UI. All 7 tests interact with real browser pages
+ * (Discover and Dashboard) and assert on session lifecycle events via a global variable injected
+ * by the `session_notifications` fixture plugin — browser execution is mandatory.
+ *
+ * Migration notes:
+ * - The `session_notifications` fixture plugin
+ *   (src/platform/test/plugin_functional/plugins/session_notifications) exposes
+ *   `window.__SESSION_NOTIFICATIONS_PLUGIN__` to track session IDs. This plugin must remain
+ *   registered (or its window-global approach re-implemented) for the Scout run; alternatively,
+ *   expose session tracking through a Kibana API endpoint to avoid the browser.execute pattern.
+ * - The Discover sub-suite has a shared `before` that navigates and selects an index pattern;
+ *   each `it` also implicitly depends on the state left by the previous one (field added in test 3,
+ *   filter added in test 4). Decouple each case with its own navigation + `clearSessionIds` call
+ *   so Playwright can retry them independently.
+ * - The Dashboard sub-suite loads ES archiver data and a saved dashboard; bring those fixtures
+ *   into the Scout server config and use `kibanaServer` / `esArchiver` Scout equivalents for
+ *   setup/teardown.
+ * - `browser.execute()` maps to Playwright's `page.evaluate()`; the Scout `page` fixture covers
+ *   this pattern directly.
+ */
 import expect from '@kbn/expect';
 import type { SessionNotificationsGlobalApi } from '@kbn/session-notifications-plugin/public';
 import type { PluginFunctionalProviderContext } from '../../services';

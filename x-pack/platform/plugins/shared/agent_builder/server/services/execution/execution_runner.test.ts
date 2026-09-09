@@ -28,6 +28,8 @@ import {
   type ChatEvent,
   type RoundCompleteEvent,
   type RoundStartedEvent,
+  CONVERSATION_SCHEMA_VERSION,
+  ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
@@ -42,6 +44,7 @@ import {
   createEmptyConversation,
   createRound,
 } from '../../test_utils';
+import { pausedAndResumedRoundTimeline } from '../../test_utils/timeline';
 import { withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
 import type { Span } from '@opentelemetry/api';
@@ -534,6 +537,40 @@ describe('handleAgentExecution', () => {
         id: 'round-1::user_message',
         data: { message: 'raw input' },
       });
+    });
+  });
+
+  describe('regenerate on a paused conversation', () => {
+    it('takes the rounds-path write, never the append-only resume', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events: pausedAndResumedRoundTimeline().slice(0, 4),
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+
+      mockAgentStream([makeRoundCompleteEvent('round-1')]);
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: {},
+          action: 'regenerate',
+        },
+        conversationClient,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(conversationClient.upsertRound).toHaveBeenCalledTimes(1);
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
   });
 

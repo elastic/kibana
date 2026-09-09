@@ -93,6 +93,14 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(screen.getByRole('link', { name: 'Open in APM' })).toBeInTheDocument();
   });
 
+  it('forwards projectRouting to the data hook', () => {
+    render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} projectRouting="_alias:*" />);
+
+    expect(mockedUseServiceFlyoutTransactionData).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
+  });
+
   it('renders transaction names as plain text when locators are not provided', () => {
     render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} locators={undefined} />);
 
