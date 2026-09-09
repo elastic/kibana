@@ -33,6 +33,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -210,6 +211,7 @@ interface PluginsStart {
   features: FeaturesPluginStart;
   expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
@@ -384,6 +386,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: coreStart.theme,
@@ -489,6 +492,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: params.theme,

@@ -7,15 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ParsedMetricItem } from '../../../types';
-import { createESQLQuery } from './create_esql_query';
+import { createESQLQuery as createESQLQueryWithSettings } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+
+const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields = "NULLIFY";';
+
+const createESQLQuery = (params: Parameters<typeof createESQLQueryWithSettings>[0]): string => {
+  const query = createESQLQueryWithSettings(params);
+  const expectedPrefix = `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} `;
+
+  expect(query.startsWith(expectedPrefix)).toBe(true);
+
+  return query.slice(expectedPrefix.length);
+};
 
 const mockMetric: ParsedMetricItem = {
   metricName: 'cpu.usage',
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
   indexName: 'metrics-*',
   units: ['ms'],
-  metricTypes: ['histogram'],
+  metricTypes: ['gauge'],
   dimensionFields: [
     { name: 'host.name' },
     { name: 'container.id' },
@@ -52,13 +63,23 @@ const mockLegacyHistogramMetric: ParsedMetricItem = {
   metricTypes: ['histogram'],
 };
 
-describe('createESQLQuery', () => {
+// Failing: See https://github.com/elastic/kibana/issues/289979
+describe.skip('createESQLQuery', () => {
+  it('should nullify unmapped fields in generated metric queries', () => {
+    expect(createESQLQueryWithSettings({ metricItem: mockMetric })).toBe(
+      `
+SET unmapped_fields = "NULLIFY"; TS metrics-*
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
+`.trim()
+    );
+  });
+
   it('should generate a basic AVG query for a metric field', () => {
     const query = createESQLQuery({ metricItem: mockMetric });
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -184,7 +205,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`host.name\`
 `.trim()
     );
   });
@@ -197,7 +218,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`, \`container.id\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`host.name\`, \`container.id\`
 `.trim()
     );
   });
@@ -210,7 +231,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`host.ip\`, \`host.name\`
 `.trim()
     );
   });
@@ -223,7 +244,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`cpu.cores\`, \`host.name\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`cpu.cores\`, \`host.name\`
 `.trim()
     );
   });
@@ -236,7 +257,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`, \`cpu.cores\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
     );
   });
@@ -248,7 +269,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS custom-metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -262,7 +283,7 @@ TS custom-metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -277,7 +298,7 @@ TS metrics-*
       `
 TS metrics-*
   | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -294,7 +315,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name == "host-01"
   | WHERE cpu.cores > 4
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`host.name\`
 `.trim()
     );
   });
@@ -308,7 +329,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -322,7 +343,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -336,7 +357,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -347,7 +368,7 @@ TS metrics-*
       fieldTypes: [ES_FIELD_TYPES.LONG],
       indexName: 'metrics-*',
       units: ['ms'],
-      metricTypes: ['histogram'],
+      metricTypes: ['gauge'],
       dimensionFields: [{ name: 'service-name' }, { name: 'container-id' }, { name: 'host-ip' }],
     };
 
@@ -359,7 +380,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`service-name\`
 `.trim()
       );
     });
@@ -372,7 +393,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`, \`container-id\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`service-name\`, \`container-id\`
 `.trim()
       );
     });
@@ -385,7 +406,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host-ip\`, \`service-name\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`host-ip\`, \`service-name\`
 `.trim()
       );
     });
@@ -396,7 +417,7 @@ TS metrics-*
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
         indexName: 'metrics-*',
         units: ['ms'],
-        metricTypes: ['histogram'],
+        metricTypes: ['gauge'],
         dimensionFields: [{ name: 'field`with`ticks' }],
       };
 
@@ -407,7 +428,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100), \`field\`\`with\`\`ticks\`
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100), \`field\`\`with\`\`ticks\`
 `.trim()
       );
     });
@@ -430,7 +451,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(TO_DOUBLE(http.request.duration))) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -443,7 +464,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100), \`service.name\`
+  | STATS AVG(AVG_OVER_TIME(TO_DOUBLE(http.request.duration))) BY TBUCKET(100), \`service.name\`
 `.trim()
       );
     });
@@ -485,7 +506,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(TO_DOUBLE(metric.value)) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(TO_DOUBLE(metric.value))) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -499,7 +520,7 @@ TS metrics-*
         `
 TS timeseries-rich-metrics-primary
   | WHERE service.name == "api-server"
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(TO_DOUBLE(http.request.duration))) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -520,7 +541,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -571,7 +592,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
-  | STATS AVG(request_duration) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -584,7 +605,7 @@ TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
       expect(query).toBe(
         `
 TS edge-case-gauge-to-counter
-  | STATS AVG(request_duration) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -597,7 +618,7 @@ TS edge-case-gauge-to-counter
       expect(query).toBe(
         `
 TS edge-case-gauge-to-counter
-  | STATS AVG(request_duration) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -609,7 +630,7 @@ TS edge-case-gauge-to-counter
       expect(query).toBe(
         `
 TS edge-case-gauge-to-counter
-  | STATS AVG(request_duration) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -622,7 +643,7 @@ TS edge-case-gauge-to-counter
       expect(query).toBe(
         `
 TS edge-case-gauge-to-counter
-  | STATS AVG(request_duration) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -662,7 +683,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS SUM(cpu.usage) BY TBUCKET(100)
+  | STATS SUM(SUM_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
       );
     });

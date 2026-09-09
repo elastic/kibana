@@ -8,13 +8,11 @@
 import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { ObservabilityLogsExplorerPageObject } from '../../../functional/page_objects/observability_logs_explorer';
-import { DatasetQualityPageObject } from '../../../functional/page_objects/dataset_quality';
 import { InfraHomePageProvider } from '../../../functional/page_objects/infra_home_page';
 
 export const pageObjects = {
   ...svlPlatformPageObjects,
   // Observability Solution stateful FTR page objects
-  datasetQuality: DatasetQualityPageObject,
   infraHome: InfraHomePageProvider,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   // Observability Solution serverless FTR page objects
