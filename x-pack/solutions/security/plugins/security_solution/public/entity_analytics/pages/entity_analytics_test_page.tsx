@@ -134,6 +134,7 @@ const useEntityGridData = ({
         body: JSON.stringify({
           sort: { field: sortField, direction: sortDirection },
           page_size: pageSize,
+          profile: true,
           ...(cursor ? { cursor } : {}),
           ...(filter ? { filter } : {}),
         }),
