@@ -28,7 +28,7 @@ The endpoint is always `https://api.linear.app/graphql` and cannot be changed in
 
 ## Test connectors [linear-action-configuration]
 
-You can test connectors when you create or edit the connector in {{kib}}. The test reads the current Linear user with the `viewer` query.
+You can test connectors when you create or edit the connector in {{kib}}. The test checks the API key and displays a connection message with the account name when available.
 
 ## Connector actions [linear-connector-actions]
 
@@ -56,19 +56,19 @@ The list actions accept these pagination fields:
 - `after` (optional): Cursor from `pageInfo.endCursor` in a previous response.
 - `orderBy` (optional): `createdAt` or `updatedAt`. The default is `updatedAt`.
 
-Each list response contains selected `nodes` and `pageInfo`. Continue paging only when `pageInfo.hasNextPage` is `true`; only those responses expose `pageInfo.endCursor`.
+Each list response contains records in `nodes` and pagination details in `pageInfo`. If `pageInfo.hasNextPage` is `true`, use `pageInfo.endCursor` as `after` to request the next page. Otherwise, there are no more pages and no next-page cursor.
 
 List issues (`listIssues`)
-:   List issues with Relay pagination. The optional `filter` supports `teamId`, `projectId`, `assigneeId`, `stateId`, `labelIds`, `titleContains`, `priority`, and inclusive `createdAfter`, `createdBefore`, `updatedAfter`, and `updatedBefore` RFC 3339 timestamps. `priority` is 0 through 4. Set `archivedStatus` to `active` (default), `archived`, or `all`. Each issue includes readable team, workflow state, project, and assignee fields, plus cycle and parent references when present.
+:   List issues using the pagination fields above. The optional `filter` supports `teamId`, `projectId`, `assigneeId`, `stateId`, `labelIds`, `titleContains`, `priority`, and inclusive `createdAfter`, `createdBefore`, `updatedAfter`, and `updatedBefore` RFC 3339 timestamps. `priority` is 0 through 4. Set `archivedStatus` to `active` (default), `archived`, or `all`. Each issue includes readable team, workflow state, project, and assignee fields, plus cycle and parent references when present.
 
 Get issue (`getIssue`)
 :   Get one issue using a Linear UUID or human-readable identifier such as `ENG-42`. The response includes readable team, workflow state, project, and assignee fields, plus cycle and parent references when present.
 
 Create issue (`createIssue`)
-:   Create an issue. `teamId` and `title` are required. Optional fields are `description`, `assigneeId`, `projectId`, `cycleId`, `parentId`, `stateId`, `priority`, `dueDate`, and `labelIds`. Use `listCycles` to resolve `cycleId`. `dueDate` must be a valid `YYYY-MM-DD` calendar date. The returned issue includes readable team, workflow state, project, and assignee fields, plus cycle and parent references.
+:   Create an issue. `teamId` and `title` are required. Optional fields are `description`, `assigneeId`, `projectId`, `cycleId`, `parentId`, `stateId`, `priority`, `dueDate`, and `labelIds`. Use `listCycles` to find a `cycleId`. `dueDate` must be a valid `YYYY-MM-DD` calendar date. The returned issue includes readable team, workflow state, project, and assignee fields, plus cycle and parent references.
 
 Update issue (`updateIssue`)
-:   Update one issue. `id` and at least one change are required. You can update `title`, `description`, `assigneeId`, `projectId`, `cycleId`, `parentId`, `stateId`, `priority`, `dueDate`, and labels. Use `listCycles` to resolve `cycleId`. Omitted fields remain unchanged. Set nullable fields such as `description`, `assigneeId`, `projectId`, `cycleId`, `parentId`, and `dueDate` to `null` to clear them. The returned issue includes readable team, workflow state, project, and assignee fields, plus cycle and parent references, so a workflow can verify assignment or clearing. Moving an issue to another team is not supported by this connector version.
+:   Update one issue. `id` and at least one change are required. You can update `title`, `description`, `assigneeId`, `projectId`, `cycleId`, `parentId`, `stateId`, `priority`, `dueDate`, and labels. Use `listCycles` to find a `cycleId`. Omitted fields remain unchanged. Set `description`, `assigneeId`, `projectId`, `cycleId`, `parentId`, or `dueDate` to `null` to clear that value. The returned issue includes readable team, workflow state, project, and assignee fields, plus cycle and parent references. Use these fields to check your changes. Moving an issue to another team is not supported.
 
 For labels, use one of these modes:
 
