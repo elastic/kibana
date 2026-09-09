@@ -10,7 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { PluginStart, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
-import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { ResponseActionsQueries } from '../../../common/search_strategy/endpoint/response_actions';
 import type { EndpointAppContext } from '../../endpoint/types';

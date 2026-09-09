@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (get_file.schema.yaml) and the zod schema generated from it (get_file.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const EndpointActionGetFileSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-
-    parameters: schema.object({
-      path: schema.string({ minLength: 1, maxLength: 4096 }),
-    }),
-  }),
-};
-
-export type ResponseActionGetFileRequestBody = TypeOf<typeof EndpointActionGetFileSchema.body>;
+export {
+  EndpointActionGetFileSchema,
+  type ResponseActionGetFileRequestBody,
+} from '@kbn/security-solution-endpoint-common';

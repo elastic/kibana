@@ -25,7 +25,7 @@ import {
   isArtifactGlobal,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { FeatureKeys } from '../../../endpoint/services';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { ExceptionItemLikeOptions } from '../types';
 import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';

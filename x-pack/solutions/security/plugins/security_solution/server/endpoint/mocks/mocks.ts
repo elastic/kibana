@@ -79,7 +79,7 @@ import {
 import { requestContextFactoryMock } from '../../request_context_factory.mock';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../../lib/detection_engine/routes/__mocks__/request_context';
-import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { createLicenseServiceMock } from '../../../common/license/mocks';
 import { createFeatureUsageServiceMock } from '../services/feature_usage/mocks';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';

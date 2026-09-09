@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (scan.schema.yaml) and the zod schema generated from it (scan.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const ScanActionRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-
-    parameters: schema.object({
-      path: schema.string({
-        minLength: 1,
-        maxLength: 4096,
-        validate: (value) => {
-          if (!value.trim().length) {
-            return 'path cannot be an empty string';
-          }
-        },
-      }),
-    }),
-  }),
-};
-
-export type ScanActionRequestBody = TypeOf<typeof ScanActionRequestSchema.body>;
+export {
+  ScanActionRequestSchema,
+  type ScanActionRequestBody,
+} from '@kbn/security-solution-endpoint-common';

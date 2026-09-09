@@ -12,7 +12,7 @@ import type {
   EndpointStrategyRequestType,
   EndpointStrategyResponseType,
 } from '../../../../common/search_strategy/endpoint';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 
 export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
   buildDsl: (

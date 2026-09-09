@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EndpointAuthz } from '../../types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { ExperimentalFeatures } from '../../../experimental_features';
 import type {
   ResponseActionAgentType,
