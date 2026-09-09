@@ -17,10 +17,14 @@ import { fetchPrebuiltImportContext } from './fetch_prebuilt_import_context';
 import { findInstalledRulesByRuleIds } from './find_installed_rules_by_rule_ids';
 import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { validateRulesToImport } from './validate_rules_to_import';
-import { splitIntoGroups } from './split_into_groups';
 import { overwriteRules } from './overwrite_rules';
 import { createRules } from './create_rules';
-import type { ImportRuleSuccess, ImportRulesResult, ImportRuleError } from './types';
+import type {
+  ImportableRuleData,
+  ImportRuleSuccess,
+  ImportRulesResult,
+  ImportRuleError,
+} from './types';
 
 interface ImportRulesParams {
   rules: RuleToImport[];
@@ -57,6 +61,7 @@ export async function importRules({
 
   // Contain any throw so one batch can't reject and abort the multi-batch loop mid-import.
   try {
+    // Step 1: Fetch data
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
     const [existingExceptionLists, prebuiltContext, existingRules] = await Promise.all([
       getReferencedExceptionLists({ rules, savedObjectsClient }),
@@ -64,6 +69,7 @@ export async function importRules({
       findInstalledRulesByRuleIds({ rulesClient, ruleIds: rules.map((r) => r.rule_id) }),
     ]);
 
+    // Step 2: Validate
     const { importableRules, errors: validationErrors } = await validateRulesToImport({
       rules,
       existingRules,
@@ -79,13 +85,23 @@ export async function importRules({
       return { successes, errors };
     }
 
-    const ruleGroups = splitIntoGroups({
-      rules: importableRules,
-      existingRules,
-      overwriteExistingRules: importOptions.overwriteRules,
-    });
+    // Step 3: Split rules into buckets
+    const conflicts: ImportableRuleData[] = [];
+    const toCreate: ImportableRuleData[] = [];
+    const toOverwrite: ImportableRuleData[] = [];
 
-    for (const { rule } of ruleGroups.conflicts) {
+    for (const item of importableRules) {
+      if (!existingRules[item.rule.rule_id]) {
+        toCreate.push(item);
+      } else if (importOptions.overwriteRules) {
+        toOverwrite.push(item);
+      } else {
+        conflicts.push(item);
+      }
+    }
+
+    // Step 4: Process each bucket
+    for (const { rule } of conflicts) {
       errors.push(
         createRuleImportErrorObject({
           ruleId: rule.rule_id,
@@ -95,9 +111,9 @@ export async function importRules({
       );
     }
 
-    if (ruleGroups.toOverwrite.length > 0) {
+    if (toOverwrite.length > 0) {
       const overwritten = await overwriteRules({
-        rules: ruleGroups.toOverwrite,
+        rules: toOverwrite,
         existingRules,
         deps: {
           actionsClient,
@@ -110,9 +126,9 @@ export async function importRules({
       errors.push(...overwritten.errors);
     }
 
-    if (ruleGroups.toCreate.length > 0) {
+    if (toCreate.length > 0) {
       const created = await createRules({
-        rules: ruleGroups.toCreate,
+        rules: toCreate,
         options: {
           allowMissingConnectorSecrets: importOptions.allowMissingConnectorSecrets,
           changeTracking: importOptions.changeTracking,
