@@ -22,7 +22,7 @@ import {
  * tool. Consumers follow the agent execution's event stream and filter for this event to
  * receive live, schema-typed updates while the investigation is still running. Every emission
  * carries the FULL current investigation state (never a delta) — see
- * {@link investigationAgentOutputSchema}.
+ * {@link investigationStateSchema}.
  */
 export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const;
 
@@ -144,21 +144,10 @@ export type InvestigationHypothesis = z.infer<typeof investigationHypothesisSche
 /** Max recommendation entries a current investigation can emit. Keep in sync with YAML maxItems. */
 export const MAX_RECOMMENDATIONS = 3;
 
-/** Historical recommendation limit retained by the read schema for persisted investigations. */
-const MAX_LEGACY_RECOMMENDATIONS = 5;
-
 const investigationItemConfidenceSchema = z.number().min(0).max(1);
 
-const sortByConfidence = <T extends { confidence?: number }>(items: T[]): T[] =>
-  [...items].sort((first, second) => {
-    if (first.confidence === undefined) {
-      return second.confidence === undefined ? 0 : 1;
-    }
-    if (second.confidence === undefined) {
-      return -1;
-    }
-    return second.confidence - first.confidence;
-  });
+const sortByConfidence = <T extends { confidence: number }>(items: T[]): T[] =>
+  [...items].sort((first, second) => second.confidence - first.confidence);
 
 /**
  * One concrete, actionable step to resolve or mitigate the issue — a command, config change, or
@@ -169,7 +158,7 @@ export const investigationRecommendationSchema = z.object({
   /** The action itself, stated concretely (e.g. "Revert the pool-size config change"). */
   title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /** How strongly the findings support that this action will resolve or mitigate the confirmed problem. */
-  confidence: investigationItemConfidenceSchema.optional(),
+  confidence: investigationItemConfidenceSchema,
   /** Why this step helps, or detail needed to carry it out, when the title alone isn't enough. */
   description: z.string().max(MAX_TEXT_LENGTH).optional(),
   /** A command, config snippet, or code change backing this step, when one applies. Raw source,
@@ -178,23 +167,8 @@ export const investigationRecommendationSchema = z.object({
 });
 export type InvestigationRecommendation = z.infer<typeof investigationRecommendationSchema>;
 
-const investigationRecommendationOutputSchema = investigationRecommendationSchema.required({
-  confidence: true,
-});
-export type InvestigationRecommendationOutput = z.infer<
-  typeof investigationRecommendationOutputSchema
->;
-
-export const investigationRecommendationsOutputSchema = z
-  .array(investigationRecommendationOutputSchema)
-  .max(MAX_RECOMMENDATIONS)
-  .overwrite(sortByConfidence);
-
 /** Max blind spot entries a current investigation can emit. Keep in sync with YAML maxItems. */
 export const MAX_BLIND_SPOTS = 3;
-
-/** Historical blind spot limit retained by the read schema for persisted investigations. */
-const MAX_LEGACY_BLIND_SPOTS = 10;
 
 /**
  * A signal the agent wanted but could not access (e.g. missing instrumentation) — an actionable
@@ -205,21 +179,11 @@ export const investigationBlindSpotSchema = z.object({
   /** The missing data source or access, named concisely (e.g. "No traces for the cart service"). */
   title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /** How strongly the findings support that closing this gap would materially improve the investigation. */
-  confidence: investigationItemConfidenceSchema.optional(),
+  confidence: investigationItemConfidenceSchema,
   /** Why this gap mattered to the investigation. */
   description: z.string().max(MAX_TEXT_LENGTH),
 });
 export type InvestigationBlindSpot = z.infer<typeof investigationBlindSpotSchema>;
-
-const investigationBlindSpotOutputSchema = investigationBlindSpotSchema.required({
-  confidence: true,
-});
-export type InvestigationBlindSpotOutput = z.infer<typeof investigationBlindSpotOutputSchema>;
-
-export const investigationBlindSpotsOutputSchema = z
-  .array(investigationBlindSpotOutputSchema)
-  .max(MAX_BLIND_SPOTS)
-  .overwrite(sortByConfidence);
 
 /** Max evidence entries per trigger-feedback proposal. Keep in sync with the YAML maxItems. */
 export const MAX_TRIGGER_FEEDBACK_EVIDENCE = 10;
@@ -276,9 +240,7 @@ export type TriggerFeedback = z.infer<typeof triggerFeedbackSchema>;
 export const MAX_HYPOTHESES = 50;
 
 /**
- * Read-facing investigation state. It accepts historical unscored recommendations and blind spots
- * at their original limits while ranking any scored items. Current agent output uses the stricter
- * {@link investigationAgentOutputSchema}; both shapes render through this compatible state type.
+ * Full investigation state shared by agent output, persistence, and consumers.
  */
 export const investigationStateSchema = z.object({
   /** Current ("what's happening now") or final narrative summary of the investigation. */
@@ -312,21 +274,16 @@ export const investigationStateSchema = z.object({
   /** Concrete, actionable steps to resolve or mitigate the issue. */
   recommendations: z
     .array(investigationRecommendationSchema)
-    .max(MAX_LEGACY_RECOMMENDATIONS)
+    .max(MAX_RECOMMENDATIONS)
     .overwrite(sortByConfidence)
     .optional(),
   /**
-   * Actionable knowledge gaps discovered during the investigation. Replaces the free-text
-   * `gaps_found` string array. Investigations persisted before this field existed still carry
-   * `gaps_found`, which this schema strips as a key it no longer declares — so recovering them
-   * means rewriting the raw payload before it reaches this schema, as
-   * `normalizeLegacyInvestigationState` in `@kbn/investigation-output` does. Those gaps are also
-   * folded into the memory `_gaps/overview` page by the workflow's `merge_investigation_gaps`
-   * step, so they survive outside this payload either way.
+   * Actionable knowledge gaps discovered during the investigation. Replaces the legacy free-text
+   * `gaps_found` string array, which this schema ignores.
    */
   blind_spots: z
     .array(investigationBlindSpotSchema)
-    .max(MAX_LEGACY_BLIND_SPOTS)
+    .max(MAX_BLIND_SPOTS)
     .overwrite(sortByConfidence)
     .optional(),
   /**
@@ -345,10 +302,3 @@ export const investigationStateSchema = z.object({
   impact: investigationImpactSchema.optional(),
 });
 export type InvestigationState = z.infer<typeof investigationStateSchema>;
-
-/** Strict state emitted by current agents; reads remain tolerant of historical unscored items. */
-export const investigationAgentOutputSchema = investigationStateSchema.extend({
-  recommendations: investigationRecommendationsOutputSchema.optional(),
-  blind_spots: investigationBlindSpotsOutputSchema.optional(),
-});
-export type InvestigationAgentOutput = z.infer<typeof investigationAgentOutputSchema>;

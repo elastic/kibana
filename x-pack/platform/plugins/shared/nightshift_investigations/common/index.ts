@@ -7,11 +7,9 @@
 
 import type {
   InvestigationBlindSpot,
-  InvestigationBlindSpotOutput,
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
-  InvestigationRecommendationOutput,
   Severity,
   TriggerFeedback,
 } from '@kbn/significant-events-schema';
@@ -120,11 +118,8 @@ export interface InvestigationStructuredOutput {
 }
 
 /** Body of PATCH /internal/nightshift/investigations/{id}. */
-export interface UpdateInvestigationRequest
-  extends Omit<InvestigationStructuredOutput, 'recommendations' | 'blind_spots'> {
+export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
   status: UpdatableInvestigationStatus;
-  recommendations?: InvestigationRecommendationOutput[];
-  blind_spots?: InvestigationBlindSpotOutput[];
   error?: string;
   conversation_id?: string;
 }

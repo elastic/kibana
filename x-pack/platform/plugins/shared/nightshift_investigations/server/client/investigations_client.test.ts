@@ -161,6 +161,20 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
+  it('omits historical recommendation and blind-spot arrays without confidence', async () => {
+    repository.get.mockResolvedValue({
+      ...makeRecord(),
+      recommendations: [{ title: 'Keep monitoring' }],
+      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+    } as unknown as InvestigationRecord);
+
+    const result = await makeClient().get('inv-1');
+
+    expect(result.summary).toBe('All clear.');
+    expect(result.recommendations).toBeUndefined();
+    expect(result.blind_spots).toBeUndefined();
+  });
+
   it('returns subject.summary from the stored subject_summary attribute', async () => {
     const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
     repository.get.mockResolvedValue(

@@ -84,9 +84,8 @@ export interface UseInvestigationStateResult {
 
 /**
  * Surfaces the current state of an investigation, live or completed, from a single source:
- * `investigationStateSchema` — the backward-compatible read schema for the stricter current state
- * the investigation agent streams via `investigation_progress` `tool_ui` events and returns from
- * the `investigate` step.
+ * `investigationStateSchema` — the same schema the investigation agent streams via
+ * `investigation_progress` `tool_ui` events and returns from the `investigate` step.
  *
  * - While the investigation runs, the underlying agent execution's id isn't known upfront (it's
  *   auto-generated) — the workflow tags it with `workflowExecutionId` as metadata instead of

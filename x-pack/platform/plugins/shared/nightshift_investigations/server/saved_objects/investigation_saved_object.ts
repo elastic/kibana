@@ -8,8 +8,10 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
+  MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
   MAX_IMPACT_ENTITIES,
+  MAX_RECOMMENDATIONS,
   MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
   SEVERITY_OPTIONS,
@@ -25,9 +27,6 @@ import type { InvestigationAttributes } from '../storage/types';
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
 const MAX_ISO_DATE_LENGTH = 64;
-/** Preserve the original storage envelope for historical unscored investigation output. */
-const MAX_STORED_RECOMMENDATIONS = 5;
-const MAX_STORED_BLIND_SPOTS = 10;
 
 const isoDateStringSchema = schema.string({
   maxLength: MAX_ISO_DATE_LENGTH,
@@ -71,8 +70,8 @@ const investigationAttributesSchemaV1 = schema.object({
   conclusion: optionalText,
   severity: schema.maybe(enumOf(SEVERITY_OPTIONS)),
   hypotheses: opaqueArray(MAX_HYPOTHESES),
-  recommendations: opaqueArray(MAX_STORED_RECOMMENDATIONS),
-  blind_spots: opaqueArray(MAX_STORED_BLIND_SPOTS),
+  recommendations: opaqueArray(MAX_RECOMMENDATIONS),
+  blind_spots: opaqueArray(MAX_BLIND_SPOTS),
   trigger_feedback: opaqueArray(MAX_TRIGGER_FEEDBACK),
   conversation_id: optionalKeyword,
   impact: schema.maybe(

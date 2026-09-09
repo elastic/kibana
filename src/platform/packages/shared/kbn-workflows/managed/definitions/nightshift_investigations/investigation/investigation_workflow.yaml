@@ -152,7 +152,7 @@ steps:
         {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
-      # Keep this in sync with investigationAgentOutputSchema in @kbn/significant-events-schema
+      # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
       # (x-pack/platform/packages/shared/kbn-significant-events-schema/src/significant_events/investigation_state.ts)
       # — this is the same schema the investigation_progress_report tool streams live, so the
       # final structured output here must match exactly (including maxLength/maxItems: the UI

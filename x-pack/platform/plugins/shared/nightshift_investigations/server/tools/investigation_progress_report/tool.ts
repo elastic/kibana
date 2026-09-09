@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   INVESTIGATION_PROGRESS_UI_EVENT,
-  investigationAgentOutputSchema,
+  investigationStateSchema,
 } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 
@@ -41,7 +41,7 @@ export const createInvestigationProgressReportTool = ({
   logger,
 }: {
   logger: Logger;
-}): BuiltinToolDefinition<typeof investigationAgentOutputSchema> => ({
+}): BuiltinToolDefinition<typeof investigationStateSchema> => ({
   id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
   type: ToolType.builtin,
   description: toolDescription,
@@ -52,7 +52,7 @@ export const createInvestigationProgressReportTool = ({
     idempotentHint: false,
     openWorldHint: false,
   },
-  schema: investigationAgentOutputSchema,
+  schema: investigationStateSchema,
   tags: ['streams', 'investigation'],
   excludeFromMcp: true,
   handler: async (state, context) => {

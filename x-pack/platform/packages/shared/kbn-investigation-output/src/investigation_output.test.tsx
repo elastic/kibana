@@ -189,7 +189,7 @@ describe('InvestigationOutput', () => {
     const gap = 'No GeoIP enrichment available for the attacker IPs.';
     const stateWithRecoveredGap: InvestigationState = {
       ...finalState,
-      blind_spots: [{ title: gap, description: gap }],
+      blind_spots: [{ title: gap, confidence: 0.8, description: gap }],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithRecoveredGap} />);

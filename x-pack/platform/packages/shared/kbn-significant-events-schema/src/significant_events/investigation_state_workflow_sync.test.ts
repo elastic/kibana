@@ -14,7 +14,6 @@ import {
 } from '@kbn/workflows/managed';
 import {
   INVESTIGATE_STEP_ID,
-  investigationAgentOutputSchema,
   investigationStateSchema,
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESIS_EVIDENCE,
@@ -28,7 +27,7 @@ interface ParsedInvestigationWorkflow {
 
 /**
  * Strips keys that intentionally differ between the hand-authored YAML schema and
- * `z.toJSONSchema(investigationAgentOutputSchema)`:
+ * `z.toJSONSchema(investigationStateSchema)`:
  * - `$schema` — only emitted by the zod conversion;
  * - `description` — the YAML carries prompt-facing descriptions the zod schema doesn't;
  * - `additionalProperties` — zod emits `false` (it strips unknown keys), while the YAML leaves
@@ -53,11 +52,10 @@ const normalizeSchema = (value: unknown): unknown => {
 /**
  * The `investigate` step's structured-output schema is hand-authored JSON Schema in
  * `investigation_workflow.yaml` (the YAML asset can't import code), and must be kept in sync
- * by hand with `investigationAgentOutputSchema` — that's the strict schema the investigation
- * agent's progress-report tool streams live. The read-facing `investigationStateSchema` remains
- * tolerant of historical unscored items. These tests catch workflow drift structurally (via
- * z.toJSONSchema equality) and behaviorally (the same current-output payloads validate identically
- * against both strict schemas).
+ * by hand with `investigationStateSchema`, which the investigation agent's progress-report tool
+ * streams live and consumers use to parse persisted results. These tests catch workflow drift
+ * structurally (via z.toJSONSchema equality) and behaviorally (the same payloads validate
+ * identically against both schemas).
  *
  * This lives here — importing the workflow definition from `@kbn/workflows/managed` — rather
  * than as a test in `@kbn/workflows` importing this schema, because `@kbn/workflows` is
@@ -65,7 +63,7 @@ const normalizeSchema = (value: unknown): unknown => {
  * this Elastic-License-2.0-only package. This package depending on `@kbn/workflows` (available
  * under Elastic License 2.0, among others) is licensing-legal in the other direction.
  */
-describe('investigation_workflow.yaml structured-output schema stays in sync with investigationAgentOutputSchema', () => {
+describe('investigation_workflow.yaml structured-output schema stays in sync with investigationStateSchema', () => {
   const workflowDefinition = getManagedWorkflowDefinition(
     SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID
   );
@@ -89,9 +87,9 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
   const ajv = new Ajv();
   const validate = ajv.compile(jsonSchema);
 
-  it('matches z.toJSONSchema(investigationAgentOutputSchema) structurally', () => {
+  it('matches z.toJSONSchema(investigationStateSchema) structurally', () => {
     expect(normalizeSchema(jsonSchema)).toEqual(
-      normalizeSchema(z.toJSONSchema(investigationAgentOutputSchema))
+      normalizeSchema(z.toJSONSchema(investigationStateSchema))
     );
   });
 
@@ -171,7 +169,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
     expect(validate(validPayload)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(validPayload).success).toBe(true);
+    expect(investigationStateSchema.safeParse(validPayload).success).toBe(true);
   });
 
   it('accepts all three trigger feedback field types (severity, status, summary) under both schemas', () => {
@@ -181,21 +179,21 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(allFields)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(allFields).success).toBe(true);
+    expect(investigationStateSchema.safeParse(allFields).success).toBe(true);
   });
 
   it('accepts a minimal payload (empty hypotheses, no optional fields) under both schemas', () => {
     const minimalPayload = { summary: 'Just started.', hypotheses: [] };
 
     expect(validate(minimalPayload)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(minimalPayload).success).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalPayload).success).toBe(true);
   });
 
   it('rejects a payload missing a required top-level field under both schemas', () => {
     const { summary, ...missingSummary } = validPayload;
 
     expect(validate(missingSummary)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingSummary).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingSummary).success).toBe(false);
   });
 
   it('rejects a hypothesis missing a required field under both schemas', () => {
@@ -205,7 +203,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(invalidHypothesis)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(invalidHypothesis).success).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidHypothesis).success).toBe(false);
   });
 
   it('accepts hypothesis evidence carrying a query and its window under both schemas', () => {
@@ -229,7 +227,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(withEvidence)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(withEvidence).success).toBe(true);
+    expect(investigationStateSchema.safeParse(withEvidence).success).toBe(true);
   });
 
   it('accepts evidence that is an observation with no query under both schemas', () => {
@@ -246,7 +244,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(observationOnly)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(observationOnly).success).toBe(true);
+    expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
   });
 
   it('accepts evidence carrying a query and a code reference in one entry under both schemas', () => {
@@ -276,7 +274,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(withCode)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(withCode).success).toBe(true);
+    expect(investigationStateSchema.safeParse(withCode).success).toBe(true);
   });
 
   it('accepts a code reference with neither host nor ref, which simply will not be linked', () => {
@@ -302,7 +300,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(unlinkable)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(unlinkable).success).toBe(true);
+    expect(investigationStateSchema.safeParse(unlinkable).success).toBe(true);
   });
 
   it('rejects a code reference missing its repo under both schemas', () => {
@@ -324,7 +322,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(missingRepo)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingRepo).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingRepo).success).toBe(false);
   });
 
   it('rejects a code reference with an unknown source under both schemas', () => {
@@ -346,7 +344,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(badSource)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(badSource).success).toBe(false);
+    expect(investigationStateSchema.safeParse(badSource).success).toBe(false);
   });
 
   it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
@@ -365,7 +363,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(tooMuchEvidence)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(tooMuchEvidence).success).toBe(false);
+    expect(investigationStateSchema.safeParse(tooMuchEvidence).success).toBe(false);
   });
 
   it('rejects evidence with a half-specified time range under both schemas', () => {
@@ -388,7 +386,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(missingTo)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingTo).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTo).success).toBe(false);
   });
 
   it('rejects an invalid hypothesis status under both schemas', () => {
@@ -398,21 +396,21 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(invalidStatus)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(invalidStatus).success).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
   });
 
   it('rejects an over-length conclusion under both schemas', () => {
     const oversized = { ...validPayload, conclusion: 'x'.repeat(10_001) };
 
     expect(validate(oversized)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(oversized).success).toBe(false);
+    expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
   });
 
   it('rejects an investigation severity outside the canonical tiers under both schemas', () => {
     const invalidSeverity = { ...validPayload, severity: 'critical' };
 
     expect(validate(invalidSeverity)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(invalidSeverity).success).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
   });
 
   it('accepts a minimal scored recommendation under both schemas', () => {
@@ -422,10 +420,10 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(minimalRecommendation)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(minimalRecommendation).success).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
   });
 
-  it('rejects a current recommendation or blind spot without confidence under both schemas', () => {
+  it('rejects a recommendation or blind spot without confidence under both schemas', () => {
     const recommendationWithoutConfidence = {
       ...validPayload,
       recommendations: [{ title: 'Roll back the deployment' }],
@@ -436,13 +434,9 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(recommendationWithoutConfidence)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(recommendationWithoutConfidence).success).toBe(
-      false
-    );
+    expect(investigationStateSchema.safeParse(recommendationWithoutConfidence).success).toBe(false);
     expect(validate(blindSpotWithoutConfidence)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(blindSpotWithoutConfidence).success).toBe(
-      false
-    );
+    expect(investigationStateSchema.safeParse(blindSpotWithoutConfidence).success).toBe(false);
   });
 
   it('rejects item confidence outside the 0–1 range under both schemas', () => {
@@ -452,11 +446,11 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(invalidConfidence)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(invalidConfidence).success).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidConfidence).success).toBe(false);
   });
 
-  it('sorts current items by confidence descending and preserves source order for ties', () => {
-    const parsed = investigationAgentOutputSchema.parse({
+  it('sorts items by confidence descending and preserves source order for ties', () => {
+    const parsed = investigationStateSchema.parse({
       ...validPayload,
       recommendations: [
         { title: 'First tied step', confidence: 0.7 },
@@ -477,46 +471,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(parsed.blind_spots?.map(({ title }) => title)).toEqual(['Higher gap', 'Lower gap']);
   });
 
-  it('preserves historical unscored lists at their original limits and order', () => {
-    const recommendations = Array.from({ length: 5 }, (_, index) => ({
-      title: `Historical step ${index}`,
-    }));
-    const blindSpots = Array.from({ length: 10 }, (_, index) => ({
-      title: `Historical gap ${index}`,
-      description: `Missing data ${index}`,
-    }));
-
-    const parsed = investigationStateSchema.parse({
-      summary: 'Historical investigation.',
-      hypotheses: [],
-      recommendations,
-      blind_spots: blindSpots,
-    });
-
-    expect(parsed.recommendations).toEqual(recommendations);
-    expect(parsed.blind_spots).toEqual(blindSpots);
-  });
-
-  it('ranks scored read items ahead of unscored historical items', () => {
-    const parsed = investigationStateSchema.parse({
-      summary: 'Mixed investigation output.',
-      hypotheses: [],
-      recommendations: [
-        { title: 'Historical first' },
-        { title: 'Lower scored', confidence: 0.4 },
-        { title: 'Historical second' },
-        { title: 'Higher scored', confidence: 0.8 },
-      ],
-    });
-
-    expect(parsed.recommendations?.map(({ title }) => title)).toEqual([
-      'Higher scored',
-      'Lower scored',
-      'Historical first',
-      'Historical second',
-    ]);
-  });
-
   it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
     const tooManyRecommendations = {
       ...validPayload,
@@ -527,7 +481,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(tooManyRecommendations)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(tooManyRecommendations).success).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyRecommendations).success).toBe(false);
   });
 
   it('rejects a recommendation missing its title under both schemas', () => {
@@ -537,7 +491,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(missingTitle)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingTitle).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
   });
 
   it('rejects a blind spot missing its description under both schemas', () => {
@@ -547,7 +501,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(missingDescription)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingDescription).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
   });
 
   it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
@@ -561,7 +515,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(tooManyBlindSpots)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(tooManyBlindSpots).success).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
   });
 
   it('rejects trigger feedback with an unknown field under both schemas', () => {
@@ -579,7 +533,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(unknownField)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(unknownField).success).toBe(false);
+    expect(investigationStateSchema.safeParse(unknownField).success).toBe(false);
   });
 
   it('rejects severity trigger feedback with an invalid enum value under both schemas', () => {
@@ -589,7 +543,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(invalidSeverity)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(invalidSeverity).success).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
   });
 
   it('rejects status trigger feedback with an invalid enum value under both schemas', () => {
@@ -599,7 +553,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(invalidStatus)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(invalidStatus).success).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
   });
 
   it('rejects trigger feedback missing a required field (reason) under both schemas', () => {
@@ -607,7 +561,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     const missingReason = { ...validPayload, trigger_feedback: [withoutReason] };
 
     expect(validate(missingReason)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingReason).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingReason).success).toBe(false);
   });
 
   it('rejects trigger feedback with empty evidence under both schemas', () => {
@@ -617,7 +571,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(emptyEvidence)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(emptyEvidence).success).toBe(false);
+    expect(investigationStateSchema.safeParse(emptyEvidence).success).toBe(false);
   });
 
   it('rejects summary trigger feedback with an empty `to` under both schemas', () => {
@@ -627,7 +581,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(emptySummary)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(emptySummary).success).toBe(false);
+    expect(investigationStateSchema.safeParse(emptySummary).success).toBe(false);
   });
 
   it('rejects a trigger_feedback array exceeding MAX_TRIGGER_FEEDBACK under both schemas', () => {
@@ -637,7 +591,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(tooMany)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(tooMany).success).toBe(false);
+    expect(investigationStateSchema.safeParse(tooMany).success).toBe(false);
   });
 
   it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {
@@ -660,7 +614,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(withImpact)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(withImpact).success).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpact).success).toBe(true);
   });
 
   it('accepts an impact entity with only a name (no optional fields) under both schemas', () => {
@@ -670,7 +624,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(minimalImpact)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(minimalImpact).success).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalImpact).success).toBe(true);
   });
 
   it('accepts an impact entity with feature_id and stream_name under both schemas', () => {
@@ -689,7 +643,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(withKi)).toBe(true);
-    expect(investigationAgentOutputSchema.safeParse(withKi).success).toBe(true);
+    expect(investigationStateSchema.safeParse(withKi).success).toBe(true);
   });
 
   it('rejects an impact entity missing its required name under both schemas', () => {
@@ -699,7 +653,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(missingName)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(missingName).success).toBe(false);
+    expect(investigationStateSchema.safeParse(missingName).success).toBe(false);
   });
 
   it('rejects an impact entities array exceeding MAX_IMPACT_ENTITIES under both schemas', () => {
@@ -713,6 +667,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     };
 
     expect(validate(tooManyEntities)).toBe(false);
-    expect(investigationAgentOutputSchema.safeParse(tooManyEntities).success).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyEntities).success).toBe(false);
   });
 });
