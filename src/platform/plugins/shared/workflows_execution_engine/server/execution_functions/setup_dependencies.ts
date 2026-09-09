@@ -28,6 +28,7 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionCursor } from '../workflow_context_manager/workflow_execution_cursor';
@@ -104,9 +105,9 @@ export async function setupDependencies(
   // actionable message and rethrow a typed, non-retryable error — otherwise the raw
   // throw escapes the task runner and the run is force-recovered into an opaque
   // "Execution abandoned" TaskRecoveryError with no failure reason and no step records.
-  let workflowExecutionGraph: WorkflowGraph;
+  let compiledGraph: WorkflowGraph;
   try {
-    workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+    compiledGraph = WorkflowGraph.fromWorkflowDefinition(
       workflowExecution.workflowDefinition,
       defaultWorkflowSettings
     );
@@ -130,8 +131,13 @@ export async function setupDependencies(
 
   // If the execution is for a specific step, narrow the graph to that step
   if (workflowExecution.stepId) {
-    workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
+    compiledGraph = compiledGraph.getStepGraph(workflowExecution.stepId);
   }
+
+  const workflowExecutionGraph = new WorkflowRuntimeGraph(
+    compiledGraph,
+    workflowExecution.scopeStack ?? []
+  );
 
   const scopedActionsClient = await actions.getActionsClientWithRequest(fakeRequest);
   const connectorExecutor = new ConnectorExecutor(scopedActionsClient);

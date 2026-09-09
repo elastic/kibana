@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows/graph';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -18,7 +19,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: RuntimeGraphView,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}

@@ -10,15 +10,15 @@
 import type {
   ExitCaseBranchNode,
   ExitDefaultBranchNode,
-  WorkflowGraph,
 } from '@kbn/workflows/graph';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { NodeImplementation } from '../node_implementation';
 
 export class ExitBranchNodeImpl implements NodeImplementation {
   constructor(
     private step: ExitCaseBranchNode | ExitDefaultBranchNode,
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: RuntimeGraphView,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 

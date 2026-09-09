@@ -15,7 +15,8 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
@@ -31,7 +32,7 @@ interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
   node: GraphNodeUnion;
@@ -60,7 +61,7 @@ interface StepExecutionRuntimeInit {
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
-  private workflowGraph: WorkflowGraph;
+  private workflowGraph: RuntimeGraphView;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;

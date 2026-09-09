@@ -10,7 +10,8 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
@@ -89,7 +90,7 @@ export class StepExecutionRuntimeFactory {
     private params: {
       workflowExecutionState: WorkflowExecutionState;
       stepIoService: StepIoService;
-      workflowExecutionGraph: WorkflowGraph;
+      workflowExecutionGraph: WorkflowRuntimeGraph;
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest: KibanaRequest;

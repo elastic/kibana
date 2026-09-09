@@ -16,7 +16,7 @@ import {
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   getActiveOtelSpanId,
@@ -30,6 +30,7 @@ import type { StepExecutionRuntimeFactory } from './step_execution_runtime_facto
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -40,7 +41,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: WorkflowRuntimeGraph;
   workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -76,7 +77,7 @@ export class WorkflowExecutionRuntimeManager {
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowGraph;
+  private workflowGraph: WorkflowRuntimeGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;

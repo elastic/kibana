@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { LoopBreakNode } from '@kbn/workflows/graph';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
@@ -24,7 +25,7 @@ export class LoopBreakNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private stepIoService: StepIoService,
-    private workflowGraph: WorkflowGraph
+    private workflowGraph: RuntimeGraphView
   ) {}
 
   public run(): void {

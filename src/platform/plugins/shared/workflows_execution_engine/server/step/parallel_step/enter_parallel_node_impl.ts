@@ -14,7 +14,8 @@ import {
   DEFAULT_PARALLEL_MAX_FAN_OUT,
   ExecutionStatus,
 } from '@kbn/workflows';
-import type { EnterParallelNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { EnterParallelNode } from '@kbn/workflows/graph';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type {
   ParallelBranchResult,
   ParallelBranchState,
@@ -76,7 +77,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private nodesFactory: NodesFactory,
-    private workflowGraph: WorkflowGraph
+    private workflowGraph: RuntimeGraphView
   ) {}
 
   public async run(): Promise<void> {
