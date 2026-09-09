@@ -344,10 +344,18 @@ handful of documents that get deleted afterwards. Running the saved automation i
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
 Saving with the save tool's `run` flag is not an exception to that. The run is named in the save
-confirmation, so approving the save approves the run, and no further question is owed. What is not
-covered is starting a run of your own accord on a workflow already saved: do not execute a saved
-workflow unless the run you are in has told you to. `platform.core.execute_workflow` starts one and
-`platform.core.get_workflow_execution_status` reports on it.
+confirmation, so approving the save approves the run, and no further question is owed — and the save
+tool then starts that run itself, in its own code, under the caller's privileges. It is not asking you
+to run anything afterwards.
+
+So when it reports that the run did not start, that is the answer, not a task. It ran with exactly the
+privileges you have, so starting the same workflow yourself fails the same way; and where the failure
+came after the run began, a second attempt doubles it. Report what it said and stop.
+
+What remains unauthorized is starting a run of your own accord on a workflow already saved: do not
+execute a saved workflow unless the run you are in has told you to.
+`platform.core.execute_workflow` starts one and `platform.core.get_workflow_execution_status` reports
+on it.
 
 ## Corpora larger than 10,000 documents
 

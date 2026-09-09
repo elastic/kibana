@@ -101,6 +101,21 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toMatch(/do not follow a save with an `ask_user_question` offering to run/);
   });
 
+  it('makes the tool the thing that runs the automation, not the agent', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/The tool starts that run itself once the dialog is accepted/);
+    expect(description).toMatch(/execution id to poll rather than a finished result/);
+  });
+
+  it('treats a failed run as something to report rather than to retry by hand', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/When `run.started` is false the run did not happen/);
+    expect(description).toMatch(/Never answer a failed run by executing the workflow yourself/);
+    expect(description).toMatch(/a second one starts the automation twice/);
+  });
+
   it('formats the attachment for the agent', async () => {
     const formatted = await attachmentType.format(
       {

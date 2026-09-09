@@ -290,8 +290,14 @@ describe('aiIndexAutomationsSkill', () => {
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
       expect(content).toMatch(
-        /do not execute a saved\s+workflow unless the run you are in has told you/
+        /do not\s+execute a saved\s+workflow unless the run you are in has told you/
       );
+    });
+
+    it('has the save tool perform the run, so a failure is reported rather than retried', () => {
+      expect(content).toMatch(/starts that run itself, in its own code/);
+      expect(content).toMatch(/that is the answer, not a task/);
+      expect(content).toMatch(/a second attempt doubles it/);
     });
 
     it('does not treat the save tool run flag as an unauthorized run', () => {
