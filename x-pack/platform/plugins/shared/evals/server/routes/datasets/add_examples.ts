@@ -105,7 +105,7 @@ export const registerAddExamplesRoute = ({
             });
           }
 
-          const { added } = await datasetClient.addExamples(datasetId, examples, {
+          const { added, conflicts } = await datasetClient.addExamples(datasetId, examples, {
             rejectDuplicates: onDuplicate !== 'skip',
             ...(source ? { source } : {}),
           });
@@ -113,7 +113,7 @@ export const registerAddExamplesRoute = ({
           return response.ok({
             body: {
               added,
-              skipped_duplicates: examples.length - added,
+              skipped_duplicates: conflicts,
             },
           });
         } catch (error) {

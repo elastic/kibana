@@ -73,9 +73,6 @@ export const READ_FILE_ERROR = i18n.translate(
   'xpack.evals.importDatasetFlyout.readFileErrorMessage',
   { defaultMessage: 'The file could not be read.' }
 );
-export const FILE_ERROR_TITLE = i18n.translate('xpack.evals.importDatasetFlyout.fileErrorTitle', {
-  defaultMessage: 'File cannot be used',
-});
 export const MAPPING_DESCRIPTION = i18n.translate(
   'xpack.evals.importDatasetFlyout.mappingDescription',
   {
@@ -221,8 +218,4 @@ export const getImportButtonLabel = (count: number) =>
 export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.evals.importDatasetFlyout.closeButtonLabel',
   { defaultMessage: 'Close' }
-);
-export const IMPORT_ERROR_MESSAGE = i18n.translate(
-  'xpack.evals.importDatasetFlyout.importErrorMessage',
-  { defaultMessage: 'The import request failed.' }
 );

@@ -730,7 +730,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 2 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 2, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -765,7 +765,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -794,7 +794,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -902,7 +902,7 @@ describe('dataset routes', () => {
         spaceId: 'sales',
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: examples.length });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: examples.length, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -929,7 +929,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1, conflicts: 2 });
 
       const response = await handler(
         context as any,

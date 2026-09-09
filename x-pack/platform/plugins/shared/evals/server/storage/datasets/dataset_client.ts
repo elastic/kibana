@@ -768,9 +768,9 @@ export class DatasetClient {
       source?: 'import';
       enforceDatasetLimit?: boolean;
     } = {}
-  ): Promise<{ added: number }> {
+  ): Promise<{ added: number; conflicts: number }> {
     if (examples.length === 0) {
-      return { added: 0 };
+      return { added: 0, conflicts: 0 };
     }
 
     if (options.enforceDatasetLimit ?? true) {
@@ -822,7 +822,7 @@ export class DatasetClient {
       await this.touchDataset(datasetId);
     }
 
-    return { added };
+    return { added, conflicts };
   }
 
   async updateExample(

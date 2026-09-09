@@ -894,7 +894,7 @@ describe('DatasetClient', () => {
       rejectDuplicates: false,
     });
 
-    expect(regularAdd).toEqual({ added: 0 });
+    expect(regularAdd).toEqual({ added: 0, conflicts: 1 });
     expect(Array.from(examplesStorage.docs.keys())).toEqual([
       DatasetClient.getExampleId({ datasetId: created.id, example: baseExampleA }),
     ]);
@@ -1584,7 +1584,7 @@ describe('DatasetClient', () => {
         // failing here would report an error for work that already succeeded.
         await expect(
           withoutRetryDelays(() => client.addExamples(created.id, [baseExampleA]))
-        ).resolves.toEqual({ added: 1 });
+        ).resolves.toEqual({ added: 1, conflicts: 0 });
         expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(created.id));
       });
 
