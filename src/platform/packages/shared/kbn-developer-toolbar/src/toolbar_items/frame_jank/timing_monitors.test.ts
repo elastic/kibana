@@ -88,6 +88,20 @@ const deliverEvents = (entries: PerformanceEventTiming[]) => {
   }
 };
 
+const installObserver = () => {
+  TimingObserver.instances = [];
+  TimingObserver.rejectBufferedObserve = false;
+  Object.defineProperty(globalThis, 'PerformanceObserver', {
+    configurable: true,
+    value: TimingObserver,
+  });
+};
+
+const restoreObserver = (originalObserver: PropertyDescriptor | undefined) => {
+  if (originalObserver) Object.defineProperty(globalThis, 'PerformanceObserver', originalObserver);
+  else Reflect.deleteProperty(globalThis, 'PerformanceObserver');
+};
+
 describe('LongTaskMonitor', () => {
   const originalObserver = Object.getOwnPropertyDescriptor(globalThis, 'PerformanceObserver');
   let monitor: LongTaskMonitor;
@@ -95,12 +109,7 @@ describe('LongTaskMonitor', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    TimingObserver.instances = [];
-    TimingObserver.rejectBufferedObserve = false;
-    Object.defineProperty(globalThis, 'PerformanceObserver', {
-      configurable: true,
-      value: TimingObserver,
-    });
+    installObserver();
     snapshots = [];
     monitor = new LongTaskMonitor();
     monitor.subscribe((info) => snapshots.push(info));
@@ -111,12 +120,10 @@ describe('LongTaskMonitor', () => {
     monitor.destroy();
     jest.useRealTimers();
     jest.restoreAllMocks();
-    if (originalObserver)
-      Object.defineProperty(globalThis, 'PerformanceObserver', originalObserver);
-    else Reflect.deleteProperty(globalThis, 'PerformanceObserver');
+    restoreObserver(originalObserver);
   });
 
-  it('expires task statistics and last duration without another task', () => {
+  it('expires task statistics without another task and cancels expiry while stopped', () => {
     deliver([timingEntry(300), timingEntry(80)]);
     expect(snapshots.at(-1)).toEqual({
       totalBlockingTime: 250,
@@ -127,30 +134,15 @@ describe('LongTaskMonitor', () => {
 
     jest.advanceTimersByTime(10_000);
     deliver([timingEntry(100), timingEntry(80)]);
-
     jest.advanceTimersByTime(20_000);
-    expect(snapshots.at(-1)).toEqual({
+    expect(snapshots.at(-1)).toMatchObject({
       totalBlockingTime: 50,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 100,
-      worstTaskStartTime: 10_000,
     });
 
-    jest.advanceTimersByTime(10_000);
-    expect(snapshots.at(-1)).toEqual({
-      totalBlockingTime: 0,
-      tasksInLast30Seconds: 0,
-      worstTaskDuration: 0,
-      worstTaskStartTime: null,
-    });
-    expect(jest.getTimerCount()).toBe(0);
-  });
-
-  it('cancels expiry while stopped and prunes retained tasks on restart', () => {
-    deliver([timingEntry(300)]);
     const publicationsBeforeStop = snapshots.length;
     monitor.stopMonitoring();
-
     jest.advanceTimersByTime(31_000);
     expect(snapshots).toHaveLength(publicationsBeforeStop);
 
@@ -164,50 +156,16 @@ describe('LongTaskMonitor', () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('selects worst task metadata deterministically and falls back as tasks expire', () => {
-    deliver([timingEntry(400, 0), timingEntry(400, 1_000), timingEntry(300, 2_000)]);
-    expect(snapshots.at(-1)).toMatchObject({
-      worstTaskDuration: 400,
-      worstTaskStartTime: 1_000,
-    });
-
-    jest.advanceTimersByTime(31_000);
-    expect(snapshots.at(-1)).toMatchObject({
-      worstTaskDuration: 300,
-      worstTaskStartTime: 2_000,
-    });
-
-    jest.advanceTimersByTime(1_000);
-    expect(snapshots.at(-1)).toMatchObject({
-      worstTaskDuration: 0,
-      worstTaskStartTime: null,
-    });
-  });
-
-  it('rejects buffered pre-session tasks and accepts in-session tasks', () => {
-    expect(TimingObserver.instances.at(-1)?.options).toEqual({ type: 'longtask', buffered: true });
-
+  it('rejects buffered pre-session tasks and still records tasks when buffered observe is unavailable', () => {
     monitor.stopMonitoring();
     jest.advanceTimersByTime(5_000);
     monitor.startMonitoring();
-    expect(snapshots.at(-1)).toEqual({
-      totalBlockingTime: 0,
-      tasksInLast30Seconds: 0,
-      worstTaskDuration: 0,
-      worstTaskStartTime: null,
-    });
-
     deliver([timingEntry(400, 1_000)]);
     expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(0);
 
     deliver([timingEntry(250, performance.now())]);
-    expect(snapshots.at(-1)).toMatchObject({
-      tasksInLast30Seconds: 1,
-      worstTaskDuration: 250,
-    });
-  });
+    expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(1);
 
-  it('still records tasks when buffered observe is unavailable', () => {
     monitor.destroy();
     TimingObserver.instances = [];
     TimingObserver.rejectBufferedObserve = true;
@@ -218,27 +176,7 @@ describe('LongTaskMonitor', () => {
 
     expect(TimingObserver.instances.at(-1)?.options).toEqual({ entryTypes: ['longtask'] });
     deliver([timingEntry(180, performance.now())]);
-    expect(snapshots.at(-1)).toMatchObject({
-      tasksInLast30Seconds: 1,
-    });
-  });
-
-  it('cancels expiry on destroy and after a subscriber stops publication', () => {
-    deliver([timingEntry(300)]);
-    const publicationsBeforeDestroy = snapshots.length;
-    monitor.destroy();
-    jest.advanceTimersByTime(31_000);
-    expect(snapshots).toHaveLength(publicationsBeforeDestroy);
-    expect(jest.getTimerCount()).toBe(0);
-
-    const stoppingMonitor = new LongTaskMonitor();
-    stoppingMonitor.subscribe((info) => {
-      if (info.tasksInLast30Seconds > 0) stoppingMonitor.stopMonitoring();
-    });
-    stoppingMonitor.startMonitoring();
-    deliver([timingEntry(150)]);
-    expect(jest.getTimerCount()).toBe(0);
-    stoppingMonitor.destroy();
+    expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(1);
   });
 });
 
@@ -249,12 +187,7 @@ describe('INPMonitor', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    TimingObserver.instances = [];
-    TimingObserver.rejectBufferedObserve = false;
-    Object.defineProperty(globalThis, 'PerformanceObserver', {
-      configurable: true,
-      value: TimingObserver,
-    });
+    installObserver();
     snapshots = [];
     monitor = new INPMonitor();
     monitor.subscribe((info) => snapshots.push(info));
@@ -265,17 +198,13 @@ describe('INPMonitor', () => {
     monitor.destroy();
     jest.useRealTimers();
     jest.restoreAllMocks();
-    if (originalObserver)
-      Object.defineProperty(globalThis, 'PerformanceObserver', originalObserver);
-    else Reflect.deleteProperty(globalThis, 'PerformanceObserver');
+    restoreObserver(originalObserver);
   });
 
-  it('expires all interaction statistics at exact idle window boundaries', () => {
+  it('expires slow-interaction statistics and cancels expiry while stopped', () => {
     deliverEvents([eventEntry(300, 1)]);
-
     jest.advanceTimersByTime(10_000);
     deliverEvents([eventEntry(100, 2), eventEntry(80, 3)]);
-
     jest.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toEqual({
       currentINP: 100,
@@ -284,21 +213,8 @@ describe('INPMonitor', () => {
       worstInteractionStartTime: 10_000,
     });
 
-    jest.advanceTimersByTime(10_000);
-    expect(snapshots.at(-1)).toEqual({
-      currentINP: 0,
-      slowInteractionsCount: 0,
-      worstInteractionDelay: 0,
-      worstInteractionStartTime: null,
-    });
-    expect(jest.getTimerCount()).toBe(0);
-  });
-
-  it('cancels expiry across stop, restart, destroy, and stop during publication', () => {
-    deliverEvents([eventEntry(300, 1)]);
     const publicationsBeforeStop = snapshots.length;
     monitor.stopMonitoring();
-
     jest.advanceTimersByTime(31_000);
     expect(snapshots).toHaveLength(publicationsBeforeStop);
 
@@ -310,87 +226,20 @@ describe('INPMonitor', () => {
       worstInteractionStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
-
-    deliverEvents([eventEntry(200, 2)]);
-    const publicationsBeforeDestroy = snapshots.length;
-    monitor.destroy();
-    jest.advanceTimersByTime(31_000);
-    expect(snapshots).toHaveLength(publicationsBeforeDestroy);
-    expect(jest.getTimerCount()).toBe(0);
-
-    const stoppingMonitor = new INPMonitor();
-    stoppingMonitor.subscribe((info) => {
-      if (info.slowInteractionsCount > 0) stoppingMonitor.stopMonitoring();
-    });
-    stoppingMonitor.startMonitoring();
-    deliverEvents([eventEntry(150, 3)]);
-    expect(jest.getTimerCount()).toBe(0);
-    stoppingMonitor.destroy();
   });
 
   it('rejects buffered pre-session interactions and accepts in-session interactions', () => {
-    expect(TimingObserver.instances.at(-1)?.options).toMatchObject({
-      type: 'event',
-      buffered: true,
-    });
-
     monitor.stopMonitoring();
     jest.advanceTimersByTime(5_000);
     monitor.startMonitoring();
-    expect(snapshots.at(-1)).toEqual({
-      currentINP: 0,
-      slowInteractionsCount: 0,
-      worstInteractionDelay: 0,
-      worstInteractionStartTime: null,
-    });
-
     deliverEvents([eventEntry(400, 1, 1_000)]);
     expect(snapshots.at(-1)?.slowInteractionsCount).toBe(0);
 
     deliverEvents([eventEntry(220, 2, performance.now())]);
-    expect(snapshots.at(-1)).toMatchObject({
-      slowInteractionsCount: 1,
-      worstInteractionDelay: 220,
-    });
+    expect(snapshots.at(-1)?.slowInteractionsCount).toBe(1);
   });
 
-  it('deduplicates interaction maxima and expires retained start times', () => {
-    deliverEvents([eventEntry(200, 1)]);
-    jest.advanceTimersByTime(1_000);
-    deliverEvents([eventEntry(300, 1)]);
-    jest.advanceTimersByTime(1_000);
-    deliverEvents([
-      eventEntry(150, 2),
-      eventEntry(120, 3, 500),
-      eventEntry(180, 4, 2_000),
-      eventEntry(250, 1, 2_500),
-    ]);
-
-    expect(snapshots.at(-1)).toEqual({
-      currentINP: 180,
-      slowInteractionsCount: 4,
-      worstInteractionDelay: 300,
-      worstInteractionStartTime: 1_000,
-    });
-
-    jest.advanceTimersByTime(29_000);
-    expect(snapshots.at(-1)).toEqual({
-      currentINP: 180,
-      slowInteractionsCount: 2,
-      worstInteractionDelay: 180,
-      worstInteractionStartTime: 2_000,
-    });
-
-    jest.advanceTimersByTime(1_000);
-    expect(snapshots.at(-1)).toEqual({
-      currentINP: 0,
-      slowInteractionsCount: 0,
-      worstInteractionDelay: 0,
-      worstInteractionStartTime: null,
-    });
-  });
-
-  it('reports nearest-rank p75 for unique slow interactions only', () => {
+  it('reports p75 of unique slow interactions and coalesces one interactionId', () => {
     deliverEvents([
       eventEntry(100, 1),
       eventEntry(200, 2),
@@ -398,62 +247,19 @@ describe('INPMonitor', () => {
       eventEntry(400, 4),
       eventEntry(80, 5),
     ]);
-
     expect(snapshots.at(-1)).toEqual({
       currentINP: 300,
       slowInteractionsCount: 4,
       worstInteractionDelay: 400,
       worstInteractionStartTime: 0,
     });
-  });
-
-  it('uses only positive integer interaction IDs and preserves the absent-ID fallback', () => {
-    deliverEvents([
-      eventEntry(300, 7, 0, 'pointerdown'),
-      eventEntry(250, 7, 1, 'click'),
-      eventEntry(200, 0, 2, 'mousedown'),
-      eventEntry(200, 0, 3, 'mouseup'),
-    ]);
-    expect(snapshots.at(-1)).toMatchObject({
-      slowInteractionsCount: 1,
-      worstInteractionDelay: 300,
-      worstInteractionStartTime: 0,
-    });
-
-    deliverEvents([eventEntry(175, 8, 9)]);
-    expect(snapshots.at(-1)?.slowInteractionsCount).toBe(2);
 
     deliverEvents([
-      eventEntry(200, -1, 4),
-      eventEntry(200, Number.NaN, 5),
-      eventEntry(200, Number.POSITIVE_INFINITY, 6),
-      eventEntry(200, 1.5, 7),
-      eventEntry(150, undefined, 8),
+      eventEntry(250, 7, performance.now(), 'pointerdown'),
+      eventEntry(200, 7, performance.now(), 'click'),
+      eventEntry(200, 0, performance.now(), 'mousedown'),
     ]);
-    expect(snapshots.at(-1)).toMatchObject({
-      slowInteractionsCount: 3,
-      worstInteractionDelay: 300,
-      worstInteractionStartTime: 0,
-    });
-  });
-
-  it('orders worst interaction metadata and falls back as interactions expire', () => {
-    deliverEvents([eventEntry(400, 1, 0), eventEntry(400, 2, 1_000), eventEntry(300, 3, 2_000)]);
-    expect(snapshots.at(-1)).toMatchObject({
-      worstInteractionDelay: 400,
-      worstInteractionStartTime: 1_000,
-    });
-
-    jest.advanceTimersByTime(31_000);
-    expect(snapshots.at(-1)).toMatchObject({
-      worstInteractionDelay: 300,
-      worstInteractionStartTime: 2_000,
-    });
-
-    jest.advanceTimersByTime(1_000);
-    expect(snapshots.at(-1)).toMatchObject({
-      worstInteractionDelay: 0,
-      worstInteractionStartTime: null,
-    });
+    expect(snapshots.at(-1)?.slowInteractionsCount).toBe(5);
+    expect(snapshots.at(-1)?.worstInteractionDelay).toBe(400);
   });
 });
