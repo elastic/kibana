@@ -7,7 +7,10 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -66,6 +69,12 @@ const saveAutomationSchema = z
       .describe(
         'Context Engine AI index id. Defaults to the id from the ai_index attachment in this conversation.'
       ),
+    run: z
+      .boolean()
+      .optional()
+      .describe(
+        'Run the automation over the full corpus straight after saving it. Set only when the user asked for it: the confirmation dialog says so, and the run costs a model call per document. Enables the workflow when its definition is disabled. Returns an execution id to poll rather than waiting for completion.'
+      ),
   })
   .superRefine((value, ctx) => {
     const sourceCount = [value.workflowAttachmentId, value.workflowYaml, value.workflowId].filter(
@@ -123,6 +132,7 @@ export const createSaveAutomationTool = ({
     - To persist a draft from generate_workflow, pass workflowAttachmentId.
     - To persist YAML that did not come from generate_workflow, pass workflowYaml.
     - If the user already saved the workflow manually, pass workflowId instead.
+    - To run it over the full corpus straight after saving, pass run: true.
     Requires an ai_index attachment in the conversation unless aiIndexId is provided explicitly.
   `,
   schema: saveAutomationSchema,
@@ -171,6 +181,25 @@ export const createSaveAutomationTool = ({
           });
         }
         workflowLabel = workflowName ? `workflow "${workflowName}"` : `workflow "${workflowId}"`;
+      }
+
+      // The dialog is binary, so a run the caller cannot perform is never offered as one: without
+      // the execute privilege this degrades to a plain save, which is what the handler will do.
+      const willRun =
+        toolParams.run === true &&
+        (await hasWorkflowExecutePrivilege({
+          security: await getSecurityStart(),
+          request,
+          spaceId,
+        }));
+
+      if (willRun) {
+        return {
+          title: 'Save and run workflow automation',
+          message: `Save ${workflowLabel} to Kibana, attach it to AI index "${aiIndexLabel}", and run it now over the full corpus?`,
+          confirm_text: 'Save and run',
+          cancel_text: 'Cancel',
+        };
       }
 
       return {

@@ -15,9 +15,12 @@ import { createSaveAutomationTool } from './tool';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
+  hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
 }));
 
-const { hasWorkflowReadPrivilege } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { hasWorkflowReadPrivilege, hasWorkflowExecutePrivilege } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows'
+);
 
 describe('save_automation tool', () => {
   const getWorkflowMock = jest.fn();
@@ -74,8 +77,10 @@ describe('save_automation tool', () => {
   const createConfirmationContext = (
     toolParams: {
       workflowAttachmentId?: string;
+      workflowYaml?: string;
       workflowId?: string;
       aiIndexId?: string;
+      run?: boolean;
     },
     attachments: AttachmentStateManager = createAttachments(),
     spaceId = 'default'
@@ -94,7 +99,8 @@ describe('save_automation tool', () => {
 
   beforeEach(() => {
     getWorkflowMock.mockReset();
-    hasWorkflowReadPrivilege.mockResolvedValue(true);
+    hasWorkflowReadPrivilege.mockClear().mockResolvedValue(true);
+    hasWorkflowExecutePrivilege.mockClear().mockResolvedValue(true);
   });
 
   it('uses the expected tool id', () => {
@@ -196,5 +202,63 @@ describe('save_automation tool', () => {
     expect(savedConfirmation?.message).toContain('workflow "workflow-1"');
     expect(savedConfirmation?.message).not.toContain('Secret Workflow');
     expect(getWorkflowMock).not.toHaveBeenCalled();
+  });
+
+  describe('run confirmation', () => {
+    it('discloses the full-corpus run in the dialog the user approves', async () => {
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowAttachmentId: 'attachment-1',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation).toEqual(
+        expect.objectContaining({
+          title: 'Save and run workflow automation',
+          confirm_text: 'Save and run',
+          cancel_text: 'Cancel',
+        })
+      );
+      expect(confirmation?.message).toContain('run it now over the full corpus');
+      expect(confirmation?.message).toContain('workflow "Index Metadata Pilot"');
+    });
+
+    it('degrades to a plain save when the caller cannot execute workflows', async () => {
+      hasWorkflowExecutePrivilege.mockResolvedValue(false);
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowAttachmentId: 'attachment-1',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation).toEqual(
+        expect.objectContaining({
+          title: 'Save workflow automation',
+          confirm_text: 'Save and attach',
+        })
+      );
+      expect(confirmation?.message).not.toContain('full corpus');
+    });
+
+    it('does not check the execute privilege when no run was asked for', async () => {
+      const tool = createTool();
+
+      await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowAttachmentId: 'attachment-1',
+          aiIndexId: 'my-ai-index',
+        })
+      );
+
+      expect(hasWorkflowExecutePrivilege).not.toHaveBeenCalled();
+    });
   });
 });

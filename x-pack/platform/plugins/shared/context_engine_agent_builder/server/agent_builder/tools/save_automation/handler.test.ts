@@ -32,10 +32,17 @@ jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowCreatePrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
+  hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
+  executeWorkflow: jest.fn(),
 }));
 
-const { hasWorkflowReadPrivilege, hasWorkflowCreatePrivilege, hasWorkflowUpdatePrivilege } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const {
+  hasWorkflowReadPrivilege,
+  hasWorkflowCreatePrivilege,
+  hasWorkflowUpdatePrivilege,
+  hasWorkflowExecutePrivilege,
+  executeWorkflow,
+} = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
 
 const WORKFLOW_ATTACHMENT_ID = 'workflow-attachment-1';
 const WORKFLOW_YAML = 'name: pilot\nsteps: []';
@@ -170,6 +177,11 @@ describe('saveAutomationHandler', () => {
     hasWorkflowReadPrivilege.mockResolvedValue(true);
     hasWorkflowCreatePrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);
+    hasWorkflowExecutePrivilege.mockResolvedValue(true);
+    executeWorkflow.mockResolvedValue({
+      success: true,
+      execution: { execution_id: 'exec-1' },
+    });
 
     aiIndexService = {
       addAutomation: jest.fn(),
@@ -312,6 +324,121 @@ describe('saveAutomationHandler', () => {
     });
     expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('wf-new', 'default');
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('run after save', () => {
+    const save = (params: Parameters<typeof saveAutomationHandler>[0]['params']) =>
+      saveAutomationHandler({
+        params,
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager() as never,
+        logger,
+        getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      });
+
+    beforeEach(() => {
+      aiIndexService.addAutomation.mockResolvedValue('attached');
+      workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+    });
+
+    it('does not run the automation unless asked to', async () => {
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID });
+
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.run).toBeUndefined();
+    });
+
+    it('starts the run without waiting, and returns the execution id to poll', async () => {
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-new', waitForCompletion: false })
+      );
+      expect(result.run).toEqual({ started: true, executionId: 'exec-1' });
+      expect(result.status).toBe('saved_and_attached');
+    });
+
+    it('enables a disabled definition, since it cannot be run by id otherwise', async () => {
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-new', enabled: false });
+
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        'wf-new',
+        { enabled: true },
+        'default',
+        request
+      );
+      expect(result.run).toEqual({
+        started: true,
+        executionId: 'exec-1',
+        enabledForRun: true,
+      });
+    });
+
+    it('leaves an already enabled definition alone', async () => {
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-new', enabled: true });
+
+      await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalledWith(
+        'wf-new',
+        { enabled: true },
+        'default',
+        request
+      );
+    });
+
+    it('keeps the save when the caller cannot execute workflows', async () => {
+      hasWorkflowExecutePrivilege.mockResolvedValue(false);
+
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.status).toBe('saved_and_attached');
+      expect(result.run).toEqual({
+        started: false,
+        reason: expect.stringContaining('execute privilege is required'),
+      });
+    });
+
+    it('keeps the saved workflow when the run fails rather than rolling it back', async () => {
+      executeWorkflow.mockResolvedValue({ success: false, error: 'boom' });
+
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
+      expect(result.status).toBe('saved_and_attached');
+      expect(result.run).toEqual({ started: false, reason: 'boom' });
+    });
+
+    it('keeps the saved workflow when starting the run throws', async () => {
+      executeWorkflow.mockRejectedValue(new Error('engine unavailable'));
+
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
+      expect(result.status).toBe('saved_and_attached');
+      expect(result.run).toEqual({ started: false, reason: 'engine unavailable' });
+    });
+
+    it('runs a workflow that was attached by id', async () => {
+      const result = await save({ workflowId: 'wf-existing', run: true });
+
+      expect(executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-existing', waitForCompletion: false })
+      );
+      expect(result).toEqual({
+        aiIndexId: 'my-ai-index',
+        workflowId: 'wf-existing',
+        status: 'attached',
+        run: { started: true, executionId: 'exec-1' },
+      });
+    });
   });
 
   it('rejects attaching a workflow id that does not exist', async () => {
