@@ -270,9 +270,8 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // Keep the client authentication paired with the authenticated credential, including its
-    // absence on inbound requests. Only trusted loopback or internally created credentials may
-    // fall back to Kibana's own secret.
+    // Keep supplied client authentication paired with the authenticated credential, falling back
+    // to Kibana's secret for UIAM bearer tokens and trusted internally created credentials.
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
     const clientAuthentication =

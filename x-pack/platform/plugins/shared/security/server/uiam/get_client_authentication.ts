@@ -9,12 +9,12 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
-/** Client authentication supplied by the caller; an empty object preserves its absence. */
+/** Client authentication supplied by the caller. */
 export interface UiamClientAuthentication {
   readonly sharedSecret?: string;
 }
 
-/** Preserves request client authentication, allowing a default only for internally created requests. */
+/** Preserves supplied client authentication and defaults to Kibana's secret when absent. */
 export const getUiamClientAuthentication = (
   request: KibanaRequest
 ): UiamClientAuthentication | undefined => {
@@ -22,5 +22,5 @@ export const getUiamClientAuthentication = (
   if (typeof sharedSecret === 'string') {
     return { sharedSecret };
   }
-  return request.isFakeRequest ? undefined : {};
+  return undefined;
 };

@@ -41,7 +41,7 @@ export type UiamClientAuthenticationParams =
       credential: HTTPAuthorizationHeader;
     }
   | {
-      /** The credential rode in over HTTP, so the request has to vouch for it. */
+      /** The credential arrived over HTTP; API keys require a trusted caller attestation. */
       credentialSource: 'inbound';
       /** The credential that will be sent to Elasticsearch. */
       credential: HTTPAuthorizationHeader;
@@ -70,8 +70,8 @@ export interface CoreUiamService {
    * - internal UIAM credential -> the shared secret;
    * - external (user-created) UIAM credential -> `undefined`, UIAM rejects external API keys
    * presented with client authentication;
-   * - inbound UIAM credential -> the shared secret only with a valid attestation, proving the
-   * loopback caller is trusted.
+   * - inbound UIAM bearer token -> the shared secret;
+   * - inbound UIAM API key -> the shared secret only with a valid caller attestation.
    */
   getElasticsearchClientAuthentication(params: UiamClientAuthenticationParams): string | undefined;
 }
@@ -101,7 +101,10 @@ export function createCoreUiamService(sharedSecret: string): CoreUiamService {
         return;
       }
 
-      if (params.credentialSource === 'inbound') {
+      if (
+        params.credentialSource === 'inbound' &&
+        params.credential.scheme.toLowerCase() !== 'bearer'
+      ) {
         // The attestation is bound to the credential it rides with, so one captured from another
         // request (or another credential) does not validate here.
         const expected = deriveInternalCallerAttestation(sharedSecret, params.credential);

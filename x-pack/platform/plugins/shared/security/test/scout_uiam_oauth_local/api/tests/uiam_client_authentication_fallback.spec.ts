@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
-import { apiTest, COMMON_HEADERS, TEST_USERNAME } from '../fixtures';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  TEST_USERNAME,
+} from '../../../scout_uiam_client_auth_local/api/fixtures';
 
-// The isolated server config deliberately gives Kibana a secret that UIAM does not accept.
+// This config uses the shared secret accepted by the local UIAM service.
 apiTest.describe(
-  '[NON-MKI] Inbound UIAM ephemeral token client authentication',
+  '[NON-MKI] UIAM ephemeral token client authentication fallback',
   { tag: tags.serverless.security.complete },
   () => {
     apiTest(
-      'preserves the gateway secret for primary Elasticsearch authentication',
+      'defaults to the Kibana secret for primary Elasticsearch authentication',
       async ({ apiClient, ephemeralToken }) => {
         const response = await apiClient.get('internal/security/me', {
           headers: {
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
           },
           responseType: 'json',
         });
@@ -38,13 +40,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'preserves the gateway secret for secondary Elasticsearch authentication',
+      'defaults to the Kibana secret for secondary Elasticsearch authentication',
       async ({ apiClient, ephemeralToken }) => {
         const response = await apiClient.post('test_endpoints/uiam/secondary_auth', {
           headers: {
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
           },
           responseType: 'json',
           body: {},
@@ -56,13 +57,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'preserves the gateway secret for direct UIAM calls',
+      'defaults to the Kibana secret for direct UIAM calls',
       async ({ apiClient, ephemeralToken }) => {
         const response = await apiClient.get('internal/security/oauth/clients', {
           headers: {
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
           },
           responseType: 'json',
         });
@@ -73,13 +73,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'preserves the gateway secret when granting an Elasticsearch API key',
+      'defaults to the Kibana secret when granting an Elasticsearch API key',
       async ({ apiClient, esClient, ephemeralToken }) => {
         const grantResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
           headers: {
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
           },
           responseType: 'json',
           body: {},
@@ -100,27 +99,19 @@ apiTest.describe(
       }
     );
 
-    for (const { description, clientHeaders } of [
-      { description: 'missing', clientHeaders: {} },
-      {
-        description: 'invalid',
-        clientHeaders: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'invalid-gateway-secret' },
-      },
-    ]) {
-      apiTest(
-        `rejects ${description} gateway client authentication when the Kibana secret is invalid`,
-        async ({ apiClient, ephemeralToken }) => {
-          const response = await apiClient.get('internal/security/me', {
-            headers: {
-              ...COMMON_HEADERS,
-              Authorization: `Bearer ${ephemeralToken}`,
-              ...clientHeaders,
-            },
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(401);
-        }
-      );
-    }
+    apiTest(
+      'rejects a supplied invalid secret instead of replacing it',
+      async ({ apiClient, ephemeralToken }) => {
+        const response = await apiClient.get('internal/security/me', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `Bearer ${ephemeralToken}`,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'invalid-gateway-secret',
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(401);
+      }
+    );
   }
 );

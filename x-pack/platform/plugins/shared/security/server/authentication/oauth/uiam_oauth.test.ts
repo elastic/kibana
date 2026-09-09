@@ -56,7 +56,7 @@ describe('UiamOAuth', () => {
         'essu_ephemeral_token',
         undefined,
         undefined,
-        sharedSecret === undefined ? {} : { sharedSecret }
+        sharedSecret === undefined ? undefined : { sharedSecret }
       );
     }
   );
@@ -98,7 +98,7 @@ describe('UiamOAuth', () => {
           project_id: 'test-project-id',
           client_name: 'Test',
         },
-        {}
+        undefined
       );
     });
 
@@ -126,7 +126,11 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.createClient(request, params);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', params, {});
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        params,
+        undefined
+      );
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -168,7 +172,7 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         undefined,
-        {}
+        undefined
       );
     });
 
@@ -184,7 +188,7 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         undefined,
         'my-project-id',
-        {}
+        undefined
       );
     });
   });
@@ -221,7 +225,7 @@ describe('UiamOAuth', () => {
           client_name: 'Updated',
           client_metadata: { k: 'v' },
         },
-        {}
+        undefined
       );
     });
 
@@ -246,7 +250,7 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         params,
-        {}
+        undefined
       );
     });
   });
@@ -277,7 +281,7 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         'done',
-        {}
+        undefined
       );
     });
   });
@@ -299,7 +303,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.deleteClient(request, 'c1');
 
       expect(result).toBe(true);
-      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', {});
+      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', undefined);
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -343,7 +347,7 @@ describe('UiamOAuth', () => {
         'c1',
         'conn1',
         undefined,
-        {}
+        undefined
       );
     });
 
@@ -365,7 +369,7 @@ describe('UiamOAuth', () => {
         undefined,
         undefined,
         'my-project-id',
-        {}
+        undefined
       );
     });
   });
@@ -401,7 +405,7 @@ describe('UiamOAuth', () => {
         'c1',
         'conn1',
         { name: 'New name' },
-        {}
+        undefined
       );
     });
 
@@ -447,7 +451,7 @@ describe('UiamOAuth', () => {
         'c1',
         'conn1',
         'reason',
-        {}
+        undefined
       );
     });
   });
@@ -473,7 +477,7 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         'conn1',
-        {}
+        undefined
       );
     });
 
@@ -514,7 +518,11 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.resolveUsers(request, ['user-1']);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.resolveUsers).toHaveBeenCalledWith('essu_access_token', ['user-1'], {});
+      expect(mockUiam.resolveUsers).toHaveBeenCalledWith(
+        'essu_access_token',
+        ['user-1'],
+        undefined
+      );
     });
 
     it('propagates the error when UIAM call fails', async () => {

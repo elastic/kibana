@@ -921,7 +921,7 @@ describe('ClusterClient', () => {
       );
     });
 
-    it('does not specify client authentication for UIAM credentials in real requests even if in UIAM mode', () => {
+    it('defaults to Kibana client authentication for inbound UIAM bearer tokens', () => {
       const config = createConfig({
         requestHeadersWhitelist: ['authorization'],
       });
@@ -951,12 +951,10 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
             'x-opaque-id': expect.any(String),
           },
         })
-      );
-      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
-        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -1006,9 +1004,9 @@ describe('ClusterClient', () => {
       expect(forwardedHeaders).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
     });
 
-    it('does not specify client authentication for UIAM credentials in real requests with an attestation bound to another credential', () => {
+    it('does not specify client authentication for UIAM API keys in real requests with an attestation bound to another credential', () => {
       const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
-      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' });
 
       const clusterClient = new ClusterClient({
         config,
@@ -1027,7 +1025,7 @@ describe('ClusterClient', () => {
           // here must not authorize the shared secret.
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
             'some-shared-secret',
-            new HTTPAuthorizationHeader('Bearer', 'essu_dev_other')
+            new HTTPAuthorizationHeader('ApiKey', 'essu_dev_other')
           ),
         },
       });
@@ -1042,9 +1040,9 @@ describe('ClusterClient', () => {
       );
     });
 
-    it('does not specify client authentication for UIAM credentials in real requests with an invalid attestation', () => {
+    it('does not specify client authentication for UIAM API keys in real requests with an invalid attestation', () => {
       const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
-      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' });
 
       const clusterClient = new ClusterClient({
         config,
@@ -1654,9 +1652,7 @@ describe('ClusterClient', () => {
             headers: {
               ...defaultHeaders,
               [ES_SECONDARY_AUTH_HEADER]: headers.authorization,
-              ...(clientAuthentication === undefined
-                ? {}
-                : { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }),
+              [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication ?? 'some-shared-secret',
             },
           })
         );
