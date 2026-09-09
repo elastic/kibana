@@ -30,6 +30,10 @@
     "@kbn/search-inference-endpoints",
     "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/connector-specs",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/utility-types"
   ]
 }
