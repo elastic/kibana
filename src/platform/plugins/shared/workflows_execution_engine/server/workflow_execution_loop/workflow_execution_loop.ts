@@ -100,6 +100,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     ]);
   } catch (error) {
     workflowExecutionCursor.captureError(error);
+    workflowExecutionCursor.stop();
+    workflowRuntime.branchExecutor?.abortActive();
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params, {

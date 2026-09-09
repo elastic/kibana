@@ -8,6 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { BranchExecutor } from './branch_executor';
 import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
@@ -15,6 +16,7 @@ import type { WorkflowExecutionLoopParams } from './types';
  * Runs nodes until the cursor stops (terminal, parked wait, or cancel).
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
+  params.workflowRuntime.branchExecutor = new BranchExecutor(params);
   while (params.workflowExecutionCursor.isExecuting) {
     await runNode(params);
     // Parked wait: keep currentNode for resume. Committing a stale undefined

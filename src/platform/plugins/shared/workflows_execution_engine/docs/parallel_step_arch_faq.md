@@ -1,5 +1,7 @@
 # Parallel step — architecture FAQ
 
+> Historical v1 design. For the current branch-cursor implementation, supported scope, and recovery guarantees, see [Parallel branch execution](parallel_branch_execution.md).
+
 A Q&A walkthrough of how the `parallel` step works, aimed at reviewers and future
 maintainers. Line references point at the implementation as of the static
 `branches` PR.

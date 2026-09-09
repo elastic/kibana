@@ -11,6 +11,8 @@ import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import { catchError } from './catch_error';
+import type { ExecutionBudget } from './execution_budget';
+import { createExecutionFence, outsideExecutionFence } from './execution_fence';
 import { handleExecutionDelay } from './handle_execution_delay';
 import { processNodeStackMonitoring } from './run_stack_monitor/process_node_stack_monitoring';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
@@ -19,6 +21,13 @@ import type { NodeImplementation } from '../step/node_implementation';
 import { isCancellableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+
+export interface RunNodeOptions {
+  runtime?: StepExecutionRuntime;
+  parentSignal?: AbortSignal;
+  deadline?: number;
+  budget?: ExecutionBudget;
+}
 
 /**
  * Invokes the cancellable node's `onCancel` hook when the step's abort signal fired.
@@ -36,13 +45,26 @@ async function runOnCancelIfNeeded(
     return;
   }
 
+  const cleanupFence = createExecutionFence();
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    await nodeImplementation.onCancel();
+    await Promise.race([
+      cleanupFence.run(() => Promise.resolve(nodeImplementation.onCancel())),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(() => {
+          workflowLogger.logWarn('Node cancellation cleanup exceeded its 1s deadline');
+          resolve();
+        }, 1000);
+      }),
+    ]);
   } catch (onCancelError) {
     workflowLogger.logError(
       'Failed to execute onCancel hook - continuing execution',
       onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
     );
+  } finally {
+    cleanupFence.close();
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -75,12 +97,21 @@ async function runOnCancelIfNeeded(
  *
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
-export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
+export async function runNode(
+  params: WorkflowExecutionLoopParams,
+  options: RunNodeOptions = {}
+): Promise<void> {
   const { workflowExecutionCursor, stepExecutionRuntimeFactory } = params;
   const node = workflowExecutionCursor.currentNode;
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
   let nodeImplementation: NodeImplementation | undefined;
+  const fence = createExecutionFence(() => workflowExecutionCursor.currentStackFrames);
+  let release: (() => void) | undefined;
+  let inFlightOperation: Promise<void> | undefined;
+  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  let unlinkAbort: (() => void) | undefined;
+  let closeAbortWait: (() => void) | undefined;
 
   if (!node) {
     return;
@@ -101,14 +132,44 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   }
 
   try {
-    stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
-      nodeId: node.id,
-      stackFrames: workflowExecutionCursor.currentStackFrames,
-    });
+    stepExecutionRuntime =
+      options.runtime ??
+      stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: node.id,
+        stackFrames: workflowExecutionCursor.currentStackFrames,
+      });
 
     // Build the node implementation before the cancel short-circuit so cancellable nodes
     // (e.g. workflow.execute holding a child execution) still get their onCancel hook.
     nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
+    const runtime = stepExecutionRuntime;
+    const implementation = nodeImplementation;
+    const parentSignal = options.parentSignal ?? params.signal;
+    const abort = () => {
+      fence.close();
+      runtime.abortController.abort(parentSignal.reason);
+    };
+    parentSignal.addEventListener('abort', abort, { once: true });
+    unlinkAbort = () => parentSignal.removeEventListener('abort', abort);
+    if (parentSignal.aborted) abort();
+    if (options.deadline !== undefined) {
+      const timeout = () => {
+        fence.close();
+        runtime.abortController.abort(new Error('Parallel branch deadline exceeded'));
+      };
+      const remaining = options.deadline - Date.now();
+      if (remaining <= 0) timeout();
+      else deadlineTimer = setTimeout(timeout, remaining);
+    }
+    const aborted = new Promise<void>((resolve) => {
+      const onAbort = () => {
+        fence.close();
+        resolve();
+      };
+      runtime.abortController.signal.addEventListener('abort', onAbort, { once: true });
+      closeAbortWait = () => runtime.abortController.signal.removeEventListener('abort', onAbort);
+      if (runtime.abortController.signal.aborted) onAbort();
+    });
 
     if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
       await cancelWorkflowIfRequested(
@@ -135,6 +196,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       return;
     }
 
+    if (runtime.abortController.signal.aborted) return;
+    // Parallel coordinators release execution capacity while their descendants run.
+    if (options.budget && node.type !== 'enter-parallel') {
+      release = await options.budget.acquire(runtime.abortController.signal);
+    }
+    if (runtime.abortController.signal.aborted) return;
+
     // Pre-warm: rehydrate any evicted step outputs that the upcoming step will need.
     // This must happen before getContext() is called (which is synchronous).
     await stepExecutionRuntime.contextManager.ensureContextReady();
@@ -151,7 +219,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * - Custom monitoring logic for monitor-able nodes
      * The order of these promises is important - we want to stop monitoring
      */
-    const runMonitorPromise = runStackMonitor(params, stepExecutionRuntime, monitorAbortController);
+    const runMonitorPromise = runStackMonitor(
+      params,
+      stepExecutionRuntime,
+      monitorAbortController
+    ).catch((error) => {
+      if (!params.boundaryNodeId || !runtime.abortController.signal.aborted)
+        workflowExecutionCursor.captureError(error);
+      throw error;
+    });
     let runStepPromise: Promise<void> = Promise.resolve();
 
     // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
@@ -161,8 +237,12 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     ) {
       runStepPromise = (async () => {
         try {
-          await Promise.resolve(nodeImplementation.run());
-          if (stepExecutionRuntime) {
+          await fence.run(() => Promise.resolve(implementation.run()));
+          if (
+            stepExecutionRuntime &&
+            !params.boundaryNodeId &&
+            !runtime.abortController.signal.aborted
+          ) {
             await handleExecutionDelay(params, stepExecutionRuntime);
           }
         } finally {
@@ -175,13 +255,22 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       })();
     }
 
-    await Promise.race([runMonitorPromise, runStepPromise]);
+    inFlightOperation = runStepPromise;
+    await Promise.race([runMonitorPromise, runStepPromise, aborted]);
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    workflowExecutionCursor.captureError(error);
+    if (!params.boundaryNodeId || !stepExecutionRuntime?.abortController.signal.aborted)
+      workflowExecutionCursor.captureError(error);
     nodeSpan?.setOutcome('failure');
   } finally {
+    fence.close();
     monitorAbortController?.abort();
+    unlinkAbort?.();
+    closeAbortWait?.();
+    if (deadlineTimer) clearTimeout(deadlineTimer);
+    // Ignoring abort must not let an operation release capacity while its I/O is still active.
+    if (inFlightOperation && release) void inFlightOperation.then(release, release);
+    else release?.();
 
     // Run cancellation cleanup in `finally` so it fires on BOTH the normal path
     // and the path where a monitor (cancellation or a timeout zone) threw and
@@ -189,12 +278,21 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // abort signal fired and the node is cancellable, and `onCancel` is required
     // to be idempotent, so this is safe to call unconditionally here.
     if (nodeImplementation && stepExecutionRuntime) {
-      await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
+      const implementation = nodeImplementation;
+      const runtime = stepExecutionRuntime;
+      await outsideExecutionFence(() =>
+        runOnCancelIfNeeded(implementation, runtime, params.workflowLogger)
+      );
     }
 
-    if (stepExecutionRuntime) {
+    if (
+      stepExecutionRuntime &&
+      !(params.boundaryNodeId && stepExecutionRuntime.abortController.signal.aborted)
+    ) {
       const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
-      await catchError(params, stepExecutionRuntime);
+      if (params.boundaryNodeId)
+        await catchError(params, stepExecutionRuntime, params.boundaryNodeId);
+      else await catchError(params, stepExecutionRuntime);
       catchErrorSpan?.end();
     }
 

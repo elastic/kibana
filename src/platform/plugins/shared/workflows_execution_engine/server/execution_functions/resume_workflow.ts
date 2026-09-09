@@ -133,6 +133,7 @@ export async function resumeWorkflow({
   await workflowRuntime.resume();
 
   const workflowExecutionLoopParams = {
+    parallelLimits: config.parallel,
     workflowRuntime,
     workflowExecutionCursor,
     stepExecutionRuntimeFactory,

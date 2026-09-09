@@ -37,6 +37,8 @@ import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import type { BranchExecutor } from '../workflow_execution_loop/branch_executor';
+import { canWriteExecution } from '../workflow_execution_loop/execution_fence';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -71,6 +73,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  */
 
 export class WorkflowExecutionRuntimeManager {
+  public branchExecutor?: BranchExecutor;
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
@@ -165,6 +168,7 @@ export class WorkflowExecutionRuntimeManager {
    * branch's scope so per-branch context (e.g. {{ foreach.item }}) resolves.
    */
   public setScopeStack(scopeStack: StackFrame[]): void {
+    if (!canWriteExecution()) return;
     this.workflowExecutionState.updateWorkflowExecution({ scopeStack: [...scopeStack] });
   }
 
@@ -190,6 +194,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    if (!canWriteExecution()) return;
     this.workflowExecutionState.updateWorkflowExecution({
       context: {
         ...(this.workflowExecution.context || {}),
@@ -199,6 +204,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public setWorkflowStatus(status: ExecutionStatus): void {
+    if (!canWriteExecution()) return;
     this.workflowExecutionState.updateWorkflowExecution({ status });
 
     if (isTerminalStatus(status)) {
@@ -211,6 +217,7 @@ export class WorkflowExecutionRuntimeManager {
    * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
    */
   public setWorkflowCancelled(reason: string): void {
+    if (!canWriteExecution()) return;
     const cancelledAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({
       status: ExecutionStatus.CANCELLED,
@@ -291,6 +298,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public markWorkflowTimeouted(): void {
+    if (!canWriteExecution()) return;
     const finishedAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({
       status: ExecutionStatus.TIMED_OUT,

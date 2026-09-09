@@ -1,4 +1,4 @@
-name: Parallel branch cursor PoC
+name: Parallel alert processing
 enabled: false
 triggers:
   - type: manual

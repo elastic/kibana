@@ -23,17 +23,17 @@ const workflow = (fixture: WorkflowRunFixture) =>
 
 const drain = async (fixture: WorkflowRunFixture) => {
   for (let tick = 0; tick < 20 && workflow(fixture)?.status === ExecutionStatus.WAITING; tick++) {
-    await new Promise((resolve) => setTimeout(resolve, 5));
+    await new Promise((resolve) => setTimeout(resolve, 1050));
     await fixture.resumeWorkflow();
   }
 };
 
-describe('parallel branch cursors proof of concept', () => {
+describe('parallel branch flow control', () => {
   it('isolates per-alert variables across conditions and sequential loops', async () => {
     const fixture = new WorkflowRunFixture();
     await fixture.runWorkflow({
       workflowYaml: readFileSync(
-        join(__dirname, '../../examples/parallel_branch_cursors_poc.yml'),
+        join(__dirname, '../../examples/parallel_branch_execution.yml'),
         'utf8'
       ),
     });
@@ -194,5 +194,46 @@ steps:
         .sort()
     ).toEqual(['a', 'b']);
     expect(executions(fixture, 'alerts')[0].output).toMatchObject({ failed: 0, succeeded: 2 });
+  });
+  it('keeps each branch loop source available when another branch exits its shorter loop', async () => {
+    const fixture = new WorkflowRunFixture();
+    jest.replaceProperty(
+      fixture.configMock.eviction,
+      'minPayloadSize',
+      schema.byteSize().validate('1b')
+    );
+    await fixture.runWorkflow({
+      workflowYaml: `
+steps:
+  - name: parallelWork
+    type: parallel
+    foreach:
+      - [a]
+      - [b, c, d, e]
+    steps:
+      - name: source
+        type: console
+        with:
+          message: '{{ foreach.item | json }}'
+      - name: loop
+        type: foreach
+        foreach: '{{ steps.source.output }}'
+        steps:
+          - name: pause
+            type: wait
+            with: { duration: 1ms }
+          - name: value
+            type: console
+            with:
+              message: '{{ foreach.item }}'
+`,
+    });
+    await drain(fixture);
+    expect(workflow(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(
+      executions(fixture, 'value')
+        .map((step) => step.output)
+        .sort()
+    ).toEqual(['a', 'b', 'c', 'd', 'e']);
   });
 });

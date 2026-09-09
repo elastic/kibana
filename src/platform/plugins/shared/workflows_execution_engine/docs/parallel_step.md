@@ -1,5 +1,7 @@
 # Parallel Step — Design & Execution Reference
 
+> Historical v1 design. For the current branch-cursor implementation, supported scope, and recovery guarantees, see [Parallel branch execution](parallel_branch_execution.md).
+
 > Reference for the `parallel` step in the Workflows execution engine — both the
 > dynamic `foreach` fan-out mode and the static `branches` scatter-gather mode
 > (see §1b). Read this before reviewing/attacking the PoC PR. It captures the

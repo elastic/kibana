@@ -18,6 +18,7 @@ import { isTerminalStatus } from '@kbn/workflows';
 import { getParallelScopes } from './parallel_scope';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
+import { canWriteExecution } from '../workflow_execution_loop/execution_fence';
 
 /** Context for the step that failed during this run; used to build workflow_execution_failed event. */
 export interface FailedStepContext {
@@ -140,6 +141,7 @@ export class WorkflowExecutionState {
   }
 
   public updateWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): void {
+    if (!canWriteExecution()) return;
     this.workflowExecution = {
       ...this.workflowExecution,
       ...workflowExecution,
@@ -230,6 +232,7 @@ export class WorkflowExecutionState {
    * runtime guard catches stray callers that bypass typing via casts.
    */
   public upsertStep(step: Partial<StepExecutionMetadata>): void {
+    if (!canWriteExecution()) return;
     if (!step.id) {
       throw new Error('WorkflowExecutionState: Step execution must have an ID to be upserted');
     }
@@ -255,12 +258,21 @@ export class WorkflowExecutionState {
    * service) merges this with its own IO partials and runs the combined
    * `bulkUpsert`. Returns an empty map when nothing is pending.
    */
-  public drainPendingStepChanges(): Map<string, Partial<StepExecutionMetadata>> {
+  public drainPendingStepChanges(
+    heldIds: ReadonlySet<string> = new Set()
+  ): Map<string, Partial<StepExecutionMetadata>> {
     if (!this.stepDocumentsChanges.size) {
       return new Map();
     }
     const drained = this.stepDocumentsChanges;
     this.stepDocumentsChanges = new Map();
+    for (const id of heldIds) {
+      const partial = drained.get(id);
+      if (partial) {
+        this.stepDocumentsChanges.set(id, partial);
+        drained.delete(id);
+      }
+    }
     return drained;
   }
 
@@ -276,7 +288,14 @@ export class WorkflowExecutionState {
     this.buildStepIdExecutionIdIndex();
   }
 
-  public async flushWorkflowDoc(): Promise<void> {
+  private workflowFlushQueue: Promise<void> = Promise.resolve();
+
+  public flushWorkflowDoc(): Promise<void> {
+    this.workflowFlushQueue = this.workflowFlushQueue.then(() => this.persistWorkflowDoc());
+    return this.workflowFlushQueue;
+  }
+
+  private async persistWorkflowDoc(): Promise<void> {
     if (!this.workflowDocumentChanges) {
       return;
     }
