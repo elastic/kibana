@@ -8,6 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
+import { createSHA256Hash } from '@kbn/crypto';
 import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -322,7 +323,7 @@ export class WorkflowRuntimeGraph {
       throw new Error(`Node not found for node id: ${ownerNodeId}`);
     }
 
-    return new WorkflowScopeStack()
+    const frames = new WorkflowScopeStack()
       .enterScope({
         nodeId: ownerNode.id,
         nodeType: ownerNode.type,
@@ -332,8 +333,9 @@ export class WorkflowRuntimeGraph {
         nodeId: `${ENTER_SYNTHETIC_PREFIX}${stepId}`,
         nodeType: `enter-${stepId}`,
         stepId,
-      })
-      .hash.slice(0, SCOPE_HASH_LENGTH);
+      }).stackFrames;
+
+    return createSHA256Hash(JSON.stringify(frames)).slice(0, SCOPE_HASH_LENGTH);
   }
 
   private cloneInterior(enterId: string, exitId: string, scopeHash: string): Map<string, string> {

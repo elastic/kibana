@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSHA256Hash } from '@kbn/crypto';
 import type { StackFrame } from '@kbn/workflows';
 
 export interface ScopeData {
@@ -29,7 +28,6 @@ export interface ScopeData {
  */
 export class WorkflowScopeStack {
   private _stackFrames: StackFrame[] = [];
-  private _hash: string = '';
 
   /**
    * Creates a new WorkflowScopeStack instance from existing stack frames.
@@ -58,14 +56,6 @@ export class WorkflowScopeStack {
     return this.cloneFrames(this._stackFrames);
   }
 
-  public get hash(): string {
-    if (!this._hash) {
-      const text = JSON.stringify(this._stackFrames);
-      this._hash = createSHA256Hash(text);
-    }
-
-    return this._hash;
-  }
   /**
    * Checks if the workflow scope stack is empty.
    *
