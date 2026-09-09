@@ -18,4 +18,5 @@ export const CreateUnsnoozeAlertActionRoute = createAlertActionRouteForType({
   summary: 'Unsnooze an alert',
   bodySchema: createUnsnoozeAlertActionBodySchema,
   oasOperationObject: createUnsnoozeAlertActionOasExamples,
+  access: 'public' as const,
 });

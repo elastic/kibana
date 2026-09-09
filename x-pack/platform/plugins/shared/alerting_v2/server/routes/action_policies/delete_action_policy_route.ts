@@ -32,6 +32,7 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Delete an action policy',
     description: 'Delete an action policy by identifier.',
     oasOperationObject: deleteActionPolicyOasExamples,

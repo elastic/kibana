@@ -39,6 +39,7 @@ export class UnsnoozeActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Unsnooze an action policy',
     description: 'Remove the snooze from an action policy.',
     oasOperationObject: unsnoozeActionPolicyOasExamples,

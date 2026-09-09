@@ -18,4 +18,5 @@ export const CreateActivateAlertActionRoute = createAlertActionRouteForType({
   summary: 'Activate an alert',
   bodySchema: createActivateAlertActionBodySchema,
   oasOperationObject: createActivateAlertActionOasExamples,
+  access: 'public' as const,
 });
