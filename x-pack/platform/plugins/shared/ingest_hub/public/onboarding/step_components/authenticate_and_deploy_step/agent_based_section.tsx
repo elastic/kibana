@@ -396,6 +396,10 @@ export function AgentBasedSection({
                 </EuiText>
                 <EuiSpacer size="s" />
                 <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.whereToAdd.existing.agentPoliciesLabel',
+                    { defaultMessage: 'Agent policies' }
+                  )}
                   helpText={
                     isEmpty
                       ? i18n.translate(
