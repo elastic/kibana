@@ -141,7 +141,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       maxSize: 100,
       meta: {
         description:
-          'Package policy IDs created for agentless services. Present only when agentless is in mechanisms.',
+          'Package policy IDs created for managed_integration services.',
       },
     })
   ),
@@ -149,7 +149,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend; used for key rotation/revocation.',
+          'Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.',
       },
     })
   ),
