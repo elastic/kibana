@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
@@ -20,6 +22,11 @@ const field = (path: string, aggregatable: boolean, type = 'keyword'): AiIndexFi
   searchable: true,
   aggregatable,
 });
+
+const esResponseError = (statusCode: number, type: string) =>
+  new errors.ResponseError(
+    elasticsearchClientMock.createApiResponse({ statusCode, body: { error: { type } } })
+  );
 
 describe('describeAiIndexAggregations', () => {
   const search = jest.fn();
@@ -141,5 +148,24 @@ describe('describeAiIndexAggregations', () => {
     });
 
     expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
+  });
+
+  it('returns empty counts when the caller lacks read on the backing indices', async () => {
+    search.mockRejectedValue(esResponseError(403, 'security_exception'));
+
+    const result = await describeAiIndexAggregations({
+      ...params,
+      fields: [field('type', true)],
+    });
+
+    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
+  });
+
+  it('rethrows other Elasticsearch errors', async () => {
+    search.mockRejectedValue(esResponseError(500, 'search_phase_execution_exception'));
+
+    await expect(
+      describeAiIndexAggregations({ ...params, fields: [field('type', true)] })
+    ).rejects.toThrow('search_phase_execution_exception');
   });
 });

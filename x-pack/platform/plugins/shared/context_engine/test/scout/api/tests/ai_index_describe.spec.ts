@@ -102,6 +102,15 @@ const READ_ONLY_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
+/** `view_index_metadata` only, no `read`: fields resolve, the counts aggregation is refused. */
+const METADATA_ONLY_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['ai-index-idx-scout-describe-*'], privileges: ['view_index_metadata'] }],
+  },
+  kibana: [CONTEXT_ENGINE_READ],
+};
+
 const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; value: string }) => ({
   id,
   description: `Scout describe fixture ${id}`,
@@ -114,11 +123,13 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   let adminCredentials: RoleApiCredentials;
   let describeCredentials: RoleApiCredentials;
   let readOnlyCredentials: RoleApiCredentials;
+  let metadataOnlyCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient, apiClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
     readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
+    metadataOnlyCredentials = await requestAuth.getApiKeyForCustomRole(METADATA_ONLY_ROLE);
 
     await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
@@ -316,6 +327,23 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       expect(response).toHaveStatusCode(403);
       // Elasticsearch refused `_mapping`; not Kibana's own authz layer.
       expect(response.body.message).toMatch(/security_exception|unauthorized/i);
+    }
+  );
+
+  apiTest(
+    'omits counts, not the whole block, when the caller lacks read',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const block = blockOf(response.body);
+      expect(fieldLine(block, 'type')).toBe('type: keyword, searchable, aggregatable');
+      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([]);
+      expect(sectionLines(block, 'Tags')).toStrictEqual([]);
+      expect(block).toContain('\n\nCount by type\n');
     }
   );
 });

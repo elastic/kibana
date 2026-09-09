@@ -125,7 +125,8 @@ Count by type
   case on canonical KI indices, but a custom index that maps `type` / `tags` as
   `text`, or inconsistently across a pattern, gets no counts. One `terms`
   aggregation backs both; it errors rather than return undercounts if a shard
-  fails.
+  fails. Both sections are also omitted when the caller lacks `read` on the
+  backing indices; the rest of the block still renders.
 - `Example queries` are three fixed ES|QL shapes written for the canonical KI
   schema (`title`, `description`, `content`, their `.semantic` multi-fields,
   `type`, `tags`) with only the `FROM` target substituted. They use named
@@ -136,7 +137,9 @@ Count by type
 Describe runs no ES|QL. It issues `_mapping` and `_field_caps` (both needed:
 `_field_caps` reports `semantic_text` as `text`) plus the one aggregation, all
 as the current user. 404 when the AI index is not registered; Elasticsearch 4xx
-(missing index privilege) is returned with its status. Each `_mapping` /
+from `_mapping` / `_field_caps` (missing `view_index_metadata`) is returned
+with its status. The aggregation is the exception: its 403 (missing `read`)
+drops the counts sections instead. Each `_mapping` /
 `_field_caps` response is capped at 20 MB before the field cap applies; a
 target broad enough to exceed it returns 400.
 
@@ -146,8 +149,9 @@ target broad enough to exceed it returns 400.
 privileges. Callers also need, on every backing index (`ai-index-*`):
 
 - `read` to query, or Elasticsearch returns 403;
-- `read` and `view_index_metadata` to describe: `_mapping` and `_field_caps`
-  need the latter, the counts aggregation the former.
+- `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
+  Elasticsearch returns 403. The counts aggregation also needs `read`; without
+  it the two counts sections are omitted and the rest of the block is returned.
 
 Kibana adds only the space filter. For the built-in SML index
 (`ai-index-idx-sml-data`), Elasticsearch additionally applies implicit
