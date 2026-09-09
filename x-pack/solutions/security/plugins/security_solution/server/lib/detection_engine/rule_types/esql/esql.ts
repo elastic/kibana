@@ -31,6 +31,7 @@ import {
   checkMissingIdFieldWarning,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import { buildNativeEsqlExceptionPipeline } from './utils/build_esql_native_exceptions';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
@@ -59,6 +60,11 @@ import type { ScheduleNotificationResponseActionsService } from '../../rule_resp
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
 
+// POC: when a rule's name contains this marker, detection exceptions are compiled
+// directly into the ES|QL query (LOOKUP JOIN + WHERE) instead of applied as a DSL
+// pre-filter. Name-based so the same rule can be A/B compared against the V1 path.
+const POC_NATIVE_ESQL_EXCEPTIONS_NAME_MARKER = 'POC EXCEPTIONS';
+
 export const esqlExecutor = async ({
   sharedParams,
   services,
@@ -81,6 +87,7 @@ export const esqlExecutor = async ({
     secondaryTimestamp,
     exceptionFilter,
     unprocessedExceptions,
+    allExceptionItems,
     ruleExecutionLogger,
   } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -105,6 +112,66 @@ export const esqlExecutor = async ({
       ruleExecutionLogger,
       isAggregating: isRuleAggregating,
     });
+
+    // POC: native ES|QL exceptions. When the rule is tagged, compile the exception
+    // items into the query (LOOKUP JOIN + WHERE) appended AFTER the rule pipeline,
+    // and skip the DSL exception filter. Works for aggregating rules too: because
+    // the stages run after the pipeline, they can reference the computed / STATS-BY
+    // output columns (not only source fields).
+    const useNativeEsqlExceptions =
+      (completeRule.ruleConfig.name ?? '').includes(POC_NATIVE_ESQL_EXCEPTIONS_NAME_MARKER) &&
+      (allExceptionItems?.length ?? 0) > 0;
+
+    let queryToRun = transformedQuery;
+    let effectiveExceptionFilter = exceptionFilter;
+
+    if (useNativeEsqlExceptions && allExceptionItems) {
+      // Probe the query's OUTPUT schema with `LIMIT 0`: this returns the columns
+      // (name + type) available after the rule pipeline, which is what an exception
+      // can be inlined against. Unlike field_caps on the source, this includes
+      // computed / aggregated columns and reflects KEEP/DROP.
+      const availableColumns = new Set<string>();
+      const columnTypes: Record<string, string | undefined> = {};
+      let schemaResolved = false;
+      try {
+        const probe = await services.scopedClusterClient.asCurrentUser.esql.query({
+          query: `${transformedQuery}\n| LIMIT 0`,
+        });
+        for (const col of probe.columns ?? []) {
+          availableColumns.add(col.name);
+          columnTypes[col.name] = col.type;
+        }
+        schemaResolved = true;
+      } catch (e) {
+        ruleExecutionLogger.warn(
+          `POC native ES|QL exceptions: output-schema probe failed, exceptions not applied in-query: ${e?.message}`
+        );
+      }
+
+      if (schemaResolved) {
+        const { pipeline, skipped } = buildNativeEsqlExceptionPipeline(
+          allExceptionItems,
+          availableColumns,
+          columnTypes
+        );
+        if (skipped.length) {
+          const details = skipped.map((s) => `${s.itemId} (${s.reason})`).join('; ');
+          result.warningMessages.push(
+            `${skipped.length} exception item(s) could not be applied to this ES|QL rule: ${details}`
+          );
+          ruleExecutionLogger.warn(`POC native ES|QL exceptions: skipped ${details}`);
+        }
+        if (pipeline) {
+          queryToRun = `${transformedQuery}${pipeline}`;
+          effectiveExceptionFilter = undefined; // do not double-apply as a DSL filter
+          ruleExecutionLogger.info(
+            `POC native ES|QL exceptions: applied ${
+              allExceptionItems.length - skipped.length
+            } exception item(s) in-query.\nQuery:\n${queryToRun}`
+          );
+        }
+      }
+    }
 
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
@@ -139,14 +206,14 @@ export const esqlExecutor = async ({
         }
 
         const esqlRequest = buildEsqlSearchRequest({
-          query: transformedQuery,
+          query: queryToRun,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
           filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
           primaryTimestamp,
           secondaryTimestamp,
-          exceptionFilter,
+          exceptionFilter: effectiveExceptionFilter,
           excludedDocuments,
           ruleExecutionTimeout,
         });
@@ -159,7 +226,11 @@ export const esqlExecutor = async ({
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
         ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
-        const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+        // In native mode all exceptions are applied in-query, so the "unprocessed
+        // exceptions" warning (large value lists) does not apply.
+        const exceptionsWarning = useNativeEsqlExceptions
+          ? undefined
+          : getUnprocessedExceptionsWarnings(unprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
         }
