@@ -15,8 +15,6 @@ export const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
 export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 export const ECF_LAUNCH_STEP_SESSION_KEY = 'onboarding.aws.ecfLaunchStep';
 export const AUTHENTICATE_AND_DEPLOY_SESSION_KEY = 'onboarding.aws.authenticateAndDeployStep';
-export const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep';
-export const STEP_STATE_SESSION_KEY = 'onboarding.aws.stepState';
 
 // Derives the root test-subj for a step from its id, matching the convention used in each step's
 // root <div data-test-subj={`onboardingStep-${id}`}>.
