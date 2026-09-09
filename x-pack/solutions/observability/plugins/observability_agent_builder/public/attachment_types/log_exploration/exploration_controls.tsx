@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
+import {
+  DateRangePicker,
+  type DateRangePickerOnChangeProps,
+  type DateRangePickerSettings,
+} from '@kbn/date-range-picker';
 import type {
   LogExplorationData,
   LogExplorationRefinement,
@@ -80,66 +85,92 @@ const shiftBaselineEpoch = (
   };
 };
 
+const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
+  roundRelativeTime: false,
+  timePrecision: 'none',
+};
+
 export const ExplorationControls: React.FC<ExplorationControlsProps> = ({
   data,
   dispatch,
   isReadOnly,
   isFetching,
-}) => (
-  <EuiFlexGroup direction="column" gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <EuiSuperDatePicker
-        compressed
-        isDisabled={isReadOnly}
-        isLoading={isFetching}
-        showUpdateButton={false}
-        start={data.source.timeRange.start}
-        end={data.source.timeRange.end}
-        onTimeChange={({ start, end }) =>
-          dispatch({
-            type: 'SET_TIME_RANGE',
-            timeRange: { start, end },
-            baselineEpoch: shiftBaselineEpoch(data, { start, end }),
-          })
-        }
-        width="auto"
-      />
-    </EuiFlexItem>
-    {data.refinements.length > 0 && (
+}) => {
+  const [settings, setSettings] = useState<DateRangePickerSettings>(DEFAULT_DATE_PICKER_SETTINGS);
+  // The picker only shows the invalid state the consumer feeds back to it.
+  const [isTimeRangeInvalid, setIsTimeRangeInvalid] = useState(false);
+
+  const onTimeChange = useCallback(
+    ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
+      setIsTimeRangeInvalid(isInvalid);
+      if (isInvalid) {
+        return;
+      }
+      // Shifting and zooming come through here too, so they cannot bypass the baseline shift.
+      dispatch({
+        type: 'SET_TIME_RANGE',
+        timeRange: { start, end },
+        baselineEpoch: shiftBaselineEpoch(data, { start, end }),
+      });
+    },
+    [data, dispatch]
+  );
+
+  const onInputChange = useCallback(() => setIsTimeRangeInvalid(false), []);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.observabilityAgentBuilder.logExploration.refinementsLabel', {
-                defaultMessage: 'Filters:',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          {data.refinements.map((refinement) => {
-            const key = refinementKey(refinement);
-            return (
-              <EuiFlexItem grow={false} key={key}>
-                {isReadOnly ? (
-                  <EuiBadge color="hollow">{refinementLabel(refinement)}</EuiBadge>
-                ) : (
-                  <EuiBadge
-                    color="hollow"
-                    iconType="cross"
-                    iconSide="right"
-                    iconOnClick={() => dispatch({ type: 'REMOVE_REFINEMENT', key })}
-                    iconOnClickAriaLabel={i18n.translate(
-                      'xpack.observabilityAgentBuilder.logExploration.removeRefinementAriaLabel',
-                      { defaultMessage: 'Remove filter' }
-                    )}
-                  >
-                    {refinementLabel(refinement)}
-                  </EuiBadge>
-                )}
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
+        <DateRangePicker
+          compressed
+          disabled={isReadOnly}
+          isLoading={isFetching}
+          isInvalid={isTimeRangeInvalid}
+          value={`${data.source.timeRange.start} to ${data.source.timeRange.end}`}
+          onChange={onTimeChange}
+          onInputChange={onInputChange}
+          settings={settings}
+          onSettingsChange={setSettings}
+          showTimeWindowButtons={{ showZoomIn: true }}
+          width="auto"
+        />
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      {data.refinements.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.observabilityAgentBuilder.logExploration.refinementsLabel', {
+                  defaultMessage: 'Filters:',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            {data.refinements.map((refinement) => {
+              const key = refinementKey(refinement);
+              return (
+                <EuiFlexItem grow={false} key={key}>
+                  {isReadOnly ? (
+                    <EuiBadge color="hollow">{refinementLabel(refinement)}</EuiBadge>
+                  ) : (
+                    <EuiBadge
+                      color="hollow"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => dispatch({ type: 'REMOVE_REFINEMENT', key })}
+                      iconOnClickAriaLabel={i18n.translate(
+                        'xpack.observabilityAgentBuilder.logExploration.removeRefinementAriaLabel',
+                        { defaultMessage: 'Remove filter' }
+                      )}
+                    >
+                      {refinementLabel(refinement)}
+                    </EuiBadge>
+                  )}
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
