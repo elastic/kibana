@@ -11,6 +11,7 @@ import type {
   Conversation,
   ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
  * Props passed to a conversation template tab's `content` component.
@@ -41,7 +42,10 @@ export interface ConversationTemplateBriefCardRenderProps {
   conversation: ConversationWithoutRoundsWithPermissions;
 }
 
+/** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */
 export interface ConversationTemplateUIContext {
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
   /** Opens the sidebar using the existing conversation navigation behavior. */
   openSidebarConversation: (conversationId: string) => void;
   /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
@@ -74,15 +78,18 @@ export interface ConversationTemplateUIDefinition {
  */
 export interface ConversationTemplateServiceStartContract {
   /**
-   * Register a reusable flyout tab under a tab id.
+   * Register a reusable flyout tab with a callback invoked once with Agent Builder capabilities.
    */
-  registerTab(tabId: string, definition: ConversationTemplateTabDefinition): void;
+  registerTab(
+    tabId: string,
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateTabDefinition
+  ): void;
   /**
    * Resolve a registered tab, if any.
    */
   getTab(tabId: string): ConversationTemplateTabDefinition | undefined;
   /**
-   * Register template UI with a callback invoked once with Agent Builder navigation methods.
+   * Register template UI with a callback invoked once with Agent Builder capabilities.
    */
   registerTemplateUIDefinition(
     templateId: string,
