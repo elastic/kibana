@@ -11,6 +11,7 @@
 
 import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from '@kbn/fleet-plugin/common';
+import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 
 import type { ServiceCategory } from './service_categories';
 
@@ -18,7 +19,7 @@ export type { ServiceCategory };
 
 export type SignalType = 'logs' | 'metrics';
 
-export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
+export type { DeploymentMethod };
 
 /**
  * Log type identifiers used by the ECF CloudFormation templates.

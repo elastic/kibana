@@ -50,7 +50,7 @@ import type {
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentAuthMethod,
-  CloudOnboardingDeploymentMechanism,
+  DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
 
@@ -378,7 +378,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. */
   connectorId?: string;
   /** Active delivery mechanisms included in this deployment's IaC stack (agentless, firehose, cloud_forwarder, agent_based). */
-  mechanisms: CloudOnboardingDeploymentMechanism[];
+  mechanisms: DeploymentMethod[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
   /** Human-readable deployment name. For AWS: the CloudFormation stack name. */

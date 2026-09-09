@@ -191,7 +191,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           (await createDeployment({
             provider: 'aws',
             connectorId,
-            mechanisms: hasEcfServices ? ['agentless', 'cloud_forwarder'] : ['agentless'],
+            mechanisms: hasEcfServices ? ['managed_integration', 'ecf'] : ['managed_integration'],
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
               string,

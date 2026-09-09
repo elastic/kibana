@@ -162,7 +162,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         existingId ??
         (await createDeployment({
           provider: 'aws',
-          mechanisms: ['cloud_forwarder'],
+          mechanisms: ['ecf'],
           services: selectedServiceIds,
           serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
             string,

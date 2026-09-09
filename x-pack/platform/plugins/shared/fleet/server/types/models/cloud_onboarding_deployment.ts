@@ -12,9 +12,8 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   connectorId: schema.maybe(schema.string({ minLength: 1 })),
   mechanisms: schema.arrayOf(
     schema.oneOf([
-      schema.literal('agentless'),
-      schema.literal('firehose'),
-      schema.literal('cloud_forwarder'),
+      schema.literal('managed_integration'),
+      schema.literal('ecf'),
       schema.literal('agent_based'),
     ]),
     { maxSize: 10 }

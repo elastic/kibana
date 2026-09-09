@@ -22,11 +22,7 @@ export interface CloudOnboardingEcfStack {
   templateVersion: string;
 }
 
-export type CloudOnboardingDeploymentMechanism =
-  | 'agentless'
-  | 'firehose'
-  | 'cloud_forwarder'
-  | 'agent_based';
+export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
 export type CloudOnboardingDeploymentAuthMethod = 'identity_federation' | 'static_keys';
 
@@ -38,7 +34,7 @@ export interface CloudOnboardingDeployment {
   id: string;
   provider: CloudProvider;
   connectorId?: string;
-  mechanisms: CloudOnboardingDeploymentMechanism[];
+  mechanisms: DeploymentMethod[];
   deploymentId?: string;
   deploymentName?: string;
   services: string[];

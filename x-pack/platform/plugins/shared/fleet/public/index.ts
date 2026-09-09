@@ -137,7 +137,10 @@ export {
   sendGetCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
 } from './hooks/use_request/cloud_onboarding_deployment';
-export type { CloudOnboardingDeploymentAuthMethod } from '../common/types/models/cloud_onboarding_deployment';
+export type {
+  CloudOnboardingDeploymentAuthMethod,
+  DeploymentMethod,
+} from '../common/types/models/cloud_onboarding_deployment';
 export type {
   CreateCloudOnboardingDeploymentRequest,
   UpdateCloudOnboardingDeploymentRequest,

@@ -35,14 +35,13 @@ const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
 
 const CloudOnboardingDeploymentMechanismSchema = schema.oneOf(
   [
-    schema.literal('agentless'),
-    schema.literal('firehose'),
-    schema.literal('cloud_forwarder'),
+    schema.literal('managed_integration'),
+    schema.literal('ecf'),
     schema.literal('agent_based'),
   ],
   {
     meta: {
-      description: 'Delivery mechanism: agentless, firehose, cloud_forwarder, or agent_based.',
+      description: 'Delivery mechanism: managed_integration, ecf, or agent_based.',
     },
   }
 );

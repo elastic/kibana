@@ -8,7 +8,7 @@
 import type {
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
-  CloudOnboardingDeploymentMechanism,
+  DeploymentMethod,
   CloudOnboardingDeploymentStatus,
   CloudOnboardingEcfStack,
 } from '../models/cloud_onboarding_deployment';
@@ -17,7 +17,7 @@ export interface CreateCloudOnboardingDeploymentRequest {
   body: {
     provider: 'aws' | 'azure' | 'gcp';
     connectorId?: string;
-    mechanisms: CloudOnboardingDeploymentMechanism[];
+    mechanisms: DeploymentMethod[];
     services: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     globalRegion?: string;
