@@ -1,13 +1,6 @@
----
-id: kibUserStorageService
-slug: /kibana-dev-docs/user-storage
-title: User Storage service
-description: Per-user, per-space (or global) key/value storage for Kibana plugins, with synchronous reads at first paint.
-date: 2026-06-18
-tags: ['kibana', 'dev', 'contributor', 'api docs', 'core', 'user storage', 'preferences']
----
+# User Storage
 
-# User Storage Service
+Per-user, schema-validated key/value storage.
 
 A server-backed, per-user store for plugin state that should follow the user across browsers, devices, and cache clears. Plugins register keys at setup time with a Zod schema, a default value, and a scope (`'space'` or `'global'`); reads on both server and browser are schema-validated, reactive, and — on the browser — synchronous at first paint via rendering injection.
 
@@ -15,9 +8,7 @@ A server-backed, per-user store for plugin state that should follow the user acr
 
 User Storage exists because over 30 plugins were independently writing to `localStorage` for per-user state, each handling serialization, scoping, and validation differently. There was no canonical pattern for "small, schema-validated, per-user data that follows the user." The service fills exactly that gap; it does not replace `localStorage`, `uiSettings`, or ES User Profile, all of which remain the right choice for their respective use cases.
 
-<DocCallOut title="Requires an authenticated user with a profile_uid">
-  Anonymous pages and API-key requests have no user profile: reads return defaults and writes get `403`. Don't build features on User Storage if they need to work without a logged-in user — see [No fallback for missing `profile_uid`](#no-fallback-for-missing-profile_uid).
-</DocCallOut>
+> **Requires an authenticated user with a `profile_uid`.** Anonymous pages and API-key requests have no user profile: reads return defaults and writes get `403`. Don't build features on User Storage if they need to work without a logged-in user — see [No fallback for missing `profile_uid`](#no-fallback-for-missing-profile_uid).
 
 ## When to use it
 
@@ -39,7 +30,7 @@ User Storage co-exists with several other per-user storage layers; pick the one 
 |---|---|---|
 | Ephemeral UI state — panel widths, collapsed/expanded states, sort orders, view-mode toggles, tour completions, callout dismissals | **`localStorage`** | Trivially re-set; no real cost when lost. Doesn't need to follow the user across devices. |
 | Identity / personalization that might follow the user across Elastic Cloud products — dark mode, avatar | **ES User Profile** | ES enforces per-user isolation; field set is small and stable. The right home for portable identity data, not for arbitrary plugin-owned state. |
-| Space-wide or cluster-wide admin-set defaults, *not* per-user | **Advanced Settings (`uiSettings`)** | Admin-managed and shared by all users in a space or cluster; can be enforced via `kibana.yml` overrides. No user dimension — see [Deciding between Advanced Settings and User Storage](#deciding-between-advanced-settings-and-user-storage). |
+| Space-wide or cluster-wide admin-set defaults, *not* per-user | **[Advanced Settings (`uiSettings`)](https://www.elastic.co/docs/extend/kibana/tutorials/ui-settings)** | Admin-managed and shared by all users in a space or cluster; can be enforced via `kibana.yml` overrides. No user dimension — see [Deciding between Advanced Settings and User Storage](#deciding-between-advanced-settings-and-user-storage). |
 | Shared / multi-user data | **Saved Objects** | Has its own visibility and sharing model. |
 | Large blobs (>~few KB) | **file service** | Saved Objects are not blob storage. |
 | Frequently-changing high-volume telemetry | **analytics** | Persisting every event in a per-user SO is the wrong shape. |
@@ -68,9 +59,7 @@ Three differences are worth weighing before choosing User Storage:
 - **Requires a `profile_uid`.** Anonymous and API-key requests get defaults and cannot write; Advanced Settings have no such requirement.
 - **Reads aren't synchronous by default.** Advanced Settings reads are synchronous in the browser; User Storage reads are synchronous only for `preload: true` keys (see [Preloaded values](#key-concepts)).
 
-<DocCallOut title="Migrating an existing Advanced Setting is a behavior change">
-  Moving a setting from `uiSettings` to User Storage turns one shared value into per-user values — it is not a drop-in swap. Plan for the semantic shift, the loss of central enforcement, and a transition path for existing values.
-</DocCallOut>
+> **Migrating an existing Advanced Setting is a behavior change.** Moving a setting from `uiSettings` to User Storage turns one shared value into per-user values — it is not a drop-in swap. Plan for the semantic shift, the loss of central enforcement, and a transition path for existing values.
 
 ## Quickstart
 
