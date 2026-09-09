@@ -40,7 +40,8 @@ const createClassicSession = async (
   );
 };
 
-spaceTest.describe('histogram session', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/289125
+spaceTest.describe.skip('histogram session', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults({ loadLongWindowDataView: true });
     await discoverScoutSpace.uiSettings.setDefaultIndex(testData.LONG_WINDOW_LOGSTASH_DATA_VIEW);

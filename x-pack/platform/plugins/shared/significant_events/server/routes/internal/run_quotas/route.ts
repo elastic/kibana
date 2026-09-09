@@ -52,7 +52,7 @@ const settingsUpdateSchema = z
 const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('detection') }).strict(),
   z.object({ group: z.literal('ki_extraction') }).strict(),
-  z.object({ group: z.literal('investigation'), critical: z.boolean() }).strict(),
+  z.object({ group: z.literal('investigation') }).strict(),
 ]);
 
 const readRunQuotaSnapshot = async ({
@@ -165,12 +165,9 @@ const consumeRoute = createServerRoute({
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    const allowOverLimit = params.body.group === 'investigation' && params.body.critical;
-
     return consumeRunQuota({
       internalRepository: createRunQuotaInternalRepository(server),
       group: params.body.group,
-      allowOverLimit,
     });
   },
 });

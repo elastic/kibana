@@ -58,7 +58,8 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId } = useOnboardingFlow();
+  const { setConnectorId, authenticateAndDeployStep } = useOnboardingFlow();
+  const { connectorId: initialConnectorId } = authenticateAndDeployStep;
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
@@ -228,6 +229,7 @@ export function ManagedIntegrationsSection({
                   iacTemplateUrl={iacTemplateUrl}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
+                  initialConnectorId={initialConnectorId}
                 />
               ) : (
                 <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
