@@ -93809,6 +93809,215 @@ components:
         - params
       title: Degraded docs
       type: object
+    Kibana_HTTP_APIs_datatableLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metrics:
+          description: Array of metrics to display as columns in the datatable
+          items:
+            allOf:
+              - anyOf:
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+              - additionalProperties: false
+                type: object
+                properties:
+                  alignment:
+                    default: right
+                    description: Alignment of the columns.
+                    enum:
+                      - left
+                      - center
+                      - right
+                    type: string
+                  apply_color_to:
+                    anyOf:
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
+                      - enum:
+                          - badge
+                        type: string
+                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                  summary:
+                    additionalProperties: false
+                    description: Summary row configuration
+                    type: object
+                    properties:
+                      label:
+                        description: Summary row label.
+                        type: string
+                      type:
+                        anyOf:
+                          - enum:
+                              - sum
+                            type: string
+                          - enum:
+                              - avg
+                            type: string
+                          - enum:
+                              - count
+                            type: string
+                          - enum:
+                              - min
+                            type: string
+                          - enum:
+                              - max
+                            type: string
+                        description: Type of summary function to apply to the column.
+                    required:
+                      - type
+                  visible:
+                    default: true
+                    description: When `false`, hides the column from the datatable.
+                    type: boolean
+                  width:
+                    description: Column width in pixels.
+                    minimum: 0
+                    type: number
+          maxItems: 1000
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        rows:
+          description: Array of operations to split the datatable rows by
+          items:
+            allOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+              - additionalProperties: false
+                type: object
+                properties:
+                  alignment:
+                    default: left
+                    description: Alignment of the rows.
+                    enum:
+                      - left
+                      - center
+                      - right
+                    type: string
+                  apply_color_to:
+                    anyOf:
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
+                      - enum:
+                          - badge
+                        type: string
+                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                  click_filter:
+                    default: false
+                    description: When `true`, enables one-click filtering on cell values.
+                    type: boolean
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+                  visible:
+                    default: true
+                    description: When `false`, hides the column from the datatable.
+                    type: boolean
+                  width:
+                    description: Column width in pixels.
+                    minimum: 0
+                    type: number
+          maxItems: 50
+          minItems: 1
+          type: array
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        split_metrics_by:
+          description: Array of operations to split the metric columns by
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+            description: Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.
+            title: Breakdown Operation
+          maxItems: 20
+          minItems: 1
+          type: array
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - data_table
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Datatable Chart (library)
+      type: object
     Kibana_HTTP_APIs_delete_agent_policy_request:
       additionalProperties: false
       properties:
@@ -95924,6 +96133,136 @@ components:
         - inputs
       title: full_agent_policy
       type: object
+    Kibana_HTTP_APIs_gaugeLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          allOf:
+            - anyOf:
+                - anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+            - additionalProperties: false
+              type: object
+              properties:
+                color:
+                  anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visNoColor'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                  default:
+                    type: auto
+                  description: Color configuration for the gauge fill.
+                goal:
+                  anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFieldMetricOperations'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticOperationDefinition'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                  description: Metric dimension using a field-based aggregation, a static value, or a mathematical formula.
+                  title: Field Metric, Static Value, or Formula Operation
+                max:
+                  anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFieldMetricOperations'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticOperationDefinition'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                  description: Metric dimension using a field-based aggregation, a static value, or a mathematical formula.
+                  title: Field Metric, Static Value, or Formula Operation
+                min:
+                  anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFieldMetricOperations'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticOperationDefinition'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                  description: Metric dimension using a field-based aggregation, a static value, or a mathematical formula.
+                  title: Field Metric, Static Value, or Formula Operation
+                subtitle:
+                  description: Subtitle below the gauge value.
+                  type: string
+                ticks:
+                  additionalProperties: false
+                  description: Ticks configuration
+                  type: object
+                  properties:
+                    mode:
+                      anyOf:
+                        - enum:
+                            - auto
+                          type: string
+                        - enum:
+                            - bands
+                          type: string
+                      default: bands
+                      description: Tick placement mode.
+                    visible:
+                      default: true
+                      description: When `true`, displays tick marks on the gauge.
+                      type: boolean
+                title:
+                  additionalProperties: false
+                  description: Title configuration
+                  type: object
+                  properties:
+                    text:
+                      description: Title text.
+                      type: string
+                    visible:
+                      default: true
+                      description: When `true`, displays the title.
+                      type: boolean
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - gauge
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+      title: Gauge Chart (library)
+      type: object
     Kibana_HTTP_APIs_geo-containment-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -96873,6 +97212,108 @@ components:
       required:
         - id
       title: get_verification_key_id_response
+      type: object
+    Kibana_HTTP_APIs_heatmapLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        axis:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapAxes'
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapLegend'
+        metric:
+          allOf:
+            - anyOf:
+                - anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+            - additionalProperties: false
+              type: object
+              properties:
+                color:
+                  anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                  default:
+                    type: auto
+                  description: Color scale configuration for the heatmap cells.
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - heatmap
+          type: string
+        x:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+          description: Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.
+          title: Breakdown Operation
+        'y':
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+          description: Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.
+          title: Breakdown Operation
+      required:
+        - type
+        - x
+        - data_source
+        - metric
+      title: Heatmap Chart (library)
       type: object
     Kibana_HTTP_APIs_index-threshold-create-rule-body-alerting:
       additionalProperties: false
@@ -100714,6 +101155,148 @@ components:
         - type
       title: kibana_asset_reference
       type: object
+    Kibana_HTTP_APIs_legacyMetricLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          allOf:
+            - anyOf:
+                - anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+            - additionalProperties: false
+              type: object
+              properties:
+                apply_color_to:
+                  description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                  enum:
+                    - value
+                    - background
+                  type: string
+                color:
+                  anyOf:
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                  default:
+                    type: auto
+                  description: Color configuration based on the metric value.
+                labels:
+                  additionalProperties: false
+                  description: Labels configuration
+                  type: object
+                  properties:
+                    alignment:
+                      default: top
+                      description: Label alignment
+                      enum:
+                        - top
+                        - bottom
+                      type: string
+                size:
+                  anyOf:
+                    - enum:
+                        - xs
+                      type: string
+                    - enum:
+                        - s
+                      type: string
+                    - enum:
+                        - m
+                      type: string
+                    - enum:
+                        - l
+                      type: string
+                    - enum:
+                        - xl
+                      type: string
+                    - enum:
+                        - xxl
+                      type: string
+                  default: m
+                  description: Font size for the label and value
+                values:
+                  additionalProperties: false
+                  description: Values configuration
+                  type: object
+                  properties:
+                    alignment:
+                      default: left
+                      description: Value alignment
+                      enum:
+                        - left
+                        - center
+                        - right
+                      type: string
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - legacy_metric
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+      title: Legacy Metric Chart (library)
+      type: object
+    Kibana_HTTP_APIs_lensApiConfigLibItemNoESQL:
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapLibItemNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleLibItemNoESQL'
+      title: Library Visualization Item
     Kibana_HTTP_APIs_LinksItemResponse:
       additionalProperties: false
       description: Response containing a links library item with metadata.
@@ -101581,6 +102164,160 @@ components:
         - id
         - hasErrors
       title: managed_integration_upgrade_dry_run_result
+      type: object
+    Kibana_HTTP_APIs_metricLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        breakdown_by:
+          allOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+            - additionalProperties: false
+              type: object
+              properties:
+                collapse_by:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                columns:
+                  default: 3
+                  description: Number of columns.
+                  type: number
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metrics:
+          description: Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.
+          items:
+            anyOf:
+              - allOf:
+                  - anyOf:
+                      - anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                  - type: object
+                    properties:
+                      apply_color_to:
+                        description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
+                      background_chart:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricComplementaryViz'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        default:
+                          type: auto
+                        description: Color configuration for the primary metric value or background.
+                      subtitle:
+                        description: Subtitle below the primary metric value.
+                        type: string
+                      type:
+                        enum:
+                          - primary
+                        type: string
+                    required:
+                      - type
+              - allOf:
+                  - anyOf:
+                      - anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                  - type: object
+                    properties:
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visNoColor'
+                        default:
+                          type: none
+                      compare:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricCompareToBaseline'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricCompareToPrimary'
+                        description: Compare the secondary metric to a baseline value or to the primary metric.
+                      type:
+                        enum:
+                          - secondary
+                        type: string
+                    required:
+                      - type
+          maxItems: 2
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - metric
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Metric Chart (library)
       type: object
     Kibana_HTTP_APIs_metrics-alert-inventory-threshold-create-rule-body-alerting:
       additionalProperties: false
@@ -103926,6 +104663,113 @@ components:
         - rule_type_id
         - params
       title: Large shard size
+      type: object
+    Kibana_HTTP_APIs_mosaicLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        group_breakdown_by:
+          description: Array of group breakdown dimensions (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+              - type: object
+                properties:
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+          maxItems: 100
+          minItems: 1
+          type: array
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+              - additionalProperties: false
+                type: object
+                properties:
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicLegend'
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - mosaic
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+      title: Mosaic Chart (library)
       type: object
     Kibana_HTTP_APIs_new_agent_policy:
       additionalProperties: false
@@ -108445,6 +109289,109 @@ components:
         - description
       title: package_policy_stream_deprecation_info
       type: object
+    Kibana_HTTP_APIs_pieLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+              - type: object
+                properties:
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieLegend'
+        metrics:
+          description: Array of metric configurations (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+              - type: object
+                properties:
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+          maxItems: 100
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - pie
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Pie Chart (library)
+      type: object
     Kibana_HTTP_APIs_QueryStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -108537,6 +109484,87 @@ components:
           - items: {}
             type: array
           - $ref: '#/components/schemas/Kibana_HTTP_APIs_RecursiveRecord'
+      type: object
+    Kibana_HTTP_APIs_regionMapLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFieldMetricOperations'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+          description: Metric dimension using a field-based aggregation or a mathematical formula.
+          title: Field Metric or Formula Operation
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        region:
+          allOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+            - additionalProperties: false
+              type: object
+              properties:
+                ems:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    boundaries:
+                      description: EMS boundaries
+                      type: string
+                    join:
+                      description: EMS join field
+                      type: string
+                  required:
+                    - boundaries
+                    - join
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - region_map
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+        - region
+      title: Region Map Chart (library)
       type: object
     Kibana_HTTP_APIs_review_upgrade_request:
       additionalProperties: false
@@ -111453,6 +112481,88 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_WiredStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
+    Kibana_HTTP_APIs_tagcloudLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudStyling'
+        tag_by:
+          allOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+            - additionalProperties: false
+              type: object
+              properties:
+                color:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - tag_cloud
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+        - tag_by
+      title: Tag Cloud Chart (library)
+      type: object
     Kibana_HTTP_APIs_transform-health-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -111604,6 +112714,109 @@ components:
         - rule_type_id
         - params
       title: Transform health
+      type: object
+    Kibana_HTTP_APIs_treemapLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+              - type: object
+                properties:
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapLegend'
+        metrics:
+          description: Array of metric configurations (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+              - type: object
+                properties:
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+          maxItems: 100
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - treemap
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Treemap Chart (library)
       type: object
     Kibana_HTTP_APIs_update_agent_policy_request_body:
       additionalProperties: false
@@ -113102,21 +114315,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleChart'
       description: Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.
       title: Visualizations
-    Kibana_HTTP_APIs_visApiConfigNoESQL:
-      anyOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyChartNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapNoESQL'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleNoESQL'
-      title: Visualizations (DSL)
     Kibana_HTTP_APIs_visApiDirection:
       description: Direction
       enum:
@@ -117348,7 +118546,7 @@ components:
       additionalProperties: false
       properties:
         data:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiConfigNoESQL'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensApiConfigLibItemNoESQL'
         id:
           type: string
         meta:
@@ -119918,6 +121116,109 @@ components:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
     Kibana_HTTP_APIs_visXyYUniqueCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+    Kibana_HTTP_APIs_waffleLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+              - type: object
+                properties:
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleLegend'
+        metrics:
+          description: Array of metric configurations (minimum 1)
+          items:
+            allOf:
+              - anyOf:
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+              - type: object
+                properties:
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+          maxItems: 100
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - waffle
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Waffle Chart (library)
+      type: object
     Kibana_HTTP_APIs_WiredStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -121159,6 +122460,49 @@ components:
         - rule_type_id
         - params
       title: Uptime TLS certificate
+      type: object
+    Kibana_HTTP_APIs_xyLibItemNoESQL:
+      additionalProperties: false
+      properties:
+        axis:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiXyAxisConfig'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visPanelFilters'
+        layers:
+          description: Chart layers
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayersNoESQL'
+          maxItems: 100
+          minItems: 1
+          type: array
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLegend'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyStyling'
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - xy
+          type: string
+      required:
+        - type
+        - layers
+      title: XY Chart (library)
       type: object
     Machine_learning_APIs_mlSync200Response:
       properties:
