@@ -116,6 +116,12 @@ export {
 export {
   INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
   INFERENCE_PII_ANONYMIZATION_WORKFLOW,
+  INFERENCE_PII_ANONYMIZATION_DEFAULTS,
+  type InferencePiiAnonymizationTemplateValues,
+  type InferencePiiBuiltInRule,
+  type InferencePiiCustomRule,
+  type BuiltInEntityClass,
+  type RegexEntityClass,
 } from './inference_pii_anonymization';
 
 // Registering the AD workflow definitions in the managed-workflows registry is

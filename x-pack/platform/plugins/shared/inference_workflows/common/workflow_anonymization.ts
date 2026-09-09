@@ -106,7 +106,8 @@ const regexRuleSchema = z
   .object({
     type: z.literal('RegExp'),
     enabled: z.boolean(),
-    pattern: z.string(),
+    // Upper-bound prevents DoS via catastrophic backtracking in very long patterns.
+    pattern: z.string().max(2048),
     entityClass: z.enum(ANONYMIZATION_ENTITY_CLASSES),
   })
   .strict();
@@ -182,6 +183,11 @@ export const aroundCompletionTriggerDefinition: CommonTriggerDefinition<
     defaultMessage: 'Runs a workflow around an inference completion call.',
   }),
   stability: 'tech_preview',
+  // At most one enabled workflow per space may subscribe to this trigger. Two enabled
+  // subscribers would collide at request time, and under failureMode: 'allow_unsafe' that
+  // collision degrades into a silent unmasked prompt. The exclusivity guard turns that into
+  // an explicit 409 at write time instead.
+  exclusivity: 'per-space',
 };
 
 export const aiPiiCommonDefinition: CommonStepDefinition<

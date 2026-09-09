@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  INFERENCE_PII_ANONYMIZATION_DEFAULTS,
+  INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+  type InferencePiiAnonymizationTemplateValues,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { managedWorkflowInstallationsCounter } from './anonymization_metrics';
 
@@ -33,14 +37,27 @@ export const createInferenceAnonymizationManagedWorkflowInstaller = ({
     }
 
     const installation = clientPromise
-      .then((client) =>
-        client.install(INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID, {
+      .then(async (client) => {
+        // Read persisted template values to avoid overwriting a space's configuration on
+        // every Kibana boot. The framework's `values ?? existingTemplateValues` logic would
+        // handle this too, but only if `values` is omitted — the typed install API requires
+        // a value for yamlTemplate workflows, so we resolve it here instead.
+        const state = await client.getInstalledWorkflowState(
+          INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+          spaceId
+        );
+        const values: InferencePiiAnonymizationTemplateValues =
+          (state?.templateValues as InferencePiiAnonymizationTemplateValues | null) ??
+          INFERENCE_PII_ANONYMIZATION_DEFAULTS;
+
+        return client.install(INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID, {
           spaceId,
           // Workflow document ids are global in storage. The suffix prevents two spaces from
           // contending for the same managed document while retaining the canonical definition id.
           workflowIdSuffix: spaceId,
-        })
-      )
+          values,
+        });
+      })
       .then(() => {
         managedWorkflowInstallationsCounter.add(1);
       })

@@ -9,10 +9,13 @@
 
 import { RE2JS } from 're2js';
 import { parse } from 'yaml';
-import { INFERENCE_PII_ANONYMIZATION_WORKFLOW } from '.';
+import { INFERENCE_PII_ANONYMIZATION_DEFAULTS, INFERENCE_PII_ANONYMIZATION_WORKFLOW } from '.';
 
 describe('INFERENCE_PII_ANONYMIZATION_WORKFLOW', () => {
-  const workflow = parse(INFERENCE_PII_ANONYMIZATION_WORKFLOW.yaml) as Record<string, unknown>;
+  // Render with defaults so assertions remain independent of what values the installer passes.
+  const workflow = parse(
+    INFERENCE_PII_ANONYMIZATION_WORKFLOW.yamlTemplate(INFERENCE_PII_ANONYMIZATION_DEFAULTS)
+  ) as Record<string, unknown>;
 
   it('ships disabled with its output contract', () => {
     expect(workflow.enabled).toBe(false);
@@ -58,5 +61,58 @@ describe('INFERENCE_PII_ANONYMIZATION_WORKFLOW', () => {
       'workflow.output',
     ]);
     expect(workflow.triggers).toEqual([{ type: 'inference.aroundCompletion' }]);
+  });
+
+  it('respects disabled built-in rules in the rendered YAML', () => {
+    const renderedWithDisabledIp = parse(
+      INFERENCE_PII_ANONYMIZATION_WORKFLOW.yamlTemplate({
+        ...INFERENCE_PII_ANONYMIZATION_DEFAULTS,
+        builtInRules: INFERENCE_PII_ANONYMIZATION_DEFAULTS.builtInRules.map((r) =>
+          r.entityClass === 'IP' ? { ...r, enabled: false } : r
+        ),
+      })
+    ) as Record<string, unknown>;
+    const steps = renderedWithDisabledIp.steps as Array<Record<string, unknown>>;
+    const anonymizeStep = steps.find(({ type }) => type === 'ai.pii') as {
+      with: { rules: Array<{ entityClass: string; enabled: boolean }> };
+    };
+    const ipRule = anonymizeStep.with.rules.find(({ entityClass }) => entityClass === 'IP');
+    expect(ipRule?.enabled).toBe(false);
+  });
+
+  it('includes custom rules in the rendered YAML', () => {
+    const renderedWithCustomRule = parse(
+      INFERENCE_PII_ANONYMIZATION_WORKFLOW.yamlTemplate({
+        ...INFERENCE_PII_ANONYMIZATION_DEFAULTS,
+        customRules: [
+          {
+            id: 'rule-1',
+            name: 'Project codes',
+            entityClass: 'RESOURCE_NAME',
+            pattern: String.raw`\bPROJ-[0-9]{4}\b`,
+            enabled: true,
+          },
+        ],
+      })
+    ) as Record<string, unknown>;
+    const steps = renderedWithCustomRule.steps as Array<Record<string, unknown>>;
+    const anonymizeStep = steps.find(({ type }) => type === 'ai.pii') as {
+      with: { rules: Array<{ entityClass: string }> };
+    };
+    expect(
+      anonymizeStep.with.rules.some(({ entityClass }) => entityClass === 'RESOURCE_NAME')
+    ).toBe(true);
+  });
+
+  it('renders failureMode to the consts block when provided', () => {
+    const renderedWithFailureMode = parse(
+      INFERENCE_PII_ANONYMIZATION_WORKFLOW.yamlTemplate({
+        ...INFERENCE_PII_ANONYMIZATION_DEFAULTS,
+        failureMode: 'allow_unsafe',
+      })
+    ) as Record<string, unknown>;
+    expect((renderedWithFailureMode.consts as Record<string, unknown>)?.failureMode).toBe(
+      'allow_unsafe'
+    );
   });
 });

@@ -564,10 +564,18 @@ export class WorkflowsManagementApi {
     const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
       defaultMessage: 'Copy',
     })}`;
-    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
 
-    // A clone inherits the source's `enabled` state from the YAML. If the source is
-    // enabled for an exclusive trigger, a second enabled subscriber would form — block it.
+    // Cloning a managed workflow is the canonical opt-out gesture: the user is taking
+    // ownership and will configure it via YAML. The clone must start disabled so that it
+    // does not immediately compete with the managed origin for exclusive triggers (e.g.
+    // inference.aroundCompletion). The managed workflow keeps running until the user
+    // explicitly disables it and enables the clone — the system never swaps them silently.
+    const clonedYaml = workflow.managed
+      ? updateWorkflowYamlFields(workflow.yaml, { name: cloneName, enabled: false }, false)
+      : updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
+
+    // A clone that is still enabled (non-managed source) may conflict with an exclusive
+    // trigger already held by another workflow in this space.
     if (workflowYamlDeclaresEnabled(clonedYaml)) {
       await this.assertExclusiveTriggersAvailable({
         triggerTypes: getTriggerTypesFromYaml(clonedYaml),
@@ -576,14 +584,23 @@ export class WorkflowsManagementApi {
     }
 
     // `updateWorkflowYamlFields` cannot inject a `name` key when the YAML root is not a
-    // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. Pass
-    // `cloneName` as an explicit fallback so the clone is still named "<name> Copy" instead
-    // of collapsing to "Untitled workflow".
+    // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. For
+    // non-managed clones pass `nameFallback` so the clone is still named "<name> Copy".
+    // Managed clones always have valid YAML (the platform enforces this), so nameFallback
+    // is not needed; omitting it keeps the options object clean and matches the expected API
+    // contract for the managed-clone path.
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
       request,
-      { nameFallback: cloneName }
+      workflow.managed
+        ? {
+            // Preserve provenance so UIs can detect "this space has a user-owned copy of
+            // system-inference_pii_anonymization" and display a read-only state rather than
+            // pretending the managed workflow is still the active configuration.
+            originManagedWorkflowId: workflow.originManagedWorkflowId ?? workflow.id,
+          }
+        : { nameFallback: cloneName }
     );
     this.notifySml(result.id, 'create', request);
     return result;

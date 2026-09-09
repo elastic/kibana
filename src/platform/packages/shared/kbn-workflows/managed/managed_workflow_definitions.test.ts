@@ -13,6 +13,7 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
   PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -49,6 +50,24 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID]: {
+    builtInRules: [
+      { entityClass: 'EMAIL', enabled: true },
+      { entityClass: 'IP', enabled: true },
+      { entityClass: 'HOST_NAME', enabled: false },
+      { entityClass: 'USER_NAME', enabled: true },
+    ],
+    customRules: [
+      {
+        id: 'custom-rule-1',
+        name: 'Internal project codes',
+        entityClass: 'RESOURCE_NAME',
+        pattern: String.raw`\bPROJ-[0-9]{4}\b`,
+        enabled: true,
+      },
+    ],
+    failureMode: 'block',
   },
   [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
