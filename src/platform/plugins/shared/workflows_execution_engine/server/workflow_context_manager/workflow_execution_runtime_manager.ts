@@ -250,8 +250,8 @@ export class WorkflowExecutionRuntimeManager {
 
       scopeStack = scopeStack.exitScope();
 
-      const scopeStepRuntime = stepExecutionRuntimeFactory.createScopeRuntime({
-        scope: currentScope,
+      const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: currentScope.nodeId,
         stackFrames: scopeStack.stackFrames,
       });
       if (scopeStepRuntime.stepExecutionExists()) {

@@ -118,20 +118,16 @@ export async function catchError(
 
       workflowExecutionCursor.navigateToNode(scopeEntry.nodeId);
 
-      const stepExecutionRuntime = stepExecutionRuntimeFactory.createScopeRuntime({
-        scope: scopeEntry,
+      const stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: scopeEntry.nodeId,
         stackFrames: newWorkflowScopeStack.stackFrames,
       });
       const stepImplementation = nodesFactory.create(stepExecutionRuntime);
 
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
-        const failedContext = stepExecutionRuntimeFactory.createScopeRuntime({
-          scope: {
-            nodeId: currentNode.id,
-            nodeType: currentNode.type,
-            stepId: currentNode.stepId,
-          },
+        const failedContext = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: currentNode.id,
           stackFrames: workflowScopeStack.stackFrames,
         });
 

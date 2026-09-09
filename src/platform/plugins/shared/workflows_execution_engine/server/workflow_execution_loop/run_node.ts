@@ -101,8 +101,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   }
 
   try {
-    stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntimeForNode({
-      node,
+    stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+      nodeId: node.id,
       stackFrames: workflowExecutionCursor.currentStackFrames,
     });
 

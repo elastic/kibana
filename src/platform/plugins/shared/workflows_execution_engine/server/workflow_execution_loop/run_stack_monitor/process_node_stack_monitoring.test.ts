@@ -40,7 +40,7 @@ describe('processNodeStackMonitoring', () => {
         getCurrentNodeScope: jest.fn(() => stackFrames),
       },
       stepExecutionRuntimeFactory: {
-        createScopeRuntime: jest.fn(() => ({})),
+        createStepExecutionRuntime: jest.fn(() => ({})),
       },
       nodesFactory: {
         create: jest
@@ -69,7 +69,7 @@ describe('processNodeStackMonitoring', () => {
         getCurrentNodeScope: jest.fn(() => []),
       },
       stepExecutionRuntimeFactory: {
-        createScopeRuntime: jest.fn(),
+        createStepExecutionRuntime: jest.fn(),
       },
       nodesFactory: {
         create: jest.fn(),

@@ -67,7 +67,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     } as unknown as WorkflowExecutionRuntimeManager;
 
     stepExecutionRuntimeFactoryMock = {
-      createScopeRuntime: jest.fn(),
+      createStepExecutionRuntime: jest.fn(),
     } as unknown as StepExecutionRuntimeFactory;
 
     impl = new EnterWorkflowTimeoutZoneNodeImpl(
@@ -190,7 +190,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         failStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
 
-      (stepExecutionRuntimeFactoryMock.createScopeRuntime as jest.Mock)
+      (stepExecutionRuntimeFactoryMock.createStepExecutionRuntime as jest.Mock)
         .mockReturnValueOnce(scopeStepExecutionRuntime1)
         .mockReturnValueOnce(scopeStepExecutionRuntime2);
 

@@ -207,7 +207,7 @@ describe('WorkflowOutputStepImpl', () => {
     const workflowRuntime = createWorkflowRuntime();
     const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
     const stepExecutionRuntimeFactory = {
-      createScopeRuntime: jest.fn().mockReturnValue(ancestorRuntime),
+      createStepExecutionRuntime: jest.fn().mockReturnValue(ancestorRuntime),
     };
     const step = new WorkflowOutputStepImpl(
       { configuration: { status: 'completed', with: { ok: true } } } as any,
@@ -219,7 +219,7 @@ describe('WorkflowOutputStepImpl', () => {
 
     await step.run();
 
-    expect(stepExecutionRuntimeFactory.createScopeRuntime).toHaveBeenCalled();
+    expect(stepExecutionRuntimeFactory.createStepExecutionRuntime).toHaveBeenCalled();
     expect(ancestorRuntime.finishStep).toHaveBeenCalled();
   });
 
