@@ -142,15 +142,39 @@ steps:
           layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'alert_count' | map: 'doc_count' | first | default: 0 }}"
           layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
 
+      # Bulk ops are built here and pushed by reference. `push:` takes a variable or
+      # a scalar; an inline object literal (`push: {'update': {...}}`) is not valid
+      # LiquidJS and throws TokenizationError at the opening brace.
+      - name: build_bulk_update_meta
+        type: data.set
+        with:
+          update_meta:
+            update:
+              _index: "{{ foreach.item._index }}"
+              _id: "{{ foreach.item._id }}"
+
       - name: queue_bulk_update_meta
         type: data.set
         with:
-          bulk_operations: "${{ variables.bulk_operations | push: {'update': {'_index': foreach.item._index, '_id': foreach.item._id}} }}"
+          bulk_operations: "${{ variables.bulk_operations | push: variables.update_meta }}"
+
+      - name: build_bulk_update_doc
+        type: data.set
+        with:
+          update_doc:
+            doc:
+              attribution:
+                environment_hits:
+                  window: "7d"
+                  computed_at: "${{ now }}"
+                  layer_1_ioc_match: "${{ variables.layer1_count }}"
+                  layer_2_behavioral: "${{ variables.layer2_count }}"
+                environment_hits_total: "${{ variables.layer1_count | plus: variables.layer2_count }}"
 
       - name: queue_bulk_update_doc
         type: data.set
         with:
-          bulk_operations: "${{ variables.bulk_operations | push: {'doc': {'attribution': {'environment_hits': {'window': '7d', 'computed_at': now, 'layer_1_ioc_match': variables.layer1_count, 'layer_2_behavioral': variables.layer2_count}, 'environment_hits_total': variables.layer1_count | plus: variables.layer2_count}}}} }}"
+          bulk_operations: "${{ variables.bulk_operations | push: variables.update_doc }}"
 
   - name: write_attributions_bulk
     type: elasticsearch.bulk
