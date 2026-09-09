@@ -86,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
             mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
@@ -233,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
             mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
@@ -322,7 +322,7 @@ export default function (providerContext: FtrProviderContext) {
             mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
@@ -390,7 +390,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should update serviceVars', async () => {
         const serviceVars = {
-          cloudwatch_metrics: [{ regions: ['us-east-1', 'eu-west-1'], namespace: 'AWS/EC2' }],
+          cloudwatch_metrics: { regions: ['us-east-1', 'eu-west-1'], namespace: 'AWS/EC2' },
         };
 
         const { body } = await supertest
@@ -525,7 +525,7 @@ export default function (providerContext: FtrProviderContext) {
             mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
