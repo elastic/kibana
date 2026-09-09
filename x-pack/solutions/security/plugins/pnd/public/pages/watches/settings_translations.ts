@@ -20,6 +20,7 @@ import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  type WorkerScheduleUnit,
 } from '@kbn/pnd-common';
 
 /* -------------------------------------------------------------------------- */
@@ -41,7 +42,7 @@ export const AUTONOMY_SECTION_TITLE = i18n.translate(
 
 export const AUTONOMY_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.sectionSubtitle',
-  { defaultMessage: 'applies to this watch only' }
+  { defaultMessage: 'applies to this worker only' }
 );
 
 export const TRIGGERS_SECTION_TITLE = i18n.translate(
@@ -70,7 +71,17 @@ export const WORKERS_SECTION_TITLE = i18n.translate(
 
 export const WORKERS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.workers.sectionSubtitle',
-  { defaultMessage: 'Workers attached to this Watch' }
+  { defaultMessage: 'Workers tagged as this Watch' }
+);
+
+export const WORKER_SECTION_SUBTITLE = i18n.translate(
+  'xpack.pnd.watches.settings.worker.sectionSubtitle',
+  { defaultMessage: 'applies to this worker only' }
+);
+
+export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
+  'xpack.pnd.watches.settings.worker.unavailable',
+  { defaultMessage: 'Settings could not be read; reload and try again' }
 );
 
 export const SKILLS_SECTION_TITLE = i18n.translate(
@@ -80,8 +91,12 @@ export const SKILLS_SECTION_TITLE = i18n.translate(
 
 export const SKILLS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.skills.sectionSubtitle',
-  { defaultMessage: "what this Watch's Workers can use" }
+  { defaultMessage: 'what this Worker can use' }
 );
+
+export const SKILLS_VIEW_ALL = i18n.translate('xpack.pnd.watches.settings.skills.viewAll', {
+  defaultMessage: 'View all skills',
+});
 
 export const GATES_SECTION_TITLE = i18n.translate('xpack.pnd.watches.settings.gates.sectionTitle', {
   defaultMessage: 'Approval gates',
@@ -121,7 +136,7 @@ export const AUTONOMY_LEVEL_NAMES: Record<string, string> = {
 export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   manual: i18n.translate('xpack.pnd.watches.settings.autonomy.manual.description', {
     defaultMessage:
-      'Nothing runs on its own. The Watch drafts proposals and every one of them waits for your review.',
+      'Nothing runs on its own. This Worker drafts proposals and every one of them waits for your review.',
   }),
   assisted: i18n.translate('xpack.pnd.watches.settings.autonomy.assisted.description', {
     defaultMessage:
@@ -129,7 +144,7 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
   supervised: i18n.translate('xpack.pnd.watches.settings.autonomy.supervised.description', {
     defaultMessage:
-      'The Watch acts within its allow-list and tells you afterwards. Consequential actions still gate.',
+      'This Worker acts within its allow-list and tells you afterwards. Consequential actions still gate.',
   }),
 };
 
@@ -140,6 +155,61 @@ export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.rangeAriaLabel',
   { defaultMessage: 'Autonomy level' }
 );
+
+/* -------------------------------------------------------------------------- */
+/* Schedule interval                                                          */
+/* -------------------------------------------------------------------------- */
+
+export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.label',
+  { defaultMessage: 'Run every' }
+);
+
+export const SCHEDULE_INTERVAL_HELP_TEXT = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.helpText',
+  { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+);
+
+export const SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.numberAriaLabel',
+  { defaultMessage: 'Schedule interval' }
+);
+
+export const SCHEDULE_INTERVAL_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.unitAriaLabel',
+  { defaultMessage: 'Schedule interval unit' }
+);
+
+const SCHEDULE_UNIT_MINUTE = (intervalValue: string) =>
+  i18n.translate('xpack.pnd.watches.settings.scheduleInterval.unit.minute', {
+    defaultMessage: '{intervalValue, plural, one {minute} other {minutes}}',
+    values: { intervalValue },
+  });
+
+const SCHEDULE_UNIT_HOUR = (intervalValue: string) =>
+  i18n.translate('xpack.pnd.watches.settings.scheduleInterval.unit.hour', {
+    defaultMessage: '{intervalValue, plural, one {hour} other {hours}}',
+    values: { intervalValue },
+  });
+
+const SCHEDULE_UNIT_DAY = (intervalValue: string) =>
+  i18n.translate('xpack.pnd.watches.settings.scheduleInterval.unit.day', {
+    defaultMessage: '{intervalValue, plural, one {day} other {days}}',
+    values: { intervalValue },
+  });
+
+/** Pluralised unit label, matching how the Attack Discovery schedule form reads its unit select. */
+export const scheduleUnitLabel = (unit: WorkerScheduleUnit, intervalValue: number): string => {
+  const value = String(intervalValue);
+  switch (unit) {
+    case 'm':
+      return SCHEDULE_UNIT_MINUTE(value);
+    case 'h':
+      return SCHEDULE_UNIT_HOUR(value);
+    case 'd':
+      return SCHEDULE_UNIT_DAY(value);
+  }
+};
 
 /* -------------------------------------------------------------------------- */
 /* Triggers                                                                   */
@@ -314,6 +384,10 @@ export const COL_WORKER = i18n.translate('xpack.pnd.watches.settings.col.worker'
 
 export const COL_SKILL = i18n.translate('xpack.pnd.watches.settings.col.skill', {
   defaultMessage: 'Skill',
+});
+
+export const COL_DESCRIPTION = i18n.translate('xpack.pnd.watches.settings.col.description', {
+  defaultMessage: 'Description',
 });
 
 export const COL_ENABLED = i18n.translate('xpack.pnd.watches.settings.col.enabled', {
@@ -536,25 +610,25 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 const WATCH_INTROS: Record<string, string> = {
   [SYSTEM_SECURITY_WATCH_FLOOR_ID]: i18n.translate('xpack.pnd.watches.settings.intro.floor', {
     defaultMessage:
-      'Coordinates Workers that reduce alert volume and route what matters. One Orchestrator, one or more Workers. Everything below configures this one Watch — Agents are managed in Workflows & Agent Builder.',
+      'Groups the Workers that reduce alert volume and route what still needs a person. Settings below belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate('xpack.pnd.watches.settings.intro.officer', {
     defaultMessage:
-      'Takes what the Floor hands over and decides who needs to know. Assembles cases, escalates criticals, and stages response proposals for approval. Everything below configures this one Watch.',
+      'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.pnd.watches.settings.intro.dark', {
     defaultMessage:
-      'Hunts continuously for threats and coverage gaps nobody has reported yet, and sweeps overnight. Findings arrive as reviewable evidence rather than alerts. Everything below configures this one Watch.',
+      'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.pnd.watches.settings.intro.deep', {
     defaultMessage:
-      'Specialist depth on demand — forensics, timelines, and hunts that need more than triage. Draws draft-only conclusions for a human to confirm. Everything below configures this one Watch.',
+      'Watch grouping for specialist analysis. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
     'xpack.pnd.watches.settings.intro.detection',
     {
       defaultMessage:
-        'Turns false-positive noise and coverage gaps into reviewable rule proposals — tuning, new rules, and prebuilt onboarding. Nothing ships without a detection engineer. Everything below configures this one Watch.',
+        'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
     }
   ),
 };

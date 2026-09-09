@@ -433,7 +433,7 @@ const artifactsSchema = z
     }
   })
   .describe(
-    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.'
+    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.'
   );
 
 /** Create rule API schema */
@@ -608,7 +608,12 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        builder_type: z.string().max(64).optional().nullable(),
+        // `null` clears all tags (an empty array is rejected by `.min(1)`, and
+        // omitting `tags` preserves the existing ones on a partial update).
+        tags: tagsSchema.min(1).nullable().optional(),
+      })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),

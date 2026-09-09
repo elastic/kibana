@@ -11,12 +11,12 @@ import { useLayoutEffect } from 'react';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 
 /**
- * Claims the Chrome Next inline app-header slot so Chrome does not also render a chrome-owned header.
+ * Claims the inline app-header slot so Chrome does not also render a chrome-owned header.
  */
 export const useInlineAppHeader = (): void => {
   const chrome = useChromeService();
   useLayoutEffect(() => {
-    chrome.next.inlineAppHeader.set(true);
-    return () => chrome.next.inlineAppHeader.set(false);
+    chrome.inlineAppHeader.set(true);
+    return () => chrome.inlineAppHeader.set(false);
   }, [chrome]);
 };
