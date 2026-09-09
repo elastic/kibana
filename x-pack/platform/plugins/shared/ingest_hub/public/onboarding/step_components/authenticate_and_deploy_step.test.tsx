@@ -249,7 +249,7 @@ describe('AuthenticateAndDeployStep', () => {
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
         detectAndReviewStep: { onboardingDeploymentId: undefined },
-      updateDetectAndReviewStep: jest.fn(),
+        updateDetectAndReviewStep: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
       renderStep();
@@ -295,7 +295,7 @@ describe('AuthenticateAndDeployStep', () => {
         servicesStep: { selectedServiceIds: ['cloudtrail'] },
         awsServicesMap: new Map([['cloudtrail', ecfService]]),
         detectAndReviewStep: { onboardingDeploymentId: undefined },
-      updateDetectAndReviewStep: jest.fn(),
+        updateDetectAndReviewStep: jest.fn(),
       });
     });
 
@@ -333,7 +333,7 @@ describe('AuthenticateAndDeployStep', () => {
           ['cloudtrail', ecfService],
         ]),
         detectAndReviewStep: { onboardingDeploymentId: undefined },
-      updateDetectAndReviewStep: jest.fn(),
+        updateDetectAndReviewStep: jest.fn(),
       });
     });
 
