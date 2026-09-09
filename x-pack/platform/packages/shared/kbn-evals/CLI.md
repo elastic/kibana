@@ -160,7 +160,6 @@ Runs a Playwright eval suite without managing EDOT/Scout. Use this when you alre
 
 ```bash
 node scripts/evals run --suite agent-builder --judge bedrock-claude
-node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
 node scripts/evals run --suite agent-builder --grep "product documentation"
 node scripts/evals run --suite streams --dry-run
 ```

@@ -32,7 +32,6 @@ plugins:
     - dev_tools
     - discover
     - discoverCustomizationExamples
-    - discover_enhanced
     - discoveries
     - embeddable_alerts_table
     - entity_store
@@ -51,6 +50,7 @@ plugins:
     - infra
     - ingest_hub
     - ingest_pipelines
+    - interactive_setup
     - intercepts
     - kibana_overview
     - kql
