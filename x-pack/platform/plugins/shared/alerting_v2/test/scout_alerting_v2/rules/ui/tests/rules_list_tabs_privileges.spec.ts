@@ -22,32 +22,15 @@ import {
  * until ECH support lands.
  */
 /*
- * `alerting:v2:enabled` is a *global* advanced setting, read via
- * `core.settings.globalClient`. This config root normally pins it on via a
- * server-arg override, but set it explicitly too so this spec is correct
- * regardless of which config it runs under.
+ * `alerting:v2:enabled` needs no setup here: this suite lives under
+ * `scout_alerting_v2`, whose config set pins the setting on with
+ * `--uiSettings.globalOverrides.alerting:v2:enabled=true`. An overridden
+ * setting is read-only, so writing it would fail with
+ * `400 ... because it is overridden` rather than be redundant. The generic
+ * Scout config leaves it unpinned, which is why the equivalent
+ * `triggers_actions_ui` specs toggle it at runtime instead.
  */
-const ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH = '/api/kibana/global_settings/alerting:v2:enabled';
-
 test.describe('Rules list - heading tabs privileges', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.request({
-      method: 'POST',
-      path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
-      headers: { 'kbn-xsrf': 'scout' },
-      body: { value: true },
-    });
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
-      headers: { 'kbn-xsrf': 'scout' },
-      ignoreErrors: [404],
-    });
-  });
-
   test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
     browserAuth,
     pageObjects,
