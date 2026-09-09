@@ -10,13 +10,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
+import type { BuildMlClientFn } from '../ml_client_factory';
 import {
   ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ANOMALY_CHARTS_ATTACHMENT_TYPE,
@@ -33,6 +33,7 @@ const schema = z.object({
   job_ids: z
     .array(z.string().min(1).max(1000))
     .min(1)
+    .max(10000)
     .describe(
       'IDs of the anomaly detection jobs or groups. Must be verified to exist via ml.ad_get_job_info before calling. For single_metric_viewer, exactly one job ID is required.'
     ),
@@ -99,9 +100,7 @@ const schema = z.object({
       from: z
         .string()
         .describe('Start of the time range (ISO 8601 or Kibana date math, e.g. "now-7d").'),
-      to: z
-        .string()
-        .describe('End of the time range (ISO 8601 or Kibana date math, e.g. "now").'),
+      to: z.string().describe('End of the time range (ISO 8601 or Kibana date math, e.g. "now").'),
     })
     .optional()
     .describe(
@@ -112,24 +111,19 @@ const schema = z.object({
 
 /**
  * Maps a minimum score (0–100) to the SeverityThreshold[] format expected by
- * the anomaly charts embeddable. Includes all severity bands whose floor is >= minScore.
+ * the anomaly charts embeddable. Uses a single open-ended floor so any value
+ * in range filters as `score >= minScore`, matching the swim lane path.
  */
-const buildAnomalyChartsThresholds = (minScore: number): SeverityThreshold[] => {
-  const bands = [
-    { min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING },
-    { min: ML_ANOMALY_THRESHOLD.WARNING, max: ML_ANOMALY_THRESHOLD.MINOR },
-    { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
-    { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
-    { min: ML_ANOMALY_THRESHOLD.CRITICAL },
-  ] as SeverityThreshold[];
-  return bands.filter((b) => b.min >= minScore);
-};
+export const buildAnomalyChartsThresholds = (minScore: number): SeverityThreshold[] => [
+  { min: minScore },
+];
 
 export const createMlChartsTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
-  enabledFeatures?: MlFeatures
+  enabledFeatures?: MlFeatures,
+  buildMlClient?: BuildMlClientFn
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: CREATE_ML_CHARTS_TOOL_ID,
   type: ToolType.builtin,
@@ -152,7 +146,7 @@ After the tool succeeds, render the chart inline by emitting:
 The returned \`config\` in the result can also be forwarded to \`platform.dashboard.generate_dashboard\` if the user asks to add the chart to a dashboard (use \`source: "config"\` with the appropriate panel type).`,
   experimental: true,
   schema,
-  handler: async (params, { esClient, request, logger, attachments }) => {
+  handler: async (params, { esClient, savedObjectsClient, request, logger, attachments }) => {
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       request,
@@ -166,9 +160,7 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
     } catch (error) {
       return {
         results: [
-          createErrorResult(
-            `Cannot create ML chart due to missing capabilities: ${error.message}`
-          ),
+          createErrorResult(`Cannot create ML chart due to missing capabilities: ${error.message}`),
         ],
       };
     }
@@ -198,9 +190,7 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
         }
         if (params.swimlane_type === 'viewBy' && !params.view_by) {
           return {
-            results: [
-              createErrorResult('view_by is required when swimlane_type is "viewBy".'),
-            ],
+            results: [createErrorResult('view_by is required when swimlane_type is "viewBy".')],
           };
         }
         attachmentType = ANOMALY_SWIMLANE_ATTACHMENT_TYPE;
@@ -247,7 +237,9 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
         // in selected_entities — otherwise the embeddable shows an empty callout instead of a chart.
         const detectorIndex = params.selected_detector_index ?? 0;
         try {
-          const jobResponse = await esClient.asInternalUser.ml.getJobs({
+          const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
+          const jobsApi = mlClient ?? esClient.asCurrentUser.ml;
+          const jobResponse = await jobsApi.getJobs({
             job_id: params.job_ids[0],
           });
           const job = jobResponse.jobs?.[0];
@@ -266,7 +258,9 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
               return {
                 results: [
                   createErrorResult(
-                    `single_metric_viewer cannot render: the selected detector requires values for the following entity field${missing.length > 1 ? 's' : ''}: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
+                    `single_metric_viewer cannot render: the selected detector requires values for the following entity field${
+                      missing.length > 1 ? 's' : ''
+                    }: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
                       `Provide them via selected_entities (e.g. from a prior anomaly record's partition_field_value / by_field_value / over_field_value).`
                   ),
                 ],
@@ -275,7 +269,9 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
           }
         } catch (fetchError) {
           logger.warn(
-            `Could not validate detector entity fields for job ${params.job_ids[0]}: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`
+            `Could not validate detector entity fields for job ${params.job_ids[0]}: ${
+              fetchError instanceof Error ? fetchError.message : String(fetchError)
+            }`
           );
           // Non-fatal: proceed and let the embeddable show its own validation state.
         }

@@ -76,6 +76,12 @@ export const createAnomalyDetectionSkill = (
         buildMlClient
       ),
       createQueryAnomaliesTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
-      createMlChartsTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
+      createMlChartsTool(
+        resolveMlCapabilities,
+        authorization,
+        mlLicense,
+        enabledFeatures,
+        buildMlClient
+      ),
     ],
   });

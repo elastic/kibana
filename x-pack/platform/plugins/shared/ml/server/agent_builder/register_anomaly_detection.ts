@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../common/license';
 import type { MlFeatures } from '../../common/constants/app';
@@ -37,9 +38,15 @@ export const registerAnomalyDetectionAgentBuilder = ({
   const buildMlClient = createMlClientFactory(mlClientFactoryDeps);
   const buildDataRecognizer = createDataRecognizerFactory(mlClientFactoryDeps);
 
-  agentBuilder.attachments.registerType(createAnomalySwimLaneAttachmentType());
-  agentBuilder.attachments.registerType(createAnomalyChartsAttachmentType());
-  agentBuilder.attachments.registerType(createSingleMetricViewerAttachmentType());
+  agentBuilder.attachments.registerType(
+    createAnomalySwimLaneAttachmentType() as AttachmentTypeDefinition
+  );
+  agentBuilder.attachments.registerType(
+    createAnomalyChartsAttachmentType() as AttachmentTypeDefinition
+  );
+  agentBuilder.attachments.registerType(
+    createSingleMetricViewerAttachmentType() as AttachmentTypeDefinition
+  );
 
   agentBuilder.skills.register(
     createAnomalyDetectionSkill(

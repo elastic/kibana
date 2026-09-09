@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { ANOMALY_SWIMLANE_ATTACHMENT_TYPE, ANOMALY_CHARTS_ATTACHMENT_TYPE, SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE } from './constants';
+export {
+  ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+} from './constants';
 export { createAnomalySwimLaneAttachmentType } from './anomaly_swimlane';
 export { createAnomalyChartsAttachmentType } from './anomaly_charts';
 export { createSingleMetricViewerAttachmentType } from './single_metric_viewer';

@@ -27,10 +27,7 @@ export const createAnomalyChartsAttachmentType = (): AttachmentTypeDefinition<
   format: (attachment) => ({
     getRepresentation: () => {
       const { data } = attachment;
-      const lines: string[] = [
-        'ML Anomaly Charts attachment',
-        `Jobs: ${data.job_ids.join(', ')}`,
-      ];
+      const lines: string[] = ['ML Anomaly Charts attachment', `Jobs: ${data.job_ids.join(', ')}`];
       if (data.max_series_to_plot != null) lines.push(`Max series: ${data.max_series_to_plot}`);
       return { type: 'text' as const, value: lines.join('\n') };
     },

@@ -24,9 +24,7 @@ function isSwimlaneWithSeverity(embeddable: unknown): embeddable is AnomalySwimL
 }
 
 export class AnomalySwimlaneSeverityBadge
-  implements
-    Action<EmbeddableApiContext>,
-    FrequentCompatibilityChangeAction<EmbeddableApiContext>
+  implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
   public readonly type = ANOMALY_SWIMLANE_SEVERITY_BADGE_ID;
   public readonly id = ANOMALY_SWIMLANE_SEVERITY_BADGE_ID;

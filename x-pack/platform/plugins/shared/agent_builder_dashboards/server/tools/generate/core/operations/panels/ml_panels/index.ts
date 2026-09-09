@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema, timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
 
@@ -22,13 +22,6 @@ import { definePanelType } from '../panel_type';
  * The embeddable type strings are intentionally string literals here so that
  * this module carries no runtime dependency on the ML plugin.
  */
-
-const timeRangeSchema = z.object({
-  from: z
-    .string()
-    .describe('Start of the time range (ISO 8601 or Kibana relative, e.g. "now-7d/d").'),
-  to: z.string().describe('End of the time range (ISO 8601 or Kibana relative, e.g. "now/d").'),
-});
 
 // ─── Anomaly Charts ───────────────────────────────────────────────────────────
 
@@ -60,6 +53,18 @@ export const anomalyChartsPanelConfigInputSchema = z.object({
 
 export const anomalyChartsPanelDefinition = definePanelType({
   embeddableType: 'ml_anomaly_charts',
+  buildPanelContent: (config) => {
+    const { severity_threshold: severityThreshold, ...rest } = config;
+    return {
+      type: 'ml_anomaly_charts',
+      config: {
+        ...rest,
+        ...(typeof severityThreshold === 'number'
+          ? { severity_threshold: [{ min: severityThreshold }] }
+          : {}),
+      },
+    };
+  },
 });
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────

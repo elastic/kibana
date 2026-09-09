@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { EuiSkeletonText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
@@ -16,6 +18,7 @@ import {
   ANOMALY_CHARTS_ATTACHMENT_TYPE,
   SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
 } from '../../common/agent_builder/attachment_type_ids';
+import type { InlineMlChartServices } from './inline_ml_charts';
 
 type SwimLaneAttachment = UnknownAttachment & { data: AnomalySwimLaneEmbeddableState };
 type AnomalyChartsAttachment = UnknownAttachment & { data: AnomalyChartsEmbeddableState };
@@ -38,28 +41,48 @@ const getLabel = (attachment: UnknownAttachment, fallback: string): string => {
   return typeof title === 'string' && title.length > 0 ? title : fallback;
 };
 
-export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPluginStart) {
-  agentBuilder.attachments.addAttachmentType<SwimLaneAttachment>(
-    ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
-    {
-      getLabel: (attachment) => getLabel(attachment, 'Anomaly Swim Lane'),
-      getIcon: () => 'machineLearningApp',
-      renderInlineContent: (props) => (
-        <React.Suspense fallback={null}>
-          <LazyInlineSwimLane {...props} />
-        </React.Suspense>
+export function registerAgentBuilderAttachments(
+  agentBuilder: AgentBuilderPluginStart,
+  services: InlineMlChartServices
+) {
+  agentBuilder.attachments.addAttachmentType<SwimLaneAttachment>(ANOMALY_SWIMLANE_ATTACHMENT_TYPE, {
+    getLabel: (attachment) =>
+      getLabel(
+        attachment,
+        i18n.translate('xpack.ml.agentBuilder.attachments.anomalySwimLane.label', {
+          defaultMessage: 'Anomaly Swim Lane',
+        })
       ),
-    }
-  );
+    getIcon: () => 'machineLearningApp',
+    renderInlineContent: (props, callbacks) => (
+      <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
+        <LazyInlineSwimLane
+          {...props}
+          services={services}
+          registerActionButtons={callbacks?.registerActionButtons}
+        />
+      </React.Suspense>
+    ),
+  });
 
   agentBuilder.attachments.addAttachmentType<AnomalyChartsAttachment>(
     ANOMALY_CHARTS_ATTACHMENT_TYPE,
     {
-      getLabel: (attachment) => getLabel(attachment, 'Anomaly Charts'),
+      getLabel: (attachment) =>
+        getLabel(
+          attachment,
+          i18n.translate('xpack.ml.agentBuilder.attachments.anomalyCharts.label', {
+            defaultMessage: 'Anomaly Charts',
+          })
+        ),
       getIcon: () => 'machineLearningApp',
-      renderInlineContent: (props) => (
-        <React.Suspense fallback={null}>
-          <LazyInlineAnomalyCharts {...props} />
+      renderInlineContent: (props, callbacks) => (
+        <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyInlineAnomalyCharts
+            {...props}
+            services={services}
+            registerActionButtons={callbacks?.registerActionButtons}
+          />
         </React.Suspense>
       ),
     }
@@ -68,11 +91,21 @@ export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPlugin
   agentBuilder.attachments.addAttachmentType<SingleMetricViewerAttachment>(
     SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
     {
-      getLabel: (attachment) => getLabel(attachment, 'Single Metric Viewer'),
+      getLabel: (attachment) =>
+        getLabel(
+          attachment,
+          i18n.translate('xpack.ml.agentBuilder.attachments.singleMetricViewer.label', {
+            defaultMessage: 'Single Metric Viewer',
+          })
+        ),
       getIcon: () => 'machineLearningApp',
-      renderInlineContent: (props) => (
-        <React.Suspense fallback={null}>
-          <LazyInlineSingleMetricViewer {...props} />
+      renderInlineContent: (props, callbacks) => (
+        <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyInlineSingleMetricViewer
+            {...props}
+            services={services}
+            registerActionButtons={callbacks?.registerActionButtons}
+          />
         </React.Suspense>
       ),
     }

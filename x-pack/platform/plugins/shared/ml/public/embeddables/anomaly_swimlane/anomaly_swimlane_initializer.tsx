@@ -233,10 +233,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                 }
                 fullWidth
               >
-                <SeverityControl
-                  value={severityThreshold}
-                  onChange={setSeverityThreshold}
-                />
+                <SeverityControl value={severityThreshold} onChange={setSeverityThreshold} />
               </EuiFormRow>
             </>
           ) : null}
