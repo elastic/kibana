@@ -525,18 +525,26 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateCustomYaraSignatureForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): CreateExceptionListItemSchemaWithNonNullProps {
+    // os_types needs to be passed to `generateCustomYaraSignature` to generate the rule text correctly,
+    // while the rest can be spreaded over so all output fields can be overridden.
+    const { os_types, ...rest } = overrides;
+
     return {
-      ...exceptionItemToCreateExceptionItem(this.generateCustomYaraSignature()),
-      ...overrides,
+      ...exceptionItemToCreateExceptionItem(this.generateCustomYaraSignature({ os_types })),
+      ...rest,
     };
   }
 
   generateCustomYaraSignatureForUpdate(
     overrides: Partial<UpdateExceptionListItemSchema> = {}
   ): UpdateExceptionListItemSchemaWithNonNullProps {
+    // os_types needs to be passed to `generateCustomYaraSignature` to generate the rule text correctly,
+    // while the rest can be spreaded over so all output fields can be overridden.
+    const { os_types, ...rest } = overrides;
+
     return {
-      ...exceptionItemToUpdateExceptionItem(this.generateCustomYaraSignature()),
-      ...overrides,
+      ...exceptionItemToUpdateExceptionItem(this.generateCustomYaraSignature({ os_types })),
+      ...rest,
     };
   }
 
