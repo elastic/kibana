@@ -8,7 +8,7 @@
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 
 /** Cold Security `gotoApp` after a custom-role login can exceed Playwright's 10s default. */
-const LIST_PAGE_READY_TIMEOUT_MS = 30_000;
+const LIST_PAGE_READY_TIMEOUT_MS = 20_000;
 
 export class ArtifactListPage {
   readonly noPrivilegesPage: Locator;
