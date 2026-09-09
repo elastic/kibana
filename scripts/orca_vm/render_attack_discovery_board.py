@@ -62,10 +62,44 @@ td.model{font-family:ui-monospace,Menlo,monospace;color:#7dd3fc}
 .disc h2{font-size:13px;margin:0 0 8px;text-transform:uppercase;color:#fbbf24;letter-spacing:.04em}
 .disc li{margin:4px 0;color:#c7cdd6}
 code{background:#1e2430;padding:1px 5px;border-radius:3px;font-size:12px}
+h2.sec{font-size:14px;margin:26px 0 10px;color:#9aa4b2;text-transform:uppercase;letter-spacing:.04em}
+table.sources td{font-size:13px;color:#c7cdd6;vertical-align:top}
+table.sources td.src-col{color:#7dd3fc;font-weight:600;width:170px;white-space:nowrap}
+tr.missing td{color:#5b6472;font-style:italic}
+tr.missing td.model{color:#6b7480;font-style:normal}
 """
 
 
-def render(agg, source_note):
+# Criterion 1: every column states exactly where its number comes from, so a
+# reader never has to guess whether a value was measured, derived, or missing.
+COLUMN_SOURCES = [
+    ("Model", "<code>task.model.id</code> from the golden score documents."),
+    ("Status", "<code>task.output.adToolResult.status</code>; shown as the share of documents reporting <code>completed</code>."),
+    ("Discoveries", "mean of <code>task.output.adToolResult.discoveryCount</code> over documents that carry it."),
+    ("Alerts in context", "mean of <code>task.output.adToolResult.alertsContextCount</code>."),
+    ("Latency", "mean score of the <code>Latency</code> evaluator, in seconds &mdash; NOT a <code>task.output</code> field."),
+    ("Total risk", "no source field exists in our schema; always blank."),
+    ("Docs", "count of scored documents contributing to that row."),
+]
+
+
+def render_missing_rows(missing):
+    """Criterion 6: reference models absent from our data are shown as
+    explicitly missing. Their cells stay blank -- never filled from the
+    reference HTML."""
+    if not missing:
+        return ""
+    cells = "\n".join(
+        "<tr class='missing'>"
+        f'<td class="model">{html.escape(m)}</td>'
+        f'<td colspan="6"><span class="na">not present in our golden data &mdash; never run in this suite</span></td>'
+        "</tr>"
+        for m in sorted(missing)
+    )
+    return cells
+
+
+def render(agg, source_note, missing_models=(), diff_summary=None):
     rows = build_rows(agg["models"])
     absent = agg["absentFields"]
     absent_html = (
@@ -74,6 +108,26 @@ def render(agg, source_note):
         or "<li>All reference columns were recovered from our data.</li>"
     )
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    sources_html = "\n".join(
+        f"<tr><td class='src-col'>{name}</td><td>{desc}</td></tr>"
+        for name, desc in COLUMN_SOURCES
+    )
+    missing_html = render_missing_rows(missing_models)
+    missing_note = (
+        f"<li><strong>{len(missing_models)} models appear in the reference artifact but not in our "
+        "golden data.</strong> They are listed at the foot of the table with blank cells. Their "
+        "reference numbers were deliberately NOT copied across &mdash; doing so would report another "
+        "harness's results as ours.</li>"
+        if missing_models else ""
+    )
+    diff_note = (
+        f"<li><strong>Field-level diff vs the reference:</strong> "
+        f"{diff_summary['identical']}/{diff_summary['comparable']} fields identical "
+        f"({100*diff_summary['identical']/max(1,diff_summary['comparable']):.1f}%), "
+        f"{diff_summary['differs']} differ, {diff_summary['absentInOurs']} absent. "
+        "Full evidence in <code>field_diff.json</code>.</li>"
+        if diff_summary else ""
+    )
     return f"""<!doctype html><meta charset="utf-8">
 <title>Attack Discovery -- golden results</title><style>{CSS}</style>
 <h1>Attack Discovery &mdash; model board</h1>
@@ -85,18 +139,27 @@ suite <code>{html.escape(agg['suiteId'])}</code> &middot; rendered {ts}</div>
 The reference artifact reports a single large run: <code>8</code> discoveries over
 <code>95</code> alerts for every model. Our golden data is a scenario-fixture suite &mdash;
 discovery counts of 0/1/4 over 0-16 alerts. Copying its shape would describe a benchmark we did not run.</li>
+{diff_note}
 {absent_html}
+{missing_note}
 <li>Each mean carries its own <code>n</code>. Coverage is uneven by design
 (57% of documents carry <code>discoveryCount</code>); a mean over 7 documents is not
 dressed up as a mean over 1040.</li>
 <li>Source: {html.escape(source_note)}</li>
 </ul></div>
 
+<h2 class="sec">Where each column comes from</h2>
+<table class="sources"><tbody>
+{sources_html}
+</tbody></table>
+
+<h2 class="sec">Results</h2>
 <table><thead><tr>
 <th>Model</th><th>Status</th><th>Discoveries</th><th>Alerts in context</th>
 <th>Latency</th><th>Total risk</th><th>Docs</th>
 </tr></thead><tbody>
 {rows}
+{missing_html}
 </tbody></table>
 """
 
@@ -105,6 +168,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--aggregate", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--field-diff", help="field_diff.json from diff_attack_discovery_vs_reference.py")
     args = ap.parse_args()
 
     agg = json.load(open(args.aggregate))
@@ -113,10 +177,23 @@ def main():
     if all(m["discoveryCount"]["mean"] is None for m in agg["models"]):
         sys.exit("no model carries a discoveryCount -- refusing to render a vacuous board")
 
-    html_out = render(agg, f"golden ES, suite_id={agg['suiteId']}, {agg['sourceDocCount']} docs")
+    missing_models = []
+    diff_summary = None
+    if args.field_diff:
+        diff = json.load(open(args.field_diff))
+        missing_models = diff.get("referenceOnly", [])
+        diff_summary = diff.get("fieldTotals")
+
+    html_out = render(
+        agg,
+        f"golden ES, suite_id={agg['suiteId']}, {agg['sourceDocCount']} docs",
+        missing_models=missing_models,
+        diff_summary=diff_summary,
+    )
     with open(args.out, "w") as fh:
         fh.write(html_out)
-    print(f"wrote {args.out} ({len(html_out)} bytes, {agg['modelCount']} models)")
+    print(f"wrote {args.out} ({len(html_out)} bytes, {agg['modelCount']} models, "
+          f"{len(missing_models)} listed as missing)")
 
 
 if __name__ == "__main__":
