@@ -15,7 +15,7 @@ import { run, type FlagsReader } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutFlakyTests } from '@kbn/scout-reporting';
 
-import { GithubApi } from '../failed_tests_reporter/github_api';
+import { DEFAULT_GITHUB_REPO, GithubApi } from '../failed_tests_reporter/github_api';
 import { FLAKY_TEST_SUITE_LABEL } from './issue_body';
 import { FAILED_TEST_ISSUE_POLICIES, reportFlakySuitesToGithub } from './reporter';
 
@@ -58,7 +58,14 @@ export function runFlakyTestsReporterCli() {
         flagsReader.enum('failed-test-issues', FAILED_TEST_ISSUE_POLICIES) ??
         DEFAULT_FAILED_TEST_ISSUE_POLICY;
       const reportUrl = flagsReader.string('report-url');
+      const repo = flagsReader.requiredString('github-repo');
+      if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+        throw createFlagError('--github-repo must be of the form owner/name');
+      }
 
+      if (repo !== DEFAULT_GITHUB_REPO) {
+        log.warning(`Filing issues against ${repo} instead of ${DEFAULT_GITHUB_REPO}`);
+      }
       log.info(`Reading flaky test report from ${inputPath}`);
       const { data: report } = ScoutFlakyTests.fromFile(inputPath);
       if (dryRun) {
@@ -67,7 +74,7 @@ export function runFlakyTestsReporterCli() {
 
       const summary = await reportFlakySuitesToGithub({
         report,
-        github: new GithubApi({ log, token, dryRun }),
+        github: new GithubApi({ log, token, dryRun, repo }),
         log,
         labels,
         maxNewIssues,
@@ -108,6 +115,7 @@ export function runFlakyTestsReporterCli() {
           'failed-test-issues',
           'report-url',
           'summary-path',
+          'github-repo',
         ],
         boolean: ['dry-run'],
         default: {
@@ -116,6 +124,7 @@ export function runFlakyTestsReporterCli() {
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
           'failed-test-issues': DEFAULT_FAILED_TEST_ISSUE_POLICY,
           'summary-path': DEFAULT_SUMMARY_PATH,
+          'github-repo': DEFAULT_GITHUB_REPO,
           'dry-run': false,
         },
         help: `
@@ -128,6 +137,7 @@ export function runFlakyTestsReporterCli() {
           )} suites that already have an open failed-test issue [default: ${DEFAULT_FAILED_TEST_ISSUE_POLICY}]
           --report-url          Link to the report, shown in every issue (e.g. the Buildkite artifact)
           --summary-path        Where to write the JSON summary of what was filed [default: ${DEFAULT_SUMMARY_PATH}]
+          --github-repo         owner/name of the repository to file issues in, e.g. a sandbox for testing [default: ${DEFAULT_GITHUB_REPO}]
         `,
       },
     }

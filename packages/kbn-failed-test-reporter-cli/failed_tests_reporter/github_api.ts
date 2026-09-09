@@ -11,7 +11,7 @@ import Url from 'url';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
+export const DEFAULT_GITHUB_REPO = 'elastic/kibana';
 
 /** URL of the `rel="next"` entry of a GitHub `Link` response header, if any. */
 export function nextPageUrl(linkHeader: string | null): string | undefined {
@@ -73,21 +73,24 @@ export class GithubApi {
   private readonly log: ToolingLog;
   private readonly token: string | undefined;
   private readonly dryRun: boolean;
+  private readonly baseUrl: string;
   private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
-   * sent, but will instead be logged.
+   * sent, but will instead be logged. `repo` (`owner/name`) defaults to elastic/kibana.
    */
   constructor(options: {
     log: GithubApi['log'];
     token: GithubApi['token'];
     dryRun: GithubApi['dryRun'];
+    repo?: string;
   }) {
     this.log = options.log;
     this.token = options.token;
     this.dryRun = options.dryRun;
+    this.baseUrl = `https://api.github.com/repos/${options.repo ?? DEFAULT_GITHUB_REPO}/`;
 
     if (!this.token && !this.dryRun) {
       throw new TypeError('token parameter is required');
@@ -107,7 +110,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'PATCH',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}`),
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
         data: {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
@@ -132,7 +135,7 @@ export class GithubApi {
         {
           method: 'GET',
           url: Url.resolve(
-            BASE_URL,
+            this.baseUrl,
             `issues/${encodeURIComponent(issueNumber)}/comments?per_page=${perPage}&page=${page}`
           ),
         },
@@ -158,7 +161,7 @@ export class GithubApi {
   async listIssues({ labels, state, maxPages = 50 }: ListIssuesOptions): Promise<GithubIssue[]> {
     const issues: GithubIssue[] = [];
     const query = new URLSearchParams({ labels: labels.join(','), state, per_page: '100' });
-    let url: string | undefined = Url.resolve(BASE_URL, `issues?${query}`);
+    let url: string | undefined = Url.resolve(this.baseUrl, `issues?${query}`);
 
     for (let page = 1; page <= maxPages && url; page++) {
       const resp = await this.request<Array<GithubIssue & { pull_request?: unknown }>>(
@@ -192,7 +195,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}/comments`),
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}/comments`),
         data: {
           body: commentBody,
         },
@@ -205,7 +208,7 @@ export class GithubApi {
     const resp = await this.request<GithubIssueMini>(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, 'issues'),
+        url: Url.resolve(this.baseUrl, 'issues'),
         data: {
           title,
           body,

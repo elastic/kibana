@@ -28,7 +28,9 @@ retry flakes, flakiest branch and latest run per test), recent failure messages,
 again (`suite.filePath`). Suites whose tests already have an open `failed-test` issue are skipped
 by default; `--failed-test-issues link` files the suite issue anyway and lists the related issues
 in it. `--max-new-issues` (default 10) caps how many issues one run may create; existing issues
-are always updated. A JSON summary of what was done is written to `--summary-path`.
+are always updated. A JSON summary of what was done is written to `--summary-path`. To try the
+output on a sandbox repository, pass `--github-repo owner/name` with a token that has write
+access to its issues.
 
 The [kibana / scout / report-flaky-tests](https://buildkite.com/elastic/kibana-scout-report-flaky-tests)
 pipeline runs both commands daily. Its second step stays in dry-run mode until
