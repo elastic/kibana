@@ -16,15 +16,18 @@ import type { TaskContext } from '../task_context';
 
 const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cmd` : path);
 
-export async function yarnInstall({ log, buildDir, config }: TaskContext) {
+export async function installDependencies({ log, buildDir, config }: TaskContext) {
   const pkgJson = Path.resolve(buildDir, 'package.json');
 
   if (config?.skipInstallDependencies || !Fs.existsSync(pkgJson)) {
     return;
   }
 
-  log.info('running yarn to install dependencies');
-  await execa(winVersion('yarn'), ['install', '--production', '--pure-lockfile'], {
+  log.info('running pnpm to install dependencies');
+  // `--ignore-workspace` keeps the plugin build standalone when it lives inside a
+  // pnpm workspace (e.g. built from within the Kibana repo), so pnpm doesn't walk
+  // up to a parent pnpm-workspace.yaml and attempt a frozen workspace install.
+  await execa(winVersion('pnpm'), ['install', '--prod', '--ignore-workspace'], {
     cwd: buildDir,
   });
 }
