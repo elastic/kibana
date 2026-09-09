@@ -15,8 +15,8 @@ export const EMPTY_LABEL = i18n.translate('fieldFormats.blankLabel', {
 });
 
 export const NULL_LABEL = i18n.translate('fieldFormats.nullLabel', {
-  defaultMessage: '(null)',
-  description: 'Represents the label used to replace an null value in tables and charts',
+  defaultMessage: '-',
+  description: 'Represents the label used to replace a null value in tables and charts',
 });
 
 export const NAN_LABEL = 'NaN';

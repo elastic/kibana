@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import moment from 'moment-timezone';
 import { DateFormat } from './date';
 import { type FieldFormatsGetConfigFn } from '../../../common';
@@ -33,8 +34,8 @@ describe('Date Format', () => {
   });
 
   test('decoding an undefined or null date should return an empty string', () => {
-    expect(convert(null)).toBe('(null)');
-    expect(convert(undefined)).toBe('(null)');
+    expect(convert(null)).toBe(NULL_LABEL);
+    expect(convert(undefined)).toBe(NULL_LABEL);
   });
 
   test('should clear the memoization cache after changing the date', () => {

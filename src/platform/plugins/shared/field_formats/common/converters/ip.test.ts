@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { IpFormat } from './ip';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
@@ -23,10 +24,10 @@ describe('IP Address Format', () => {
   });
 
   test('missing value', () => {
-    expect(ip.convertToText(null)).toBe('(null)');
-    expect(ip.convertToText(undefined)).toBe('(null)');
-    expectReactElementWithNull(ip.convertToReact(null));
-    expectReactElementWithNull(ip.convertToReact(undefined));
+    expect(ip.convertToText(null)).toBe(NULL_LABEL);
+    expect(ip.convertToText(undefined)).toBe(NULL_LABEL);
+    expectReactElementWithNull(ip.convertToReact(null), null);
+    expectReactElementWithNull(ip.convertToReact(undefined), undefined);
   });
 
   test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

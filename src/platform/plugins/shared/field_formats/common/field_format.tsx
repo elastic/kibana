@@ -238,7 +238,12 @@ export abstract class FieldFormat {
       return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
+      const rawValueLabel = String(val);
+      return (
+        <span css={emptyValueStyles} title={rawValueLabel} aria-label={rawValueLabel}>
+          {NULL_LABEL}
+        </span>
+      );
     }
   }
 }

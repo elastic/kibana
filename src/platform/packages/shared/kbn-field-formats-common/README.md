@@ -9,7 +9,7 @@ This tiny package centralizes a few labels/tokens that are used consistently whe
 The package currently exposes the following constants from `./constants`:
 
 - `EMPTY_LABEL` — i18n label for empty string values. Default: "(blank)"
-- `NULL_LABEL` — i18n label for null values. Default: "(null)"
+- `NULL_LABEL` — i18n label for null values. Default: "-"
 - `NAN_LABEL` — string used to represent Not-a-Number. Value: `"NaN"`
 - `MISSING_TOKEN` — internal token used to mark missing values in aggregations and formatting flows. Value: `"__missing__"`
 

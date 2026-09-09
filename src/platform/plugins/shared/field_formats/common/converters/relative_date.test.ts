@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import React from 'react';
 import moment from 'moment-timezone';
 import { RelativeDateFormat } from './relative_date';
@@ -26,10 +27,10 @@ describe('Relative Date Format', () => {
   });
 
   test('decoding a missing value', () => {
-    expect(convert(null)).toBe('(null)');
-    expect(convert(undefined)).toBe('(null)');
-    expectReactElementWithNull(convertToReact(null));
-    expectReactElementWithNull(convertToReact(undefined));
+    expect(convert(null)).toBe(NULL_LABEL);
+    expect(convert(undefined)).toBe(NULL_LABEL);
+    expectReactElementWithNull(convertToReact(null), null);
+    expectReactElementWithNull(convertToReact(undefined), undefined);
   });
 
   test('decoding invalid date should echo invalid value', () => {

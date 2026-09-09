@@ -153,8 +153,8 @@ describe('String Format', () => {
     const string = new StringFormat();
     expect(string.convertToText(null)).toBe(NULL_LABEL);
     expect(string.convertToText(undefined)).toBe(NULL_LABEL);
-    expectReactElementWithNull(string.convertToReact(null));
-    expectReactElementWithNull(string.convertToReact(undefined));
+    expectReactElementWithNull(string.convertToReact(null), null);
+    expectReactElementWithNull(string.convertToReact(undefined), undefined);
   });
 
   test('does escape value while highlighting', () => {

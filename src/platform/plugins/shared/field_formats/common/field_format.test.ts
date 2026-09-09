@@ -19,8 +19,8 @@ import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 import { highlightTags } from './utils/highlight/highlight_tags';
 import type { FieldFormatParams, ReactContextTypeOptions, TextContextTypeOptions } from './types';
-import { NULL_LABEL } from '@kbn/field-formats-common';
-import { expectReactElementAsArray } from './test_utils';
+import { MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
+import { expectReactElementAsArray, expectReactElementWithNull } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
 const renderReact = (node: React.ReactNode) =>
@@ -174,6 +174,14 @@ describe('FieldFormat class', () => {
         'color',
         result.current.euiTheme.colors.darkShade
       );
+    });
+
+    test('exposes the raw missing value on the React placeholder tooltip', () => {
+      const f = getTestFormat();
+
+      expectReactElementWithNull(f.convertToReact(null), null);
+      expectReactElementWithNull(f.convertToReact(undefined), undefined);
+      expectReactElementWithNull(f.convertToReact(MISSING_TOKEN), MISSING_TOKEN);
     });
 
     describe('default convertToReact highlight support', () => {

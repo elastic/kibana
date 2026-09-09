@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { GeoPointFormat } from './geo_point';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
@@ -110,10 +111,10 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(geoPointFormat.convertToText(null)).toBe('(null)');
-      expect(geoPointFormat.convertToText(undefined)).toBe('(null)');
-      expectReactElementWithNull(geoPointFormat.convertToReact(null));
-      expectReactElementWithNull(geoPointFormat.convertToReact(undefined));
+      expect(geoPointFormat.convertToText(null)).toBe(NULL_LABEL);
+      expect(geoPointFormat.convertToText(undefined)).toBe(NULL_LABEL);
+      expectReactElementWithNull(geoPointFormat.convertToReact(null), null);
+      expectReactElementWithNull(geoPointFormat.convertToReact(undefined), undefined);
     });
 
     test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

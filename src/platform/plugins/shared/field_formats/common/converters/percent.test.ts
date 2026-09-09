@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { PercentFormat } from './percent';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
@@ -38,16 +39,16 @@ describe('PercentFormat', () => {
     expect(formatter.convertToText(35)).toBe('35%');
     expect(formatter.convertToText(3500)).toBe('3,500%');
     expect(formatter.convertToText('35')).toBe('35%');
-    expect(formatter.convertToText(null)).toBe('(null)');
+    expect(formatter.convertToText(null)).toBe(NULL_LABEL);
   });
 
   test('missing value', () => {
     const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
 
-    expect(formatter.convertToText(null)).toBe('(null)');
-    expect(formatter.convertToText(undefined)).toBe('(null)');
-    expectReactElementWithNull(formatter.convertToReact(null));
-    expectReactElementWithNull(formatter.convertToReact(undefined));
+    expect(formatter.convertToText(null)).toBe(NULL_LABEL);
+    expect(formatter.convertToText(undefined)).toBe(NULL_LABEL);
+    expectReactElementWithNull(formatter.convertToReact(null), null);
+    expectReactElementWithNull(formatter.convertToReact(undefined), undefined);
   });
 
   test('wraps a multi-value array with bracket notation', () => {

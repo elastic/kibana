@@ -15,12 +15,16 @@ export const renderReactNode = (node: ReactNode) => render(node).container;
 
 /**
  * Asserts that a React element represents a null value display.
+ * `rawValue` is the original formatter input (`null`, `undefined`, or `__missing__`).
  */
-export const expectReactElementWithNull = (element: React.ReactNode) => {
+export const expectReactElementWithNull = (element: React.ReactNode, rawValue: unknown) => {
   expect(isValidElement(element)).toBe(true);
   const { children } = renderReactNode(element);
   expect(children).toHaveLength(1);
-  expect(children[0]).toHaveTextContent(NULL_LABEL);
+  const node = children[0];
+  expect(node).toHaveTextContent(NULL_LABEL);
+  expect(node).toHaveAttribute('title', String(rawValue));
+  expect(node).toHaveAttribute('aria-label', String(rawValue));
 };
 
 /**
