@@ -22,7 +22,7 @@ import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
-import { getRepresentativeQuery, isTextBasedAttributes } from '@kbn/lens-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import type { LensEmbeddableStartServices } from '../types';
@@ -90,7 +90,10 @@ export function initializeSearchContext(
     getProjectRoutingOverrides(query$.getValue())
   );
 
-  const usesEsql$ = new BehaviorSubject<boolean>(isTextBasedAttributes(attributes));
+  const initialQuery = getRepresentativeQuery(attributes);
+  const esql$ = new BehaviorSubject<AggregateQuery[]>(
+    isOfAggregateQueryType(initialQuery) ? [initialQuery] : []
+  );
   const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -112,8 +115,14 @@ export function initializeSearchContext(
       .pipe(map(getProjectRoutingOverrides), distinctUntilChanged(isEqual))
       .subscribe(projectRoutingOverrides$),
     internalApi.attributes$
-      .pipe(map(isTextBasedAttributes), distinctUntilChanged())
-      .subscribe(usesEsql$),
+      .pipe(
+        map((attrs) => {
+          const q = getRepresentativeQuery(attrs);
+          return isOfAggregateQueryType(q) ? [q] : [];
+        }),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(esql$),
   ];
 
   return {
@@ -123,7 +132,7 @@ export function initializeSearchContext(
       query$,
       timeslice$,
       projectRoutingOverrides$,
-      usesEsql$,
+      esql$,
       approximationApplied$,
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,

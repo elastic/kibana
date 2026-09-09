@@ -137,9 +137,9 @@ describe('visualizeEmbeddable', () => {
     });
   });
 
-  describe('usesEsql$', () => {
-    test('should be false by default when the vis type does not provide usesEsql', () => {
-      expect(embeddableApi.usesEsql$.getValue()).toBe(false);
+  describe('esql$', () => {
+    test('should be empty by default when the vis type does not provide getEsqlQuery', () => {
+      expect(embeddableApi.esql$.getValue()).toEqual([]);
     });
 
     const buildEmbeddableWithVisType = async (type: string) => {
@@ -172,14 +172,14 @@ describe('visualizeEmbeddable', () => {
       return api;
     };
 
-    test('should reflect true when the vis type reports it uses ES|QL', async () => {
+    test('should be non-empty when the vis type reports it uses ES|QL', async () => {
       const api = await buildEmbeddableWithVisType('vega-esql');
-      expect(api.usesEsql$.getValue()).toBe(true);
+      expect(api.esql$.getValue().length).toBeGreaterThan(0);
     });
 
-    test('should reflect false when the vis type reports it does not use ES|QL', async () => {
+    test('should be empty when the vis type reports it does not use ES|QL', async () => {
       const api = await buildEmbeddableWithVisType('vega-no-esql');
-      expect(api.usesEsql$.getValue()).toBe(false);
+      expect(api.esql$.getValue()).toEqual([]);
     });
   });
 

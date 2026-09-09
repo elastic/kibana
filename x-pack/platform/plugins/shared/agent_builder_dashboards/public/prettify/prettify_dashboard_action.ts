@@ -51,7 +51,7 @@ const isPrettifiable = (
     ([id, child]) =>
       Boolean(dashboardApi.layout$.getValue().panels[id]) &&
       apiPublishesEsqlUsage(child) &&
-      child.usesEsql$.getValue()
+      child.esql$.getValue().length > 0
   );
 
 export const createPrettifyDashboardAction = ({
@@ -88,7 +88,7 @@ export const createPrettifyDashboardAction = ({
             const esqlChildren = Object.values(children).filter(apiPublishesEsqlUsage);
             return esqlChildren.length === 0
               ? EMPTY
-              : merge(...esqlChildren.map((child) => child.usesEsql$.pipe(skip(1))));
+              : merge(...esqlChildren.map((child) => child.esql$.pipe(skip(1))));
           })
         )
       ).pipe(map(() => undefined)),

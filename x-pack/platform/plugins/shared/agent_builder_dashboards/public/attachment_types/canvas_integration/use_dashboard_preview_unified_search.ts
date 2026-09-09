@@ -12,7 +12,7 @@ import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { isOfQueryType, type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   apiPublishesEsqlUsage,
@@ -117,14 +117,14 @@ export const useDashboardPreviewUnifiedSearch = ({
     }
 
     const approximationSubscription = dashboardApi.isApproximate$.subscribe(setIsApproximate);
-    const esqlUsageSubscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+    const esqlUsageSubscription = combineCompatibleChildrenApis<PublishesEsqlUsage, AggregateQuery[][]>(
       dashboardApi,
-      'usesEsql$',
+      'esql$',
       apiPublishesEsqlUsage,
       []
     )
       .pipe(
-        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
+        map((esqlValues) => esqlValues.some((v) => v.length > 0)),
         distinctUntilChanged()
       )
       .subscribe(setHasEsqlPanel);

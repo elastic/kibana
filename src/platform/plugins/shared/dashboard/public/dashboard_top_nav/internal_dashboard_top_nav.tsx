@@ -25,7 +25,7 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -208,14 +208,14 @@ export function InternalDashboardTopNav({
 
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, AggregateQuery[][]>(
       dashboardApi,
-      'usesEsql$',
+      'esql$',
       apiPublishesEsqlUsage,
       []
     )
       .pipe(
-        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
+        map((esqlValues) => esqlValues.some((v) => v.length > 0)),
         distinctUntilChanged()
       )
       .subscribe(setHasEsqlPanel);

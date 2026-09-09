@@ -60,7 +60,7 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
-import { getPublishedEsqlQuery, specUsesEsql } from '../lib/spec_uses_esql';
+import { getEsqlQueriesFromSpec, getPublishedEsqlQuery } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
@@ -122,7 +122,7 @@ export const vegaEmbeddableFactory = (
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
-    const usesEsql$ = new BehaviorSubject(false);
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const query$ = new BehaviorSubject<AggregateQuery | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
@@ -141,7 +141,7 @@ export const vegaEmbeddableFactory = (
           }
         }),
         tap((spec) => {
-          usesEsql$.next(spec ? specUsesEsql(spec) : false);
+          esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           query$.next(getPublishedEsqlQuery(spec));
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
@@ -196,7 +196,7 @@ export const vegaEmbeddableFactory = (
       blockingError$,
       dataLoading$,
       rendered$,
-      usesEsql$,
+      esql$,
       approximationApplied$,
       query$,
       projectRoutingOverrides$,
