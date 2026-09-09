@@ -8,6 +8,8 @@
 import { Subject } from 'rxjs';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import {
+  canAccessDashboardsApp,
+  canAccessSecurityLanding,
   redirectDashboardOnlyLanding,
   shouldRedirectDashboardOnlyLanding,
   subscribeDashboardOnlyLanding,
@@ -21,6 +23,31 @@ const mockLocationPathname = (pathname: string) => {
     value: { ...originalLocation, pathname },
   });
 };
+
+describe('canAccessSecurityLanding', () => {
+  it('returns false for a dashboard-only capability set', () => {
+    expect(
+      canAccessSecurityLanding({
+        navLinks: { securitySolutionUI: true, dashboards: true },
+        dashboard_v2: { show: true },
+      } as never)
+    ).toBe(false);
+  });
+
+  it('returns true when Security show is granted', () => {
+    expect(canAccessSecurityLanding({ siemV5: { show: true } } as never)).toBe(true);
+  });
+});
+
+describe('canAccessDashboardsApp', () => {
+  it('returns true for dashboard_v2.show', () => {
+    expect(canAccessDashboardsApp({ dashboard_v2: { show: true } } as never)).toBe(true);
+  });
+
+  it('returns false when only navLinks.dashboards is set', () => {
+    expect(canAccessDashboardsApp({ navLinks: { dashboards: true } } as never)).toBe(false);
+  });
+});
 
 describe('shouldRedirectDashboardOnlyLanding', () => {
   it.each(['/', '/app/security/get_started', '/app/security/get_started/'])(
@@ -81,16 +108,21 @@ describe('redirectDashboardOnlyLanding', () => {
   const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
   const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
 
-  const setNavLinks = (navLinks: Record<string, boolean>) => {
+  const setCapabilities = (capabilities: Record<string, unknown>) => {
     mockServices.application.capabilities = {
       ...mockServices.application.capabilities,
-      navLinks,
+      ...capabilities,
     };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setNavLinks({});
+    setCapabilities({
+      navLinks: {},
+      siemV5: {},
+      dashboard_v2: {},
+      dashboard: {},
+    });
     removeBasePath.mockImplementation((pathname: string) => pathname);
   });
 
@@ -104,9 +136,12 @@ describe('redirectDashboardOnlyLanding', () => {
   it('navigates dashboard-only users from Get started to dashboards', () => {
     mockLocationPathname('/s/default/app/security/get_started');
     removeBasePath.mockReturnValue('/app/security/get_started');
-    setNavLinks({
-      dashboards: true,
-      securitySolutionUI: false,
+    setCapabilities({
+      navLinks: {
+        dashboards: true,
+        securitySolutionUI: true,
+      },
+      dashboard_v2: { show: true },
     });
 
     redirectDashboardOnlyLanding(mockServices);
@@ -115,15 +150,12 @@ describe('redirectDashboardOnlyLanding', () => {
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
   });
 
-  it('uses dashboard_v2.show when navLinks.dashboards is unset', () => {
+  it('does not treat navLinks.securitySolutionUI as Get started access', () => {
     mockLocationPathname('/app/security/get_started');
-    setNavLinks({
-      securitySolutionUI: false,
-    });
-    mockServices.application.capabilities = {
-      ...mockServices.application.capabilities,
+    setCapabilities({
+      navLinks: { securitySolutionUI: true },
       dashboard_v2: { show: true },
-    };
+    });
 
     redirectDashboardOnlyLanding(mockServices);
 
@@ -132,9 +164,13 @@ describe('redirectDashboardOnlyLanding', () => {
 
   it('does not navigate editors away from Get started', () => {
     mockLocationPathname('/app/security/get_started');
-    setNavLinks({
-      dashboards: true,
-      securitySolutionUI: true,
+    setCapabilities({
+      navLinks: {
+        dashboards: true,
+        securitySolutionUI: true,
+      },
+      siemV5: { show: true },
+      dashboard_v2: { show: true },
     });
 
     redirectDashboardOnlyLanding(mockServices);
@@ -146,17 +182,19 @@ describe('redirectDashboardOnlyLanding', () => {
 describe('subscribeDashboardOnlyLanding', () => {
   const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
   const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
-  const currentAppId$ = new Subject<string | undefined>();
+  const currentLocation$ = new Subject<string>();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockServices.application.currentAppId$ = currentAppId$;
+    mockServices.application.currentLocation$ = currentLocation$;
     mockServices.application.capabilities = {
       ...mockServices.application.capabilities,
       navLinks: {
         dashboards: true,
-        securitySolutionUI: false,
+        securitySolutionUI: true,
       },
+      dashboard_v2: { show: true },
+      siemV5: {},
     };
     removeBasePath.mockImplementation((pathname: string) => pathname);
   });
@@ -168,13 +206,13 @@ describe('subscribeDashboardOnlyLanding', () => {
     });
   });
 
-  it('redirects again when the user navigates back to Get started', () => {
+  it('redirects when location emits Get started for an inaccessible Security app', () => {
     mockLocationPathname('/app/dashboards');
     const subscription = subscribeDashboardOnlyLanding(mockServices);
     expect(navigateToApp).not.toHaveBeenCalled();
 
     mockLocationPathname('/app/security/get_started');
-    currentAppId$.next('securitySolutionUI');
+    currentLocation$.next('/app/security/get_started');
 
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
     subscription.unsubscribe();
