@@ -18,6 +18,7 @@ import {
   ANOMALY_CHARTS_ATTACHMENT_TYPE,
   SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
 } from '../../common/agent_builder/attachment_type_ids';
+import type { InlineMlChartServices } from './inline_ml_charts';
 
 type SwimLaneAttachment = UnknownAttachment & { data: AnomalySwimLaneEmbeddableState };
 type AnomalyChartsAttachment = UnknownAttachment & { data: AnomalyChartsEmbeddableState };
@@ -40,7 +41,10 @@ const getLabel = (attachment: UnknownAttachment, fallback: string): string => {
   return typeof title === 'string' && title.length > 0 ? title : fallback;
 };
 
-export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPluginStart) {
+export function registerAgentBuilderAttachments(
+  agentBuilder: AgentBuilderPluginStart,
+  services: InlineMlChartServices
+) {
   agentBuilder.attachments.addAttachmentType<SwimLaneAttachment>(ANOMALY_SWIMLANE_ATTACHMENT_TYPE, {
     getLabel: (attachment) =>
       getLabel(
@@ -50,9 +54,13 @@ export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPlugin
         })
       ),
     getIcon: () => 'machineLearningApp',
-    renderInlineContent: (props) => (
+    renderInlineContent: (props, callbacks) => (
       <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
-        <LazyInlineSwimLane {...props} />
+        <LazyInlineSwimLane
+          {...props}
+          services={services}
+          registerActionButtons={callbacks?.registerActionButtons}
+        />
       </React.Suspense>
     ),
   });
@@ -68,9 +76,13 @@ export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPlugin
           })
         ),
       getIcon: () => 'machineLearningApp',
-      renderInlineContent: (props) => (
+      renderInlineContent: (props, callbacks) => (
         <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyInlineAnomalyCharts {...props} />
+          <LazyInlineAnomalyCharts
+            {...props}
+            services={services}
+            registerActionButtons={callbacks?.registerActionButtons}
+          />
         </React.Suspense>
       ),
     }
@@ -87,9 +99,13 @@ export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPlugin
           })
         ),
       getIcon: () => 'machineLearningApp',
-      renderInlineContent: (props) => (
+      renderInlineContent: (props, callbacks) => (
         <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyInlineSingleMetricViewer {...props} />
+          <LazyInlineSingleMetricViewer
+            {...props}
+            services={services}
+            registerActionButtons={callbacks?.registerActionButtons}
+          />
         </React.Suspense>
       ),
     }

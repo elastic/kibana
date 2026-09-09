@@ -156,6 +156,7 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-visualizations",
     "@kbn/zod",
     "@kbn/cps",
     "@kbn/cps-utils",

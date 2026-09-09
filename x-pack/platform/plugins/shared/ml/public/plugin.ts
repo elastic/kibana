@@ -330,7 +330,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                   const { registerAgentBuilderAttachments } = await import(
                     './agent_builder/register_agent_builder_attachments'
                   );
-                  registerAgentBuilderAttachments(pluginStart.agentBuilder);
+                  registerAgentBuilderAttachments(pluginStart.agentBuilder, {
+                    application: coreStart.application,
+                    unifiedSearch: pluginStart.unifiedSearch,
+                    embeddable: pluginStart.embeddable,
+                    locator: this.locator,
+                  });
                 }
 
                 pluginStart.cps?.cpsManager?.registerAppAccess('ml', (location: string) =>
