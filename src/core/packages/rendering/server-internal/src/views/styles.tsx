@@ -29,14 +29,18 @@ export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
   );
 };
 
-interface SplashColors {
+interface BootPageColors {
   pageBackground: string;
   welcomeText: string;
   progress: string;
   progressBefore: string;
+  errorTitleText: string;
+  errorBodyText: string;
+  errorButtonBackground: string;
+  errorButtonText: string;
 }
 
-const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashColors } => {
+const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPageColors } => {
   if (theme === 'borealis') {
     return {
       light: {
@@ -44,12 +48,20 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
         welcomeText: '#5A6D8C', // colors.subduedText
         progress: '#ECF1F9', // colors.lightestShade
         progressBefore: '#0B64DD', // colors.primary
+        errorTitleText: '#07101F', // colors.textPrimary
+        errorBodyText: '#5A6D8C', // colors.subduedText
+        errorButtonBackground: '#0B64DD', // colors.primary
+        errorButtonText: '#FFFFFF', // colors.textInverse
       },
       dark: {
         pageBackground: '#07101F',
         welcomeText: '#8E9FBC',
         progress: '#172336',
         progressBefore: '#599DFF',
+        errorTitleText: '#EFF3F9', // colors.textPrimary
+        errorBodyText: '#8E9FBC', // colors.subduedText
+        errorButtonBackground: '#599DFF', // colors.primary
+        errorButtonText: '#07101F', // colors.textInverse
       },
     };
   }
@@ -60,17 +72,25 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
       welcomeText: '#69707D',
       progress: '#F5F7FA',
       progressBefore: '#006DE4',
+      errorTitleText: '#1a1c21',
+      errorBodyText: '#69707D',
+      errorButtonBackground: '#006DE4',
+      errorButtonText: '#FFFFFF',
     },
     dark: {
       pageBackground: '#141519',
       welcomeText: '#98A2B3',
       progress: '#25262E',
       progressBefore: '#1BA9F5',
+      errorTitleText: '#DFE5EF',
+      errorBodyText: '#98A2B3',
+      errorButtonBackground: '#1BA9F5',
+      errorButtonText: '#141519',
     },
   };
 };
 
-const splashRules = (colors: SplashColors) => `
+const bootPageRules = (colors: BootPageColors) => `
           html {
             background-color: ${colors.pageBackground};
           }
@@ -86,6 +106,19 @@ const splashRules = (colors: SplashColors) => `
           .kbnProgress:before {
             background-color: ${colors.progressBefore};
           }
+
+          .kbnBootstrapErrorTitle {
+            color: ${colors.errorTitleText};
+          }
+
+          .kbnBootstrapErrorText {
+            color: ${colors.errorBodyText};
+          }
+
+          .kbnBootstrapErrorButton {
+            background-color: ${colors.errorButtonBackground};
+            color: ${colors.errorButtonText};
+          }
 `;
 
 const InlineStyles: FC<{ darkMode: DarkModeValue; themeName: ThemeName }> = ({
@@ -100,11 +133,11 @@ const InlineStyles: FC<{ darkMode: DarkModeValue; themeName: ThemeName }> = ({
   // no flash-of-light before the dark theme is applied.
   const css =
     darkMode === 'system'
-      ? `${splashRules(light)}
+      ? `${bootPageRules(light)}
           @media (prefers-color-scheme: dark) {
-            ${splashRules(dark)}
+            ${bootPageRules(dark)}
           }`
-      : splashRules(darkMode ? dark : light);
+      : bootPageRules(darkMode ? dark : light);
 
   /* eslint-disable react/no-danger */
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
