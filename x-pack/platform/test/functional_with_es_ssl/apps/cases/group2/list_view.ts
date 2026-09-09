@@ -359,15 +359,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.waitForCasesToBeListed();
       });
 
+      const resetListState = async () => {
+        await browser.clearLocalStorage();
+        await cases.navigation.navigateToApp();
+        await cases.casesTable.validateCasesTableHasNthRows(0);
+      };
+
       afterEach(async () => {
-        await cases.casesTable.clearFilters();
         await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
+        await resetListState();
       });
 
       after(async () => {
         await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
+        await resetListState();
         await deleteUsersAndRoles(getService, users, roles);
       });
 
