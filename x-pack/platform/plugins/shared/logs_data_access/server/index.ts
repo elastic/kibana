@@ -14,6 +14,16 @@ export type {
   LogsRatesServiceReturnType,
 } from './services/get_logs_rates_service';
 
+export type {
+  LogPattern,
+  SemanticLogSearchService,
+  SemanticLogSearchParams,
+  SemanticLogSearchResult,
+  ExpandPatternParams,
+  ExpandPatternResult,
+  TimeRange,
+} from '../common/services/semantic_log_search/types';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { LogsDataAccessPlugin } = await import('./plugin');
   return new LogsDataAccessPlugin(initializerContext);
