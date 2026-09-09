@@ -8,13 +8,13 @@
  */
 
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import type { DiscoverSessionApiTab } from '../schema';
-import { transformVisContextIn, transformVisContextOut } from './transform_vis_context';
+import type { DiscoverSessionApiTab } from '../../server';
+import { fromApiVisContext, toApiVisContext } from './vis_context';
 
-describe('vis context transforms', () => {
-  describe('transformVisContextOut', () => {
+describe('vis context', () => {
+  describe('toApiVisContext', () => {
     it('maps stored visContext to API vis_context and omits requestData', () => {
-      const result = transformVisContextOut({
+      const result = toApiVisContext({
         suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
         requestData: {
           dataViewId: 'logs-dv',
@@ -36,8 +36,8 @@ describe('vis context transforms', () => {
     });
 
     it('returns undefined for cleared stored vis context', () => {
-      expect(transformVisContextOut({})).toBeUndefined();
-      expect(transformVisContextOut(undefined)).toBeUndefined();
+      expect(toApiVisContext({})).toBeUndefined();
+      expect(toApiVisContext(undefined)).toBeUndefined();
     });
   });
 
@@ -56,10 +56,10 @@ describe('vis context transforms', () => {
       },
     };
 
-    it('round-trips API vis_context when requestData is supplied on transform in', () => {
-      const stored = transformVisContextIn(apiVisContext, requestData);
+    it('round-trips API vis_context when requestData is supplied', () => {
+      const stored = fromApiVisContext(apiVisContext, requestData);
 
-      expect(transformVisContextOut(stored)).toEqual(apiVisContext);
+      expect(toApiVisContext(stored)).toEqual(apiVisContext);
       expect(stored).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
         requestData,
@@ -68,32 +68,19 @@ describe('vis context transforms', () => {
     });
   });
 
-  describe('transformVisContextIn', () => {
-    it('maps API vis_context to stored visContext with requestData', () => {
-      const result = transformVisContextIn(
-        {
-          suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
-          attributes: {
-            visualizationType: 'lnsXY',
-            state: { foo: 'bar' },
-          },
+  describe('fromApiVisContext', () => {
+    it('uses an empty fingerprint when requestData is not supplied', () => {
+      const result = fromApiVisContext({
+        suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
+        attributes: {
+          visualizationType: 'lnsXY',
+          state: { foo: 'bar' },
         },
-        {
-          dataViewId: 'logs-dv',
-          timeField: '@timestamp',
-          timeInterval: 'auto',
-          breakdownField: 'host.name',
-        }
-      );
+      });
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
-        requestData: {
-          dataViewId: 'logs-dv',
-          timeField: '@timestamp',
-          timeInterval: 'auto',
-          breakdownField: 'host.name',
-        },
+        requestData: {},
         attributes: {
           visualizationType: 'lnsXY',
           state: { foo: 'bar' },
@@ -102,7 +89,7 @@ describe('vis context transforms', () => {
     });
 
     it('returns undefined when API vis_context is missing', () => {
-      expect(transformVisContextIn(undefined)).toBeUndefined();
+      expect(fromApiVisContext(undefined)).toBeUndefined();
     });
   });
 });
