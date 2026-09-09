@@ -377,16 +377,18 @@ const buildTimelineDataProviderOrFilter = (
   };
 };
 
+const getAlertGroupId = (ecsData: Ecs): string => {
+  const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
+  return Array.isArray(alertGroupIdField) ? alertGroupIdField[0] : alertGroupIdField;
+};
+
 const buildEqlDataProviderOrFilter = (
   alertIds: string[],
   ecs: Ecs[] | Ecs
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
   if (!isEmpty(alertIds) && Array.isArray(ecs) && ecs.length > 1) {
     const alertGroupIds = ecs.reduce<string[]>((acc, ecsData) => {
-      const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
-      const alertGroupId = Array.isArray(alertGroupIdField)
-        ? alertGroupIdField[0]
-        : alertGroupIdField;
+      const alertGroupId = getAlertGroupId(ecsData);
       if (!acc.includes(alertGroupId)) {
         return [...acc, alertGroupId];
       }
@@ -398,11 +400,8 @@ const buildEqlDataProviderOrFilter = (
     };
   } else if (!Array.isArray(ecs) || ecs.length === 1) {
     const ecsData = Array.isArray(ecs) ? ecs[0] : ecs;
-    const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
     const queryMatchField = getFieldKey(ecsData, ALERT_GROUP_ID);
-    const alertGroupId = Array.isArray(alertGroupIdField)
-      ? alertGroupIdField[0]
-      : alertGroupIdField;
+    const alertGroupId = getAlertGroupId(ecsData);
     return {
       dataProviders: [
         {
