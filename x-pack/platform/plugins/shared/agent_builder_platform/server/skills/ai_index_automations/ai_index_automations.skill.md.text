@@ -101,8 +101,13 @@ for a `STATS` command rather than asking the model for it.
 
 ## Validate before you propose
 
-When a proposal carries workflow YAML — an edited step, a rewritten query, a new field mapping —
-**it must pass `platform.workflows.validate_workflow` first.** A proposal that does not parse, or
+`platform.core.generate_workflow` validates its own output: it re-generates against the errors and
+fails the call rather than returning YAML that does not parse. Do not re-validate what it gave you
+— that is a round trip that cannot fail.
+
+Validation is for the YAML it did not produce: a step you wrote out yourself, a query you edited by
+hand, a proposal that quotes YAML in prose. **That must pass
+`platform.workflows.validate_workflow` before you show it.** A proposal that does not parse, or
 that names a step type which does not exist, costs a reviewer the entire round trip and teaches
 them to distrust the next one.
 
@@ -117,11 +122,12 @@ them to distrust the next one.
   one. If you could not validate — the tool was unavailable, or the change is prose rather than
   YAML — say that instead. Do not imply a check you did not run.
 
-Validation establishes that the workflow parses, that its step types exist and that its references
-resolve. It does **not** establish that a query inside it returns anything. Where the change is to
-an ES|QL step, check the query itself with `platform.core.execute_esql`, which reads and writes
-nothing. Where a step's ES|QL is being repaired, `platform.core.generate_esql` will rewrite it
-given the failing query, the reason and the mapping.
+Validation, wherever it happens, establishes that the workflow parses, that its step types exist
+and that its references resolve. It does **not** establish that a query inside it returns anything
+— a generated workflow can be valid and still be built on an ES|QL step that matches no documents.
+That is the check worth running on a draft: try the query with `platform.core.execute_esql`, which
+reads and writes nothing. Where a step's ES|QL needs repairing, `platform.core.generate_esql` will
+rewrite it given the failing query, the reason and the mapping.
 
 `platform.workflows.get_examples` shows working definitions when you are unsure of a shape.
 

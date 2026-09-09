@@ -110,9 +110,19 @@ describe('aiIndexAutomationsSkill', () => {
       }
     });
 
-    it('requires workflow YAML to be validated before it is proposed', () => {
+    it('requires hand-written workflow YAML to be validated before it is proposed', () => {
       expect(content).toContain('Validate before you propose');
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
+    });
+
+    it('does not ask for a second validation of what generate_workflow already validated', () => {
+      expect(content).toMatch(/generate_workflow` validates its own output/);
+      expect(content).toMatch(/Do not re-validate what it gave you/);
+    });
+
+    it('names the check validation does not cover, since a valid draft can still match nothing', () => {
+      expect(content).toMatch(/does \*\*not\*\* establish that a query inside it returns anything/);
+      expect(content).toContain(platformCoreTools.executeEsql);
     });
 
     it('does not let validating a workflow be read as licence to run it', () => {
