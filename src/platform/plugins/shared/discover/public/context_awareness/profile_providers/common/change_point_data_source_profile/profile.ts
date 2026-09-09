@@ -89,6 +89,7 @@ export const createChangePointDataSourceProfileProvider = (
           [SOURCE_COLUMN]: ({ column }: CustomGridColumnProps) => ({
             ...column,
             isExpandable: false,
+            cellActions: [],
           }),
         };
 
