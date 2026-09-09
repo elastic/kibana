@@ -10,11 +10,5 @@ export {
   useRuleExecutionsDataView,
   ruleExecutionToDataTableRecord,
 } from './rule_executions_data_view';
-export {
-  POLICY_EXECUTION_FIELDS,
-  POLICY_RECORD_EXTRA_FIELDS,
-  usePolicyExecutionsDataView,
-  policyExecutionToDataTableRecord,
-} from './policy_executions_data_view';
 export { displayField, useAdHocDataView } from './create_ad_hoc_data_view';
 export type { AdHocDataViewState } from './create_ad_hoc_data_view';
