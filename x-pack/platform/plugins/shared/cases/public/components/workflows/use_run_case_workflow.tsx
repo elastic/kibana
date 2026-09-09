@@ -121,6 +121,8 @@ export interface UseRunCaseWorkflowResult {
   inputs: Record<string, unknown>;
   /** Cases-owned executor that routes runs through the Cases API. */
   runWorkflow: RunWorkflowExecutor;
+  /** Whether the workflow panel should show its built-in success toast. */
+  showSuccessToast: boolean;
   /** Predicate limiting the workflow selector to configured tags. */
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator prioritising tagged then context-relevant workflows. */
@@ -167,6 +169,7 @@ export const useRunCaseWorkflow = ({
     closeModal,
     inputs,
     runWorkflow,
+    showSuccessToast: false,
     filterWorkflow,
     sortWorkflow,
   };

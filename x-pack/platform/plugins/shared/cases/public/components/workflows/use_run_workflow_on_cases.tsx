@@ -16,11 +16,8 @@ import type { CasesUI } from '../../containers/types';
 import { runCaseWorkflow } from './api';
 import * as i18n from './translations';
 
-/**
- * Builds the `text` mount point for the "View execution" button, floated right,
- * matching the RunWorkflowPanel success toast style.
- */
-const buildViewExecutionText = (executionHref: string, rendering: ToMountPointParams) =>
+/** Builds the `text` mount point for the right-aligned "View execution" button. */
+export const buildViewExecutionText = (executionHref: string, rendering: ToMountPointParams) =>
   toMountPoint(
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiButton
