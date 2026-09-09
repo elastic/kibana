@@ -44,9 +44,10 @@ export const transformDiscoverSessionOut = (
       );
       warnings.push(...controlPanelWarnings);
 
-      const presentation = {
+      const sessionTab = {
         id: tab.id,
         label: tab.label,
+        ...apiTab,
         hide_chart: tab.attributes.hideChart ?? false,
         hide_table: tab.attributes.hideTable ?? false,
         ...(tab.attributes.hideAggregatedPreview !== undefined && {
@@ -74,7 +75,7 @@ export const transformDiscoverSessionOut = (
           }),
       };
 
-      return transformTabTypeStateOut({ ...apiTab, ...presentation }, tab.attributes.tabTypeState);
+      return transformTabTypeStateOut(sessionTab, tab.attributes.tabTypeState);
     }),
   };
 

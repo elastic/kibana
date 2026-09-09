@@ -171,7 +171,7 @@ const discoverSessionTabIdentitySchema = z
 const discoverSessionDefaultTabTypeStateSchema = z
   .object({
     type: z
-      .literal(DiscoverTabType.Default)
+      .literal(`${DiscoverTabType.Default}`)
       .default(DiscoverTabType.Default)
       .meta({
         description:
@@ -189,7 +189,7 @@ const histogramPercentileSchema = z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).met
 
 const discoverSessionMetricsTabTypeStateSchema = z
   .object({
-    type: z.literal(DiscoverTabType.Metrics).meta({
+    type: z.literal(`${DiscoverTabType.Metrics}`).meta({
       description:
         'A tab with saved metrics grid settings. Requires an ES|QL data source. ' +
         'These settings are used only when the query supports the metrics experience.',

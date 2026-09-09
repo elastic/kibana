@@ -22,6 +22,7 @@ import {
   discoverSessionApiDataSchema,
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
+  type DiscoverSessionApiMetricsTab,
 } from './schema';
 
 // Keep these values independent from the schema constants so contract changes require an explicit
@@ -119,6 +120,20 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.sample_size).toBe(500);
   });
 
+  it('accepts plain string tab types in the exported TypeScript types', () => {
+    const defaultType: DiscoverSessionApiClassicTab['type'] = 'default';
+    const metricsType: DiscoverSessionApiMetricsTab['type'] = 'metrics';
+    const validated = discoverSessionApiDataSchema.parse({
+      title: 'String tab types',
+      tabs: [
+        { ...classicTab, type: defaultType },
+        { ...metricsTab, type: metricsType },
+      ],
+    });
+
+    expect(validated.tabs.map((tab) => tab.type)).toEqual(['default', 'metrics']);
+  });
+
   it.each(['TS metrics-* | LIMIT 10', 'FROM custom-* | LIMIT 10'])(
     'preserves the metrics tab type regardless of the ES|QL query: %s',
     (query) => {
@@ -156,11 +171,15 @@ describe('discoverSessionApiDataSchema', () => {
     ).toThrow();
   });
 
-  it('rejects unknown tab properties', () => {
+  it.each([
+    ['classic', classicTab],
+    ['ES|QL', esqlTab],
+    ['metrics', metricsTab],
+  ])('rejects unknown properties on a %s tab', (_, tabInput) => {
     expect(() =>
       discoverSessionApiDataSchema.parse({
         title: 'Unknown tab property',
-        tabs: [{ ...esqlTab, unknown_property: true }],
+        tabs: [{ ...tabInput, unknown_property: true }],
       })
     ).toThrow();
   });
