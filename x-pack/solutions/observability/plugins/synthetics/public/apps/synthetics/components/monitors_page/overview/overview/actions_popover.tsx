@@ -314,20 +314,14 @@ export function ActionsPopover({
         </NoPermissionsTooltip>
       ),
       icon: 'flask',
-<<<<<<< HEAD
-      disabled: isRemote || testInProgress || !canUsePublicLocations || !isServiceAllowed,
-      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
-      onClick: isRemote
-=======
       disabled:
-        isReadOnly ||
+        isRemote ||
         testInProgress ||
         !canUsePublicLocations ||
         !isServiceAllowed ||
         !canRunTestManually,
-      toolTipContent: readOnlyActionTooltip,
-      onClick: isReadOnly
->>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
+      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
+      onClick: isRemote
         ? undefined
         : () => {
             dispatch(

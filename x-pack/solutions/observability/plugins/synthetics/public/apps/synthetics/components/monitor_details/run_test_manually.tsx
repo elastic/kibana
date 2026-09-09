@@ -14,12 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-<<<<<<< HEAD
 import { useDispatch, useSelector } from 'react-redux';
-import { useSyntheticsSettingsContext } from '../../contexts';
-=======
-import { useDispatch, useSelector } from 'react-redux-v7';
->>>>>>> e264fc085397 ([Synthetics] Add "Run tests manually" sub-feature privilege (monitor:run-manually) (#282149))
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { NoPermissionsTooltip } from '../common/components/permissions';
 import {

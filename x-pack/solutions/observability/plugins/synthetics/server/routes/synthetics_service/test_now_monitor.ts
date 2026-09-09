@@ -38,7 +38,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
   // which grants manual runs to an otherwise read-only role.
   writeAccess: false,
   anyRequiredPrivileges: ['uptime-write', MONITOR_RUN_MANUALLY_API],
-  options: { availability: { since: '9.2.0' } },
+  options: { availability: { since: '9.5.0' } },
 });
 
 export const triggerTestNow = async (
