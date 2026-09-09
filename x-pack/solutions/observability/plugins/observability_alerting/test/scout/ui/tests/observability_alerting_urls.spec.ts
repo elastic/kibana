@@ -14,12 +14,6 @@ import {
 } from '../fixtures/alerting_v2_setting';
 import { OBSERVABILITY_ALERTING_SURFACES } from '../fixtures/page_objects';
 
-const logSurfaceUrl = (log: { info: (msg: string) => void }, label: string, url: string): void => {
-  const line = `[observability-alerting] ${label} ${url}`;
-  log.info(line);
-  process.stdout.write(`${line}\n`);
-};
-
 /*
  * Lives under the default Scout config (`test/scout/`) so
  * `alerting:v2:enabled` stays unpinned and can be flipped at runtime. Both
@@ -50,10 +44,10 @@ test.describe(
         await unsetAlertingV2EnabledSetting(kbnClient);
 
         const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
-        logSurfaceUrl(log, 'requested', requested);
+        log.debug(`[observability-alerting] requested ${requested}`);
 
         const landed = await pageObjects.observabilityAlerting.goto(surface.path);
-        logSurfaceUrl(log, 'landed', landed);
+        log.debug(`[observability-alerting] landed ${landed}`);
 
         await expect(pageObjects.observabilityAlerting.appNotFoundPageContent).toBeVisible({
           timeout: 30_000,
@@ -68,10 +62,10 @@ test.describe(
         await setAlertingV2EnabledSetting(kbnClient, true);
 
         const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
-        logSurfaceUrl(log, 'requested', requested);
+        log.debug(`[observability-alerting] requested ${requested}`);
 
         const landed = await pageObjects.observabilityAlerting.goto(surface.path);
-        logSurfaceUrl(log, 'landed', landed);
+        log.debug(`[observability-alerting] landed ${landed}`);
 
         await expect(pageObjects.observabilityAlerting.pageTitle).toHaveText(surface.title, {
           timeout: 30_000,
