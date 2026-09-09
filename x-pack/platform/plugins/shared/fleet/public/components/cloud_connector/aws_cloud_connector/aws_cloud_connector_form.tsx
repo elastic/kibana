@@ -72,9 +72,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     iacTemplateUrl,
     packageName: packageInfo?.name,
     policyTemplates: enabledPolicyTemplates,
-    templateSha: newPolicy.cloud_connector_iac?.staticTemplate
-      ? undefined
-      : newPolicy.cloud_connector_iac?.templateSha ?? undefined,
+    templateSha: newPolicy.cloud_connector_iac?.templateSha ?? undefined,
   });
 
   useEffect(() => {
@@ -85,8 +83,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     if (
       current?.templateSha === iacConfirm.templateSha &&
       current?.blueprintId === iacConfirm.blueprintId &&
-      current?.blueprintVersion === iacConfirm.blueprintVersion &&
-      current?.staticTemplate === iacConfirm.staticTemplate
+      current?.blueprintVersion === iacConfirm.blueprintVersion
     ) {
       return;
     }

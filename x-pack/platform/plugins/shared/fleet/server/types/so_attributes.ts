@@ -375,9 +375,6 @@ export interface CloudConnectorSOAttributes {
   blueprintVersion?: string | null;
   stackId?: string;
   region?: string;
-  staticTemplate?: boolean;
-  cftUpgradeStatus?: string;
-  cftUpgradeCheckedAt?: string;
 }
 
 export interface CloudOnboardingDeploymentSOAttributes {

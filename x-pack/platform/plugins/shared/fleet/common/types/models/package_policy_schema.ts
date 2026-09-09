@@ -275,9 +275,6 @@ export const PackagePolicyBaseSchema = {
           ),
           stackId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
           region: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
-          staticTemplate: schema.maybe(schema.boolean()),
-          cftUpgradeStatus: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
-          cftUpgradeCheckedAt: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
         },
         {
           meta: {

@@ -158,7 +158,7 @@ export const useCloudConnectorTemplate = ({
     ) {
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
-        setIacConfirm({ staticTemplate: true, templateSha: null });
+        setIacConfirm({ templateSha: null });
         window.open(staticTemplateUrl, '_blank');
       } else {
         setTemplateGenerationError(
@@ -187,7 +187,7 @@ export const useCloudConnectorTemplate = ({
 
     const fallbackToStatic = (reason: string) => {
       reportFallback(reason);
-      setIacConfirm({ staticTemplate: true, templateSha: null });
+      setIacConfirm({ templateSha: null });
       navigateTo(staticTemplateUrl);
     };
 
@@ -250,7 +250,6 @@ export const useCloudConnectorTemplate = ({
         templateSha: data.templateSha,
         blueprintId: data.blueprint.id,
         blueprintVersion: data.blueprint.version,
-        staticTemplate: false,
       });
 
       // Only the template source changes: swap the templateURL query param on

@@ -49,6 +49,9 @@ import {
 } from '../errors';
 
 import { appContextService } from './app_context';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
+import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
+import { deleteSecrets } from './secrets/common';
 
 const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
   'templateSha',
@@ -56,9 +59,6 @@ const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
   'blueprintVersion',
   'stackId',
   'region',
-  'staticTemplate',
-  'cftUpgradeStatus',
-  'cftUpgradeCheckedAt',
 ];
 
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
@@ -66,7 +66,7 @@ export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean 
 
 /**
  * Maps a confirm-time IaC payload onto connector SO attributes.
- * A static-template fallback stores the flag and clears templateSha.
+ * A static-template fallback sends templateSha: null so no digest is stored.
  */
 export const iacAttributesFromConfirm = (
   iac: CloudConnectorIacState | undefined
@@ -77,16 +77,9 @@ export const iacAttributesFromConfirm = (
 
   const attrs: Partial<CloudConnectorSOAttributes> = {};
 
-  if (iac.staticTemplate) {
-    attrs.staticTemplate = true;
-    attrs.templateSha = null;
-  } else if (iac.templateSha) {
-    attrs.staticTemplate = false;
+  if (iac.templateSha !== undefined) {
     attrs.templateSha = iac.templateSha;
-  } else if (iac.templateSha === null) {
-    attrs.templateSha = null;
   }
-
   if (iac.blueprintId !== undefined) {
     attrs.blueprintId = iac.blueprintId;
   }
@@ -99,18 +92,9 @@ export const iacAttributesFromConfirm = (
   if (iac.region !== undefined) {
     attrs.region = iac.region;
   }
-  if (iac.cftUpgradeStatus !== undefined) {
-    attrs.cftUpgradeStatus = iac.cftUpgradeStatus;
-  }
-  if (iac.cftUpgradeCheckedAt !== undefined) {
-    attrs.cftUpgradeCheckedAt = iac.cftUpgradeCheckedAt;
-  }
 
   return attrs;
 };
-import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
-import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
-import { deleteSecrets } from './secrets/common';
 
 export interface CloudConnectorServiceInterface {
   create(
