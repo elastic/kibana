@@ -15,6 +15,11 @@ import collections
 import json
 import sys
 
+# Upstream (query_matrix_traces.ts:95, trajectory_agreement.ts:407) treats the
+# last message over 50 chars as the final answer; match it exactly so offline
+# and live renders agree.
+MIN_ANSWER_CHARS = 50
+
 
 def out_of(doc):
     return (doc.get('task') or {}).get('output') or {}
@@ -41,7 +46,6 @@ def to_step(s):
 
 
 def to_entry(doc, sibling_docs):
-    output = out_of(doc)
     steps = [to_step(s) for s in raw_steps(doc)]
     steps = [{k: v for k, v in s.items() if v is not None} for s in steps]
     trail = [s['toolId'] for s in steps if s.get('type') == 'tool' and s.get('toolId')]
@@ -51,9 +55,20 @@ def to_entry(doc, sibling_docs):
     if isinstance(question, dict):
         question = question.get('question') or json.dumps(question)[:2000]
 
-    answer = output.get('answer') or output.get('content') or output.get('response')
-    if isinstance(answer, dict):
-        answer = json.dumps(answer)[:4000]
+    # The final answer lives in `messages[].message` as a plain string -- there is
+    # no `output.answer` field, so probing for one silently strips every card's
+    # conclusion ("No final answer message captured."). Upstream rule: the LAST
+    # message over MIN_ANSWER_CHARS wins; shorter trailing messages are tool
+    # chatter. Scan every sibling doc, not just the richest-steps one -- 22 of 759
+    # cells keep their steps and their final message in DIFFERENT documents.
+    answer = None
+    for sibling in sibling_docs:
+        for msg in out_of(sibling).get('messages') or []:
+            if not isinstance(msg, dict):
+                continue
+            text = msg.get('message')
+            if isinstance(text, str) and len(text.strip()) > MIN_ANSWER_CHARS:
+                answer = text
 
     scores = {}
     for sibling in sibling_docs:
@@ -104,12 +119,26 @@ def main():
         entries[f'{model}:{example}'] = to_entry(best, docs)
 
     json.dump(entries, open(dst, 'w'))
+    with_steps = sum(1 for e in entries.values() if e.get('steps'))
+    with_question = sum(1 for e in entries.values() if e.get('question'))
+    with_answer = sum(1 for e in entries.values() if e.get('answer'))
     print(f'grouped pairs : {len(grouped)}')
     print(f'entries       : {len(entries)}')
-    print(f'  with steps  : {sum(1 for e in entries.values() if e.get("steps"))}')
-    print(f'  with question: {sum(1 for e in entries.values() if e.get("question"))}')
+    print(f'  with steps  : {with_steps}')
+    print(f'  with question: {with_question}')
+    print(f'  with answer : {with_answer}')
     print(f'  models      : {len({k.split(":", 1)[0] for k in entries})}')
     print(f'wrote         : {dst}')
+
+    # A field that is empty for EVERY entry is a probe reading the wrong key,
+    # not a corpus that happens to lack it. Printing the zero and continuing is
+    # how boards shipped with "No final answer message captured." on every card.
+    for field, count in (('steps', with_steps), ('question', with_question), ('answer', with_answer)):
+        if entries and count == 0:
+            sys.exit(
+                f"error: 0 of {len(entries)} entries carry '{field}'. That is a field-path "
+                f"bug in this converter, not missing data -- fix the probe before rendering."
+            )
 
 
 if __name__ == '__main__':
