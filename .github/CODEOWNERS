@@ -1254,7 +1254,7 @@ x-pack/solutions/observability/plugins/observability_shared @elastic/observabili
 x-pack/solutions/observability/plugins/profiling @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-presentation-team
-x-pack/solutions/observability/plugins/slo @elastic/obs-signals-logs-team
+x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-signals-logs-team
