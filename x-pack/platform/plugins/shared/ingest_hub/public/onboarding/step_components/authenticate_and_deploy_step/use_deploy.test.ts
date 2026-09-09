@@ -1330,6 +1330,66 @@ describe('useDeploy', () => {
         expect.objectContaining({ status: expect.stringMatching(/succeeded|failed/) })
       );
     });
+
+    it('dedupes packagePolicyIds when prior bundled deploy mapped multiple instances to the same policy', async () => {
+      // Simulates a retry where detectAndReviewStep already holds inst-a and inst-b both pointing
+      // to 'shared-policy' (a bundled group from the prior run). The new deploy adds 'policy-ec2'.
+      // Without Set dedup, the merged Object.values would contain 'shared-policy' twice.
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        detectAndReviewStep: {
+          policyIdsByInstance: { 'inst-a': 'shared-policy', 'inst-b': 'shared-policy' },
+          onboardingDeploymentId: 'dep-dedup-test',
+        },
+      });
+      mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-ec2' } });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        // Retry — instanceIds provided — so no new SO create, uses existing dep id.
+        await result.current.handleDeploy(['ec2']);
+      });
+
+      const updateCall = mockSendUpdateCloudOnboardingDeployment.mock.calls[0];
+      const packagePolicyIds: string[] = updateCall[1].packagePolicyIds;
+      // Must contain each distinct policy exactly once.
+      expect(packagePolicyIds).toContain('shared-policy');
+      expect(packagePolicyIds).toContain('policy-ec2');
+      expect(packagePolicyIds.filter((id) => id === 'shared-policy')).toHaveLength(1);
+    });
+
+    it('shows addDanger toast when SO create fails (best-effort — deploy still proceeds)', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendCreateCloudOnboardingDeployment.mockRejectedValue(new Error('SO create failed'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const addDanger =
+        mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts?.addDanger;
+      expect(addDanger).toHaveBeenCalled();
+      // Deploy must still proceed despite the SO failure.
+      expect(mockSendCreateAgentlessPolicy).toHaveBeenCalled();
+    });
+
+    it('shows addDanger toast when SO update fails after deploy completes', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendUpdateCloudOnboardingDeployment.mockRejectedValue(new Error('SO update failed'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const addDanger =
+        mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts?.addDanger;
+      expect(addDanger).toHaveBeenCalled();
+      // onContinue must still fire — update failure is non-fatal.
+      expect(mockUseOnboardingFlow.mock.results[0].value.updateDetectAndReviewStep).toHaveBeenCalled();
+    });
   });
 });
 

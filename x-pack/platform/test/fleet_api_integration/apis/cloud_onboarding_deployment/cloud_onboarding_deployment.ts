@@ -143,12 +143,30 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 400 when connectorId is missing', async () => {
-        await supertest
+      it('should create a static-keys deployment when connectorId is omitted', async () => {
+        // connectorId is now optional — static-keys flow omits it and passes authMethod instead.
+        const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send({ provider: 'aws', mechanisms: [], services: ['cloudtrail'] })
-          .expect(400);
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['agentless'],
+            services: ['cloudtrail'],
+            globalRegion: 'us-east-1',
+            dataFormat: 'ecs',
+          })
+          .expect(200);
+
+        expect(body.item).to.have.property('id');
+        expect(body.item.provider).to.equal('aws');
+        expect(body.item.authMethod).to.equal('static_keys');
+        expect(body.item.globalRegion).to.equal('us-east-1');
+        expect(body.item.dataFormat).to.equal('ecs');
+        expect(body.item.connectorId).to.be(undefined);
+        expect(body.item.status).to.equal('pending');
+
+        createdIds.push(body.item.id);
       });
 
       it('should return 400 when connectorId is empty string', async () => {

@@ -38,6 +38,14 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => ({ services: { cloud: undefined } })),
 }));
 
+jest.mock('./authenticate_and_deploy_step/use_onboarding_so', () => ({
+  useOnboardingSO: jest.fn(() => ({
+    createDeployment: jest.fn().mockResolvedValue(null),
+    updateDeployment: jest.fn().mockResolvedValue(undefined),
+    persistDeploymentId: jest.fn(),
+  })),
+}));
+
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
