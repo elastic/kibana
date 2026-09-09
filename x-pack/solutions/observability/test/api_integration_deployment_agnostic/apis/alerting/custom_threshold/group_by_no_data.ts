@@ -63,11 +63,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
     };
 
-    const runRuleTwice = async () => {
-      await alertingApi.runRule(roleAuthc, ruleId);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      await alertingApi.runRule(roleAuthc, ruleId);
-    };
+    // `_run_soon` only stamps the task to run "now" -- calling it repeatedly in quick
+    // succession doesn't queue separate executions, and a second call can arrive while
+    // the first is still running. Force two *confirmed* executions by polling the
+    // execution event log (scoped to this rule) rather than assuming a fixed gap between
+    // calls is enough, with a generous retry budget for slow/contended environments.
+    const forceRuns = (numOfRuns: number) =>
+      alertingApi.helpers.waitForNumRuleRuns({
+        roleAuthc,
+        ruleId,
+        numOfRuns,
+        esClient,
+        testStart: new Date(),
+        retryOptions: { retryCount: 10, retryDelay: 3000 },
+      });
 
     const getAlertsForRule = async () => {
       const response = await esClient.search({
@@ -143,7 +152,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           // Serverless enforces `xpack.alerting.rules.minimumScheduleInterval` (1m) and
           // rejects anything shorter, so this is the floor available to a deployment-agnostic
-          // suite. Executions are driven explicitly via `runRuleTwice` rather than by this
+          // suite. Executions are driven explicitly via `forceRuns` rather than by this
           // interval, so the tests below never wait on a scheduled run.
           schedule: { interval: '1m' },
           params: {
@@ -178,14 +187,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // staying fresh -- this keeps the test's freshness assumption self-contained
         // regardless of how much time setup took.
         await indexDocsFor(['host-a', 'host-b']);
-        await runRuleTwice();
+        await forceRuns(2);
         await alertingApi.waitForRuleStatus({ roleAuthc, ruleId, expectedStatus: 'ok' });
 
         const alerts = await getAlertsForRule();
         expect(alerts).to.eql([]);
       });
 
-      it('alerts for the disappeared group only when one group stops reporting, never the ungrouped "*" instance', async () => {
+      it('alerts for the disappeared group only when one group stops reporting, never the ungrouped "*" instance', async function () {
+        // Two forceRuns(2) calls, each tolerant of slow/contended executions, can exceed
+        // the framework's 360s default in the worst case.
+        this.timeout(420000);
+
         // host-b stops entirely. host-a is kept refreshed concurrently for as long as
         // this test runs, so its freshness never depends on how long the assertions take.
         await indexDocsFor(['host-a', 'host-b']);
@@ -193,9 +206,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         try {
           // Establish lastPeriodEnd while both hosts are still current, then let host-b
           // age out before forcing the run that should notice it.
-          await runRuleTwice();
+          await forceRuns(2);
           await new Promise((resolve) => setTimeout(resolve, STALENESS_WAIT_MS));
-          await runRuleTwice();
+          await forceRuns(2);
 
           const resp = await alertingApi.waitForAlertInIndex({
             indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
@@ -221,7 +234,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('recovers the disappeared group when it resumes, without emitting "*"', async () => {
         await indexDocsFor(['host-b']);
-        await runRuleTwice();
+        await forceRuns(2);
 
         const resp = await alertingApi.waitForAlertInIndex({
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
@@ -236,14 +249,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectNoUngroupedAlert();
       });
 
-      it('alerts per-group for every group when they all stop reporting simultaneously, never collapsing into "*"', async () => {
+      it('alerts per-group for every group when they all stop reporting simultaneously, never collapsing into "*"', async function () {
+        // Two forceRuns(2) calls, each tolerant of slow/contended executions, can exceed
+        // the framework's 360s default in the worst case.
+        this.timeout(420000);
+
         // Anchor the freshness point explicitly, then let both hosts age out of the
         // lookback window together without re-indexing either one -- a total outage
         // must still resolve to one alert per group, never a single ungrouped alert.
         await indexDocsFor(['host-a', 'host-b']);
-        await runRuleTwice();
+        await forceRuns(2);
         await new Promise((resolve) => setTimeout(resolve, STALENESS_WAIT_MS));
-        await runRuleTwice();
+        await forceRuns(2);
 
         const respA = await alertingApi.waitForAlertInIndex({
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
@@ -270,7 +287,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('recovers every group when they all resume, without emitting "*"', async () => {
         await indexDocsFor(['host-a', 'host-b']);
-        await runRuleTwice();
+        await forceRuns(2);
         await alertingApi.waitForRuleStatus({ roleAuthc, ruleId, expectedStatus: 'ok' });
 
         await expectNoUngroupedAlert();
