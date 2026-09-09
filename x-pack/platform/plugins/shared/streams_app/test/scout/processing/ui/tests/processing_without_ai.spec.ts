@@ -40,7 +40,7 @@ test.describe(
       ).toBeVisible();
       await expect(
         page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton')
-      ).toBeHidden();
+      ).toBeVisible();
     });
 
     test('should create a processor from the manual empty prompt', async ({ pageObjects }) => {
