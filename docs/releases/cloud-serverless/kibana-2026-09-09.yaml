@@ -38,13 +38,13 @@ entries:
   - https://github.com/elastic/kibana/issues/284644
 - file:
     name: 288575.yaml
-    checksum: e466b89863dca8e0892ea1b3bf61546bc2760838
+    checksum: 2b50c9adc6df32b0ff2cc94f40e2b9d7230caae9
   type: enhancement
   title: Show "View pack" and "View query" labels for read-only Osquery users
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Relabels the row action from Edit to View when the destination page renders read-only, so the Osquery pack and saved query menus match what the page allows.
+  description: Relabels the row actions from "Edit pack" and "Edit query" to "View pack" and "View query" when the destination page renders read-only, so the Osquery pack and saved query menus match what the page allows.
   prs:
   - https://github.com/elastic/kibana/pull/288575
 - file:
@@ -84,13 +84,13 @@ entries:
   - https://github.com/elastic/kibana/pull/288627
 - file:
     name: 288451.yaml
-    checksum: 813081c51a166a244cd5951ea571f65d1f7b9bf7
+    checksum: 6ceeeeae42e0177cc4ad6e9fba32001d33c7a55c
   type: bug-fix
-  title: Fix row height in the user selection list
+  title: Fix row height in user pickers such as case assignees
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Restores the previous 48 pixel row height in the user selection list.
+  description: Restores the 48 pixel row height in the shared user picker. This affects menus such as case assignees, Alerting v2 episode assignees, and the "Created by" filter in dashboard and visualization lists.
   prs:
   - https://github.com/elastic/kibana/pull/288451
 - file:
@@ -122,13 +122,13 @@ entries:
   - https://github.com/elastic/kibana/issues/286218
 - file:
     name: 288962.yaml
-    checksum: 30cfdfbf19c123c6946fa48d046f00c155f40b5e
+    checksum: e06666d704c2f1b6f6e90b3f5fc07560ee9a7fd3
   type: bug-fix
-  title: Fix removing all tags from a rule not persisting
+  title: Fix tags reappearing after removing all tags from an Alerting v2 rule
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes an issue in Alerting v2 where removing all tags from a rule was not saved — the previous tags reappeared when the rule was reopened.
+  description: Fixes an Alerting v2 rule keeping its previous tags after you remove all of them. The save reported success, but the tags reappeared when you reopened the rule. Removing only some tags always worked.
   areas:
   - Alerting and reporting
   prs:
@@ -163,13 +163,15 @@ entries:
   - https://github.com/elastic/kibana/pull/288379
 - file:
     name: 276488.yaml
-    checksum: 71c9c9b4b9ea734dd695adde4576ca783e5ffc89
+    checksum: 546f644be4e390ef3cb1547e10e5c159e81e8c47
   type: bug-fix
   title: Fix the `security.alerts` tool returning alerts from other spaces
   products:
   - product: cloud-serverless
   - product: kibana
   description: Scopes the Agent Builder `security.alerts` tool to the current Kibana space. The tool no longer accepts an `index` argument, and it returns zero alerts when the current space has no alerts index.
+  impact: The `security.alerts` Agent Builder tool no longer accepts an `index` argument. Calls that still pass it no longer influence which index is searched, because the tool always searches the alerts index of the current Kibana space.
+  action: Remove the `index` argument from any custom agent, prompt, or automation that calls the `security.alerts` tool.
   prs:
   - https://github.com/elastic/kibana/pull/276488
 - file:
@@ -189,13 +191,13 @@ entries:
   - https://github.com/elastic/kibana/issues/276158
 - file:
     name: 280600.yaml
-    checksum: 8153a38d2ec2045d468f51ef412304fad74e1cd2
+    checksum: 27057e764be3b20802f26c69fe083d484b3cac98
   type: enhancement
-  title: Stop emitting default Synthetics monitor values in the agent policy
+  title: Reduce Synthetics agent policy size by omitting default monitor values
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Reduces the size of the generated agent policy. Synthetics no longer writes monitor configuration fields whose value already matches the Heartbeat default.
+  description: Omits monitor configuration fields whose value already matches the Heartbeat default. This reduces the size of the generated agent policy for every Synthetics monitor.
   prs:
   - https://github.com/elastic/kibana/pull/280600
   issues:
@@ -226,13 +228,13 @@ entries:
   - https://github.com/elastic/kibana/pull/287214
 - file:
     name: 289066.yaml
-    checksum: 1bf9d1642d3bc6dc459afaa3cc0da8954d43fb29
+    checksum: 89c00ea912cb3aa82bed51fa47a970a7d0cb6d4c
   type: bug-fix
   title: Fix time range picker labels for custom presets and rounded ranges
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes custom quick ranges showing raw time values instead of their configured label. Rounded relative ranges now end with a (rounded) suffix, for example Last 1 year (rounded) for `-1y/y`. Also fixes the absolute date format used for display.
+  description: Fixes custom quick ranges showing raw time values instead of their configured label. Rounded relative ranges now end with a "(rounded)" suffix, for example "Last 1 year (rounded)" for `-1y/y`. Also fixes the absolute date format used for display.
   areas:
   - Kibana platform
   - Discover and ES|QL
@@ -242,13 +244,13 @@ entries:
   - https://github.com/elastic/kibana/issues/286115
 - file:
     name: 288636.yaml
-    checksum: 37215f8465fac14d09d8d8dba7e812d78cffc5d4
+    checksum: 04e31a4e42c36c58970bd42f671e48618b4676f8
   type: bug-fix
   title: Fix case template settings not applied when you change the template
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes Sync alerts and Extract observables being turned off when you apply a template to an existing case from the Section settings popover, even when the template enables them.
+  description: Fixes "Sync alerts" and "Extract observables" being turned off when you apply a template to an existing case from the "Section settings" popover, even when the template enables them.
   areas:
   - Alerting and reporting
   prs:
@@ -272,24 +274,24 @@ entries:
   - https://github.com/elastic/kibana/issues/288009
 - file:
     name: 288925.yaml
-    checksum: b41779d9fddc33e34fa0b73b9d0c602acdaad2be
+    checksum: 79ed38590895079d1ac9c7953d0fb1c0356570d1
   type: enhancement
-  title: Default Observability Add Data destinations to OpenTelemetry
+  title: Add OpenTelemetry-first defaults to the Observability "Add Data" page
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Opens the integrations catalog with the Observability and OpenTelemetry filters from Add Data. When a technology supports more than one collection method, the OpenTelemetry variant is listed first and marked "Recommended".
+  description: Adds OpenTelemetry-first defaults to Observability "Add Data". "Browse all" now opens the integrations catalog with the Observability and OpenTelemetry filters. When a technology supports more than one collection method, the OpenTelemetry variant is listed first and marked "Recommended".
   prs:
   - https://github.com/elastic/kibana/pull/288925
 - file:
     name: 288499.yaml
-    checksum: 79fdaf6ceef44bc67a10b3c651ff0ee17aa6c28f
+    checksum: 6893506aacc9cd7bfd5f0d1051f708c17050bc41
   type: bug-fix
-  title: Fix Threat Hunting leads not being saved on serverless
+  title: Fix "Threat hunting leads" showing no results on serverless
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes Threat Hunting Leads reporting no entities on serverless even when the entity store held data. Lead generation ran correctly, but the leads index could not be created because serverless rejects the `index.auto_expand_replicas` setting.
+  description: Fixes "Threat hunting leads" reporting no entities on serverless even when the Entity store contained data. Lead generation ran correctly, but the leads index could not be created because serverless rejects the `index.auto_expand_replicas` setting.
   prs:
   - https://github.com/elastic/kibana/pull/288499
   issues:
@@ -331,24 +333,24 @@ entries:
   - https://github.com/elastic/kibana/pull/288785
 - file:
     name: 288290.yaml
-    checksum: 2713f66af24dfb086912bf87b2a10bce5211ef09
+    checksum: 05160f1973e2f354b5b2c9aa6f2f8f06b4e889c1
   type: enhancement
-  title: Add an Investigate action to Observability alerts
+  title: Add an "Investigate" action to Observability alerts
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Adds an Investigate action to Observability alert rows and to the alert detail action menu. The action appears when investigations and Agent Builder write access are available.
+  description: Adds an "Investigate" action to Observability alert rows and to the alert detail action menu. The action appears when investigations and Agent Builder write access are available.
   prs:
   - https://github.com/elastic/kibana/pull/288290
 - file:
     name: 287807.yaml
-    checksum: 4f1c321e7ca08f4113d82fd35d544239911ee7f8
+    checksum: c7612a646fbbeb0c9402ae6bef96658f8202e5f7
   type: bug-fix
   title: Fix filter buttons shown in Discover for values that violate `ignore_above`
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes the Discover data table offering filter for and filter out buttons on a cell whose value was never indexed because it exceeds the `ignore_above` limit. Such a filter can never match a document.
+  description: Fixes the Discover data table offering "Filter for" and "Filter out" buttons on a cell whose value was never indexed because it exceeds the `ignore_above` limit. Such a filter can never match a document.
   areas:
   - Discover and ES|QL
   prs:
@@ -357,13 +359,13 @@ entries:
   - https://github.com/elastic/kibana/issues/251014
 - file:
     name: 288475.yaml
-    checksum: ea34155b5913cd071e4d5317575a27784ecd8123
+    checksum: 26577e1cea066de4475d1b7ed2f760eb26d99197
   type: enhancement
   title: Add a "Fix with AI Agent" quick fix to workflow validation errors
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Adds a Fix with AI Agent action to workflow YAML validation errors, available from the editor quick fix and from the validation error row. The action prefills the chat input instead of sending it.
+  description: Adds a "Fix with AI Agent" action to workflow YAML validation errors, available from the editor quick fix and from the validation error row. The action prefills the chat input instead of sending it.
   prs:
   - https://github.com/elastic/kibana/pull/288475
 - file:
@@ -416,13 +418,13 @@ entries:
   - https://github.com/elastic/kibana/pull/277445
 - file:
     name: 287934.yaml
-    checksum: 44657f5613972d321e3d881b91dd01ea6c0077b5
+    checksum: da8040f2eb76acd8f2e0197fe905576e4f6f389a
   type: bug-fix
   title: Fix Analyzer process labels disagreeing with Session View
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes Event Analyzer labeling a process node with its newest executable name instead of the name in effect when the analyzed event happened, which made the graph disagree with Session View.
+  description: Fixes the Analyzer labeling a process node with its newest executable name instead of the name in effect when the analyzed event happened, which made the graph disagree with Session View.
   prs:
   - https://github.com/elastic/kibana/pull/287934
   issues:
@@ -440,13 +442,13 @@ entries:
   - https://github.com/elastic/kibana/pull/288946
 - file:
     name: 288432.yaml
-    checksum: 50ae14ea9559d4ca6ab3d3c0717be6eb2042bbeb
+    checksum: 7f981a6cb5ae80e9b85772bfc0fca9d4396cacbb
   type: feature
   title: Add a dashboard screenshot to the "Enhance this dashboard" request
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Adds a screenshot of the dashboard to the chat request when you select Enhance this dashboard, alongside the existing dashboard attachment. Map panels render blank in the screenshot.
+  description: Adds a screenshot of the dashboard to the chat request when you select "Enhance this dashboard", alongside the existing dashboard attachment. Map panels render blank in the screenshot.
   areas:
   - Dashboards and visualizations
   prs:
@@ -477,13 +479,13 @@ entries:
   - https://github.com/elastic/kibana/issues/287888
 - file:
     name: 288644.yaml
-    checksum: 8b9ce4a9594372c3b8aa7d350e2a7c49612949e3
+    checksum: c203453ed3304f3cd76e169cb40c5c77e95fd9b3
   type: bug-fix
   title: Fix alerting rules keeping an API key that was queued for invalidation
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes an alerting rule continuing to present an API key that was already queued for invalidation. Rule updates now write the whole saved object, so credentials that the rotation strips are removed.
+  description: Fixes an alerting rule keeping an API key that was already queued for invalidation. API key rotation and rule enabling now replace the stored rule in full, so credentials removed during rotation no longer remain on the rule.
   areas:
   - Alerting and reporting
   prs:

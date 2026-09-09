@@ -9,4 +9,4 @@ products:
 areas:
 - Discover and ES|QL
 title: "Fix filter buttons shown in Discover for values that violate `ignore_above`"
-description: "Fixes the Discover data table offering filter for and filter out buttons on a cell whose value was never indexed because it exceeds the `ignore_above` limit. Such a filter can never match a document."
+description: "Fixes the Discover data table offering \"Filter for\" and \"Filter out\" buttons on a cell whose value was never indexed because it exceeds the `ignore_above` limit. Such a filter can never match a document."

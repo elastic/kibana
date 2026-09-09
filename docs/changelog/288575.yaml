@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
 - product: kibana
 title: "Show \"View pack\" and \"View query\" labels for read-only Osquery users"
-description: Relabels the row action from Edit to View when the destination page renders read-only, so the Osquery pack and saved query menus match what the page allows.
+description: "Relabels the row actions from \"Edit pack\" and \"Edit query\" to \"View pack\" and \"View query\" when the destination page renders read-only, so the Osquery pack and saved query menus match what the page allows."

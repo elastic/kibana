@@ -6,5 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
 - product: kibana
-title: Fix Threat Hunting leads not being saved on serverless
-description: "Fixes Threat Hunting Leads reporting no entities on serverless even when the entity store held data. Lead generation ran correctly, but the leads index could not be created because serverless rejects the `index.auto_expand_replicas` setting."
+title: "Fix \"Threat hunting leads\" showing no results on serverless"
+description: "Fixes \"Threat hunting leads\" reporting no entities on serverless even when the Entity store contained data. Lead generation ran correctly, but the leads index could not be created because serverless rejects the `index.auto_expand_replicas` setting."

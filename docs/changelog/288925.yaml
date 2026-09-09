@@ -4,5 +4,5 @@ type: enhancement
 products:
 - product: cloud-serverless
 - product: kibana
-title: Default Observability Add Data destinations to OpenTelemetry
-description: "Opens the integrations catalog with the Observability and OpenTelemetry filters from Add Data. When a technology supports more than one collection method, the OpenTelemetry variant is listed first and marked \"Recommended\"."
+title: "Add OpenTelemetry-first defaults to the Observability \"Add Data\" page"
+description: "Adds OpenTelemetry-first defaults to Observability \"Add Data\". \"Browse all\" now opens the integrations catalog with the Observability and OpenTelemetry filters. When a technology supports more than one collection method, the OpenTelemetry variant is listed first and marked \"Recommended\"."

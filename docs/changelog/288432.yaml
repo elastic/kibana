@@ -7,4 +7,4 @@ products:
 areas:
 - Dashboards and visualizations
 title: "Add a dashboard screenshot to the \"Enhance this dashboard\" request"
-description: Adds a screenshot of the dashboard to the chat request when you select Enhance this dashboard, alongside the existing dashboard attachment. Map panels render blank in the screenshot.
+description: "Adds a screenshot of the dashboard to the chat request when you select \"Enhance this dashboard\", alongside the existing dashboard attachment. Map panels render blank in the screenshot."

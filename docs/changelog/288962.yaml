@@ -8,5 +8,5 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Fix removing all tags from a rule not persisting
-description: Fixes an issue in Alerting v2 where removing all tags from a rule was not saved — the previous tags reappeared when the rule was reopened.
+title: Fix tags reappearing after removing all tags from an Alerting v2 rule
+description: Fixes an Alerting v2 rule keeping its previous tags after you remove all of them. The save reported success, but the tags reappeared when you reopened the rule. Removing only some tags always worked.

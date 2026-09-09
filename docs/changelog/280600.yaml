@@ -6,5 +6,5 @@ type: enhancement
 products:
 - product: cloud-serverless
 - product: kibana
-title: Stop emitting default Synthetics monitor values in the agent policy
-description: Reduces the size of the generated agent policy. Synthetics no longer writes monitor configuration fields whose value already matches the Heartbeat default.
+title: Reduce Synthetics agent policy size by omitting default monitor values
+description: Omits monitor configuration fields whose value already matches the Heartbeat default. This reduces the size of the generated agent policy for every Synthetics monitor.

@@ -7,4 +7,4 @@ products:
 areas:
 - Alerting and reporting
 title: Fix alerting rules keeping an API key that was queued for invalidation
-description: Fixes an alerting rule continuing to present an API key that was already queued for invalidation. Rule updates now write the whole saved object, so credentials that the rotation strips are removed.
+description: Fixes an alerting rule keeping an API key that was already queued for invalidation. API key rotation and rule enabling now replace the stored rule in full, so credentials removed during rotation no longer remain on the rule.

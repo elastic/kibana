@@ -6,3 +6,5 @@ products:
 - product: kibana
 title: "Fix the `security.alerts` tool returning alerts from other spaces"
 description: "Scopes the Agent Builder `security.alerts` tool to the current Kibana space. The tool no longer accepts an `index` argument, and it returns zero alerts when the current space has no alerts index."
+impact: "The `security.alerts` Agent Builder tool no longer accepts an `index` argument. Calls that still pass it no longer influence which index is searched, because the tool always searches the alerts index of the current Kibana space."
+action: "Remove the `index` argument from any custom agent, prompt, or automation that calls the `security.alerts` tool."
