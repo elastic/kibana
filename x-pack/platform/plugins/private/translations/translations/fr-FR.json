@@ -58859,7 +58859,6 @@
     "xpack.upgradeAssistant.overview.latestAvailableVersionLoading": "Chargement de la dernière version disponible",
     "xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable": "Non disponible",
     "xpack.upgradeAssistant.overview.latestMinVersionTooltip": "La mise à niveau vers v{latestVersion} nécessite v{minVersionToUpgradeToLatest}.",
-    "xpack.upgradeAssistant.overview.linkToReleaseNotes": "{linkToReleaseNotes}",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "Chargement de l'état de la collecte de logs de déclassement…",
     "xpack.upgradeAssistant.overview.loadingUpgradeStatus": "Chargement du statut de mise à niveau",
     "xpack.upgradeAssistant.overview.logsStep.description": "Consultez les logs de déclassement Elasticsearch pour vous assurer que vous n'utilisez pas d'API déclassées.",

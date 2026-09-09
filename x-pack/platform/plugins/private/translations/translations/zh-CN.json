@@ -59315,7 +59315,6 @@
     "xpack.upgradeAssistant.overview.latestAvailableVersionLoading": "正在加载最新的可用版本",
     "xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable": "不可用",
     "xpack.upgradeAssistant.overview.latestMinVersionTooltip": "升级到 v{latestVersion} 需要 v{minVersionToUpgradeToLatest}。",
-    "xpack.upgradeAssistant.overview.linkToReleaseNotes": "{linkToReleaseNotes}",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "正在加载弃用日志收集状态……",
     "xpack.upgradeAssistant.overview.loadingUpgradeStatus": "正在加载升级状态",
     "xpack.upgradeAssistant.overview.logsStep.countDescription": "自 {checkpoint} 以来，您有 {deprecationCount, plural, =0 {no} other {{deprecationCount}}} 个弃用{deprecationCount, plural, one {issue} other {问题}}。",

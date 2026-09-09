@@ -59108,7 +59108,6 @@
     "xpack.upgradeAssistant.overview.latestAvailableVersionLoading": "Neueste verfügbare Version wird geladen",
     "xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable": "Nicht verfügbar",
     "xpack.upgradeAssistant.overview.latestMinVersionTooltip": "Ein Upgrade auf v{latestVersion} erfordert v{minVersionToUpgradeToLatest}.",
-    "xpack.upgradeAssistant.overview.linkToReleaseNotes": "{linkToReleaseNotes}",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "Ladezustand der Erfassung des Veraltungslogs …",
     "xpack.upgradeAssistant.overview.loadingUpgradeStatus": "Upgrade-Status wird geladen.",
     "xpack.upgradeAssistant.overview.logsStep.countDescription": "Sie haben Probleme mit der {deprecationCount, plural, =0 {no} other {{deprecationCount}}} Veralterung {deprecationCount, plural, one {issue} other {Probleme}} seit {checkpoint}.",

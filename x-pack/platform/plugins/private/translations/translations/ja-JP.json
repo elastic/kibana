@@ -59312,7 +59312,6 @@
     "xpack.upgradeAssistant.overview.latestAvailableVersionLoading": "最新の利用可能なバージョンを読み込み中",
     "xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable": "利用不可",
     "xpack.upgradeAssistant.overview.latestMinVersionTooltip": "{latestVersion}へのアップグレードにはv{minVersionToUpgradeToLatest}が必要です。",
-    "xpack.upgradeAssistant.overview.linkToReleaseNotes": "{linkToReleaseNotes}",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "廃止予定ログ収集状態を読み込んでいます...",
     "xpack.upgradeAssistant.overview.loadingUpgradeStatus": "アップグレードステータスを読み込んでいます",
     "xpack.upgradeAssistant.overview.logsStep.countDescription": "{checkpoint}以降に{deprecationCount, plural, =0 {no} other {{deprecationCount}}}件の非推奨の{deprecationCount, plural, one {issue} other {問題}}があります。",
