@@ -23,7 +23,7 @@ import {
 import {
   apiHasPinnedPanels,
   apiPublishesChildren,
-  apiPublishesESQLQuery,
+  apiPublishesEsqlUsage,
   initializeRelatedPanels,
   initializeStateApi,
   type StateComparators,
@@ -289,8 +289,9 @@ function getRelatedStaticQuery(
    * For static ??field controls, we need to know which query to pull suggestions from
    */
   const getRelatedQuery = (_api: unknown) => {
-    const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
-    return query && getESQLQueryVariables(query).includes(variableKey) ? query : undefined;
+    if (!apiPublishesEsqlUsage(_api)) return undefined;
+    const match = _api.esql$.getValue().find((q) => getESQLQueryVariables(q.esql).includes(variableKey));
+    return match?.esql;
   };
 
   const parentQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
