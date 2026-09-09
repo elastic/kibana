@@ -26,16 +26,15 @@ export const initializeManagedWorkflows = async ({
   );
   let canReconcile = true;
 
-  // Install in dependency order so children land before their callers. A
-  // failure still lets the rest attempt to install; it only skips reconciliation.
-  for (const id of PND_RULE_WORKFLOW_IDS) {
-    try {
-      await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
-    } catch (error) {
+  const ruleWorkflowInstalls = await Promise.allSettled(
+    PND_RULE_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+  );
+  for (const [index, result] of ruleWorkflowInstalls.entries()) {
+    if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed PND rule workflow "${id}": ${
-          error instanceof Error ? error.message : String(error)
+        `Failed to install managed PND rule workflow "${PND_RULE_WORKFLOW_IDS[index]}": ${
+          result.reason instanceof Error ? result.reason.message : String(result.reason)
         }`
       );
     }

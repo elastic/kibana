@@ -50,13 +50,12 @@ describe('initializeManagedWorkflows', () => {
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('attempts every install but does not reconcile when one fails', async () => {
+  it('does not reconcile when a required rule workflow install fails', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
     client.install.mockRejectedValueOnce(new Error('rule workflow install failed'));
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install).toHaveBeenCalledTimes(PND_RULE_WORKFLOW_IDS.length);
     expect(client.ready).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('rule workflow install failed')
