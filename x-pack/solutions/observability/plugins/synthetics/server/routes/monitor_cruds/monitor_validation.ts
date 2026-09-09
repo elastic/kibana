@@ -24,15 +24,7 @@ import {
   MonitorTypeEnum,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
-import {
-  BrowserFieldsCodec,
-  HTTPFieldsCodec,
-  ICMPFieldsCodec,
-  TCPFieldsCodec,
-} from '../../../common/runtime_types/zod/monitor_types';
-import { MonitorTypeCodec } from '../../../common/runtime_types/zod/monitor_configs';
-import { ProjectMonitorCodec } from '../../../common/runtime_types/zod/monitor_types_project';
-import { formatZodErrors } from '../../../common/runtime_types/zod/format_errors';
+import { getZodMonitorCodecs } from './zod_monitor_codecs';
 
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
@@ -40,19 +32,6 @@ import {
   HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
-
-type MonitorCodecType =
-  | typeof ICMPFieldsCodec
-  | typeof TCPFieldsCodec
-  | typeof HTTPFieldsCodec
-  | typeof BrowserFieldsCodec;
-
-const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
-  [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
-  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
-  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
-  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
-};
 
 export interface ValidationResult {
   valid: boolean;
@@ -76,6 +55,9 @@ export class MonitorValidationError extends Error {
  * @param spaceId
  */
 export function validateMonitor(monitorFields: MonitorFields, spaceId: string): ValidationResult {
+  const { MonitorTypeCodec, formatZodErrors, monitorTypeToCodecMap, ICMPFieldsCodec } =
+    getZodMonitorCodecs();
+
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
 
@@ -209,6 +191,7 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
 }
 
 export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
+  const { MonitorTypeCodec, formatZodErrors } = getZodMonitorCodecs();
   const monitorType = monitor.type as MonitorTypeEnum;
   const decodedType = MonitorTypeCodec.safeParse(monitorType);
 
@@ -388,6 +371,7 @@ export function validateProjectMonitor(
   publicLocations: Locations,
   privateLocations: SyntheticsPrivateLocations
 ): ValidationResult {
+  const { ProjectMonitorCodec, formatZodErrors } = getZodMonitorCodecs();
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
   const decodedMonitor = ProjectMonitorCodec.safeParse(monitorFields);
