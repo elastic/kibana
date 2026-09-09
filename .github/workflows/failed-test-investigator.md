@@ -240,7 +240,7 @@ Every fix you propose is held to the same guardrails as the fixer and verifier w
 
 ## Labels
 
-Label only when `confidence` is `medium` or `high`. A `low`-confidence verdict adds or removes no labels — except `failure:inconclusive` and `failure:insufficient-data`, which exist to record exactly that uncertainty. The comment already surfaces low confidence (see "Comment format"), and a wrong label misroutes the issue while an unlabeled one just waits for the next failure or an engineer to firm up the call.
+Label only when `confidence` is `medium` or `high`. A `low`-confidence verdict adds or removes no labels — except `failure:inconclusive` and `failure:insufficient-data`, which exist to record exactly that uncertainty. The comment already surfaces low confidence (see "Comment format").
 
 ### Classification label
 
