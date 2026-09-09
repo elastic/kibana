@@ -48,7 +48,7 @@ interface AuthenticateAndDeployStepProps {
 
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod } =
+  const { servicesStep, awsServicesMap, deploymentMethod, setDeploymentMethod, detectAndReviewStep } =
     useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
@@ -150,21 +150,26 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         })
         .filter((s): s is NonNullable<typeof s> => s !== null);
 
-      const deploymentId = await createDeployment({
-        provider: 'aws',
-        mechanisms: ['cloud_forwarder'],
-        services: selectedServiceIds,
-        serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
-          string,
-          Record<string, unknown>
-        >,
-        globalRegion,
-        dataFormat,
-      });
+      // Reuse an existing deployment id (user clicked Back then Next again) rather
+      // than creating a second SO and orphaning the first.
+      const existingId = detectAndReviewStep.onboardingDeploymentId;
+      const deploymentId =
+        existingId ??
+        (await createDeployment({
+          provider: 'aws',
+          mechanisms: ['cloud_forwarder'],
+          services: selectedServiceIds,
+          serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
+            string,
+            Record<string, unknown>
+          >,
+          globalRegion,
+          dataFormat,
+        }));
 
       if (deploymentId) {
         await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
-        persistDeploymentId(deploymentId);
+        if (!existingId) persistDeploymentId(deploymentId);
       }
       setIsSavingSO(false);
     }
@@ -178,6 +183,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     globalRegion,
     dataFormat,
+    detectAndReviewStep.onboardingDeploymentId,
     createDeployment,
     updateDeployment,
     persistDeploymentId,

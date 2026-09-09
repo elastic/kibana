@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
@@ -39,15 +39,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 jest.mock('./authenticate_and_deploy_step/use_onboarding_so', () => ({
-  useOnboardingSO: jest.fn(() => ({
-    createDeployment: jest.fn().mockResolvedValue(null),
-    updateDeployment: jest.fn().mockResolvedValue(undefined),
-    persistDeploymentId: jest.fn(),
-  })),
+  useOnboardingSO: jest.fn(),
 }));
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
+import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -55,6 +52,7 @@ import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseDeploy = useDeploy as jest.Mock;
+const mockUseOnboardingSO = useOnboardingSO as jest.Mock;
 const MockManagedIntegrationsSection = ManagedIntegrationsSection as unknown as jest.Mock;
 const mockUseEcfDeployment = useEcfDeployment as jest.Mock;
 const MockEcfDeploymentSection = EcfDeploymentSection as unknown as jest.Mock;
@@ -141,6 +139,12 @@ describe('AuthenticateAndDeployStep', () => {
       awsServicesMap: awsServicesMapWithMI,
       deploymentMethod: 'managed_integration',
       setDeploymentMethod: jest.fn(),
+      detectAndReviewStep: { onboardingDeploymentId: undefined },
+    });
+    mockUseOnboardingSO.mockReturnValue({
+      createDeployment: jest.fn().mockResolvedValue(null),
+      updateDeployment: jest.fn().mockResolvedValue(undefined),
+      persistDeploymentId: jest.fn(),
     });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
     mockUseEcfDeployment.mockReturnValue(makeEcfReturn());
@@ -243,6 +247,7 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: awsServicesMapEmpty,
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { onboardingDeploymentId: undefined },
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
       renderStep();
@@ -287,6 +292,7 @@ describe('AuthenticateAndDeployStep', () => {
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: ['cloudtrail'] },
         awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: undefined },
       });
     });
 
@@ -323,6 +329,7 @@ describe('AuthenticateAndDeployStep', () => {
           ['guardduty', miService],
           ['cloudtrail', ecfService],
         ]),
+        detectAndReviewStep: { onboardingDeploymentId: undefined },
       });
     });
 
@@ -338,6 +345,40 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+  });
+
+  describe('ECF-only SO reuse on Back→Next', () => {
+    it('reuses existing deploymentId and does not call createDeployment when SO already exists', async () => {
+      // Simulates: user clicked Next (SO created, id persisted), navigated Back, clicked Next again.
+      const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
+      const mockUpdate = jest.fn().mockResolvedValue(undefined);
+      const mockPersist = jest.fn();
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: mockCreate,
+        updateDeployment: mockUpdate,
+        persistDeploymentId: mockPersist,
+      });
+
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+      });
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: true }));
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+
+      // SO already exists — must not create a second one.
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+      expect(mockCreate).not.toHaveBeenCalled();
+      // Must update the existing SO with the latest ecfStacks.
+      expect(mockUpdate).toHaveBeenCalledWith('existing-dep-id', expect.objectContaining({ status: 'succeeded' }));
+      // persistDeploymentId must not fire again (URL/context already set).
+      expect(mockPersist).not.toHaveBeenCalled();
+      expect(onContinue).toHaveBeenCalledTimes(1);
     });
   });
 });
