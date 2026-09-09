@@ -16,6 +16,7 @@ import {
   type InferencePiiBuiltInRule,
   type InferencePiiCustomRule,
 } from '@kbn/workflows/managed';
+import { anonymizationApiPrivileges } from '../../common/anonymization_features';
 
 const WORKFLOW_ID_FOR_SPACE = (spaceId: string) =>
   `${INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID}-${spaceId}`;
@@ -72,9 +73,7 @@ export const registerAnonymizationSettingsRoutes = ({
       path: '/internal/inference_workflows/anonymization/settings',
       security: {
         authz: {
-          // TODO Stage 4: replace with genAiSettings.anonymization.show privilege
-          enabled: false,
-          reason: 'RBAC will be added in Stage 4 (Anonymization sub-feature)',
+          requiredPrivileges: [anonymizationApiPrivileges.read],
         },
       },
       validate: {},
@@ -111,9 +110,7 @@ export const registerAnonymizationSettingsRoutes = ({
       path: '/internal/inference_workflows/anonymization/settings',
       security: {
         authz: {
-          // TODO Stage 4: replace with genAiSettings.anonymization.manage privilege
-          enabled: false,
-          reason: 'RBAC will be added in Stage 4 (Anonymization sub-feature)',
+          requiredPrivileges: [anonymizationApiPrivileges.manage],
         },
       },
       validate: {

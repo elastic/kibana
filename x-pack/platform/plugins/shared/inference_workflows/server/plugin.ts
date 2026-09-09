@@ -28,6 +28,7 @@ import {
   type InferenceAnonymizationManagedWorkflowInstaller,
 } from './workflow_anonymization/managed_workflow_installer';
 import { registerRoutes } from './routes';
+import { registerAnonymizationFeature } from './features';
 
 const MANAGED_WORKFLOW_OWNER = 'inferenceWorkflows';
 
@@ -47,6 +48,7 @@ export class InferenceWorkflowsPlugin
   }
 
   setup(core: CoreSetup<InferenceWorkflowsStartDeps>, deps: InferenceWorkflowsSetupDeps) {
+    registerAnonymizationFeature({ features: deps.features });
     this.workflowDrivenEnabled = deps.inference.anonymizationConfig.workflowDrivenEnabled;
     deps.workflowsExtensions.registerStepDefinition(aiPromptStepDefinition(core));
     deps.workflowsExtensions.registerStepDefinition(aiSummarizeStepDefinition(core));

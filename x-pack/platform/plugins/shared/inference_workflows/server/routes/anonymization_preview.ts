@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RE2JS } from 're2js';
 import type { IRouter } from '@kbn/core/server';
 import { BUILT_IN_PATTERNS, type BuiltInEntityClass } from '@kbn/workflows/managed';
+import { anonymizationApiPrivileges } from '../../common/anonymization_features';
 
 /**
  * A resolved pattern rule ready to run against text.
@@ -121,9 +122,7 @@ export const registerAnonymizationPreviewRoute = ({ router }: { router: IRouter 
       path: '/internal/inference_workflows/anonymization/_preview',
       security: {
         authz: {
-          // TODO Stage 4: replace with genAiSettings.anonymization.show privilege
-          enabled: false,
-          reason: 'RBAC will be added in Stage 4 (Anonymization sub-feature)',
+          requiredPrivileges: [anonymizationApiPrivileges.read],
         },
       },
       validate: {

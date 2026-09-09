@@ -7,6 +7,7 @@
 
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -18,6 +19,7 @@ import type {
 export interface InferenceWorkflowsSetupDeps {
   inference: InferenceServerSetup;
   spaces: SpacesPluginSetup;
+  features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;

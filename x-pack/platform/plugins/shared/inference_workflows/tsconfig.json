@@ -19,6 +19,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-spaces-common",
     "@kbn/spaces-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/features-plugin"
   ]
 }
