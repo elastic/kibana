@@ -33,6 +33,10 @@ const ALERT_MEDIUM_FIELD = 'alert_medium';
 const ALERT_LOW_FIELD = 'alert_low';
 const RISK_SCORE_NORM_FIELD = 'entity.risk.calculated_score_norm';
 const CASE_COUNT_FIELD = 'case_count';
+const ANOMALY_COUNT_FIELD = 'anomaly_count';
+
+// ML anomaly records are not namespaced per space — query the shared wildcard pattern.
+const ML_ANOMALY_INDICES = '.ml-anomalies-*';
 
 // Risk score history docs have one of host/user/service set per document.
 const ENTITY_ID_COALESCE = `COALESCE(host.name, user.name, service.name)`;
@@ -47,7 +51,8 @@ const COMPUTED_SORT_FIELDS = new Set([
   LAST_SEEN_ALERT_FIELD,
   RISK_SCORE_CHANGE_FIELD,
   GROUP_SIZE_FIELD,
-  CASE_COUNT_FIELD,
+  ALERT_COUNT_FIELD,
+  ANOMALY_COUNT_FIELD,
 ]);
 
 // Only allow field names composed of safe characters to prevent ES|QL injection.
@@ -280,6 +285,106 @@ const lastSeenAlertCountQuery = (alertsIndex: string, entityAlias: string): stri
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
+// ── query builders: alert_count sort ─────────────────────────────────────────
+
+// Same union-of-legs pattern as alertCountEnrichQuery but without an entity-name filter —
+// we want all entities sorted by total alert count.
+const alertCountSortBaseQuery = (alertsIndex: string): string => {
+  const cutoff = new Date(Date.now() - ALERT_LOOKBACK_DAYS * 86_400_000).toISOString();
+
+  const mkLeg = (field: string): string =>
+    [
+      `FROM ${alertsIndex}`,
+      `| WHERE \`@timestamp\` >= "${cutoff}"`,
+      `| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed"`,
+      `| WHERE ${field} IS NOT NULL`,
+      `| STATS ${ALERT_COUNT_FIELD} = COUNT(*) BY entity_name = ${field}`,
+    ].join('\n');
+
+  const [firstLeg, ...restLegs] = ALERT_ENTITY_FIELDS.map(mkLeg);
+  const union = [
+    `FROM (\n${indent(firstLeg)}\n)`,
+    ...restLegs.map((leg) => `(\n${indent(leg)}\n)`),
+  ].join(',\n');
+
+  return [
+    union,
+    `| STATS ${ALERT_COUNT_FIELD} = SUM(${ALERT_COUNT_FIELD}) BY entity_name`,
+    `| RENAME entity_name AS \`entity.name\``,
+  ].join('\n');
+};
+
+const alertCountSortDataQuery = (
+  alertsIndex: string,
+  entityAlias: string,
+  cursor: PageCursor | null,
+  pageSize: number,
+  dir: SortDir
+): string => {
+  const inner = [
+    alertCountSortBaseQuery(alertsIndex),
+    `| LOOKUP JOIN ${entityAlias} ON \`entity.name\``,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
+    keepClause(ALERT_COUNT_FIELD),
+    ...(cursor ? [cursorClause(cursor)] : []),
+  ].join('\n');
+  return [`FROM (`, indent(inner), `)`, sortSuffix(ALERT_COUNT_FIELD, dir, pageSize)].join('\n');
+};
+
+const alertCountSortCountQuery = (alertsIndex: string, entityAlias: string): string =>
+  [
+    alertCountSortBaseQuery(alertsIndex),
+    `| LOOKUP JOIN ${entityAlias} ON \`entity.name\``,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
+    `| KEEP \`${ENTITY_ID_FIELD}\``,
+    `| STATS total = COUNT(*)`,
+  ].join('\n');
+
+// ── query builders: anomaly_count sort ───────────────────────────────────────
+
+const anomalyCountSortBaseQuery = (): string =>
+  [
+    `FROM ${ML_ANOMALY_INDICES}`,
+    `| WHERE result_type == "record" AND is_interim == false`,
+    `| EVAL entity_name = MV_FIRST(COALESCE(\`host.name\`, \`user.name\`))`,
+    `| WHERE entity_name IS NOT NULL`,
+    `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY entity_name`,
+    `| RENAME entity_name AS \`entity.name\``,
+  ].join('\n');
+
+const anomalyCountSortDataQuery = (
+  entityAlias: string,
+  cursor: PageCursor | null,
+  pageSize: number,
+  dir: SortDir
+): string => {
+  const inner = [
+    anomalyCountSortBaseQuery(),
+    `| LOOKUP JOIN ${entityAlias} ON \`entity.name\``,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
+    keepClause(ANOMALY_COUNT_FIELD),
+    ...(cursor ? [cursorClause(cursor)] : []),
+  ].join('\n');
+  return [`FROM (`, indent(inner), `)`, sortSuffix(ANOMALY_COUNT_FIELD, dir, pageSize)].join('\n');
+};
+
+const anomalyCountSortCountQuery = (entityAlias: string): string =>
+  [
+    anomalyCountSortBaseQuery(),
+    `| LOOKUP JOIN ${entityAlias} ON \`entity.name\``,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
+    `| KEEP \`${ENTITY_ID_FIELD}\``,
+    `| STATS total = COUNT(*)`,
+  ].join('\n');
+
 // ── query builders: risk_score_change sort ────────────────────────────────────
 
 // TODO: when sorting by risk_score_change, only entities that have BOTH a yesterday score and
@@ -294,7 +399,7 @@ const riskScoreChangeBaseQuery = (
 ): string =>
   [
     `FROM ${riskScoreIndex}`,
-    `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
+    `| WHERE \`@timestamp\` >= "${yesterdayStart}" AND \`@timestamp\` < "${todayStart}"`,
     `| EVAL \`entity.id\` = ${ENTITY_ID_COALESCE}, yesterday_score = ${RISK_SCORE_COALESCE}`,
     `| STATS yesterday_score = MAX(yesterday_score) BY \`entity.id\``,
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
@@ -311,10 +416,10 @@ const riskScoreChangeDataQuery = (
   cursor: PageCursor | null,
   pageSize: number,
   dir: SortDir,
-  window: RiskDateWindow
+  riskWindow: RiskDateWindow
 ): string =>
   [
-    riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, window),
+    riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, riskWindow),
     ...(cursor ? [cursorClause(cursor)] : []),
     sortSuffix(RISK_SCORE_CHANGE_FIELD, dir, pageSize),
   ].join('\n');
@@ -322,11 +427,12 @@ const riskScoreChangeDataQuery = (
 const riskScoreChangeCountQuery = (
   riskScoreIndex: string,
   entityAlias: string,
-  window: RiskDateWindow
+  riskWindow: RiskDateWindow
 ): string =>
-  [riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, window), `| STATS total = COUNT(*)`].join(
-    '\n'
-  );
+  [
+    riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, riskWindow),
+    `| STATS total = COUNT(*)`,
+  ].join('\n');
 
 // ── query builders: per-page enrichment ──────────────────────────────────────
 
@@ -339,7 +445,7 @@ const yesterdayScoreEnrichQuery = (
   const ids = toList(entityIds);
   return [
     `FROM ${riskScoreIndex}`,
-    `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
+    `| WHERE \`@timestamp\` >= "${yesterdayStart}" AND \`@timestamp\` < "${todayStart}"`,
     // Pre-filter using indexed name fields so Lucene skips unrelated risk docs before EVAL.
     `| WHERE host.name IN (${ids}) OR user.name IN (${ids}) OR service.name IN (${ids})`,
     `| EVAL entity_id = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
@@ -355,45 +461,19 @@ interface QueryPair {
   countQuery: string;
 }
 
-const buildPageQueries = (
-  sort: { field: string; direction: SortDir },
-  cursor: PageCursor | null,
-  pageSize: number,
-  entityAlias: string,
-  alertsIndex: string,
-  riskScoreIndex: string,
-  window: RiskDateWindow
-): QueryPair => {
-  if (sort.field === LAST_SEEN_ALERT_FIELD) {
-    return {
-      dataQuery: lastSeenAlertDataQuery(alertsIndex, entityAlias, cursor, pageSize, sort.direction),
-      countQuery: lastSeenAlertCountQuery(alertsIndex, entityAlias),
-    };
-  }
-  if (sort.field === RISK_SCORE_CHANGE_FIELD) {
-    return {
-      dataQuery: riskScoreChangeDataQuery(
-        riskScoreIndex,
-        entityAlias,
-        cursor,
-        pageSize,
-        sort.direction,
-        window
-      ),
-      countQuery: riskScoreChangeCountQuery(riskScoreIndex, entityAlias, window),
-    };
-  }
-  if (sort.field === GROUP_SIZE_FIELD) {
-    return {
-      dataQuery: groupSizeSortDataQuery(entityAlias, cursor, pageSize, sort.direction),
-      countQuery: groupSizeSortCountQuery(entityAlias),
-    };
-  }
-  return {
-    dataQuery: nativeEntityDataQuery(entityAlias, sort.field, sort.direction, cursor, pageSize),
-    countQuery: nativeEntityCountQuery(entityAlias),
-  };
-};
+interface QueryDeps {
+  entityAlias: string;
+  alertsIndex: string;
+  riskScoreIndex: string;
+  riskWindow: RiskDateWindow;
+}
+
+interface SortHandler {
+  dataQuery: (cursor: PageCursor | null, pageSize: number, dir: SortDir, deps: QueryDeps) => string;
+  countQuery: (deps: QueryDeps) => string;
+  /** Fields the sort query already populates — enrichPageRows skips fetching them again. */
+  providedFields: readonly string[];
+}
 
 // ── query builders: group_size sort ──────────────────────────────────────────
 
@@ -415,7 +495,9 @@ const groupSizeSortDataQuery = (
   return [
     `FROM (\n${indent(inner)}\n)`,
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
-    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
     keepClause(GROUP_SIZE_FIELD),
     ...(cursor ? [cursorClause(cursor)] : []),
     sortSuffix(GROUP_SIZE_FIELD, dir, pageSize),
@@ -431,6 +513,70 @@ const groupSizeSortCountQuery = (entityAlias: string): string =>
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
+// ── sort handler registry ─────────────────────────────────────────────────────
+
+// To add a new computed sort: write dataQuery + countQuery builders above, then add one entry here.
+const SORT_HANDLERS: Partial<Record<string, SortHandler>> = {
+  [LAST_SEEN_ALERT_FIELD]: {
+    dataQuery: (cursor, pageSize, dir, { alertsIndex, entityAlias }) =>
+      lastSeenAlertDataQuery(alertsIndex, entityAlias, cursor, pageSize, dir),
+    countQuery: ({ alertsIndex, entityAlias }) => lastSeenAlertCountQuery(alertsIndex, entityAlias),
+    providedFields: [LAST_SEEN_ALERT_FIELD],
+  },
+  [RISK_SCORE_CHANGE_FIELD]: {
+    dataQuery: (cursor, pageSize, dir, { riskScoreIndex, entityAlias, riskWindow }) =>
+      riskScoreChangeDataQuery(riskScoreIndex, entityAlias, cursor, pageSize, dir, riskWindow),
+    countQuery: ({ riskScoreIndex, entityAlias, riskWindow }) =>
+      riskScoreChangeCountQuery(riskScoreIndex, entityAlias, riskWindow),
+    providedFields: [RISK_SCORE_CHANGE_FIELD],
+  },
+  [GROUP_SIZE_FIELD]: {
+    dataQuery: (cursor, pageSize, dir, { entityAlias }) =>
+      groupSizeSortDataQuery(entityAlias, cursor, pageSize, dir),
+    countQuery: ({ entityAlias }) => groupSizeSortCountQuery(entityAlias),
+    providedFields: [GROUP_SIZE_FIELD],
+  },
+  [ALERT_COUNT_FIELD]: {
+    dataQuery: (cursor, pageSize, dir, { alertsIndex, entityAlias }) =>
+      alertCountSortDataQuery(alertsIndex, entityAlias, cursor, pageSize, dir),
+    countQuery: ({ alertsIndex, entityAlias }) =>
+      alertCountSortCountQuery(alertsIndex, entityAlias),
+    // Alert count enrichment also provides severity breakdown — don't skip it.
+    providedFields: [],
+  },
+  [ANOMALY_COUNT_FIELD]: {
+    dataQuery: (cursor, pageSize, dir, { entityAlias }) =>
+      anomalyCountSortDataQuery(entityAlias, cursor, pageSize, dir),
+    countQuery: ({ entityAlias }) => anomalyCountSortCountQuery(entityAlias),
+    providedFields: [ANOMALY_COUNT_FIELD],
+  },
+};
+
+const buildPageQueries = (
+  sort: { field: string; direction: SortDir },
+  cursor: PageCursor | null,
+  pageSize: number,
+  deps: QueryDeps
+): QueryPair => {
+  const handler = SORT_HANDLERS[sort.field];
+  if (handler) {
+    return {
+      dataQuery: handler.dataQuery(cursor, pageSize, sort.direction, deps),
+      countQuery: handler.countQuery(deps),
+    };
+  }
+  return {
+    dataQuery: nativeEntityDataQuery(
+      deps.entityAlias,
+      sort.field,
+      sort.direction,
+      cursor,
+      pageSize
+    ),
+    countQuery: nativeEntityCountQuery(deps.entityAlias),
+  };
+};
+
 // ── query builders: group_size enrichment ────────────────────────────────────
 
 const groupSizeEnrichQuery = (entityAlias: string, groupKeys: readonly string[]): string =>
@@ -442,25 +588,39 @@ const groupSizeEnrichQuery = (entityAlias: string, groupKeys: readonly string[])
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
   ].join('\n');
 
+// ── query builders: anomaly_count enrichment ─────────────────────────────────
+
+// ML anomaly records carry `host.name` and `user.name` as top-level keyword arrays.
+// MV_FIRST picks the primary identity; COALESCE prefers host over user when both are present.
+const anomalyCountEnrichQuery = (entityNames: string[]): string => {
+  const names = toList(entityNames);
+  return [
+    `FROM ${ML_ANOMALY_INDICES}`,
+    `| WHERE result_type == "record" AND is_interim == false`,
+    `| EVAL entity_name = MV_FIRST(COALESCE(\`host.name\`, \`user.name\`))`,
+    `| WHERE entity_name IN (${names})`,
+    `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY entity_name`,
+  ].join('\n');
+};
+
 const enrichPageRows = async (
   pageRows: Row[],
-  sort: { field: string; direction: SortDir },
-  alertsIndex: string,
-  riskScoreIndex: string,
-  entityAlias: string,
-  window: RiskDateWindow,
+  sortField: string,
+  deps: QueryDeps,
   rawQuery: (q: string) => Promise<Row[]>,
   logger: EntityAnalyticsRoutesDeps['logger']
 ): Promise<void> => {
   if (pageRows.length === 0) return;
 
+  const { alertsIndex, riskScoreIndex, entityAlias, riskWindow } = deps;
+  // Fields already populated by the sort query — skip re-fetching them.
+  const provided = new Set(SORT_HANDLERS[sortField]?.providedFields ?? []);
+
   const entityNames = pageRows.map((r) => r['entity.name'] as string).filter(Boolean);
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   const groupKeys = [
     ...new Set(
-      pageRows.map(
-        (r) => (r[RESOLVED_TO_FIELD] as string | null) ?? (r[ENTITY_ID_FIELD] as string)
-      )
+      pageRows.map((r) => (r[RESOLVED_TO_FIELD] as string | null) ?? (r[ENTITY_ID_FIELD] as string))
     ),
   ].filter(Boolean);
 
@@ -470,18 +630,21 @@ const enrichPageRows = async (
       return null;
     });
 
-  const [alertRows, alertCountRows, scoreRows, groupSizeRows] = await Promise.all([
-    sort.field !== LAST_SEEN_ALERT_FIELD
+  const [alertRows, alertCountRows, scoreRows, groupSizeRows, anomalyRows] = await Promise.all([
+    !provided.has(LAST_SEEN_ALERT_FIELD)
       ? tryEnrich(alertUnionQuery(alertsIndex, toList(entityNames)), 'alert enrich')
       : null,
     entityNames.length > 0
       ? tryEnrich(alertCountEnrichQuery(alertsIndex, entityNames), 'alert count enrich')
       : null,
-    sort.field !== RISK_SCORE_CHANGE_FIELD
-      ? tryEnrich(yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, window), 'score enrich')
+    !provided.has(RISK_SCORE_CHANGE_FIELD)
+      ? tryEnrich(yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, riskWindow), 'score enrich')
       : null,
-    groupKeys.length > 0
+    groupKeys.length > 0 && !provided.has(GROUP_SIZE_FIELD)
       ? tryEnrich(groupSizeEnrichQuery(entityAlias, groupKeys), 'group size enrich')
+      : null,
+    entityNames.length > 0 && !provided.has(ANOMALY_COUNT_FIELD)
+      ? tryEnrich(anomalyCountEnrichQuery(entityNames), 'anomaly count enrich')
       : null,
   ]);
 
@@ -494,14 +657,21 @@ const enrichPageRows = async (
   }
 
   if (alertCountRows) {
-    type SeverityBucket = { total: number; critical: number; high: number; medium: number; low: number };
+    interface SeverityBucket {
+      total: number;
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    }
     const byName = new Map<string, SeverityBucket>();
     for (const r of alertCountRows) {
       const name = r.entity_name as string;
       const sev = (r['kibana.alert.severity'] as string | null) ?? '';
       const cnt = (r[ALERT_COUNT_FIELD] as number) ?? 0;
-      if (!byName.has(name)) byName.set(name, { total: 0, critical: 0, high: 0, medium: 0, low: 0 });
-      const bucket = byName.get(name)!;
+      if (!byName.has(name))
+        byName.set(name, { total: 0, critical: 0, high: 0, medium: 0, low: 0 });
+      const bucket = byName.get(name) ?? { total: 0, critical: 0, high: 0, medium: 0, low: 0 };
       bucket.total += cnt;
       if (sev === 'critical') bucket.critical += cnt;
       else if (sev === 'high') bucket.high += cnt;
@@ -538,9 +708,18 @@ const enrichPageRows = async (
       row[GROUP_SIZE_FIELD] = byGroupKey.get(gk) ?? 1;
     }
   }
+
+  if (anomalyRows) {
+    const byName = new Map(
+      anomalyRows.map((r) => [r.entity_name as string, r[ANOMALY_COUNT_FIELD] as number])
+    );
+    for (const row of pageRows) {
+      row[ANOMALY_COUNT_FIELD] = byName.get(row['entity.name'] as string) ?? 0;
+    }
+  }
 };
 
-// ── query builders: case_count sort / enrichment ─────────────────────────────
+// ── case_count enrichment ─────────────────────────────────────────────────────
 
 // cases-attachments SO type has `attachmentId: keyword` mapping. The scoped SO client
 // handles namespace isolation automatically, so one aggregation replaces N individual lookups.
@@ -572,7 +751,11 @@ const batchCaseCounts = async (
       type: 'cases-attachments',
       perPage: 1,
       filter,
-      aggs: { by_entity: { terms: { field: 'cases-attachments.attributes.attachmentId', size: entityIds.length } } },
+      aggs: {
+        by_entity: {
+          terms: { field: 'cases-attachments.attributes.attachmentId', size: entityIds.length },
+        },
+      },
     });
     const counts = new Map<string, number>();
     for (const b of result.aggregations?.by_entity?.buckets ?? []) {
@@ -585,38 +768,13 @@ const batchCaseCounts = async (
   }
 };
 
-/** Returns ALL entity case-count buckets in the current space (for case_count sort). */
-const getAllCaseBuckets = async (
-  soClient: ISavedObjectsRepository,
-  logger: EntityAnalyticsRoutesDeps['logger']
-): Promise<CaseTermsBucket[]> => {
-  try {
-    const result = await soClient.find<unknown, CaseAggs>({
-      type: 'cases-attachments',
-      perPage: 1,
-      filter: 'cases-attachments.attributes.type: "security.entity"',
-      aggs: { by_entity: { terms: { field: 'cases-attachments.attributes.attachmentId', size: 10000 } } },
-    });
-    logger.debug(`getAllCaseBuckets: found ${result.aggregations?.by_entity?.buckets?.length ?? 0} buckets, total=${result.total}`);
-    return result.aggregations?.by_entity?.buckets ?? [];
-  } catch (e) {
-    logger.error(`getAllCaseBuckets: ${e}`);
-    return [];
-  }
-};
-
-/** Fetches entity store rows for a specific set of entity IDs (used by case_count sort path). */
-const entityDataByIdsQuery = (entityAlias: string, entityIds: readonly string[]): string =>
-  [
-    `FROM ${entityAlias}`,
-    `| WHERE ${ENTITY_ID_FIELD} IN (${toList(entityIds)})`,
-    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
-    keepClause(),
-  ].join('\n');
-
 // ── route ─────────────────────────────────────────────────────────────────────
 
-export const registerEntityGridRoute = ({ router, logger, getStartServices }: EntityAnalyticsRoutesDeps) => {
+export const registerEntityGridRoute = ({
+  router,
+  logger,
+  getStartServices,
+}: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .post({
       access: 'internal',
@@ -644,6 +802,7 @@ export const registerEntityGridRoute = ({ router, logger, getStartServices }: En
                 max: MAX_PAGE_SIZE,
               }),
               cursor: schema.maybe(schema.string({ maxLength: 500 })),
+              profile: schema.maybe(schema.boolean()),
             }),
           },
         },
@@ -664,6 +823,7 @@ export const registerEntityGridRoute = ({ router, logger, getStartServices }: En
             sort = { field: ENTITY_ID_FIELD, direction: 'asc' as const },
             page_size: pageSize,
             cursor: encodedCursor,
+            profile: profileEnabled = false,
           } = request.body;
 
           // Validate sort field to prevent ES|QL injection via the field name.
@@ -687,94 +847,38 @@ export const registerEntityGridRoute = ({ router, logger, getStartServices }: En
 
           // filter is from the search bar and targets entity store fields — apply it only to
           // entity queries, not to alert or risk score index queries which have different schemas.
-          const esqlOpts = filter ? { filter } : {};
+          const esqlOpts = {
+            ...(filter ? { filter } : {}),
+            ...(profileEnabled ? { profile: true } : {}),
+          };
+          const rawOpts = profileEnabled ? { profile: true as const } : {};
           const query = (q: string) =>
-            esClient.esql.query({ query: q, drop_null_columns: true, ...esqlOpts }).then(toRows);
+            esClient.esql.query({ query: q, drop_null_columns: true, ...esqlOpts }).then((r) => {
+              if (profileEnabled)
+                logger.info(`[entity-grid profile] ${q}\n${JSON.stringify(r.profile, null, 2)}`);
+              return toRows(r);
+            });
           const rawQuery = (q: string) =>
-            esClient.esql.query({ query: q, drop_null_columns: true }).then(toRows);
+            esClient.esql.query({ query: q, drop_null_columns: true, ...rawOpts }).then((r) => {
+              if (profileEnabled)
+                logger.info(`[entity-grid profile] ${q}\n${JSON.stringify(r.profile, null, 2)}`);
+              return toRows(r);
+            });
 
-          const window = riskDateWindow();
+          const riskWindow = riskDateWindow();
+          const deps: QueryDeps = { entityAlias, alertsIndex, riskScoreIndex, riskWindow };
           const [coreStart] = await getStartServices();
           const soClient = coreStart.savedObjects.createInternalRepository(['cases-attachments']);
 
-          // ── case_count sort: paginate via SO aggregation, look up entity rows separately ──
-          if (sort.field === CASE_COUNT_FIELD) {
-            const allBuckets = await getAllCaseBuckets(soClient, logger);
-            allBuckets.sort((a, b) => {
-              const cmp = sort.direction === 'desc' ? b.doc_count - a.doc_count : a.doc_count - b.doc_count;
-              if (cmp !== 0) return cmp;
-              return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
-            });
-
-            let startIdx = 0;
-            if (cursor) {
-              const cursorCount = cursor.sortValue as number;
-              const cursorId = cursor.entityId;
-              const found = allBuckets.findIndex((b) =>
-                sort.direction === 'desc'
-                  ? b.doc_count < cursorCount || (b.doc_count === cursorCount && b.key > cursorId)
-                  : b.doc_count > cursorCount || (b.doc_count === cursorCount && b.key > cursorId)
-              );
-              startIdx = found === -1 ? allBuckets.length : found;
-            }
-
-            const pageBuckets = allBuckets.slice(startIdx, startIdx + pageSize + 1);
-            const hasNextPage = pageBuckets.length > pageSize;
-            const pageBucketsSlice = hasNextPage ? pageBuckets.slice(0, pageSize) : pageBuckets;
-            const pageEntityIds = pageBucketsSlice.map((b) => b.key);
-            const caseCountMap = new Map(pageBucketsSlice.map((b) => [b.key, b.doc_count]));
-
-            let pageRows: Row[] = [];
-            if (pageEntityIds.length > 0) {
-              const entityRows = await query(entityDataByIdsQuery(entityAlias, pageEntityIds));
-              const entityRowMap = new Map(entityRows.map((r) => [r[ENTITY_ID_FIELD] as string, r]));
-              pageRows = pageEntityIds.map((id) => ({
-                ...(entityRowMap.get(id) ?? { [ENTITY_ID_FIELD]: id }),
-                [CASE_COUNT_FIELD]: caseCountMap.get(id) ?? 0,
-              }));
-            }
-
-            await enrichPageRows(pageRows, sort, alertsIndex, riskScoreIndex, entityAlias, window, rawQuery, logger);
-
-            const lastBucket = pageBucketsSlice[pageBucketsSlice.length - 1];
-            const nextCursor = hasNextPage && lastBucket
-              ? encodeCursor({
-                  sortField: CASE_COUNT_FIELD,
-                  sortDirection: sort.direction,
-                  sortValue: lastBucket.doc_count,
-                  entityId: lastBucket.key,
-                })
-              : null;
-
-            return response.ok({ body: { entities: pageRows, next_cursor: nextCursor, total: allBuckets.length } });
-          }
-
           // ── standard sort: ES|QL-based pagination ────────────────────────────
-          const { dataQuery, countQuery } = buildPageQueries(
-            sort,
-            cursor,
-            pageSize,
-            entityAlias,
-            alertsIndex,
-            riskScoreIndex,
-            window
-          );
+          const { dataQuery, countQuery } = buildPageQueries(sort, cursor, pageSize, deps);
 
           const [allRows, [countRow]] = await Promise.all([query(dataQuery), query(countQuery)]);
           const hasNextPage = allRows.length > pageSize;
           const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
           const total = (countRow?.total as number) ?? 0;
 
-          await enrichPageRows(
-            pageRows,
-            sort,
-            alertsIndex,
-            riskScoreIndex,
-            entityAlias,
-            window,
-            rawQuery,
-            logger
-          );
+          await enrichPageRows(pageRows, sort.field, deps, rawQuery, logger);
 
           // Batch case count enrichment — one SO aggregation for the whole page.
           const pageCaseCounts = await batchCaseCounts(
