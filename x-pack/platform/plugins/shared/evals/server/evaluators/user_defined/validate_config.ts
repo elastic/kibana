@@ -39,7 +39,9 @@ interface TemplateVariables {
  *
  * Parses through a per-call writer, whose cache is discarded with it, because the
  * module-level `Mustache.parse` memoizes every template it sees into a process-global
- * cache with no eviction — and validation runs on drafts that are never stored.
+ * cache with no eviction — and validation runs on drafts that are never stored. This
+ * only covers validation; rendering a judge still goes through Mustache's default
+ * writer inside the inference plugin.
  */
 const getTemplateVariables = (template: string): TemplateVariables => {
   const all = new Set<string>();

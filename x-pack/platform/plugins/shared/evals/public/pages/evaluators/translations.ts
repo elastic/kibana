@@ -115,7 +115,8 @@ export const PROMPT_LABEL = i18n.translate('xpack.evals.evaluators.promptLabel',
 });
 export const PROMPT_HELP = i18n.translate('xpack.evals.evaluators.promptHelpDescription', {
   defaultMessage:
-    'Use triple braces for declared inputs, for example {{{agent_response}}}, so their contents remain unchanged.',
+    'Use triple braces for declared inputs, for example {example}, so their contents remain unchanged.',
+  values: { example: '{{{agent_response}}}' },
 });
 export const EVIDENCE_LABEL = i18n.translate('xpack.evals.evaluators.evidenceLabel', {
   defaultMessage: 'Trace evidence',
