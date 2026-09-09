@@ -27,7 +27,9 @@ export type {
   ScopedRunnerRunToolsParams,
   RunContext,
   RunContextStackEntry,
+  RunApprovals,
   RunToolParams,
+  RequestBoundRunToolParams,
   RunToolFn,
   Runner,
   RunToolReturn,
@@ -133,6 +135,8 @@ export type {
   InternalAgentDefinition,
   InternalAgentDefinitionAvailabilityHandler,
   AgentRegistry,
+  AiIndexDetail,
+  AiIndexResolver,
 } from './agents';
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
@@ -155,6 +159,22 @@ export type {
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
+  AttachmentsStart,
 } from './plugin_contract';
+export type {
+  AttachmentPublicClient,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+} from './attachments';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
+export type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from './availability';
