@@ -9,9 +9,9 @@ import { randomUUID } from 'crypto';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
+const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH } = testData;
 const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
@@ -24,21 +24,7 @@ const SINGLE_AI_INDEX_ID = `scout-describe-single-${RUN_ID}`;
 const DATA_STREAM_AI_INDEX_ID = `scout-describe-ds-${RUN_ID}`;
 
 const describePath = (id: string) => `${AI_INDEX_COLLECTION_PATH}/${id}/_describe`;
-const QUERY_PATH = `${AI_INDEX_COLLECTION_PATH}/_query`;
-
-interface EsqlResponse {
-  columns: Array<{ name: string }>;
-  values: unknown[][];
-}
-
-const columnValues = ({ columns, values }: EsqlResponse, name: string): unknown[] => {
-  const index = columns.findIndex((column) => column.name === name);
-  return values.map((row) => row[index]);
-};
-
-const spaceScoped = (spaceId: string) => ({
-  permissions: { kibana: { privileges: [{ space: spaceId }] } },
-});
+const QUERY_PATH = AI_INDEX_QUERY_PATH;
 
 /** KIs in INDEX_A; `other` is scoped to a space tests never use. */
 const KI_DOCS = {
