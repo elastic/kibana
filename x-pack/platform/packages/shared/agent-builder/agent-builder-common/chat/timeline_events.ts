@@ -92,10 +92,20 @@ export enum TimelineEventType {
   executionAborted = 'execution_aborted',
 }
 
+/** Fields the server fills in when an event is accepted; absent on producer input. */
+export interface ServerAssignedEventFields {
+  id: string;
+  created_at: string;
+  actor: EventActor;
+}
+
 /**
- * The fields a producer supplies for a timeline event.
+ * Unconstrained event envelope — works for both built-in and custom event types.
+ * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
+ * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> {
+export interface ConversationEventInput<TType extends string = string, TData = unknown>
+  extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
   /** The type-specific payload. */
@@ -104,26 +114,28 @@ export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> 
   execution_id?: string;
   /** The content event that triggered the run this event belongs to. */
   trigger_event_id?: string;
-  /** Server-assigned when omitted. */
-  id?: string;
-  /** Server-assigned when omitted. */
-  created_at?: string;
-  /** Defaults to the scoped user when omitted. */
-  actor?: EventActor;
 }
+
+/** A stored conversation event: producer fields plus server-assigned fields made required. */
+export type ConversationEvent<
+  TType extends string = string,
+  TData = unknown
+> = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
+
+/** The fields a producer supplies for a timeline event. */
+export type BaseTimelineEventInput<TType extends TimelineEventType, TData> = ConversationEventInput<
+  TType,
+  TData
+>;
 
 /**
  * A stored timeline event: the producer fields, plus the server-assigned `id`, `created_at`, and
  * `actor` made required.
  */
-export type BaseTimelineEvent<TType extends TimelineEventType, TData> = BaseTimelineEventInput<
+export type BaseTimelineEvent<TType extends TimelineEventType, TData> = ConversationEvent<
   TType,
   TData
-> & {
-  id: string;
-  created_at: string;
-  actor: EventActor;
-};
+>;
 
 /** A message from a user, stored the moment it arrives, apart from any run. */
 export type UserMessageEventData = RoundInput;
@@ -253,3 +265,32 @@ export interface ActiveExecution {
   trigger_event_id: string;
   started_at: string;
 }
+
+/**
+ * The delimiter used in round-derived event ids (e.g. `${roundId}::user_message`).
+ * A registered event `type` must not contain this character — it would produce ids
+ * indistinguishable from round-derived ones and get silently dropped or overwritten.
+ */
+export const CONVERSATION_EVENT_ID_DELIMITER = '::' as const;
+
+/**
+ * Type names that are not covered by a `TimelineEventType` member but would still
+ * produce ids colliding with round-derived ones.
+ * Built-in names (`user_message`, `execution_started`, etc.) are covered by the
+ * duplicate-registration guard and need no separate entry here.
+ */
+export const RESERVED_CONVERSATION_EVENT_TYPES = ['execution', 'step'] as const;
+export type ReservedConversationEventType = (typeof RESERVED_CONVERSATION_EVENT_TYPES)[number];
+
+/**
+ * Compile-time guard that rejects a type string if it contains the id delimiter or is reserved.
+ *
+ * Only effective when `T` is inferred as a literal — a `string`-typed variable slips through.
+ * Always pair with the runtime check in the registry.
+ */
+export type ValidConversationEventType<T extends string> =
+  T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}`
+    ? never
+    : T extends ReservedConversationEventType
+    ? never
+    : T;
