@@ -123,6 +123,7 @@ export const vegaEmbeddableFactory = (
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
     const usesEsql$ = new BehaviorSubject(false);
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const query$ = new BehaviorSubject<AggregateQuery | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -196,6 +197,7 @@ export const vegaEmbeddableFactory = (
       dataLoading$,
       rendered$,
       usesEsql$,
+      approximationApplied$,
       query$,
       projectRoutingOverrides$,
       dataViews$,
@@ -315,6 +317,7 @@ export const vegaEmbeddableFactory = (
             if (signal.aborted) {
               return;
             }
+            approximationApplied$.next(visData.approximationApplied);
             // Show warnings only in edit mode matching the legacy vega behavior.
             renderInput$.next({
               showWarnings: getInheritedViewMode(api) === 'edit',
