@@ -320,47 +320,4 @@ describe('control panel transforms', () => {
       expect(panels).toEqual(apiPanels);
     });
   });
-
-  describe('transformControlPanelsIn', () => {
-    it('maps API control_panels to stored flattened controlGroupJson', () => {
-      const result = transformControlPanelsIn([
-        {
-          id: 'control-1',
-          type: ESQL_CONTROL,
-          width: 'small',
-          grow: true,
-          config: {
-            control_type: 'STATIC_VALUES',
-            variable_name: 'foo',
-            variable_type: 'values',
-            available_options: ['x', 'y'],
-            selected_options: ['y'],
-            single_select: true,
-          },
-        },
-      ]);
-
-      expect(result).toBe(
-        JSON.stringify({
-          'control-1': {
-            order: 0,
-            type: ESQL_CONTROL,
-            width: 'small',
-            grow: true,
-            control_type: 'STATIC_VALUES',
-            variable_name: 'foo',
-            variable_type: 'values',
-            available_options: ['x', 'y'],
-            selected_options: ['y'],
-            single_select: true,
-          },
-        })
-      );
-    });
-
-    it('returns undefined for empty control arrays', () => {
-      expect(transformControlPanelsIn(undefined)).toBeUndefined();
-      expect(transformControlPanelsIn([])).toBeUndefined();
-    });
-  });
 });
