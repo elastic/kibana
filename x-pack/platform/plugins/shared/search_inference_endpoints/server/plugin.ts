@@ -16,16 +16,12 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
-import { resolveModelsForFeature, NO_DEFAULT_CONNECTOR } from './lib/resolve_models_for_feature';
+import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
@@ -206,45 +202,6 @@ export class SearchInferenceEndpointsPlugin
             core.savedObjects.getScopedClient(request)
           );
 
-          if (opts?.onlyReturnConfigured) {
-            const [defaultConnectorId, defaultConnectorOnly] = await Promise.all([
-              uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR),
-              uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY),
-            ]);
-            if (defaultConnectorOnly) {
-              if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
-                return { endpoints: [], warnings: [], soEntryFound: false };
-              }
-              try {
-                const connector = await getConnectorById(defaultConnectorId);
-                return { endpoints: [connector], warnings: [], soEntryFound: false };
-              } catch (e) {
-                this.logger.warn(
-                  `Failed to load default connector "${defaultConnectorId}": ${
-                    e instanceof Error ? e.message : String(e)
-                  }`
-                );
-                return { endpoints: [], warnings: [], soEntryFound: false };
-              }
-            }
-
-            const configured = await getForFeatureFn(
-              featureRegistry,
-              soClient,
-              getConnectorById,
-              featureId,
-              this.logger,
-              opts
-            );
-            return {
-              endpoints: configured.soEntryFound
-                ? configured.endpoints
-                : configured.endpoints.map((e) => ({ ...e, isRecommended: true })),
-              warnings: configured.warnings,
-              soEntryFound: configured.soEntryFound,
-            };
-          }
-
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
@@ -257,6 +214,7 @@ export class SearchInferenceEndpointsPlugin
             uiSettingsClient,
             featureId,
             ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
+            opts,
             logger: this.logger,
           });
 
