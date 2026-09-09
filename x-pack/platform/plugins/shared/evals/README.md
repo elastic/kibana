@@ -180,7 +180,15 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 - **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
-- **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones. `_evaluate` grades a trace with saved evaluators, `_test` runs an unsaved draft definition against a trace so it can be tried before it exists, `_validate` reports whether a trace carries the evidence each evaluator declares, and `_resolve_instrumentation` probes which profiles a trace matches. Built-in names cannot be created, updated, or deleted, and cannot be used for a draft; each returns `409`.
+- **Evaluators** — `/internal/evals/evaluators` lists every evaluator available in the space and creates, reads, updates, or deletes user-defined ones. Built-in names cannot be created, updated, or deleted, and cannot be used for a draft; each returns `409`. Four action routes operate on traces, and they do not all sit under the same path segment:
+
+  | Route                                             | Purpose                                                              |
+  | ------------------------------------------------- | -------------------------------------------------------------------- |
+  | `/internal/evals/_evaluate`                       | Grade a trace with one or more saved evaluators                       |
+  | `/internal/evals/evaluators/_test`                | Run an unsaved draft definition against a trace, before it exists     |
+  | `/internal/evals/evaluators/_validate`            | Report whether a trace carries the evidence each evaluator declares   |
+  | `/internal/evals/traces/_resolve_instrumentation` | Probe which instrumentation profiles a trace matches                  |
+
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments
 - **Traces** — span retrieval for a given trace ID
