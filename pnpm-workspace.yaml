@@ -625,6 +625,7 @@ packages:
   - 'src/platform/packages/private/kbn-reporting/mocks_server'
   - 'src/platform/packages/private/kbn-reporting/public'
   - 'src/platform/packages/private/kbn-reporting/server'
+  - 'src/platform/packages/private/kbn-rxjs-history'
   - 'src/platform/packages/private/kbn-saved-objects-settings'
   - 'src/platform/packages/private/kbn-scout-info'
   - 'src/platform/packages/private/kbn-scout-reporting'
