@@ -448,38 +448,34 @@ export const RuleDetailsPage = connector(
     );
 
     const isBuildingBlockRule = rule?.building_block_type != null;
-    const [areAlertFiltersInitialized, setAreAlertFiltersInitialized] = useState(false);
     const ruleRuleId = rule?.rule_id ?? '';
-    useEffect(() => {
-      setAreAlertFiltersInitialized(false);
-    }, [ruleRuleId]);
+    const [ruleIdWithInitializedAlertFilters, setRuleIdWithInitializedAlertFilters] = useState<
+      string | null
+    >(null);
 
+    // Building block alerts are hidden by default, so they must be explicitly enabled when viewing
+    // a building block rule, otherwise its own alerts would be filtered out of its details page.
     useEffect(() => {
-      if (rule != null && !areAlertFiltersInitialized) {
-        setShowBuildingBlockAlerts(isBuildingBlockRule);
+      if (ruleRuleId === '') {
+        return;
       }
-    }, [rule, isBuildingBlockRule, setShowBuildingBlockAlerts, areAlertFiltersInitialized]);
+      setShowBuildingBlockAlerts(isBuildingBlockRule);
+      setRuleIdWithInitializedAlertFilters(ruleRuleId);
+    }, [ruleRuleId, isBuildingBlockRule, setShowBuildingBlockAlerts]);
 
-    useEffect(() => {
-      if (
-        rule != null &&
-        !areAlertFiltersInitialized &&
-        showBuildingBlockAlerts === isBuildingBlockRule
-      ) {
-        setAreAlertFiltersInitialized(true);
-      }
-    }, [rule, isBuildingBlockRule, showBuildingBlockAlerts, areAlertFiltersInitialized]);
-    const shouldShowBuildingBlockAlerts = areAlertFiltersInitialized
-      ? showBuildingBlockAlerts
-      : isBuildingBlockRule || showBuildingBlockAlerts;
+    // The alerts table must not be mounted until the default filters above have been applied,
+    // otherwise it would issue its first query with the wrong building block filter.
+    const areAlertFiltersInitialized =
+      ruleRuleId !== '' && ruleIdWithInitializedAlertFilters === ruleRuleId;
+
     const alertDefaultFilters = useMemo(
       () => [
         ...buildAlertsFilter(ruleRuleId ?? ''),
-        ...buildShowBuildingBlockFilter(shouldShowBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
         ...buildAlertStatusFilter(filterGroup),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ],
-      [ruleRuleId, shouldShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+      [ruleRuleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
     );
 
     const alertMergedFilters = useMemo(
@@ -926,7 +922,7 @@ export const RuleDetailsPage = connector(
                           />
                           <EuiSpacer />
                         </Display>
-                        {ruleId != null && rule != null && (
+                        {ruleId != null && rule != null && areAlertFiltersInitialized && (
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
