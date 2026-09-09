@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { i18n } from '@kbn/i18n';
 import kbnRison from '@kbn/rison';
@@ -92,13 +93,30 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
       !health.summary.stateMatches);
 
   return (
-    <EuiCallOut
-      color="danger"
+    <KbnDangerCallout
       announceOnMount
       style={{ maxWidth: '500px' }}
       title={i18n.translate('xpack.slo.sloDetails.healthCallout.title', {
         defaultMessage: 'This SLO has issues with its transforms',
       })}
+      actionProps={
+        showRepairButton
+          ? {
+              primary: {
+                'data-test-subj': 'sloSloHealthCalloutRepairButton',
+                iconSide: 'left',
+                iconType: 'wrench',
+                onClick: () => repairSlo(),
+                children: i18n.translate(
+                  'xpack.slo.sloDetails.sloHealthCallout.repairButtonLabel',
+                  {
+                    defaultMessage: 'Repair',
+                  }
+                ),
+              },
+            }
+          : undefined
+      }
     >
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         {links.length > 0 && (
@@ -120,29 +138,14 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           </EuiFlexItem>
         )}
         {showRepairButton && (
-          <>
-            <EuiFlexItem>
-              {i18n.translate('xpack.slo.sloDetails.healthCallout.description', {
-                defaultMessage:
-                  'Data may not be processed and the SLO may not function properly. Repairing the SLO will start an attempt to resolve simple issues with transforms automatically. Transforms labeled as "unhealthy" may require manual intervention.',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                data-test-subj="sloSloHealthCalloutRepairButton"
-                iconSide="left"
-                iconType="wrench"
-                color="danger"
-                onClick={() => repairSlo()}
-              >
-                {i18n.translate('xpack.slo.sloDetails.sloHealthCallout.repairButtonLabel', {
-                  defaultMessage: 'Repair',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </>
+          <EuiFlexItem>
+            {i18n.translate('xpack.slo.sloDetails.healthCallout.description', {
+              defaultMessage:
+                'Data may not be processed and the SLO may not function properly. Repairing the SLO will start an attempt to resolve simple issues with transforms automatically. Transforms labeled as "unhealthy" may require manual intervention.',
+            })}
+          </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 }
