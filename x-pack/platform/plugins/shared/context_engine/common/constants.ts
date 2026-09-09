@@ -101,6 +101,7 @@ export const MAX_AI_INDEX_QUERY_RESPONSE_BYTES = 20 * 1024 * 1024;
 export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
 /** Byte cap per `_mapping` / `_field_caps` response; field cap applies after download. */
 export const MAX_AI_INDEX_DESCRIBE_METADATA_BYTES = 20 * 1024 * 1024;
+export const MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS = 20;
 export const MAX_AI_INDEX_DESCRIBE_TAG_COUNTS = 20;
 
 export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
