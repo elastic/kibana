@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 
 export interface EpisodeSourceError {
@@ -36,4 +37,15 @@ export const fetchFromSource = async <T>(
   } catch (error) {
     return { results: [], errors: [{ sourceId: source.id, error: toError(error) }] };
   }
+};
+
+export const fetchEpisodesFromSource = async (
+  source: EpisodeDataSource | undefined,
+  run: (source: EpisodeDataSource) => Promise<AlertEpisode[]> | undefined
+): Promise<FetchFromSourceResult<AlertEpisode[]>> => {
+  const result = await fetchFromSource(source, run);
+  return {
+    ...result,
+    results: result.results.map((rows) => rows.map((ep) => ({ ...ep, source_id: source!.id }))),
+  };
 };

@@ -17,3 +17,12 @@ export { createUnresolveAction } from './unresolve';
 export { createEditTagsAction } from './edit_tags';
 export { createEditAssigneeAction } from './edit_assignee';
 export { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
+export {
+  createCompositeEpisodeAction,
+  type CompositeActionDef,
+  type CompositeActionDeps,
+} from './create_composite_episode_action';
+export {
+  executeCompositeAction,
+  type ExecuteCompositeActionParams,
+} from './execute_composite_action';

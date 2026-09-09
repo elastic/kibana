@@ -5,44 +5,38 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  type BulkCreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
-import type { EpisodeAction, EpisodeActionContext } from './types';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
+import type { EpisodeAction } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
-import * as i18n from './translations';
+import { uniqueByGroup } from './helpers';
+import {
+  createCompositeEpisodeAction,
+  type CompositeActionDeps,
+} from './create_composite_episode_action';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
+import * as i18n from './translations';
 
-export interface UnsnoozeActionDeps {
-  http: HttpStart;
-  notifications: NotificationsStart;
-}
-
-export const createUnsnoozeAction = (deps: UnsnoozeActionDeps): EpisodeAction => ({
-  id: 'ALERTING_V2_UNSNOOZE_EPISODE',
-  order: 21,
-  displayName: i18n.UNSNOOZE,
-  iconType: 'bell',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)),
-  execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-    }));
-    if (!items.length) return;
-
-    try {
-      const response = await bulkCreateAlertActions(deps.http, items);
-      deps.notifications.toasts.add(successOrPartialToast(response));
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
-  },
-});
+export const createUnsnoozeAction = (
+  deps: CompositeActionDeps,
+  extension?: EpisodeActionExtension
+): EpisodeAction =>
+  createCompositeEpisodeAction(
+    {
+      id: 'ALERTING_V2_UNSNOOZE_EPISODE',
+      order: 21,
+      displayName: i18n.UNSNOOZE,
+      iconType: 'bell',
+      isCompatible: (ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry),
+      execute: (episodes, http) =>
+        bulkCreateAlertActions(
+          http,
+          uniqueByGroup(episodes).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+          }))
+        ),
+    },
+    extension,
+    deps
+  );

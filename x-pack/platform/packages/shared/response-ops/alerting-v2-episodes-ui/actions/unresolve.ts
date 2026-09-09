@@ -15,6 +15,7 @@ import {
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { episodeSupportsActions } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 export interface UnresolveActionDeps {
@@ -27,11 +28,16 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
   order: 31,
   displayName: i18n.UNRESOLVE,
   iconType: 'cross',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE),
+  isCompatible: ({ episodes }: EpisodeActionContext) => {
+    const nativeEpisodes = episodes.filter(episodeSupportsActions);
+    return (
+      nativeEpisodes.length > 0 &&
+      nativeEpisodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE)
+    );
+  },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
+    const actionable = episodes.filter(episodeSupportsActions);
+    const items: BulkCreateAlertActionBody = uniqueByGroup(actionable).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
       reason: i18n.RESOLVE_ACTION_REASON,
@@ -46,4 +52,7 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
     }
   },
+  showWhenDisabled: ({ episodes }: EpisodeActionContext) =>
+    episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE),
+  disabledTooltip: i18n.UNRESOLVE_NOT_AVAILABLE,
 });

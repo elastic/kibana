@@ -14,6 +14,8 @@ import type {
   EpisodesSortState,
 } from '../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { EpisodeAction } from '../actions/types';
+import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
@@ -64,6 +66,25 @@ export interface EpisodeSourceHistogram {
   isCapHit: boolean;
 }
 
+export interface SourceActionResult {
+  succeeded: number;
+  failed: number;
+  errors?: string[];
+}
+
+/**
+ * Extension that a data source registers to participate in a common episode action.
+ */
+export interface EpisodeActionExtension<TContext = void> {
+  actionId: string;
+  isCompatible: (ep: AlertEpisode) => boolean;
+  execute: (
+    episodes: AlertEpisode[],
+    http: HttpStart,
+    context?: TContext
+  ) => Promise<SourceActionResult>;
+}
+
 export interface EpisodeDataSource {
   id: string;
   queryKeyPrefix: readonly unknown[];
@@ -72,4 +93,6 @@ export interface EpisodeDataSource {
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  actionExtensions?: Array<EpisodeActionExtension<any>>;
+  createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
 }
