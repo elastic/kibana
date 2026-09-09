@@ -9,9 +9,9 @@ applies_to:
 
 # Linear connector [linear-action-type]
 
-The Linear connector uses the fixed Linear GraphQL API endpoint to find teams, projects, cycles, workflow states, labels, users, and issues, then create and update issues, add comments, and link evidence. It uses a personal Linear API key.
+The Linear connector connects Elastic investigations to engineering work. Use Agent Builder to find and inspect Linear issues in chat. Use Workflows to create or update issues, add comments, and link evidence as part of an automated response.
 
-The initial connector rollout is available to Agent Builder. Create and update actions are defined for a planned Workflows activation after the connector reaches all Production-NonCanary versions, but they are not available during this first rollout.
+The connector provides 12 actions for teams, projects, cycles, workflow states, labels, users, issues, comments, and attachments. It uses a personal Linear API key.
 
 ## Create connectors in {{kib}} [define-linear-ui]
 
@@ -83,7 +83,7 @@ Create comment (`createComment`)
 Create attachment (`createAttachment`)
 :   Link an existing HTTPS URL to an issue. `issueId`, `title`, and `url` are required. Optional `subtitle`, `iconUrl`, and metadata are supported. An `iconUrl` should point to a PNG or JPG no larger than 1 MB; Linear recommends 20x20 pixels. The connector validates that the URL uses HTTPS but does not fetch the icon or verify its format, size, or dimensions. Metadata values must be strings or numbers. This action links a URL; it does not upload file bytes. Linear updates the existing attachment when the same issue and URL are used again.
 
-The list and get actions are exposed as Agent Builder tools. The create and update actions are not exposed as autonomous tools and remain unavailable until the planned Workflows activation.
+Workflows can use all 12 actions. The eight list and get actions are also available as Agent Builder tools. Actions that change Linear data are not Agent Builder tools.
 
 ## Connector networking configuration [linear-connector-networking-configuration]
 

@@ -772,7 +772,7 @@ export const Linear: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {
@@ -805,9 +805,9 @@ export const Linear: ConnectorSpec = {
 
   skill: `Linear organizes product work into teams, projects, workflow states, labels, users, issues, comments, and attachments.
 
-Availability:
-- This initial connector rollout is available to Agent Builder only.
-- Read actions marked as tools are available now. Mutation actions are reserved for a planned Workflows activation after the connector reaches all Production-NonCanary versions.
+Application support:
+- Agent Builder uses the read actions to find and inspect Linear work in chat.
+- Workflows can use all actions to find work, create or update issues, add comments, and link evidence. State-changing actions are not Agent Builder tools.
 
 Discovery flow:
 1. Call listTeams first and retain the team id.

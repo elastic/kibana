@@ -531,8 +531,8 @@ describe('Linear', () => {
   });
 
   describe('metadata and auth', () => {
-    it('stages the new connector for Agent Builder before Workflows activation', () => {
-      expect(Linear.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+    it('supports Agent Builder and Workflows', () => {
+      expect(Linear.metadata.supportedFeatureIds).toEqual(['agentBuilder', 'workflows']);
       expect(Linear.metadata.minimumLicense).toBe('enterprise');
       expect(Linear.metadata.description).toBe(
         'Find Linear teams, projects, users, and issues, then create issues, update issues, add comments, and link evidence.'
@@ -546,7 +546,8 @@ describe('Linear', () => {
       expect(Linear.skill).toContain('listTeams');
       expect(Linear.skill).toContain('listCycles');
       expect(Linear.skill).toContain('labelIds');
-      expect(Linear.skill).toContain('planned Workflows activation');
+      expect(Linear.skill).toContain('Workflows can use all actions');
+      expect(Linear.skill).toContain('State-changing actions are not Agent Builder tools');
     });
 
     it('fixes the Authorization header and explains additive permission scopes', () => {
