@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/core-user-storage-common'
   - '@kbn/ui-actions-plugin'
   - '@kbn/share-plugin'

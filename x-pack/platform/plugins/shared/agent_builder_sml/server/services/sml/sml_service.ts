@@ -401,15 +401,22 @@ const resolveAuthorizedUniverse = async ({
  * Mirrors the Elasticsearch-side implicit DLS query: a document is visible when it carries no
  * privilege elements at all (public), OR when at least one element scoped to this requested space
  * (or to the global wildcard) matches. What "matches" means depends on `authz`:
- * - with `authz` (security plugin present), the element must additionally have ALL of its actions
- *   covered by what the caller holds (the `terms_set` clause);
+ * - with `authz` (security plugin present), the element must additionally either require no
+ *   actions at all (`count: 0` and no action names — see below) or have ALL of its actions covered
+ *   by what the caller holds (the `terms_set` clause);
  * - without `authz` (security plugin absent — dev / test), space scoping alone applies:
  *   privilege enforcement is skipped, matching the open-access semantics of every other
  *   Kibana surface in that configuration.
  *
+ * `count: 0` with no names is the public escape a type without `getPermissions` gets (one empty
+ * element per space), per {@link SmlTypeDefinition.getPermissions}. Since the indexer derives
+ * `count` from the list, `count: 0` *with* a name is malformed: the public branch requires no
+ * names, the gated branch requires `count > 0`, so both reject it and it fails CLOSED.
+ *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
- * would turn the whole filter into a no-op.
+ * would turn the whole filter into a no-op. The `must_not exists` inside the `count: 0` branch is
+ * a different case — it sits *within* the `nested` query, where it is evaluated per child document.
  *
  * This is passed to the ES|QL `_query` API's `filter` parameter rather than expressed as a WHERE
  * clause, because ES|QL's index resolution excludes `nested` fields — they cannot be referenced as
@@ -448,11 +455,34 @@ const buildVisibilityFilter = ({
                 ...(authz
                   ? [
                       {
-                        terms_set: {
-                          [PERM_NAME_FIELD]: {
-                            terms: authz.authorizedActions,
-                            minimum_should_match_field: PERM_COUNT_FIELD,
-                          },
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            // Public escape: zero required actions, no names.
+                            {
+                              bool: {
+                                filter: [
+                                  { term: { [PERM_COUNT_FIELD]: 0 } },
+                                  { bool: { must_not: [{ exists: { field: PERM_NAME_FIELD } }] } },
+                                ],
+                              },
+                            },
+                            {
+                              bool: {
+                                filter: [
+                                  { range: { [PERM_COUNT_FIELD]: { gt: 0 } } },
+                                  {
+                                    terms_set: {
+                                      [PERM_NAME_FIELD]: {
+                                        terms: authz.authorizedActions,
+                                        minimum_should_match_field: PERM_COUNT_FIELD,
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
                         },
                       },
                     ]
@@ -466,25 +496,16 @@ const buildVisibilityFilter = ({
   },
 });
 
-/**
- * The action-sets an item requires in a given space: one entry per privilege group scoped to that
- * space or to the global wildcard. Mirrors the ES-side DLS clause — a caller must hold ALL actions
- * within a single group, and groups for other spaces are irrelevant.
- */
-const requiredActionsInSpace = (
+/** Privilege groups scoped to this space or the global wildcard; others are irrelevant. */
+const relevantGroupsInSpace = (
   privileges: SmlKibanaPrivilegeGroup[],
   spaceId: string
-): string[][] =>
-  privileges.filter((g) => g.space === spaceId || g.space === '*').map((g) => g.name);
+): SmlKibanaPrivilegeGroup[] => privileges.filter((g) => g.space === spaceId || g.space === '*');
 
 /**
- * Check whether the current user has access to specific SML items.
- * For each id, the access verdict checks that all listed Kibana
- * `permissions.kibana.privileges[].name` action strings are authorized.
- *
- * Chunks without any kibana privileges are visible to anyone in the
- * space. When the security plugin is absent, all ids resolve to `true`
- * (open access).
+ * Whether the caller may access each SML item. Grants when it holds at least `count` distinct named
+ * actions of a group scoped to this space (or the wildcard). Items with no privileges are public;
+ * with the security plugin absent every id resolves to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,
@@ -551,12 +572,14 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const relevantGroupsByDoc = new Map<string, string[][]>();
+  const relevantGroupsByDoc = new Map<string, SmlKibanaPrivilegeGroup[]>();
   for (const [id, groups] of docAuthz) {
-    relevantGroupsByDoc.set(id, requiredActionsInSpace(groups, spaceId));
+    relevantGroupsByDoc.set(id, relevantGroupsInSpace(groups, spaceId));
   }
 
-  const uniqueActions = [...new Set([...relevantGroupsByDoc.values()].flat(2))];
+  const uniqueActions = [
+    ...new Set([...relevantGroupsByDoc.values()].flat().flatMap((g) => g.name)),
+  ];
 
   const authorizedPerms = await getAuthorizedPrivileges({
     permissions: uniqueActions,
@@ -579,10 +602,15 @@ const checkItemsAccess = async ({
       accessMap.set(id, true);
       continue;
     }
-    // Existential across groups, universal within one — the same shape as the nested DLS query.
     accessMap.set(
       id,
-      groups.some((actions) => actions.every((a) => authorizedPerms.has(a)))
+      groups.some((group) => {
+        if (group.count === 0) {
+          return group.name.length === 0;
+        }
+        const distinctHeld = new Set(group.name.filter((action) => authorizedPerms.has(action)));
+        return group.count > 0 && group.name.length > 0 && distinctHeld.size >= group.count;
+      })
     );
   }
 

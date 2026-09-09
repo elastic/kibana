@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, test as scoutTest } from '@kbn/scout';
+import { test as scoutTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
@@ -63,59 +63,69 @@ const assertRandomSamplingOption = async (
   }
 };
 
-spaceTest.describe('index based random sampler controls', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {
-    await mlTestResources.createDataViewIfNeeded('ft_farequote', '@timestamp', scoutSpace.id);
-    await mlTestResources.createDataViewIfNeeded(
-      'ft_module_sample_logs',
-      '@timestamp',
-      scoutSpace.id
-    );
-    await mlTestResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote', scoutSpace.id);
-    await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
-  });
-
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-  });
-
-  spaceTest.afterEach(async ({ page }) => {
-    await page.evaluate(() => {
-      window.localStorage.removeItem('dataVisualizer.randomSamplerPreference');
-    });
-  });
-
-  spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
-    await mlTestResources.deleteSavedSearches(scoutSpace.id);
-    await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
-  });
-
-  spaceTest('with small data sets', async ({ pageObjects, page }) => {
-    await scoutTest.step(`has random sampler 'on - automatic' by default`, async () => {
-      await goToSourceForIndexBasedDataVisualizer(
-        pageObjects,
-        farequoteDataViewTestData.sourceIndexOrSavedSearch,
-        farequoteDataViewTestData.isSavedSearch
+// Constantly fails on ECH: https://github.com/elastic/kibana/issues/286690
+spaceTest.describe(
+  'index based random sampler controls',
+  { tag: '@local-stateful-classic' },
+  () => {
+    spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {
+      await mlTestResources.createDataViewIfNeeded('ft_farequote', '@timestamp', scoutSpace.id);
+      await mlTestResources.createDataViewIfNeeded(
+        'ft_module_sample_logs',
+        '@timestamp',
+        scoutSpace.id
       );
-      await assertRandomSamplingOption(pageObjects, page, 'dvRandomSamplerOptionOnAutomatic', 100);
+      await mlTestResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote', scoutSpace.id);
+      await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
     });
 
-    await scoutTest.step(`retains random sampler 'off' setting`, async () => {
-      await pageObjects.indexDataVisualizer.setRandomSamplingOption('dvRandomSamplerOptionOff');
-      await goToSourceForIndexBasedDataVisualizer(
-        pageObjects,
-        farequoteLuceneSearchTestData.sourceIndexOrSavedSearch,
-        farequoteLuceneSearchTestData.isSavedSearch
-      );
-      await assertRandomSamplingOption(pageObjects, page, 'dvRandomSamplerOptionOff');
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
     });
 
-    await scoutTest.step(`retains random sampler 'on - manual' setting`, async () => {
-      await pageObjects.indexDataVisualizer.setRandomSamplingOption(
-        'dvRandomSamplerOptionOnManual'
-      );
-      await goToSourceForIndexBasedDataVisualizer(pageObjects, 'ft_module_sample_logs');
-      await assertRandomSamplingOption(pageObjects, page, 'dvRandomSamplerOptionOnManual');
+    spaceTest.afterEach(async ({ page }) => {
+      await page.evaluate(() => {
+        window.localStorage.removeItem('dataVisualizer.randomSamplerPreference');
+      });
     });
-  });
-});
+
+    spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
+      await mlTestResources.deleteSavedSearches(scoutSpace.id);
+      await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
+    });
+
+    spaceTest('with small data sets', async ({ pageObjects, page }) => {
+      await scoutTest.step(`has random sampler 'on - automatic' by default`, async () => {
+        await goToSourceForIndexBasedDataVisualizer(
+          pageObjects,
+          farequoteDataViewTestData.sourceIndexOrSavedSearch,
+          farequoteDataViewTestData.isSavedSearch
+        );
+        await assertRandomSamplingOption(
+          pageObjects,
+          page,
+          'dvRandomSamplerOptionOnAutomatic',
+          100
+        );
+      });
+
+      await scoutTest.step(`retains random sampler 'off' setting`, async () => {
+        await pageObjects.indexDataVisualizer.setRandomSamplingOption('dvRandomSamplerOptionOff');
+        await goToSourceForIndexBasedDataVisualizer(
+          pageObjects,
+          farequoteLuceneSearchTestData.sourceIndexOrSavedSearch,
+          farequoteLuceneSearchTestData.isSavedSearch
+        );
+        await assertRandomSamplingOption(pageObjects, page, 'dvRandomSamplerOptionOff');
+      });
+
+      await scoutTest.step(`retains random sampler 'on - manual' setting`, async () => {
+        await pageObjects.indexDataVisualizer.setRandomSamplingOption(
+          'dvRandomSamplerOptionOnManual'
+        );
+        await goToSourceForIndexBasedDataVisualizer(pageObjects, 'ft_module_sample_logs');
+        await assertRandomSamplingOption(pageObjects, page, 'dvRandomSamplerOptionOnManual');
+      });
+    });
+  }
+);

@@ -89,6 +89,7 @@ test.describe(
       // Both seeded streams render as their own destination node.
       await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
       await expect(streams.getCanvasDestinationNode(PROCESSING_STREAM)).toBeVisible();
+      await expect(streams.canvasEmptyState).toHaveCount(0);
     });
 
     test('renders a minimap that collapses and reopens', async ({ pageObjects: { streams } }) => {
@@ -150,14 +151,18 @@ test.describe(
       await streams.tidyUpCanvasFromPane();
       await expect(streams.canvasUndo).toBeEnabled();
 
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM), {
+        modifiers: ['Shift'],
+      });
       await page.keyboard.press('Control+z');
       await expect(streams.canvasUndo).toBeDisabled();
     });
 
     test('undoes a keyboard-driven node reposition', async ({ page, pageObjects: { streams } }) => {
       // Selecting + focusing a node lets the arrow keys reposition it.
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM), {
+        modifiers: ['Shift'],
+      });
       await page.keyboard.press('ArrowRight');
 
       // The keyboard move records a history step even though no pointer drag ran,

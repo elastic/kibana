@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  euiCanAnimate,
-  useEuiTheme,
-  type EuiFlexGroupProps,
-} from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiFlexGroupProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -20,6 +14,12 @@ import { AttachmentType, isAttachmentGroup } from '@kbn/agent-builder-common/att
 import { AttachmentPill } from './attachment_pill';
 import { AttachmentGroupPill } from './attachment_group_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import {
+  ATTACHMENT_PILL_WIDTH,
+  ATTACHMENT_PILL_HEIGHT,
+  imageUploadProgressFillStyles,
+  imageUploadProgressTrackColorStyles,
+} from './image_upload_styles';
 
 export interface AttachmentPillsRowProps {
   attachments: ConversationAttachment[];
@@ -29,11 +29,6 @@ export interface AttachmentPillsRowProps {
   uploadingNames?: Set<string>;
   hoveredImageName?: string | null;
 }
-
-const indeterminateProgressSweep = keyframes`
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(250%); }
-`;
 
 const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
   const { euiTheme } = useEuiTheme();
@@ -47,8 +42,8 @@ const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
       aria-label={label}
       css={css`
         position: relative;
-        width: 72px;
-        height: 32px;
+        width: ${ATTACHMENT_PILL_WIDTH}px;
+        height: ${ATTACHMENT_PILL_HEIGHT}px;
         border-radius: ${euiTheme.border.radius.small};
         background: ${euiTheme.colors.backgroundBaseSubdued};
         overflow: hidden;
@@ -63,25 +58,10 @@ const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
           left: 4px;
           right: 4px;
           height: 2px;
-          border-radius: 999px;
-          background: ${euiTheme.colors.backgroundLightText};
-          overflow: hidden;
+          ${imageUploadProgressTrackColorStyles(euiTheme)}
         `}
       >
-        <div
-          css={css`
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 40%;
-            border-radius: 999px;
-            background: ${euiTheme.colors.backgroundFilledText};
-            ${euiCanAnimate} {
-              animation: ${indeterminateProgressSweep} 1.4s ease-in-out infinite;
-            }
-          `}
-        />
+        <div css={imageUploadProgressFillStyles(euiTheme)} />
       </div>
     </div>
   );

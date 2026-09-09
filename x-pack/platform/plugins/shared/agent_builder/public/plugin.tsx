@@ -22,7 +22,6 @@ import {
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
@@ -62,6 +61,7 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
+  OpenConversationDetailsOptions,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type {
@@ -75,6 +75,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { appPaths } from './application/utils/app_paths';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -105,6 +106,7 @@ export class AgentBuilderPlugin
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
+  private sidebarOpenSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -196,7 +198,14 @@ export class AgentBuilderPlugin
     const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+    const agentBuilderSidebar = core.chrome.sidebar.getApp('agentBuilder');
+    this.sidebarOpenSubscription = agentBuilderSidebar.isOpen$().subscribe((isOpen) => {
+      if (!isOpen) {
+        this.activeSidebarRef = null;
+        this.sidebarCallbacks = null;
+        clearSidebarRuntimeContext();
+      }
+    });
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
       const { conversationId, ...openOptions } = options ?? {};
@@ -209,7 +218,7 @@ export class AgentBuilderPlugin
       }
 
       // If already open, update props instead of creating new
-      if (this.activeSidebarRef && this.sidebarCallbacks) {
+      if (agentBuilderSidebar.isOpen() && this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
         return { chatRef: this.activeSidebarRef };
       }
@@ -220,26 +229,32 @@ export class AgentBuilderPlugin
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },
-        onClose: () => {
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
       });
 
-      sidebar.open();
+      agentBuilderSidebar.open();
 
       const sidebarRef: ConversationSidebarRef = {
-        close: () => {
-          sidebar.close();
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
+        close: agentBuilderSidebar.close,
       };
 
       this.activeSidebarRef = sidebarRef;
       return { chatRef: sidebarRef };
+    };
+
+    const openConversationDetails = async ({
+      conversationId,
+      onClose,
+    }: OpenConversationDetailsOptions): Promise<() => void> => {
+      const { openConversationDetailsFlyout } = await import(
+        './flyout/open_conversation_details_flyout'
+      );
+      return openConversationDetailsFlyout({
+        core,
+        conversationsService,
+        conversationTemplatesService,
+        conversationId,
+        onClose,
+      });
     };
 
     const internalServices: AgentBuilderInternalService = {
@@ -331,11 +346,25 @@ export class AgentBuilderPlugin
         }));
       });
 
+    const publicAttachmentsService = createPublicAttachmentContract({ attachmentsService });
+
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
-      attachments: createPublicAttachmentContract({ attachmentsService }),
+      attachments: publicAttachmentsService,
       conversationTemplates: createPublicConversationTemplatesContract({
         conversationTemplatesService,
+        context: {
+          attachmentsService: publicAttachmentsService,
+          openSidebarConversation: (conversationId) => {
+            openSidebarInternal({ conversationId });
+          },
+          openFullscreenConversation: ({ conversationId, agentId }) => {
+            agentBuilderSidebar.close();
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
+              path: appPaths.agent.conversations.byId({ agentId, conversationId }),
+            });
+          },
+        },
       }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
@@ -374,13 +403,8 @@ export class AgentBuilderPlugin
         return openSidebarInternal(options);
       },
       toggleChat: (options?: OpenConversationSidebarOptions) => {
-        if (this.activeSidebarRef) {
-          const sidebarRef = this.activeSidebarRef;
-          // Be defensive: clear local references immediately in case the sidebar doesn't
-          // synchronously invoke our onClose callback.
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          sidebarRef.close();
+        if (agentBuilderSidebar.isOpen()) {
+          agentBuilderSidebar.close();
           return;
         }
 
@@ -391,34 +415,10 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      openConversationDetails,
     };
 
     if (hasAgentBuilder) {
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <AgentBuilderNavControlInitiator
-              coreStart={core}
-              pluginsStart={startDependencies}
-              agentBuilderService={agentBuilderService}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
-      });
-
-      // Chrome Next transition: also expose this control as an AI button so it renders in the
-      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
-      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
-      // Remove the `registerRight` registration once Chrome Next is the only chrome.
-      // See https://github.com/elastic/kibana/issues/260010
       core.chrome.next.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
@@ -435,5 +435,6 @@ export class AgentBuilderPlugin
 
   stop() {
     this.experimentalDeepLinksSubscription?.unsubscribe();
+    this.sidebarOpenSubscription?.unsubscribe();
   }
 }
