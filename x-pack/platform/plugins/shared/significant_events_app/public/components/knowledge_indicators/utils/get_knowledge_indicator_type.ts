@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 
 export const MATCH_QUERY_TYPE = 'match_query';

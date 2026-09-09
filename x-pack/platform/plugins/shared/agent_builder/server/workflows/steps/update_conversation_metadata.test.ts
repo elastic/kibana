@@ -13,6 +13,7 @@ import {
 
 const experimentalEnabled = jest.fn().mockResolvedValue(true);
 const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
 
 describe('updateConversationMetadataStepDefinition', () => {
   const baseInput = {
@@ -22,10 +23,11 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('creates expected step definition structure', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
 
     expect(definition.id).toBe('ai.conversation.metadata.patch');
     expect(typeof definition.handler).toBe('function');
@@ -43,10 +45,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
     const result = await definition.handler(
       createStepHandlerContext({
         input: baseInput,
@@ -72,10 +75,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
     const result = await definition.handler(
       createStepHandlerContext({
         input: { conversation_id: 'conv-1', updates: { status: 'open' } },
@@ -96,10 +100,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       patchMetadata: jest.fn().mockRejectedValue(new Error('validation failed')),
     });
 
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
     expect(result).toEqual({
@@ -109,10 +114,11 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('rejects an empty updates object', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
 
     expect(
       definition.inputSchema.safeParse({ conversation_id: 'conv-1', updates: {} }).success
@@ -121,20 +127,22 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('rejects input without conversation_id', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalEnabled,
+    });
 
     expect(definition.inputSchema.safeParse({ updates: { status: 'open' } }).success).toBe(false);
   });
 
   it('returns an error when experimental features are disabled', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalDisabled
-    );
+      getAgentRegistry,
+      isExperimentalEnabled: experimentalDisabled,
+    });
 
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
