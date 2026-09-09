@@ -8,13 +8,16 @@
 /**
  * zod twins of `../monitor_management/monitor_types.ts`.
  *
- * Built as **flat** `z.looseObject`s (not `z.intersection` / `.and()`), so:
+ * Per-type field codecs (HTTP/TCP/ICMP/Browser/…) are **flat** `z.looseObject`s
+ * (spread, not `z.intersection` / `.and()`), so:
  *  - plain decode keeps unknown top-level keys (matches `t.intersection`)
  *  - `.strip()` strips unknown top-level keys only, while nested
  *    `looseObject`s keep extras (matches shallow `t.exact`)
  *
- * Nothing imports these yet — characterization / parity suites prove them
- * first.
+ * Wrappers that attach ids / heartbeat fields onto a *union* still use `.and()`
+ * — same as io-ts `t.intersection([SyntheticsMonitorCodec, t.type(…)])`. Those
+ * shapes are not passed through `.strip()` (Phase 3 exact-decode targets the
+ * flat per-type codecs only).
  */
 
 import { z } from '@kbn/zod';
