@@ -64,15 +64,15 @@ export const QRadarMitreRequest = lazySchema(() =>
     /**
      * The vendor identifier
      */
-    vendor: z.literal('qradar'),
+    vendor: z.literal('qradar').describe('The vendor identifier'),
     /**
      * The type of enhancement data
      */
-    type: z.literal('mitre'),
+    type: z.literal('mitre').describe('The type of enhancement data'),
     /**
      * QRadar MITRE mappings data keyed by rule name
      */
-    data: QRadarMitreMappingsData,
+    data: QRadarMitreMappingsData.describe('QRadar MITRE mappings data keyed by rule name'),
   })
 );
 export type QRadarMitreRequest = z.infer<typeof QRadarMitreRequest>;
