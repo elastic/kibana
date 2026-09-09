@@ -1,0 +1,15 @@
+{
+  "title": "Risk scores table stays empty after 1 year range",
+  "level": 1,
+  "flow": "Happy path",
+  "role": "t2_analyst",
+  "steps_followed": ["Open Entity Analytics", "Set time range to Last 1 year"],
+  "current_behavior": "Table shows 0 entities",
+  "expected_behavior": "Table lists entities in range",
+  "why_issue": "Analyst cannot see yearly risk",
+  "evidence": [
+    "Screenshot: /tmp/session/screenshots/ea-flow1.png",
+    "Console: TypeError: cannot read map of undefined",
+    "Network: GET /internal/risk_score → 500"
+  ]
+}

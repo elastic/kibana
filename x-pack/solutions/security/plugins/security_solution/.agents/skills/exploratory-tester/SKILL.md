@@ -9,7 +9,7 @@ description: >
 
 # Exploratory Tester
 
-> **[EXPERIMENTAL]** This skill is under active development. Findings, flow coverage, and report structure may change between sessions. Review all outputs carefully before acting on them — do not file bugs or escalate findings without independent verification.
+> **[EXPERIMENTAL]** This skill is under active development. Findings, flow coverage, and report structure may change between sessions. Review all outputs carefully before acting on them. Do not file the report or escalate findings without independent verification. If the human later names specific findings to file, read and follow `security-file-bug`. Do not file anything they did not name. Do not offer to file anything on your own initiative.
 
 Explore a Kibana Security Solution feature area through a real browser, collect structured evidence, and report findings classified by confidence.
 
