@@ -167,6 +167,11 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  // Nightshift sandbox tools — available to all agents with enable_elastic_capabilities.
+  'nightshift_sandbox_bash',
+  'nightshift_sandbox_view_file',
+  'nightshift_sandbox_str_replace',
+  'nightshift_sandbox_write_file',
 ];
 
 /**

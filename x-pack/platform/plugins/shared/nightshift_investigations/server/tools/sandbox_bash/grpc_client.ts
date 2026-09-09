@@ -885,9 +885,23 @@ export class SandboxConnectionManager {
           status: 'error' as const,
           error_message: 'Connector callbacks not configured',
         }));
-    return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.runCommandBidi(conversationId, params, handler)
-    );
+    return this.withUnavailableReset(conversationId, async () => {
+      try {
+        return await this.apiClient.runCommandBidi(conversationId, params, handler);
+      } catch (err) {
+        // Fall back to non-bidi RunCommand when the server doesn't implement RunCommandBidi.
+        // Connector callbacks are not supported in this mode.
+        if (
+          err &&
+          typeof err === 'object' &&
+          'code' in err &&
+          (err as { code: number }).code === grpc.status.UNIMPLEMENTED
+        ) {
+          return this.apiClient.runCommand(conversationId, params);
+        }
+        throw err;
+      }
+    });
   }
 
   async statFiles(
