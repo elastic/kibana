@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './schema';
-export * from './report';
-export * from './format';
+require('@kbn/setup-node-env');
+require('@kbn/failed-test-reporter-cli').runFlakyTestsReporterCli();

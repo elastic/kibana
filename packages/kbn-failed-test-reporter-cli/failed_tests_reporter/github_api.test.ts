@@ -9,7 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { GithubApi } from './github_api';
+import { GithubApi, nextPageUrl } from './github_api';
 
 const log = new ToolingLog();
 
@@ -68,5 +68,102 @@ describe('GithubApi#getIssueComments()', () => {
 
     expect(await api.getIssueComments(42)).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('nextPageUrl()', () => {
+  it('returns the rel="next" link', () => {
+    expect(
+      nextPageUrl(
+        '<https://api.github.com/repositories/1/issues?page=2>; rel="next", <https://api.github.com/repositories/1/issues?page=16>; rel="last"'
+      )
+    ).toBe('https://api.github.com/repositories/1/issues?page=2');
+  });
+
+  it('is undefined on the last page or without a Link header', () => {
+    expect(
+      nextPageUrl(
+        '<https://api.github.com/repositories/1/issues?page=15>; rel="prev", <https://api.github.com/repositories/1/issues?page=1>; rel="first"'
+      )
+    ).toBeUndefined();
+    expect(nextPageUrl(null)).toBeUndefined();
+  });
+});
+
+describe('GithubApi#listIssues()', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const issue = (number: number, extra: Record<string, unknown> = {}) => ({
+    number,
+    html_url: `https://github.com/elastic/kibana/issues/${number}`,
+    node_id: `n${number}`,
+    title: `#${number}`,
+    labels: [],
+    body: `body ${number}`,
+    state: 'open',
+    ...extra,
+  });
+
+  it('follows the Link header, drops pull requests and normalizes missing bodies', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async (url) => {
+      const page = new URL(String(url)).searchParams.get('page');
+      if (page === '2') {
+        return jsonResponse([issue(3, { body: null })]);
+      }
+      // A short first page that is not the last one
+      return new Response(JSON.stringify([issue(1), issue(2, { pull_request: {} })]), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          Link: '<https://api.github.com/repos/elastic/kibana/issues?labels=failed-test&state=open&per_page=100&page=2>; rel="next"',
+        },
+      });
+    });
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'https://api.github.com/repos/elastic/kibana/issues?labels=failed-test&state=open&per_page=100'
+    );
+    expect(issues.map(({ number, body }) => [number, body])).toEqual([
+      [1, 'body 1'],
+      [3, ''],
+    ]);
+  });
+
+  it('still fetches in dry-run mode because listing is read-only', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockImplementation(async () => jsonResponse([issue(1)]));
+
+    const api = new GithubApi({ log, token: undefined, dryRun: true });
+    const issues = await api.listIssues({ labels: ['flaky-test-suite'], state: 'all' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(issues).toHaveLength(1);
+  });
+
+  it('stops after maxPages and warns', async () => {
+    jest.spyOn(global, 'fetch').mockImplementation(
+      async () =>
+        new Response(JSON.stringify([issue(1)]), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            Link: '<https://api.github.com/repos/elastic/kibana/issues?page=99>; rel="next"',
+          },
+        })
+    );
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open', maxPages: 2 });
+
+    expect(issues).toHaveLength(2);
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('results are incomplete'));
   });
 });

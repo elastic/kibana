@@ -13,6 +13,22 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
 
+/** URL of the `rel="next"` entry of a GitHub `Link` response header, if any. */
+export function nextPageUrl(linkHeader: string | null): string | undefined {
+  if (!linkHeader) {
+    return undefined;
+  }
+  for (const part of linkHeader.split(',')) {
+    const match = part.trim().match(/^<([^>]+)>;\s*rel="next"$/);
+    if (match) {
+      return match[1];
+    }
+  }
+  return undefined;
+}
+
+export type GithubIssueState = 'open' | 'closed';
+
 export interface GithubIssue {
   html_url: string;
   number: number;
@@ -20,6 +36,15 @@ export interface GithubIssue {
   title: string;
   labels: unknown[];
   body: string;
+  state: GithubIssueState;
+}
+
+export interface ListIssuesOptions {
+  /** Only issues carrying every one of these labels. */
+  labels: string[];
+  state: GithubIssueState | 'all';
+  /** Safety valve against unbounded pagination; 100 issues per page. */
+  maxPages?: number;
 }
 
 /**
@@ -124,6 +149,43 @@ export class GithubApi {
 
       page += 1;
     }
+  }
+
+  /**
+   * List issues by label, following pagination. Read-only, so it also runs in dry-run mode. Pull
+   * requests share the issues endpoint and are filtered out.
+   */
+  async listIssues({ labels, state, maxPages = 50 }: ListIssuesOptions): Promise<GithubIssue[]> {
+    const issues: GithubIssue[] = [];
+    const query = new URLSearchParams({ labels: labels.join(','), state, per_page: '100' });
+    let url: string | undefined = Url.resolve(BASE_URL, `issues?${query}`);
+
+    for (let page = 1; page <= maxPages && url; page++) {
+      const resp = await this.request<Array<GithubIssue & { pull_request?: unknown }>>(
+        { method: 'GET', url, safeForDryRun: true },
+        []
+      );
+
+      for (const issue of resp.data) {
+        if (!issue.pull_request) {
+          issues.push({ ...issue, body: issue.body ?? '' });
+        }
+      }
+
+      // Pages can hold fewer items than requested even when more follow, so trust the Link header
+      url = nextPageUrl(resp.headers.get('link'));
+    }
+
+    if (!url) {
+      return issues;
+    }
+
+    this.log.warning(
+      `Stopped listing issues labelled ${labels.join(
+        ','
+      )} after ${maxPages} pages; results are incomplete`
+    );
+    return issues;
   }
 
   async addIssueComment(issueNumber: number, commentBody: string) {

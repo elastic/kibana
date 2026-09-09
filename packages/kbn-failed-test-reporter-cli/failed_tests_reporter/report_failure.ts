@@ -49,7 +49,10 @@ function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtend
   return 'id' in failure && 'target' in failure && 'location' in failure;
 }
 
-function truncateFailureBody(failure: string, maxCharacters: number = 8192): string {
+/**
+ * Cuts failure output posted to GitHub down to `maxCharacters`, appending a note when it does.
+ */
+export function truncateFailureBody(failure: string, maxCharacters: number = 8192): string {
   return failure.length <= maxCharacters
     ? failure
     : [

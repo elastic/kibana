@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderFlakySuiteIssueBody renders the impact statement, tables, samples and metadata footer 1`] = `
+"2 tests in this suite were flaky on \`kibana-on-merge\` over the last 7 days (2026-09-02 to 2026-09-09). The worst offender failed in **49 of 509 builds** (9.6%) and passed in the others.
+
+**Suite details**
+
+| Field | Value |
+|---|---|
+| File | \`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\` |
+| Framework | playwright |
+| Config path | \`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\` |
+| Code owners | elastic/obs-ux-management-team |
+| Pipelines | kibana-on-merge |
+| Branches | all |
+| Report | [flaky_tests.json](https://buildkite.com/elastic/kibana-scout-report-flaky-tests/builds/42) (generated 2026-09-09 09:04 UTC) |
+| Reports flagging this suite | 3 |
+
+**Impact per test** (ranked by failed builds)
+
+| Test | Failed builds | Fail rate | Retry flakes | Flakiest branch | Latest run |
+|---|---|---|---|---|---|
+| creates default alert, triggers on down status, and recovers | 49/509 | 9.6% | 12 | main (9.6%) | passed, 3h ago |
+| applies a maintenance \\\\| window in bulk | 11/509 | 2.2% | 4 | main (9.6%) | passed, 3h ago |
+
+<details>
+<summary>Recent failures: creates default alert, triggers on down status, and recovers</summary>
+
+[kibana-on-merge #12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC
+
+\`\`\`\`
+Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
+\`\`\`\`
+
+</details>
+
+**Definitions**
+
+Flaky: ran in at least 10 builds of the window, failed in at least 2 builds, and passed at least once (or recovered on an in-run retry). Tests that never passed in the window are consistently failing rather than flaky and are not reported here.
+
+**Next steps**
+
+- Reproduce with the flaky test runner: https://buildkite.com/elastic/kibana-flaky
+- Regenerate this report locally: \`node scripts/scout discover-flaky-tests --pipelines kibana-on-merge --lookbackDays 7 --classifications flaky\`
+
+<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\",\\"playwright:default_status_alert:bulk\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":3}} -->"
+`;

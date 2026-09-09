@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './schema';
-export * from './report';
-export * from './format';
+export { runFlakyTestsReporterCli } from './flaky_tests_reporter_cli';
