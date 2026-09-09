@@ -37,8 +37,7 @@ import {
   timelineFromRounds,
   type ProcessedConversationRound,
 } from '../../../../test_utils/timeline';
-import { eventsForContext } from '../../../conversation/client/events_to_rounds';
-import type { ProcessedTimelineEvent } from './context_timeline';
+import { eventsForContext, type ProcessedTimelineEvent } from './context_timeline';
 
 describe('prepareMessages', () => {
   const now = new Date().toISOString();

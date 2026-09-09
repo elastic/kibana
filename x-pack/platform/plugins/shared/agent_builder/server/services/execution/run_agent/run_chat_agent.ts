@@ -64,8 +64,7 @@ import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
-import { eventsForContext } from '../../conversation';
-import { groupTimelineRounds, roundResponse } from './utils/context_timeline';
+import { eventsForContext, groupTimelineRounds, roundResponse } from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 

@@ -7,15 +7,30 @@
 
 import type {
   AssistantResponse,
+  Conversation,
   ConversationRoundStep,
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
   TimelineEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
-import { parseExecutionId } from '../../../conversation/client/rounds_to_events';
+import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
+import { parseExecutionId, roundsToEvents } from '../../../conversation/client/rounds_to_events';
+
+/**
+ * The normalized timeline the agent context is built from: one execution per round, with HITL
+ * resume executions folded into their round. Legacy (rounds-only) conversations serialize their
+ * stored rounds; events-native conversations are folded and re-serialized. Context only, never
+ * persisted, so downstream consumers can read events without reconstructing rounds.
+ */
+export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
+  isEventsNativeVersion(conversation.schema_version) &&
+  conversation.events &&
+  conversation.events.length > 0
+    ? roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) })
+    : roundsToEvents(conversation);
 
 /** A `user_message` whose payload has been processed for the agent (attachments migrated to refs, context rendered). */
 export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'data'> & {

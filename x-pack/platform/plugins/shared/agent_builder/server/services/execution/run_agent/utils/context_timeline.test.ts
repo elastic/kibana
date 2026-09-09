@@ -7,13 +7,13 @@
 
 import type { TimelineEvent } from '@kbn/agent-builder-common';
 import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
-import { eventsForContext } from '../../../conversation/client/events_to_rounds';
 import {
   eventsNativeConversation,
   pausedAndResumedRoundTimeline,
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
 import {
+  eventsForContext,
   groupTimelineRounds,
   isAwaitingPrompt,
   lastExecutionTerminated,

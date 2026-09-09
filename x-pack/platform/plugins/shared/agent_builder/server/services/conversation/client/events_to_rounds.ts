@@ -6,7 +6,6 @@
  */
 
 import type {
-  Conversation,
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundStep,
@@ -21,26 +20,12 @@ import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
-  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
 import { isAskUserQuestionPromptResponse } from '@kbn/agent-builder-common/agents/prompts';
-import { parseExecutionId, roundsToEvents } from './rounds_to_events';
+import { parseExecutionId } from './rounds_to_events';
 import { applyResumeResolution } from './merge_rounds';
-
-/**
- * The normalized timeline the agent context is built from: one execution per round, with HITL
- * resume executions folded into their round. Legacy (rounds-only) conversations serialize their
- * stored rounds; events-native conversations are folded and re-serialized. Context only, never
- * persisted, so downstream consumers can read events without reconstructing rounds.
- */
-export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
-  isEventsNativeVersion(conversation.schema_version) &&
-  conversation.events &&
-  conversation.events.length > 0
-    ? roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) })
-    : roundsToEvents(conversation);
 
 /** A single execution reconstructed into a partial round, awaiting the fold. */
 interface ExecutionPartial {

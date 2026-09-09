@@ -31,8 +31,7 @@ import {
   type AgentHandlerContextMock,
 } from '../../../../test_utils/runner';
 import { prepareConversation as prepareConversationFromTimeline } from './prepare_conversation';
-import { groupTimelineRounds } from './context_timeline';
-import { eventsForContext } from '../../../conversation/client/events_to_rounds';
+import { eventsForContext, groupTimelineRounds } from './context_timeline';
 import {
   TIMELINE_FIXTURE_AUTHOR,
   eventsNativeConversation,

@@ -11,9 +11,10 @@ import {
   ConversationRoundStatus,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
-import { pausedAndResumedRoundTimeline } from '../../../test_utils/timeline';
-import { eventsForContext, eventsToRounds } from './events_to_rounds';
-import { roundsToEvents } from './rounds_to_events';
+import { pausedAndResumedRoundTimeline } from '../../../../test_utils/timeline';
+import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
+import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
+import { eventsForContext } from './context_timeline';
 
 const storedRound = (id: string, message: string): ConversationRound => ({
   id,
