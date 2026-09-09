@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/288788
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix stale field overrides left on classic streams after you remove them all
-description: Fixes a classic stream keeping its Elasticsearch mappings override after you remove the last field override, which pinned the deleted field on every later backing index.

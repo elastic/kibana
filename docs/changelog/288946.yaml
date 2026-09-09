@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/288946
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix bulk close of alerts failing when the filter uses a runtime field
-description: "Fixes \"Select all\" followed by \"Close selected\" updating no alerts when the filter references a data view runtime field, such as a column produced by an ES|QL detection rule."

@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/276488
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Keep the Agent Builder `security.alerts` tool scoped to the current Kibana space"

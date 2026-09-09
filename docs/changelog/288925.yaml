@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/288925
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Add OpenTelemetry-first defaults to the Observability \"Add Data\" page"
-description: "Adds OpenTelemetry-first defaults to Observability \"Add Data\". \"Browse all\" now opens the integrations catalog with the Observability and OpenTelemetry filters. When a technology supports more than one collection method, the OpenTelemetry variant is listed first and marked \"Recommended\"."

@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/288451
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix row height in user pickers such as case assignees
-description: "Restores the 48 pixel row height in the shared user picker. This affects menus such as case assignees, Alerting v2 episode assignees, and the \"Created by\" filter in dashboard and visualization lists."

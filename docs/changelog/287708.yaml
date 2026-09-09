@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/287708
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix the alert analysis workflow settings page loading indefinitely
-description: Fixes the Security alert analysis workflow settings page loading forever for some roles. The page now requires only the Rules and Advanced Settings privileges, and it shows an error with a retry action when the request fails.

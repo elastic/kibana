@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/288290
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Add an \"Investigate\" action to Observability alerts"
-description: "Adds an \"Investigate\" action to Observability alert rows and to the alert detail action menu. The action appears when investigations and Agent Builder write access are available."

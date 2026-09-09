@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/277445
-type: feature
-products:
-- product: cloud-serverless
-- product: kibana
-title: Add a step minimap to the workflow YAML editor
-description: Adds a scrollable minimap beside the workflow YAML editor. Each step appears as a labeled pill with error and warning indicators, and selecting a pill jumps the editor to that step.
