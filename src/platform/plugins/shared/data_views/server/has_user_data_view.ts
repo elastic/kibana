@@ -33,7 +33,7 @@ export const getDataViews = async ({
 /**
  * This function currently returns true if there are any data views
  * It was created to filter out hard coded data views that were not created by the user.
- * Given we find a case where we need to distinguish between user-created and managed data views, 
+ * Given we find a case where we need to distinguish between user-created and managed data views,
  * This function may need to be updated accordingly, or removed since hasDataView should be used instead.
  * @param esClient
  * @param soClient
