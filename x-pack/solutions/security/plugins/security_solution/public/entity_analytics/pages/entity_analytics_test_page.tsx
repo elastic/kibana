@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import {
@@ -20,11 +20,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { useQuery } from '@kbn/react-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -33,10 +34,21 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import {
+  globalFiltersQuerySelector,
+  globalQuerySelector,
+} from '../../common/store/inputs/selectors';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { ENTITY_GRID_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
+import { AssetCriticalityBadge } from '../components/asset_criticality';
+import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
+import {
+  EntitySourceValue,
+  toEntitySourceArray,
+} from '../../flyout/entity_details/shared/components/entity_source_value';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.testPage.pageTitle', {
   defaultMessage: 'Entity analytics (ES|QL)',
@@ -58,10 +70,10 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
   { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
   { id: 'entity.source', displayAsText: 'Source', initialWidth: 140, isSortable: false },
-  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 100, isSortable: false },
+  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 100, isSortable: true },
   { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, isSortable: false },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: true },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, isSortable: true },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: false },
   {
     id: 'entity.attributes.watchlists',
     displayAsText: 'Watchlists',
@@ -99,6 +111,7 @@ const useEntityGridData = ({
   pageSize,
   cursors,
   onNextCursor,
+  filter,
 }: {
   sortField: string;
   sortDirection: 'asc' | 'desc';
@@ -106,6 +119,7 @@ const useEntityGridData = ({
   pageSize: number;
   cursors: Array<string | null>;
   onNextCursor: (pageIndex: number, cursor: string) => void;
+  filter?: object;
 }) => {
   const { http } = useKibana().services;
   const cursor = cursors[pageIndex] ?? null;
@@ -113,7 +127,7 @@ const useEntityGridData = ({
   const [cachedTotal, setCachedTotal] = useState(0);
 
   const { data, isFetching } = useQuery(
-    ['entity-test-grid', sortField, sortDirection, pageIndex, pageSize, cursor],
+    ['entity-test-grid', sortField, sortDirection, pageIndex, pageSize, cursor, filter],
     async () => {
       const result = await http.post<EntityGridResponse>(ENTITY_GRID_INTERNAL_URL, {
         version: '1',
@@ -121,6 +135,7 @@ const useEntityGridData = ({
           sort: { field: sortField, direction: sortDirection },
           page_size: pageSize,
           ...(cursor ? { cursor } : {}),
+          ...(filter ? { filter } : {}),
         }),
       });
       return result;
@@ -164,6 +179,23 @@ export const EntityAnalyticsTestPage: React.FC = () => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
 
+  const globalFilters = useDeepEqualSelector(globalFiltersQuerySelector());
+  const globalQuery = useDeepEqualSelector(globalQuerySelector());
+
+  const esFilter = useMemo(() => {
+    try {
+      const built = buildEsQuery(dataView, [globalQuery], globalFilters);
+      const hasContent =
+        built.bool?.must?.length ||
+        built.bool?.filter?.length ||
+        built.bool?.should?.length ||
+        built.bool?.must_not?.length;
+      return hasContent ? built : undefined;
+    } catch {
+      return undefined;
+    }
+  }, [dataView, globalQuery, globalFilters]);
+
   const watchlistNames = useWatchlistNames();
   const [sortField, setSortField] = useState('entity.risk.calculated_score_norm');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -176,6 +208,11 @@ export const EntityAnalyticsTestPage: React.FC = () => {
     setPageIndex(0);
     setCursors([null]);
   }, []);
+
+  // Reset pagination when the search filter changes.
+  useEffect(() => {
+    resetPagination();
+  }, [esFilter, resetPagination]);
 
   const onNextCursor = useCallback((idx: number, cursor: string) => {
     setCursors((prev) => {
@@ -192,6 +229,7 @@ export const EntityAnalyticsTestPage: React.FC = () => {
     pageSize,
     cursors,
     onNextCursor,
+    filter: esFilter,
   });
 
   const [visibleColumns, setVisibleColumns] = useState(GRID_COLUMNS.map((c) => c.id));
@@ -213,37 +251,43 @@ export const EntityAnalyticsTestPage: React.FC = () => {
       if (columnId === 'risk_score_change') {
         const delta = value as number;
         if (delta > 0)
-          return (
-            <EuiTextColor color="danger">
-              {'↑ +'}
-              {delta.toFixed(1)}
-            </EuiTextColor>
-          );
+          return <EuiTextColor color="danger">{`↑ ${Math.round(delta)}%`}</EuiTextColor>;
         if (delta < 0)
-          return (
-            <EuiTextColor color="success">
-              {'↓ '}
-              {delta.toFixed(1)}
-            </EuiTextColor>
-          );
-        return <>{'→ 0.0'}</>;
+          return <EuiTextColor color="success">{`↓ ${Math.round(Math.abs(delta))}%`}</EuiTextColor>;
+        return <>{'→ 0%'}</>;
       }
       if (columnId === 'alert_count') {
         const row = rows[relativeIndex];
-        const total = value as number;
-        if (total === 0) return <>{'—'}</>;
+        const alertCount = value as number;
+        if (alertCount === 0) return <>{'—'}</>;
         const severities = [
-          { key: 'Critical', count: (row?.alert_critical as number) ?? 0, color: getSeverityColor('critical', euiTheme) },
-          { key: 'High', count: (row?.alert_high as number) ?? 0, color: getSeverityColor('high', euiTheme) },
-          { key: 'Medium', count: (row?.alert_medium as number) ?? 0, color: getSeverityColor('medium', euiTheme) },
-          { key: 'Low', count: (row?.alert_low as number) ?? 0, color: getSeverityColor('low', euiTheme) },
+          {
+            key: 'Critical',
+            count: (row?.alert_critical as number) ?? 0,
+            color: getSeverityColor('critical', euiTheme),
+          },
+          {
+            key: 'High',
+            count: (row?.alert_high as number) ?? 0,
+            color: getSeverityColor('high', euiTheme),
+          },
+          {
+            key: 'Medium',
+            count: (row?.alert_medium as number) ?? 0,
+            color: getSeverityColor('medium', euiTheme),
+          },
+          {
+            key: 'Low',
+            count: (row?.alert_low as number) ?? 0,
+            color: getSeverityColor('low', euiTheme),
+          },
         ].filter((s) => s.count > 0);
         return (
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <DistributionBar stats={severities} hideLastTooltip />
             </EuiFlexItem>
-            <EuiBadge color="hollow">{total}</EuiBadge>
+            <EuiBadge color="hollow">{alertCount}</EuiBadge>
           </EuiFlexGroup>
         );
       }
@@ -254,11 +298,31 @@ export const EntityAnalyticsTestPage: React.FC = () => {
       if (columnId === 'entity.attributes.watchlists') {
         const ids = value as string[];
         if (!Array.isArray(ids) || ids.length === 0) return <>{'—'}</>;
-        return <>{ids.map((id) => watchlistNames.get(id) ?? id).join(', ')}</>;
+        const names = ids.map((id) => watchlistNames.get(id) ?? id);
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+            <EuiFlexItem grow={false}>{names[0]}</EuiFlexItem>
+            {names.length > 1 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge>{`+${names.length - 1}`}</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      }
+      if (columnId === 'asset.criticality') {
+        return (
+          <AssetCriticalityBadge
+            criticalityLevel={(value as CriticalityLevelWithUnassigned) ?? 'unassigned'}
+          />
+        );
+      }
+      if (columnId === 'entity.source') {
+        return <EntitySourceValue values={toEntitySourceArray(value)} textSize="s" />;
       }
       return <>{String(value)}</>;
     },
-    [rows, pageIndex, pageSize, watchlistNames]
+    [rows, pageIndex, pageSize, watchlistNames, euiTheme]
   );
 
   const sorting = useMemo(
