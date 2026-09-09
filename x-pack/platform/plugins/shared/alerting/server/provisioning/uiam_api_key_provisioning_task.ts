@@ -406,7 +406,7 @@ export class UiamApiKeyProvisioningTask {
           // We surface it as a warn so operators can spot systematically broken docs instead
           // of the failure being silently swallowed inside the bulk response.
           this.logger.warn(
-            `Failed to persist UIAM provisioning status ${so.id}: ${so.error.message}`,
+            `Failed to persist UIAM provisioning status doc ${so.id}: ${so.error.message}`,
             { tags: TAGS }
           );
         } else {

@@ -77,7 +77,7 @@ describe('task_uiam_provisioning_observability_status', () => {
     });
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Error writing task provisioning status for task:task-failed: validation failed',
+      'Failed to persist UIAM provisioning status doc task:task-failed: validation failed',
       expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(logger.info).toHaveBeenCalled();
@@ -200,9 +200,33 @@ describe('task_uiam_provisioning_observability_status', () => {
       ]);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Failed to delete 1 legacy UIAM provisioning status doc(s): Conflict',
+        'Failed to delete 1 legacy UIAM provisioning status doc(s) for tasks: task-1 (Conflict)',
         expect.objectContaining({ tags: expect.any(Array) })
       );
+    });
+
+    it('names at most 10 failures and counts the rest', async () => {
+      const failures = Array.from({ length: 12 }, (_, i) => ({
+        id: `task-${i}`,
+        type: UIAM_PROVISIONING_STATUS_TYPE,
+        success: false,
+        error: { statusCode: 409, message: 'Conflict' },
+      }));
+      const savedObjectsClient = createSavedObjectsClientMock({
+        bulkDelete: jest.fn().mockResolvedValue({ statuses: failures }),
+      });
+
+      await deleteLegacyTaskProvisioningStatusDocs(
+        savedObjectsClient,
+        logger,
+        failures.map(({ id }) => createSkippedTaskProvisioningStatus(id, 'no api key'))
+      );
+
+      const [message] = (logger.warn as jest.Mock).mock.calls[0];
+      expect(message).toContain('Failed to delete 12 legacy UIAM provisioning status doc(s)');
+      expect(message).toContain('task-9 (Conflict)');
+      expect(message).not.toContain('task-10');
+      expect(message).toContain('and 2 more');
     });
 
     it('swallows a whole-call bulkDelete failure', async () => {

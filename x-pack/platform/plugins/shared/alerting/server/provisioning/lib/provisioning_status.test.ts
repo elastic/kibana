@@ -113,9 +113,32 @@ describe('provisioning status docs', () => {
       ]);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Failed to delete 1 legacy UIAM provisioning status doc(s): Conflict',
+        'Failed to delete 1 legacy UIAM provisioning status doc(s) for rules: rule-1 (Conflict)',
         expect.objectContaining({ tags: expect.any(Array) })
       );
+    });
+
+    it('names at most 10 failures and counts the rest', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const failures = Array.from({ length: 12 }, (_, i) => ({
+        id: `rule-${i}`,
+        type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+        success: false,
+        error: { error: 'Conflict', message: 'Conflict', statusCode: 409 },
+      }));
+      savedObjectsClient.bulkDelete.mockResolvedValue({ statuses: failures });
+
+      await deleteLegacyProvisioningStatusDocs(
+        savedObjectsClient,
+        logger,
+        failures.map(({ id }) => createSkippedRuleStatus(id, 'The rule has no API key'))
+      );
+
+      const [message] = (logger.warn as jest.Mock).mock.calls[0];
+      expect(message).toContain('Failed to delete 12 legacy UIAM provisioning status doc(s)');
+      expect(message).toContain('rule-9 (Conflict)');
+      expect(message).not.toContain('rule-10');
+      expect(message).toContain('and 2 more');
     });
 
     it('swallows a whole-call bulkDelete failure', async () => {

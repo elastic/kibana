@@ -132,12 +132,24 @@ export const prepareTaskProvisioningStatusWrite = (
   return { docs, counts };
 };
 
+/** Cap on the number of failed legacy deletes named in a single warn, to bound log line length. */
+const MAX_LOGGED_LEGACY_DELETE_FAILURES = 10;
+
 /**
  * Deletes the status docs written under the pre-namespacing bare entity id (`<taskId>` rather than
- * `task:<taskId>`) for the tasks we just wrote a namespaced doc for. Mirrors
- * `deleteLegacyProvisioningStatusDocs` in `alerting/server/provisioning/lib/provisioning_status.ts`.
- * Best effort: a legacy doc is missing for every task first provisioned after this change, and any
- * other failure is retried the next time the task is written.
+ * `task:<taskId>`) for the tasks we just wrote a namespaced doc for. Best effort: a legacy doc is
+ * missing for every task first provisioned after this change, and any other failure is retried the
+ * next time the task is written.
+ *
+ * This is a deliberate duplicate of `deleteLegacyProvisioningStatusDocs` in
+ * `alerting/server/provisioning/lib/provisioning_status.ts`, differing only in the client type and
+ * `TAGS`. The shared home for it would be `@kbn/uiam-api-keys-provisioning-status`, but that package
+ * is `shared-common` and so cannot hold `@kbn/core/server` code, and standing up a `shared-server`
+ * package for ~25 lines of throwaway migration logic is not worth it.
+ *
+ * TODO: transitional one-shot migration for the pre-namespacing id scheme. Delete this helper and
+ * its call site once every deployment has run the provisioning task at least once; it is removed
+ * wholesale by https://github.com/elastic/kibana/pull/287038, which retires the provisioning tasks.
  */
 export const deleteLegacyTaskProvisioningStatusDocs = async (
   savedObjectsClient: ISavedObjectsRepository,
@@ -157,8 +169,14 @@ export const deleteLegacyTaskProvisioningStatusDocs = async (
       ({ success, error }) => !success && error?.statusCode !== 404
     );
     if (unexpectedErrors.length > 0) {
+      const named = unexpectedErrors.slice(0, MAX_LOGGED_LEGACY_DELETE_FAILURES);
+      const omitted = unexpectedErrors.length - named.length;
       logger.warn(
-        `Failed to delete ${unexpectedErrors.length} legacy UIAM provisioning status doc(s): ${unexpectedErrors[0].error?.message}`,
+        `Failed to delete ${
+          unexpectedErrors.length
+        } legacy UIAM provisioning status doc(s) for tasks: ${named
+          .map(({ id, error }) => `${id} (${error?.message})`)
+          .join(', ')}${omitted > 0 ? ` and ${omitted} more` : ''}`,
         { tags: TAGS }
       );
     }
@@ -187,7 +205,9 @@ export const writeTaskUiamProvisioningObservabilityStatus = async (
     result.saved_objects.forEach((so) => {
       if (isSavedObjectErrorResult(so)) {
         logger.warn(
-          `Error writing task provisioning status for ${so.id}: ${so.error.message ?? so.error}`,
+          `Failed to persist UIAM provisioning status doc ${so.id}: ${
+            so.error.message ?? so.error
+          }`,
           { tags: TAGS }
         );
       } else {

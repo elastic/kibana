@@ -100,11 +100,18 @@ export const prepareProvisioningStatusWrite = (
   return { docs, counts };
 };
 
+/** Cap on the number of failed legacy deletes named in a single warn, to bound log line length. */
+const MAX_LOGGED_LEGACY_DELETE_FAILURES = 10;
+
 /**
  * Deletes the status docs written under the pre-namespacing bare entity id (`<ruleId>` rather than
  * `rule:<ruleId>`) for the rules we just wrote a namespaced doc for. Best effort: a legacy doc is
  * missing for every rule first provisioned after this change, and any other failure is retried the
  * next time the rule is written.
+ *
+ * TODO: transitional one-shot migration for the pre-namespacing id scheme. Delete this helper and
+ * its call site once every deployment has run the provisioning task at least once; it is removed
+ * wholesale by https://github.com/elastic/kibana/pull/287038, which retires the provisioning tasks.
  */
 export const deleteLegacyProvisioningStatusDocs = async (
   savedObjectsClient: SavedObjectsClientContract,
@@ -124,8 +131,14 @@ export const deleteLegacyProvisioningStatusDocs = async (
       ({ success, error }) => !success && error?.statusCode !== 404
     );
     if (unexpectedErrors.length > 0) {
+      const named = unexpectedErrors.slice(0, MAX_LOGGED_LEGACY_DELETE_FAILURES);
+      const omitted = unexpectedErrors.length - named.length;
       logger.warn(
-        `Failed to delete ${unexpectedErrors.length} legacy UIAM provisioning status doc(s): ${unexpectedErrors[0].error?.message}`,
+        `Failed to delete ${
+          unexpectedErrors.length
+        } legacy UIAM provisioning status doc(s) for rules: ${named
+          .map(({ id, error }) => `${id} (${error?.message})`)
+          .join(', ')}${omitted > 0 ? ` and ${omitted} more` : ''}`,
         { tags: TAGS }
       );
     }
