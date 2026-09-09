@@ -121,6 +121,17 @@ steps:
             - If no Elastic Defend endpoint_id is present, or required extra fields are missing, set propose=false. Do not guess ids, pids, paths, or commands.
             - Cite hosts, process/path, tactics, and why this action now in rationale.
 
+            For each recommended action set actionInput to the exact shape the action workflow expects:
+            - endpoint.isolate_host → { "endpoint_ids": [agentId] }
+            - endpoint.kill_process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
+              or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
+            - endpoint.suspend_process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
+              or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
+            agentId must come from Elastic Defend agent.id in the telemetry.
+            For process actions include pid when present in telemetry, otherwise entity_id.
+            Never guess pids, entity_ids, or agent IDs that are not in the evidence.
+            Optionally add a short comment (one sentence) explaining why you chose this action.
+
           schema:
             type: object
             required:
@@ -153,6 +164,9 @@ steps:
                   Containment this reconstruction justifies. Empty when the evidence justifies none.
                 items:
                   type: object
+                  required:
+                    - actionId
+                    - actionInput
                   properties:
                     agentId:
                       type: string
@@ -162,3 +176,40 @@ steps:
                         - endpoint.isolate_host
                         - endpoint.kill_process
                         - endpoint.suspend_process
+                    comment:
+                      type: string
+                      maxLength: 500
+                      description: One sentence explaining why this action is justified.
+                    actionInput:
+                      type: object
+                      description: >
+                        Input for the action workflow. Shape depends on actionId:
+                        endpoint.isolate_host → { endpoint_ids }.
+                        endpoint.kill_process / endpoint.suspend_process → { endpoint_ids, parameters: { pid } or { entity_id } }.
+                      required:
+                        - endpoint_ids
+                      properties:
+                        endpoint_ids:
+                          type: array
+                          items:
+                            type: string
+                          description: Elastic Defend agent IDs (agent.id) from the evidence.
+                        parameters:
+                          type: object
+                          description: Required for kill/suspend — exactly one of pid or entity_id.
+                          properties:
+                            pid:
+                              type: number
+                              description: Process ID from endpoint telemetry.
+                            entity_id:
+                              type: string
+                              description: Elastic Defend process entity_id from endpoint telemetry.
+
+      - name: emit_result
+        type: workflow.output
+        status: completed
+        with:
+          propose: "${{ steps.forensic_analysis.output.propose }}"
+          rationale: "{{ steps.forensic_analysis.output.rationale }}"
+          proposal: "{{ steps.forensic_analysis.output.proposal }}"
+          recommendedActions: "${{ steps.forensic_analysis.output.recommendedActions }}"

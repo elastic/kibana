@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID } from './actions/action_isolate_host';
+import { ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID } from './actions/action_kill_process';
+import { ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID } from './actions/action_suspend_process';
 import { PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './dark_continuous_threat_hunt';
 import { PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
@@ -55,8 +58,31 @@ export const PND_MANAGED_WORKER_WORKFLOW_IDS = [
   PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
 ] as const;
 
+export {
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW,
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+} from './actions/action_isolate_host';
+export {
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+} from './actions/action_kill_process';
+export {
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+} from './actions/action_suspend_process';
+
 export const PND_RULE_WORKFLOW_IDS = [
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
+] as const;
+
+/**
+ * Action workflows AlertZero may propose. Discovery is normally by the generic
+ * `action` tag; this list is the install set and the fallback.
+ */
+export const ALERT_ZERO_ACTION_WORKFLOW_IDS = [
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 ] as const;
