@@ -7,8 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ApiClientFixture, KibanaRole } from '@kbn/scout-oblt';
-import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_API_URLS } from '../../../common/fixtures';
+import type { KibanaRole } from '@kbn/scout-oblt';
+import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
+import { testNowMonitor } from '../../../common/fixtures/monitors';
 
 /**
  * "Run test manually" (`POST /api/synthetics/monitor/test/{monitorId}`) is gated by an
@@ -40,13 +41,6 @@ const ROLE_CONFIGS = {
   },
 } satisfies Record<string, KibanaRole>;
 
-const runTest = (apiClient: ApiClientFixture, headers: Record<string, string>, monitorId: string) =>
-  apiClient.post(`${SYNTHETICS_API_URLS.TEST_NOW_MONITOR}/${monitorId}`.replace(/^\//, ''), {
-    headers,
-    body: {},
-    responseType: 'json',
-  });
-
 apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'] }, () => {
   let allHeaders: Record<string, string>;
   let readOnlyHeaders: Record<string, string>;
@@ -65,31 +59,25 @@ apiTest.describe('RunTestManuallyPermissions', { tag: ['@local-stateful-classic'
   });
 
   apiTest('read-only role cannot run tests (403)', async ({ apiClient }) => {
-    const res = await runTest(apiClient, readOnlyHeaders, uuidv4());
-    expect(res.statusCode).toBe(403);
+    const res = await testNowMonitor(apiClient, readOnlyHeaders, uuidv4(), { statusCode: 403 });
     expect(decodeURIComponent((res.body as { message?: string }).message ?? '')).toContain(
       '[uptime-write,monitor-run]'
     );
   });
 
   apiTest('user with no Synthetics access cannot run tests (403)', async ({ apiClient }) => {
-    const res = await runTest(apiClient, noSyntheticsHeaders, uuidv4());
-    expect(res.statusCode).toBe(403);
+    await testNowMonitor(apiClient, noSyntheticsHeaders, uuidv4(), { statusCode: 403 });
   });
 
   apiTest('read + can_run_test role is authorized to run tests', async ({ apiClient }) => {
-    const res = await runTest(apiClient, readWithRunHeaders, uuidv4());
     // Passes authz; the dummy monitor does not exist → 404, not 403.
-    expect(res.statusCode).not.toBe(403);
-    expect(res.statusCode).toBe(404);
+    await testNowMonitor(apiClient, readWithRunHeaders, uuidv4(), { statusCode: 404 });
   });
 
   apiTest(
     'base `all` role is still authorized to run tests (non-breaking)',
     async ({ apiClient }) => {
-      const res = await runTest(apiClient, allHeaders, uuidv4());
-      expect(res.statusCode).not.toBe(403);
-      expect(res.statusCode).toBe(404);
+      await testNowMonitor(apiClient, allHeaders, uuidv4(), { statusCode: 404 });
     }
   );
 });
