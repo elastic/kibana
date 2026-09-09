@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { get } from 'lodash';
 import type {
   AlertHit,
   AlertInstanceContext,
   CombinedSummarizedAlerts,
 } from '@kbn/alerting-plugin/server/types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { get } from 'lodash';
 import type { AlertEvent, AlertEventHit, AlertEventRule } from '../types/alert_types';
 
 const attachContext = (
