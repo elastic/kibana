@@ -24,6 +24,7 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 import { AutonomySlider } from './components/autonomy_slider';
+import { ScheduleIntervalField } from './components/schedule_interval_field';
 import { SettingsSection } from './components/settings_section';
 import { WorkerSkillsTable } from './components/worker_skills_table';
 import { WatchesSectionLayout } from './components/watches_section_layout';
@@ -62,6 +63,20 @@ const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
           updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
         }
       />
+      {/* Only schedule-driven Workers project an interval; the others are alert- or
+          event-triggered and own no schedule to configure. */}
+      {worker.settings.scheduleInterval != null ? (
+        <>
+          <EuiSpacer size="m" />
+          <ScheduleIntervalField
+            current={worker.settings.scheduleInterval}
+            isDisabled={settingsLocked}
+            onChange={(scheduleInterval) =>
+              updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
+            }
+          />
+        </>
+      ) : null}
       <EuiSpacer size="m" />
       <WorkerSkillsTable skills={worker.skills} />
     </SettingsSection>

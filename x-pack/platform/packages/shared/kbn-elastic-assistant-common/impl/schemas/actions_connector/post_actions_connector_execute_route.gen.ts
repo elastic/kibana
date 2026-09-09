@@ -25,7 +25,9 @@ export const ExecuteConnectorRequestQuery = lazySchema(() =>
     /**
      * If true, the response will not include content references.
      */
-    content_references_disabled: BooleanFromString.optional().default(false),
+    content_references_disabled: BooleanFromString.optional()
+      .default(false)
+      .describe('If true, the response will not include content references.'),
   })
 );
 export type ExecuteConnectorRequestQuery = z.infer<typeof ExecuteConnectorRequestQuery>;
@@ -36,7 +38,7 @@ export const ExecuteConnectorRequestParams = lazySchema(() =>
     /**
      * The connector's `id` value.
      */
-    connectorId: z.string(),
+    connectorId: z.string().describe("The connector's `id` value."),
   })
 );
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
@@ -60,7 +62,9 @@ export const ExecuteConnectorRequestBody = lazySchema(() =>
     /**
      * System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
      */
-    promptIds: PromptIds.optional(),
+    promptIds: PromptIds.optional().describe(
+      'System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server'
+    ),
   })
 );
 export type ExecuteConnectorRequestBody = z.infer<typeof ExecuteConnectorRequestBody>;
@@ -79,13 +83,17 @@ export const ExecuteConnectorResponse = lazySchema(() =>
         /**
          * Could be any string, not necessarily a UUID
          */
-        transactionId: z.string().optional(),
+        transactionId: z
+          .string()
+          .optional()
+          .describe('Could be any string, not necessarily a UUID'),
         /**
          * Could be any string, not necessarily a UUID
          */
-        traceId: z.string().optional(),
+        traceId: z.string().optional().describe('Could be any string, not necessarily a UUID'),
       })
-      .optional(),
+      .optional()
+      .describe('Trace Data'),
   })
 );
 export type ExecuteConnectorResponse = z.infer<typeof ExecuteConnectorResponse>;
