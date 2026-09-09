@@ -13,6 +13,7 @@ import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { LazyInitContext } from '@kbn/core-plugins-server';
 import { DEFERRED_INIT_STATE_TYPE } from '@kbn/core-deferred-init-common';
 import type { PluginWrapper } from './plugin';
@@ -40,6 +41,7 @@ export class PluginsSystem<T extends PluginType> {
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
+  private pluginNamesByOpaqueId?: Map<PluginOpaqueId, PluginName>;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -58,12 +60,41 @@ export class PluginsSystem<T extends PluginType> {
 
     this.plugins.set(plugin.name, plugin);
 
-    // clear sorted plugin name cache on addition
+    // clear derived plugin caches on addition
     this.sortedPluginNames = undefined;
+    this.pluginNamesByOpaqueId = undefined;
   }
 
   public getPlugins() {
     return [...this.plugins.values()];
+  }
+
+  /**
+   * Resolves a start contract on behalf of the plugin identified by `source`, backing
+   * `context.loadPluginContract()` in that plugin's route handlers. Opaque ids are what the
+   * request handler context knows about the route's owner; the runtime resolver works in plugin
+   * names and needs one to enforce that the dependency is declared in the caller's manifest.
+   *
+   * Returns `undefined` for an unknown opaque id (core's own routes, or a plugin belonging to the
+   * other plugin system) so the caller can reject with its own message.
+   */
+  public loadPluginContractFor(
+    source: PluginOpaqueId,
+    dependencyName: PluginName
+  ): Promise<unknown> | undefined {
+    const pluginName = this.getPluginNameByOpaqueId(source);
+    return pluginName === undefined
+      ? undefined
+      : this.runtimeResolver.loadPluginContract(pluginName, dependencyName);
+  }
+
+  private getPluginNameByOpaqueId(source: PluginOpaqueId): PluginName | undefined {
+    if (!this.pluginNamesByOpaqueId) {
+      this.pluginNamesByOpaqueId = new Map(
+        [...this.plugins.values()].map((plugin) => [plugin.opaqueId, plugin.name])
+      );
+    }
+    return this.pluginNamesByOpaqueId.get(source);
   }
 
   /**
@@ -107,6 +138,9 @@ export class PluginsSystem<T extends PluginType> {
     const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
     this.runtimeResolver.setDependencyMap(runtimeDependencies);
     if (this.deferredInitEngine) {
+      const lazyPluginNames = collectLazyPluginNames(this.plugins);
+      assertLazyPluginsAreNotInjectedDependencies(this.plugins, lazyPluginNames);
+      this.runtimeResolver.setLazyPluginNames(lazyPluginNames);
       this.runtimeResolver.setDeferredInitEngine(this.deferredInitEngine);
     }
 
@@ -472,6 +506,67 @@ const buildReverseDependencyMap = (
     reverseMap.set(pluginName, []);
   }
   return reverseMap;
+};
+
+/**
+ * Deferred initialization is a server-side concern -- the engine only ever registers a plugin
+ * during the server `setup()` loop -- so a plugin without server code cannot be lazy no matter
+ * what its manifest says, and must not constrain how others depend on it.
+ */
+const collectLazyPluginNames = (pluginMap: Map<PluginName, PluginWrapper>): Set<PluginName> =>
+  new Set(
+    [...pluginMap.values()]
+      .filter((plugin) => plugin.enableLazyInitialize && plugin.includesServerPlugin)
+      .map(({ name }) => name)
+  );
+
+/**
+ * Rejects, at boot, any plugin that declares a deferred-init plugin as a required or optional
+ * dependency. Core builds the `plugins` argument of `setup()`/`start()` from those two lists
+ * alone, so such a declaration hands the dependent a start contract whose Elasticsearch-backed
+ * state has not been initialized yet, with nothing at the call site to signal it. Declaring the
+ * dependency under `runtimePluginDependencies` instead keeps it out of that argument entirely --
+ * and out of the topological sort, so a lazy plugin no longer dictates its dependents' boot order
+ * -- while still permitting `core.plugins.loadPluginContract()`, which waits for the deferred init
+ * to finish before handing the contract over.
+ *
+ * Only dependents that ship server code are checked: `requiredPlugins` is shared by both sides of
+ * a plugin, and a browser-only dependent is never handed a server contract, so forbidding the
+ * declaration there would reject a perfectly safe dependency on the lazy plugin's browser
+ * contract.
+ */
+const assertLazyPluginsAreNotInjectedDependencies = (
+  pluginMap: Map<PluginName, PluginWrapper>,
+  lazyPluginNames: ReadonlySet<PluginName>
+): void => {
+  if (!lazyPluginNames.size) {
+    return;
+  }
+
+  const violations: string[] = [];
+  for (const [pluginName, plugin] of pluginMap) {
+    if (!plugin.includesServerPlugin) {
+      continue;
+    }
+    for (const dependencyName of new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins])) {
+      if (lazyPluginNames.has(dependencyName)) {
+        violations.push(`"${pluginName}" -> "${dependencyName}"`);
+      }
+    }
+  }
+
+  if (violations.length) {
+    throw new Error(
+      `Plugins that opt into deferred initialization cannot be declared as required or optional ` +
+        `dependencies, because core would then inject their uninitialized start contract into the ` +
+        `dependent's setup()/start(). Offending dependencies: ${violations.join(
+          ', '
+        )}. Move each ` +
+        `of these to "runtimePluginDependencies" in the dependent's kibana.jsonc, and read the ` +
+        `contract with "await core.plugins.loadPluginContract(<dependency>)" from a route handler, ` +
+        `a task runner, or another post-boot code path.`
+    );
+  }
 };
 
 const buildPluginRuntimeDependencyMap = (

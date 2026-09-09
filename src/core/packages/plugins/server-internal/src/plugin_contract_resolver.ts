@@ -23,6 +23,15 @@ export class RuntimePluginContractResolver {
   private setupContracts?: Map<PluginName, unknown>;
   private startContracts?: Map<PluginName, unknown>;
   private deferredInitEngine?: DeferredInitEngine;
+  /**
+   * Names of the plugins that opted into deferred initialization, derived from the manifests
+   * during `setupPlugins` and therefore known before any plugin's `setup()` runs. The engine's
+   * own {@link DeferredInitEngine.isRegistered} cannot back the {@link onStart} guard: lazy
+   * dependencies are declared as `runtimePluginDependencies`, which create no topological edge,
+   * so a dependent can call `onStart` from its own `setup()` before the lazy plugin has been set
+   * up and registered with the engine.
+   */
+  private lazyPluginNames: ReadonlySet<PluginName> = new Set();
 
   private readonly setupRequestQueue: PluginContractRequest[] = [];
   private readonly startRequestQueue: PluginContractRequest[] = [];
@@ -44,24 +53,15 @@ export class RuntimePluginContractResolver {
     this.deferredInitEngine = engine;
   }
 
+  setLazyPluginNames(names: ReadonlySet<PluginName>) {
+    this.lazyPluginNames = new Set(names);
+  }
+
   onSetup = <T extends PluginContractMap>(
     pluginName: PluginName,
     dependencyNames: Array<keyof T>
   ): Promise<PluginContractResolverResponse<T>> => {
-    if (!this.dependencyMap) {
-      throw new Error('onSetup cannot be called before setDependencyMap');
-    }
-
-    const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
-    const notDependencyPlugins = dependencyNames.filter(
-      (name) => !dependencyList.has(name as PluginName)
-    );
-    if (notDependencyPlugins.length) {
-      throw new Error(
-        'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
-          `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
-      );
-    }
+    this.assertDeclaredDependencies('onSetup', pluginName, dependencyNames as PluginName[]);
 
     if (this.setupContracts) {
       const response = createContractRequestResponse(
@@ -82,40 +82,67 @@ export class RuntimePluginContractResolver {
     pluginName: PluginName,
     dependencyNames: Array<keyof T>
   ): Promise<PluginContractResolverResponse<T>> => {
+    this.assertDeclaredDependencies('onStart', pluginName, dependencyNames as PluginName[]);
+
+    // `onStart` hands back the raw start contract the moment the dependency's `start()` returns,
+    // which for a deferred-init plugin is before its Elasticsearch work has run. Route it to
+    // `loadPluginContract`, which waits for that work, rather than leaving a silent bypass of the
+    // boot-time rule that keeps lazy plugins out of the injected `plugins` argument.
+    const lazyDependencies = (dependencyNames as PluginName[]).filter((name) =>
+      this.lazyPluginNames.has(name)
+    );
+    if (lazyDependencies.length) {
+      throw new Error(
+        `onStart cannot resolve plugins that opt into deferred initialization, because their ` +
+          `start contract is not safe to use until that initialization completes. Deferred-init ` +
+          `dependencies: ${lazyDependencies.join(', ')}. Use ` +
+          `"await core.plugins.loadPluginContract(<dependency>)" instead, from a post-boot code ` +
+          `path such as a route handler or a task runner.`
+      );
+    }
+
+    return this.requestStartContracts<T>(dependencyNames as PluginName[]);
+  };
+
+  private assertDeclaredDependencies(
+    api: 'onSetup' | 'onStart' | 'loadPluginContract',
+    pluginName: PluginName,
+    dependencyNames: PluginName[]
+  ): void {
     if (!this.dependencyMap) {
-      throw new Error('onStart cannot be called before setDependencyMap');
+      throw new Error(`${api} cannot be called before setDependencyMap`);
     }
 
     const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
-    const notDependencyPlugins = dependencyNames.filter(
-      (name) => !dependencyList.has(name as PluginName)
-    );
+    const notDependencyPlugins = dependencyNames.filter((name) => !dependencyList.has(name));
     if (notDependencyPlugins.length) {
       throw new Error(
         'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
           `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
       );
     }
+  }
 
+  /**
+   * The queueing half of {@link onStart}, without its deferred-init guard, so
+   * {@link loadPluginContract} can reuse it -- that API is the sanctioned way to reach a lazy
+   * plugin's start contract, so it must not trip the guard that points callers at it.
+   */
+  private requestStartContracts = <T extends PluginContractMap>(
+    dependencyNames: PluginName[]
+  ): Promise<PluginContractResolverResponse<T>> => {
     if (this.startContracts) {
-      const response = createContractRequestResponse(
-        dependencyNames as PluginName[],
-        this.startContracts
-      );
+      const response = createContractRequestResponse(dependencyNames, this.startContracts);
       return Promise.resolve(response as PluginContractResolverResponse<T>);
     }
 
-    if ((dependencyNames as PluginName[]).every((name) => this.availableStartContracts.has(name))) {
-      const response = createContractRequestResponse(
-        dependencyNames as PluginName[],
-        this.availableStartContracts
-      );
+    if (dependencyNames.every((name) => this.availableStartContracts.has(name))) {
+      const response = createContractRequestResponse(dependencyNames, this.availableStartContracts);
       return Promise.resolve(response as PluginContractResolverResponse<T>);
     }
 
-    const startContractRequest = createPluginContractRequest<PluginContractResolverResponse<T>>(
-      dependencyNames as PluginName[]
-    );
+    const startContractRequest =
+      createPluginContractRequest<PluginContractResolverResponse<T>>(dependencyNames);
     this.startRequestQueue.push(startContractRequest as PluginContractRequest);
     return startContractRequest.contractPromise;
   };
@@ -155,7 +182,9 @@ export class RuntimePluginContractResolver {
     pluginName: PluginName,
     dependencyName: PluginName
   ): Promise<T> => {
-    const response = await this.onStart<Record<PluginName, T>>(pluginName, [dependencyName]);
+    this.assertDeclaredDependencies('loadPluginContract', pluginName, [dependencyName]);
+
+    const response = await this.requestStartContracts<Record<PluginName, T>>([dependencyName]);
     const item = response[dependencyName];
     if (!item.found) {
       throw new Error(

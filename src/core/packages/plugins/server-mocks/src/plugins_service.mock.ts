@@ -32,6 +32,7 @@ const createServiceMock = (): PluginsServiceMock =>
   lazyObject({
     discover: jest.fn(),
     getExposedPluginConfigsToUsage: jest.fn(),
+    loadPluginContractForRoute: jest.fn(),
     preboot: jest.fn(),
     setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
     start: jest.fn().mockResolvedValue(createInternalStartContractMock()),

@@ -199,16 +199,19 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
 }): CoreSetup {
   const router = deps.http.createRouter('', plugin.opaqueId);
 
+  // Defined only for plugins that opted into deferred init, so the surfaces below can narrow on
+  // it instead of re-checking both conditions (and asserting non-null) at each use.
+  const lazyInitEngine = plugin.enableLazyInitialize ? deferredInitEngine : undefined;
+
   // For plugins opted into deferred init, hand the plugin a guarded router whose routes return
   // 503 until init completes. Resolved lazily (memoized) on first `createRouter()` call.
   // Asset serving via `resources` keeps the raw, un-gated router.
   let exposedRouter: IRouter | undefined;
   const getExposedRouter = (): IRouter => {
     if (!exposedRouter) {
-      exposedRouter =
-        deferredInitEngine && plugin.enableLazyInitialize
-          ? createGuardedRouter(router, deferredInitEngine, plugin.name)
-          : router;
+      exposedRouter = lazyInitEngine
+        ? createGuardedRouter(router, lazyInitEngine, plugin.name)
+        : router;
     }
     return exposedRouter;
   };
@@ -253,7 +256,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getDeprecatedRoutes: deps.http.getDeprecatedRoutes,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Omit<Context, 'resolve'>
+        ContextName extends keyof Omit<Context, 'resolve' | 'loadPluginContract'>
       >(
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>
@@ -326,10 +329,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
       loadPluginContract: (dependencyName) =>
         runtimeResolver.loadPluginContract(plugin.name, dependencyName),
-      lazyInit:
-        deferredInitEngine && plugin.enableLazyInitialize
-          ? { waitForInit: () => deferredInitEngine.waitUntilAvailable(plugin.name) }
-          : undefined,
+      lazyInit: lazyInitEngine
+        ? { waitForInit: () => lazyInitEngine.waitUntilAvailable(plugin.name) }
+        : undefined,
     },
     pricing: {
       isFeatureAvailable: deps.pricing.isFeatureAvailable,

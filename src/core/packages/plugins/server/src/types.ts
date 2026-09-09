@@ -275,6 +275,14 @@ export interface PluginManifest {
   /**
    * Opt this plugin into core-managed lazy/deferred Elasticsearch initialization. See
    * {@link Plugin.lazyInitialize}. Default is false.
+   *
+   * @remarks
+   * Once set, no other plugin may list this one under `requiredPlugins` or `optionalPlugins` --
+   * core rejects that at boot. Those two lists are what core injects into a dependent's
+   * `setup()`/`start()` arguments, and the injected start contract would be backed by
+   * Elasticsearch state that has not been initialized yet. Dependents must declare this plugin
+   * under `runtimePluginDependencies` and read its start contract with
+   * `core.plugins.loadPluginContract()`, which waits for the deferred init to complete.
    */
   readonly enableLazyInitialize?: boolean;
 }

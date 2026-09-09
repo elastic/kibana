@@ -107,6 +107,10 @@ export interface PluginsServiceSetup {
    * @remark The execution order is not guaranteed to be consistent. Only guarantee is that the returned promise will be
    *         resolved once all plugins are started, and before Core's `start` lifecycle is resumed.
    *
+   * @remark Throws for a dependency that opted into deferred initialization: its start
+   *         contract is not safe to use until that initialization completes, so those must be
+   *         read with {@link LoadPluginContract | loadPluginContract} instead.
+   *
    * @example
    * ```ts
    * setup(core) {
@@ -184,6 +188,10 @@ export interface PluginsServiceStart {
    *
    * @remark The execution order is not guaranteed to be consistent. Only guarantee is that the returned promise will be
    *         resolved once all plugins are started, and before Core's `start` lifecycle is resumed.
+   *
+   * @remark Throws for a dependency that opted into deferred initialization: its start
+   *         contract is not safe to use until that initialization completes, so those must be
+   *         read with {@link LoadPluginContract | loadPluginContract} instead.
    *
    * @example
    * ```ts

@@ -59,15 +59,16 @@ export class DeferredInitExampleConsumerServerPlugin
         },
         validate: false,
       },
-      async (_context, _request, response) => {
-        // Correct pattern #1 — call `loadPluginContract` from a route handler (post-boot). This
-        // plugin never touches `deferredInitExample`'s own routes, yet loading its start contract
-        // here still (1) kicks its deferred init if nobody has triggered it yet, (2) waits for it,
-        // and (3) throws DeferredInitializationError (-> 503 via core's central handler) on failure.
+      async (context, _request, response) => {
+        // Correct pattern #1 — `context.loadPluginContract` from a route handler (post-boot).
+        // This plugin never touches `deferredInitExample`'s own routes, yet loading its start
+        // contract here still (1) kicks its deferred init if nobody has triggered it yet,
+        // (2) waits for it, and (3) throws DeferredInitializationError (-> 503 via core's central
+        // handler) on failure. It is scoped to this plugin, so `deferredInitExample` must be
+        // declared in this plugin's manifest -- as `runtimePluginDependencies`, since a lazy
+        // plugin cannot be a required/optional dependency.
         const deferredInitExample =
-          await core.plugins.loadPluginContract<DeferredInitExampleStartContract>(
-            'deferredInitExample'
-          );
+          await context.loadPluginContract<DeferredInitExampleStartContract>('deferredInitExample');
         const doc = await deferredInitExample.getDoc();
         return response.ok({ body: doc });
       }

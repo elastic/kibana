@@ -420,6 +420,54 @@ describe('RuntimePluginContractResolver', () => {
     });
   });
 
+  describe('deferred-init dependencies', () => {
+    beforeEach(() => {
+      resolver.setLazyPluginNames(new Set(['pluginA']));
+    });
+
+    it('rejects onStart for a dependency that opted into deferred initialization', () => {
+      expect(() => resolver.onStart(SOURCE_PLUGIN, ['pluginA'])).toThrowError(
+        /onStart cannot resolve plugins that opt into deferred initialization/
+      );
+    });
+
+    it('rejects onStart when only one of several dependencies is lazy, naming just that one', () => {
+      expect(() => resolver.onStart(SOURCE_PLUGIN, ['pluginB', 'pluginA'])).toThrowError(
+        /Deferred-init dependencies: pluginA\./
+      );
+    });
+
+    it('still resolves onStart for non-lazy dependencies', async () => {
+      resolver.resolveStartRequests(toMap({ pluginB: 'contractB' }));
+
+      await expect(resolver.onStart(SOURCE_PLUGIN, ['pluginB'])).resolves.toEqual({
+        pluginB: { found: true, contract: 'contractB' },
+      });
+    });
+
+    it('still allows onSetup for a lazy dependency, whose setup contract needs no deferred init', async () => {
+      resolver.resolveSetupRequests(toMap({ pluginA: 'setupContractA' }));
+
+      await expect(resolver.onSetup(SOURCE_PLUGIN, ['pluginA'])).resolves.toEqual({
+        pluginA: { found: true, contract: 'setupContractA' },
+      });
+    });
+
+    it('does not let the onStart guard block loadPluginContract, the sanctioned path', async () => {
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).resolves.toBe(
+        pluginAContract
+      );
+    });
+
+    it('rejects loadPluginContract for a dependency missing from the manifest', async () => {
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'undeclared')).rejects.toThrowError(
+        /Undeclared dependencies: undeclared/
+      );
+    });
+  });
+
   describe('loadPluginContract', () => {
     const createEngineMock = (): jest.Mocked<DeferredInitEngine> =>
       ({

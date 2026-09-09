@@ -16,7 +16,7 @@ import { getFlattenedObject } from '@kbn/std';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { type PluginName, PluginType } from '@kbn/core-base-common';
+import { type PluginName, type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
@@ -109,6 +109,27 @@ export class PluginsService
       this.deferredInitEngine
     );
   }
+
+  /**
+   * Backs `context.loadPluginContract()` for standard plugins' route handlers. Handed to the
+   * context service at setup, which knows a route's owner only by opaque id. Preboot plugins are
+   * excluded: no start contract exists during preboot.
+   */
+  public readonly loadPluginContractForRoute = (
+    source: PluginOpaqueId,
+    dependencyName: PluginName
+  ): Promise<unknown> => {
+    const contract = this.standardPluginsSystem.loadPluginContractFor(source, dependencyName);
+    if (!contract) {
+      return Promise.reject(
+        new Error(
+          `Cannot load the start contract of "${dependencyName}": context.loadPluginContract() ` +
+            `is only available to routes registered by a standard plugin.`
+        )
+      );
+    }
+    return contract;
+  };
 
   public async discover({
     environment,

@@ -28,6 +28,7 @@ describe('getDiscoverSession', () => {
     });
 
     const requestContext = {
+      loadPluginContract: jest.fn(),
       resolve: jest.fn().mockResolvedValue({ core }),
     } as unknown as RequestHandlerContext;
 
