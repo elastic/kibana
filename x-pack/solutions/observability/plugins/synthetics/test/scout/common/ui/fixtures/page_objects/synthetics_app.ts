@@ -318,7 +318,8 @@ export class SyntheticsAppPage {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
       if (selector.includes('codeEditorContainer')) {
-        // Monaco splits long scripts across .view-line nodes; assert the unique container.
+        // Monaco wraps long scripts across .view-line nodes, and Advanced
+        // options adds a second codeEditorContainer for params.
         await expect(this.page.locator(selector)).toContainText(expected);
       } else {
         await expect(this.page.locator(selector)).toHaveValue(expected);

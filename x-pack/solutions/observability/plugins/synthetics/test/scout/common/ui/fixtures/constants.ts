@@ -110,7 +110,10 @@ export const monitorConfigurations = (locationLabel: string) => {
       monitorEditDetails: [
         ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
         ['[data-test-subj=syntheticsMonitorConfigName]', browserName],
-        ['[data-test-subj="codeEditorContainer"]', 'step("test step", () => {})'],
+        [
+          'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"]',
+          'step("test step", () => {})',
+        ],
         ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
       ] as Array<[string, string]>,
     },
@@ -133,7 +136,7 @@ export const monitorConfigurations = (locationLabel: string) => {
         ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
         ['[data-test-subj=syntheticsMonitorConfigName]', apiName],
         [
-          '[data-test-subj="codeEditorContainer"]',
+          'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"]',
           'step("ping", async ({ request }) => { await request.get("https://elastic.co"); })',
         ],
         ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
@@ -156,7 +159,10 @@ export const monitorConfigurations = (locationLabel: string) => {
       monitorEditDetails: [
         ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
         ['[data-test-subj=syntheticsMonitorConfigName]', browserRecorderName],
-        ['[data-test-subj="codeEditorContainer"]', 'step("test step", () => {})'],
+        [
+          'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"]',
+          'step("test step", () => {})',
+        ],
       ] as Array<[string, string]>,
     },
   };
