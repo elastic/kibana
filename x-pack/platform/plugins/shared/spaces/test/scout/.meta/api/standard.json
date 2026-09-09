@@ -1,5 +1,5 @@
 {
-  "sha1": "8ab33c1ba0785cdedefd83bbc58d47acbcaf6608",
+  "sha1": "c9e2b412218db3170d09f62148c14180564b7146",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -94,7 +94,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/content_summary.spec.ts",
-        "line": 46,
+        "line": 48,
         "column": 57
       }
     },
@@ -108,7 +108,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/content_summary.spec.ts",
-        "line": 70,
+        "line": 72,
         "column": 14
       }
     },
@@ -122,7 +122,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/content_summary.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 24
       }
     },
@@ -256,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/persisted_feature_visibility.spec.ts",
-        "line": 49,
-        "column": 49
+        "line": 52,
+        "column": 31
       }
     },
     {
@@ -270,8 +270,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/persisted_feature_visibility.spec.ts",
-        "line": 62,
-        "column": 75
+        "line": 65,
+        "column": 48
       }
     },
     {
@@ -284,8 +284,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/persisted_feature_visibility.spec.ts",
-        "line": 77,
-        "column": 11
+        "line": 79,
+        "column": 77
       }
     },
     {
@@ -602,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 52
       }
     },
@@ -616,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 14
       }
     },
@@ -630,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 80
       }
     },
@@ -644,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 20
       }
     },
@@ -658,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 51
       }
     },
@@ -672,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 26
       }
     },
@@ -686,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 26
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 88,
+        "line": 89,
         "column": 29
       }
     },
@@ -714,7 +714,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 24
       }
     },
@@ -728,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/space_attributes.spec.ts",
-        "line": 27,
-        "column": 11
+        "line": 28,
+        "column": 5
       }
     },
     {
@@ -742,8 +742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/space_attributes.spec.ts",
-        "line": 46,
-        "column": 14
+        "line": 47,
+        "column": 9
       }
     },
     {
@@ -756,7 +756,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/space_attributes.spec.ts",
-        "line": 67,
+        "line": 69,
         "column": 7
       }
     },
