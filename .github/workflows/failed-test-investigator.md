@@ -123,6 +123,13 @@ safe-outputs:
     # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
     # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+    # Apply labels through the REST add-labels endpoint. With issue intents on, the
+    # agent's `confidence` is forwarded to GitHub's `updateIssue` mutation, which at the
+    # repo's default "Cautious" automation level only writes HIGH-confidence labels and
+    # parks MEDIUM/LOW ones as pending suggestions. A `medium` verdict then silently
+    # applied no labels at all, so `ai:fix-flaky` never fired the Flaky Test Fixer
+    # (see https://github.com/github/gh-aw/issues/53654).
+    issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
