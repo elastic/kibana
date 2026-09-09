@@ -42,11 +42,6 @@ export interface CreateModelProviderOpts {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
-  /**
-   * Optional reasoning effort forwarded to the LLM as `reasoning.effort` on chatComplete
-   * requests made through this provider's returned models. Ignored for the fast model
-   * (i.e. models resolved via {@link getFastModelConnectorId}).
-   */
   reasoningLevel?: ChatCompletionReasoningEffort;
 }
 
@@ -163,9 +158,8 @@ export const createModelProvider = ({
     };
   };
 
-  // Cache key encodes (connectorId, applyReasoning) so the same connector can serve both
-  // a reasoning-enabled and reasoning-free variant when it is reached through both the default
-  // path and the fast path (which happens when no dedicated fast endpoint is configured).
+  // Cache key encodes (connectorId, applyReasoning) so the same connector can serve both a
+  // reasoning-enabled and reasoning-free variant when it is reached through both the default path and the fast path
   const buildScopedModel = memoizeAsyncByKey(async (key: string): Promise<ScopedModel> => {
     const [connectorId, applyReasoningFlag] = key.split('|');
     const applyReasoning = applyReasoningFlag === 'true';
@@ -236,8 +230,9 @@ export const createModelProvider = ({
   const getModelById = (
     connectorId: string,
     applyReasoning: boolean = true
-  ): Promise<ScopedModel> =>
-    buildScopedModel(`${connectorId}|${applyReasoning && reasoningLevel !== undefined}`);
+  ): Promise<ScopedModel> => {
+    return buildScopedModel(`${connectorId}|${applyReasoning && reasoningLevel !== undefined}`);
+  };
 
   const hasFastModel = memoizeAsync(async () => {
     const [fastConnectorId, resolvedDefaultConnectorId] = await Promise.all([
