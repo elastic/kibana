@@ -305,10 +305,21 @@ the tag back with `platform.core.execute_esql`:
 
 ```esql
 FROM <destination> METADATA _id
+| MV_EXPAND tags
 | WHERE tags == "ce-pilot-<runId>"
 | KEEP _id, title, type, content, attributes
 | LIMIT 100
 ```
+
+`MV_EXPAND tags` is not optional and is the one part of this worth memorizing. `tags` is a keyword
+array, an indicator carries several, and in ES|QL a scalar comparison like `==` skips multivalued
+rows outright rather than matching any element. Without the expand the query is valid, runs, and
+returns nothing at all — which reads exactly like a pilot that wrote no indicators, and sends you
+looking for a fault in the workflow that isn't there. Expanding first gives one row per tag, so the
+`WHERE` then matches the row carrying the pilot tag.
+
+`<destination>` is the `dest.value` from the brief. `FROM ai-index-*` works too when you are unsure
+of it, at the cost of scanning every AI index.
 
 Judge those against what the brief asked for. When one step is what is wrong,
 `platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can

@@ -220,6 +220,16 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/Both of these parse, validate and run/);
     });
 
+    it('expands tags before filtering, since == skips multivalued rows', () => {
+      expect(content).toMatch(/\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"/);
+      expect(content).toMatch(/`MV_EXPAND tags` is not optional/);
+      expect(content).toMatch(/skips multivalued\s+rows outright/);
+    });
+
+    it('warns that the unexpanded query looks like a pilot that wrote nothing', () => {
+      expect(content).toMatch(/returns nothing at all — which reads exactly like a pilot/);
+    });
+
     it('requires the pilot to tag its indicators and delete them afterwards', () => {
       expect(content).toContain('ce-pilot-');
       expect(content).toContain('context-engine.deleteKi');

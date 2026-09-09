@@ -188,9 +188,9 @@ describe('saveAutomationHandler', () => {
       assertCanAcceptAutomation: jest.fn().mockResolvedValue(undefined),
     };
     workflowsManagement = {
-      getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new' }),
+      getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
       createWorkflow: jest.fn(),
-      updateWorkflow: jest.fn(),
+      updateWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
       deleteWorkflows: jest.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
     };
     getCoreStart.mockResolvedValue({});
@@ -378,6 +378,38 @@ describe('saveAutomationHandler', () => {
         executionId: 'exec-1',
         enabledForRun: true,
       });
+    });
+
+    it('reports why enabling was refused rather than executing into "workflow is disabled"', async () => {
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-new', enabled: false });
+      workflowsManagement.updateWorkflow.mockResolvedValue({
+        id: 'wf-new',
+        enabled: false,
+        validationErrors: ['Workflow has no valid definition'],
+      });
+
+      const result = await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.status).toBe('saved_and_attached');
+      expect(result.run).toEqual({
+        started: false,
+        reason:
+          "Workflow 'wf-new' is saved but could not be enabled, so it was not run. Workflow has no valid definition",
+      });
+    });
+
+    it('treats a workflow with no enabled flag as one that still needs enabling', async () => {
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-new' });
+
+      await save({ workflowAttachmentId: WORKFLOW_ATTACHMENT_ID, run: true });
+
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        'wf-new',
+        { enabled: true },
+        'default',
+        request
+      );
     });
 
     it('leaves an already enabled definition alone', async () => {

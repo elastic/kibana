@@ -445,9 +445,27 @@ const runSavedAutomation = async ({
     // A disabled definition cannot be run by id. Asking to save and run is consent to enable it,
     // and `enabled` on its own is the one update a managed workflow accepts.
     const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
-    const enabledForRun = workflow?.enabled === false;
+    const enabledForRun = workflow?.enabled !== true;
     if (enabledForRun) {
-      await workflowsManagement.updateWorkflow(workflowId, { enabled: true }, spaceId, request);
+      // Enabling is refused rather than thrown when the stored definition is invalid, and the
+      // refusal only shows up on the response. Reporting that beats executing into a bare
+      // "workflow is disabled", which names the symptom and not the reason.
+      const update = await workflowsManagement.updateWorkflow(
+        workflowId,
+        { enabled: true },
+        spaceId,
+        request
+      );
+
+      if (update.enabled !== true) {
+        const details = update.validationErrors?.length
+          ? ` ${update.validationErrors.join('; ')}`
+          : '';
+        return {
+          started: false,
+          reason: `Workflow '${workflowId}' is saved but could not be enabled, so it was not run.${details}`,
+        };
+      }
     }
 
     const result = await executeWorkflow({
