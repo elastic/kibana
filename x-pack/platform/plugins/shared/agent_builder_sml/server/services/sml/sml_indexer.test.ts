@@ -128,8 +128,8 @@ describe('createSmlIndexer', () => {
         query: {
           bool: {
             filter: [
-              { term: { 'origin.uri': 'lens://att-1' } },
-              { term: { ingestion_method: 'crawled' } },
+              { term: { 'attributes.origin.uri': 'lens://att-1' } },
+              { term: { 'attributes.ingestion_method': 'crawled' } },
             ],
           },
         },
@@ -183,7 +183,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { bool: { filter: [{ term: { 'origin.uri': 'lens://att-2' } }] } },
+        query: { bool: { filter: [{ term: { 'attributes.origin.uri': 'lens://att-2' } }] } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -196,13 +196,9 @@ describe('createSmlIndexer', () => {
       // inputs are. Document carries `origin_id`/`type` as searchable fields.
       expect(bulkCall.operations[0].index._id).toBe('mock-uuid-1');
       expect(bulkCall.operations[1]).toEqual({
-        id: 'mock-uuid-1',
         type: 'lens',
         title: 'My Viz',
-        origin: { uri: 'lens://att-2' },
         content: 'content',
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
         permissions: {
           kibana: {
             privileges: [
@@ -211,7 +207,14 @@ describe('createSmlIndexer', () => {
             ],
           },
         },
-        ingestion_method: 'crawled',
+        // Bookkeeping lives under the flattened `attributes` root.
+        attributes: {
+          id: 'mock-uuid-1',
+          origin: { uri: 'lens://att-2' },
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          ingestion_method: 'crawled',
+        },
       });
     });
 
@@ -253,28 +256,69 @@ describe('createSmlIndexer', () => {
       expect(bulkMock).toHaveBeenCalledTimes(1);
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.operations[1]).toEqual({
-        id: 'mock-uuid-1',
         type: 'dashboard',
         title: 'Sales Q3',
-        origin: { uri: 'dashboard://dash-100' },
         content: 'sales dashboard for Q3 with revenue and conversion metrics',
         description: 'Quarterly sales overview, executive audience',
         tags: ['sales', 'executive', 'quarterly'],
-        attributes: {
-          owner_team: 'sales-ops',
-          fields: [{ name: 'revenue', type: 'currency' }],
-        },
-        user_id: 'user-7',
         references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
         permissions: {
           kibana: {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
-        ingestion_method: 'crawled',
+        // The type writer's own attributes sit alongside the SML-owned keys.
+        attributes: {
+          owner_team: 'sales-ops',
+          fields: [{ name: 'revenue', type: 'currency' }],
+          id: 'mock-uuid-1',
+          origin: { uri: 'dashboard://dash-100' },
+          user_id: 'user-7',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          ingestion_method: 'crawled',
+        },
       });
+    });
+
+    it('producer attributes cannot override the SML bookkeeping keys', async () => {
+      const smlEntry = {
+        type: 'dashboard',
+        title: 'Forged',
+        content: 'c',
+        attributes: {
+          // `origin.uri` gates deleteEntry and `ingestion_method` gates manual-entry
+          // protection, so a type writer must not be able to forge either.
+          origin: { uri: 'dashboard://somebody-elses-origin' },
+          ingestion_method: 'manual',
+          id: 'forged-id',
+          owner_team: 'sales-ops',
+        },
+      };
+      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry })
+      );
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'dash-1',
+          attachmentType: 'dashboard',
+          action: 'create',
+          esClient,
+          logger,
+        })
+      );
+
+      const { attributes } = bulkMock.mock.calls[0][0].operations[1];
+      expect(attributes.origin).toEqual({ uri: 'dashboard://dash-1' });
+      expect(attributes.ingestion_method).toBe('crawled');
+      expect(attributes.id).toBe('mock-uuid-1');
+      // Non-reserved producer keys survive.
+      expect(attributes.owner_team).toBe('sales-ops');
     });
 
     it('update action: same as create (delete-then-write)', async () => {
@@ -649,8 +693,8 @@ describe('createSmlIndexer', () => {
             query: expect.objectContaining({
               bool: expect.objectContaining({
                 filter: expect.arrayContaining([
-                  { term: { 'origin.uri': 'lens://att-protected' } },
-                  { term: { ingestion_method: 'manual' } },
+                  { term: { 'attributes.origin.uri': 'lens://att-protected' } },
+                  { term: { 'attributes.ingestion_method': 'manual' } },
                 ]),
               }),
             }),
@@ -689,7 +733,7 @@ describe('createSmlIndexer', () => {
         expect(esClient.count).not.toHaveBeenCalled();
         expect(getSmlEntry).toHaveBeenCalledTimes(1);
         expect(bulkMock).toHaveBeenCalledTimes(1);
-        expect(bulkMock.mock.calls[0][0].operations[1].ingestion_method).toBe('crawled');
+        expect(bulkMock.mock.calls[0][0].operations[1].attributes.ingestion_method).toBe('crawled');
       });
 
       it('delete action proceeds regardless of manual entries', async () => {
@@ -1121,7 +1165,7 @@ describe('createSmlIndexer', () => {
       // No ingestion_method term means both manual + crawled are removed.
       // Space guard is present because createDeleteParams defaults spaces to ['default'].
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'origin.uri': 'lens://att-wipe-all' } },
+        { term: { 'attributes.origin.uri': 'lens://att-wipe-all' } },
         {
           nested: {
             path: 'permissions.kibana.privileges',
@@ -1144,8 +1188,8 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'origin.uri': 'lens://att-wipe-manual' } },
-        { term: { ingestion_method: 'manual' } },
+        { term: { 'attributes.origin.uri': 'lens://att-wipe-manual' } },
+        { term: { 'attributes.ingestion_method': 'manual' } },
         {
           nested: {
             path: 'permissions.kibana.privileges',
@@ -1168,8 +1212,8 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'origin.uri': 'lens://att-default-scope' } },
-        { term: { ingestion_method: 'crawled' } },
+        { term: { 'attributes.origin.uri': 'lens://att-default-scope' } },
+        { term: { 'attributes.ingestion_method': 'crawled' } },
         {
           nested: {
             path: 'permissions.kibana.privileges',
@@ -1215,7 +1259,9 @@ describe('createSmlIndexer', () => {
 
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       // No space guard when spaces is empty — global delete.
-      expect(callArgs.query.bool.filter).toEqual([{ term: { 'origin.uri': 'lens://att-global' } }]);
+      expect(callArgs.query.bool.filter).toEqual([
+        { term: { 'attributes.origin.uri': 'lens://att-global' } },
+      ]);
     });
   });
 });

@@ -30,10 +30,10 @@ const createDeps = () => {
   esClient.indices.getIndexTemplate.mockResolvedValue({
     index_templates: [
       {
-        name: 'ai-index-idx-sml',
+        name: 'ai-index-idx-managed',
         index_template: {
-          index_patterns: [`${smlIndexName}*`],
-          composed_of: ['ai-index@mappings', 'ai-index-sml@mappings'],
+          index_patterns: ['.ai-index-idx-*'],
+          composed_of: ['ai-index@mappings', 'ai-index-managed@mappings'],
           version: TEMPLATE_VERSION,
         },
       },

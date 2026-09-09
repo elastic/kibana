@@ -12,7 +12,7 @@ import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from
 import { expect } from '@kbn/scout/api';
 import type { SmlSearchHttpResponse } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
 import { AGENT_BUILDER_SML_FEATURE_ID } from '@kbn/agent-builder-sml-plugin/common/features';
-import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
+import type { SmlIndexedDocument } from '@kbn/agent-builder-sml-plugin/server';
 import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
@@ -97,14 +97,10 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
 // id. Names the gated action so the gated role is a real holder; the indexer never emits `count: 0`
 // with names, so that combination is only reachable by writing it by hand.
 const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<void> => {
-  const document: SmlDocument = {
-    id: MALFORMED_ENTRY_ID,
+  const document: SmlIndexedDocument = {
     type: SML_TEST_MALFORMED_KI_TYPE,
     title: `${SML_TEST_SEARCH_TOKEN} ${SML_TEST_MALFORMED_KI_TYPE}`,
-    origin: { uri: `${SML_TEST_MALFORMED_KI_TYPE}://${MALFORMED_ENTRY_ID}` },
     content: `${SML_TEST_SEARCH_TOKEN} malformed permission element fixture`,
-    created_at: '2024-01-01T00:00:00.000Z',
-    updated_at: '2024-01-01T00:00:00.000Z',
     permissions: {
       kibana: {
         privileges: [
@@ -112,7 +108,13 @@ const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<
         ],
       },
     },
-    ingestion_method: 'crawled',
+    attributes: {
+      id: MALFORMED_ENTRY_ID,
+      origin: { uri: `${SML_TEST_MALFORMED_KI_TYPE}://${MALFORMED_ENTRY_ID}` },
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_at: '2024-01-01T00:00:00.000Z',
+      ingestion_method: 'crawled',
+    },
   };
   await sysEsClient.index({
     index: smlIndexName,

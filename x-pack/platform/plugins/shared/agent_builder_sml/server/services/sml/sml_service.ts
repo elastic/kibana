@@ -16,6 +16,8 @@ import type {
   SmlSearchResult,
   SmlAutocompleteResult,
   SmlDocument,
+  SmlIndexedAttributes,
+  SmlIndexedDocument,
   SmlTypeDefinition,
   SmlSearchFilters,
   SmlSearchConstraints,
@@ -534,17 +536,19 @@ const checkItemsAccess = async ({
 
   let docAuthz: Map<string, SmlKibanaPrivilegeGroup[]>;
   try {
-    const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
+    const response = await esClient.asInternalUser.search<
+      Pick<SmlIndexedDocument, 'attributes' | 'permissions'>
+    >({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ terms: { id: ids } }],
+          filter: [{ terms: { 'attributes.id': ids } }],
         },
       },
-      _source: ['id', 'permissions'],
+      _source: ['attributes.id', 'permissions'],
     });
 
     docAuthz = new Map(
@@ -552,7 +556,7 @@ const checkItemsAccess = async ({
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [source.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
+          return [source.attributes?.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
             string,
             SmlKibanaPrivilegeGroup[]
           ];
@@ -675,6 +679,13 @@ const buildSmlEsqlQuery = ({
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
 
+  // `attributes` is a `flattened` field: ES|QL exposes it as a single column and cannot address
+  // its keys as `attributes.x`, so pull the SML bookkeeping out with FIELD_EXTRACT up front. Every
+  // later WHERE / SORT / KEEP then works on plain keyword columns.
+  lines.push(
+    '| EVAL id = FIELD_EXTRACT(attributes, "id"), origin_uri = FIELD_EXTRACT(attributes, "origin.uri")'
+  );
+
   // runtime-imposed per-type id-allowlist constraints
   if (constraints) {
     for (const [typeId, criteria] of Object.entries(constraints)) {
@@ -687,7 +698,7 @@ const buildSmlEsqlQuery = ({
         // Non-empty → allow matching docs of this type, pass through other types
         const uriPlaceholders = criteria.ids.map(() => '?').join(', ');
         params.push(typeId, ...criteria.ids.map((id) => `${typeId}://${id}`));
-        lines.push(`| WHERE type != ? OR origin.uri IN (${uriPlaceholders})`);
+        lines.push(`| WHERE type != ? OR origin_uri IN (${uriPlaceholders})`);
       }
     }
   }
@@ -743,8 +754,7 @@ const buildSmlEsqlQuery = ({
   const shouldKeep = (f: string) =>
     fields !== undefined ? fields.includes(f) : DEFAULT_FIELDS.has(f);
 
-  // Materialize object sub-fields into flat columns before KEEP.
-  lines.push('| EVAL origin_uri = origin.uri');
+  // Materialize `references.uri` into a flat column before KEEP.
   if (shouldKeep('references')) {
     lines.push('| EVAL ref_uris = references.uri');
   }
@@ -797,7 +807,7 @@ export const buildConstraintsFilter = (
         bool: {
           should: [
             {
-              terms: { 'origin.uri': criteria.ids.map((id) => `${typeId}://${id}`) },
+              terms: { 'attributes.origin.uri': criteria.ids.map((id) => `${typeId}://${id}`) },
             },
             {
               bool: {
@@ -1137,7 +1147,7 @@ const autocompleteSml = async ({
       filterClauses.push(agentClause);
     }
 
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asInternalUser.search<SmlIndexedDocument>({
       index: smlIndexName,
       size,
       allow_no_indices: true,
@@ -1148,9 +1158,14 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
-      // Order will be arbitrary as every result scores the same.
-      sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
-      _source: ['id', 'type', 'title', 'origin'],
+      // Order will be arbitrary as every result scores the same. `attributes.updated_at` is a
+      // `flattened` keyword holding an ISO-8601 string, so a lexical sort is still chronological.
+      sort: [
+        { _score: { order: 'desc' } },
+        { 'attributes.updated_at': 'desc' },
+        { 'attributes.id': 'asc' },
+      ],
+      _source: ['attributes.id', 'type', 'title', 'attributes.origin'],
     });
 
     const results: SmlAutocompleteResult[] = response.hits.hits
@@ -1158,10 +1173,10 @@ const autocompleteSml = async ({
       .map((hit) => {
         const source = hit._source!;
         return {
-          id: source.id ?? '',
+          id: source.attributes?.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
-          origin: { uri: source.origin?.uri ?? '' },
+          origin: { uri: source.attributes?.origin?.uri ?? '' },
         };
       });
 
@@ -1196,14 +1211,14 @@ const getDocumentsByIds = async ({
   if (ids.length === 0) return docMap;
 
   try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asInternalUser.search<SmlIndexedDocument>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ terms: { id: ids } }, buildVisibilityFilter({ spaceId })],
+          filter: [{ terms: { 'attributes.id': ids } }, buildVisibilityFilter({ spaceId })],
         },
       },
     });
@@ -1223,29 +1238,40 @@ const getDocumentsByIds = async ({
 };
 
 /**
- * Project an ES `_source` payload into the canonical `SmlDocument`
- * shape used everywhere downstream. Centralised because `getDocumentsByIds`
- * (and any future reader) applies the same mapping — keeping them in sync
- * by-hand is a footgun.
+ * Project an ES `_source` payload into the canonical {@link SmlDocument} shape used everywhere
+ * downstream, lifting the SML-owned keys out of `attributes` so consumers keep a flat shape.
+ * Centralised because `getDocumentsByIds` (and any future reader) applies the same mapping —
+ * keeping them in sync by-hand is a footgun.
  */
-const hydrateDocument = (source: SmlDocument): SmlDocument => {
-  const originUri = source.origin?.uri ?? '';
+const hydrateDocument = (source: SmlIndexedDocument): SmlDocument => {
+  const {
+    id,
+    origin,
+    created_at: createdAt,
+    updated_at: updatedAt,
+    ingestion_method: ingestionMethod,
+    user_id: userId,
+    ...typeAttributes
+  } = source.attributes ?? ({} as SmlIndexedAttributes);
+  const originUri = origin?.uri ?? '';
+
   const doc: SmlDocument = {
-    id: source.id ?? '',
+    id: id ?? '',
     type: source.type ?? '',
     title: source.title ?? '',
-    origin_id: source.origin_id ?? originUri.split('://')[1] ?? '',
+    origin_id: originUri.split('://')[1] ?? '',
     origin: { uri: originUri },
     content: source.content ?? '',
-    created_at: source.created_at ?? '',
-    updated_at: source.updated_at ?? '',
+    created_at: createdAt ?? '',
+    updated_at: updatedAt ?? '',
     permissions: source.permissions ?? emptyPermissions(),
-    ingestion_method: source.ingestion_method ?? 'crawled',
+    ingestion_method: ingestionMethod ?? 'crawled',
   };
   if (source.description !== undefined) doc.description = source.description;
   if (source.tags !== undefined) doc.tags = source.tags;
-  if (source.attributes !== undefined) doc.attributes = source.attributes;
-  if (source.user_id !== undefined) doc.user_id = source.user_id;
+  // Only the type writer's own keys — the SML-owned ones are destructured out above.
+  if (Object.keys(typeAttributes).length > 0) doc.attributes = typeAttributes;
+  if (userId !== undefined) doc.user_id = userId;
   if (source.references !== undefined) doc.references = source.references;
   return doc;
 };

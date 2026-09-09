@@ -12,13 +12,14 @@ import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type {
   SmlContext,
-  SmlDocument,
   SmlEntry,
   SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
+  SmlIndexedAttributes,
+  SmlIndexedDocument,
   SmlTypeDefinition,
 } from './types';
 
@@ -346,28 +347,34 @@ class SmlIndexerImpl implements SmlIndexer {
       .map((space) => ({ space, name: actions, count: actions.length }));
 
     const now = new Date().toISOString();
-    const document: SmlDocument = {
+
+    // Producer attributes go in first so the SML-owned keys below always win: `origin.uri` and
+    // `ingestion_method` gate deletion and manual-entry protection, so a type writer must not be
+    // able to forge them.
+    const attributes: SmlIndexedAttributes = {
+      ...entry.attributes,
       id: entryId,
-      type: entry.type,
-      title: entry.title,
       origin: { uri: `${entry.type}://${originId}` },
-      content: entry.content,
       created_at: createdAt || now,
       updated_at: now,
-      permissions: { kibana: { privileges } },
       ingestion_method: ingestionMethod,
+    };
+    if (entry.user_id !== undefined) {
+      attributes.user_id = entry.user_id;
+    }
+
+    const document: SmlIndexedDocument = {
+      type: entry.type,
+      title: entry.title,
+      content: entry.content,
+      permissions: { kibana: { privileges } },
+      attributes,
     };
     if (entry.description !== undefined) {
       document.description = entry.description;
     }
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
-    }
-    if (entry.attributes !== undefined) {
-      document.attributes = entry.attributes;
-    }
-    if (entry.user_id !== undefined) {
-      document.user_id = entry.user_id;
     }
     if (entry.references !== undefined) {
       document.references = entry.references;
@@ -438,8 +445,8 @@ class SmlIndexerImpl implements SmlIndexer {
         query: {
           bool: {
             filter: [
-              { term: { 'origin.uri': originUri } },
-              { term: { ingestion_method: 'manual' } },
+              { term: { 'attributes.origin.uri': originUri } },
+              { term: { 'attributes.ingestion_method': 'manual' } },
             ],
           },
         },
@@ -481,9 +488,11 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
   }): Promise<void> {
-    const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
+    const filter: Array<Record<string, unknown>> = [
+      { term: { 'attributes.origin.uri': originUri } },
+    ];
     if (ingestionMethod) {
-      filter.push({ term: { ingestion_method: ingestionMethod } });
+      filter.push({ term: { 'attributes.ingestion_method': ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
       // Space scoping is a direct term match on the nested `.space` field

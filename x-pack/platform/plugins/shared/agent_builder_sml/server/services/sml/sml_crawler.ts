@@ -441,27 +441,25 @@ export class SmlCrawlerImpl implements SmlCrawler {
     if (originUris.length === 0) return result;
 
     try {
-      const response = await esClient.search<{ origin?: { uri?: string } }>({
+      const response = await esClient.search<{ attributes?: { origin?: { uri?: string } } }>({
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
         size: originUris.length,
         track_total_hits: false,
-        _source: ['origin.uri'],
+        _source: ['attributes.origin.uri'],
         query: {
           bool: {
             filter: [
-              { terms: { 'origin.uri': originUris } },
-              { term: { ingestion_method: 'manual' } },
+              { terms: { 'attributes.origin.uri': originUris } },
+              { term: { 'attributes.ingestion_method': 'manual' } },
             ],
           },
         },
-        // Collapse so we get at most one hit per origin.uri.
-        collapse: { field: 'origin.uri' },
       });
 
       for (const hit of response.hits.hits) {
-        const originUri = hit._source?.origin?.uri;
+        const originUri = hit._source?.attributes?.origin?.uri;
         if (originUri) {
           result.add(originUri);
         }

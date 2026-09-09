@@ -480,6 +480,10 @@ describe('SmlService', () => {
       const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
       expect(esql).not.toContain('FORK');
       expect(esql).not.toContain('FUSE');
+      // `attributes` is `flattened`, so its keys are only reachable through FIELD_EXTRACT.
+      expect(esql).toContain(
+        '| EVAL id = FIELD_EXTRACT(attributes, "id"), origin_uri = FIELD_EXTRACT(attributes, "origin.uri")'
+      );
       expect(esql).toContain('| SORT id ASC');
     });
 
@@ -532,7 +536,7 @@ describe('SmlService', () => {
       };
 
       // Constraints WHERE clause: exclude type OR allow specific origin URIs
-      expect(esql).toContain('| WHERE type != ? OR origin.uri IN (?)');
+      expect(esql).toContain('| WHERE type != ? OR origin_uri IN (?)');
       // Agent type filter
       expect(esql).toContain('| WHERE type IN (?, ?)');
       // Agent tag filter with MV_CONTAINS
@@ -962,7 +966,7 @@ describe('SmlService', () => {
           filter: [expectedVisibilityFilter({})],
         },
       });
-      expect(call._source).toEqual(['id', 'type', 'title', 'origin']);
+      expect(call._source).toEqual(['attributes.id', 'type', 'title', 'attributes.origin']);
     });
 
     it('breaks score ties deterministically instead of falling back to doc order', async () => {
@@ -983,8 +987,8 @@ describe('SmlService', () => {
       const call = esClient.search.mock.calls[0]![0]!;
       expect(call.sort).toEqual([
         { _score: { order: 'desc' } },
-        { updated_at: 'desc' },
-        { id: 'asc' },
+        { 'attributes.updated_at': 'desc' },
+        { 'attributes.id': 'asc' },
       ]);
     });
 
@@ -1232,7 +1236,7 @@ describe('SmlService', () => {
         bool: {
           should: [
             {
-              terms: { 'origin.uri': ['connector://gh-1', 'connector://jira-1'] },
+              terms: { 'attributes.origin.uri': ['connector://gh-1', 'connector://jira-1'] },
             },
             { bool: { must_not: [{ term: { type: 'connector' } }] } },
           ],
@@ -1252,22 +1256,26 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'entry-1',
                 type: 'connector',
                 title: 'GitHub',
-                origin: { uri: 'gh-1' },
                 permissions: makePermissions(),
+                attributes: {
+                  id: 'entry-1',
+                  origin: { uri: 'gh-1' },
+                },
               },
               _score: 5.4,
             },
             {
               _source: {
-                id: 'entry-2',
                 type: 'connector',
                 title: 'GitHub Enterprise Server',
-                origin: { uri: 'gh-2' },
                 spaces: ['default'],
                 permissions: makePermissions(),
+                attributes: {
+                  id: 'entry-2',
+                  origin: { uri: 'gh-2' },
+                },
               },
               _score: 4.1,
             },
@@ -1297,11 +1305,13 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'entry-2',
                 type: 'dashboard',
                 title: 'Sales Q3',
-                origin: { uri: 'dash-1' },
                 permissions: makePermissions(),
+                attributes: {
+                  id: 'entry-2',
+                  origin: { uri: 'dash-1' },
+                },
               },
               _score: 2.0,
             },
@@ -1626,10 +1636,12 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-1',
                 permissions: makePermissions([
                   { space: 'default', name: ['saved_object:lens/get'] },
                 ]),
+                attributes: {
+                  id: 'item-1',
+                },
               },
             },
           ],
@@ -1659,10 +1671,12 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-1',
                 permissions: makePermissions([
                   { space: 'default', name: ['saved_object:dashboard/get'] },
                 ]),
+                attributes: {
+                  id: 'item-1',
+                },
               },
             },
           ],
@@ -1691,8 +1705,10 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-global',
                 permissions: makePermissions([{ space: '*', name: ['saved_object:lens/get'] }]),
+                attributes: {
+                  id: 'item-global',
+                },
               },
             },
           ],
@@ -1721,11 +1737,13 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-other-space',
                 // Only tokens for a different space — no spaceId| or *| match for 'default'.
                 permissions: makePermissions([
                   { space: 'other-space', name: ['saved_object:lens/get'] },
                 ]),
+                attributes: {
+                  id: 'item-other-space',
+                },
               },
             },
           ],
@@ -1759,8 +1777,10 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-1',
                 permissions: makePermissions(),
+                attributes: {
+                  id: 'item-1',
+                },
               },
             },
           ],
@@ -1791,8 +1811,10 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-zero-actions',
                 permissions: makePermissions([{ space: 'default', name: [] }]),
+                attributes: {
+                  id: 'item-zero-actions',
+                },
               },
             },
           ],
@@ -1823,13 +1845,15 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-malformed',
                 permissions: {
                   kibana: {
                     privileges: [
                       { space: 'default', name: ['saved_object:dashboard/get'], count: 0 },
                     ],
                   },
+                },
+                attributes: {
+                  id: 'item-malformed',
                 },
               },
             },
@@ -1861,13 +1885,15 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-malformed',
                 permissions: {
                   kibana: {
                     privileges: [
                       { space: 'default', name: ['saved_object:dashboard/get'], count: 0 },
                     ],
                   },
+                },
+                attributes: {
+                  id: 'item-malformed',
                 },
               },
             },
@@ -1898,13 +1924,15 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-negative',
                 permissions: {
                   kibana: {
                     privileges: [
                       { space: 'default', name: ['saved_object:dashboard/get'], count: -1 },
                     ],
                   },
+                },
+                attributes: {
+                  id: 'item-negative',
                 },
               },
             },
@@ -1935,11 +1963,13 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-empty-names',
                 permissions: {
                   kibana: {
                     privileges: [{ space: 'default', name: [], count: 3 }],
                   },
+                },
+                attributes: {
+                  id: 'item-empty-names',
                 },
               },
             },
@@ -1971,7 +2001,6 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'item-duplicate-names',
                 permissions: {
                   kibana: {
                     privileges: [
@@ -1982,6 +2011,9 @@ describe('SmlService', () => {
                       },
                     ],
                   },
+                },
+                attributes: {
+                  id: 'item-duplicate-names',
                 },
               },
             },
@@ -2043,10 +2075,10 @@ describe('SmlService', () => {
           ignore_unavailable: true,
           query: {
             bool: {
-              filter: [{ terms: { id: ['id-1'] } }],
+              filter: [{ terms: { 'attributes.id': ['id-1'] } }],
             },
           },
-          _source: ['id', 'permissions'],
+          _source: ['attributes.id', 'permissions'],
         })
       );
       expect(
@@ -2066,16 +2098,20 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'no-tokens',
                 permissions: makePermissions([]),
+                attributes: {
+                  id: 'no-tokens',
+                },
               },
             },
             {
               _source: {
-                id: 'with-deps',
                 permissions: makePermissions([
                   { space: 'default', name: ['saved_object:lens/get'] },
                 ]),
+                attributes: {
+                  id: 'with-deps',
+                },
               },
             },
           ],
@@ -2114,29 +2150,33 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'doc-1',
                 type: 'lens',
                 title: 'Doc 1',
-                origin: { uri: 'lens://ref-1' },
                 content: 'content 1',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
                 permissions: makePermissions(),
+                attributes: {
+                  id: 'doc-1',
+                  origin: { uri: 'lens://ref-1' },
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-02',
+                },
               },
             },
             {
               _source: {
-                id: 'doc-2',
                 type: 'dashboard',
                 title: 'Doc 2',
-                origin: { uri: 'dashboard://ref-2' },
                 content: 'content 2',
                 description: 'dash desc',
-                user_id: 'u2',
                 references: [{ uri: 'lens:x:y' }],
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
                 permissions: makePermissions(),
+                attributes: {
+                  id: 'doc-2',
+                  origin: { uri: 'dashboard://ref-2' },
+                  user_id: 'u2',
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-02',
+                },
               },
             },
           ],
@@ -2190,21 +2230,23 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'doc-3',
                 type: 'dashboard',
                 title: 'Sales Q3',
-                origin: { uri: 'dashboard://dash-100' },
                 content: 'sales content',
                 description: 'sales summary',
                 tags: ['sales', 'executive'],
-                attributes: { owner_team: 'sales-ops' },
-                user_id: 'user-7',
                 references: [{ uri: 'category://sales' }],
-                created_at: '2026-04-01T00:00:00.000Z',
-                updated_at: '2026-04-02T00:00:00.000Z',
                 permissions: makePermissions([
                   { space: 'default', name: ['saved_object:dashboard/get'] },
                 ]),
+                attributes: {
+                  owner_team: 'sales-ops',
+                  id: 'doc-3',
+                  origin: { uri: 'dashboard://dash-100' },
+                  user_id: 'user-7',
+                  created_at: '2026-04-01T00:00:00.000Z',
+                  updated_at: '2026-04-02T00:00:00.000Z',
+                },
               },
             },
           ],
@@ -2308,7 +2350,7 @@ describe('SmlService', () => {
           query: {
             bool: {
               filter: [
-                { terms: { id: ['id-1', 'id-2'] } },
+                { terms: { 'attributes.id': ['id-1', 'id-2'] } },
                 {
                   bool: {
                     minimum_should_match: 1,

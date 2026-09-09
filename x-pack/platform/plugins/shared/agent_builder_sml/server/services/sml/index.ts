@@ -14,6 +14,8 @@ export type {
   SmlListItem,
   SmlSearchResult,
   SmlDocument,
+  SmlIndexedDocument,
+  SmlIndexedAttributes,
   SmlCrawlerStateDocument,
   SmlCrawler,
   SmlIndexAction,

@@ -27,6 +27,8 @@ export type {
   SmlSearchConstraints,
   SmlSearchFilters,
   SmlDocument,
+  SmlIndexedDocument,
+  SmlIndexedAttributes,
   SmlIndexAction,
 } from './services/sml/types';
 
