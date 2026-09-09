@@ -47,16 +47,29 @@ const ResourceCard = ({
   dataTestSubj,
 }: ResourceCardProps) => {
   const assetBasePath = useAssetBasePath();
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, highContrastMode } = useEuiTheme();
+
+  // `EuiSplitPanel` draws the high-contrast divider implied by `direction` and the
+  // `responsive` prop, but `layoutRowOrStackCss` is driving responsiveness.
+  // This is a trick to have the high-contrast divider on either layout.
+  const outerDividerCss = highContrastMode
+    ? css({ gap: euiTheme.border.width.thin, backgroundColor: euiTheme.border.color })
+    : undefined;
+  // `&&` doubles specificity to beat EUI's own `:not(:last-child)` divider rule.
+  const innerDividerCss = highContrastMode ? css({ '&&': { border: 'none' } }) : undefined;
 
   return (
     <EuiSplitPanel.Outer
       direction="row"
       responsive={false}
       data-test-subj={dataTestSubj}
-      css={[layoutRowOrStackCss({ threshold: CARD_MIN_WIDTH }), css({ height: '100%' })]}
+      css={[
+        layoutRowOrStackCss({ threshold: CARD_MIN_WIDTH }),
+        css({ height: '100%' }),
+        outerDividerCss,
+      ]}
     >
-      <EuiSplitPanel.Inner paddingSize="none" color="subdued">
+      <EuiSplitPanel.Inner paddingSize="none" color="subdued" css={innerDividerCss}>
         <EuiFlexGroup
           justifyContent="center"
           alignItems="center"
@@ -68,7 +81,7 @@ const ResourceCard = ({
           <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner paddingSize="l">
+      <EuiSplitPanel.Inner paddingSize="l" color="plain" css={innerDividerCss}>
         <EuiFlexItem grow={5}>
           <EuiTitle size="xs">
             <h4>{title}</h4>
