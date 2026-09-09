@@ -31,9 +31,9 @@ export const installMlModel = async (
   logger: Logger,
   esReferences: EsAssetReference[]
 ) => {
-  const mlModelPath = packageInstallContext.paths.find((path) => isMlModel(path));
+  const mlModelPaths = packageInstallContext.paths.filter((path) => isMlModel(path));
 
-  if (mlModelPath !== undefined) {
+  for (const mlModelPath of mlModelPaths) {
     const mlModelAssetsMap: AssetsMap = new Map();
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
