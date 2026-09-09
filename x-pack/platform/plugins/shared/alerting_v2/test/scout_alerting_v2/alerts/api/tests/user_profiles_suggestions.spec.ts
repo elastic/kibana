@@ -50,15 +50,17 @@ const getSuggestedUsernames = (body: unknown): string[] =>
  * (classic) until ECH support lands.
  */
 apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }, () => {
-  let adminHeaders: Record<string, string>;
+  let readerHeaders: Record<string, string>;
   let seededUsername: string;
 
   apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
-    const adminCredentials = await requestAuth.getApiKeyForAdmin();
+    const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ALERTS_READ_ROLE
+    );
     // This is an internal API reached over POST, so the request needs the
     // shared XSRF / internal-origin headers alongside the API key; without
     // them Kibana rejects the request with a 400 before it hits validation.
-    adminHeaders = { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
+    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
 
     await samlAuth.asInteractiveUser(SEEDED_PROFILE_ROLE);
     const { username } = await samlAuth.session.getUserData(SEEDED_PROFILE_ROLE);
@@ -71,7 +73,11 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     await expect
       .poll(
         async () => {
-          const response = await suggestProfiles(apiClient, { name: seededUsername }, adminHeaders);
+          const response = await suggestProfiles(
+            apiClient,
+            { name: seededUsername },
+            readerHeaders
+          );
           return getSuggestedUsernames(response.body);
         },
         { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
@@ -80,21 +86,25 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
   });
 
   apiTest('returns an empty list when nothing matches the search term', async ({ apiClient }) => {
-    const response = await suggestProfiles(apiClient, { name: 'zzzznosuchuserzzzz' }, adminHeaders);
+    const response = await suggestProfiles(
+      apiClient,
+      { name: 'zzzznosuchuserzzzz' },
+      readerHeaders
+    );
 
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual([]);
   });
 
   apiTest('validation: rejects a body without a name', async ({ apiClient }) => {
-    const response = await suggestProfiles(apiClient, { size: 10 }, adminHeaders);
+    const response = await suggestProfiles(apiClient, { size: 10 }, readerHeaders);
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects an empty name', async ({ apiClient }) => {
-    const response = await suggestProfiles(apiClient, { name: '' }, adminHeaders);
+    const response = await suggestProfiles(apiClient, { name: '' }, readerHeaders);
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
@@ -104,7 +114,7 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     const response = await suggestProfiles(
       apiClient,
       { name: 'a'.repeat(NAME_MAX_LENGTH + 1) },
-      adminHeaders
+      readerHeaders
     );
 
     expect(response).toHaveStatusCode(400);
@@ -115,7 +125,7 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     const response = await suggestProfiles(
       apiClient,
       { name: seededUsername, size: SIZE_MAX + 1 },
-      adminHeaders
+      readerHeaders
     );
 
     expect(response).toHaveStatusCode(400);
@@ -126,7 +136,7 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     const response = await suggestProfiles(
       apiClient,
       { name: seededUsername, size: -1 },
-      adminHeaders
+      readerHeaders
     );
 
     expect(response).toHaveStatusCode(400);
@@ -137,7 +147,7 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     const response = await suggestProfiles(
       apiClient,
       { name: seededUsername, size: 1.5 },
-      adminHeaders
+      readerHeaders
     );
 
     expect(response).toHaveStatusCode(400);
@@ -146,11 +156,8 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
 
   apiTest(
     'authorization: returns 200 for a user with read-only alerts privileges',
-    async ({ apiClient, requestAuth }) => {
-      const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
-      const headers = { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader };
-
-      const response = await suggestProfiles(apiClient, { name: seededUsername }, headers);
+    async ({ apiClient }) => {
+      const response = await suggestProfiles(apiClient, { name: seededUsername }, readerHeaders);
 
       expect(response).toHaveStatusCode(200);
     }

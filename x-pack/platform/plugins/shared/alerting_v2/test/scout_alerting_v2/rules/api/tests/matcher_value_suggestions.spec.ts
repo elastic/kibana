@@ -10,12 +10,13 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH } from '@kbn/alerting-v2-constants';
 import {
   ALERTING_V2_ALERTS_READ_ROLE,
-  ALERTING_V2_RULES_AND_ALERTS_READ_ROLE,
   ALERTING_V2_RULES_READ_ROLE,
+  ALL_ROLE,
   apiTest,
   buildAlertEvent,
   buildCreateRuleData,
   NO_ACCESS_ROLE,
+  READ_ROLE,
   testData,
 } from '../fixtures';
 
@@ -76,14 +77,14 @@ const buildSeededAlertEvents = () => [
  * (classic) until ECH support lands.
  */
 apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classic' }, () => {
-  let adminHeaders: Record<string, string>;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-    const adminCredentials = await requestAuth.getApiKeyForAdmin();
+    const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
     // This is an internal API reached over POST, so the request needs the
     // shared XSRF / internal-origin headers alongside the API key; without
     // them Kibana rejects the request with a 400 before it hits validation.
-    adminHeaders = { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
+    writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
 
     await apiServices.spaces.delete(OTHER_SPACE_ID);
     await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
@@ -108,7 +109,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'episode_status', query: '' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -122,7 +123,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     const response = await suggestValues(
       apiClient,
       { field: 'episode_status', query: 'a' },
-      { headers: adminHeaders }
+      { headers: writerHeaders }
     );
 
     expect(response).toHaveStatusCode(200);
@@ -140,7 +141,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'rule.name', query: 'scoutcpu' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -163,7 +164,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'rule.tags', query: '' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -186,7 +187,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'rule.tags', query: '' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -203,7 +204,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'group_hash', query: '' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -219,7 +220,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'group_hash', query: 'scout.' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -236,7 +237,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'episode_id', query: 'scout-episode-w' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -252,7 +253,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'data.host', query: 'scout-' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -264,7 +265,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     const response = await suggestValues(
       apiClient,
       { field: 'not_a_matcher_field', query: '' },
-      { headers: adminHeaders }
+      { headers: writerHeaders }
     );
 
     expect(response).toHaveStatusCode(200);
@@ -287,7 +288,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const defaultSpaceResponse = await suggestValues(
         apiClient,
         { field: 'rule.name', query: '' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(defaultSpaceResponse).toHaveStatusCode(200);
@@ -296,7 +297,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const otherSpaceResponse = await suggestValues(
         apiClient,
         { field: 'rule.name', query: '' },
-        { headers: adminHeaders, spaceId: OTHER_SPACE_ID }
+        { headers: writerHeaders, spaceId: OTHER_SPACE_ID }
       );
 
       expect(otherSpaceResponse).toHaveStatusCode(200);
@@ -310,7 +311,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         { field: 'rule.name', query: 'test', unknownField: 'x' },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(400);
@@ -329,7 +330,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
           fieldMeta: { name: 'rule.name', type: 'string' },
           filters: [],
         },
-        { headers: adminHeaders }
+        { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -341,7 +342,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     const response = await suggestValues(
       apiClient,
       { field: 'rule.name' },
-      { headers: adminHeaders }
+      { headers: writerHeaders }
     );
 
     expect(response).toHaveStatusCode(400);
@@ -352,7 +353,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     const response = await suggestValues(
       apiClient,
       { field: '', query: '' },
-      { headers: adminHeaders }
+      { headers: writerHeaders }
     );
 
     expect(response).toHaveStatusCode(400);
@@ -363,7 +364,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     const response = await suggestValues(
       apiClient,
       { field: 'a'.repeat(FIELD_MAX_LENGTH + 1), query: '' },
-      { headers: adminHeaders }
+      { headers: writerHeaders }
     );
 
     expect(response).toHaveStatusCode(400);
@@ -374,7 +375,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     const response = await suggestValues(
       apiClient,
       { field: 'rule.name', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
-      { headers: adminHeaders }
+      { headers: writerHeaders }
     );
 
     expect(response).toHaveStatusCode(400);
@@ -384,9 +385,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest(
     'authorization: returns 200 for a user with read privileges on rules and alerts',
     async ({ apiClient, requestAuth }) => {
-      const credentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_RULES_AND_ALERTS_READ_ROLE
-      );
+      const credentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
       const response = await suggestValues(
         apiClient,
