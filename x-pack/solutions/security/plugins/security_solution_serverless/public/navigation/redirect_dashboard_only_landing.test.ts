@@ -69,12 +69,16 @@ describe('redirectDashboardOnlyLanding', () => {
   const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
   const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const setNavLinks = (navLinks: Record<string, boolean>) => {
     mockServices.application.capabilities = {
       ...mockServices.application.capabilities,
-      navLinks: {},
+      navLinks,
     };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setNavLinks({});
     removeBasePath.mockImplementation((pathname: string) => pathname);
   });
 
@@ -88,10 +92,10 @@ describe('redirectDashboardOnlyLanding', () => {
   it('navigates dashboard-only users from Get started to dashboards', () => {
     mockLocationPathname('/s/default/app/security/get_started');
     removeBasePath.mockReturnValue('/app/security/get_started');
-    mockServices.application.capabilities.navLinks = {
+    setNavLinks({
       dashboards: true,
       securitySolutionUI: false,
-    };
+    });
 
     redirectDashboardOnlyLanding(mockServices);
 
@@ -101,10 +105,10 @@ describe('redirectDashboardOnlyLanding', () => {
 
   it('does not navigate editors away from Get started', () => {
     mockLocationPathname('/app/security/get_started');
-    mockServices.application.capabilities.navLinks = {
+    setNavLinks({
       dashboards: true,
       securitySolutionUI: true,
-    };
+    });
 
     redirectDashboardOnlyLanding(mockServices);
 
