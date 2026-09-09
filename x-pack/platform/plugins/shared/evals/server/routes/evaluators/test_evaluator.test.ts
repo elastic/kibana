@@ -237,7 +237,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(409);
   });
 
   it('rejects the all-zero OpenTelemetry trace ID', async () => {
@@ -264,7 +264,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
     expect(response.payload.result).toEqual(
       expect.objectContaining({
         status: 'error',
-        error: expect.objectContaining({ message: 'Error: offline' }),
+        error: expect.objectContaining({ message: 'offline' }),
       })
     );
     expect(logger.error).toHaveBeenCalledWith(

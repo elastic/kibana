@@ -17,12 +17,19 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
+import { hasTraceDocuments, normalizeEvidence } from '../../evaluators/evidence/evidence_service';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { getIssuePath } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
+import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
+
+/**
+ * Far shorter than the grading budget: unresolved evidence is this route's answer, not a
+ * failure, so it only needs enough polls to absorb export skew on a trace still indexing.
+ */
+const READINESS_RETRIES = 2;
 
 const getUnmetPaths = (error: z.ZodError): string[] => [
   ...new Set(error.issues.map((issue) => getIssuePath(issue.path))),
@@ -54,6 +61,7 @@ const getRemediation = (unmetPaths: string[], profile: string): string | undefin
 
 export const registerValidateRoute = ({
   router,
+  logger,
   evaluatorRegistry,
   getSpaceId,
 }: RouteDependencies) => {
@@ -123,7 +131,30 @@ export const registerValidateRoute = ({
           traceId,
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
-        const round = await normalizeEvidence(traceAccessor, resolvedMapping);
+
+        // A trace with no documents at all is a bad trace id, not missing instrumentation.
+        // Separating the two keeps the remediation below pointing at a real cause.
+        if (!(await hasTraceDocuments(traceAccessor))) {
+          return response.notFound({
+            body: {
+              message: `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+            },
+          });
+        }
+
+        // Resolve evidence the same way grading does, so the two routes agree about a trace
+        // that is still indexing. Evidence that never resolves is reported per evaluator below.
+        let round: Awaited<ReturnType<typeof awaitTraceReady>>;
+        try {
+          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger, {
+            retries: READINESS_RETRIES,
+          });
+        } catch (error) {
+          if (!(error instanceof TraceReadinessError)) {
+            throw error;
+          }
+          round = await normalizeEvidence(traceAccessor, resolvedMapping);
+        }
 
         const validationResults: ValidateResponse['evaluators'] = resolvedEvaluators.map(
           ({ definition }) => {

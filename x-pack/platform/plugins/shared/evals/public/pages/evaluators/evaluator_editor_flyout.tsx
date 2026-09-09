@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckboxGroup,
-  EuiComboBox,
   EuiFieldText,
   EuiFlyout,
   EuiFlyoutBody,
@@ -20,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormErrorText,
   EuiFormRow,
   EuiLoadingSpinner,
   EuiPanel,
@@ -29,7 +29,6 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
-  type EuiComboBoxOptionOption,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
@@ -48,6 +47,10 @@ import {
   useUpdateEvaluator,
 } from '../../hooks/use_evaluators_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
+import {
+  ConnectorSelector,
+  type ConnectorSelectorOption,
+} from '../../components/shared/connector_selector';
 import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
@@ -80,6 +83,49 @@ const EVIDENCE_PROFILE_KEYS = {
   steps: 'tool_calls',
 } as const;
 
+type FieldErrorKey =
+  | 'name'
+  | 'description'
+  | 'systemPrompt'
+  | 'prompt'
+  | 'evidence'
+  | 'referenceDataKeys'
+  | 'scores';
+
+type FieldErrors = Partial<Record<FieldErrorKey, string>>;
+
+const FIELD_ERROR_MESSAGES: Record<FieldErrorKey, string> = {
+  name: i18n.NAME_INVALID_ERROR,
+  description: i18n.DESCRIPTION_INVALID_ERROR,
+  systemPrompt: i18n.SYSTEM_PROMPT_INVALID_ERROR,
+  prompt: i18n.PROMPT_INVALID_ERROR,
+  evidence: i18n.EVIDENCE_INVALID_ERROR,
+  referenceDataKeys: i18n.REFERENCE_KEYS_INVALID_ERROR,
+  scores: i18n.SCORES_INVALID_ERROR,
+};
+
+/** Maps a draft schema issue back to the form field the user can act on. */
+const toFieldErrorKey = (path: ReadonlyArray<PropertyKey>): FieldErrorKey | undefined => {
+  const [root, branch, leaf] = path.map(String);
+
+  if (root === 'name' || root === 'description') {
+    return root;
+  }
+  if (root !== 'judge') {
+    return undefined;
+  }
+  if (branch === 'system_prompt') {
+    return 'systemPrompt';
+  }
+  if (branch === 'prompt' || branch === 'evidence') {
+    return branch;
+  }
+  if (branch === 'reference_data_keys') {
+    return 'referenceDataKeys';
+  }
+  return branch === 'output' && leaf === 'scores' ? 'scores' : undefined;
+};
+
 const toScoreFormValue = (score: JudgeScore, id: number): ScoreFormValue => ({
   id,
   name: score.name,
@@ -103,8 +149,13 @@ const parseLabels = (value: string): JudgeScore['labels'] | undefined => {
   for (const line of lines) {
     const separator = line.lastIndexOf('=');
     const label = line.slice(0, separator).trim();
-    const score = Number(line.slice(separator + 1).trim());
-    if (separator < 1 || !label || !Number.isFinite(score) || score < 0 || score > 1) {
+    // `Number('')` is 0, so an omitted score would otherwise parse as a valid 0.
+    const rawScore = line.slice(separator + 1).trim();
+    const score = Number(rawScore);
+    if (separator < 1 || !label || !rawScore) {
+      return undefined;
+    }
+    if (!Number.isFinite(score) || score < 0 || score > 1) {
       return undefined;
     }
     labels.push({ value: label, score });
@@ -121,9 +172,11 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   onClose,
 }) => {
   const titleId = useGeneratedHtmlId();
-  const { data: evaluatorData, isLoading: isLoadingEvaluator } = useEvaluator(
-    mode === 'edit' ? evaluatorName : undefined
-  );
+  const {
+    data: evaluatorData,
+    isLoading: isLoadingEvaluator,
+    error: loadEvaluatorError,
+  } = useEvaluator(mode === 'edit' ? evaluatorName : undefined);
   const { connectors, isLoading: isLoadingConnectors } = useModelConnectors();
   const createEvaluator = useCreateEvaluator();
   const updateEvaluator = useUpdateEvaluator();
@@ -142,10 +195,12 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [traceId, setTraceId] = useState('');
   const [referenceData, setReferenceData] = useState('{}');
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [testResult, setTestResult] = useState<TestEvaluatorResponse['result'] | null>(null);
 
   useEffect(() => {
     setFormError(null);
+    setFieldErrors({});
     setTestResult(null);
   }, [
     connectorId,
@@ -176,11 +231,10 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     setNextScoreId(evaluator.judge.output.scores.length);
   }, [evaluatorData, mode]);
 
-  const connectorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+  const connectorOptions = useMemo<ConnectorSelectorOption[]>(
     () => connectors.map((connector) => ({ label: connector.name, value: connector.id })),
     [connectors]
   );
-  const selectedConnector = connectorOptions.filter(({ value }) => value === connectorId);
   const evidenceMap = Object.fromEntries(
     ['input', 'response', 'steps'].map((key) => [
       key,
@@ -199,13 +253,15 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     for (const score of scores) {
       const scoreName = score.name.trim();
       if (!scoreName) {
-        setFormError(i18n.REQUIRED_FIELDS_ERROR);
+        setFieldErrors({ scores: i18n.SCORES_INVALID_ERROR });
+        setFormError(i18n.HIGHLIGHTED_FIELDS_ERROR);
         return undefined;
       }
 
       if (score.type === 'categorical') {
         const labels = parseLabels(score.labels);
         if (!labels) {
+          setFieldErrors({ scores: i18n.INVALID_LABELS_ERROR });
           setFormError(i18n.INVALID_LABELS_ERROR);
           return undefined;
         }
@@ -236,8 +292,21 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       output: { scores: parsedScores },
     };
     const draft = { name: name.trim(), description: description.trim(), judge };
-    if (!UserDefinedEvaluatorDraft.safeParse(draft).success) {
-      setFormError(i18n.REQUIRED_FIELDS_ERROR);
+    const parsed = UserDefinedEvaluatorDraft.safeParse(draft);
+    if (!parsed.success) {
+      const nextFieldErrors: FieldErrors = {};
+      for (const { path } of parsed.error.issues) {
+        const key = toFieldErrorKey(path);
+        if (key) {
+          nextFieldErrors[key] = FIELD_ERROR_MESSAGES[key];
+        }
+      }
+      setFieldErrors(nextFieldErrors);
+      setFormError(
+        Object.keys(nextFieldErrors).length > 0
+          ? i18n.HIGHLIGHTED_FIELDS_ERROR
+          : i18n.REQUIRED_FIELDS_ERROR
+      );
       return undefined;
     }
     return judge;
@@ -245,6 +314,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
 
   const onSave = async () => {
     setFormError(null);
+    setFieldErrors({});
     const judge = buildDraft();
     if (!judge) {
       return;
@@ -271,6 +341,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
 
   const onTest = async () => {
     setFormError(null);
+    setFieldErrors({});
     setTestResult(null);
     const judge = buildDraft();
     if (!judge) {
@@ -281,9 +352,11 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       return;
     }
 
+    // The field is optional, so clearing it reads as "send nothing", not as invalid JSON.
+    const trimmedReferenceData = referenceData.trim();
     let parsedReferenceData: Record<string, unknown>;
     try {
-      const parsed = JSON.parse(referenceData) as unknown;
+      const parsed = trimmedReferenceData ? (JSON.parse(trimmedReferenceData) as unknown) : {};
       if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
         throw new Error();
       }
@@ -334,44 +407,83 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       <EuiFlyoutBody>
         {mode === 'edit' && isLoadingEvaluator ? (
           <EuiLoadingSpinner size="xl" />
+        ) : loadEvaluatorError ? (
+          <KbnDangerCallout
+            announceOnMount
+            title={i18n.LOAD_EVALUATOR_ERROR_TITLE}
+            data-test-subj="evalsEvaluatorLoadError"
+            text={<p>{getErrorMessage(loadEvaluatorError)}</p>}
+          />
         ) : (
           <EuiForm isInvalid={Boolean(formError)} error={formError ?? undefined} component="form">
-            <EuiFormRow label={i18n.NAME_LABEL} helpText={i18n.NAME_HELP} fullWidth>
+            <EuiFormRow
+              label={i18n.NAME_LABEL}
+              helpText={i18n.NAME_HELP}
+              isInvalid={Boolean(fieldErrors.name)}
+              error={fieldErrors.name}
+              fullWidth
+            >
               <EuiFieldText
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 disabled={mode === 'edit'}
+                isInvalid={Boolean(fieldErrors.name)}
                 maxLength={128}
                 fullWidth
                 data-test-subj="evalsEvaluatorName"
               />
             </EuiFormRow>
-            <EuiFormRow label={i18n.DESCRIPTION_LABEL} fullWidth>
+            <EuiFormRow
+              label={i18n.DESCRIPTION_LABEL}
+              isInvalid={Boolean(fieldErrors.description)}
+              error={fieldErrors.description}
+              fullWidth
+            >
               <EuiTextArea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
+                isInvalid={Boolean(fieldErrors.description)}
                 maxLength={2048}
                 fullWidth
                 data-test-subj="evalsEvaluatorDescription"
               />
             </EuiFormRow>
-            <EuiFormRow label={i18n.SYSTEM_PROMPT_LABEL} fullWidth>
+            <EuiFormRow
+              label={i18n.SYSTEM_PROMPT_LABEL}
+              isInvalid={Boolean(fieldErrors.systemPrompt)}
+              error={fieldErrors.systemPrompt}
+              fullWidth
+            >
               <EuiTextArea
                 value={systemPrompt}
                 onChange={(event) => setSystemPrompt(event.target.value)}
+                isInvalid={Boolean(fieldErrors.systemPrompt)}
                 fullWidth
                 data-test-subj="evalsEvaluatorSystemPrompt"
               />
             </EuiFormRow>
-            <EuiFormRow label={i18n.PROMPT_LABEL} helpText={i18n.PROMPT_HELP} fullWidth>
+            <EuiFormRow
+              label={i18n.PROMPT_LABEL}
+              helpText={i18n.PROMPT_HELP}
+              isInvalid={Boolean(fieldErrors.prompt)}
+              error={fieldErrors.prompt}
+              fullWidth
+            >
               <EuiTextArea
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
+                isInvalid={Boolean(fieldErrors.prompt)}
                 fullWidth
                 data-test-subj="evalsEvaluatorPrompt"
               />
             </EuiFormRow>
-            <EuiFormRow label={i18n.EVIDENCE_LABEL} labelType="legend" fullWidth>
+            <EuiFormRow
+              label={i18n.EVIDENCE_LABEL}
+              labelType="legend"
+              isInvalid={Boolean(fieldErrors.evidence)}
+              error={fieldErrors.evidence}
+              fullWidth
+            >
               <EuiCheckboxGroup
                 options={[
                   { id: 'input', label: i18n.INPUT_EVIDENCE },
@@ -392,11 +504,14 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
             <EuiFormRow
               label={i18n.REFERENCE_DATA_LABEL}
               helpText={i18n.REFERENCE_DATA_HELP}
+              isInvalid={Boolean(fieldErrors.referenceDataKeys)}
+              error={fieldErrors.referenceDataKeys}
               fullWidth
             >
               <EuiFieldText
                 value={referenceDataKeys}
                 onChange={(event) => setReferenceDataKeys(event.target.value)}
+                isInvalid={Boolean(fieldErrors.referenceDataKeys)}
                 fullWidth
                 data-test-subj="evalsEvaluatorReferenceKeys"
               />
@@ -423,16 +538,26 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {fieldErrors.scores ? (
+              <EuiFormErrorText data-test-subj="evalsEvaluatorScoresError">
+                {fieldErrors.scores}
+              </EuiFormErrorText>
+            ) : null}
             <EuiSpacer size="s" />
             {scores.map((score) => (
               <React.Fragment key={score.id}>
                 <EuiPanel hasBorder hasShadow={false} paddingSize="m">
                   <EuiFlexGroup alignItems="flexStart">
                     <EuiFlexItem>
-                      <EuiFormRow label={i18n.SCORE_NAME_LABEL} fullWidth>
+                      <EuiFormRow
+                        label={i18n.SCORE_NAME_LABEL}
+                        isInvalid={Boolean(fieldErrors.scores) && !score.name.trim()}
+                        fullWidth
+                      >
                         <EuiFieldText
                           value={score.name}
                           onChange={(event) => updateScore(score.id, { name: event.target.value })}
+                          isInvalid={Boolean(fieldErrors.scores) && !score.name.trim()}
                           fullWidth
                           data-test-subj={`evalsEvaluatorScoreName-${score.id}`}
                         />
@@ -501,17 +626,15 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               <p>{i18n.TEST_DESCRIPTION}</p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiFormRow label={i18n.CONNECTOR_LABEL} fullWidth>
-              <EuiComboBox<string>
-                options={connectorOptions}
-                selectedOptions={selectedConnector}
-                onChange={(selected) => setConnectorId(selected[0]?.value ?? '')}
-                singleSelection={{ asPlainText: true }}
-                isLoading={isLoadingConnectors}
-                fullWidth
-                data-test-subj="evalsEvaluatorConnector"
-              />
-            </EuiFormRow>
+            <ConnectorSelector
+              label={i18n.CONNECTOR_LABEL}
+              connectorOptions={connectorOptions}
+              selectedConnectorIds={connectorId ? [connectorId] : []}
+              onChange={(selected) => setConnectorId(selected[0] ?? '')}
+              isLoading={isLoadingConnectors}
+              singleSelection
+              dataTestSubj="evalsEvaluatorConnector"
+            />
             <EuiFormRow label={i18n.TRACE_ID_LABEL} fullWidth>
               <EuiFieldText
                 value={traceId}
@@ -579,7 +702,9 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               fill
               onClick={onSave}
               isLoading={isSaving}
-              disabled={isTesting || (mode === 'edit' && isLoadingEvaluator)}
+              disabled={
+                isTesting || Boolean(loadEvaluatorError) || (mode === 'edit' && isLoadingEvaluator)
+              }
               data-test-subj="evalsEvaluatorSave"
             >
               {i18n.SAVE_BUTTON}

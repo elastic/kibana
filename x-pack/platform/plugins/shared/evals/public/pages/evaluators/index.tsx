@@ -127,8 +127,8 @@ export const EvaluatorsPage: React.FC = () => {
         width: '90px',
         actions: [
           {
-            name: i18n.EDIT_FLYOUT_TITLE,
-            description: i18n.EDIT_FLYOUT_TITLE,
+            name: (evaluator) => i18n.EDIT_ARIA_LABEL(evaluator.name),
+            description: (evaluator) => i18n.EDIT_ARIA_LABEL(evaluator.name),
             icon: 'pencil',
             type: 'icon',
             available: (evaluator) => evaluator.origin === 'user_defined',
@@ -136,8 +136,8 @@ export const EvaluatorsPage: React.FC = () => {
             'data-test-subj': 'evalsEvaluatorEdit',
           },
           {
-            name: i18n.DELETE_BUTTON,
-            description: i18n.DELETE_BUTTON,
+            name: (evaluator) => i18n.DELETE_ARIA_LABEL(evaluator.name),
+            description: (evaluator) => i18n.DELETE_ARIA_LABEL(evaluator.name),
             icon: 'trash',
             color: 'danger',
             type: 'icon',

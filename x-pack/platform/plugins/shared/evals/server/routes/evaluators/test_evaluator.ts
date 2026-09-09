@@ -20,7 +20,7 @@ import {
   validateJudgeConfig,
 } from '../../evaluators/user_defined/validate_config';
 import type { RouteDependencies } from '../register_routes';
-import { builtInEvaluatorMessage } from './shared/handle_evaluator_error';
+import { builtInEvaluatorConflict } from './shared/handle_evaluator_error';
 import { EvaluationExecutionError, executeEvaluators } from './shared/execute_evaluators';
 
 export const registerTestEvaluatorRoute = ({
@@ -52,7 +52,7 @@ export const registerTestEvaluatorRoute = ({
         const { definition: draft, connector_id: connectorId, subject } = request.body;
 
         if (evaluatorRegistry.isBuiltIn(draft.name)) {
-          return response.badRequest({ body: { message: builtInEvaluatorMessage(draft.name) } });
+          return builtInEvaluatorConflict(response, draft.name);
         }
 
         try {

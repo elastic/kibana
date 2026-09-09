@@ -105,7 +105,7 @@ export const executeEvaluators = async ({
     round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
   } catch (error) {
     if (error instanceof TraceReadinessError) {
-      throw new EvaluationExecutionError(String(error), 'notFound');
+      throw new EvaluationExecutionError(error.message, 'notFound');
     }
     throw error;
   }
@@ -221,7 +221,7 @@ export const executeEvaluators = async ({
       results.push({
         status: 'error',
         evaluator: await describeEvaluator(definition, connectorId),
-        error: { message: String(error) },
+        error: { message: error instanceof Error ? error.message : String(error) },
       });
     }
   }

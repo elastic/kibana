@@ -187,8 +187,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await adminClient
           .put(evaluatorPath('correctness'))
           .send({ description: 'Changed' })
-          .expect(400);
-        await adminClient.delete(evaluatorPath('correctness')).expect(400);
+          .expect(409);
+        await adminClient.delete(evaluatorPath('correctness')).expect(409);
       });
 
       it('creates a user-defined evaluator with manage_evals', async () => {

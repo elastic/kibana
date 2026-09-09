@@ -101,7 +101,8 @@ export const NAME_LABEL = i18n.translate('xpack.evals.evaluators.nameLabel', {
   defaultMessage: 'Name',
 });
 export const NAME_HELP = i18n.translate('xpack.evals.evaluators.nameHelpDescription', {
-  defaultMessage: 'Use lowercase letters, numbers, hyphens, or underscores.',
+  defaultMessage:
+    'At least 2 characters. Use lowercase letters, numbers, hyphens, or underscores, starting and ending with a letter or number.',
 });
 export const DESCRIPTION_LABEL = i18n.translate('xpack.evals.evaluators.descriptionLabel', {
   defaultMessage: 'Description',
@@ -210,6 +211,42 @@ export const CANCEL_BUTTON = i18n.translate('xpack.evals.evaluators.cancelButton
 export const REQUIRED_FIELDS_ERROR = i18n.translate(
   'xpack.evals.evaluators.requiredFieldsErrorMessage',
   { defaultMessage: 'Complete all required fields and provide at least one valid score.' }
+);
+export const HIGHLIGHTED_FIELDS_ERROR = i18n.translate(
+  'xpack.evals.evaluators.highlightedFieldsErrorMessage',
+  { defaultMessage: 'Fix the highlighted fields and try again.' }
+);
+export const LOAD_EVALUATOR_ERROR_TITLE = i18n.translate(
+  'xpack.evals.evaluators.loadEvaluatorErrorTitle',
+  { defaultMessage: 'Unable to load this evaluator' }
+);
+export const NAME_INVALID_ERROR = i18n.translate('xpack.evals.evaluators.nameInvalidErrorMessage', {
+  defaultMessage:
+    'Enter at least 2 characters using lowercase letters, numbers, hyphens, or underscores, starting and ending with a letter or number.',
+});
+export const DESCRIPTION_INVALID_ERROR = i18n.translate(
+  'xpack.evals.evaluators.descriptionInvalidErrorMessage',
+  { defaultMessage: 'Enter a description of up to 2048 characters.' }
+);
+export const SYSTEM_PROMPT_INVALID_ERROR = i18n.translate(
+  'xpack.evals.evaluators.systemPromptInvalidErrorMessage',
+  { defaultMessage: 'Enter a system prompt of up to 32768 characters.' }
+);
+export const PROMPT_INVALID_ERROR = i18n.translate(
+  'xpack.evals.evaluators.promptInvalidErrorMessage',
+  { defaultMessage: 'Enter an evaluation prompt of up to 32768 characters.' }
+);
+export const EVIDENCE_INVALID_ERROR = i18n.translate(
+  'xpack.evals.evaluators.evidenceInvalidErrorMessage',
+  { defaultMessage: 'Select at least one trace evidence field.' }
+);
+export const REFERENCE_KEYS_INVALID_ERROR = i18n.translate(
+  'xpack.evals.evaluators.referenceKeysInvalidErrorMessage',
+  { defaultMessage: 'Enter up to 20 comma-separated keys of 256 characters each.' }
+);
+export const SCORES_INVALID_ERROR = i18n.translate(
+  'xpack.evals.evaluators.scoresInvalidErrorMessage',
+  { defaultMessage: 'Name every score, and add between 1 and 10 of them.' }
 );
 export const INVALID_LABELS_ERROR = i18n.translate(
   'xpack.evals.evaluators.invalidLabelsErrorMessage',

@@ -30,8 +30,23 @@ const REDACTED_TRACE_ID = '0af7651916cd43dd8448eb211c80319d';
 
 const buildRouteSearchMock = () =>
   buildSearchMock(async ({ index, filters, traceId, emptySearchResponse }) => {
-    if (!traceId) {
+    if (traceId !== FULL_TRACE_ID && traceId !== REDACTED_TRACE_ID) {
       return emptySearchResponse;
+    }
+
+    // Both known traces carry their evidence in `traces-*`, but `logs-*` still has to answer
+    // the unfiltered existence probe, or a trace that exists reads as absent.
+    if (index === 'logs-*') {
+      const isEvidenceProbe = [
+        'user_prompt',
+        'api_response_body',
+        'gen_ai.user.message',
+        'gen_ai.choice',
+      ].some((eventName) => hasTermFilter(filters, 'event_name', eventName));
+
+      return isEvidenceProbe
+        ? emptySearchResponse
+        : withHits([{ '@timestamp': '2026-07-10T10:00:00.000Z' }]);
     }
 
     if (traceId === FULL_TRACE_ID) {
