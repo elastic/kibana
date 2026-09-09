@@ -772,9 +772,10 @@ const batchCaseCounts = async (
 
 export const registerEntityGridRoute = ({
   router,
-  logger,
+  logger: rootLogger,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
+  const logger = rootLogger.get('entityAnalytics.entityGrid');
   router.versioned
     .post({
       access: 'internal',
