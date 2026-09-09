@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { configureHTTP2 } from '../../../common/configure_http2';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
-
-  return configureHTTP2({
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  });
-}
+// These suites don't ingest Elasticsearch data and keep their state in the browser
+// (localStorage) or the worker's own space, so they can run in parallel. Suites that
+// create indices, pipelines or sample data stay in the sequential `./tests` config.
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 3,
+});
