@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
@@ -19,7 +19,7 @@ import {
 import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, type ProjectRouting } from '@kbn/es-query';
 import type { SavedSearchComponentProps, SavedSearchTableConfig } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -176,15 +176,28 @@ const SavedSearchComponentTable: React.FC<
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
   const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
 
-  const { executionContext } = props;
+  const { executionContext, projectRouting } = props;
+
+  // created once; later changes are published through the effect below
+  const [projectRouting$] = useState(
+    () => new BehaviorSubject<ProjectRouting | undefined>(projectRouting)
+  );
+
+  useEffect(() => {
+    if (projectRouting$.getValue() !== projectRouting) {
+      projectRouting$.next(projectRouting);
+    }
+  }, [projectRouting, projectRouting$]);
+
   const parentApi = useMemo(() => {
     return {
       ...(executionContext ? { executionContext } : {}),
+      projectRouting$,
       getSerializedStateForChild: () => {
         return initialSerializedState;
       },
     };
-  }, [initialSerializedState, executionContext]);
+  }, [initialSerializedState, executionContext, projectRouting$]);
 
   useEffect(
     function syncIndex() {
