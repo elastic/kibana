@@ -10,15 +10,14 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import {
   mockAwsPackage,
+  navigateToOnboardingStep,
   useOnboardingFeatureFlag,
   SERVICES_STEP_SESSION_KEY,
   SERVICE_SETTINGS_SESSION_KEY,
+  AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
+  DETECT_AND_REVIEW_SESSION_KEY,
+  STEP_STATE_SESSION_KEY,
 } from '../helpers/onboarding';
-
-// Session keys for additional step state written/read by hydrateOnboardingSession.
-const AUTHENTICATE_AND_DEPLOY_SESSION_KEY = 'onboarding.aws.authenticateAndDeployStep';
-const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep';
-const STEP_STATE_SESSION_KEY = 'onboarding.aws.stepState';
 
 // Minimal aws manifest with elb (managed_integration) so ManagedIntegrationsSection renders.
 // hide_in_var_group_options forces identityFederationSupported=false on all inputs so
@@ -67,35 +66,12 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     page,
   }) => {
     // Set up session with a connector (SO write only happens on the connector path).
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#authenticate-and-deploy');
-    await page.evaluate(
-      ({
-        servicesKey,
-        settingsKey,
-        authKey,
-      }: {
-        servicesKey: string;
-        settingsKey: string;
-        authKey: string;
-      }) => {
-        sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ['elb'] }));
-        sessionStorage.setItem(
-          settingsKey,
-          JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-        );
-        sessionStorage.setItem(
-          authKey,
-          JSON.stringify({ connectorId: 'connector-test-123', authMethod: 'identity_federation' })
-        );
-      },
-      {
-        servicesKey: SERVICES_STEP_SESSION_KEY,
-        settingsKey: SERVICE_SETTINGS_SESSION_KEY,
-        authKey: AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
-      }
-    );
-    await page.reload();
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      serviceVars: {},
+      authenticateAndDeployStep: { connectorId: 'connector-test-123', authMethod: 'identity_federation' },
+    });
 
     // Mock SO create — returns a deployment id that the update will reference.
     await page.route(
@@ -313,9 +289,9 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
     // Both fields start hidden — click Replace then enter values.
-    await page.getByText(/replace access key id/i).click();
+    await page.testSubj.locator('staticKeysReplace-accessKeyId-toggle').click();
     await page.testSubj.locator('staticKeysReplace-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
-    await page.getByText(/replace secret access key/i).click();
+    await page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle').click();
     await page.testSubj.locator('staticKeysReplace-secretAccessKey').fill('wJalrXUtnFEMI/K7MDENG');
     await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
@@ -381,7 +357,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     // StaticKeysReplaceView should be visible — both fields start hidden.
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
     // The hidden-field panels are present (Replace buttons visible, no inputs).
-    await expect(page.getByText(/replace access key id/i)).toBeVisible();
-    await expect(page.getByText(/replace secret access key/i)).toBeVisible();
+    await expect(page.testSubj.locator('staticKeysReplace-accessKeyId-toggle')).toBeVisible();
+    await expect(page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle')).toBeVisible();
   });
 });

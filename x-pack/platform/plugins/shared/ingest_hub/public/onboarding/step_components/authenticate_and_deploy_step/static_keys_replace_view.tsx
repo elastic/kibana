@@ -21,7 +21,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
-function HiddenFieldPanel({ varName, onReplace }: { varName: string; onReplace: () => void }) {
+function HiddenFieldPanel({
+  varName,
+  onReplace,
+  dataTestSubj,
+}: {
+  varName: string;
+  onReplace: () => void;
+  dataTestSubj?: string;
+}) {
   return (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <EuiText size="s" color="subdued">
@@ -38,6 +46,7 @@ function HiddenFieldPanel({ varName, onReplace }: { varName: string; onReplace: 
         iconType="refresh"
         iconSide="left"
         size="xs"
+        data-test-subj={dataTestSubj}
       >
         <FormattedMessage
           id="xpack.ingestHub.staticKeysReplaceView.replaceButton"
@@ -123,7 +132,11 @@ export function StaticKeysReplaceView({
             </EuiFlexGroup>
           </>
         ) : (
-          <HiddenFieldPanel varName={accessKeyIdLabel} onReplace={() => setIsReplacingAKID(true)} />
+          <HiddenFieldPanel
+            varName={accessKeyIdLabel}
+            onReplace={() => setIsReplacingAKID(true)}
+            dataTestSubj="staticKeysReplace-accessKeyId-toggle"
+          />
         )}
       </EuiFormRow>
 
@@ -154,6 +167,7 @@ export function StaticKeysReplaceView({
           <HiddenFieldPanel
             varName={secretAccessKeyLabel}
             onReplace={() => setIsReplacingSecret(true)}
+            dataTestSubj="staticKeysReplace-secretAccessKey-toggle"
           />
         )}
       </EuiFormRow>
