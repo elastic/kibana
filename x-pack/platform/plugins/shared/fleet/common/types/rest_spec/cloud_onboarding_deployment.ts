@@ -10,6 +10,7 @@ import type {
   CloudOnboardingDeploymentAuthMethod,
   CloudOnboardingDeploymentMechanism,
   CloudOnboardingDeploymentStatus,
+  CloudOnboardingEcfStack,
 } from '../models/cloud_onboarding_deployment';
 
 export interface CreateCloudOnboardingDeploymentRequest {
@@ -45,6 +46,7 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     agentPolicyId?: string;
     packagePolicyIds?: string[];
     apiKeyId?: string;
+    ecfStacks?: CloudOnboardingEcfStack[];
   };
 }
 

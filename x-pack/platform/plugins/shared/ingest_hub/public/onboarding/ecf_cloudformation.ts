@@ -165,7 +165,7 @@ const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn 
  * `ElasticAPIKey` is intentionally NOT pre-filled: it is a sensitive credential that should
  * not appear in browser history or URL logs.  The user fills it in the AWS console.
  *
- * TODO: generate a dedicated Elastic API key server-side and pre-fill it (follow-up issue).
+ * TODO: generate a dedicated Elastic API key server-side and pre-fill it (ingest-dev#9519).
  *
  * @param ecfConfigs    ECF service configurations (from `getEcfServiceConfigs`).
  * @param region        AWS region for the CloudFormation stack (the global region from Step 2).
