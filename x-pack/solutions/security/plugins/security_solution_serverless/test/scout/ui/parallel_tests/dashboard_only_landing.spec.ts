@@ -40,14 +40,11 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'keeps a privileged user on Get started',
-      async ({ page, browserAuth, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-        await page.waitForURL(/\/app\/security\/get_started/);
-        await expect(page.testSubj.locator('onboarding-hub-page')).toBeVisible();
-      }
-    );
+    spaceTest('keeps a privileged user on Get started', async ({ page, browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await page.gotoApp('security/get_started');
+      await page.waitForURL(/\/app\/security\/get_started/);
+      await expect(page.testSubj.locator('onboarding-hub-page')).toBeVisible();
+    });
   }
 );
