@@ -23,11 +23,13 @@ import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
+import { installSandboxSeedWorkflow } from './lib/managed_workflows/install_sandbox_seed_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { sandboxWriteFileStepDefinition } from './step_definitions/sandbox_write_file';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -80,6 +82,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
+    const config = this.ctx.config.get();
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
@@ -97,14 +100,15 @@ export class NightshiftInvestigationsPlugin
     );
 
     if (plugins.agentBuilder) {
-      registerInvestigationAgentType(plugins.agentBuilder);
+      registerInvestigationAgentType(plugins.agentBuilder, {
+        sandboxEnabled: !!config.sandbox,
+      });
       plugins.agentBuilder.tools.register(
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
         })
       );
 
-      const config = this.ctx.config.get();
       if (config.sandbox) {
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
@@ -181,6 +185,10 @@ export class NightshiftInvestigationsPlugin
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
+        );
+        // `sandboxConnectionManager` is only set when `config.sandbox` is present.
+        plugins.workflowsExtensions.registerStepDefinition(
+          sandboxWriteFileStepDefinition(() => this.sandboxConnectionManager)
         );
       }
 
@@ -300,6 +308,7 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
+    await installSandboxSeedWorkflow({ client });
     await client.ready();
   }
 
