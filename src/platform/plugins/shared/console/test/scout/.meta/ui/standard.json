@@ -1,5 +1,5 @@
 {
-  "sha1": "10775c2bb897c2c164cb9b508fe3d4245326be76",
+  "sha1": "320a025d0383ff7cb7d8573bbf9987d7a7c4328d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 124,
-        "column": 5
+        "line": 128,
+        "column": 23
       }
     },
     {
@@ -260,8 +260,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 133,
-        "column": 23
+        "line": 141,
+        "column": 5
       }
     },
     {
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 186,
+        "line": 189,
         "column": 1
       }
     },
@@ -300,7 +300,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 193,
+        "line": 196,
         "column": 1
       }
     },
