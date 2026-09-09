@@ -39,6 +39,18 @@ export interface PersonaMatrixExample {
     expectedSkill?: string;
     expectedTools?: string[];
     /**
+     * Connector id that the authored artifact must actually reference, checked
+     * deterministically by the `ConnectorInvoked` evaluator. Calling the
+     * workflow-generation tool is not evidence that the produced workflow
+     * targets the connector the prompt demanded.
+     */
+    expectedConnectorId?: string;
+    /**
+     * Step type (e.g. `http`) that must appear as a YAML key in the authored
+     * workflow, so prose describing a step cannot score as a built one.
+     */
+    expectedStepType?: string;
+    /**
      * Whether the declared tool sequence is a rankable contract. "probe" is
      * intentionally open-ended and returns N/A from the trajectory evaluator.
      */
@@ -504,6 +516,11 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     metadata: {
       expectedSkill: 'workflow-authoring',
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
+      // Verified deterministically by ConnectorInvoked: calling
+      // generate_workflow is not evidence that the authored workflow actually
+      // targets Slack. The prompt names this connector id explicitly.
+      expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
+      expectedStepType: 'http',
       severity: 'medium',
       tags: ['workflow', 'authoring'],
     },
@@ -529,6 +546,10 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // `workflow-authoring` documents that it is NOT required for creating or
       // editing a workflow — call `platform.core.generate_workflow` directly.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
+      // This prompt names no connector id, so only the http step is a fair
+      // deterministic assertion. Asserting an id the prompt never gave would
+      // false-fail a correct answer.
+      expectedStepType: 'http',
       severity: 'low',
       tags: ['workflow', 'authoring-fixed'],
     },
@@ -553,6 +574,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask
       // for the skill and generate_workflow is the documented direct path.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
+      // Prompt names the connector id explicitly, so both are assertable.
+      expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
+      expectedStepType: 'http',
       severity: 'medium',
       tags: ['workflow', 'authoring-parameterized'],
     },

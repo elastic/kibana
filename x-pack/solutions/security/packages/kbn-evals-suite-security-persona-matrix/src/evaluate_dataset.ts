@@ -26,6 +26,7 @@ import type {
   PersonaMatrixExampleInput,
 } from './datasets/persona_matrix_prompts';
 import { selectShard } from './datasets/select_shard';
+import { createConnectorInvokedEvaluator } from './evaluators/connector_invoked_evaluator';
 import type { PersonaMatrixChatClient } from './chat_client';
 
 /**
@@ -450,6 +451,10 @@ export function createEvaluatePersonaMatrixDataset({
     const expectedToolCalledEvaluator = createPersonaMatrixExpectedToolCalledEvaluator();
     const finalAnswerPresentEvaluator = createPersonaMatrixFinalAnswerPresentEvaluator();
     const minExpectedStepsEvaluator = createPersonaMatrixMinExpectedStepsEvaluator();
+    // Deterministic proof that an authored workflow targets the connector the
+    // prompt demanded. ExpectedToolCalled only proves generate_workflow was
+    // called, never what it produced -- see connector_invoked_evaluator.ts.
+    const connectorInvokedEvaluator = createConnectorInvokedEvaluator();
 
     const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
 
@@ -462,6 +467,7 @@ export function createEvaluatePersonaMatrixDataset({
       expectedToolCalledEvaluator,
       finalAnswerPresentEvaluator,
       minExpectedStepsEvaluator,
+      connectorInvokedEvaluator,
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       evaluators.criteria([
