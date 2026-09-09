@@ -17,7 +17,9 @@ import {
   createRequestAbortedError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,
+  createAgentExecutionError,
 } from '@kbn/agent-builder-common/base/errors';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { RoundError } from './round_error';
 
 jest.mock('./reasoning_error_panel', () => ({
@@ -83,5 +85,63 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderGenericRoundError')).toBeInTheDocument();
     expect(screen.getByTestId('reasoningErrorPanel')).toBeInTheDocument();
+  });
+
+  describe('connector errors', () => {
+    const createConnectorError = (statusCode: number, message = 'connector failed') =>
+      createAgentExecutionError(message, AgentExecutionErrorCode.connectorError, { statusCode });
+
+    it('renders an actionable message instead of a raw stack trace on a 403', () => {
+      const error = createConnectorError(
+        403,
+        'Received an unsuccessful status code for request from inference entity id [.anthropic-claude-4.6-sonnet-chat_completion] status [403]. Error message: [Organization is not authorized to access any resource]'
+      );
+
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+      expect(screen.getByTestId('agentBuilderRoundErrorConnector')).toBeInTheDocument();
+      // the generic stack-trace fallback must not be used for a classified connector error
+      expect(screen.queryByTestId('agentBuilderGenericRoundError')).not.toBeInTheDocument();
+      expect(screen.getByText(/organization may not be entitled/i)).toBeInTheDocument();
+    });
+
+    it('preserves the underlying provider message for troubleshooting', () => {
+      const error = createConnectorError(
+        403,
+        'Organization is not authorized to access any resource'
+      );
+
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+      expect(screen.getByTestId('agentBuilderRoundErrorConnector')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Organization is not authorized to access any resource/)
+      ).toBeInTheDocument();
+    });
+
+    it('distinguishes an authentication failure from an entitlement failure', () => {
+      renderWithIntl(<RoundError error={createConnectorError(401)} onRetry={onRetry} />);
+
+      expect(screen.getByText(/rejected the credentials/i)).toBeInTheDocument();
+    });
+
+    it('describes rate limiting as retryable', () => {
+      renderWithIntl(<RoundError error={createConnectorError(429)} onRetry={onRetry} />);
+
+      expect(screen.getByText(/rate limiting/i)).toBeInTheDocument();
+    });
+
+    it('describes provider outages for 5xx responses', () => {
+      renderWithIntl(<RoundError error={createConnectorError(503)} onRetry={onRetry} />);
+
+      expect(screen.getByText(/currently unavailable/i)).toBeInTheDocument();
+    });
+
+    it('renders inside the reasoning error panel', () => {
+      renderWithIntl(<RoundError error={createConnectorError(403)} onRetry={onRetry} />);
+
+      expect(screen.getByTestId('agentBuilderRoundErrorConnector')).toBeInTheDocument();
+      expect(screen.getByTestId('reasoningErrorPanel')).toBeInTheDocument();
+    });
   });
 });

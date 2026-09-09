@@ -462,6 +462,16 @@ export const isContextLengthExceededAgentError = (
 };
 
 /**
+ * Checks if the given error is a connector error, i.e. the underlying inference
+ * connector responded with an HTTP error status.
+ */
+export const isConnectorAgentError = (
+  err: unknown
+): err is AgentBuilderAgentExecutionError<AgentExecutionErrorCode.connectorError> => {
+  return isAgentExecutionError(err) && err.meta.errCode === AgentExecutionErrorCode.connectorError;
+};
+
+/**
  * Represents an error related to hook execution
  */
 export type AgentBuilderHooksExecutionError =
@@ -507,6 +517,7 @@ export const AgentBuilderErrorUtils = {
   isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
+  isConnectorAgentError,
   createInternalError,
   createForbiddenError,
   createToolNotFoundError,
