@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../fixtures';
+import { enableElasticChartDebug, spaceTest, testData } from '../fixtures';
 
 const ESQL_QUERY = 'from logstash-* | stats averageB = avg(bytes) by extension';
 
@@ -52,9 +52,10 @@ spaceTest.describe(
 
     spaceTest(
       'changes dimensions in the Discover ES|QL Lens flyout',
-      async ({ page, pageObjects }) => {
+      async ({ context, pageObjects }) => {
         const { discover, lens } = pageObjects;
 
+        await enableElasticChartDebug(context);
         await discover.goto({ queryMode: 'esql' });
         await discover.waitUntilTabIsLoaded();
         await discover.writeAndSubmitEsqlQuery(ESQL_QUERY);
@@ -67,7 +68,15 @@ spaceTest.describe(
           field: 'extension',
         });
 
-        await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+        await expect
+          .poll(
+            async () =>
+              (await lens.workspace.getCurrentChartDebugState('xyVisChart')).legend?.items
+                .map((item) => item.name)
+                .sort(),
+            { timeout: 20_000 }
+          )
+          .toStrictEqual(['css', 'gif', 'jpg', 'php', 'png']);
       }
     );
   }
