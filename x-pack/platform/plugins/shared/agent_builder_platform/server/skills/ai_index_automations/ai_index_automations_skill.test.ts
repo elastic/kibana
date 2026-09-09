@@ -125,6 +125,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('warns that re-generating to make an edit re-rolls what was already settled', () => {
       expect(content).toMatch(/re-rolls parts of the workflow you had\s+already settled/);
+      expect(content).toMatch(/Once means once/);
     });
 
     it('points at the lookup tools that cover built-in and connector step types', () => {
@@ -149,7 +150,43 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('tells the brief to say why workflow-authoring is needed, which its own description denies', () => {
-      expect(content).toMatch(/an instruction to load `workflow-authoring` too, and why/);
+      expect(content).toMatch(/why `workflow-authoring` is needed/);
+    });
+
+    it('has the subagent load skills by id rather than search for ids it was given', () => {
+      expect(content).toMatch(/`load_skill` on `ai-index-automations`/);
+      expect(content).toMatch(/do not reach for `search_relevant_skills`/);
+    });
+
+    it('restates the rules in the brief, since a skill loaded late cannot govern earlier calls', () => {
+      expect(content).toMatch(/restated in the prompt rather than left to the skill/);
+      expect(content).toMatch(/cannot govern the first two/);
+    });
+
+    it('points at the referenced-file path instead of browsing the filesystem', () => {
+      expect(content).toMatch(/among its `referenced_files` with an absolute path/);
+      expect(content).toMatch(/nothing to go looking for with `list_files`/);
+    });
+
+    it('explains the five-match cliff that makes keyword step lookups useless', () => {
+      expect(content).toMatch(/only when the query matches five types or fewer/);
+      expect(content).toMatch(/Pass `stepType` with an exact id/);
+    });
+
+    it('names the closed set of step types, so lookups can be targeted', () => {
+      for (const stepType of [
+        '`elasticsearch.esql.query`',
+        '`ai.prompt`',
+        '`foreach`',
+        '`if`',
+        '`data.set`',
+      ]) {
+        expect(content).toContain(stepType);
+      }
+    });
+
+    it('asks for one examples call rather than one per step', () => {
+      expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
     it('requires the pilot to tag its indicators and delete them afterwards', () => {

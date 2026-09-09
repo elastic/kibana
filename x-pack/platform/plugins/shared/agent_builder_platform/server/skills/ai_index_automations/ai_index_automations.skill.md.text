@@ -167,13 +167,19 @@ will invent it confidently. Put in the prompt:
 - the AI index id, and whether its destination is an index or a data stream
 - the sources and the exact corpus filter the automation should apply
 - the strategy from `analyze-and-improve`, and what the indicators are meant to capture
-- an instruction to load `ai-index-automations` and to build to the rules in this skill, so you do
-  not have to restate them
-- an instruction to load `workflow-authoring` too, and why: it describes Liquid templating and
-  `on-failure` handling, which the loop below needs and which that skill's own description — it
-  claims not to be required for creating or running workflows — will otherwise talk it out of loading
+- an instruction to make its first two calls `load_skill` on `ai-index-automations` and then
+  `workflow-authoring`, by id, ahead of every other tool. `load_skill` takes the id directly and
+  returns the skill's content, its tools and the paths of its referenced files, so a subagent that
+  has been handed the ids has nothing to search for
+- why `workflow-authoring` is needed — Liquid templating and `on-failure` handling — since that
+  skill's own description claims it is not required for creating or running workflows, and will
+  otherwise talk it out of loading it
 - the pilot tag you have chosen for this attempt
 - that the complete final YAML must come back verbatim
+- the three rules below, restated in the prompt rather than left to the skill: scaffold once, never
+  validate a definition you are about to run, and look step types up by exact name. A skill read on
+  the third call cannot govern the first two, and a subagent that discovers these mid-flight has
+  usually spent half its budget by then
 
 That last point is worth stating bluntly in the prompt, because `run_subagent` tells the model its
 job is to summarize. A summary of a workflow is worthless here: the YAML *is* the deliverable. Ask
@@ -188,11 +194,24 @@ is still wrong rather than burning the budget silently.
 
 If you are the subagent, this is the work.
 
+**Load the skills before you touch anything else.** `load_skill` takes a skill id — this one, then
+`workflow-authoring` — and returns its content, its tools and the paths of its referenced files. Make
+those two calls first and do not reach for `search_relevant_skills`: the brief named the skills, so
+there is nothing to search for. Everything done before they are loaded is done without the rules, and
+is usually thrown away.
+
+The worked example arrives the same way. `load_skill` returns `index-selection-reference-workflow`
+among its `referenced_files` with an absolute path, and `read_file` on that path is the whole
+retrieval — there is nothing to go looking for with `list_files`.
+
 **Scaffold it once, then take the YAML into text.**
 `platform.core.generate_workflow` is the quickest route to a draft that parses: it is primed with
 every built-in step type and every connector configured here, and it validates its own output,
 re-generating against the errors rather than returning YAML that does not parse. It hands back an
 attachment id rather than a definition, so call `attachments.read` on that id to get the YAML itself.
+Once means once: after that call the definition is text you are holding, and every later change is an
+edit to that text. A second `generate_workflow` produces a second attachment to read back and re-rolls
+what the first one settled.
 
 Work in text from there. `platform.workflows.validate_workflow`, `platform.core.execute_workflow` and
 `platform.workflows.workflow_execute_step` all take a raw `yaml` string, so once the definition is in
@@ -204,7 +223,8 @@ already settled, and each re-roll is a chance to lose something the last pilot p
 `platform.core.execute_workflow` parses and validates before a single step executes, and throws when
 that fails. So does `platform.workflows.workflow_execute_step`. A draft that cannot parse costs you
 the run and nothing else — there are no side effects to guard against, and a validate call ahead of
-each run is two round trips for one answer.
+each run is two round trips for one answer. If your next call is a run, strike the validate call from
+the plan.
 
 Call `platform.workflows.validate_workflow` when it tells you something the run did not. Its failures
 carry the definitions of every built-in and connector step type the workflow references, and the
@@ -217,11 +237,17 @@ happens after the final run, so the YAML you hand back is never executed in the 
 in. Validation is the only check it gets. Validate the whole definition rather than the part you
 touched, because a step in isolation cannot tell you whether its references still resolve.
 
-**Look things up rather than guessing at them.** `platform.workflows.get_step_definitions` gives a
-step type's inputs, outputs and examples ahead of time,
-`platform.workflows.get_trigger_definitions` gives the event context a trigger provides, and
-`platform.workflows.get_examples` shows working definitions when you are unsure of a shape. None of
-them can see the `context-engine` steps; those are in this skill and nowhere a tool can reach.
+**Look step types up by exact name, once each.** `platform.workflows.get_step_definitions` returns a
+step type's inputs, config and examples only when the query matches five types or fewer. Match more
+than that and it returns bare ids and labels with no parameters at all — so a keyword search teaches
+you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
+
+The types these automations use are a closed set: `elasticsearch.esql.query`, `ai.prompt`, `foreach`,
+`if` and `data.set`, alongside the `context-engine` steps written out above, which no lookup can
+return at all. Fetch only the ones you are actually unsure of.
+
+`platform.workflows.get_examples` is one call for the example library rather than one per step, and
+`platform.workflows.get_trigger_definitions` gives the event context a trigger provides.
 
 Validation establishes that the workflow parses, that its step types exist and that its references
 resolve. It does **not** establish that a query inside it returns anything, which is why the rest of
