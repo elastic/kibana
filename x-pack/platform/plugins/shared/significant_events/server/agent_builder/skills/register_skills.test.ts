@@ -13,6 +13,7 @@ import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/o
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
 import { registerSignificantEventsSkills } from './register_skills';
+import { kiQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
@@ -24,6 +25,7 @@ const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 // `ki-identification-management` is only added when a KI onboarding client is present.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
+  kiQueryGenerationSkill.id,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
   'significant-events-onboarding',

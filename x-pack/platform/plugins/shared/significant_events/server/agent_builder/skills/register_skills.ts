@@ -11,6 +11,7 @@ import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
+import { kiQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { significantEventsManagementSkill } from './significant_events_management';
@@ -80,6 +81,7 @@ export const registerSignificantEventsSkills = async ({
 
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
+    kiQueryGenerationSkill,
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
     ...(streamsKIsOnboardingClient && maintenanceService
