@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export const MAX_CASES_TOOLTIP = (max: number): string =>
   i18n.translate('xpack.cases.actions.runWorkflow.maxCasesTooltip', {
-    defaultMessage:
-      'Select {max} or fewer cases to run a workflow.',
+    defaultMessage: 'Select {max} or fewer cases to run a workflow.',
     values: { max },
   });
