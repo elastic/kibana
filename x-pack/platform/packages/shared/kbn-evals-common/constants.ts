@@ -70,6 +70,7 @@ export const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0' as 
 export const EVALUATOR_UUID_NAMESPACE = 'c1d6a0f2-8b4e-4a17-9c3d-5f2e7a9b0c41' as const;
 
 export const MAX_EXAMPLES_PER_DATASET = 10_000 as const;
+export const MAX_DATASET_EXAMPLES_REQUEST_BYTES = 5 * 1024 * 1024;
 export const MAX_SCORES_PER_QUERY = 10_000 as const;
 
 export const MAX_TAGS_PER_DATASET = 20 as const;
