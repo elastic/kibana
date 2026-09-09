@@ -6,13 +6,11 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexAutomation, AiIndexDest } from '../../common/http_api/ai_indices';
-import { deleteAiIndexBackingStore } from './delete_backing_store';
 
-/**
- * Best-effort deletion of the backing store. Returns an error string on failure, null on success.
- */
+/** Best-effort backing-store delete. Returns an error string on failure, null on success or 404. */
 export const deleteBackingStoreResource = async ({
   esClient,
   dest,
@@ -25,9 +23,16 @@ export const deleteBackingStoreResource = async ({
   aiIndexId: string;
 }): Promise<string | null> => {
   try {
-    await deleteAiIndexBackingStore(esClient, dest);
+    if (dest.type === 'data_stream') {
+      await esClient.indices.deleteDataStream({ name: dest.value });
+    } else {
+      await esClient.indices.delete({ index: dest.value });
+    }
     return null;
   } catch (error) {
+    if (isResponseError(error) && error.statusCode === 404) {
+      return null;
+    }
     const message = error instanceof Error ? error.message : String(error);
     logger.warn(
       `Deleted AI index '${aiIndexId}', but failed to delete its backing store '${dest.value}': ${message}`

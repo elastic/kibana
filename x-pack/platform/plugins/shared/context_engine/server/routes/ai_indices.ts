@@ -699,6 +699,17 @@ export const registerAiIndexRoutes = ({
             errors.push(...automationErrors);
           }
 
+          // Log any partial failures to audit trail
+          for (const err of errors) {
+            auditLogger.log(
+              aiIndexAuditEvent({
+                action: AiIndexAuditAction.DELETE_RESOURCES,
+                id: aiIndexId,
+                error: new Error(err),
+              })
+            );
+          }
+
           // The improvements store is keyed by AI index id, so revisions left behind would
           // resurface if an AI index were later recreated under the same id. Best-effort: the store
           // is a user-owned index and the caller may well have no privileges on it, and reporting a

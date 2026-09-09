@@ -32,9 +32,10 @@ export const AiIndexDeleteConfirmModal = ({
   onSuccess,
 }: AiIndexDeleteConfirmModalProps) => {
   const {
-    services: { notifications },
+    services: { notifications, application },
   } = useKibana();
   const { deleteAiIndex, isDeleting } = useDeleteAiIndex();
+  const canDeleteWorkflows = application.capabilities.workflowsManagement?.deleteWorkflow ?? false;
   const automationsCount = aiIndex.automations.length;
   const [deleteKnowledgeIndicators, setDeleteKnowledgeIndicators] = useState(true);
   const [deleteAutomations, setDeleteAutomations] = useState(true);
@@ -129,7 +130,7 @@ export const AiIndexDeleteConfirmModal = ({
         id={automationsCheckboxId}
         data-test-subj="contextAiIndexDeleteAutomationsCheckbox"
         checked={deleteAutomations}
-        disabled={automationsCount === 0}
+        disabled={automationsCount === 0 || !canDeleteWorkflows}
         onChange={(event) => setDeleteAutomations(event.target.checked)}
         label={
           <FormattedMessage
