@@ -191,6 +191,67 @@ describe('createListConnectorsTool', () => {
     expect(errorResult.data.message).toContain('boom');
   });
 
+  describe('agent connector scoping', () => {
+    beforeEach(() => {
+      mockGetAll.mockResolvedValue([
+        { id: 'conn-slack', name: 'My Slack', actionTypeId: '.slack2' },
+        { id: 'conn-slack-2', name: 'Other Slack', actionTypeId: '.slack2' },
+      ]);
+    });
+
+    it('filters to agentConfiguration.connector_ids when set', async () => {
+      const tool = createListConnectorsTool({ getActions, getInference });
+      const result = await tool.handler({}, {
+        ...mockContext,
+        agentConfiguration: { connector_ids: ['conn-slack'], tools: [] },
+      } as any);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        total: number;
+        connectors: Array<{ connectorId: string }>;
+      };
+      expect(data.total).toBe(1);
+      expect(data.connectors[0].connectorId).toBe('conn-slack');
+    });
+
+    it('returns no connectors when connector_ids is an empty array', async () => {
+      const tool = createListConnectorsTool({ getActions, getInference });
+      const result = await tool.handler({}, {
+        ...mockContext,
+        agentConfiguration: { connector_ids: [], tools: [] },
+      } as any);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        total: number;
+        connectors: unknown[];
+      };
+      expect(data).toEqual({ total: 0, connectors: [] });
+    });
+
+    it('returns every connector when agentConfiguration has no connector_ids', async () => {
+      const tool = createListConnectorsTool({ getActions, getInference });
+      const result = await tool.handler({}, {
+        ...mockContext,
+        agentConfiguration: { tools: [] },
+      } as any);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        total: number;
+      };
+      expect(data.total).toBe(2);
+    });
+
+    it('returns every connector when agentConfiguration is absent', async () => {
+      const tool = createListConnectorsTool({ getActions, getInference });
+      const result = await tool.handler({}, mockContext);
+
+      const data = ((result as ToolHandlerStandardReturn).results[0] as OtherResult).data as {
+        total: number;
+      };
+      expect(data.total).toBe(2);
+    });
+  });
+
   describe('availability', () => {
     it('is unavailable when the experimental features flag is off', async () => {
       const tool = createListConnectorsTool({ getActions, getInference });

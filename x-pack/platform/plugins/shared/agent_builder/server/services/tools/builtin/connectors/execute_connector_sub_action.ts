@@ -91,6 +91,23 @@ export const createExecuteConnectorSubActionTool = ({
     },
   },
   handler: async ({ connectorId, subAction, params }, context) => {
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration. The LLM has no say in this — it's part of the trust boundary. Checked
+    // before resolving the connector so a non-attached connectorId isn't even confirmed to exist.
+    const connectorIds = context.agentConfiguration?.connector_ids;
+    if (connectorIds !== undefined && !connectorIds.includes(connectorId)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Connector '${connectorId}' is not available to this agent. ` +
+              'Use list_connectors to see the connectors attached to this agent.',
+            metadata: { connectorId, subAction },
+          }),
+        ],
+      };
+    }
+
     const actions = await getActions();
     const actionsClient = await actions.getActionsClientWithRequest(context.request);
 

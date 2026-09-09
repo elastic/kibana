@@ -66,13 +66,21 @@ export const createListConnectorsTool = ({
           };
     },
   },
-  handler: async (_input, { request, logger }) => {
+  handler: async (_input, { request, logger, agentConfiguration }) => {
     try {
       const actions = await getActions();
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const allConnectors = await actionsClient.getAll({ includeSystemActions: false });
 
-      const connectors = allConnectors.flatMap((connector) => {
+      // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+      // configuration. The LLM has no say in this — it's part of the trust boundary.
+      const connectorIds = agentConfiguration?.connector_ids;
+      const allowedConnectorIds = connectorIds !== undefined ? new Set(connectorIds) : undefined;
+      const scopedConnectors = allowedConnectorIds
+        ? allConnectors.filter((connector) => allowedConnectorIds.has(connector.id))
+        : allConnectors;
+
+      const connectors = scopedConnectors.flatMap((connector) => {
         const spec = getConnectorSpec(connector.actionTypeId);
         if (!spec) return [];
 

@@ -285,6 +285,59 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
+  describe('agent connector scoping', () => {
+    it('rejects a connectorId not in agentConfiguration.connector_ids without resolving it', async () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        { ...mockContext, agentConfiguration: { connector_ids: ['conn-999'], tools: [] } } as any
+      );
+
+      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+      const errorResult = (result as ToolHandlerStandardReturn).results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain("Connector 'conn-123' is not available");
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('allows a connectorId that is in agentConfiguration.connector_ids', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        { ...mockContext, agentConfiguration: { connector_ids: ['conn-123'], tools: [] } } as any
+      );
+
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+      expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('is unrestricted when agentConfiguration has no connector_ids', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        { ...mockContext, agentConfiguration: { tools: [] } } as any
+      );
+
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+      expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('is unrestricted when agentConfiguration is absent', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        mockContext
+      );
+
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+      expect(mockExecute).toHaveBeenCalled();
+    });
+  });
+
   it('returns error when connector resolution fails', async () => {
     mockGet.mockRejectedValue(new Error('Saved object not found'));
 
