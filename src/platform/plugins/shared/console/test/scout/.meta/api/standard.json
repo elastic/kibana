@@ -1,5 +1,5 @@
 {
-  "sha1": "945a4a1ca3e8affb32730d1e5b2399515ead8da9",
+  "sha1": "857752f5174e6c0a57b66bb7b9b49be062abbb98",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -322,8 +322,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_authz.spec.ts",
-        "line": 72,
-        "column": 24
+        "line": 73,
+        "column": 38
       }
     },
     {
@@ -343,7 +343,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_authz.spec.ts",
         "line": 76,
-        "column": 14
+        "column": 9
       }
     },
     {
@@ -362,8 +362,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_authz.spec.ts",
-        "line": 82,
-        "column": 18
+        "line": 83,
+        "column": 24
       }
     },
     {
@@ -382,8 +382,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_authz.spec.ts",
-        "line": 88,
-        "column": 94
+        "line": 90,
+        "column": 76
       }
     },
     {
@@ -403,7 +403,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_authz.spec.ts",
         "line": 94,
-        "column": 14
+        "column": 9
       }
     },
     {
@@ -422,8 +422,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_authz.spec.ts",
-        "line": 102,
-        "column": 20
+        "line": 103,
+        "column": 44
       }
     },
     {
