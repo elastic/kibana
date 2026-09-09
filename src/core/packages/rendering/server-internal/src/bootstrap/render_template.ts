@@ -118,15 +118,19 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       var errorReload =  document.querySelector('[data-error-message-reload]').dataset.errorMessageReload;
 
       var err = document.createElement('div');
-      err.className = 'kbnBootstrapError';
+      err.style.textAlign = 'center';
+      err.style.padding = '120px 20px';
+      err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
 
       var errorTitleEl = document.createElement('h1');
       errorTitleEl.className = 'kbnBootstrapErrorTitle';
       errorTitleEl.innerText = errorTitle;
+      errorTitleEl.style.margin = '20px';
 
       var errorTextEl = document.createElement('p');
       errorTextEl.className = 'kbnBootstrapErrorText';
       errorTextEl.innerText = errorText;
+      errorTextEl.style.margin = '20px';
 
       var errorReloadEl = document.createElement('button');
       errorReloadEl.className = 'kbnBootstrapErrorButton';
@@ -134,6 +138,9 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       errorReloadEl.onclick = function () {
         location.reload();
       };
+      errorReloadEl.setAttribute('style',
+       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; outline-color: rgb(0, 0, 0); border:none'
+      );
 
       err.appendChild(errorTitleEl);
       err.appendChild(errorTextEl);

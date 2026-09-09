@@ -15,43 +15,6 @@ import { ApmSystem } from './apm_system';
 
 import { LOAD_BOOTSTRAP_START } from './events';
 
-interface BootstrapErrorContent {
-  errorTitle: string;
-  errorText: string;
-  errorReload: string;
-}
-
-const renderBootstrapErrorPage = ({
-  errorTitle,
-  errorText,
-  errorReload,
-}: BootstrapErrorContent) => {
-  const err = document.createElement('div');
-  err.className = 'kbnBootstrapError';
-
-  const errorTitleEl = document.createElement('h1');
-  errorTitleEl.className = 'kbnBootstrapErrorTitle';
-  errorTitleEl.innerText = errorTitle;
-
-  const errorTextEl = document.createElement('p');
-  errorTextEl.className = 'kbnBootstrapErrorText';
-  errorTextEl.innerText = errorText;
-
-  const errorReloadEl = document.createElement('button');
-  errorReloadEl.className = 'kbnBootstrapErrorButton';
-  errorReloadEl.innerText = errorReload;
-  errorReloadEl.onclick = () => {
-    location.reload();
-  };
-
-  err.appendChild(errorTitleEl);
-  err.appendChild(errorTextEl);
-  err.appendChild(errorReloadEl);
-
-  document.body.innerHTML = '';
-  document.body.appendChild(err);
-};
-
 /** @internal */
 export async function __kbnBootstrap__() {
   performance.mark(KBN_LOAD_MARKS, {
@@ -118,7 +81,38 @@ export async function __kbnBootstrap__() {
           defaultMessage: defaultErrorReload,
         });
 
-    renderBootstrapErrorPage({ errorTitle, errorText, errorReload });
+    const err = document.createElement('div');
+    err.style.textAlign = 'center';
+    err.style.padding = '120px 20px';
+    err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+
+    const errorTitleEl = document.createElement('h1');
+    errorTitleEl.className = 'kbnBootstrapErrorTitle';
+    errorTitleEl.innerText = errorTitle;
+    errorTitleEl.style.margin = '20px';
+
+    const errorTextEl = document.createElement('p');
+    errorTextEl.className = 'kbnBootstrapErrorText';
+    errorTextEl.innerText = errorText;
+    errorTextEl.style.margin = '20px';
+
+    const errorReloadEl = document.createElement('button');
+    errorReloadEl.className = 'kbnBootstrapErrorButton';
+    errorReloadEl.innerText = errorReload;
+    errorReloadEl.onclick = function () {
+      location.reload();
+    };
+    errorReloadEl.setAttribute(
+      'style',
+      'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; outline-color: rgb(0, 0, 0); border:none'
+    );
+
+    err.appendChild(errorTitleEl);
+    err.appendChild(errorTextEl);
+    err.appendChild(errorReloadEl);
+
+    document.body.innerHTML = '';
+    document.body.appendChild(err);
     return;
   }
 

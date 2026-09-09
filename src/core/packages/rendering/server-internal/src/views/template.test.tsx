@@ -119,26 +119,4 @@ describe('Template (boot splash)', () => {
       expect(css).toContain('background-color: #141519;'); // amsterdam dark override
     });
   });
-
-  describe('bootstrap error page colors', () => {
-    const getBootPageCss = ($: ReturnType<typeof render>) => $('head style').text();
-
-    it('inlines borealis bootstrap error colors for light mode', () => {
-      const css = getBootPageCss(render({ ...baseMetadata, darkMode: false }));
-      expect(css).toContain('.kbnBootstrapError {');
-      expect(css).toContain('padding: 120px 20px;');
-      expect(css).toContain('.kbnBootstrapErrorTitle');
-      expect(css).toContain('color: #07101F;');
-      expect(css).toContain('.kbnBootstrapErrorButton');
-      expect(css).toContain('background-color: #0B64DD;');
-      expect(css).not.toContain('#0077cc');
-    });
-
-    it('inlines borealis bootstrap error colors for dark mode', () => {
-      const css = getBootPageCss(render({ ...baseMetadata, darkMode: true }));
-      expect(css).toContain('color: #EFF3F9;');
-      expect(css).toContain('background-color: #599DFF;');
-      expect(css).toContain('color: #07101F;');
-    });
-  });
 });

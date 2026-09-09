@@ -29,18 +29,16 @@ export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
   );
 };
 
-interface BootPageColors {
+interface SplashColors {
   pageBackground: string;
   welcomeText: string;
   progress: string;
   progressBefore: string;
   errorTitleText: string;
-  errorBodyText: string;
-  errorButtonBackground: string;
   errorButtonText: string;
 }
 
-const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPageColors } => {
+const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashColors } => {
   if (theme === 'borealis') {
     return {
       light: {
@@ -49,8 +47,6 @@ const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPa
         progress: '#ECF1F9', // colors.lightestShade
         progressBefore: '#0B64DD', // colors.primary
         errorTitleText: '#07101F', // colors.textPrimary
-        errorBodyText: '#5A6D8C', // colors.subduedText
-        errorButtonBackground: '#0B64DD', // colors.primary
         errorButtonText: '#FFFFFF', // colors.textInverse
       },
       dark: {
@@ -59,8 +55,6 @@ const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPa
         progress: '#172336',
         progressBefore: '#599DFF',
         errorTitleText: '#EFF3F9', // colors.textPrimary
-        errorBodyText: '#8E9FBC', // colors.subduedText
-        errorButtonBackground: '#599DFF', // colors.primary
         errorButtonText: '#07101F', // colors.textInverse
       },
     };
@@ -73,8 +67,6 @@ const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPa
       progress: '#F5F7FA',
       progressBefore: '#006DE4',
       errorTitleText: '#1a1c21',
-      errorBodyText: '#69707D',
-      errorButtonBackground: '#006DE4',
       errorButtonText: '#FFFFFF',
     },
     dark: {
@@ -83,46 +75,12 @@ const getThemeStyles = (theme: ThemeName): { light: BootPageColors; dark: BootPa
       progress: '#25262E',
       progressBefore: '#1BA9F5',
       errorTitleText: '#DFE5EF',
-      errorBodyText: '#98A2B3',
-      errorButtonBackground: '#1BA9F5',
-      errorButtonText: '#141519',
+      errorButtonText: '#FFFFFF',
     },
   };
 };
 
-const bootstrapErrorLayoutRules = `
-          .kbnBootstrapError {
-            text-align: center;
-            padding: 120px 20px;
-            font-family: Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
-          }
-
-          .kbnBootstrapErrorTitle {
-            margin: 20px;
-            font-size: 1.75rem;
-            font-weight: 700;
-            line-height: 1.25;
-          }
-
-          .kbnBootstrapErrorText {
-            margin: 20px;
-            font-size: 1rem;
-            line-height: 1.5;
-          }
-
-          .kbnBootstrapErrorButton {
-            cursor: pointer;
-            padding-inline: 12px;
-            block-size: 40px;
-            font-size: 1rem;
-            line-height: 1.4286rem;
-            border-radius: 6px;
-            min-inline-size: 112px;
-            border: none;
-          }
-`;
-
-const bootPageRules = (colors: BootPageColors) => `
+const splashRules = (colors: SplashColors) => `
           html {
             background-color: ${colors.pageBackground};
           }
@@ -144,11 +102,11 @@ const bootPageRules = (colors: BootPageColors) => `
           }
 
           .kbnBootstrapErrorText {
-            color: ${colors.errorBodyText};
+            color: ${colors.welcomeText};
           }
 
           .kbnBootstrapErrorButton {
-            background-color: ${colors.errorButtonBackground};
+            background-color: ${colors.progressBefore};
             color: ${colors.errorButtonText};
           }
 `;
@@ -165,11 +123,11 @@ const InlineStyles: FC<{ darkMode: DarkModeValue; themeName: ThemeName }> = ({
   // no flash-of-light before the dark theme is applied.
   const css =
     darkMode === 'system'
-      ? `${bootstrapErrorLayoutRules}${bootPageRules(light)}
+      ? `${splashRules(light)}
           @media (prefers-color-scheme: dark) {
-            ${bootPageRules(dark)}
+            ${splashRules(dark)}
           }`
-      : `${bootstrapErrorLayoutRules}${bootPageRules(darkMode ? dark : light)}`;
+      : splashRules(darkMode ? dark : light);
 
   /* eslint-disable react/no-danger */
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
