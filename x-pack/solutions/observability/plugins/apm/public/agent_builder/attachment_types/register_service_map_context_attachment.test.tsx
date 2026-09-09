@@ -23,9 +23,7 @@ const renderBadges = (data: Record<string, unknown>) => {
   const definition = createServiceMapContextAttachmentDefinition();
   const attachment = buildAttachment(data);
   return render(
-    <EuiThemeProvider>
-      {definition.renderInlineContent({ attachment })}
-    </EuiThemeProvider>
+    <EuiThemeProvider>{definition.renderInlineContent({ attachment })}</EuiThemeProvider>
   );
 };
 
@@ -76,9 +74,7 @@ describe('createServiceMapContextAttachmentDefinition', () => {
   it('renders only the time range badge when all optional fields are absent', () => {
     const { getAllByRole } = renderBadges({ timeRange: { from: 'now-1h', to: 'now' } });
     // EuiBadge renders as a span with a 'generic' role; there should be exactly one
-    const badges = getAllByRole('generic').filter((el) =>
-      el.textContent?.includes('now-1h → now')
-    );
+    const badges = getAllByRole('generic').filter((el) => el.textContent?.includes('now-1h → now'));
     expect(badges.length).toBeGreaterThanOrEqual(1);
   });
 

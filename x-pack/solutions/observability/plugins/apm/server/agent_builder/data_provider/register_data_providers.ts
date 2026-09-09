@@ -18,7 +18,10 @@ import { getConnectionStatsItems } from '../../lib/connections/get_connection_st
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { getServiceMapServiceBadges } from '../../routes/service_map/get_service_map_service_badges';
-import { getServiceAnomalies, DEFAULT_ANOMALIES } from '../../routes/service_map/get_service_anomalies';
+import {
+  getServiceAnomalies,
+  DEFAULT_ANOMALIES,
+} from '../../routes/service_map/get_service_anomalies';
 import { getSeverity, isNoAnomalyScore } from '../../../common/anomaly_detection';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';

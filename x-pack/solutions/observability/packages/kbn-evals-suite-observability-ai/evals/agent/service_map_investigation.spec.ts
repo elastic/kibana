@@ -129,7 +129,7 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'Addresses the frontend service first because it is the user\'s highlighted focus',
+                    "Addresses the frontend service first because it is the user's highlighted focus",
                     'Reports that the frontend service is healthy — no active alerts, no SLO violations, no significant anomalies',
                     'Still identifies the payment service as the primary problem in the wider map (its degradation is the most significant issue even though it is not the highlighted service)',
                     'Does not invent alerts, SLO violations, or anomalies for the frontend service',

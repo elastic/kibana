@@ -76,7 +76,9 @@ describe('createServiceMapContextAttachmentType', () => {
     it('returns a text representation containing the serialised attachment data', () => {
       const data = { timeRange: { from: 'now-1h', to: 'now' }, environment: 'production' };
       if (!attachmentType.validate(data).valid) throw new Error('pre-condition failed');
-      const representation = attachmentType.format({ id: 'test', type: attachmentType.id, data }).getRepresentation();
+      const representation = attachmentType
+        .format({ id: 'test', type: attachmentType.id, data })
+        .getRepresentation();
       expect(representation.type).toBe('text');
       expect(JSON.parse(representation.value as string)).toMatchObject(data);
     });

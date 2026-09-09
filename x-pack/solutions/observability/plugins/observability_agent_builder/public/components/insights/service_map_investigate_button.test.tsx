@@ -71,7 +71,9 @@ const defaultProps = {
   rangeTo: 'now',
 };
 
-const renderButton = (props: Partial<React.ComponentProps<typeof ServiceMapInvestigateButton>> = {}) =>
+const renderButton = (
+  props: Partial<React.ComponentProps<typeof ServiceMapInvestigateButton>> = {}
+) =>
   render(
     <EuiThemeProvider>
       <ServiceMapInvestigateButton {...defaultProps} {...props} />
@@ -86,9 +88,7 @@ describe('ServiceMapInvestigateButton', () => {
   it('renders the button when all guard conditions are met', () => {
     setupMocks();
     const { getByTestId } = renderButton();
-    expect(
-      getByTestId('observabilityAgentBuilderServiceMapInvestigateButton')
-    ).toBeInTheDocument();
+    expect(getByTestId('observabilityAgentBuilderServiceMapInvestigateButton')).toBeInTheDocument();
   });
 
   it('has label "Investigate map"', () => {
