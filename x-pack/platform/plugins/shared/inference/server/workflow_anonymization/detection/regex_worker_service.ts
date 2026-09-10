@@ -58,7 +58,7 @@ export class PiiRegexWorkerService {
    * Executes PII regex rules against records.
    *
    * Throws when a rule has an invalid RE2 pattern and `failureMode` is `'block'`
-   * (the default). With `'allow_unsafe'`, logs and skips the offending rule.
+   * (the default). With `'allow_unsafe'`, logs and returns no matches for the entire payload.
    *
    * When the worker pool is disabled, runs synchronously on the main event loop.
    * In that mode only RE2-compilable patterns are accepted; patterns that require
