@@ -9,6 +9,13 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/esql/_esql_view.ts
 
+/**
+ * Migration recommendation: MIXED. Migrate to src/platform/plugins/shared/discover/test/scout/esql.
+ *
+ * Config: ../config.ts pins `--feature_flags.overrides.discover.cascadeLayoutEnabled=false`. Confirm
+ * assertions hold with the feature enabled before pinning the flag in Scout.
+ */
+
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import { NULL_LABEL } from '@kbn/field-formats-common';
@@ -89,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
+    /** Migration recommendation: MIGRATE TO SCOUT. Near-duplicate pairs below collapse during migration. */
     describe('ES|QL in Discover', () => {
       beforeEach(async () => {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -96,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
+      // Migration recommendation: MIGRATE, trimmed to ES|QL-specific assertions (classic chrome covered by view_mode_toggle.spec.ts).
       it('should render esql view correctly', async function () {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -143,6 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
       });
 
+      // Migration recommendation: MIGRATE, merged with the ?_tstart/?_tend test below.
       it('should not render the histogram for indices with no @timestamp field', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -179,6 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       });
 
+      // Migration recommendation: MIGRATE, merged with the logstash* variant below.
       it('should perform test query correctly', async function () {
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -218,6 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
+      // Migration recommendation: MIGRATE, merged into 'should perform test query correctly'.
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -231,6 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
+      // Migration recommendation: MIGRATE; assert column order, not NULL_LABEL placeholder styling.
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -261,6 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
+      // Migration recommendation: MIGRATE; replace render-count workaround with a Playwright time-range assertion.
       it('should allow brushing time series', async () => {
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -290,6 +304,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: UNIT. Focus management after Escape — cover next to esql_editor.test.tsx.
+     * Note: .esqlSourcesBadge CSS class selector needs a test subject before any browser version is kept.
+     */
     describe('resource browser', () => {
       it('returns focus to the editor when the data source picker is closed via Escape', async () => {
         await discover.selectTextBaseLang();
@@ -317,6 +335,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: UNIT then DELETE. Four malformed queries → table-driven unit test in
+     * kbn-esql-editor; callout presence already covered by view_mode_toggle.spec.ts.
+     */
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await discover.selectTextBaseLang();
@@ -345,6 +367,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Leaving ES|QL mode has to tear the editor down and
+     * restore the classic search bar; nothing below the browser covers that transition.
+     */
     describe('switching to a data view', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
@@ -353,6 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
+      // Migration recommendation: MIGRATE, merged with the saved-search variant below.
       it('should switch to a data view immediately', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -394,6 +421,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE. Reconcile with test/scout/tabs inspector.spec.ts rather than
+     * adding a third inspector spec.
+     */
     describe('inspector', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
@@ -422,6 +453,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /** Migration recommendation: MIGRATE; stub _query/async route instead of sleeping 15 s. */
       describe('with slow queries', () => {
         it('should show only one entry in inspector for table/visualization', async function () {
           const state = kbnRison.encode({
@@ -459,6 +491,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIXED. Three of four tests covered by history_local_storage.test.ts —
+     * convert to unit tests. Note: tests are order-dependent; the Scout port must set up its own history.
+     */
     describe('query history', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
@@ -467,6 +503,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
+      // Migration recommendation: UNIT (history_local_storage.test.ts).
       it('should see my current query in the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -477,6 +514,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', historyItems);
       });
 
+      // Migration recommendation: UNIT (history_local_storage.test.ts).
       it('updating the query should add this to the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -495,6 +533,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // Migration recommendation: MIGRATE; clicking a history row must populate Monaco and re-run.
       it('should select a query from the history and submit it', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -511,6 +550,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // Migration recommendation: UNIT (history_local_storage.test.ts).
       it('should add a failed query to the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -527,6 +567,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE, split. 'should sort correctly' covers three contracts
+     * (apply, save/reload/reopen, dashboard) — migrate as three specs; parametrize over bytes and var0.
+     */
     describe('sorting', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
@@ -694,6 +738,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // Migration recommendation: MIGRATE, folded into the split above as the var0 case.
       it('should sort on custom vars too', async () => {
         const savedSearchName = 'testSortingForCustomVars';
 
@@ -783,6 +828,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIXED. Query strings covered by append_where.test.ts and
+     * tab_state_filters.test.ts; keep one browser wiring test and one visualization-state test.
+     */
     describe('filtering by clicking on the table in Discover', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
@@ -791,6 +840,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
+      // Migration recommendation: MIGRATE, merged with 'should append an end in existing where clause' below.
       it('should append a where clause by clicking the table', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -841,6 +891,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // Migration recommendation: DELETE; strict subset of the test below.
       it('should append a where clause by clicking the table without changing the chart type', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -876,6 +927,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(type).to.be('Line');
       });
 
+      // Migration recommendation: MIGRATE; drop common.sleep(1000) — assert committed color value instead.
       it('should append a where clause by clicking the table without changing the chart type nor the visualization state', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -928,6 +980,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE. Replace [role="gridcell"]:nth-child() selectors with test subjects.
+     */
     describe('filtering by clicking on the table in Dashboards', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
@@ -983,6 +1038,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE as one stepped spec; the four tests share a before and run
+     * as a chain.
+     */
     describe('histogram breakdown', () => {
       before(async () => {
         await common.navigateToApp('discover');
@@ -1036,6 +1095,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
 
+      // Migration recommendation: MIGRATE, merged with 'should choose breakdown field'.
       it('should choose breakdown field when selected from field stats', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();

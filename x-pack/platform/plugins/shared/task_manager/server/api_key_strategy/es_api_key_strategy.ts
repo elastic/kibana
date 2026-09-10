@@ -15,6 +15,7 @@ import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { getApiKeyAndUserScope } from '../lib/api_key_utils';
 import type {
+  ApiKeyInvalidationSource,
   ApiKeySOFields,
   ApiKeyStrategy,
   GrantApiKeysOpts,
@@ -45,8 +46,8 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
     return taskInstance.apiKey;
   }
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
-    const { userScope, uiamApiKey } = taskInstance;
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
+    const { userScope, uiamApiKey } = source;
     if (!userScope || userScope.apiKeyCreatedByUser) {
       return [];
     }

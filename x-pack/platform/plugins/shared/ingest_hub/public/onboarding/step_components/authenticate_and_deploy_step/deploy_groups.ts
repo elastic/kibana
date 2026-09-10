@@ -178,10 +178,16 @@ export async function deployGroup(
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
-  const pkgTemplates: Array<{ name?: string; type?: string; inputs?: Array<{ type: string }> }> =
-    (pkgInfo as any).policy_templates ?? [];
+  const pkgTemplates: Array<{
+    name?: string;
+    type?: string;
+    input?: string;
+    inputs?: Array<{ type: string }>;
+  }> = (pkgInfo as any).policy_templates ?? [];
   for (const template of pkgTemplates) {
-    const templateInputs = template.inputs ?? (template.type ? [{ type: template.type }] : []);
+    // Input-only templates have `input` (singular, the collector type e.g. 'otelcol') and
+    // `type` (signal type e.g. 'metrics'). Use `input` for the key — `type` is wrong here.
+    const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {
       const key = template.name ? `${template.name}-${input.type}` : input.type;
       if (!inputs[key]) {
@@ -199,7 +205,15 @@ export async function deployGroup(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(connectorId ? { cloud_connector: { enabled: true, cloud_connector_id: connectorId } } : {}),
+    ...(connectorId
+      ? {
+          cloud_connector: {
+            enabled: true,
+            cloud_connector_id: connectorId,
+            target_csp: 'aws' as const,
+          },
+        }
+      : {}),
   });
 
   return { policyId: (response as any)?.data?.item?.policy_ids?.[0] };
