@@ -187,7 +187,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
     });
 
-    describe('8.8.0', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/233770
+    describe.skip('8.8.0', () => {
       it('adds UUIDs to all alerts', async () => {
         await retry.try(async () => {
           const response = await es.search<{ task: SerializedConcreteTaskInstance }>(
