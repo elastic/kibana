@@ -24,12 +24,7 @@ import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/
 import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
-import { getCasesClientInternalArgs } from '../../client/client';
-import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
-import {
-  preflightWorkflowExecution,
-  recordWorkflowExecution,
-} from '../../client/user_actions/record_workflow_execution';
+import type { CasesWorkflowOperations } from '../../client/workflows/operations';
 import type { CasesRequestHandlerContext } from '../../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { buildActivityOrigin } from './build_activity_origin';
@@ -92,6 +87,7 @@ interface RunWorkflowParams {
   request: KibanaRequest;
   context: CasesRequestHandlerContext;
   casesClient: CasesClient;
+  workflowOperations: CasesWorkflowOperations;
   spaceId: string;
 }
 
@@ -121,6 +117,7 @@ export class CasesWorkflowRunService {
     request,
     context,
     casesClient,
+    workflowOperations,
     spaceId,
   }: RunWorkflowParams): Promise<RunCaseWorkflowResponse> {
     const { caseIds } = body;
@@ -133,6 +130,7 @@ export class CasesWorkflowRunService {
         request,
         context,
         casesClient,
+        workflowOperations,
         spaceId,
         auditLogger,
       });
@@ -154,6 +152,7 @@ export class CasesWorkflowRunService {
     request,
     context,
     casesClient,
+    workflowOperations,
     spaceId,
     auditLogger,
   }: RunWorkflowParams & { auditLogger: AuditLogger }): Promise<RunCaseWorkflowResponse> {
@@ -168,17 +167,13 @@ export class CasesWorkflowRunService {
 
     const { caseIds } = body;
 
-    // Recover the internal CasesClientArgs from the request-scoped public client so we can
-    // call the module-private workflow functions (ensureAuthorizedToRunWorkflow,
-    // preflightWorkflowExecution, recordWorkflowExecution) directly without exposing them on
-    // the public CasesSubClient / UserActionsSubClient interfaces.
-    const clientArgs = getCasesClientInternalArgs(casesClient);
-
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
     // Returns entities so subsequent steps can reuse them without re-fetching the cases.
-    const authorizedEntities = await ensureAuthorizedToRunWorkflow({ ids: caseIds }, clientArgs);
+    const authorizedEntities = await workflowOperations.ensureAuthorizedToRunWorkflow({
+      ids: caseIds,
+    });
 
     // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
     // was not looking at any specific sub-entity, alert/document inputs are not permitted,
@@ -259,7 +254,7 @@ export class CasesWorkflowRunService {
     }
 
     // Fail fast before anything irreversible: check the per-case user-action limit for all cases.
-    await preflightWorkflowExecution({ caseIds }, clientArgs);
+    await workflowOperations.preflightWorkflowExecution({ caseIds });
 
     const workflow = await this.management.getWorkflow(workflowId, spaceId);
     if (!workflow) {
@@ -334,25 +329,22 @@ export class CasesWorkflowRunService {
     // Record the case activity immediately after the execution starts.
     // A failure to record must NOT be reported as an execution failure — the run did succeed.
     try {
-      await recordWorkflowExecution(
-        {
-          caseIds,
-          workflow: {
-            id: workflow.id,
-            name: workflow.name,
-            executionId: workflowExecutionId,
-          },
-          origin: buildActivityOrigin({
-            origin: body.origin,
-            theCase,
-            resolvedAttachmentOrigin,
-          }),
-          // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
-          // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
-          entities: authorizedEntities,
+      await workflowOperations.recordWorkflowExecution({
+        caseIds,
+        workflow: {
+          id: workflow.id,
+          name: workflow.name,
+          executionId: workflowExecutionId,
         },
-        clientArgs
-      );
+        origin: buildActivityOrigin({
+          origin: body.origin,
+          theCase,
+          resolvedAttachmentOrigin,
+        }),
+        // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
+        // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
+        entities: authorizedEntities,
+      });
       return { workflowExecutionId, activityStatus: 'succeeded' };
     } catch (error) {
       this.logger.error(

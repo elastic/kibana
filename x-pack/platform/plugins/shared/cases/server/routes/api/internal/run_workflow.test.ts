@@ -10,11 +10,17 @@ import {
   WorkflowsManagementOperationPrivileges,
 } from '@kbn/workflows';
 import { createCasesClientMock } from '../../../client/mocks';
+import type { CasesWorkflowOperations } from '../../../client/workflows/operations';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import { createRunWorkflowRoute, runCaseWorkflowParamsSchema } from './run_workflow';
 
 describe('run workflow route', () => {
   const casesClient = createCasesClientMock();
+  const workflowOperations: jest.Mocked<CasesWorkflowOperations> = {
+    ensureAuthorizedToRunWorkflow: jest.fn(),
+    preflightWorkflowExecution: jest.fn(),
+    recordWorkflowExecution: jest.fn(),
+  };
   const service = {
     run: jest.fn(),
   } as unknown as jest.Mocked<CasesWorkflowRunService>;
@@ -57,7 +63,9 @@ describe('run workflow route', () => {
     const response = { ok: jest.fn() };
     const context = {
       cases: {
-        getCasesClient: jest.fn().mockResolvedValue(casesClient),
+        getCasesWorkflowRunContext: jest
+          .fn()
+          .mockResolvedValue({ casesClient, workflowOperations }),
       },
     };
 
@@ -73,6 +81,7 @@ describe('run workflow route', () => {
       request,
       context,
       casesClient,
+      workflowOperations,
       spaceId: 'space-1',
     });
     expect(response.ok).toHaveBeenCalledWith({

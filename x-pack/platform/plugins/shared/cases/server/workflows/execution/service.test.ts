@@ -17,23 +17,15 @@ import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { WorkflowAttachmentValidationContext } from '../../attachment_framework/types';
-
-jest.mock('../../client/client', () => ({
-  ...jest.requireActual('../../client/client'),
-  getCasesClientInternalArgs: jest.fn(),
-}));
+import { createCasesWorkflowOperations } from '../../client/workflows/operations';
 
 jest.mock('../../client/cases/ensure_authorized_to_run_workflow', () => ({
   ...jest.requireActual('../../client/cases/ensure_authorized_to_run_workflow'),
   ensureAuthorizedToRunWorkflow: jest.fn(),
 }));
 
-import { getCasesClientInternalArgs } from '../../client/client';
 import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
 
-const mockGetCasesClientInternalArgs = getCasesClientInternalArgs as jest.MockedFunction<
-  typeof getCasesClientInternalArgs
->;
 const mockEnsureAuthorizedToRunWorkflow = ensureAuthorizedToRunWorkflow as jest.MockedFunction<
   typeof ensureAuthorizedToRunWorkflow
 >;
@@ -46,6 +38,7 @@ describe('CasesWorkflowRunService', () => {
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
   const clientArgs = createCasesClientMockArgs();
+  const workflowOperations = createCasesWorkflowOperations(clientArgs);
   let workflowsAvailable = true;
   let licenseValid = true;
   const license = {
@@ -149,6 +142,7 @@ describe('CasesWorkflowRunService', () => {
       request,
       context,
       casesClient,
+      workflowOperations,
       spaceId: 'default',
     });
 
@@ -156,9 +150,6 @@ describe('CasesWorkflowRunService', () => {
     jest.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
-    // getCasesClientInternalArgs returns our test clientArgs so the module-private functions
-    // run against the same service mocks the rest of the test controls.
-    mockGetCasesClientInternalArgs.mockReturnValue(clientArgs as never);
     // Default: authorization succeeds for case-1 with the security solution owner.
     mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
       { id: 'case-1', owner: SECURITY_SOLUTION_OWNER },
