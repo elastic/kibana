@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -37,7 +37,6 @@ import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
-import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
@@ -367,26 +366,10 @@ export function InternalDashboardTopNav({
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
-  );
-
-  const shareAction = useDashboardShareAction({ maybeRedirect });
+  const shareAction = useDashboardShareAction({ redirectTo });
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    maybeRedirect,
+    redirectTo,
     showResetChange,
     shareAction,
   });
@@ -425,7 +408,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
+                        dashboardApi.runInteractiveSave(redirectTo);
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
                     >
@@ -444,7 +427,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [isPopoverOpen, dashboardApi, redirectTo]);
 
   const appHeaderBadges = useMemo<AppHeaderBadge[]>(
     () =>

@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { AssetImage } from '../../../asset_image';
 import { ProcessingPanel } from './pipeline_suggestions/processing_panel';
 import {
@@ -38,9 +37,6 @@ export const ProcessingButtonsManual = ({
   color = 'text',
 }: ProcessingButtonsManualProps) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    core: { notifications },
-  } = useKibana();
   const { addProcessor } = useStreamEnrichmentEvents();
 
   const canAddStep = useOptionalInteractiveModeSelector(
@@ -54,21 +50,6 @@ export const ProcessingButtonsManual = ({
 
   return (
     <EuiFlexGroup gutterSize="s" justifyContent={center ? 'center' : 'flexStart'}>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          color={color}
-          fill={false}
-          css={css`
-            color: ${euiTheme.colors.textPrimary};
-          `}
-          data-test-subj="streamsAppStreamDetailEnrichmentCreateConditionButton"
-          iconType="timeline"
-          onClick={() => notifications.toasts.addWarning(unsupportedConditionMessage)}
-        >
-          {createConditionText}
-        </EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
@@ -274,23 +255,9 @@ const cardDescriptionManual = i18n.translate(
   }
 );
 
-const createConditionText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionButtonText',
-  {
-    defaultMessage: 'Create condition',
-  }
-);
-
 const createProcessorText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.createProcessorButtonText',
   {
     defaultMessage: 'Create processor',
-  }
-);
-
-const unsupportedConditionMessage = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionUnsupportedMessage',
-  {
-    defaultMessage: 'Conditions are not supported in ingest pipelines yet.',
   }
 );
