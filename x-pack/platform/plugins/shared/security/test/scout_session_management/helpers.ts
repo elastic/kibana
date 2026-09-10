@@ -246,7 +246,9 @@ export async function loginWithSAML(
   providerName = 'saml1'
 ): Promise<string> {
   const { cookie, location } = await startSAMLHandshake(apiClient, providerName);
-  return finishSAMLHandshake(apiClient, config, cookie, location);
+  const sessionCookie = await finishSAMLHandshake(apiClient, config, cookie, location);
+  await assertSessionCookie(apiClient, sessionCookie, 'a@b.c', { type: 'saml', name: providerName });
+  return sessionCookie;
 }
 
 export async function loginWithAnonymous(apiClient: ApiClientFixture): Promise<string> {
