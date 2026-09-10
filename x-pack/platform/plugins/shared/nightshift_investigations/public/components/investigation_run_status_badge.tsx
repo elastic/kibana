@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InvestigationStatus } from '../../../common';
+import type { InvestigationStatus } from '../../common';
 
 const STATUS_PRESENTATION: Record<InvestigationStatus, { label: string; color: string }> = {
   pending: {

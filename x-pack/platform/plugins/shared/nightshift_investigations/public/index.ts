@@ -19,6 +19,5 @@ export type {
   NightshiftInvestigationsRepositoryClient,
   NightshiftInvestigationsEndpoint,
 } from './api';
-export { InvestigationDetailFlyout } from './components/investigation_detail_flyout';
-export type { InvestigationDetailFlyoutProps } from './components/investigation_detail_flyout';
-export { InvestigationRunStatusBadge } from './components/investigation_run_status_badge';
+export { InvestigationDetailFlyout, InvestigationRunStatusBadge } from './components';
+export type { InvestigationDetailFlyoutProps } from './components';

@@ -27,7 +27,7 @@ import {
   type InvestigationDiscoverParams,
 } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
-import type { GetInvestigationResponse } from '../../../common';
+import type { GetInvestigationResponse } from '../../common';
 import { InvestigationRunStatusBadge } from './investigation_run_status_badge';
 import { formatDate, formatDuration } from './utils';
 
