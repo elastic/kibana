@@ -253,7 +253,7 @@ describe('detection rule workflows', () => {
       // The sweep checks live enabled status for the harvested candidates only and
       // drops disabled rules from the fan-out source (a parallel branch body cannot
       // carry a step-level `if`), failing open into a full fan-out when the lookup
-      // gave no verdict.
+      // returned nothing.
       it('skips reviews for rules that are no longer enabled', () => {
         const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
         const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
@@ -272,23 +272,25 @@ describe('detection rule workflows', () => {
         expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
         expect(lookup['on-failure']).toEqual({ continue: true });
 
-        // The prefixed joined string keeps the verdict non-empty when zero
-        // candidates are enabled, so all-disabled never reads as no-verdict.
+        // The prefixed joined string stays non-empty when zero candidates are
+        // enabled, so all-disabled never reads as a missing lookup.
         expect(String(resolve.if)).toContain('steps.list_enabled_candidates.output.data != null');
-        expect(String(resolve.with?.verdict)).toContain("| join: ',' | prepend: 'enabled:'");
+        expect(String(resolve.with?.enabled_rule_ids)).toContain(
+          "| join: ',' | prepend: 'enabled:'"
+        );
 
         const rowsExpr = String(rows.with?.rows);
         expect(rowsExpr).toContain(
-          "where_exp: 'row', 'steps.resolve_enabled_rules.output.verdict == null or steps.resolve_enabled_rules.output.verdict contains row[0]'"
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
-        // where_exp argument; this direct reference keeps the verdict resident. If
-        // it is removed, an evicted verdict renders null and the filter fails open.
-        expect(String(rows.with?.verdict)).toContain(
-          '${{ steps.resolve_enabled_rules.output.verdict }}'
+        // where_exp argument; this direct reference keeps the ids resident. If it
+        // is removed, an evicted value renders null and the filter fails open.
+        expect(String(rows.with?.enabled_rule_ids)).toContain(
+          '${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}'
         );
         // Slice after the enabled filter: the pool overscans the launch cap so
         // disabled candidates cannot starve enabled rules ranked below them.

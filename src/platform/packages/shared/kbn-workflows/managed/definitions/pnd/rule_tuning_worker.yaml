@@ -209,14 +209,14 @@ steps:
     type: data.set
     if: "${{ steps.list_enabled_candidates.output.data != null }}"
     with:
-      verdict: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
+      enabled_rule_ids: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
 
   # Only enabled rules are included in the fan-out.
   - name: resolve_fanout_rows
     type: data.set
     with:
-      verdict: "${{ steps.resolve_enabled_rules.output.verdict }}"
-      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.verdict == null or steps.resolve_enabled_rules.output.verdict contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
+      enabled_rule_ids: "${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
 
   # One review execution per rule, launched synchronously inside a parallel
   # branch so this sweep joins once every gate has settled. The gate itself cannot
