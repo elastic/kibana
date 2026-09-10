@@ -19,11 +19,7 @@ import {
   getEntityDefinition,
   type EntityDefinitionOptions,
 } from '../../../common/domain/definitions/registry';
-import {
-  type LogSlicePaginationParams,
-  type PaginationParams,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-} from './query_builder_commons';
+import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
   interpretLogPaginationCursorRows,
