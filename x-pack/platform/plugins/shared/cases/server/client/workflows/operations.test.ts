@@ -38,7 +38,7 @@ describe('createCasesWorkflowOperations', () => {
 
   it('binds activity recording to the request-scoped client arguments', async () => {
     const params = {
-      entities: [{ id: 'case-1', owner: 'securitySolution' }],
+      caseIds: ['case-1'],
       workflow: {
         id: 'workflow-1',
         name: 'Workflow',

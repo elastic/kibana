@@ -185,25 +185,6 @@ export class CasesWorkflowRunService {
     const selectedDocuments = parseSelectedDocumentPairs(body.inputs);
     let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
     let resolvedAttachmentOrigin: ResolvedWorkflowAttachmentOrigin | undefined;
-    // Observable inputs (observableIds / observableTypeKeys) are server-owned and stripped before
-    // the run. Unlike alert inputs, they are not re-injected for non-observable origins, so a
-    // caller who supplies them would get an empty value silently. Reject eagerly so the contract is
-    // explicit, whether or not an origin is provided.
-    const observableInputKeys = new Set(['observableIds', 'observableTypeKeys']);
-    const rawEventForObservableCheck = isPlainObject(body.inputs.event)
-      ? (body.inputs.event as Record<string, unknown>)
-      : {};
-    const hasObservableInputs = Object.keys(rawEventForObservableCheck).some((k) =>
-      observableInputKeys.has(k)
-    );
-    if (
-      hasObservableInputs &&
-      body.origin?.type !== OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
-      body.origin?.type !== OBSERVABLES_WORKFLOW_ORIGIN_TYPE
-    ) {
-      throw Boom.badRequest('Observable inputs can only be used with observable origins.');
-    }
-
     if (body.origin === undefined) {
       if (selectedAlerts.length > 0) {
         throw Boom.badRequest('Alert inputs can only be used with a single case.');
@@ -261,11 +242,14 @@ export class CasesWorkflowRunService {
       ]);
       resolvedAttachmentOrigin = validateOrigin({
         origin: body.origin,
+        caseId: caseIds[0],
+        selectedAlerts,
         theCase,
-        inputs: body.inputs,
+        attachedAlerts,
+        selectedDocuments,
+        attachedEvents,
         attachmentTypeRegistry: this.attachmentTypeRegistry,
-        alerts: { selected: selectedAlerts, attached: attachedAlerts },
-        documents: { selected: selectedDocuments, attached: attachedEvents },
+        inputs: body.inputs,
       });
     }
 
@@ -346,7 +330,7 @@ export class CasesWorkflowRunService {
     // A failure to record must NOT be reported as an execution failure — the run did succeed.
     try {
       await workflowOperations.recordWorkflowExecution({
-        entities: authorizedEntities,
+        caseIds,
         workflow: {
           id: workflow.id,
           name: workflow.name,
@@ -357,6 +341,9 @@ export class CasesWorkflowRunService {
           theCase,
           resolvedAttachmentOrigin,
         }),
+        // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
+        // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
+        entities: authorizedEntities,
       });
       return { workflowExecutionId, activityStatus: 'succeeded' };
     } catch (error) {
