@@ -285,10 +285,7 @@ async function resolveMatchGroup(
       .filter((entity): entity is FetchedEntity => entity != null);
 
     // Drop mid-chain aliases: cascadeLinkEntities rejects them as a target.
-    const linkable = [
-      ...unresolved,
-      ...existingTargets.filter((entity) => !entity.resolvedTo),
-    ];
+    const linkable = [...unresolved, ...existingTargets.filter((entity) => !entity.resolvedTo)];
     const candidates = uniqueById(linkable);
     if (candidates.length === 0) {
       stats.skippedNoopBuckets++;
@@ -328,9 +325,9 @@ async function resolveMatchGroup(
     if (err instanceof ResolutionSearchTruncatedError) {
       stats.skippedTruncatedBuckets++;
       logger.warn(
-        `${ruleId}: declining truncated alias tree for bucket '${row.matchValue}': ${getErrorMessage(
-          err
-        )}`
+        `${ruleId}: declining truncated alias tree for bucket '${
+          row.matchValue
+        }': ${getErrorMessage(err)}`
       );
       return;
     }
