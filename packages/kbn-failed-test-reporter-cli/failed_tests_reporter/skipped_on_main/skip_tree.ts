@@ -128,11 +128,6 @@ export function parseSuiteTree(source: string, fileName = 'spec.ts'): SuiteNode[
 
 const HOOK_SUFFIX_RE = / "(?:before|after) (?:all|each)" hook\b.*$/;
 
-interface SuiteMatch {
-  chain: string;
-  skipped: SuiteNode | undefined;
-}
-
 /**
  * Collects the nearest skipped ancestor (or undefined) for every node matching `isMatch`. A title
  * may occur more than once in a file; the caller forgives only when every occurrence is skipped,
@@ -143,8 +138,8 @@ const collectMatches = (
   nodes: SuiteNode[],
   throughDynamic: boolean,
   isMatch: (node: SuiteNode, parent: SuiteNode | undefined, chain: string) => boolean
-): SuiteMatch[] => {
-  const matches: SuiteMatch[] = [];
+): Array<SuiteNode | undefined> => {
+  const matches: Array<SuiteNode | undefined> = [];
   const walk = (
     children: SuiteNode[],
     parent: SuiteNode | undefined,
@@ -161,7 +156,7 @@ const collectMatches = (
       }
       const chain = parentChain === undefined ? node.title : `${parentChain} ${node.title}`;
       if (isMatch(node, parent, chain)) {
-        matches.push({ chain, skipped });
+        matches.push(skipped);
       }
       walk(node.children, node, chain, skipped);
     }
@@ -170,8 +165,8 @@ const collectMatches = (
   return matches;
 };
 
-const skipIfUnanimous = (matches: SuiteMatch[]): SuiteNode | undefined =>
-  matches.length > 0 && matches.every((match) => match.skipped) ? matches[0].skipped : undefined;
+const skipIfUnanimous = (matches: Array<SuiteNode | undefined>): SuiteNode | undefined =>
+  matches.length > 0 && matches.every(Boolean) ? matches[0] : undefined;
 
 /**
  * Whether a mocha full title (space-joined suite titles + test title, as written to JUnit `name`)
@@ -179,18 +174,18 @@ const skipIfUnanimous = (matches: SuiteMatch[]): SuiteNode | undefined =>
  * prefixed with titles from wrapping configs. Hook failures ("before all" hook for "x") are
  * attributed to the enclosing suite.
  *
- * When several chains are suffixes of the title, only the longest ones (most segments aligned)
- * are considered, and the skip is returned only when all of them are skipped.
+ * Returns the skipped node only when every chain that is a suffix of the title is skipped: the
+ * wrapping-config prefix is unknown, so no alignment can be preferred over another.
  */
 export function findSkipForFullTitle(nodes: SuiteNode[], fullTitle: string): SuiteNode | undefined {
   const target = fullTitle.replace(HOOK_SUFFIX_RE, '');
-  const matches = collectMatches(
-    nodes,
-    false,
-    (_node, _parent, chain) => target === chain || target.endsWith(` ${chain}`)
+  return skipIfUnanimous(
+    collectMatches(
+      nodes,
+      false,
+      (_node, _parent, chain) => target === chain || target.endsWith(` ${chain}`)
+    )
   );
-  const longest = Math.max(0, ...matches.map((match) => match.chain.length));
-  return skipIfUnanimous(matches.filter((match) => match.chain.length === longest));
 }
 
 /**

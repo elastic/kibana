@@ -177,14 +177,14 @@ describe('findSkipForFullTitle', () => {
     expect(findSkipForFullTitle(t, 'root dyn 1 inner t')).toBeUndefined();
   });
 
-  it('does not forgive when the same chain also occurs unskipped', () => {
+  it('does not forgive when a shorter suffix of the title also occurs unskipped', () => {
     const t = parseSuiteTree(`
-      describe('a', () => { describe('b', () => { it('c', () => {}); }); });
+      describe('b', () => { it('c', () => {}); });
       describe('x', () => { describe.skip('b', () => { it('c', () => {}); }); });
     `);
-    expect(findSkipForFullTitle(t, 'root a b c')).toBeUndefined();
+    // 'x' may be a describe in this file or a wrapping config title; both alignments are valid.
+    expect(findSkipForFullTitle(t, 'root x b c')).toBeUndefined();
     expect(findSkipForFullTitle(t, 'root b c')).toBeUndefined();
-    expect(findSkipForFullTitle(t, 'root x b c')?.title).toBe('b');
   });
 });
 
