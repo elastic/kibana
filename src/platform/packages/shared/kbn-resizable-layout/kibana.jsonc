@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/resizable-layout",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",
