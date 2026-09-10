@@ -16,7 +16,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
-import type { ExperimentRecordService } from './storage/experiments/experiment_record_service';
 import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import type { EvaluatorOrigin, EvaluatorRegistry } from './evaluators/types';
 import type { EvalsTaskProvider } from './task_providers/types';
@@ -72,7 +71,6 @@ export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   evaluationScoreService: EvaluationScoreService;
   evaluatorDefinitionService: EvaluatorDefinitionService;
-  experimentRecordService: ExperimentRecordService;
   evaluatorRegistry: EvaluatorRegistry;
 }
 

@@ -32,10 +32,8 @@ import type { EvalStepDeps } from './types';
 import {
   buildExampleScoreBody,
   compareExperimentsPairwise,
-  createExperimentRecord,
   evaluateTrace,
   evaluateWorkBatch,
-  finalizeExperimentRecord,
   flattenDatasetWork,
   ingestScores,
   resolveDatasets,
@@ -43,7 +41,6 @@ import {
   resolveTaskModel,
   runExampleEvaluation,
   runTask,
-  toErrorMessage,
   toRunnerEvaluatorResults,
 } from './lib';
 import type { DatasetEvaluationConfig, StepRuntime } from './lib';
@@ -87,38 +84,12 @@ const evaluateDatasetStateSchema = z.object({
   completed: z.number().int(),
   failed: z.number().int(),
   scores_ingested: z.number().int(),
-  // Optional so state persisted by an older Kibana still parses mid-run.
-  score_ingest_failures: z.number().int().optional(),
   errors: z.array(z.string()),
   task_model: resolvedModelSchema,
   evaluator_model: resolvedModelSchema,
 });
 
 const MAX_DATASET_STEP_ERRORS = 20;
-
-const CANCELLED_MESSAGE = 'Dataset evaluation was cancelled';
-
-/** Closes the experiment record after a cancellation and returns the step error. */
-const finalizeCancelledRecord = async (
-  runtime: StepRuntime,
-  experimentId: string,
-  partial?: { completed: number; failed: number; scoreIngestFailures: number }
-): Promise<Error> => {
-  await finalizeExperimentRecord(runtime, experimentId, {
-    status: 'failed',
-    error: CANCELLED_MESSAGE,
-    ...(partial
-      ? {
-          completeness: {
-            successful_tasks: partial.completed,
-            failed_tasks: partial.failed,
-            score_ingest_failures: partial.scoreIngestFailures,
-          },
-        }
-      : {}),
-  });
-  return new Error(CANCELLED_MESSAGE);
-};
 
 export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition[] => {
   const makeRuntime = (context: StepHandlerContext): StepRuntime => ({
@@ -347,48 +318,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         resolveEvaluatorModel(runtime, input.evaluators, input.connector_id),
       ]);
 
-      // Snapshot the protocol into an experiment record before any example runs.
-      // An experiment can span several datasets (and dataset-fanout shards share
-      // one experiment id — the first shard's create wins, siblings get a 409),
-      // so the record names the first dataset and carries the full id list in
-      // the protocol metadata.
-      const [firstDataset] = datasets;
-      await createExperimentRecord(runtime, input.experiment_id, {
-        name: (input.experiment_name ?? firstDataset.name).slice(0, 256),
-        protocol: {
-          dataset: {
-            id: firstDataset.id,
-            name: firstDataset.name,
-            ...(firstDataset.description
-              ? { description: firstDataset.description.slice(0, 2048) }
-              : {}),
-            examples_count: firstDataset.examples.length,
-          },
-          task: {
-            model: taskModel,
-            configuration: {
-              connector_id: input.connector_id,
-              ...(input.agent_id ? { agent_id: input.agent_id } : {}),
-              ...(input.task_ref ? { task_ref: input.task_ref } : {}),
-              ...(input.params ? { params: input.params } : {}),
-            },
-          },
-          // Stored evaluators resolve their kind and judge model only during
-          // evaluation, so the snapshot carries what is configured up front.
-          evaluators: input.evaluators.map(({ name, version }) => ({
-            name,
-            ...(version ? { version } : {}),
-          })),
-          total_repetitions: input.repetitions ?? DEFAULT_REPETITIONS,
-          ...(datasets.length > 1 ? { metadata: { dataset_ids: input.dataset_ids } } : {}),
-        },
-        provenance: {
-          ...(input.execution_id ? { execution_id: input.execution_id } : {}),
-          ...(input.suite_id ? { suite_id: input.suite_id } : {}),
-        },
-        ...(input.space_ids?.length ? { space_ids: input.space_ids } : {}),
-      });
-
       return {
         state: {
           work,
@@ -396,7 +325,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
           completed: 0,
           failed: 0,
           scores_ingested: 0,
-          score_ingest_failures: 0,
           errors: [],
           task_model: taskModel,
           evaluator_model: evaluatorModel,
@@ -407,61 +335,33 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const runtime = makeRuntime(context);
       const { input, state } = context;
       if (!state) {
-        const message = 'ai.evals.evaluateDataset poll invoked without persisted state';
-        await finalizeExperimentRecord(runtime, input.experiment_id, {
-          status: 'failed',
-          error: message,
-        });
-        return { error: new Error(message) };
+        return {
+          error: new Error('ai.evals.evaluateDataset poll invoked without persisted state'),
+        };
       }
       if (runtime.abortSignal.aborted) {
-        return {
-          error: await finalizeCancelledRecord(runtime, input.experiment_id, {
-            completed: state.completed,
-            failed: state.failed,
-            scoreIngestFailures: state.score_ingest_failures ?? 0,
-          }),
-        };
+        return { error: new Error('Dataset evaluation was cancelled') };
       }
 
       const concurrency = input.concurrency ?? DEFAULT_CONCURRENCY;
       const batchSize = Math.max(concurrency, POLL_BATCH_SIZE);
       const batch = state.work.slice(state.cursor, state.cursor + batchSize);
-      let batchResult;
-      try {
-        batchResult = await evaluateWorkBatch(
-          deps.taskProviderRegistry,
-          runtime,
-          buildDatasetConfig(input, {
-            taskModel: state.task_model,
-            evaluatorModel: state.evaluator_model,
-          }),
-          batch,
-          concurrency
-        );
-      } catch (error) {
-        // The record must not outlive a failed step as "running". Should the
-        // engine retry the poll and eventually complete, the later finalize
-        // overwrites this one.
-        await finalizeExperimentRecord(runtime, input.experiment_id, {
-          status: 'failed',
-          error: toErrorMessage(error),
-        });
-        throw error;
-      }
+      const batchResult = await evaluateWorkBatch(
+        deps.taskProviderRegistry,
+        runtime,
+        buildDatasetConfig(input, {
+          taskModel: state.task_model,
+          evaluatorModel: state.evaluator_model,
+        }),
+        batch,
+        concurrency
+      );
 
       // Normalize a mid-batch cancellation to the same clean result as the
       // between-polls guard above, so cancelling produces one step outcome
       // regardless of timing.
       if (batchResult.cancelled) {
-        return {
-          error: await finalizeCancelledRecord(runtime, input.experiment_id, {
-            completed: state.completed + batchResult.completed,
-            failed: state.failed + batchResult.failed,
-            scoreIngestFailures:
-              (state.score_ingest_failures ?? 0) + batchResult.scoreIngestFailures,
-          }),
-        };
+        return { error: new Error('Dataset evaluation was cancelled') };
       }
 
       const cursor = state.cursor + batch.length;
@@ -471,25 +371,12 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         completed: state.completed + batchResult.completed,
         failed: state.failed + batchResult.failed,
         scores_ingested: state.scores_ingested + batchResult.scoresIngested,
-        score_ingest_failures: (state.score_ingest_failures ?? 0) + batchResult.scoreIngestFailures,
         errors: [...state.errors, ...batchResult.errors].slice(0, MAX_DATASET_STEP_ERRORS),
         task_model: state.task_model,
         evaluator_model: state.evaluator_model,
       };
 
       if (cursor >= state.work.length) {
-        // A run where no example succeeded failed as a whole; partial failures
-        // ride on the completeness counters of a completed record instead.
-        const allFailed = nextState.completed === 0 && nextState.failed > 0;
-        await finalizeExperimentRecord(runtime, input.experiment_id, {
-          status: allFailed ? 'failed' : 'completed',
-          ...(allFailed && nextState.errors.length > 0 ? { error: nextState.errors[0] } : {}),
-          completeness: {
-            successful_tasks: nextState.completed,
-            failed_tasks: nextState.failed,
-            score_ingest_failures: nextState.score_ingest_failures,
-          },
-        });
         return {
           output: {
             experiment_id: input.experiment_id,
@@ -503,13 +390,10 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       }
       return { state: nextState };
     },
-    onCancel: async (context) => {
+    onCancel: (context) => {
       context.logger.info(
         'ai.evals.evaluateDataset cancelled; in-flight evaluations aborted via signal'
       );
-      // A poll may never run again after cancellation, so the record is also
-      // closed here; a racing poll writes the same terminal state.
-      await finalizeCancelledRecord(makeRuntime(context), context.input.experiment_id);
     },
   });
 

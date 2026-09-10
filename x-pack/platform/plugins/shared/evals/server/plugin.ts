@@ -33,7 +33,6 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/datasets/dataset_service';
 import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
-import { ExperimentRecordService } from './storage/experiments/experiment_record_service';
 import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
 import { createTaskProviderRegistry } from './task_providers/registry';
@@ -51,7 +50,6 @@ export class EvalsPlugin
   private datasetService?: DatasetService;
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
-  private experimentRecordService?: ExperimentRecordService;
   private taskProviderRegistry?: TaskProviderRegistry;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
@@ -96,7 +94,6 @@ export class EvalsPlugin
           !this.datasetService ||
           !this.evaluationScoreService ||
           !this.evaluatorDefinitionService ||
-          !this.experimentRecordService ||
           !this.evaluatorRegistry
         ) {
           throw new Error('Evals storage services have not been initialized');
@@ -106,7 +103,6 @@ export class EvalsPlugin
           datasetService: this.datasetService,
           evaluationScoreService: this.evaluationScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
-          experimentRecordService: this.experimentRecordService,
           evaluatorRegistry: this.evaluatorRegistry,
         };
       }
@@ -253,11 +249,6 @@ export class EvalsPlugin
       coreStart.elasticsearch.client.asInternalUser,
       this.isServerless,
       evaluatorRegistry.isBuiltIn
-    );
-    this.experimentRecordService = new ExperimentRecordService(
-      this.logger,
-      coreStart.elasticsearch.client.asInternalUser,
-      this.isServerless
     );
 
     return {
