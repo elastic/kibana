@@ -12,6 +12,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
   const response: ParsedCommandInput = {
     name: getCommandNameFromTextInput(input),
     args: {},
+    params: [],
   };
 
   if (!input) {
@@ -19,10 +20,23 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
   }
 
   const inputFirstSpacePosition = input.indexOf(' ');
-  const rawArguments =
-    inputFirstSpacePosition === -1
-      ? []
-      : input.substring(inputFirstSpacePosition).trim().split(/--/);
+  const inputArguments =
+    inputFirstSpacePosition === -1 ? '' : input.substring(inputFirstSpacePosition).trim();
+  let rawArguments = inputFirstSpacePosition === -1 ? [] : inputArguments.split(/--/);
+
+  if (!inputArguments.includes('--')) {
+    if (inputArguments.length > 0) {
+      response.params.push(inputArguments);
+    }
+    return response;
+  }
+
+  if (!inputArguments.startsWith('--')) {
+    const firstNamedParamsPosition = inputArguments.indexOf('--');
+
+    response.params.push(inputArguments.substring(0, firstNamedParamsPosition));
+    rawArguments = inputArguments.substring(firstNamedParamsPosition).split(/--/);
+  }
 
   for (const rawArg of rawArguments) {
     const argNameAndValueTrimmedString = rawArg.trim();
@@ -78,12 +92,14 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 class ParsedCommand implements ParsedCommandInterface {
   public readonly name: string;
   public readonly args: Record<string, string[]>;
+  public readonly params: string[];
   public readonly hasArgs: boolean;
 
   constructor(public readonly input: string) {
     const parseInput = parseInputString(input);
     this.name = parseInput.name;
     this.args = parseInput.args;
+    this.params = parseInput.params;
     this.hasArgs = Object.keys(this.args).length > 0;
   }
 
