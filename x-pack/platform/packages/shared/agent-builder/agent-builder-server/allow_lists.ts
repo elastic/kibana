@@ -258,6 +258,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-management',
   'connector-authoring',
+  'connector-discovery',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
