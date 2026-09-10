@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import type {
   PersistedIndexPatternLayer,
   PieVisualizationState,
@@ -77,6 +77,14 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 
   if (!isLensAvailable) {
     return null;
+  }
+
+  if (buttonType === ViewResultsActionButtonType.menuItem) {
+    return (
+      <EuiContextMenuItem icon="lensApp" onClick={handleClick} disabled={isDisabled}>
+        {VIEW_IN_LENS}
+      </EuiContextMenuItem>
+    );
   }
 
   if (buttonType === ViewResultsActionButtonType.button) {
