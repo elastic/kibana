@@ -14,6 +14,7 @@ import { getCommandDefinition } from '../conversation_input/message_editor/comma
 
 interface RoundInputTextProps {
   text: string;
+  onHoverImage?: (name: string | null) => void;
 }
 
 const useRoundInputTextStyles = () => {
@@ -61,7 +62,7 @@ const useRoundInputTextStyles = () => {
   };
 };
 
-export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
+export const RoundInputText: React.FC<RoundInputTextProps> = ({ text, onHoverImage }) => {
   const segments = useMemo(() => deserializeInputSegments(text), [text]);
   const styles = useRoundInputTextStyles();
 
@@ -80,7 +81,12 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
         if (segment.type === 'image') {
           return (
             <EuiToolTip key={index} content={segment.name} disableScreenReaderOutput>
-              <span css={styles.imageBadgeWrapper} tabIndex={0}>
+              <span
+                css={styles.imageBadgeWrapper}
+                tabIndex={0}
+                onMouseEnter={onHoverImage ? () => onHoverImage(segment.name) : undefined}
+                onMouseLeave={onHoverImage ? () => onHoverImage(null) : undefined}
+              >
                 <EuiIcon type="image" size="s" aria-hidden={true} />
                 <span className="image-badge-label" css={styles.imageBadgeInner}>
                   {segment.name}
