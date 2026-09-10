@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -12,9 +14,9 @@ import { SESSION_ERROR_REASON_HEADER } from '../../../../common/constants';
 import {
   clearAllSessions,
   ensureSessionIndexReady,
-  getSessionCount,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
+  refreshSessionIndex,
   SESSION_API_HEADERS,
 } from '../../../scout_session_management/helpers';
 
@@ -27,29 +29,15 @@ test.describe('Session Idle expired', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   test(`should return ${SESSION_ERROR_REASON_HEADER} header if session is expired`, async ({
     apiClient,
     config,
-    esClient,
   }) => {
     test.setTimeout(100000);
 
     const cookie = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 5000 }).toBe(1);
+    await refreshSessionIndex(apiClient, config);
 
-    const meResponse = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookie },
-    });
-    expect(meResponse).toHaveStatusCode(200);
-
-    await expect
-      .poll(
-        async () => {
-          const expiredResponse = await apiClient.get('/internal/security/me', {
-            headers: { ...SESSION_API_HEADERS, Cookie: cookie },
-          });
-          return expiredResponse.statusCode;
-        },
-        { timeout: 20000 }
-      )
-      .toBe(401);
+    // Wait out the idle timeout without touching the session — any authenticated
+    // request would reset the idle clock, preventing the 401 from ever firing.
+    await setTimeoutAsync(11000);
 
     const expiredResponse = await apiClient.get('/internal/security/me', {
       headers: { ...SESSION_API_HEADERS, Cookie: cookie },
