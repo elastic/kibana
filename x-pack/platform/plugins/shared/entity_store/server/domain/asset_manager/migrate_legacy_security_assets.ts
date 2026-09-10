@@ -169,8 +169,7 @@ export async function hasLegacySecurityAssets(
       return true;
     }
   }
-  const legacyHistory = await resolveLegacyHistorySnapshotIndices(esClient, namespace);
-  return legacyHistory.length > 0;
+  return false;
 }
 
 /**
