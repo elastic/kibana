@@ -12,17 +12,6 @@ import { exceptionItemBaseSchema } from '@kbn/securitysolution-exceptions-common
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-/**
- * A *proposed* detection rule exception, carried by value.
- *
- * The payload is the item shape the `security.createRuleException` step accepts
- * (`exceptionItemBaseSchema`), so a proposal produced by the rule tuning worker
- * can be attached verbatim and later handed to that step unchanged. Nothing is
- * created in the exceptions API when the attachment is added: an exception the
- * analyst has not accepted yet must not exist on the cluster, so this
- * attachment deliberately has no `origin`/`resolve` by-reference mode and is
- * read-only.
- */
 export const exceptionAttachmentDataSchema = securityAttachmentDataSchema.extend(
   exceptionItemBaseSchema.shape
 );
