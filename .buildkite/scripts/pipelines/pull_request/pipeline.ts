@@ -151,6 +151,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       'pick_test_group_run_order',
       'build_scout_tests',
       'report_package_metrics',
+      'verify_rspack_build',
     ]);
 
     if (prHasFIPSLabel()) {
