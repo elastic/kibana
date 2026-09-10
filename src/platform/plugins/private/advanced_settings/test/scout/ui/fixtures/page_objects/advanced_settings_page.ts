@@ -20,31 +20,37 @@ export class AdvancedSettingsPage {
     return this.page.testSubj.locator(`management-settings-editField-${settingName}`).inputValue();
   }
 
+  // Clicks Save and waits for the change to be applied. The save button lives in
+  // the unsaved-changes bottom bar, which is removed once the save completes, so
+  // its disappearance is the real "saved" signal (the page title is always
+  // visible and waiting on it is a no-op).
+  private async saveAndWait() {
+    const saveButton = this.page.testSubj.locator('settings-save-button');
+    await saveButton.click();
+    await saveButton.waitFor({ state: 'hidden' });
+  }
+
   async setAdvancedSettingsSelect(settingName: string, value: string) {
     const select = this.page.testSubj.locator(`management-settings-editField-${settingName}`);
     await select.selectOption(value);
-    await this.page.testSubj.locator('settings-save-button').click();
-    await this.page.testSubj.locator('managementSettingsTitle').waitFor({ state: 'visible' });
+    await this.saveAndWait();
   }
 
   async setAdvancedSettingsInput(settingName: string, value: string) {
     const field = this.page.testSubj.locator(`management-settings-editField-${settingName}`);
     await field.clear();
     await field.fill(value);
-    await this.page.testSubj.locator('settings-save-button').click();
-    await this.page.testSubj.locator('managementSettingsTitle').waitFor({ state: 'visible' });
+    await this.saveAndWait();
   }
 
   async clearAdvancedSetting(settingName: string) {
     await this.page.testSubj.locator(`management-settings-resetField-${settingName}`).click();
-    await this.page.testSubj.locator('settings-save-button').click();
-    await this.page.testSubj.locator('managementSettingsTitle').waitFor({ state: 'visible' });
+    await this.saveAndWait();
   }
 
   async toggleAdvancedSettingCheckbox(settingName: string) {
     await this.page.testSubj.locator(`management-settings-editField-${settingName}`).click();
-    await this.page.testSubj.locator('settings-save-button').click();
-    await this.page.testSubj.locator('managementSettingsTitle').waitFor({ state: 'visible' });
+    await this.saveAndWait();
   }
 
   async getAdvancedSettingCheckboxValue(settingName: string) {

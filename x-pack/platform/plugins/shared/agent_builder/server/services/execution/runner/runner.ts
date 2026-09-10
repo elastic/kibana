@@ -13,7 +13,10 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
@@ -246,6 +249,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     projectRouting,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     conversation,
     nextInput,
     promptState,
@@ -259,6 +263,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
+    reasoningLevel?: ChatCompletionReasoningEffort;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
@@ -285,6 +290,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       defaultConnectorId,
       telemetryMetadata,
       maxContentLength,
+      reasoningLevel,
     });
 
     const subAgentExecutor = createSubAgentExecutor({
@@ -376,6 +382,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         projectRouting,
         telemetryMetadata,
         maxContentLength,
+        reasoningLevel,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         interactive,
@@ -390,6 +397,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         projectRouting,
         telemetryMetadata,
         maxContentLength,
+        reasoningLevel,
         conversation,
         nextInput,
         abortSignal,
