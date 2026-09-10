@@ -1169,6 +1169,7 @@ export function XYChart({
                       <BubbleSeries
                         key={layer.layerId}
                         id={`xy-points-overlay-${layer.layerId}`}
+                        name={layer.yAccessor}
                         xAccessor="x"
                         yAccessors={['y']}
                         data={points}
