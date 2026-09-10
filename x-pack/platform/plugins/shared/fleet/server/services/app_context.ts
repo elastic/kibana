@@ -26,7 +26,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { FeatureFlagsStart } from '@kbn/core/server';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';

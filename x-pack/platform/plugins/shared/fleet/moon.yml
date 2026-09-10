@@ -136,7 +136,6 @@ dependsOn:
   - '@kbn/elastic-agent-condition-language'
   - '@kbn/app-header'
   - '@kbn/core-http-browser'
-  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod
