@@ -434,7 +434,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const generateBlocklistEntryValue = useCallback(
       (value: string | string[], newOperator: ListOperatorTypeEnum) => {
         if (newOperator === ListOperatorTypeEnum.MATCH) {
-          return { value: Array.isArray(value) ? value.join(', ') : value };
+          return { value: Array.isArray(value) ? value.join(',') : value };
         } else {
           return {
             value: typeof value === 'string' ? splitCommaSeparatedValues(value) : value,
