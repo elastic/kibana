@@ -50,6 +50,18 @@ export const ENTITY_CLASS_OPTIONS = [
   { value: 'RESOURCE_ID', text: 'RESOURCE_ID' },
 ];
 
+const PATTERN_PLACEHOLDER_BY_CLASS: Record<string, string> = {
+  EMAIL: String.raw`[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}`,
+  IP: String.raw`\b\d{1,3}(?:\.\d{1,3}){3}\b`,
+  HOST_NAME: String.raw`[a-z0-9\-]+(?:\.[a-z0-9\-]+)+`,
+  USER_NAME: String.raw`[a-z][a-z0-9_\-]{2,19}`,
+  URL: String.raw`https?://\S+`,
+  CLOUD_ACCOUNT: String.raw`\d{12}`,
+  ENTITY_NAME: String.raw`[A-Z][a-z]+ [A-Z][a-z]+`,
+  RESOURCE_NAME: String.raw`[a-z][a-z0-9\-]{2,63}`,
+  RESOURCE_ID: String.raw`EMP-\d{6}`,
+};
+
 // ---------------------------------------------------------------------------
 // Sample text defaults per entity class
 // ---------------------------------------------------------------------------
@@ -306,7 +318,7 @@ export const CustomPatternModal: React.FC<CustomPatternModalProps> = ({
                   value={form.pattern}
                   onChange={(e) => handlePatternChange(e.target.value)}
                   onBlur={() => setPatternError(validatePattern(form.pattern))}
-                  placeholder={i18n.translate('xpack.inferenceWorkflows.anonymization.modal.patternPlaceholder', { defaultMessage: "EMP-\\\\d'{6}'" })}
+                  placeholder={PATTERN_PLACEHOLDER_BY_CLASS[form.entityClass] ?? String.raw`[A-Z]{2,}-\d+`}
                   isInvalid={patternError !== null}
                   data-test-subj="anonymization-modal-pattern"
                   style={{ fontFamily: 'monospace' }}
