@@ -88,8 +88,11 @@ const rulesSchema = schema.object({
    * Upper bound on the combined number of rule runs per minute across all
    * spaces. Creating, updating or enabling a rule that would push the total
    * past this limit is rejected.
+   *
+   * The default matches the alerting v1 hosted budget (`xpack.alerting.rules.maxScheduledPerMinute`).
+   * Serverless projects are capped at 400 via `config/serverless.yml`, mirroring v1.
    */
-  maxScheduledPerMinute: schema.number({ defaultValue: 400, min: 0, max: 32000 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0, max: 32000 }),
   /** Per-execution guardrails applied while a rule runs. */
   run: rulesRunSchema,
 });

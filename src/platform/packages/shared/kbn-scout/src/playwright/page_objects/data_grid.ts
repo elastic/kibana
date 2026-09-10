@@ -20,7 +20,6 @@ const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
 export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
-export type DataGridPaginationScope = 'discover' | 'docViewer';
 
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
@@ -73,10 +72,8 @@ export class DataGrid {
     });
   }
 
-  private getPaginationContainer(scope: DataGridPaginationScope = 'discover'): Locator {
-    return this.page.testSubj.locator(
-      scope === 'docViewer' ? 'UnifiedDocViewerTableGrid' : 'docTable'
-    );
+  private getPaginationContainer(): Locator {
+    return this.page.testSubj.locator('docTable');
   }
 
   async addFieldFromSidebar(field: string) {
@@ -86,8 +83,8 @@ export class DataGrid {
     await this.waitForLoad();
   }
 
-  async changeRowsPerPageTo(rowsPerPage: number, scope: DataGridPaginationScope = 'discover') {
-    await this.getRowsPerPageButton(scope).click();
+  async changeRowsPerPageTo(rowsPerPage: number) {
+    await this.getRowsPerPageButton().click();
     const option = this.page.testSubj.locator(`tablePagination-${rowsPerPage}-rows`);
     await option.waitFor({ state: 'visible' });
     await option.click();
@@ -112,6 +109,24 @@ export class DataGrid {
     await cell.hover();
     await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
     await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+  }
+
+  async filterCell({
+    rowIndex,
+    columnId,
+    mode,
+  }: {
+    rowIndex: number;
+    columnId: string;
+    mode: 'for' | 'out';
+  }): Promise<void> {
+    const actionTestSubj = mode === 'for' ? 'filterForButton' : 'filterOutButton';
+    const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+
+    await this.expandCell({ rowIndex, columnId });
+    await expansionPopover.locator(`[data-test-subj="${actionTestSubj}"]`).click();
+    await expansionPopover.waitFor({ state: 'hidden' });
+    await this.waitForLoad();
   }
 
   async expandMetaFieldsSection() {
@@ -184,33 +199,29 @@ export class DataGrid {
     return (await selectedButton.innerText()).trim() as DataGridDensity;
   }
 
-  getPageButton(pageIndex: number, scope: DataGridPaginationScope = 'discover'): Locator {
-    return this.getPaginationContainer(scope).locator(
+  getPageButton(pageIndex: number): Locator {
+    return this.getPaginationContainer().locator(
       `[data-test-subj="pagination-button-${pageIndex}"]`
     );
   }
 
-  getCurrentPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
-    return this.getPaginationContainer(scope).locator(
+  getCurrentPageButton(): Locator {
+    return this.getPaginationContainer().locator(
       '[data-test-subj^="pagination-button-"][aria-current="page"]'
     );
   }
 
   /** The "Rows per page: N" toolbar button. Absent in `singlePage` pagination mode. */
-  getRowsPerPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
-    return this.getPaginationContainer(scope).locator(
-      '[data-test-subj="tablePaginationPopoverButton"]'
-    );
+  getRowsPerPageButton(): Locator {
+    return this.getPaginationContainer().locator('[data-test-subj="tablePaginationPopoverButton"]');
   }
 
-  getPreviousPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
-    return this.getPaginationContainer(scope).locator(
-      '[data-test-subj="pagination-button-previous"]'
-    );
+  getPreviousPageButton(): Locator {
+    return this.getPaginationContainer().locator('[data-test-subj="pagination-button-previous"]');
   }
 
-  getNextPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
-    return this.getPaginationContainer(scope).locator('[data-test-subj="pagination-button-next"]');
+  getNextPageButton(): Locator {
+    return this.getPaginationContainer().locator('[data-test-subj="pagination-button-next"]');
   }
 
   /**
@@ -236,8 +247,8 @@ export class DataGrid {
     return (await selectedButton.innerText()).trim() as DataGridRowHeight;
   }
 
-  async getCurrentRowsPerPage(scope: DataGridPaginationScope = 'discover'): Promise<number> {
-    const buttonText = await this.getRowsPerPageButton(scope).innerText();
+  async getCurrentRowsPerPage(): Promise<number> {
+    const buttonText = await this.getRowsPerPageButton().innerText();
     const rowsPerPage = buttonText.match(/Rows per page:\s*(\d+)/)?.[1];
 
     if (!rowsPerPage) {
@@ -247,8 +258,8 @@ export class DataGrid {
     return Number(rowsPerPage);
   }
 
-  async getCurrentPageNumber(scope: DataGridPaginationScope = 'discover'): Promise<string> {
-    const currentPage = this.getCurrentPageButton(scope);
+  async getCurrentPageNumber(): Promise<string> {
+    const currentPage = this.getCurrentPageButton();
     await currentPage.waitFor({ state: 'visible' });
     const pageNumber = await currentPage.evaluate((element) => element.textContent?.trim() ?? '');
     if (!pageNumber) {
