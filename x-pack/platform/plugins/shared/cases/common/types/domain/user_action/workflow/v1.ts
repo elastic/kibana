@@ -8,10 +8,11 @@
 import * as rt from 'io-ts';
 import { UserActionTypes } from '../action/v1';
 import {
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from './constants';
 
 /** Identifies the workflow plus the specific execution to link to. */
@@ -28,12 +29,15 @@ export const WorkflowPayloadRt = rt.strict({
  * `buildActivityOrigin` actually writes for that type. A `cases.case` origin never carries
  * `index`, `typeKey`, or `value`; a `cases.observable` origin never carries `index`.
  *
- * - `cases.case`       — triggered from the case detail page.
- * - `cases.observable` — triggered from the observables table for a specific observable;
- *                        carries optional `typeKey` + `value` for display.
- * - `cases.alert`      — triggered from the alerts table for a single alert;
- *                        carries optional `index` for the deep link.
- * - `cases.alerts`     — triggered from the alerts table with a multi-alert selection.
+ * - `cases.case`        — triggered from the case detail page.
+ * - `cases.observable`  — triggered from the observables table for a specific observable;
+ *                         carries optional `typeKey` + `value` for display.
+ * - `cases.observables` — triggered from the observables table with a multi-observable selection;
+ *                         carries optional `count` for display in the activity feed.
+ * - `cases.attachment`  — triggered from one registered attachment target; carries its
+ *                         normalized attachment type and optional index.
+ * - `cases.attachments` — triggered from a registered attachment bulk surface; carries its
+ *                         normalized attachment type and optional count.
  */
 export const WorkflowOriginRt = rt.union([
   rt.strict({
@@ -59,21 +63,46 @@ export const WorkflowOriginRt = rt.union([
   rt.exact(
     rt.intersection([
       rt.type({
-        type: rt.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
-        /** The primary identifier: alertId (_id). */
+        type: rt.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+        /** The primary identifier: caseId. */
         id: rt.string,
       }),
       rt.partial({
-        /** The ES index the alert lives in, used to build the deep link. */
+        /** Number of observables in the selection, for display in the activity feed. */
+        count: rt.number,
+      }),
+    ])
+  ),
+  rt.exact(
+    rt.intersection([
+      rt.type({
+        type: rt.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
+        /** The primary identifier: attachmentId. */
+        id: rt.string,
+        /** The normalized registered attachment type. */
+        attachmentType: rt.string,
+      }),
+      rt.partial({
+        /** Optional ES index used by document-backed attachment actions. */
         index: rt.string,
       }),
     ])
   ),
-  rt.strict({
-    type: rt.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
-    /** The primary identifier: caseId. */
-    id: rt.string,
-  }),
+  rt.exact(
+    rt.intersection([
+      rt.type({
+        type: rt.literal(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
+        /** The primary identifier: caseId. */
+        id: rt.string,
+        /** The normalized registered attachment type. */
+        attachmentType: rt.string,
+      }),
+      rt.partial({
+        /** Number of selected attachment targets. */
+        count: rt.number,
+      }),
+    ])
+  ),
 ]);
 
 export const WorkflowUserActionPayloadRt = rt.exact(

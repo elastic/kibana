@@ -6,34 +6,39 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { WorkflowOrigin, WorkflowUserAction } from '../../../common/types/domain';
 import {
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
+import { renderAttachmentAction } from './attachment_action';
 import { useAppUrl, useKibana } from '../../common/lib/kibana';
 import type { CasesConfigurationUI } from '../../containers/types';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 interface WorkflowActivityLabelProps {
   workflow: SnakeToCamelCase<WorkflowUserAction>['payload']['workflow'];
   origin?: WorkflowOrigin;
   casesConfiguration: CasesConfigurationUI;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
 const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
   workflow,
   origin,
   casesConfiguration,
+  unifiedAttachmentTypeRegistry,
 }) => {
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const capabilities = useKibana().services?.application?.capabilities;
@@ -65,6 +70,30 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
 
   const label = (() => {
     switch (origin?.type) {
+      case ATTACHMENT_WORKFLOW_ORIGIN_TYPE:
+      case ATTACHMENTS_WORKFLOW_ORIGIN_TYPE: {
+        if (unifiedAttachmentTypeRegistry.has(origin.attachmentType)) {
+          const attachmentType = unifiedAttachmentTypeRegistry.get(origin.attachmentType);
+          const registeredLabel = attachmentType.workflow?.getActivityLabel({
+            workflowName: workflowNameNode,
+            count: origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE ? origin.count : undefined,
+          });
+          if (registeredLabel != null) {
+            return registeredLabel;
+          }
+        }
+
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnAttachmentLabel"
+            defaultMessage="ran {name} on {count, plural, =0 {an attachment} one {# attachment} other {# attachments}}"
+            values={{
+              name: workflowNameNode,
+              count: origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE ? origin.count ?? 1 : 0,
+            }}
+          />
+        );
+      }
       case OBSERVABLE_WORKFLOW_ORIGIN_TYPE: {
         if (origin.typeKey && origin.value) {
           const allObservableTypes = [
@@ -73,11 +102,18 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           ];
           const found = allObservableTypes.find((t) => t.key === origin.typeKey);
           const typeLabel = found?.label ?? origin.typeKey;
+          const observableNode = (
+            <EuiBadge color="hollow" data-test-subj="workflow-observable-badge">
+              {typeLabel}
+              {': '}
+              {origin.value}
+            </EuiBadge>
+          );
           return (
             <FormattedMessage
               id="xpack.cases.caseView.userActions.ranWorkflowOnObservableDetailsLabel"
-              defaultMessage="ran {name} on observable {typeLabel}: {value}"
-              values={{ name: workflowNameNode, typeLabel, value: origin.value }}
+              defaultMessage="ran {name} on observable {observable}"
+              values={{ name: workflowNameNode, observable: observableNode }}
             />
           );
         }
@@ -89,22 +125,25 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           />
         );
       }
-      case ALERT_WORKFLOW_ORIGIN_TYPE:
+      case OBSERVABLES_WORKFLOW_ORIGIN_TYPE: {
+        const count = origin.count;
+        if (count !== undefined) {
+          return (
+            <FormattedMessage
+              id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesCountLabel"
+              defaultMessage="ran {name} on {count, plural, one {# observable} other {# observables}}"
+              values={{ name: workflowNameNode, count }}
+            />
+          );
+        }
         return (
           <FormattedMessage
-            id="xpack.cases.caseView.userActions.ranWorkflowOnAlertLabel"
-            defaultMessage="ran {name} on an alert"
+            id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesLabel"
+            defaultMessage="ran {name} on observables"
             values={{ name: workflowNameNode }}
           />
         );
-      case ALERTS_WORKFLOW_ORIGIN_TYPE:
-        return (
-          <FormattedMessage
-            id="xpack.cases.caseView.userActions.ranWorkflowOnAlertsLabel"
-            defaultMessage="ran {name} on alerts"
-            values={{ name: workflowNameNode }}
-          />
-        );
+      }
       case CASE_WORKFLOW_ORIGIN_TYPE:
       default:
         return (
@@ -131,16 +170,39 @@ export const createWorkflowUserActionBuilder: UserActionBuilder = ({
   userProfiles,
   handleOutlineComment,
   casesConfiguration,
+  unifiedAttachmentTypeRegistry,
 }: UserActionBuilderArgs) => ({
   build: () => {
     const action = userAction as SnakeToCamelCase<WorkflowUserAction>;
     const { workflow, origin } = action.payload;
+
+    // Resolve the document-flyout button for attachment origins. The button is
+    // solution-owned (it lives behind getDocumentAction on the unified attachment type),
+    // so we look it up from the registry rather than hard-coding the flyout here.
+    let documentAction: React.ReactNode;
+    if (origin?.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE) {
+      if (unifiedAttachmentTypeRegistry.has(origin.attachmentType)) {
+        const attachmentType = unifiedAttachmentTypeRegistry.get(origin.attachmentType);
+        const resolvedAction = attachmentType.getDocumentAction?.({
+          id: userAction.id,
+          documentId: origin.id,
+          index: origin.index,
+        });
+        if (resolvedAction != null) {
+          documentAction = renderAttachmentAction(
+            resolvedAction,
+            `workflow-document-action-${userAction.id}`
+          );
+        }
+      }
+    }
 
     const label = (
       <WorkflowActivityLabel
         workflow={workflow}
         origin={origin}
         casesConfiguration={casesConfiguration}
+        unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
       />
     );
 
@@ -150,6 +212,7 @@ export const createWorkflowUserActionBuilder: UserActionBuilder = ({
       handleOutlineComment,
       label,
       icon: 'workflow',
+      documentAction,
     }).build();
   },
 });

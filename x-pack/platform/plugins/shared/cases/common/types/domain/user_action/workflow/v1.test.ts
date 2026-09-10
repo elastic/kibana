@@ -15,17 +15,12 @@ import {
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from './constants';
 
 const defaultWorkflow = { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' };
 const caseOrigin = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-1' };
-const alertOrigin = {
-  type: ALERT_WORKFLOW_ORIGIN_TYPE,
-  id: 'alert-1',
-  index: '.alerts-security.alerts-default',
-};
 const observableOrigin = {
   type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   id: 'obs-1',
@@ -53,8 +48,24 @@ describe('WorkflowOriginRt', () => {
   it.each([
     ['cases.case', caseOrigin],
     ['cases.observable', observableOrigin],
-    ['cases.alert', alertOrigin],
-    ['cases.alerts', { type: ALERTS_WORKFLOW_ORIGIN_TYPE, id: 'case-1' }],
+    [
+      'cases.attachment',
+      {
+        type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+        id: 'alert-1',
+        attachmentType: 'security.alert',
+        index: '.alerts-security.alerts-default',
+      },
+    ],
+    [
+      'cases.attachments',
+      {
+        type: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+        id: 'case-1',
+        attachmentType: 'security.alert',
+        count: 2,
+      },
+    ],
   ] as const)('accepts origin type %s', (_label, origin) => {
     const result = WorkflowOriginRt.decode(origin);
     expect(result._tag).toBe('Right');
@@ -72,7 +83,12 @@ describe('WorkflowOriginRt', () => {
     expect(result._tag).toBe('Left');
   });
 
-  it.each(['cases.comment', 'cases.attachment'] as const)(
+  it('rejects the removed cases.comment origin', () => {
+    const result = WorkflowOriginRt.decode({ type: 'cases.comment', id: 'x' });
+    expect(result._tag).toBe('Left');
+  });
+
+  it.each(['cases.alert', 'cases.alerts', 'cases.event'])(
     'rejects removed origin type %s',
     (type) => {
       const result = WorkflowOriginRt.decode({ type, id: 'x' });
@@ -110,7 +126,7 @@ describe('WorkflowUserActionPayloadRt', () => {
 describe('WorkflowUserActionRt', () => {
   const defaultRequest = {
     type: UserActionTypes.workflow,
-    payload: { workflow: defaultWorkflow, origin: alertOrigin },
+    payload: { workflow: defaultWorkflow, origin: caseOrigin },
   };
 
   it('has expected attributes', () => {

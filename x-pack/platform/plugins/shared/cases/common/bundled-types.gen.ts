@@ -2509,23 +2509,45 @@ export const PayloadWorkflow = lazySchema(() =>
          * The origin type.
          */
         type: z
-          .enum(['cases.case', 'cases.observable', 'cases.alert', 'cases.alerts'])
+          .enum([
+            'cases.case',
+            'cases.observable',
+            'cases.observables',
+            'cases.attachment',
+            'cases.attachments',
+          ])
           .describe('The origin type.'),
         /**
-         * The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
+         * The primary identifier of the case, observable, or attachment from which the workflow was triggered.
          */
         id: z
           .string()
           .describe(
-            'The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).'
+            'The primary identifier of the case, observable, or attachment from which the workflow was triggered.'
           ),
         /**
-         * For alert origins, the Elasticsearch index the alert lives in.
+         * For generic attachment origins, the normalized registered attachment type.
+         */
+        attachmentType: z
+          .string()
+          .optional()
+          .describe('For generic attachment origins, the normalized registered attachment type.'),
+        /**
+         * For document-backed attachment origins, the Elasticsearch index the document lives in.
          */
         index: z
           .string()
           .optional()
-          .describe('For alert origins, the Elasticsearch index the alert lives in.'),
+          .describe(
+            'For document-backed attachment origins, the Elasticsearch index the document lives in.'
+          ),
+        /**
+         * For bulk attachment or observable origins, the number of selected targets.
+         */
+        count: z
+          .number()
+          .optional()
+          .describe('For bulk attachment or observable origins, the number of selected targets.'),
         /**
          * For observable origins, the observable type key.
          */
