@@ -61,8 +61,48 @@ echo "--- Upload issue summary"
 buildkite-agent artifact upload "$SUMMARY_PATH"
 
 echo "--- Annotate build"
-counts="$(jq -r '.counts | "**\(.created)** created, **\(.existing)** already tracked, **\(.skipped)** skipped by the cap"' "$SUMMARY_PATH")"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
+if [[ "$mode" == "dry run" ]]; then
+  counts="$(jq -r '.counts | "**\(.created)** would be created, **\(.existing)** already tracked, **\(.skipped)** would be skipped by the cap"' "$SUMMARY_PATH")"
+else
+  counts="$(jq -r '.counts | "**\(.created)** created, **\(.existing)** already tracked, **\(.skipped)** skipped by the cap"' "$SUMMARY_PATH")"
+fi
+
+# One bullet per suite of the given action; created issues link to GitHub except in dry-run mode,
+# where nothing was filed.
+list_suites() {
+  local action="$1"
+  if [[ "$mode" == "dry run" && "$action" == "created" ]]; then
+    jq -r --arg action "$action" '.actions[] | select(.action == $action) | "- `\(.filePath)`"' "$SUMMARY_PATH"
+  elif [[ "$action" == "skipped" ]]; then
+    jq -r --arg action "$action" '.actions[] | select(.action == $action) | "- `\(.filePath)`"' "$SUMMARY_PATH"
+  else
+    jq -r --arg action "$action" '.actions[] | select(.action == $action)
+      | "- [#\(.issue.number)](\(.issue.url)) `\(.filePath)`"' "$SUMMARY_PATH"
+  fi
+}
+
+# Markdown section for one action, collapsed when it is likely to be long
+section() {
+  local action="$1" title="$2" collapsed="$3"
+  local count
+  count="$(jq -r --arg action "$action" '[.actions[] | select(.action == $action)] | length' "$SUMMARY_PATH")"
+  if [[ "$count" == "0" ]]; then
+    return
+  fi
+  echo
+  if [[ "$collapsed" == "true" ]]; then
+    echo "<details><summary>${title} (${count})</summary>"
+    echo
+    list_suites "$action"
+    echo
+    echo "</details>"
+  else
+    echo "**${title} (${count})**"
+    echo
+    list_suites "$action"
+  fi
+}
 
 {
   case "$mode" in
@@ -76,14 +116,13 @@ suites="$(jq -r '.suites' "$SUMMARY_PATH")"
       echo "Dry run for ${suites} flaky suites (set \`FLAKY_TESTS_GITHUB_REPO\` to file issues): ${counts}."
       ;;
   esac
-  echo
   if [[ "$mode" == "dry run" ]]; then
-    jq -r '.actions[] | select(.action == "created")
-      | "- would be created: `\(.filePath)`"' "$SUMMARY_PATH"
+    section created "Would create an issue" false
   else
-    jq -r '.actions[] | select(.action == "created")
-      | "- created: [#\(.issue.number)](\(.issue.url)) `\(.filePath)`"' "$SUMMARY_PATH"
+    section created "Created" false
   fi
+  section existing "Already tracked by an open issue" true
+  section skipped "Skipped, cap of ${FLAKY_TESTS_MAX_NEW_ISSUES} new issues per run reached" true
   echo
   echo "Summary: <a href=\"artifact://${SUMMARY_PATH}\">${SUMMARY_PATH}</a>"
 } | buildkite-agent annotate --style info --context flaky-test-issues

@@ -82,8 +82,8 @@ export function runFlakyTestsReporterCli() {
 
       const { created, existing, skipped } = summary.counts;
       log.info(
-        `${summary.suites} flaky suites: ${created} issues created, ${existing} already tracked, ` +
-          `${skipped} skipped (summary in ${summaryPath})`
+        `${summary.suites} flaky suites: ${created} issues ${dryRun ? 'would be ' : ''}created, ` +
+          `${existing} already tracked, ${skipped} skipped by the cap (summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
     },

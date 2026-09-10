@@ -111,18 +111,20 @@ export const reportFlakySuitesToGithub = async ({
     actions.push(action);
     counts[action.action] += 1;
   };
+  // One line per suite, worded as a plan in dry-run mode so the log reads as "what would happen"
+  const would = dryRun ? 'would ' : '';
 
   for (const suite of suites) {
     const { filePath } = suite;
     const issue = existing.get(filePath);
     if (issue) {
-      log.info(`#${issue.number} already tracks ${filePath}`);
+      log.info(`already tracked by #${issue.number}: ${filePath}`);
       record({ action: 'existing', filePath, issue: toRef(issue) });
       continue;
     }
 
     if (counts.created >= maxNewIssues) {
-      log.info(`Skipping ${filePath}: already created ${maxNewIssues} issues this run`);
+      log.info(`${would}skip, cap of ${maxNewIssues} new issues reached: ${filePath}`);
       record({ action: 'skipped', filePath, reason: 'max-new-issues' });
       continue;
     }
@@ -132,7 +134,9 @@ export const reportFlakySuitesToGithub = async ({
       renderFlakySuiteIssueBody(suite, { report, reportUrl }),
       labels
     );
-    log.info(`Created #${newIssue.number} for ${filePath}`);
+    log.info(
+      dryRun ? `would create an issue: ${filePath}` : `created #${newIssue.number}: ${filePath}`
+    );
     record({ action: 'created', filePath, issue: toRef(newIssue) });
   }
 
