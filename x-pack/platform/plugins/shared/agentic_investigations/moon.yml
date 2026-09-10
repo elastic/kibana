@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agentic-investigations-common'
   - '@kbn/core-http-browser'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
