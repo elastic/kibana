@@ -8,13 +8,6 @@
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import type { AssetManagerClient } from '../../../domain/asset_manager/asset_manager_client';
-import type { LogExtractionInstallParams } from '../../constants';
-
-export function collectAdditionalIndexPatterns(
-  logExtraction?: LogExtractionInstallParams
-): string[] {
-  return logExtraction?.additionalIndexPatterns ?? [];
-}
 
 export function getMissingPrivileges({
   privileges: { kibana, elasticsearch },

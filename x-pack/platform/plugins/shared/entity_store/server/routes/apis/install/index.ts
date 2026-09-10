@@ -13,10 +13,7 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
-import {
-  collectAdditionalIndexPatterns,
-  enforceEntityStorePrivileges,
-} from '../utils/check_entity_store_privileges';
+import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
@@ -28,6 +25,8 @@ export function registerInstall(router: EntityStorePluginRouter) {
         'Install the Entity Store and create engines for the specified entity types. ' +
         'A single `logExtraction` configuration is shared across all entity types. ' +
         'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
+        'Omitting a field leaves it unchanged. ' +
+        'Sending `null` for a field clears that override and reverts to the default value. ' +
         'To change settings after install, use the update endpoint.',
       options: {
         tags: ['oas-tag:Security entity store'],
@@ -63,7 +62,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           assetManager,
           req,
           res,
-          collectAdditionalIndexPatterns(logExtraction)
+          logExtraction?.additionalIndexPatterns
         );
         if (forbidden) return forbidden;
         const { engines } = await assetManager.getStatus();

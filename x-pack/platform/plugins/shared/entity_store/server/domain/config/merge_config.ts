@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '../../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import type { LogExtractionConfig, LogExtractionTypeOverride } from '../saved_objects';
 import {
   LATEST_LOG_EXTRACTION_DEFAULTS,
@@ -15,31 +15,23 @@ import {
 /** Built-in per entity-type defaults. Empty for now: raising frequency also cuts throughput, so values need measurement (#269261). */
 export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtractionConfig>>> = {};
 
-/** Copies a layer's set fields over `base`. `undefined` and `null` are skipped, so they fall through to the layers below. */
-const applyLayer = (
-  base: Partial<LogExtractionConfig>,
+/** A layer's set fields. `undefined` and `null` are dropped, so they fall through to the layers below. */
+const setFields = (
   layer: Partial<LogExtractionTypeOverride> | Partial<LogExtractionConfig> | undefined
-): Partial<LogExtractionConfig> => {
-  for (const [key, value] of Object.entries(layer ?? {})) {
-    if (value !== null && value !== undefined) {
-      (base as Record<string, unknown>)[key] = value;
-    }
-  }
-  return base;
-};
+): Partial<LogExtractionConfig> =>
+  Object.fromEntries(
+    Object.entries(layer ?? {}).filter(([, value]) => value !== null && value !== undefined)
+  ) as Partial<LogExtractionConfig>;
 
 /** Config in effect for one entity type: code defaults, then `globalOverrides`, then `typeOverride`. */
 export const getMergedConfig = (
   type: EntityType,
   globalOverrides: Partial<LogExtractionConfig>,
   typeOverride: LogExtractionTypeOverride | undefined
-): LogExtractionConfig => {
-  const merged: Partial<LogExtractionConfig> = {
+): LogExtractionConfig =>
+  LogExtractionConfigSchema.parse({
     ...LATEST_LOG_EXTRACTION_DEFAULTS,
     ...DEFAULT_CONFIG_BY_TYPE[type],
-  };
-  applyLayer(merged, globalOverrides);
-  applyLayer(merged, typeOverride);
-
-  return LogExtractionConfigSchema.parse(merged);
-};
+    ...setFields(globalOverrides),
+    ...setFields(typeOverride),
+  });

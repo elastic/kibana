@@ -99,7 +99,6 @@ describe('AssetManagerClient', () => {
     init: jest.Mock;
     findOrThrow: jest.Mock;
     update: jest.Mock;
-    updateLogExtractionConfig: jest.Mock;
     delete: jest.Mock;
   };
   let mockGlobalStateClient: {
@@ -137,7 +136,6 @@ describe('AssetManagerClient', () => {
       init: jest.fn().mockResolvedValue(undefined),
       findOrThrow: jest.fn().mockResolvedValue({ type: 'user', status: 'started' }),
       update: jest.fn().mockResolvedValue(undefined),
-      updateLogExtractionConfig: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
