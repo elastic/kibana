@@ -47,6 +47,9 @@ export const SUPPORTS_IDENTITY_FEDERATION_VAR_NAME = 'supports_identity_federati
 // Sibling flags for azure/gcp will be added as those packages migrate to var_groups.
 export const AWS_IDENTITY_FEDERATION_ENABLED_FLAG = 'fleet.awsIdentityFederationEnabled';
 
+/** LaunchDarkly flag that gates Fleet calls to the IaC Provisioner. Fallback is false. */
+export const ENABLE_IAC_PROVISIONER_FLAG = 'fleet.enableIacProvisioner';
+
 // OTel Verifier package constants
 export const VERIFIER_PKG_NAME = 'verifier_otel';
 export const VERIFIER_POLICY_TEMPLATE = 'verifierreceiver';
