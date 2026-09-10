@@ -267,7 +267,7 @@ export function getDashboardApi({
       attributes: getState(),
     }),
     setState,
-    runInteractiveSave: (redirectTo: DashboardRedirect) => {
+    runInteractiveSave: (redirectTo?: DashboardRedirect) => {
       trackOverlayApi.clearOverlays();
       const previousDashboardId = savedObjectId$.value;
 
@@ -279,8 +279,8 @@ export function getDashboardApi({
         title,
       } = settingsManager.api.getSettings();
 
-      let resolve: (() => void) | undefined;
-      const promise = new Promise<void>((_resolve) => (resolve = _resolve));
+      let resolve: ((results: { id: string } | undefined) => void) | undefined;
+      const promise = new Promise<{ id: string } | undefined>((_resolve) => (resolve = _resolve));
 
       openSaveModal({
         description,
@@ -314,7 +314,7 @@ export function getDashboardApi({
             dashboardId: id,
             dashboardState: getState(),
           });
-          if (redirectRequired) {
+          if (redirectTo && redirectRequired) {
             redirectTo({
               id,
               editMode: true,
@@ -322,9 +322,9 @@ export function getDashboardApi({
               destination: 'dashboard',
             });
           }
-          resolve?.();
+          resolve?.({ id });
         },
-        onClose: () => resolve?.(),
+        onClose: () => resolve?.(undefined),
       });
 
       return promise;

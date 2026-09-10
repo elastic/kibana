@@ -211,7 +211,7 @@ export type DashboardApi = CanExpandPanels &
     isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
-    runInteractiveSave: (redirectTo: DashboardRedirect) => Promise<void>;
+    runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
