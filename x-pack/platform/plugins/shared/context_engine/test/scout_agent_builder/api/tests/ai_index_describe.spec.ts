@@ -11,8 +11,13 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH } = testData;
-const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
+const {
+  AI_INDEX_COLLECTION_PATH,
+  AI_INDEX_QUERY_PATH,
+  API_HEADERS,
+  CONTEXT_ENGINE_ENABLED_SETTING,
+  CONTEXT_ENGINE_READ,
+} = testData;
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
@@ -71,13 +76,6 @@ const fieldLine = (block: string, path: string): string | undefined =>
 
 const fieldPaths = (block: string): string[] =>
   sectionLines(block, 'Fields').map((line) => line.slice(0, line.indexOf(': ')));
-
-const API_HEADERS = {
-  ...testData.COMMON_HEADERS,
-  'elastic-api-version': '2023-10-31',
-};
-
-const CONTEXT_ENGINE_READ = { base: [], feature: { contextEngine: ['read'] }, spaces: ['*'] };
 
 /** Documented caller: `contextEngine:read` + `read`, `view_index_metadata` on backing indices. */
 const DESCRIBE_ROLE: KibanaRole = {
