@@ -12,12 +12,13 @@ import {
   TRACES_INDEX_PATTERN,
   GetTraceRequestParams,
 } from '@kbn/evals-common';
+import type { TraceSpan } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 import { MAX_SPANS_PER_TRACE_SEARCH, computeTraceDurationMs, shapeTraceSpan } from './trace_spans';
-import type { EvalTraceSpan, TraceSpanSource } from './trace_spans';
+import type { TraceSpanSource } from './trace_spans';
 
 export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -56,7 +57,7 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
           const hits = searchResponse.hits?.hits ?? [];
           const spans = hits
             .map((hit) => shapeTraceSpan(hit, traceId))
-            .filter((span): span is EvalTraceSpan => span !== null);
+            .filter((span): span is TraceSpan => span !== null);
 
           return response.ok({
             body: {

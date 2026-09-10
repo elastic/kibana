@@ -317,7 +317,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         resolveTaskModel(runtime, input.task_model, input.connector_id),
         resolveEvaluatorModel(runtime, input.evaluators, input.connector_id),
       ]);
-
       return {
         state: {
           work,

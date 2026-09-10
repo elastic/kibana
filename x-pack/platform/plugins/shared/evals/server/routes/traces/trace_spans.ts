@@ -6,6 +6,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { TraceSpan } from '@kbn/evals-common';
 
 /** Raw shape of a span document in the traces-* indices. */
 export interface TraceSpanSource {
@@ -23,23 +24,11 @@ export interface TraceSpanSource {
 /** Ceiling on the span documents fetched by one traces-* search. */
 export const MAX_SPANS_PER_TRACE_SEARCH = 10_000;
 
-export interface EvalTraceSpan {
-  span_id: string;
-  trace_id: string;
-  parent_span_id?: string;
-  name: string;
-  kind?: string;
-  status?: string;
-  start_time: string;
-  duration_ms: number;
-  attributes: Record<string, unknown>;
-}
-
 /** Shapes one traces-* hit into the API's span, converting OTel nanosecond durations to ms. */
 export const shapeTraceSpan = (
   hit: SearchHit<TraceSpanSource>,
   fallbackTraceId: string
-): EvalTraceSpan | null => {
+): TraceSpan | null => {
   const source = hit._source;
   if (!source) {
     return null;
@@ -61,7 +50,7 @@ export const shapeTraceSpan = (
 };
 
 /** Wall-clock duration of a trace: earliest span start to latest span end. */
-export const computeTraceDurationMs = (spans: EvalTraceSpan[]): number => {
+export const computeTraceDurationMs = (spans: TraceSpan[]): number => {
   if (spans.length === 0) {
     return 0;
   }

@@ -14,6 +14,8 @@ import {
   parseStatsAggregationResponse,
   buildEvaluatorModelsAggregation,
   parseEvaluatorModelsAggregation,
+  buildExperimentEvaluatorsAggregation,
+  parseExperimentEvaluatorsAggregation,
   buildModelDisplayId,
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
@@ -79,11 +81,20 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
             aggs: {
               ...buildStatsAggregation(),
               evaluator_models: buildEvaluatorModelsAggregation(),
+              evaluators: buildExperimentEvaluatorsAggregation(),
+              first_score: { min: { field: '@timestamp' } },
+              last_score: { max: { field: '@timestamp' } },
             },
           });
 
-          const aggregations = aggResponse.aggregations as Record<string, unknown> | undefined;
+          const aggregations = aggResponse.aggregations as
+            | (Record<string, unknown> & {
+                first_score?: { value_as_string?: string };
+                last_score?: { value_as_string?: string };
+              })
+            | undefined;
           const stats = parseStatsAggregationResponse(aggregations);
+          const evaluators = parseExperimentEvaluatorsAggregation(aggregations);
           // Every distinct judge, most scores first; empty when only code evaluators ran. Derived
           // from the same aggregation as the listing so both agree on the predominant judge,
           // unlike `firstDoc`, which reflects whichever judge the unsorted search happens to hit.
@@ -111,7 +122,11 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               git_branch: firstDoc.metadata?.git?.branch ?? null,
               git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
               ci: firstDoc.metadata?.ci,
+              hostname: firstDoc.metadata?.hostname,
+              first_score_at: aggregations?.first_score?.value_as_string,
+              last_score_at: aggregations?.last_score?.value_as_string,
               total_repetitions: firstDoc.metadata?.total_repetitions ?? 1,
+              evaluators,
               stats,
             },
           });

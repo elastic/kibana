@@ -14,7 +14,6 @@ import {
   buildExperimentRunsAggregation,
   parseExperimentRunsAggregation,
   buildExperimentRunsFetchQuery,
-  RUNS_SORT_ORDER,
   GetEvaluationExperimentRunsRequestParams,
   GetEvaluationExperimentRunsRequestQuery,
 } from '@kbn/evals-common';
@@ -182,7 +181,7 @@ export const registerGetExperimentRunsRoute = ({
           );
           const searchResponse = await evalsContext.evaluationScoreService.search({
             query: buildExperimentRunsFetchQuery(query, runKeys),
-            sort: RUNS_SORT_ORDER,
+            sort: [{ 'evaluator.name': { order: 'asc' } }],
             size: pageDocumentCount,
           });
 

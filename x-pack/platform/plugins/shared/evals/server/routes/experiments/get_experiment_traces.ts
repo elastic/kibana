@@ -16,7 +16,7 @@ import {
   GetEvaluationExperimentTracesRequestParams,
   GetEvaluationExperimentTracesRequestQuery,
 } from '@kbn/evals-common';
-import type { GetEvaluationExperimentTracesResponse } from '@kbn/evals-common';
+import type { GetEvaluationExperimentTracesResponse, TraceSpan } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
@@ -27,7 +27,7 @@ import {
   computeTraceDurationMs,
   shapeTraceSpan,
 } from '../traces/trace_spans';
-import type { EvalTraceSpan, TraceSpanSource } from '../traces/trace_spans';
+import type { TraceSpanSource } from '../traces/trace_spans';
 
 export const registerGetExperimentTracesRoute = ({
   router,
@@ -137,7 +137,7 @@ export const registerGetExperimentTracesRoute = ({
               // was never traced (which has no reference at all).
               const spans = (item.hits?.hits ?? [])
                 .map((hit) => shapeTraceSpan(hit, reference.trace_id))
-                .filter((span): span is EvalTraceSpan => span !== null);
+                .filter((span): span is TraceSpan => span !== null);
               return {
                 ...reference,
                 spans,

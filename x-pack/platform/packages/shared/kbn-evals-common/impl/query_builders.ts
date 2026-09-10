@@ -225,6 +225,76 @@ export const parseEvaluatorModelsAggregation = (
   );
 
 // ---------------------------------------------------------------------------
+// Per-experiment evaluator inventory
+// ---------------------------------------------------------------------------
+
+/** Cap on the distinct evaluators reported for one experiment; matches the API schema's maxItems. */
+const MAX_EXPERIMENT_EVALUATORS = 1000;
+
+export interface ExperimentEvaluatorSummary {
+  name: string;
+  version?: string;
+  kind?: 'llm' | 'code';
+  /** Model this evaluator judged with; never reported for code evaluators. */
+  model?: EvaluatorJudgeModel;
+  /** Score documents this evaluator produced. */
+  score_count: number;
+}
+
+/**
+ * Every evaluator that scored an experiment, with the version and kind it ran as and, for
+ * evaluators that invoked a judge, that judge's model (family and provider nested under the id,
+ * as in {@link buildEvaluatorModelsAggregation}).
+ */
+export const buildExperimentEvaluatorsAggregation = () => ({
+  terms: { field: 'evaluator.name', size: MAX_EXPERIMENT_EVALUATORS },
+  aggs: {
+    version: { terms: { field: 'evaluator.version', size: 1 } },
+    kind: { terms: { field: 'evaluator.kind', size: 1 } },
+    model_id: {
+      terms: { field: 'evaluator.model.id', size: 1 },
+      aggs: {
+        family: { terms: { field: 'evaluator.model.family', size: 1 } },
+        provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+      },
+    },
+  },
+});
+
+interface ExperimentEvaluatorsAggregation {
+  buckets?: Array<{
+    key: string;
+    doc_count?: number;
+    version?: TermsBucket;
+    kind?: TermsBucket;
+    model_id?: EvaluatorModelsAggregation;
+  }>;
+}
+
+/**
+ * Reads {@link buildExperimentEvaluatorsAggregation}, registered as `evaluators`. A model is
+ * never attributed to a `code` evaluator, even when legacy documents carry one.
+ */
+export const parseExperimentEvaluatorsAggregation = (
+  aggregations: Record<string, unknown> | undefined
+): ExperimentEvaluatorSummary[] =>
+  (
+    (aggregations as { evaluators?: ExperimentEvaluatorsAggregation } | undefined)?.evaluators
+      ?.buckets ?? []
+  ).map((bucket) => {
+    const version = firstBucket(bucket.version);
+    const kind = firstBucket(bucket.kind) as ExperimentEvaluatorSummary['kind'];
+    const [model] = kind === 'code' ? [] : toEvaluatorModels(bucket.model_id);
+    return {
+      name: bucket.key,
+      ...(version && { version }),
+      ...(kind && { kind }),
+      ...(model && { model }),
+      score_count: bucket.doc_count ?? 0,
+    };
+  });
+
+// ---------------------------------------------------------------------------
 // Per-experiment stats aggregation
 // ---------------------------------------------------------------------------
 
@@ -244,6 +314,7 @@ export const buildStatsAggregation = () => ({
         aggs: {
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
+          evaluator_kind: { terms: { field: 'evaluator.kind', size: 1 } },
           // Family and provider are nested under the id so they stay correlated with their own
           // model. Sibling terms aggs would pair one judge's id with another's family when a
           // bucket spans several judges, describing a model that never existed.
@@ -259,139 +330,6 @@ export const buildStatsAggregation = () => ({
     },
   },
 });
-
-// ---------------------------------------------------------------------------
-// Protocol + execution aggregation (single query over score docs)
-// ---------------------------------------------------------------------------
-
-const MAX_PROTOCOL_DATASETS = 100;
-const MAX_PROTOCOL_EVALUATORS = 1000;
-
-export interface ExperimentProtocolDataset {
-  id: string;
-  name: string;
-  evaluated_example_count: number;
-}
-
-export interface ExperimentProtocolEvaluator {
-  name: string;
-  version?: string;
-  kind?: 'llm' | 'code';
-  model?: { id: string; family: string | undefined; provider: string | undefined };
-  score_count: number;
-}
-
-export interface ExperimentProtocolAggregates {
-  first_score_at: string | undefined;
-  last_score_at: string | undefined;
-  total_repetitions: number;
-  datasets: ExperimentProtocolDataset[];
-  evaluators: ExperimentProtocolEvaluator[];
-}
-
-/**
- * Returns the aggregation tree deriving an experiment's protocol
- */
-export const buildProtocolAggregation = () => ({
-  first_score: { min: { field: '@timestamp' } },
-  last_score: { max: { field: '@timestamp' } },
-  total_repetitions: { max: { field: 'metadata.total_repetitions' } },
-  // Fallback when metadata.total_repetitions is absent (pre-field documents):
-  // max(task.repetition_index) + 1 gives the true observed repetition count.
-  max_seen_repetition: { max: { field: 'task.repetition_index' } },
-  datasets: {
-    terms: { field: 'example.dataset.id', size: MAX_PROTOCOL_DATASETS },
-    aggs: {
-      dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
-      example_count: { cardinality: { field: 'example.id' } },
-    },
-  },
-  evaluators: {
-    terms: { field: 'evaluator.name', size: MAX_PROTOCOL_EVALUATORS },
-    aggs: {
-      version: { terms: { field: 'evaluator.version', size: 1 } },
-      kind: { terms: { field: 'evaluator.kind', size: 1 } },
-      model_id: {
-        terms: { field: 'evaluator.model.id', size: 1 },
-        aggs: {
-          family: { terms: { field: 'evaluator.model.family', size: 1 } },
-          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
-        },
-      },
-    },
-  },
-});
-
-interface ProtocolAggregations {
-  first_score?: { value_as_string?: string };
-  last_score?: { value_as_string?: string };
-  total_repetitions?: { value?: number | null };
-  max_seen_repetition?: { value?: number | null };
-  datasets?: {
-    buckets?: Array<{
-      key: string;
-      dataset_name?: TermsBucket;
-      example_count?: { value?: number | null };
-    }>;
-  };
-  evaluators?: {
-    buckets?: Array<{
-      key: string;
-      doc_count?: number;
-      version?: TermsBucket;
-      kind?: TermsBucket;
-      model_id?: {
-        buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
-      };
-    }>;
-  };
-}
-
-export const parseProtocolAggregationResponse = (
-  aggregations: Record<string, unknown> | undefined
-): ExperimentProtocolAggregates => {
-  const aggs = aggregations as ProtocolAggregations | undefined;
-
-  const datasets = (aggs?.datasets?.buckets ?? []).map((bucket) => ({
-    id: bucket.key,
-    name: firstBucket(bucket.dataset_name) ?? bucket.key,
-    evaluated_example_count: bucket.example_count?.value ?? 0,
-  }));
-
-  const evaluators = (aggs?.evaluators?.buckets ?? []).map((bucket) => {
-    const kind = firstBucket(bucket.kind) as 'llm' | 'code' | undefined;
-    const modelBucket = bucket.model_id?.buckets?.[0];
-    const modelFamily = firstBucket(modelBucket?.family);
-    const modelProvider = firstBucket(modelBucket?.provider);
-
-    return {
-      name: bucket.key,
-      version: firstBucket(bucket.version),
-      kind,
-      ...(kind !== 'code' &&
-        modelBucket && {
-          model: {
-            id: buildModelDisplayId(modelBucket.key, modelFamily, modelProvider),
-            family: modelFamily,
-            provider: modelProvider,
-          },
-        }),
-      score_count: bucket.doc_count ?? 0,
-    };
-  });
-
-  const metadataRepetitions = aggs?.total_repetitions?.value;
-  const maxSeenIndex = aggs?.max_seen_repetition?.value;
-  const totalRepetitions = metadataRepetitions ?? (maxSeenIndex != null ? maxSeenIndex + 1 : 1);
-
-  return {
-    first_score_at: aggs?.first_score?.value_as_string,
-    last_score_at: aggs?.last_score?.value_as_string,
-    total_repetitions: totalRepetitions,
-    datasets,
-    evaluators,
-  };
-};
 
 // ---------------------------------------------------------------------------
 // Experiment runs (example x repetition) pagination
@@ -519,13 +457,6 @@ export const SCORES_SORT_ORDER: SortField[] = [
   { 'example.index': { order: 'asc' } },
   { 'evaluator.name': { order: 'asc' } },
   { 'task.repetition_index': { order: 'asc' } },
-];
-
-export const RUNS_SORT_ORDER: SortField[] = [
-  { 'example.dataset.name': { order: 'asc' } },
-  { 'example.index': { order: 'asc' } },
-  { 'task.repetition_index': { order: 'asc' } },
-  { 'evaluator.name': { order: 'asc' } },
 ];
 
 // ---------------------------------------------------------------------------
@@ -812,6 +743,7 @@ interface StatsAggregations {
             count?: number;
           };
           score_median?: { values?: Record<string, number | null> };
+          evaluator_kind?: TermsBucket;
           evaluator_model_id?: {
             buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
           };
@@ -857,7 +789,11 @@ export const parseStatsAggregationResponse = (
     return evaluatorBuckets.map((evaluatorBucket) => {
       const scoreStats = evaluatorBucket.score_stats;
       const median = evaluatorBucket.score_median?.values?.['50.0'];
-      const modelBucket = evaluatorBucket.evaluator_model_id?.buckets?.[0];
+      // A code evaluator invokes no model, so a stray one on legacy documents is not reported.
+      const isCodeEvaluator = firstBucket(evaluatorBucket.evaluator_kind) === 'code';
+      const modelBucket = isCodeEvaluator
+        ? undefined
+        : evaluatorBucket.evaluator_model_id?.buckets?.[0];
       const modelId = modelBucket?.key;
       const modelFamily = firstBucket(modelBucket?.family);
       const modelProvider = firstBucket(modelBucket?.provider);
