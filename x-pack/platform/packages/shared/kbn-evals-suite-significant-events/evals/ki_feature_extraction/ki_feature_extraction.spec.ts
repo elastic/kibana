@@ -14,11 +14,7 @@ import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
-import {
-  cleanSignificantEventsDataStreams,
-  replayIntoManagedStream,
-  replaySignificantEventsSnapshot,
-} from '../../src/data_generators/replay';
+import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction';
 import {
@@ -29,7 +25,11 @@ import {
   resolveScenarioSnapshotSource,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetSnapshot,
+} from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
 import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
@@ -107,13 +107,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           }
 
           await cleanSignificantEventsDataStreams(esClient, log);
-          if (dataset.replayMode === 'managed-stream') {
-            await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs, {
-              includeOriginalNameIndices: true,
-            });
-          } else {
-            await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
-          }
+          await replayDatasetSnapshot({ esClient, log, dataset, source });
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
           const sampledHits = await collectSampleDocuments({

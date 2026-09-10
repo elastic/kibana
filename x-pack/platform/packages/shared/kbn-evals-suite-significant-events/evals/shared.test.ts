@@ -5,11 +5,28 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import type { GcsConfig } from '../src/data_generators/replay';
-import { SIGEVENTS_SNAPSHOT_RUN } from '../src/data_generators/replay';
-import { snapshotCatalogKey } from '../src/datasets';
-import { hasAvailableSnapshot } from './shared';
+import type { GcsConfig, ReplayStats } from '../src/data_generators/replay';
+import {
+  SIGEVENTS_SNAPSHOT_RUN,
+  replayIntoManagedStream,
+  replaySignificantEventsSnapshot,
+} from '../src/data_generators/replay';
+import type { DatasetConfig } from '../src/datasets';
+import { INCIDENTS_NAMESPACE, OTEL_DEMO_NAMESPACE } from '../src/constants';
+import { getDatasetById, snapshotCatalogKey } from '../src/datasets';
+import {
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+  replayDatasetSnapshot,
+} from './shared';
+
+jest.mock('../src/data_generators/replay', () => ({
+  ...jest.requireActual('../src/data_generators/replay'),
+  replayIntoManagedStream: jest.fn(),
+  replaySignificantEventsSnapshot: jest.fn(),
+}));
 
 const BUCKET = 'significant-events-datasets';
 
@@ -34,6 +51,14 @@ const catalogWith = (source: SnapshotSource, snapshotNames: string[]): Map<strin
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
+
+const registeredDataset = (id: string): DatasetConfig => {
+  const dataset = getDatasetById(id);
+  if (!dataset) {
+    throw new Error(`Dataset "${id}" is not registered`);
+  }
+  return dataset;
+};
 
 describe('hasAvailableSnapshot', () => {
   beforeEach(() => {
@@ -116,5 +141,92 @@ describe('hasAvailableSnapshot', () => {
         log,
       })
     ).not.toThrow(new RegExp(SIGEVENTS_SNAPSHOT_RUN));
+  });
+});
+
+describe('dataset-aware replay', () => {
+  const esClient = new Client({ node: 'http://localhost:9200' });
+  const replayStats: ReplayStats = {
+    total: 12,
+    created: 10,
+    skipped: 2,
+    maxTimestamp: '2026-03-27T10:00:00.000Z',
+    replayNow: '2026-09-10T10:00:00.000Z',
+  };
+
+  beforeEach(() => {
+    jest.mocked(replayIntoManagedStream).mockReset().mockResolvedValue(replayStats);
+    jest.mocked(replaySignificantEventsSnapshot).mockReset().mockResolvedValue(undefined);
+  });
+
+  it('replays a standard dataset from its own snapshot path', async () => {
+    await replayDatasetSnapshot({
+      esClient,
+      log,
+      dataset: registeredDataset(OTEL_DEMO_NAMESPACE),
+      source: runScopedSource,
+    });
+
+    expect(replaySignificantEventsSnapshot).toHaveBeenCalledWith(
+      esClient,
+      log,
+      'healthy-baseline',
+      runScopedSource.gcs
+    );
+    expect(replayIntoManagedStream).not.toHaveBeenCalled();
+  });
+
+  it('replays a managed-stream dataset into the managed stream', async () => {
+    await replayDatasetSnapshot({
+      esClient,
+      log,
+      dataset: registeredDataset(INCIDENTS_NAMESPACE),
+      source: fixedPathSource,
+    });
+
+    expect(replayIntoManagedStream).toHaveBeenCalledWith(
+      esClient,
+      log,
+      'incident-3048',
+      fixedPathSource.gcs,
+      { includeOriginalNameIndices: true }
+    );
+    expect(replaySignificantEventsSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('keeps the strict index filter when a standard dataset is forced into the managed stream', async () => {
+    const stats = await replayDatasetIntoManagedStream({
+      esClient,
+      log,
+      dataset: registeredDataset(OTEL_DEMO_NAMESPACE),
+      source: runScopedSource,
+    });
+
+    expect(replayIntoManagedStream).toHaveBeenCalledWith(
+      esClient,
+      log,
+      'healthy-baseline',
+      runScopedSource.gcs,
+      { includeOriginalNameIndices: false }
+    );
+    expect(stats).toEqual(replayStats);
+  });
+
+  it('includes original-name indices when a managed-stream dataset is replayed into the managed stream', async () => {
+    const stats = await replayDatasetIntoManagedStream({
+      esClient,
+      log,
+      dataset: registeredDataset(INCIDENTS_NAMESPACE),
+      source: fixedPathSource,
+    });
+
+    expect(replayIntoManagedStream).toHaveBeenCalledWith(
+      esClient,
+      log,
+      'incident-3048',
+      fixedPathSource.gcs,
+      { includeOriginalNameIndices: true }
+    );
+    expect(stats).toEqual(replayStats);
   });
 });

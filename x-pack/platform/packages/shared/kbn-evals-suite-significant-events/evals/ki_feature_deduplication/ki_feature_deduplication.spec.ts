@@ -29,10 +29,7 @@ import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-even
 import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
-import {
-  cleanSignificantEventsDataStreams,
-  replaySignificantEventsSnapshot,
-} from '../../src/data_generators/replay';
+import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import {
   createSemanticUniquenessEvaluator,
@@ -49,7 +46,11 @@ import {
   type KIFeatureExtractionScenario,
   type KIFeatureDeduplicationScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetSnapshot,
+} from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
 import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
@@ -311,12 +312,7 @@ evaluate.describe(
                   }
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
-                    await replaySignificantEventsSnapshot(
-                      esClient,
-                      log,
-                      source.snapshotName,
-                      source.gcs
-                    );
+                    await replayDatasetSnapshot({ esClient, log, dataset, source });
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }

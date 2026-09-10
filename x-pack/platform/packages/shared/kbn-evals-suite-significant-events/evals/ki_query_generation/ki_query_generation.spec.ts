@@ -40,7 +40,6 @@ import {
   deleteTemporaryReplayIndices,
   ensureStreamsEnabled,
   loadKIFeaturesFromSnapshot,
-  replayIntoManagedStream,
   SIGEVENTS_WIRED_ROOTS,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -54,7 +53,11 @@ import {
   resolveScenarioSnapshotSource,
   type KIQueryGenerationScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+} from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { resolveMaxSteps } from './resolve_max_steps';
 import {
@@ -189,12 +192,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               continue;
             }
 
-            const stats = await replayIntoManagedStream(
+            const stats = await replayDatasetIntoManagedStream({
               esClient,
               log,
-              source.snapshotName,
-              source.gcs
-            );
+              dataset,
+              source,
+            });
 
             if (stats.created === 0) {
               throw new Error(
@@ -363,7 +366,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   }
                   await apiServices.streams.disable().catch(() => {});
                   await apiServices.streams.enable();
-                  await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
+                  await replayDatasetIntoManagedStream({ esClient, log, dataset, source });
                   await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                   lastReplayedSnapshot = source.snapshotName;
                 }

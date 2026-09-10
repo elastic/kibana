@@ -13,10 +13,7 @@ import {
 } from '@kbn/evals';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { GcsConfig } from '../../src/data_generators/replay';
-import {
-  cleanSignificantEventsDataStreams,
-  replaySignificantEventsSnapshot,
-} from '../../src/data_generators/replay';
+import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -32,7 +29,11 @@ import {
   followUpRetainedCountEvaluator,
 } from '../../src/evaluators/ki_feature_exclusion/feature_counts';
 import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
-import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetSnapshot,
+} from '../shared';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
 evaluate.describe.configure({ timeout: 1_200_000 });
@@ -159,12 +160,7 @@ evaluate.describe(
 
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
-                    await replaySignificantEventsSnapshot(
-                      esClient,
-                      log,
-                      source.snapshotName,
-                      source.gcs
-                    );
+                    await replayDatasetSnapshot({ esClient, log, dataset, source });
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }

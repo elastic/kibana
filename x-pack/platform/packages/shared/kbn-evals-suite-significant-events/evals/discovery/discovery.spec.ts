@@ -12,7 +12,6 @@ import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
-  replayIntoManagedStream,
   SIGEVENTS_WIRED_ROOTS,
   cleanSignificantEventsDataStreams,
   ensureStreamsEnabled,
@@ -38,7 +37,11 @@ import {
   createDiscoveryEvaluators,
   createContinuationEvaluators,
 } from '../../src/evaluators/discovery';
-import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+} from '../shared';
 import {
   extractDiscoveriesFromToolCall,
   extractSignificantEventsFromToolCall,
@@ -142,12 +145,12 @@ evaluate.describe(
               }
               await ensureStreamsEnabled({ esClient, apiServices, log });
 
-              const stats = await replayIntoManagedStream(
+              const stats = await replayDatasetIntoManagedStream({
                 esClient,
                 log,
-                snapshotSource.snapshotName,
-                snapshotSource.gcs
-              );
+                dataset,
+                source: snapshotSource,
+              });
 
               if (stats.created === 0) {
                 log.info(
@@ -281,12 +284,12 @@ evaluate.describe(
                         .catch(() => {});
                     }
                     await ensureStreamsEnabled({ esClient, apiServices, log });
-                    const stats = await replayIntoManagedStream(
+                    const stats = await replayDatasetIntoManagedStream({
                       esClient,
                       log,
-                      snapshotSource.snapshotName,
-                      snapshotSource.gcs
-                    );
+                      dataset,
+                      source: snapshotSource,
+                    });
                     if (stats.created === 0) {
                       throw new Error(
                         `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
@@ -527,12 +530,12 @@ evaluate.describe(
                       }
 
                       await ensureStreamsEnabled({ esClient, apiServices, log });
-                      const stats = await replayIntoManagedStream(
+                      const stats = await replayDatasetIntoManagedStream({
                         esClient,
                         log,
-                        snapshotSource.snapshotName,
-                        snapshotSource.gcs
-                      );
+                        dataset,
+                        source: snapshotSource,
+                      });
                       if (stats.created === 0) {
                         throw new Error(
                           `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
