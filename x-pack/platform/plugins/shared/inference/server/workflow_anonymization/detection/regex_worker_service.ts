@@ -7,7 +7,7 @@
 
 import Piscina from 'piscina';
 import type { Logger } from '@kbn/logging';
-import type { AnonymizationWorkerConfig } from '../../config';
+import type { WorkflowAnonymizationWorkerConfig } from '../../config';
 import type { PiiRegexWorkerTaskPayload, PiiRegexMatch, PiiDetectionFailureMode } from './types';
 import { executeRegexRules } from './execute_regex_rules';
 
@@ -24,9 +24,9 @@ function runSync(payload: PiiRegexWorkerTaskPayload): PiiRegexMatch[] {
 export class PiiRegexWorkerService {
   private readonly enabled: boolean;
   private worker?: Piscina;
-  private readonly config: AnonymizationWorkerConfig;
+  private readonly config: WorkflowAnonymizationWorkerConfig;
 
-  constructor(config: AnonymizationWorkerConfig, private readonly logger: Logger) {
+  constructor(config: WorkflowAnonymizationWorkerConfig, private readonly logger: Logger) {
     this.config = config;
     this.enabled = config.enabled;
 
