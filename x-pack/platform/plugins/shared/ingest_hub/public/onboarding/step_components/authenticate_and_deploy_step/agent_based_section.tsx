@@ -8,8 +8,6 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGrid,
@@ -24,6 +22,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -183,39 +183,54 @@ export function AgentBasedSection({
 
   const isEmpty = !isPoliciesLoading && policyOptions.length === 0;
 
+  // ── Deploy success tracking ───────────────────────────────────────────────
+  // For the "new policy" path, agentPolicyId is persisted on success and serves as the durable
+  // flag. For the "existing policy" path, no policy id is created — instead we track success
+  // via isDeploying going true→false with no failures, in this session only (not persisted).
+  const [existingPolicyDeployDone, setExistingPolicyDeployDone] = useState(false);
+  const prevIsDeployingRef = useRef(isDeploying);
+  useEffect(() => {
+    if (prevIsDeployingRef.current && !isDeploying && !hasFailed && agentHostsMode === 'existing') {
+      setExistingPolicyDeployDone(true);
+    }
+    prevIsDeployingRef.current = isDeploying;
+  }, [isDeploying, hasFailed, agentHostsMode]);
+
   // ── Flyout ────────────────────────────────────────────────────────────────
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const agentPolicyForFlyout = useMemo(() => {
-    if (!agentPolicyId) return undefined;
-    // Minimal AgentPolicy shape the flyout needs — it only reads id and name.
-    return { id: agentPolicyId } as AgentPolicy;
-  }, [agentPolicyId]);
+    // New-policy path: use the created policy id.
+    // Existing-policy path: pre-select the first selected policy in the flyout's dropdown.
+    const policyId = agentPolicyId ?? selectedAgentPolicyIds[0];
+    if (!policyId) return undefined;
+    return { id: policyId } as AgentPolicy;
+  }, [agentPolicyId, selectedAgentPolicyIds]);
 
   // ── "Add agent" click: deploy first (if needed), then open flyout ─────────
   // Track whether a deploy was kicked off in this session so we know to auto-open the flyout
-  // when agentPolicyId lands (transition guard below). Without this flag, mounting with an
-  // already-set agentPolicyId (repeated onboarding, session storage retained) would suppress
-  // the transition and never auto-open the flyout.
+  // when the deploy completes. Without this flag, mounting with an already-deployed state
+  // (repeated onboarding, session storage retained) would suppress the transition.
   const deployInitiatedRef = useRef(false);
 
+  // Whether the current mode already has a completed deploy backing it.
+  // If the user switches from "existing" (which set existingPolicyDeployDone) to "new",
+  // there is no agentPolicyId yet, so we must deploy rather than just opening the flyout.
+  const isDeployedForCurrentMode =
+    agentHostsMode === 'new' ? !!agentPolicyId : existingPolicyDeployDone;
+
   const handleAddAgentClick = useCallback(() => {
-    if (agentPolicyId) {
-      // Already deployed — open flyout directly without re-deploying.
+    if (isDeployedForCurrentMode) {
+      // Already deployed for this mode — open flyout directly without re-deploying.
       setIsFlyoutOpen(true);
     } else {
-      // Deploy the agent policy + package policies, then open the flyout.
-      // The parent's onDeploy sets agentPolicyId on success; we watch it via useEffect
-      // to open the flyout once the id lands (see below).
+      // Deploy, then open flyout on success via the effects below.
       deployInitiatedRef.current = true;
       onDeploy();
     }
-  }, [agentPolicyId, onDeploy]);
+  }, [isDeployedForCurrentMode, onDeploy]);
 
-  // Open flyout automatically once the deploy succeeds and agentPolicyId is set.
-  // Only fires when a deploy was initiated in this session (deployInitiatedRef), so mounting
-  // with an already-set agentPolicyId (e.g. repeated onboarding) doesn't re-open the flyout
-  // automatically — the user clicks "Add agent" to open it explicitly in that case.
+  // New-policy path: open flyout when agentPolicyId transitions undefined → set.
   const prevAgentPolicyIdRef = useRef<string | undefined>(agentPolicyId);
   useEffect(() => {
     if (agentPolicyId && !prevAgentPolicyIdRef.current && deployInitiatedRef.current) {
@@ -224,23 +239,38 @@ export function AgentBasedSection({
     prevAgentPolicyIdRef.current = agentPolicyId;
   }, [agentPolicyId]);
 
+  // Existing-policy path: open flyout when existingPolicyDeployDone flips true.
+  const prevExistingDoneRef = useRef(existingPolicyDeployDone);
+  useEffect(() => {
+    if (existingPolicyDeployDone && !prevExistingDoneRef.current && deployInitiatedRef.current) {
+      setIsFlyoutOpen(true);
+    }
+    prevExistingDoneRef.current = existingPolicyDeployDone;
+  }, [existingPolicyDeployDone]);
+
   // ── Deploy readiness ──────────────────────────────────────────────────────
   const isAddAgentReady = useMemo(() => {
-    // Already deployed → always ready to open flyout (no credential re-check needed).
-    if (agentPolicyId) return true;
+    // Already deployed for this mode → always ready to open flyout (no credential re-check needed).
+    if (isDeployedForCurrentMode) return true;
     if (!isCredentialReady) return false;
     if (agentHostsMode === 'existing') return selectedAgentPolicyIds.length > 0;
     return true;
-  }, [agentPolicyId, isCredentialReady, agentHostsMode, selectedAgentPolicyIds]);
+  }, [isDeployedForCurrentMode, isCredentialReady, agentHostsMode, selectedAgentPolicyIds]);
 
   // ── Enrollment status ─────────────────────────────────────────────────────
   // Poll the real agent count from Fleet so "N agents enrolled" reflects actual enrollments, not
   // the initial 'detecting' status (set on all instances immediately after a successful deploy).
+  // For existing-policy path, poll against the first selected policy (same one pre-selected in flyout).
+  const pollPolicyId =
+    agentPolicyId ?? (existingPolicyDeployDone ? selectedAgentPolicyIds[0] : undefined);
   const { data: agentStatusData } = useGetAgentStatus(
-    { policyId: agentPolicyId ?? '' },
-    { pollIntervalMs: agentPolicyId ? 10_000 : undefined }
+    { policyId: pollPolicyId ?? '' },
+    { pollIntervalMs: pollPolicyId ? 10_000 : undefined }
   );
-  const agentCount = agentPolicyId ? agentStatusData?.results?.all ?? 0 : 0;
+  const agentCount = pollPolicyId ? agentStatusData?.results?.all ?? 0 : 0;
+  // UI locks (radio frozen, button hidden) only once an agent has actually enrolled.
+  // Before that, the user can still change the radio or click "Add agent" to open the flyout again.
+  const isAgentEnrolled = agentCount > 0;
 
   const receivingCount = Object.values(serviceStatuses).filter((s) => s === 'receiving').length;
 
@@ -265,11 +295,12 @@ export function AgentBasedSection({
         })}
         serviceCount={serviceCount}
         isDone={isDone}
+        autoCollapse={false}
         dataTestSubj="agentBasedSection"
         headerButtonTestSubj="agentBasedSection-headerButton"
       >
         <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          {!agentPolicyId && (
+          {(!isAgentEnrolled || !isDeployedForCurrentMode) && (
             <EuiText size="s">
               <p>
                 <FormattedMessage
@@ -290,9 +321,10 @@ export function AgentBasedSection({
             </EuiText>
           )}
 
-          {/* Credential fields — hidden once deployed; credentials are memory-only and not needed
-              after the agent policy is created. */}
-          {!agentPolicyId && (
+          {/* Credential fields — hidden once an agent enrolls on the current mode. When the user
+              switches to "new" after an existing-policy deploy (no agentPolicyId yet), credentials
+              must be shown again so they can configure and deploy the new policy. */}
+          {(!isAgentEnrolled || !isDeployedForCurrentMode) && (
             <>
               <EuiSpacer size="m" />
 
@@ -372,10 +404,8 @@ export function AgentBasedSection({
                 name="agentHostsMode"
                 options={hostsRadioOptions}
                 idSelected={agentHostsMode}
-                onChange={
-                  agentPolicyId
-                    ? () => {}
-                    : (id) => setAgentBasedDeployment({ agentHostsMode: id as 'new' | 'existing' })
+                onChange={(id) =>
+                  setAgentBasedDeployment({ agentHostsMode: id as 'new' | 'existing' })
                 }
                 data-test-subj="agentBasedSection-hostsRadio"
               />
@@ -383,8 +413,8 @@ export function AgentBasedSection({
 
             <EuiSpacer size="m" />
 
-            {/* Pre-deploy: combobox for existing policy selection */}
-            {!agentPolicyId && agentHostsMode === 'existing' && (
+            {/* Pre-deploy: combobox for existing policy selection — only before a deploy has completed */}
+            {!isDeployedForCurrentMode && agentHostsMode === 'existing' && (
               <>
                 <EuiText size="s" color="subdued">
                   <p>
@@ -437,8 +467,8 @@ export function AgentBasedSection({
               </>
             )}
 
-            {/* Pre-deploy description for new policy mode */}
-            {!agentPolicyId && agentHostsMode === 'new' && (
+            {/* Pre-deploy description for new policy mode — only before a deploy has completed */}
+            {!isDeployedForCurrentMode && agentHostsMode === 'new' && (
               <>
                 <EuiText size="s" color="subdued">
                   <p>
@@ -452,8 +482,8 @@ export function AgentBasedSection({
               </>
             )}
 
-            {/* Post-deploy description — replaces the pre-deploy text once the policy exists */}
-            {agentPolicyId && (
+            {/* Post-deploy description — replaces the pre-deploy text once the current mode has a completed deploy */}
+            {isDeployedForCurrentMode && (
               <EuiText size="s" color="subdued">
                 <p>
                   <FormattedMessage
@@ -464,9 +494,10 @@ export function AgentBasedSection({
               </EuiText>
             )}
 
-            {/* Primary CTA: Add agent — hidden once the deploy succeeded, because "Add another
-                agent" in AgentEnrollmentStatus covers re-opening the flyout from that point on. */}
-            {!agentPolicyId && (
+            {/* Primary CTA: Add agent — hidden once an agent has enrolled AND the current mode
+                is already deployed. If the user switches to "new" after an existing-policy deploy,
+                show it again so they can deploy+enroll on the new policy. */}
+            {(!isAgentEnrolled || !isDeployedForCurrentMode) && (
               <EuiButton
                 fill
                 isDisabled={!isAddAgentReady || isDeploying}
@@ -492,7 +523,7 @@ export function AgentBasedSection({
                 agentCount comes from useGetAgentStatus (live polling), not service statuses, so
                 it stays 0 until a real agent connects — even though serviceStatuses immediately
                 set instances to 'detecting' after a successful deploy. */}
-            {agentPolicyId && agentCount > 0 && (
+            {isDeployedForCurrentMode && agentCount > 0 && (
               <>
                 <EuiSpacer size="m" />
                 <AgentEnrollmentStatus
@@ -502,7 +533,7 @@ export function AgentBasedSection({
                   targets={targets}
                   serviceStatuses={serviceStatuses}
                   servicesMap={servicesMap}
-                  onAddAgent={() => setIsFlyoutOpen(true)}
+                  onAddAgent={handleAddAgentClick}
                 />
               </>
             )}
@@ -512,50 +543,51 @@ export function AgentBasedSection({
           {hasFailed && !isDeploying && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnDangerCallout
                 title={
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.errorCallout.title"
                     defaultMessage="Deployment failed"
                   />
                 }
-                color="danger"
-                iconType="error"
                 announceOnMount
                 data-test-subj="agentBasedSection-errorCallout"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.errorCallout.body"
-                  defaultMessage="One or more integrations could not be deployed."
-                />
-                {/* Surface the server's message — a generic string makes validation errors like a
-                  missing required var impossible to diagnose from the UI. */}
-                {uniqueErrorMessages.length > 0 && (
-                  <ul data-test-subj="agentBasedSection-errorMessages">
-                    {uniqueErrorMessages.map((msg) => (
-                      <li key={msg}>
-                        {/* Fleet's validation errors are newline-separated (one line per invalid
-                          var), which HTML would collapse into one run-on line. */}
-                        <EuiText size="s" css={{ whiteSpace: 'pre-wrap' }}>
-                          {msg}
-                        </EuiText>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <EuiSpacer size="s" />
-                <EuiButton
-                  size="s"
-                  color="danger"
-                  onClick={handleRetry}
-                  data-test-subj="agentBasedSection-retryButton"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.retryButton"
-                    defaultMessage="Retry"
-                  />
-                </EuiButton>
-              </EuiCallOut>
+                text={
+                  <>
+                    <FormattedMessage
+                      id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.errorCallout.body"
+                      defaultMessage="One or more integrations could not be deployed."
+                    />
+                    {/* Surface the server's message — a generic string makes validation errors like
+                      a missing required var impossible to diagnose from the UI. */}
+                    {uniqueErrorMessages.length > 0 && (
+                      <ul data-test-subj="agentBasedSection-errorMessages">
+                        {uniqueErrorMessages.map((msg) => (
+                          <li key={msg}>
+                            {/* Fleet's validation errors are newline-separated (one line per
+                              invalid var), which HTML would collapse into one run-on line. */}
+                            <EuiText size="s" css={{ whiteSpace: 'pre-wrap' }}>
+                              {msg}
+                            </EuiText>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                }
+                actionProps={{
+                  primary: {
+                    children: (
+                      <FormattedMessage
+                        id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.retryButton"
+                        defaultMessage="Retry"
+                      />
+                    ),
+                    onClick: handleRetry,
+                    'data-test-subj': 'agentBasedSection-retryButton',
+                  },
+                }}
+              />
             </>
           )}
         </EuiPanel>
@@ -565,7 +597,7 @@ export function AgentBasedSection({
           isDone. The flyout is a portal/overlay regardless of DOM position, but it must be mounted
           to be visible. The accordion unmounts its children when isOpen=false, which would
           discard isFlyoutOpen state and prevent the flyout from showing after a successful deploy. */}
-      {isFlyoutOpen && agentPolicyId && (
+      {isFlyoutOpen && (
         <Suspense fallback={null}>
           <LazyAgentEnrollmentFlyout
             agentPolicy={agentPolicyForFlyout}
@@ -683,8 +715,9 @@ function AgentEnrollmentStatus({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
+          <EuiButton
+            color="text"
+            size="m"
             onClick={onAddAgent}
             data-test-subj="agentBasedSection-addAnotherAgentButton"
           >
@@ -692,7 +725,7 @@ function AgentEnrollmentStatus({
               id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAnotherAgent"
               defaultMessage="+ Add another agent"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 

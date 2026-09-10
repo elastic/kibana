@@ -36,8 +36,10 @@ export interface SectionAccordionProps {
   title: string;
   /** Service count label rendered as subdued text next to the title */
   serviceCount: number;
-  /** When true the Done badge is shown and the accordion auto-collapses */
+  /** When true the Done badge is shown. When autoCollapse is also true, the accordion collapses. */
   isDone: boolean;
+  /** When false, the Done badge shows but the accordion does not auto-collapse. Default true. */
+  autoCollapse?: boolean;
   /** data-test-subj on the outer EuiPanel */
   dataTestSubj: string;
   /** data-test-subj on the header button */
@@ -50,6 +52,7 @@ export function SectionAccordion({
   title,
   serviceCount,
   isDone,
+  autoCollapse = true,
   dataTestSubj,
   headerButtonTestSubj,
   children,
@@ -63,11 +66,11 @@ export function SectionAccordion({
   const [isOpen, setIsOpen] = useState(true);
   const prevIsDoneRef = useRef(isDone);
   useEffect(() => {
-    if (isDone && !prevIsDoneRef.current) {
+    if (autoCollapse && isDone && !prevIsDoneRef.current) {
       setIsOpen(false);
     }
     prevIsDoneRef.current = isDone;
-  }, [isDone]);
+  }, [autoCollapse, isDone]);
 
   const headerButtonCss = css`
     display: block;

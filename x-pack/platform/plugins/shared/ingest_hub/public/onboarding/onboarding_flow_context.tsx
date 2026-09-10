@@ -330,7 +330,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     agentHostsMode: persistedAuthenticateAndDeployStep?.agentHostsMode ?? 'new',
     agentPolicyId: persistedAuthenticateAndDeployStep?.agentPolicyId,
     agentPolicyName: persistedAuthenticateAndDeployStep?.agentPolicyName,
-    selectedAgentPolicyIds: persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? [],
+    selectedAgentPolicyIds:
+      persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? ([] as string[]),
   };
 
   const detectAndReviewStep: DetectAndReviewStepState = {
