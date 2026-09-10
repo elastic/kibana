@@ -297,6 +297,12 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     await assertSessionExpired(apiClient, basicCookie);
     await assertSessionExpired(apiClient, samlCookie);
 
-    await putNativeUser(esClient, TEST_USERNAME, TEST_PASSWORD, ['kibana_admin'], 'Invalidate Test User');
+    await putNativeUser(
+      esClient,
+      TEST_USERNAME,
+      TEST_PASSWORD,
+      ['kibana_admin'],
+      'Invalidate Test User'
+    );
   });
 });
