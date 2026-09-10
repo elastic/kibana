@@ -55,6 +55,7 @@ import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_p
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
 import { agentlessAgentService } from './agents/agentless_agent';
+import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 
@@ -1069,6 +1070,54 @@ describe('Agent policy', () => {
           },
         ]
       );
+    });
+
+    it('should force-revoke agents before deleting an agentless policy', async () => {
+      const agentlessSoClient = getSavedObjectMock({
+        revision: 1,
+        name: 'Test agentless',
+        package_policies: ['package-1'],
+        supports_agentless: true,
+      });
+      // agentless policies are allowed to have active agents; the count check is bypassed
+      esClient.count.mockResolvedValue({ count: 1 } as any);
+      jest.spyOn(agentlessAgentService, 'deleteAgentlessAgent').mockResolvedValue(undefined as any);
+
+      await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
+
+      expect(jest.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
+        agentlessSoClient,
+        esClient,
+        'mocked',
+        { revoke: true }
+      );
+    });
+
+    it('should force-revoke agents before calling deleteAgentlessAgent', async () => {
+      const agentlessSoClient = getSavedObjectMock({
+        revision: 1,
+        name: 'Test agentless',
+        package_policies: ['package-1'],
+        supports_agentless: true,
+      });
+      esClient.count.mockResolvedValue({ count: 1 } as any);
+      const callOrder: string[] = [];
+
+      jest.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
+        callOrder.push('unenrollForAgentPolicyId');
+      });
+      jest.spyOn(agentlessAgentService, 'deleteAgentlessAgent').mockImplementationOnce(async () => {
+        callOrder.push('deleteAgentlessAgent');
+        return undefined as any;
+      });
+
+      await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
+
+      const unenrollIdx = callOrder.indexOf('unenrollForAgentPolicyId');
+      const deleteIdx = callOrder.indexOf('deleteAgentlessAgent');
+      expect(unenrollIdx).toBeGreaterThanOrEqual(0);
+      expect(deleteIdx).toBeGreaterThanOrEqual(0);
+      expect(unenrollIdx).toBeLessThan(deleteIdx);
     });
   });
 
