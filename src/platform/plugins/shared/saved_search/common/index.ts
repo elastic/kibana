@@ -18,6 +18,7 @@ export type {
   SavedSearchByValueAttributes,
   DiscoverSession,
   DiscoverSessionTab,
+  DiscoverSessionTabTypeState,
 } from './types';
 
 export { VIEW_MODE } from '@kbn/discover-utils';
@@ -31,6 +32,7 @@ export {
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
   MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
 } from './constants';
 
 export {

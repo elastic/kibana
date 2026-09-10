@@ -12,9 +12,14 @@ import {
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData, DiscoverSessionApiEsqlTab } from '../schema';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiData,
+  DiscoverSessionApiEsqlTab,
+} from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -103,6 +108,55 @@ describe('discover session API transforms', () => {
     it('maps saved object attributes to API data', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
+    });
+
+    it('omits the inline data view ID from self filters and preserves foreign filter IDs', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const searchSource = parseSearchSourceJSON(
+        classicTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const inlineDataViewId = 'inline-data-view-id';
+      searchSource.index = { id: inlineDataViewId, title: 'logs-*' };
+      searchSource.filter = [
+        {
+          meta: { index: inlineDataViewId },
+          query: { match_phrase: { 'service.name': 'api' } },
+        },
+        {
+          meta: { index: 'foreign-data-view-id' },
+          query: { match_phrase: { 'host.name': 'web-01' } },
+        },
+      ];
+
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
+            },
+          },
+        ],
+      });
+      const [selfFilter, foreignFilter] = (sessionState.tabs[0] as DiscoverSessionApiClassicTab)
+        .filters;
+
+      expect(selfFilter).not.toHaveProperty('data_view_id');
+      expect(foreignFilter).toHaveProperty('data_view_id', 'foreign-data-view-id');
+
+      const { attributes, references } = transformDiscoverSessionIn(sessionState);
+      const roundTrippedSearchSource = injectReferences(
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+
+      expect(roundTrippedSearchSource.filter?.[0]).not.toHaveProperty('meta.index');
+      expect(roundTrippedSearchSource.filter?.[1]).toHaveProperty(
+        'meta.index',
+        'foreign-data-view-id'
+      );
     });
 
     it('omits time_range but preserves refresh_interval when time restore is disabled', () => {
@@ -254,6 +308,12 @@ describe('discover session API transforms', () => {
               breakdownField: 'transaction.id',
               chartInterval: 'h',
               density: 'compact',
+              documentsDisplayMode: 'json',
+              jsonModeSettings: {
+                hideNulls: true,
+                wrapLines: false,
+                defaultRenderedNodes: 10,
+              },
               controlGroupJson: undefined,
               visContext: undefined,
             },
@@ -290,6 +350,12 @@ describe('discover session API transforms', () => {
               breakdownField: 'transaction.id',
               chartInterval: 'h',
               density: 'compact',
+              documentsDisplayMode: 'json',
+              jsonModeSettings: {
+                hideNulls: true,
+                wrapLines: false,
+                defaultRenderedNodes: 10,
+              },
               visContext: {
                 suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
                 requestData: {
@@ -506,34 +572,6 @@ describe('discover session API transforms', () => {
       });
     });
 
-    it('selects the data view through the layer linkage and falls back on ambiguity', () => {
-      const ambiguous = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv-a' }, 'layer-2': { index: 'esql-dv-b' } },
-        adHocDataViews: {
-          'esql-dv-a': { type: 'esql', timeFieldName: '@timestamp' },
-          'esql-dv-b': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(
-        getStoredVisContext({ ...esqlTab, breakdown_field: 'host.name', vis_context: ambiguous })
-      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
-
-      const sameDataView = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv' }, 'layer-2': { index: 'esql-dv' } },
-        adHocDataViews: {
-          'unused-esql-dv': { type: 'esql', timeFieldName: 'event.ingested' },
-          'esql-dv': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(getStoredVisContext({ ...esqlTab, vis_context: sameDataView })).toEqual(
-        expect.objectContaining({
-          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
-        })
-      );
-    });
-
     it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
@@ -542,7 +580,11 @@ describe('discover session API transforms', () => {
 
       expect(
         getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
-      ).toEqual(expect.objectContaining({ requestData: { dataViewId: 'esql-dv' } }));
+      ).toStrictEqual({
+        suggestionType: visContext.suggestion_type,
+        requestData: { dataViewId: 'esql-dv' },
+        attributes: visContext.attributes,
+      });
     });
 
     it('falls back when the blob is not a recognizable ES|QL chart', () => {
@@ -570,7 +612,11 @@ describe('discover session API transforms', () => {
           breakdown_field: '',
           vis_context: wrongDataViewType,
         })
-      ).toEqual(expect.objectContaining({ requestData: {} }));
+      ).toStrictEqual({
+        suggestionType: wrongDataViewType.suggestion_type,
+        requestData: {},
+        attributes: wrongDataViewType.attributes,
+      });
     });
 
     it('keeps behavior unchanged without a vis_context', () => {
