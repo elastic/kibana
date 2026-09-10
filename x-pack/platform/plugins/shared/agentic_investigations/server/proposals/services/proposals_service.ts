@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncMapWithLimit } from '@kbn/std';
@@ -28,6 +29,9 @@ import type {
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
+  ProposalChartsSummaryBucket,
+  ProposalChartsSummaryQuery,
+  ProposalChartsSummaryResponse,
   ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
@@ -248,6 +252,114 @@ export class ProposalsService {
   }
 
   /**
+   * Open-proposal counts per bucket. A proposal counts as open at bucket T if it
+   * was created at or before the end of T and not decided by the start of T+1.
+   *
+   * An anchor count seeds a running sum that opens and closes then move, which is
+   * what keeps this to three queries instead of one per bucket.
+   */
+  async chartsSummary(
+    { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
+    spaceId: string
+  ): Promise<ProposalChartsSummaryResponse> {
+    const now = Date.now();
+    const bucketMs = bucketMinutes * 60 * 1000;
+    const windowStartMs = Math.floor((now - windowHours * 60 * 60 * 1000) / bucketMs) * bucketMs;
+    const windowStartIso = new Date(windowStartMs).toISOString();
+    // +1 so the window always ends at or after `now` even after flooring.
+    const bucketCount = Math.floor((now - windowStartMs) / bucketMs) + 1;
+
+    const zeroBuckets = (): ProposalChartsSummaryResponse => ({
+      buckets: Array.from({ length: bucketCount }, (_, i) => ({
+        timestamp: windowStartMs + i * bucketMs,
+        counts: {},
+      })),
+    });
+
+    let anchorResponse;
+    let opensResponse;
+    let closesResponse;
+    try {
+      [anchorResponse, opensResponse, closesResponse] = await Promise.all([
+        // TODO(#19258): once `supersededBy` exists, add `AND supersededBy IS NULL`
+        // to all three queries, so a superseded proposal is not counted alongside
+        // its replacement.
+        this.deps.storage.esql({
+          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND createdAt < TO_DATETIME(${{ wsAnchorCreated: windowStartIso }})
+          AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{
+            wsAnchorDecided: windowStartIso,
+          }}))
+          AND (expiresAt IS NULL OR expiresAt > NOW())
+        | STATS anchor = COUNT(*) BY category
+        | LIMIT 50`,
+        }),
+
+        this.deps.storage.esql({
+          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND createdAt >= TO_DATETIME(${{ wsOpensFilter: windowStartIso }})
+          AND (expiresAt IS NULL OR expiresAt > NOW())
+        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
+          wsOpensDiff: windowStartIso,
+        }}), createdAt) / ${{ bucketMinutes }})
+        | STATS opens = COUNT(*) BY idx, category
+        | SORT idx ASC
+        | LIMIT 16200`,
+        }),
+
+        this.deps.storage.esql({
+          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND decidedAt IS NOT NULL
+          AND decidedAt >= TO_DATETIME(${{ wsClosesFilter: windowStartIso }})
+          AND (expiresAt IS NULL OR expiresAt > NOW())
+        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
+          wsClosesDiff: windowStartIso,
+        }}), decidedAt) / ${{ bucketMinutes }})
+        | STATS closes = COUNT(*) BY idx, category
+        | SORT idx ASC
+        | LIMIT 16200`,
+        }),
+      ]);
+    } catch (error) {
+      // An index created outside the storage adapter can be missing a field this
+      // queries, which ES|QL rejects rather than treating as null. Read that as
+      // "no data" so the UI flatlines instead of 500ing; anything else propagates.
+      if (isEsqlVerificationError(error)) {
+        this.deps.logger.warn(
+          `chartsSummary: ES|QL verification error — returning zero buckets. ` +
+            `Recreate the index via the proposals write path to fix the mapping. Error: ${error.message}`
+        );
+        return zeroBuckets();
+      }
+      throw error;
+    }
+
+    const anchorByCat = parseEsqlCountByCategory(anchorResponse, 'anchor');
+    const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
+    const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
+
+    const runningSums: Record<string, number> = { ...anchorByCat };
+    const buckets: ProposalChartsSummaryBucket[] = [];
+
+    for (let i = 0; i < bucketCount; i++) {
+      const timestamp = windowStartMs + i * bucketMinutes * 60_000;
+
+      for (const [cat, count] of Object.entries(opensByIdxAndCat[i] ?? {})) {
+        runningSums[cat] = (runningSums[cat] ?? 0) + count;
+      }
+      for (const [cat, count] of Object.entries(closesByIdxAndCat[i] ?? {})) {
+        // Clamped because a close whose open the anchor missed would drive this
+        // negative, and a negative open count is worse than an undercount.
+        runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
+      }
+
+      buckets.push({ timestamp, counts: { ...runningSums } });
+    }
+
+    return { buckets };
+  }
+
+  /**
    * Records the approval and then releases the gating workflow. Order matters:
    * the workflow only ever receives a boolean, so anything durable has to be
    * written first.
@@ -340,7 +452,14 @@ export class ProposalsService {
       );
     }
 
-    const updated: StoredProposalRecord = { ...proposal, status, executionError };
+    const updated: StoredProposalRecord = {
+      ...proposal,
+      status,
+      executionError,
+      // Only writeDecision stamps decidedAt otherwise, so a proposal a workflow
+      // terminated would read as open forever.
+      ...(isTerminal(status) && !proposal.decidedAt ? { decidedAt: new Date().toISOString() } : {}),
+    };
     const { id: _id, ...document } = updated;
 
     await this.deps.storage.index({
@@ -692,8 +811,62 @@ const sameInput = (
   stored: Record<string, unknown> | undefined
 ): boolean => isEqual(submitted ?? {}, stored ?? {});
 
+const isEsqlVerificationError = (error: unknown): boolean => {
+  const type =
+    (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ??
+    (error as { body?: { error?: { type?: string } } })?.body?.error?.type;
+  return type === 'verification_exception';
+};
+
 const isVersionConflict = (error: unknown): boolean => {
   const status = (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
   const metaStatus = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
   return status === 409 || metaStatus === 409;
+};
+
+/**
+ * Columns are looked up by name, not position: `drop_null_columns: true` (the
+ * adapter default) shifts the offsets when a column comes back entirely null.
+ */
+const parseEsqlCountByCategory = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): Record<string, number> => {
+  const colIdx = response.columns.findIndex((c) => c.name === countField);
+  const catIdx = response.columns.findIndex((c) => c.name === 'category');
+  if (colIdx === -1 || catIdx === -1) return {};
+
+  const result: Record<string, number> = {};
+  for (const row of response.values) {
+    const category = row[catIdx] as string | null;
+    const count = row[colIdx] as number | null;
+    if (category) result[category] = count ?? 0;
+  }
+  return result;
+};
+
+/** Same by-name lookup as above. Rows with a negative or non-finite `idx` are dropped. */
+const parseEsqlCountByIdxAndCategory = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): Record<number, Record<string, number>> => {
+  const idxCol = response.columns.findIndex((c) => c.name === 'idx');
+  const catCol = response.columns.findIndex((c) => c.name === 'category');
+  const cntCol = response.columns.findIndex((c) => c.name === countField);
+  if (idxCol === -1 || catCol === -1 || cntCol === -1) return {};
+
+  const result: Record<number, Record<string, number>> = {};
+  for (const row of response.values) {
+    const rawIdx = row[idxCol] as number | null;
+    const category = row[catCol] as string | null;
+    const count = row[cntCol] as number | null;
+
+    if (rawIdx === null || rawIdx === undefined || !Number.isFinite(rawIdx) || !category) continue;
+    const idx = Math.floor(rawIdx);
+    if (idx < 0) continue;
+
+    if (!result[idx]) result[idx] = {};
+    result[idx][category] = count ?? 0;
+  }
+  return result;
 };

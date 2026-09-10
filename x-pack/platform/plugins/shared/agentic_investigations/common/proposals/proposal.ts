@@ -221,6 +221,26 @@ export interface ListByWindowQuery {
   decidedWithinHours: number;
 }
 
+export const proposalChartsSummaryQuerySchema = z.object({
+  /** The 168h ceiling keeps the three ES|QL queries cheap. */
+  windowHours: z.coerce.number().int().min(1).max(168).default(24),
+  /** The 5 minute floor bounds the response size. */
+  bucketMinutes: z.coerce.number().int().min(5).max(1440).default(30),
+});
+export type ProposalChartsSummaryQuery = z.infer<typeof proposalChartsSummaryQuerySchema>;
+
+export interface ProposalChartsSummaryBucket {
+  /** Unix ms, start of the bucket. */
+  timestamp: number;
+  /** Per category, how many proposals were created but not yet decided at the bucket end. */
+  counts: Record<string, number>;
+}
+
+export interface ProposalChartsSummaryResponse {
+  /** One entry per slot, zero-filled, oldest first. */
+  buckets: ProposalChartsSummaryBucket[];
+}
+
 /** Terminal states: a decided or executed proposal can no longer be acted on. */
 export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
 
