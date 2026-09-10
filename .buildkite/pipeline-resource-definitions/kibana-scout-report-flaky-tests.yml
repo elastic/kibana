@@ -26,9 +26,10 @@ spec:
         FLAKY_TESTS_PIPELINES: 'kibana-on-merge'
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
-        # Inputs of .buildkite/scripts/steps/scout_report_flaky_tests_github.sh. Issues are only
-        # filed when FLAKY_TESTS_REPORT_TO_GITHUB is 'true'; otherwise the step logs a dry run.
-        FLAKY_TESTS_REPORT_TO_GITHUB: 'false'
+        # Inputs of .buildkite/scripts/steps/scout_report_flaky_tests_github.sh. Issues are filed
+        # in FLAKY_TESTS_GITHUB_REPO: the appex-qa-ai sandbox while the format settles, then
+        # 'elastic/kibana' to go live. Empty means dry run (requests logged, nothing filed).
+        FLAKY_TESTS_GITHUB_REPO: 'elastic/appex-qa-ai'
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
       allow_rebuilds: true
       branch_configuration: main

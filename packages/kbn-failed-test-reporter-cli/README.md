@@ -43,5 +43,6 @@ try the output on a sandbox repository, pass `--github-repo owner/name` with a t
 write access to its issues.
 
 The [kibana / scout / report-flaky-tests](https://buildkite.com/elastic/kibana-scout-report-flaky-tests)
-pipeline runs both commands daily. Its second step stays in dry-run mode until
-`FLAKY_TESTS_REPORT_TO_GITHUB=true` is set on the pipeline or schedule.
+pipeline runs both commands daily. Its second step files the issues in the repository named by
+`FLAKY_TESTS_GITHUB_REPO`: the `elastic/appex-qa-ai` sandbox while the format settles, then
+`elastic/kibana` to go live. Leaving the variable empty makes the step a dry run.
