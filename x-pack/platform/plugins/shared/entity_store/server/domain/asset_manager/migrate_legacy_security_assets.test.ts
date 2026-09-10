@@ -332,9 +332,8 @@ describe('migrateLegacySecurityAssets', () => {
     expect(mockDeleteIndex).not.toHaveBeenCalled();
   });
 
-  it('migrates legacy history snapshot indices to neutral names', async () => {
+  it('does not treat legacy history snapshot indices as legacy assets', async () => {
     const legacyHistory = `.entities.v2.history.security_${namespace}.2026-08-01-12`;
-    const newHistory = `.entities.v2.history.${namespace}.2026-08-01-12`;
 
     mockConcrete([]);
     esClient.indices.resolveIndex.mockResolvedValue({
@@ -343,22 +342,16 @@ describe('migrateLegacySecurityAssets', () => {
       data_streams: [],
     });
 
+    // History indices are intentionally left in place as pre-migration snapshots.
+    // They must not trigger a migration loop: hasLegacySecurityAssets should return
+    // false so migrateLegacySecurityAssets is a no-op when only history indices exist.
+    await expect(hasLegacySecurityAssets(esClient, namespace)).resolves.toBe(false);
+
     await migrateLegacySecurityAssets({ esClient, logger, namespace });
 
-    expect(mockCreateIndex).toHaveBeenCalledWith(
-      esClient,
-      newHistory,
-      expect.objectContaining({ throwIfExists: false })
-    );
-    expect(mockReindex).toHaveBeenCalledWith(
-      esClient,
-      expect.objectContaining({
-        source: { index: legacyHistory },
-        dest: { index: newHistory },
-        waitForTask: expect.objectContaining({ forever: true }),
-      })
-    );
-    expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyHistory);
+    expect(mockCreateIndex).not.toHaveBeenCalled();
+    expect(mockReindex).not.toHaveBeenCalled();
+    expect(mockDeleteIndex).not.toHaveBeenCalled();
   });
 
   it('deletes index templates before component templates', async () => {
