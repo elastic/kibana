@@ -21,14 +21,14 @@ const InputSchema = z.object({
     description: 'Optional client-supplied ID for the attachment. Server-generated if omitted.',
   }),
   type: z.string().min(1).max(256).meta({
-    description: "The attachment type (e.g. 'text', 'esql', 'visualization').",
+    description: 'The attachment type.',
   }),
   data: z.unknown().optional().meta({
     description: 'The attachment data/content. Required unless `origin` is provided.',
   }),
   origin: z.string().min(1).max(2048).optional().meta({
     description:
-      'Origin string (e.g. saved object ID) for by-reference attachments. When provided without `data`, content is resolved once at creation time.',
+      'Origin string for by-reference attachments. When provided without `data`, content is resolved once at creation time.',
   }),
   description: z.string().max(1024).optional().meta({
     description: 'Human-readable description of the attachment.',
