@@ -326,6 +326,19 @@ run_eval() {
   export TRACING_ES_URL="${GOLDEN_ES_URL:?GOLDEN_ES_URL required}"
   export TRACING_ES_API_KEY="${GOLDEN_ES_API_KEY:?GOLDEN_ES_API_KEY required}"
   echo "trace evaluators will query: $TRACING_ES_URL"
+  # AD suite only: GCS dataset credentials for the alerts-snapshot restore.
+  # The scout evals_tracing config gates ES gcs-client registration (and thus
+  # the 95-alert corpus restore) on this env var. run_model.sh must read it
+  # from the shipped file: build_env_prefix only forwards FORWARDED_ENV_VARS,
+  # and the sweeper never puts the (large, secret) JSON in the environment.
+  if [ "${EVAL_SUITE:-}" = "security-persona-matrix-attack-discovery" ]; then
+    if [ ! -s /tmp/gcs_credentials.json ]; then
+      echo "FATAL: AD suite requires /tmp/gcs_credentials.json (deploy ships it)" >&2
+      return 1
+    fi
+    export GCS_CREDENTIALS="$(cat /tmp/gcs_credentials.json)"
+    echo "GCS_CREDENTIALS loaded ($(wc -c < /tmp/gcs_credentials.json) bytes)"
+  fi
   node scripts/evals start --profile local --suite "${EVAL_SUITE:-security-persona-matrix}" --model "$MODEL" 2>&1 | tee /tmp/evals-start.log | tail -40
   return ${PIPESTATUS[0]}
 }

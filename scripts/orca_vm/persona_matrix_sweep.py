@@ -107,6 +107,21 @@ SUITE_PROFILES = {
         # which is what judge-stability analysis wants anyway.
         "honors_shard": False,
     },
+    "security-persona-matrix-attack-discovery": {
+        "cli_suite": "security-persona-matrix-attack-discovery",
+        "gate_suite_id": "security-persona-matrix-attack-discovery",
+        "vm_prefix": "orca-pmad",
+        # attack_discovery.spec.ts: ONE example (generate API over the real
+        # 95-alert GCS corpus). MEASURED on the 2026-09-10 smoke
+        # (exec 5bd8fa4a589f4cf4, EVAL_EXIT=0): 8 docs = 8 evaluators
+        # (AttackDiscoveryBasic, AttackDiscoveryRubric, Criteria, Latency,
+        # Tool Calls, Input/Output/Cached Tokens) x 1 example x 1 rep.
+        # Snapshot restore races Kibana's boot-time alerting init (dual
+        # write-index alias) — the restore.ts overlay below carries the fix.
+        "n_examples": 1,
+        "gate": "exact",
+        "honors_shard": False,
+    },
     "security-automatic-migrations": {
         "cli_suite": "security-automatic-migrations",
         "gate_suite_id": "security-automatic-migrations",
@@ -590,6 +605,34 @@ MODELS = [
 ]
 
 
+# AD snapshot-restore fix: Kibana's boot-time alerting init recreates the
+# Security alert index mid-restore, surfacing as either "open index ... already
+# exists" or "alias [...] has more than one write index". The base image's
+# restore.ts only retries the former. Sourced from THIS worktree (identical to
+# fix/alerts-snapshot-restore-dual-write-retry 166f1a19aa28, off upstream/main).
+# Without it the AD fan-out deterministically fails restore 3/3 attempts on a
+# fresh-wipe VM (observed 2026-09-10 smoke v2); with it smoke v3 passed
+# (EVAL_EXIT=0, exec 5bd8fa4a589f4cf4, 8/8 evaluators on golden).
+PATCHED_RESTORE_TS = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot/src/restore.ts"
+)
+RESTORE_TS_REMOTE = (
+    "Projects/kibana/x-pack/solutions/security/packages/"
+    "kbn-security-evals-alerts-snapshot/src/restore.ts"
+)
+# GCS service-account JSON for the alerts snapshot
+# (security-ai-datasets/attack-discovery/oh-my-malware-95-deduped). The scout
+# evals_tracing config only registers the ES gcs client when GCS_CREDENTIALS
+# is set — without it the AD spec skips restore and runs against a stale
+# corpus. Durable copy in ~/.elastic; /tmp is wiped by macOS reboots.
+GCS_CREDENTIALS_LOCAL = next(
+    (p for p in (os.path.expanduser("~/.elastic/gcs-credentials.json"),
+                 "/tmp/gcs_credentials.json") if os.path.isfile(p)),
+    os.path.expanduser("~/.elastic/gcs-credentials.json"),
+)
+
 def is_sweep_resource(name: str) -> bool:
     """True when an Azure resource belongs to any suite's sweep VMs.
 
@@ -921,6 +964,12 @@ def deploy(ip: str) -> None:
         "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/"
         "persona_matrix.config.json")
     scp(str(matrix_cfg), ip, "/tmp/persona_matrix.config.json")
+    # AD suite: GCS dataset credentials + the dual-write restore fix. Both are
+    # no-ops for persona-matrix runs (restore.ts is only imported by suites
+    # that restore snapshots; GCS creds are only read by the AD spec).
+    if SUITE == "security-persona-matrix-attack-discovery":
+        scp(GCS_CREDENTIALS_LOCAL, ip, "/tmp/gcs_credentials.json")
+        scp(str(PATCHED_RESTORE_TS), ip, RESTORE_TS_REMOTE)
     scp(os.path.expanduser("~/.elastic/eis-connectors-cache.json"), ip,
         ".elastic/eis-connectors-cache.json")
     scp(os.path.expanduser("~/.elastic/eis-ccm-key.json"), ip,
