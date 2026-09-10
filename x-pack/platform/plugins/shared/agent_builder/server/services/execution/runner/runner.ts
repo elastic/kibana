@@ -65,7 +65,11 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
-import { DEFAULT_DEDUCTIVE_ENDPOINT, DEDUCTIVE_ENABLED_FLAG } from '../run_agent/deductive/config';
+import {
+  DEDUCTIVE_AGENT_ID,
+  DEFAULT_DEDUCTIVE_ENDPOINT,
+  DEDUCTIVE_ENABLED_FLAG,
+} from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
@@ -256,6 +260,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   const createScopedRunnerWithDeps = async ({
     request,
+    agentId,
     defaultConnectorId,
     projectRouting,
     telemetryMetadata,
@@ -270,6 +275,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     parentExecutionId,
   }: {
     request: KibanaRequest;
+    /** Agent id for this run; used to lazily resolve Deductive-only config. */
+    agentId?: string;
     defaultConnectorId?: string;
     projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -336,45 +343,49 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
     // External Deductive execution path: gated per-deployment by the LaunchDarkly feature
     // flag (self-managed / LD-unreachable stays off), configured per-deployment via Advanced
-    // Settings (agentBuilder:deductive*). All users of the deployment share this config; the
-    // Deductive agent is a built-in agent available to everyone when enabled.
-    const deductiveEnabled = await runnerDeps.featureFlags
-      .getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
-      .catch(() => false);
-
-    // Per-user values take precedence; fall back to the global (deployment-wide) scope so a
-    // single Global Advanced Settings entry applies to every user unless a user overrides it.
-    const globalDeductiveSettings = () =>
-      runnerDeps.uiSettings.globalAsScopedToClient(
-        runnerDeps.savedObjects.getScopedClient(request)
-      );
-
-    // Prefer GLOBAL (deployment-wide) values; only explicit user-provided values override
-    // them. `uiSettings.get` falls back to the registered default (turing) for unset keys,
-    // so the user scope must be read via getUserProvided to avoid an unset value shadowing.
-    const deductive = deductiveEnabled
-      ? await (async () => {
-          const global = globalDeductiveSettings();
-          const [userProvided, globalEndpoint, globalKey] = await Promise.all([
-            uiSettingsClient
-              .getUserProvided()
-              .catch(() => ({} as Record<string, { userValue?: unknown }>)),
-            global.get<string>(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID).catch(() => undefined),
-            global.get<string>(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID).catch(() => undefined),
-          ]);
-          const pick = (key: string): string | undefined => {
-            const v = userProvided[key]?.userValue;
-            return v != null && v !== '' ? String(v) : undefined;
-          };
-          return {
-            enabled: true,
-            endpoint:
-              (pick(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID) ?? globalEndpoint)?.trim() ||
-              DEFAULT_DEDUCTIVE_ENDPOINT,
-            apiKey: pick(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID) ?? globalKey,
-          };
-        })()
-      : undefined;
+    // Settings (agentBuilder:deductive*). Resolved lazily ONLY for the Deductive agent so
+    // ordinary agents and tool runs never read the flag/credentials or pay the cost.
+    const deductive =
+      agentId === DEDUCTIVE_AGENT_ID
+        ? await (async () => {
+            // Per-user values take precedence; fall back to the global (deployment-wide)
+            // scope so a single Global Advanced Settings entry applies to every user unless
+            // a user overrides it. `uiSettings.get` falls back to the registered default
+            // (turing) for unset keys, so the user scope must be read via getUserProvided
+            // to avoid an unset value shadowing the global.
+            const globalDeductiveSettings = () =>
+              runnerDeps.uiSettings.globalAsScopedToClient(
+                runnerDeps.savedObjects.getScopedClient(request)
+              );
+            const [flagEnabled, global, userProvided] = await Promise.all([
+              runnerDeps.featureFlags
+                .getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
+                .catch(() => false),
+              globalDeductiveSettings(),
+              uiSettingsClient
+                .getUserProvided()
+                .catch(() => ({} as Record<string, { userValue?: unknown }>)),
+            ]);
+            const readGlobal = async (key: string) =>
+              global.get<string>(key).catch(() => undefined);
+            const [globalEndpoint, globalKey] = await Promise.all([
+              readGlobal(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID),
+              readGlobal(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID),
+            ]);
+            const pick = (key: string): string | undefined => {
+              const v = userProvided[key]?.userValue;
+              return v != null && v !== '' ? String(v) : undefined;
+            };
+            return {
+              enabled: flagEnabled,
+              endpoint:
+                (pick(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID) ?? globalEndpoint)
+                  ?.trim()
+                  .replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
+              apiKey: pick(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID) ?? globalKey,
+            };
+          })()
+        : undefined;
 
     const allDeps = {
       ...runnerDeps,
@@ -443,10 +454,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         ...otherParams
       } = params;
+      const { agentId } = params;
       const { nextInput, conversation } = params.agentParams;
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
+        agentId,
         defaultConnectorId,
         projectRouting,
         telemetryMetadata,

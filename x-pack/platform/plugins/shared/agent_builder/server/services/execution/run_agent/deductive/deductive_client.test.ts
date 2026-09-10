@@ -213,7 +213,36 @@ describe('deductive_client', () => {
         throw new Error('expected to throw');
       } catch (error) {
         expect(error).toBeInstanceOf(DeductiveError);
-        expect((error as Error).message).toBe('deductive stream closed without an answer');
+        expect((error as Error).message).toBe('deductive stream closed before completion');
+      }
+    });
+
+    it('throws DeductiveError on premature EOF after some answer events (no complete)', async () => {
+      fetchMock.mockImplementation(async (url) => {
+        if (String(url).endsWith('/stream')) {
+          return asResponse({
+            status: 200,
+            body: sseBody([
+              'data: {"type":"connected"}\n\n',
+              'data: {"type":"answer","content":"partial"}\n\n',
+              // stream ends without the `complete` event (e.g. upstream proxy cut)
+            ]),
+          });
+        }
+        return asResponse({ status: 202 });
+      });
+
+      try {
+        await sendDeductiveMessageAndReadSse({
+          endpoint: 'https://turing.deductive.ai',
+          token: 'tok',
+          sessionId: 's1',
+          message: 'hi',
+        });
+        throw new Error('expected to throw');
+      } catch (error) {
+        expect(error).toBeInstanceOf(DeductiveError);
+        expect((error as Error).message).toBe('deductive stream closed before completion');
       }
     });
   });

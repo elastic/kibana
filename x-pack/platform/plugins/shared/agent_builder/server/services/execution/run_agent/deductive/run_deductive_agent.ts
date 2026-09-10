@@ -39,9 +39,15 @@ export const runDeductiveAgent = async (
   // Advanced Settings (context.deductive) take precedence; env vars remain a dev fallback.
   const config = resolveDeductiveConfig(context.deductive);
 
-  if (!config.token) {
+  // Kill-switch: the runner only resolves `context.deductive` for this agent, but the
+  // deployment flag can be switched off between the run starting and this handler executing
+  // (config is read once per run). Never call out to Deductive while either the deployment
+  // flag or the Advanced Setting is off, even if a token is present (env or otherwise).
+  if (!config.enabled || !config.token) {
     throw new DeductiveError(
-      'Deductive execution requires a bearer token. Set DEDUCTIVE_API_KEY (and optionally DEDUCTIVE_REFRESH_TOKEN).'
+      'Deductive AI execution is disabled. Enable the agentBuilder.deductiveEnabled per-deployment ' +
+        'feature flag and the agentBuilder:deductiveEnabled Advanced Setting, and set ' +
+        'DEDUCTIVE_API_KEY (or the deductiveApiKey Advanced Setting).'
     );
   }
 

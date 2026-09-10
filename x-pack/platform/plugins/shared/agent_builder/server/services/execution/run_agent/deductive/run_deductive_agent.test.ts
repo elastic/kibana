@@ -31,9 +31,16 @@ const baseParams = (conversation?: any): any => ({
   conversation,
 });
 
-const context = (): any => {
+const context = (deductiveOverride?: any): any => {
   const ctx = createAgentHandlerContextMock() as any;
   ctx.conversationClient.update = jest.fn().mockResolvedValue({});
+  // default: a passing runner-resolved config (flag + setting + key all present)
+  ctx.deductive = {
+    enabled: true,
+    endpoint: 'https://app.deductive.ai',
+    apiKey: 'dak_ctx',
+    ...(deductiveOverride ?? {}),
+  };
   return ctx;
 };
 
@@ -72,8 +79,8 @@ describe('runDeductiveAgent', () => {
 
     // session created because no metadata was present
     expect(clientMock.createDeductiveSession).toHaveBeenCalledWith({
-      endpoint: 'https://turing.deductive.ai',
-      token: 'dak_test-token',
+      endpoint: 'https://app.deductive.ai',
+      token: 'dak_ctx',
       teamId: undefined,
     });
 
@@ -148,11 +155,29 @@ describe('runDeductiveAgent', () => {
     );
   });
 
-  it('fails when no API key is configured', async () => {
+  it('fails when both settings and env are absent', async () => {
     delete process.env.DEDUCTIVE_API_KEY;
-    const ctx = context();
+    const ctx = context({ enabled: true, endpoint: 'https://app.deductive.ai', apiKey: '' }); // no apiKey
 
-    await expect(runDeductiveAgent(baseParams(), ctx)).rejects.toThrow('requires a bearer token');
+    await expect(runDeductiveAgent(baseParams(), ctx)).rejects.toThrow(
+      'Deductive AI execution is disabled'
+    );
+  });
+
+  it.each([
+    ['feature flag off', { enabled: false, endpoint: 'https://app.deductive.ai', apiKey: 'k' }],
+    ['advanced setting off (no context)', undefined],
+  ])('kill-switch %s: rejects before any Deductive call', async (_name, dedCtx) => {
+    const ctx = context();
+    // an available cache (or stale context) must not permit a run when the gate is off
+    ctx.deductive = dedCtx;
+    process.env.DEDUCTIVE_API_KEY = 'dak_present';
+    // prime the availability cache as if enabled, then the gate is off
+    await expect(runDeductiveAgent(baseParams({ id: 'conv-1' }), ctx)).rejects.toThrow(
+      'Deductive AI execution is disabled'
+    );
+    expect(clientMock.createDeductiveSession).not.toHaveBeenCalled();
+    expect(clientMock.sendDeductiveMessageAndReadSse).not.toHaveBeenCalled();
   });
 
   it('emits text chunks as the answer streams', async () => {

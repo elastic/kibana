@@ -306,7 +306,7 @@ export class AgentBuilderPlugin
       avatar_color: '#111113',
       avatar_icon: DEDUCTIVE_AVATAR_ICON,
       availability: {
-        cacheMode: 'space',
+        cacheMode: 'none',
         handler: async ({ request, uiSettings }) => {
           // Availability must honor the GLOBAL (deployment-wide) setting too, so an admin
           // configures `agentBuilder:deductiveEnabled` once and every user sees the agent —

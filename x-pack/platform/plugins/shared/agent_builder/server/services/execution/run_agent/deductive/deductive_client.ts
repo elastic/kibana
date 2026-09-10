@@ -61,6 +61,29 @@ interface StreamOptions {
 
 const DEFAULT_STREAM_TIMEOUT_MS = 300_000;
 
+/**
+ * Combines an optional caller signal with a deadline-driven abort into a single signal,
+ * without relying on `AbortSignal.timeout`/`AbortSignal.any` (absent in some test envs).
+ */
+const withTimeoutSignal = (
+  timeoutMs: number,
+  abortSignal?: AbortSignal
+): { signal: AbortSignal | undefined; clear: () => void } => {
+  if (typeof AbortController === 'undefined') {
+    return { signal: abortSignal, clear: () => {} };
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  abortSignal?.addEventListener?.('abort', () => controller.abort(), { once: true });
+  return {
+    signal: controller.signal,
+    clear: () => {
+      clearTimeout(timer);
+      abortSignal?.removeEventListener?.('abort', () => controller.abort());
+    },
+  };
+};
+
 interface JsonResponseBody {
   session_id?: string;
   url?: string;
@@ -97,18 +120,22 @@ export const createDeductiveSession = async ({
   token: string;
   teamId?: string;
 }): Promise<DeductiveSession> => {
-  const response = await fetch(`${endpoint}/api/v1/sessions`, {
-    method: 'POST',
-    headers: jsonHeaders(token, teamId),
-    body: JSON.stringify({ mode: 'ask' }),
-  });
-
-  if (response.status !== 200 && response.status !== 201) {
-    throw new DeductiveError(`failed to create session: ${response.status}`, response.status);
+  const { signal, clear } = withTimeoutSignal(30_000);
+  try {
+    const response = await fetch(`${endpoint}/api/v1/sessions`, {
+      method: 'POST',
+      headers: jsonHeaders(token, teamId),
+      body: JSON.stringify({ mode: 'ask' }),
+      signal,
+    });
+    if (response.status !== 200 && response.status !== 201) {
+      throw new DeductiveError(`failed to create session: ${response.status}`, response.status);
+    }
+    const body = await readJson(response);
+    return { sessionId: body.session_id ?? '', url: body.url ?? '' };
+  } finally {
+    clear();
   }
-
-  const body = await readJson(response);
-  return { sessionId: body.session_id ?? '', url: body.url ?? '' };
 };
 
 export const refreshDeductiveToken = async ({
@@ -153,6 +180,10 @@ export const sendDeductiveMessageAndReadSse = async ({
 }: StreamOptions): Promise<DeductiveRunResult> => {
   const streamUrl = `${endpoint}/api/v1/sessions/${encodeURIComponent(sessionId)}/stream`;
 
+  // Hard wall-clock bound for the entire Deductive interaction (headers, SSE, message POST):
+  // aborts a pending `fetch` if the backend stalls before headers or between SSE chunks.
+  const { signal: combinedSignal, clear } = withTimeoutSignal(timeoutMs, abortSignal);
+
   const response = await fetch(streamUrl, {
     method: 'GET',
     headers: {
@@ -161,7 +192,7 @@ export const sendDeductiveMessageAndReadSse = async ({
       Connection: 'keep-alive',
       ...authHeaders(token, teamId),
     },
-    signal: abortSignal,
+    signal: combinedSignal,
   });
 
   if (response.status === 401) {
@@ -256,7 +287,7 @@ export const sendDeductiveMessageAndReadSse = async ({
           method: 'POST',
           headers: jsonHeaders(token, teamId),
           body: JSON.stringify(body),
-          signal: abortSignal,
+          signal: combinedSignal,
         }
       );
       if (messageResponse.status !== 200 && messageResponse.status !== 202) {
@@ -271,7 +302,14 @@ export const sendDeductiveMessageAndReadSse = async ({
   // Flush any trailing buffered SSE.
   parser.feed(decoder.decode());
   await drainEventBuffer();
+  // Stop the deadline timer now the flow is done.
+  clear();
 
+  if (!completed) {
+    // Premature EOF: the stream closed without the protocol's `complete` event. Treat it as
+    // an error rather than presenting a truncated answer as finished.
+    throw new DeductiveError('deductive stream closed before completion', 500);
+  }
   if (answer.length === 0) {
     throw new DeductiveError('deductive stream closed without an answer');
   }

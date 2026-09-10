@@ -74,26 +74,36 @@ export const resolveDeductiveConfig = (contextDeductive?: {
   teamId: string | undefined;
 } => {
   const env = getEnvDeductiveConfig();
-  const configFromSettings = contextDeductive?.enabled === true;
+  const settingsConfigured =
+    typeof contextDeductive?.endpoint === 'string' &&
+    contextDeductive.endpoint !== '' &&
+    typeof contextDeductive?.apiKey === 'string' &&
+    contextDeductive.apiKey !== '';
 
-  if (configFromSettings) {
-    // Advanced Settings are the authoritative per-deployment config: endpoint, key, agent
-    // ids all come FROM the UI. Env extras (refresh token / team) must NOT leak in — a
-    // differet env refresh token (e.g. the turing OAuth one) would otherwise be replayed
-    // against the wrong cluster and 401 on /auth/refresh.
+  if (
+    contextDeductive?.enabled &&
+    settingsConfigured &&
+    contextDeductive.endpoint &&
+    contextDeductive.apiKey
+  ) {
+    // Advanced Settings are the authoritative per-deployment config: endpoint + key come
+    // FROM the UI. Env extras (refresh token / team) must NOT leak in — a different env
+    // refresh token (e.g. the turing OAuth one) would otherwise be replayed against the
+    // wrong cluster and 401 on /auth/refresh.
     return {
       enabled: true,
-      endpoint:
-        (contextDeductive.endpoint ?? env.endpoint).trim().replace(/\/+$/, '') || env.endpoint,
-      token: contextDeductive.apiKey ?? undefined,
+      endpoint: contextDeductive.endpoint.trim().replace(/\/+$/, ''),
+      token: contextDeductive.apiKey,
       refreshToken: undefined,
       teamId: undefined,
     };
   }
 
-  // Env/dev fallback (no settings configured).
+  // Flag is on but settings are NOT (or only partially) configured: fall back to env so the
+  // documented dev path (DEDUCTIVE_API_KEY + DEDUCTIVE_ENDPOINT) keeps working. `enabled`
+  // still reflects the flag; the run path rejects when there is no usable token.
   return {
-    enabled: false,
+    enabled: contextDeductive?.enabled ?? false,
     endpoint: env.endpoint,
     token: env.token,
     refreshToken: env.refreshToken,
