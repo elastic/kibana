@@ -443,12 +443,6 @@ importers:
       '@kbn/aiops-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-aiops-utils
-      '@kbn/alertzero-common':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-alertzero-common
-      '@kbn/alertzero-plugin':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/plugins/alertzero
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
@@ -509,6 +503,12 @@ importers:
       '@kbn/alerts-ui-shared':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-alerts-ui-shared
+      '@kbn/alertzero-common':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-alertzero-common
+      '@kbn/alertzero-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/plugins/alertzero
       '@kbn/analytics':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-analytics
