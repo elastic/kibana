@@ -107,6 +107,15 @@ describe('VerifyKiInputSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it.each(['types', 'attributes'])('rejects an empty applies_to.%s list', (key) => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: {},
+      verifiers: [{ workflow_id: 'no-pii', applies_to: { [key]: [] } }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects duplicate custom verifier workflows', () => {
     const result = VerifyKiInputSchema.safeParse({
       ki: {},

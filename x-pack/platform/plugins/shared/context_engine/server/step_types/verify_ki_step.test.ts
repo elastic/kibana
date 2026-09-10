@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
@@ -368,11 +369,12 @@ describe('verify_ki workflow step', () => {
   describe('custom verifier workflows', () => {
     const validEsql = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
 
-    const completedWith = (output: unknown) => ({
-      status: ExecutionStatus.COMPLETED,
-      error: null,
-      context: { output },
-    });
+    const completedWith = (output: unknown): WorkflowExecutionDto =>
+      ({
+        status: ExecutionStatus.COMPLETED,
+        error: null,
+        context: { output },
+      } as unknown as WorkflowExecutionDto);
 
     it('runs built-in and workflow verifiers in declaration order', async () => {
       setContextEngineEnabled(true);
@@ -401,9 +403,7 @@ describe('verify_ki workflow step', () => {
 
     it('runs the workflow in the executing space with the step request', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.getWorkflowExecution.mockResolvedValue(
-        completedWith({ passed: true }) as never
-      );
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
 
       await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii', timeout_sec: 15 }] });
 
@@ -459,7 +459,7 @@ describe('verify_ki workflow step', () => {
     it('reports custom verifier failures by kind, not id', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(
-        completedWith({ passed: false, reason: 'nope' }) as never
+        completedWith({ passed: false, reason: 'nope' })
       );
 
       await runHandler(
@@ -477,9 +477,7 @@ describe('verify_ki workflow step', () => {
 
     it('forwards the verifier chain, ending with this workflow, to the child run', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.getWorkflowExecution.mockResolvedValue(
-        completedWith({ passed: true }) as never
-      );
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
 
       await runHandler(
         { title: 'x' },
@@ -554,9 +552,7 @@ describe('verify_ki workflow step', () => {
 
     it('checks the execute privilege in the executing space before dispatching', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.getWorkflowExecution.mockResolvedValue(
-        completedWith({ passed: true }) as never
-      );
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
 
       await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii' }] });
 
@@ -589,6 +585,22 @@ describe('verify_ki workflow step', () => {
 
       expect(checkExecutePrivilege).not.toHaveBeenCalled();
       expect(output.passed).toBe(true);
+    });
+
+    it('reports several failing custom verifiers as one workflow entry', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        completedWith({ passed: false, reason: 'nope' })
+      );
+
+      await runHandler(
+        { title: 'x' },
+        { verifiers: [{ workflow_id: 'no-pii' }, { workflow_id: 'has-owner' }] }
+      );
+
+      expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith(
+        expect.objectContaining({ verifiersRun: 2, failedVerifierIds: ['workflow'] })
+      );
     });
 
     it('throws when a workflow verifier is listed but workflowsManagement is unavailable', async () => {

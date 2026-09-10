@@ -110,10 +110,14 @@ export const withKiVerificationTelemetry = async ({
       outcome: 'success',
       passed: summary.passed,
       verifiersRun: summary.results.length,
-      // Workflow ids derive from user-typed names, so custom verifiers are reported by kind only.
-      failedVerifierIds: failures.map(({ verifier }) =>
-        verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX) ? 'workflow' : verifier
-      ),
+      // Workflow ids derive from user-typed names, so custom verifiers collapse to one `workflow` entry.
+      failedVerifierIds: [
+        ...new Set(
+          failures.map(({ verifier }) =>
+            verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX) ? 'workflow' : verifier
+          )
+        ),
+      ],
     });
     if (summary.passed) {
       logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);

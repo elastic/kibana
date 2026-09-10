@@ -14,6 +14,7 @@ import type { KiVerifierContext } from '../types';
 import type { KiVerifierWorkflowRunner } from './workflow_verifier';
 import {
   createWorkflowVerifier,
+  MAX_REASON_LENGTH,
   WORKFLOW_VERIFIER_POLL_INTERVAL_MS,
   WORKFLOW_VERIFIER_TRIGGERED_BY,
 } from './workflow_verifier';
@@ -252,13 +253,70 @@ describe('createWorkflowVerifier', () => {
       );
     });
 
-    it('truncates long reasons', async () => {
-      completed({ passed: false, reason: 'x'.repeat(5000) });
+    it('truncates long reasons to the cap plus an ellipsis', async () => {
+      completed({ passed: false, reason: 'x'.repeat(MAX_REASON_LENGTH * 2) });
 
       const outcome = await makeVerifier().verify({}, context);
 
-      expect(outcome.passed).toBe(false);
-      expect(outcome.passed === false && outcome.reason.length).toBeLessThan(5000);
+      expect(outcome).toEqual({ passed: false, reason: `${'x'.repeat(MAX_REASON_LENGTH)}…` });
+    });
+
+    it.each([ExecutionStatus.CANCELLED, ExecutionStatus.TIMED_OUT])(
+      'fails when the workflow ended with status %s',
+      async (status) => {
+        workflowsManagement.getWorkflowExecution.mockResolvedValue(execution(status));
+
+        await expect(makeVerifier().verify({}, context)).resolves.toEqual({
+          passed: false,
+          reason: `Verifier workflow 'my-verifier' ended with status '${status}'`,
+        });
+      }
+    );
+
+    it('keeps polling while the execution document is not yet readable', async () => {
+      workflowsManagement.getWorkflowExecution
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(execution(ExecutionStatus.COMPLETED, { output: { passed: true } }));
+
+      const pending = makeVerifier().verify({}, context);
+      await jest.advanceTimersByTimeAsync(WORKFLOW_VERIFIER_POLL_INTERVAL_MS);
+
+      await expect(pending).resolves.toEqual({ passed: true });
+    });
+
+    it('propagates a poll failure', async () => {
+      workflowsManagement.getWorkflowExecution.mockRejectedValue(new Error('search failed'));
+
+      await expect(makeVerifier().verify({}, context)).rejects.toThrow('search failed');
+      expect(workflowsManagement.cancelWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('cancels the execution when aborted with a non-Error reason', async () => {
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        execution(ExecutionStatus.RUNNING)
+      );
+      const controller = new AbortController();
+
+      const pending = makeVerifier().verify({}, { ...context, abortSignal: controller.signal });
+      await jest.advanceTimersByTimeAsync(WORKFLOW_VERIFIER_POLL_INTERVAL_MS / 2);
+      controller.abort('shutting down');
+
+      await expect(pending).rejects.toBe('shutting down');
+      expect(workflowsManagement.cancelWorkflowExecution).toHaveBeenCalledWith(
+        executionId,
+        spaceId,
+        request
+      );
+    });
+
+    it('logs the execution id at debug when the verifier does not pass', async () => {
+      completed({ passed: false, reason: 'has PII' });
+
+      await makeVerifier().verify({}, context);
+
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        `KI verifier 'my-verifier' did not pass (workflow execution ${executionId})`
+      );
     });
 
     it('propagates executeWorkflow errors and audits the failed run', async () => {

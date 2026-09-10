@@ -13,6 +13,7 @@ import {
   ESQL_VALID_RUNTIME_VERIFIER_ID,
   ESQL_VALID_SYNTAX_VERIFIER_ID,
   KI_VERIFIER_IDS,
+  WORKFLOW_VERIFIER_ID_PREFIX,
 } from '../ki_verification';
 import { MAX_KI_ATTRIBUTE_KEY_LENGTH, MAX_KI_TYPE_LENGTH, kiPartialFieldsSchema } from './ki';
 
@@ -44,11 +45,13 @@ export const kiVerifierWorkflowSchema = z.object({
     .object({
       types: z
         .array(z.string().min(1).max(MAX_KI_TYPE_LENGTH))
+        .min(1)
         .max(MAX_KI_VERIFIER_APPLIES_TO_VALUES)
         .optional()
         .describe('Run only for KIs with one of these types'),
       attributes: z
         .array(z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH))
+        .min(1)
         .max(MAX_KI_VERIFIER_APPLIES_TO_VALUES)
         .optional()
         .describe('Run only for KIs carrying every one of these attribute keys'),
@@ -66,7 +69,7 @@ export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;
 
 /** The key a verifier entry is deduplicated on; matches the `verifier` id in the summary. */
 export const getKiVerifierEntryKey = (entry: KiVerifierEntry): string =>
-  typeof entry === 'string' ? entry : `workflow:${entry.workflow_id}`;
+  typeof entry === 'string' ? entry : `${WORKFLOW_VERIFIER_ID_PREFIX}${entry.workflow_id}`;
 
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,

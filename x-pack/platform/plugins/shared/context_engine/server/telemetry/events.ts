@@ -119,11 +119,13 @@ const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
     items: {
       type: 'keyword',
       _meta: {
-        description: 'Verifier id, verbatim.',
+        description:
+          'Built-in verifier id, verbatim; custom verifier workflows collapse to "workflow".',
       },
     },
     _meta: {
-      description: 'Failing verifier ids. Present only when a completed run failed verification.',
+      description:
+        'Distinct failing verifier ids. Present only when a completed run failed verification.',
       optional: true,
     },
   },

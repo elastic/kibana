@@ -10,6 +10,7 @@ import type { AuditEvent, AuditLogger } from '@kbn/core-security-server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import { WORKFLOW_VERIFIER_ID_PREFIX } from '../../../common/ki_verification';
 import {
   DEFAULT_KI_VERIFIER_TIMEOUT_SEC,
   type KiVerifierWorkflow,
@@ -17,12 +18,13 @@ import {
 import { isAbortError } from '../../telemetry';
 import type { KiVerifier, KiVerifierOutcome, KnowledgeIndicator } from '../types';
 
-/** Prefix distinguishing workflow verifier ids from built-in ids in the summary. */
-export const WORKFLOW_VERIFIER_ID_PREFIX = 'workflow:';
+export { WORKFLOW_VERIFIER_ID_PREFIX };
 
 export const WORKFLOW_VERIFIER_TRIGGERED_BY = 'context-engine:verify-ki';
 
 export const WORKFLOW_VERIFIER_POLL_INTERVAL_MS = 1_000;
+
+export const MAX_REASON_LENGTH = 2048;
 
 /**
  * How many levels of verifier workflows may nest (a verifier whose own
@@ -39,8 +41,6 @@ export const readKiVerifierChain = (metadata: Record<string, unknown> | undefine
   const chain = metadata?.[KI_VERIFIER_CHAIN_METADATA_KEY];
   return Array.isArray(chain) ? chain.filter((id): id is string => typeof id === 'string') : [];
 };
-
-const MAX_REASON_LENGTH = 2048;
 
 const workflowVerifierOutputSchema = z.object({
   passed: z.boolean(),
@@ -187,7 +187,7 @@ export const createWorkflowVerifier = (
         appliesTo.attributes.every((key) => ki.attributes?.[key] !== undefined);
       return matchesType && matchesAttributes;
     },
-    async verify(ki, { abortSignal }) {
+    async verify(ki, { abortSignal, logger }) {
       abortSignal?.throwIfAborted();
 
       let workflowExecutionId: string;
@@ -211,6 +211,15 @@ export const createWorkflowVerifier = (
           .cancelWorkflowExecution(workflowExecutionId, spaceId, request)
           .catch(() => undefined);
       const deadline = Date.now() + timeoutMs;
+      // Reasons can echo user data, so only the execution id is logged for tracing.
+      const settle = (outcome: KiVerifierOutcome): KiVerifierOutcome => {
+        if (!outcome.passed) {
+          logger.debug(
+            `KI verifier '${workflowId}' did not pass (workflow execution ${workflowExecutionId})`
+          );
+        }
+        return outcome;
+      };
 
       try {
         while (true) {
@@ -221,20 +230,26 @@ export const createWorkflowVerifier = (
             { includeOutput: true }
           );
           if (execution && isTerminalStatus(execution.status)) {
-            return toOutcome(workflowId, execution);
+            return settle(toOutcome(workflowId, execution));
           }
           if (execution?.status === ExecutionStatus.WAITING_FOR_INPUT) {
             await cancel();
-            return toOutcome(workflowId, execution);
+            return settle(toOutcome(workflowId, execution));
           }
           if (Date.now() >= deadline) {
             await cancel();
-            return fail(`Verifier workflow '${workflowId}' timed out after ${timeoutMs / 1000}s`);
+            return settle(
+              fail(`Verifier workflow '${workflowId}' timed out after ${timeoutMs / 1000}s`)
+            );
           }
           await sleep(WORKFLOW_VERIFIER_POLL_INTERVAL_MS, abortSignal);
         }
       } catch (error) {
-        if (isAbortError(error)) {
+        // `signal.reason` may be a non-Error value, so check the signal itself as well.
+        if (isAbortError(error) || abortSignal?.aborted) {
+          logger.debug(
+            `KI verifier '${workflowId}' aborted (workflow execution ${workflowExecutionId})`
+          );
           await cancel();
         }
         throw error;
