@@ -10,19 +10,18 @@ import { expect } from '@kbn/scout/api';
 
 import { SESSION_ERROR_REASON_HEADER } from '../../../../common/constants';
 import {
+  clearAllSessions,
   ensureSessionIndexReady,
   getSessionCount,
-  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
   SESSION_API_HEADERS,
-} from '../../../session_management/helpers';
+} from '../../../scout_session_management/helpers';
 
 test.describe('Session Idle expired', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
-    await invalidateAllSessions(apiClient, config);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 10000 }).toBe(0);
+    await clearAllSessions(apiClient, config, esClient);
   });
 
   test(`should return ${SESSION_ERROR_REASON_HEADER} header if session is expired`, async ({

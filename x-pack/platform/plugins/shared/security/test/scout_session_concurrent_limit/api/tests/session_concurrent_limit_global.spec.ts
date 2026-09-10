@@ -9,12 +9,13 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  assertSessionCookie,
+  assertSessionExpired,
+  clearAllSessions,
   deleteNativeUser,
   disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
-  getSessionCount,
-  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithAnonymous,
   loginWithBasic,
@@ -23,12 +24,16 @@ import {
   refreshSessionIndex,
   SESSION_API_HEADERS,
   toggleSessionCleanupTask,
-} from '../../../session_management/helpers';
+} from '../../../scout_session_management/helpers';
 
 const TEST_USERNAME = 'concurrent_test_user';
 const TEST_PASSWORD = 'changeme';
 const ANONYMOUS_USERNAME = 'anonymous_user';
 const ANONYMOUS_PASSWORD = 'changeme';
+const SAML_USERNAME = 'a@b.c';
+const BASIC_PROVIDER = { type: 'basic', name: 'basic1' } as const;
+const SAML_PROVIDER = { type: 'saml', name: 'saml1' } as const;
+const ANONYMOUS_PROVIDER = { type: 'anonymous', name: 'anonymous1' } as const;
 
 test.describe('Session Concurrent Limit global', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   test.beforeAll(async ({ apiClient, config, esClient }) => {
@@ -47,8 +52,7 @@ test.describe('Session Concurrent Limit global', { tag: [...LOCAL_STATEFUL_TAGS]
     await refreshSessionIndex(apiClient, config);
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
-    await invalidateAllSessions(apiClient, config);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(0);
+    await clearAllSessions(apiClient, config, esClient);
   });
 
   test.afterAll(async ({ apiClient, config, esClient }) => {
@@ -63,197 +67,63 @@ test.describe('Session Concurrent Limit global', { tag: [...LOCAL_STATEFUL_TAGS]
     config,
   }) => {
     const cookieOne = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-    const meOne = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieOne },
-    });
-    expect(meOne.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, cookieOne, TEST_USERNAME, BASIC_PROVIDER);
 
     const cookieTwo = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-    const me1a = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieOne },
-    });
-    expect(me1a.body.username).toBe(TEST_USERNAME);
-    const me2a = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieTwo },
-    });
-    expect(me2a.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, cookieOne, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, cookieTwo, TEST_USERNAME, BASIC_PROVIDER);
 
     const cookieThree = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
     await refreshSessionIndex(apiClient, config);
-    const ex1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieOne },
-    });
-    expect(ex1).toHaveStatusCode(401);
-    const ok2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieTwo },
-    });
-    expect(ok2.body.username).toBe(TEST_USERNAME);
-    const ok3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieThree },
-    });
-    expect(ok3.body.username).toBe(TEST_USERNAME);
+    await assertSessionExpired(apiClient, cookieOne);
+    await assertSessionCookie(apiClient, cookieTwo, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, cookieThree, TEST_USERNAME, BASIC_PROVIDER);
 
     const cookieFour = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
     await refreshSessionIndex(apiClient, config);
-    const ex2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieTwo },
-    });
-    expect(ex2).toHaveStatusCode(401);
-    const ok3b = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieThree },
-    });
-    expect(ok3b.body.username).toBe(TEST_USERNAME);
-    const ok4 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieFour },
-    });
-    expect(ok4.body.username).toBe(TEST_USERNAME);
+    await assertSessionExpired(apiClient, cookieTwo);
+    await assertSessionCookie(apiClient, cookieThree, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, cookieFour, TEST_USERNAME, BASIC_PROVIDER);
   });
 
   test('should properly enforce session limit with single provider and multiple users', async ({
     apiClient,
     config,
   }) => {
+    const adminUsername = config.auth.username;
     const c1 = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
     const c2 = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-    const c3 = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
-    const c4 = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
+    const c3 = await loginWithBasic(apiClient, adminUsername, config.auth.password);
+    const c4 = await loginWithBasic(apiClient, adminUsername, config.auth.password);
 
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c1 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c2 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c3 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c4 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
+    await assertSessionCookie(apiClient, c1, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c2, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c3, adminUsername, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c4, adminUsername, BASIC_PROVIDER);
 
-    const c5 = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
+    const c5 = await loginWithBasic(apiClient, adminUsername, config.auth.password);
     await refreshSessionIndex(apiClient, config);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c1 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c2 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: c3 },
-      })
-    ).toHaveStatusCode(401);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c4 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c5 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
+    await assertSessionCookie(apiClient, c1, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c2, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionExpired(apiClient, c3);
+    await assertSessionCookie(apiClient, c4, adminUsername, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c5, adminUsername, BASIC_PROVIDER);
 
-    const c6 = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
+    const c6 = await loginWithBasic(apiClient, adminUsername, config.auth.password);
     await refreshSessionIndex(apiClient, config);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c1 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c2 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: c4 },
-      })
-    ).toHaveStatusCode(401);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c5 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c6 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
+    await assertSessionCookie(apiClient, c1, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c2, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionExpired(apiClient, c4);
+    await assertSessionCookie(apiClient, c5, adminUsername, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c6, adminUsername, BASIC_PROVIDER);
 
     const c7 = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
     await refreshSessionIndex(apiClient, config);
-    expect(
-      await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: c1 },
-      })
-    ).toHaveStatusCode(401);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c2 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c5 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c6 },
-        })
-      ).body.username
-    ).toBe(config.auth.username);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: c7 },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
+    await assertSessionExpired(apiClient, c1);
+    await assertSessionCookie(apiClient, c2, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c5, adminUsername, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c6, adminUsername, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, c7, TEST_USERNAME, BASIC_PROVIDER);
   });
 
   test('should properly enforce session limit even for multiple concurrent logins', async ({
@@ -287,117 +157,40 @@ test.describe('Session Concurrent Limit global', { tag: [...LOCAL_STATEFUL_TAGS]
     const samlCookieTwo = await loginWithSAML(apiClient, config);
 
     await refreshSessionIndex(apiClient, config);
-
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: basicCookieOne },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: basicCookieTwo },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: samlCookieOne },
-        })
-      ).body.username
-    ).toBe('a@b.c');
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: samlCookieTwo },
-        })
-      ).body.username
-    ).toBe('a@b.c');
+    await assertSessionCookie(apiClient, basicCookieOne, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, basicCookieTwo, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookieOne, SAML_USERNAME, SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookieTwo, SAML_USERNAME, SAML_PROVIDER);
 
     const samlCookieThree = await loginWithSAML(apiClient, config);
     await refreshSessionIndex(apiClient, config);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: basicCookieOne },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: basicCookieTwo },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: samlCookieOne },
-      })
-    ).toHaveStatusCode(401);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: samlCookieTwo },
-        })
-      ).body.username
-    ).toBe('a@b.c');
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: samlCookieThree },
-        })
-      ).body.username
-    ).toBe('a@b.c');
+    await assertSessionCookie(apiClient, basicCookieOne, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, basicCookieTwo, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionExpired(apiClient, samlCookieOne);
+    await assertSessionCookie(apiClient, samlCookieTwo, SAML_USERNAME, SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookieThree, SAML_USERNAME, SAML_PROVIDER);
 
     const basicCookieThree = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
     await refreshSessionIndex(apiClient, config);
-    expect(
-      await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: basicCookieOne },
-      })
-    ).toHaveStatusCode(401);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: basicCookieTwo },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: basicCookieThree },
-        })
-      ).body.username
-    ).toBe(TEST_USERNAME);
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: samlCookieTwo },
-        })
-      ).body.username
-    ).toBe('a@b.c');
-    expect(
-      (
-        await apiClient.get('/internal/security/me', {
-          headers: { ...SESSION_API_HEADERS, Cookie: samlCookieThree },
-        })
-      ).body.username
-    ).toBe('a@b.c');
+    await assertSessionExpired(apiClient, basicCookieOne);
+    await assertSessionCookie(apiClient, basicCookieTwo, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, basicCookieThree, TEST_USERNAME, BASIC_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookieTwo, SAML_USERNAME, SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookieThree, SAML_USERNAME, SAML_PROVIDER);
   });
 
   test('should not enforce session limit for anonymous users', async ({ apiClient, config }) => {
-    for (const _ of [0, 1, 2, 3]) {
-      const cookie = await loginWithAnonymous(apiClient);
-      await refreshSessionIndex(apiClient, config);
-      const response = await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: cookie },
-      });
-      expect(response.body.username).toBe(ANONYMOUS_USERNAME);
+    // Create every session first so the oldest is checked after the limit would have displaced it.
+    const cookies = [
+      await loginWithAnonymous(apiClient),
+      await loginWithAnonymous(apiClient),
+      await loginWithAnonymous(apiClient),
+      await loginWithAnonymous(apiClient),
+    ];
+    await refreshSessionIndex(apiClient, config);
+
+    for (const cookie of cookies) {
+      await assertSessionCookie(apiClient, cookie, ANONYMOUS_USERNAME, ANONYMOUS_PROVIDER);
     }
   });
 });

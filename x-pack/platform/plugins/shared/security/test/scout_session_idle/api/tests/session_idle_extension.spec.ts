@@ -9,15 +9,15 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  clearAllSessions,
   ensureSessionIndexReady,
   extractSessionCookie,
-  getSessionCount,
   getSessionsCreatedAt,
-  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
+  refreshSessionIndex,
   SESSION_API_HEADERS,
-} from '../../../session_management/helpers';
+} from '../../../scout_session_management/helpers';
 
 const IDLE_TIMEOUT_MS = 10_000;
 
@@ -26,8 +26,7 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
 
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
-    await invalidateAllSessions(apiClient, config);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 10000 }).toBe(0);
+    await clearAllSessions(apiClient, config, esClient);
     sessionCookie = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
   });
 
@@ -65,14 +64,17 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
 
   test('POST /internal/security/session should extend the session', async ({
     apiClient,
+    config,
     esClient,
   }) => {
+    await refreshSessionIndex(apiClient, config);
     const allCreatedAtBefore = await getSessionsCreatedAt(esClient);
     expect(allCreatedAtBefore.every((value) => value > 0)).toBe(true);
 
-    await apiClient.get('/internal/security/session', {
+    const beforeExtend = await apiClient.get('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, 'kbn-system-request': 'true', Cookie: sessionCookie },
     });
+    expect(beforeExtend).toHaveStatusCode(200);
 
     const extendResponse = await apiClient.post('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, Cookie: sessionCookie },
@@ -90,9 +92,12 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
     expect(getResponse).toHaveStatusCode(200);
     const getOverhead = Date.now() - afterExtend;
 
+    // The idle clock has only run down since login, so a no-op POST could never satisfy this.
+    expect(getResponse.body.expiresInMs).toBeGreaterThan(beforeExtend.body.expiresInMs);
     expect(getResponse.body.expiresInMs).toBeGreaterThan(IDLE_TIMEOUT_MS - getOverhead - 100);
     expect(getResponse.body.expiresInMs).toBeLessThan(IDLE_TIMEOUT_MS + 100);
 
+    await refreshSessionIndex(apiClient, config);
     const allCreatedAtAfter = await getSessionsCreatedAt(esClient);
     expect(allCreatedAtAfter).toStrictEqual(allCreatedAtBefore);
   });

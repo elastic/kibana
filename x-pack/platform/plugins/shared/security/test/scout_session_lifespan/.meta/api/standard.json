@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "e4974aa9b0838eebbd0820d059684ae965653122",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_lifespan/api/tests/session_lifespan.spec.ts",
-        "line": 26,
-        "column": 11
+        "line": 28,
+        "column": 89
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_lifespan/api/tests/session_lifespan.spec.ts",
-        "line": 44,
-        "column": 89
+        "line": 49,
+        "column": 18
       }
     }
   ]

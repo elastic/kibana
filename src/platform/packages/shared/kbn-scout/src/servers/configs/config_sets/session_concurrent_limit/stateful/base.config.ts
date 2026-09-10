@@ -11,6 +11,7 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 import {
   addOrReplaceArg,
+  preCreateSamlProvider,
   TEST_ENDPOINTS_PLUGIN_PATH,
   withSaml1Realm,
 } from '../../session_management/shared';
@@ -26,8 +27,7 @@ addOrReplaceArg(
     basic: { basic1: { order: 0 } },
     saml: {
       saml1: { order: 1, realm: 'saml1' },
-      // Required for Scout's preCreateSecurityIndexesViaSamlAuth step
-      'cloud-saml-kibana': { order: 4, realm: 'cloud-saml-kibana' },
+      ...preCreateSamlProvider(4),
     },
     anonymous: {
       anonymous1: {
@@ -40,7 +40,7 @@ addOrReplaceArg(
 addOrReplaceArg(
   kbnServerArgs,
   'xpack.task_manager.unsafe.exclude_task_types',
-  JSON.stringify(['UPTIME:*'])
+  JSON.stringify(['Fleet-Metrics-Task', 'UPTIME:*'])
 );
 kbnServerArgs.push(`--plugin-path=${TEST_ENDPOINTS_PLUGIN_PATH}`);
 

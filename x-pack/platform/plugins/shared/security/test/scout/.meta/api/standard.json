@@ -1,5 +1,5 @@
 {
-  "sha1": "aa22bdd03f2f5f2b7fe230d95a6d21603487142f",
+  "sha1": "461f6c86115011303acaca8188c53ac11e1806c2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 152,
-        "column": 11
+        "line": 138,
+        "column": 7
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
-        "line": 36,
-        "column": 8
+        "line": 39,
+        "column": 55
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
-        "line": 49,
-        "column": 8
+        "line": 52,
+        "column": 22
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
-        "line": 62,
-        "column": 8
+        "line": 58,
+        "column": 79
       }
     },
     {
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 81,
+        "line": 79,
         "column": 1
       }
     },
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 109,
-        "column": 5
+        "line": 103,
+        "column": 27
       }
     }
   ]

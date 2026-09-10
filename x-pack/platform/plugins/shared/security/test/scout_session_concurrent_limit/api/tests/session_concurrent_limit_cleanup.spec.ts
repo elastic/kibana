@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  assertSessionCookie,
+  assertSessionExpired,
+  clearAllSessions,
   deleteNativeUser,
   disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   finishSAMLHandshake,
   getSessionCount,
-  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithAnonymous,
   loginWithBasic,
@@ -24,14 +28,19 @@ import {
   refreshSessionIndex,
   removeSessionCreatedAt,
   runCleanupTask,
-  SESSION_API_HEADERS,
   startSAMLHandshake,
-} from '../../../session_management/helpers';
+} from '../../../scout_session_management/helpers';
 
 const TEST_USERNAME = 'concurrent_test_user';
 const TEST_PASSWORD = 'changeme';
 const ANONYMOUS_USERNAME = 'anonymous_user';
 const ANONYMOUS_PASSWORD = 'changeme';
+const SAML_USERNAME = 'a@b.c';
+const BASIC_PROVIDER = { type: 'basic', name: 'basic1' } as const;
+const SAML_PROVIDER = { type: 'saml', name: 'saml1' } as const;
+const ANONYMOUS_PROVIDER = { type: 'anonymous', name: 'anonymous1' } as const;
+// Gives sessions distinct `createdAt` values so cleanup deterministically removes the oldest.
+const CREATED_AT_SPACING_MS = 500;
 
 test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   test.beforeAll(async ({ esClient }) => {
@@ -48,8 +57,7 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
-    await invalidateAllSessions(apiClient, config);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(0);
+    await clearAllSessions(apiClient, config, esClient);
   });
 
   test.afterAll(async ({ esClient }) => {
@@ -66,7 +74,9 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
     test.setTimeout(100000);
 
     const cookieOne = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
+    await setTimeoutAsync(CREATED_AT_SPACING_MS);
     const cookieTwo = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
+    await setTimeoutAsync(CREATED_AT_SPACING_MS);
     const cookieThree = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
 
     await expect.poll(async () => getSessionCount(esClient), { timeout: 20000 }).toBe(3);
@@ -75,20 +85,11 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
 
     await expect.poll(async () => getSessionCount(esClient), { timeout: 30000 }).toBe(2);
 
-    const r1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieOne },
-    });
-    expect(r1).toHaveStatusCode(401);
+    await assertSessionExpired(apiClient, cookieOne);
 
-    const r2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieTwo },
-    });
-    expect(r2.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, cookieTwo, TEST_USERNAME, BASIC_PROVIDER);
 
-    const r3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieThree },
-    });
-    expect(r3.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, cookieThree, TEST_USERNAME, BASIC_PROVIDER);
   });
 
   test('should properly clean up sessions that exceeded concurrent session limit even for multiple providers', async ({
@@ -120,35 +121,17 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
 
     await expect.poll(async () => getSessionCount(esClient), { timeout: 30000 }).toBe(4);
 
-    const b1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: basicCookieOne },
-    });
-    expect(b1).toHaveStatusCode(401);
+    await assertSessionExpired(apiClient, basicCookieOne);
 
-    const b2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: basicCookieTwo },
-    });
-    expect(b2.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, basicCookieTwo, TEST_USERNAME, BASIC_PROVIDER);
 
-    const b3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: basicCookieThree },
-    });
-    expect(b3.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, basicCookieThree, TEST_USERNAME, BASIC_PROVIDER);
 
-    const s1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieOne },
-    });
-    expect(s1).toHaveStatusCode(401);
+    await assertSessionExpired(apiClient, samlCookieOne);
 
-    const s2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieTwo },
-    });
-    expect(s2.body.username).toBe('a@b.c');
+    await assertSessionCookie(apiClient, samlCookieTwo, SAML_USERNAME, SAML_PROVIDER);
 
-    const s3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieThree },
-    });
-    expect(s3.body.username).toBe('a@b.c');
+    await assertSessionCookie(apiClient, samlCookieThree, SAML_USERNAME, SAML_PROVIDER);
   });
 
   test('should properly clean up sessions that exceeded concurrent session limit when legacy sessions are present', async ({
@@ -176,6 +159,8 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
     const samlCookieThree = await loginWithSAML(apiClient, config);
     await expect.poll(async () => getSessionCount(esClient), { timeout: 20000 }).toBe(6);
 
+    // Make every session document visible before picking the newest one per user and provider.
+    await refreshSessionIndex(apiClient, config);
     const aggResponse = await esClient.search({
       index: '.kibana_security_session*',
       size: 0,
@@ -213,35 +198,17 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
 
     await expect.poll(async () => getSessionCount(esClient), { timeout: 30000 }).toBe(4);
 
-    const b1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: basicCookieOne },
-    });
-    expect(b1.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, basicCookieOne, TEST_USERNAME, BASIC_PROVIDER);
 
-    const b2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: basicCookieTwo },
-    });
-    expect(b2.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, basicCookieTwo, TEST_USERNAME, BASIC_PROVIDER);
 
-    const b3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: basicCookieThree },
-    });
-    expect(b3).toHaveStatusCode(401);
+    await assertSessionExpired(apiClient, basicCookieThree);
 
-    const s1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieOne },
-    });
-    expect(s1.body.username).toBe('a@b.c');
+    await assertSessionCookie(apiClient, samlCookieOne, SAML_USERNAME, SAML_PROVIDER);
 
-    const s2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieTwo },
-    });
-    expect(s2.body.username).toBe('a@b.c');
+    await assertSessionCookie(apiClient, samlCookieTwo, SAML_USERNAME, SAML_PROVIDER);
 
-    const s3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieThree },
-    });
-    expect(s3).toHaveStatusCode(401);
+    await assertSessionExpired(apiClient, samlCookieThree);
   });
 
   test('should not clean up session if the limit is not exceeded', async ({
@@ -260,15 +227,9 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
 
     await expect.poll(async () => getSessionCount(esClient), { timeout: 30000 }).toBe(2);
 
-    const r1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieOne },
-    });
-    expect(r1.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, cookieOne, TEST_USERNAME, BASIC_PROVIDER);
 
-    const r2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: cookieTwo },
-    });
-    expect(r2.body.username).toBe(TEST_USERNAME);
+    await assertSessionCookie(apiClient, cookieTwo, TEST_USERNAME, BASIC_PROVIDER);
   });
 
   test('should not clean up sessions of the anonymous users', async ({
@@ -289,10 +250,7 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
     await expect.poll(async () => getSessionCount(esClient), { timeout: 30000 }).toBe(3);
 
     for (const cookie of [cookieOne, cookieTwo, cookieThree]) {
-      const response = await apiClient.get('/internal/security/me', {
-        headers: { ...SESSION_API_HEADERS, Cookie: cookie },
-      });
-      expect(response.body.username).toBe(ANONYMOUS_USERNAME);
+      await assertSessionCookie(apiClient, cookie, ANONYMOUS_USERNAME, ANONYMOUS_PROVIDER);
     }
   });
 
@@ -315,12 +273,14 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
       handshakeOne.cookie,
       handshakeOne.location
     );
+    await setTimeoutAsync(CREATED_AT_SPACING_MS);
     const samlCookieTwo = await finishSAMLHandshake(
       apiClient,
       config,
       handshakeTwo.cookie,
       handshakeTwo.location
     );
+    await setTimeoutAsync(CREATED_AT_SPACING_MS);
     const samlCookieThree = await finishSAMLHandshake(
       apiClient,
       config,
@@ -330,19 +290,10 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
 
     await refreshSessionIndex(apiClient, config);
 
-    const s1 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieOne },
-    });
-    expect(s1).toHaveStatusCode(401);
+    await assertSessionExpired(apiClient, samlCookieOne);
 
-    const s2 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieTwo },
-    });
-    expect(s2.body.username).toBe('a@b.c');
+    await assertSessionCookie(apiClient, samlCookieTwo, SAML_USERNAME, SAML_PROVIDER);
 
-    const s3 = await apiClient.get('/internal/security/me', {
-      headers: { ...SESSION_API_HEADERS, Cookie: samlCookieThree },
-    });
-    expect(s3.body.username).toBe('a@b.c');
+    await assertSessionCookie(apiClient, samlCookieThree, SAML_USERNAME, SAML_PROVIDER);
   });
 });

@@ -9,25 +9,24 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  clearAllSessions,
   disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   extractSessionCookie,
   getSessionCount,
-  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
   loginWithSAML,
   runCleanupTask,
   SESSION_API_HEADERS,
-} from '../../../session_management/helpers';
+} from '../../../scout_session_management/helpers';
 
 test.describe('Session Idle cleanup', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
-    await invalidateAllSessions(apiClient, config);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 10000 }).toBe(0);
+    await clearAllSessions(apiClient, config, esClient);
   });
 
   test.afterAll(async ({ esClient }) => {

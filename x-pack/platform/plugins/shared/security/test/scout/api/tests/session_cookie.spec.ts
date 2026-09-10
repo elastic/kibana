@@ -14,7 +14,7 @@ import {
   loginWithBasic,
   putNativeUser,
   SESSION_API_HEADERS,
-} from '../../../session_management/helpers';
+} from '../../../scout_session_management/helpers';
 
 const TEST_USERNAME = 'session_cookie_test_user';
 const TEST_PASSWORD = 'changeme';

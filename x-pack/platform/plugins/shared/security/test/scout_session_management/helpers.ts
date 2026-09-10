@@ -72,16 +72,8 @@ export async function disableSessionAuthcDebugLogs(esClient: EsClient): Promise<
   });
 }
 
-export async function refreshSessionDocs(esClient: EsClient): Promise<void> {
-  await esClient.indices.refresh({
-    index: SESSION_INDEX,
-    ignore_unavailable: true,
-    expand_wildcards: 'all',
-  });
-}
-
+// Reads lag writes until the index refreshes; call `refreshSessionIndex` first or poll.
 export async function getSessionCount(esClient: EsClient): Promise<number> {
-  await refreshSessionDocs(esClient);
   const result = await esClient.search({
     index: SESSION_INDEX,
     ignore_unavailable: true,
@@ -92,7 +84,6 @@ export async function getSessionCount(esClient: EsClient): Promise<number> {
 
 export async function assertSessionCookie(
   apiClient: ApiClientFixture,
-  esClient: EsClient,
   cookie: string,
   username: string,
   provider: { type: string; name: string }
@@ -103,7 +94,6 @@ export async function assertSessionCookie(
   expect(response).toHaveStatusCode(200);
   expect(response.body.username).toBe(username);
   expect(response.body.authentication_provider).toMatchObject(provider);
-  await refreshSessionDocs(esClient);
 }
 
 export async function assertSessionExpired(
@@ -117,7 +107,6 @@ export async function assertSessionExpired(
 }
 
 export async function getSessionsCreatedAt(esClient: EsClient): Promise<number[]> {
-  await refreshSessionDocs(esClient);
   const result = await esClient.search({
     index: SESSION_INDEX,
     ignore_unavailable: true,
@@ -167,11 +156,26 @@ async function pollInvalidateUntilOk(
     .toBe(200);
 }
 
-export async function invalidateAllSessions(
+// Sessions are written with `refresh: false`, so refresh before the delete-by-query and the count.
+export async function clearAllSessions(
   apiClient: ApiClientFixture,
-  config: ScoutTestConfig
+  config: ScoutTestConfig,
+  esClient: EsClient
 ): Promise<void> {
-  await pollInvalidateUntilOk(apiClient, config, { match: 'all' });
+  await expect
+    .poll(
+      async () => {
+        await refreshSessionIndex(apiClient, config);
+        const response = await postSessionInvalidate(apiClient, config, { match: 'all' });
+        if (response.statusCode !== 200) {
+          return -1;
+        }
+        await refreshSessionIndex(apiClient, config);
+        return getSessionCount(esClient);
+      },
+      { timeout: 15000 }
+    )
+    .toBe(0);
 }
 
 export async function invalidateMatchingSessions(

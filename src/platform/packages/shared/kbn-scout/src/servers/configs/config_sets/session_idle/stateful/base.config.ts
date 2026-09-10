@@ -11,6 +11,7 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 import {
   addOrReplaceArg,
+  preCreateSamlProvider,
   TEST_ENDPOINTS_PLUGIN_PATH,
   withSaml1Realm,
 } from '../../session_management/shared';
@@ -28,8 +29,7 @@ addOrReplaceArg(
       saml_fallback: { order: 1, realm: 'saml1' },
       saml_override: { order: 2, realm: 'saml1', session: { idleTimeout: '2m' } },
       saml_disable: { order: 3, realm: 'saml1', session: { idleTimeout: 0 } },
-      // Required for Scout's preCreateSecurityIndexesViaSamlAuth step
-      'cloud-saml-kibana': { order: 4, realm: 'cloud-saml-kibana' },
+      ...preCreateSamlProvider(4),
     },
   })
 );

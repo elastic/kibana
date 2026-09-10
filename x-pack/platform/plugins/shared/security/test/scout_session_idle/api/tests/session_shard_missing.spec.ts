@@ -9,29 +9,26 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
-  assertSessionCookie,
+  clearAllSessions,
   disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   getCleanupTaskStatus,
   getSessionCount,
-  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
+  refreshSessionIndex,
   resetCleanupTask,
   runCleanupTask,
   simulatePointInTimeFailure,
-} from '../../../session_management/helpers';
-
-const BASIC_PROVIDER = { type: 'basic', name: 'basic1' } as const;
+} from '../../../scout_session_management/helpers';
 
 test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
     await resetCleanupTask(apiClient, config);
-    await invalidateAllSessions(apiClient, config);
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(0);
+    await clearAllSessions(apiClient, config, esClient);
   });
 
   test.afterEach(async ({ apiClient, config }) => {
@@ -47,10 +44,23 @@ test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, 
 
     await simulatePointInTimeFailure(apiClient, config, true);
 
-    const cookie = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
+    await loginWithBasic(apiClient, config.auth.username, config.auth.password);
     await runCleanupTask(apiClient, config);
 
-    await assertSessionCookie(apiClient, esClient, cookie, config.auth.username, BASIC_PROVIDER);
+    // The counter only moves once the task has run and hit the simulated failure.
+    await expect
+      .poll(
+        async () => {
+          const state = await getCleanupTaskStatus(apiClient);
+          return state.shardMissingCounter ?? 0;
+        },
+        { timeout: 30000 }
+      )
+      .toBeGreaterThanOrEqual(1);
+
+    // Cleanup failed quietly: the session document survived.
+    await refreshSessionIndex(apiClient, config);
+    expect(await getSessionCount(esClient)).toBe(1);
   });
 
   test('fails if shards are unavailable more than 10 times', async ({ apiClient, config }) => {

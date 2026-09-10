@@ -9,7 +9,12 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
-import { addOrReplaceArg, withSaml1Realm } from '../../session_management/shared';
+import {
+  addOrReplaceArg,
+  preCreateSamlProvider,
+  TEST_ENDPOINTS_PLUGIN_PATH,
+  withSaml1Realm,
+} from '../../session_management/shared';
 
 const kbnServerArgs = [...defaultConfig.kbnTestServer.serverArgs];
 
@@ -24,8 +29,7 @@ addOrReplaceArg(
       saml_fallback: { order: 1, realm: 'saml1' },
       saml_override: { order: 2, realm: 'saml1', session: { lifespan: '2m' } },
       saml_disable: { order: 3, realm: 'saml1', session: { lifespan: 0 } },
-      // Required for Scout's preCreateSecurityIndexesViaSamlAuth step
-      'cloud-saml-kibana': { order: 4, realm: 'cloud-saml-kibana' },
+      ...preCreateSamlProvider(4),
     },
   })
 );
@@ -34,6 +38,8 @@ addOrReplaceArg(
   'xpack.task_manager.unsafe.exclude_task_types',
   JSON.stringify(['Fleet-Metrics-Task', 'UPTIME:*'])
 );
+// Scout's ES client cannot refresh the restricted session index; the plugin's refresh endpoint can.
+kbnServerArgs.push(`--plugin-path=${TEST_ENDPOINTS_PLUGIN_PATH}`);
 
 export const sessionLifespanConfig: ScoutServerConfig = {
   ...defaultConfig,

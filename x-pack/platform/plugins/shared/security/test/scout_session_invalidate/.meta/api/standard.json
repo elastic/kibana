@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "76903139fd36ca7b42c3aa32d24bb630e02aa61e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 52,
-        "column": 8
+        "line": 73,
+        "column": 26
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 72,
-        "column": 22
+        "line": 83,
+        "column": 11
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 93,
-        "column": 62
+        "line": 96,
+        "column": 5
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 129,
-        "column": 65
+        "line": 116,
+        "column": 26
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 158,
-        "column": 12
+        "line": 139,
+        "column": 14
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 198,
-        "column": 13
+        "line": 156,
+        "column": 12
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 230,
-        "column": 50
+        "line": 182,
+        "column": 14
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
-        "line": 270,
-        "column": 61
+        "line": 201,
+        "column": 12
       }
     }
   ]

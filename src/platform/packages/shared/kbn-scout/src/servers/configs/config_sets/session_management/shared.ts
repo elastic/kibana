@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Helpers shared by the `session_*` config sets. Not a config set itself: there are no servers here.
+
 import { resolve } from 'path';
 
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../types';
 
@@ -31,6 +34,11 @@ export const addOrReplaceArg = (serverArgs: string[], argName: string, newValue:
     serverArgs[idx] = `${argPrefix}${newValue}`;
   }
 };
+
+/** SAML provider Scout needs for its `preCreateSecurityIndexesViaSamlAuth` step. */
+export const preCreateSamlProvider = (order: number) => ({
+  'cloud-saml-kibana': { order, realm: MOCK_IDP_REALM_NAME },
+});
 
 function saml1RealmEsArgs(config: ScoutServerConfig, order: number): string[] {
   const { hostname, port } = config.servers.kibana;

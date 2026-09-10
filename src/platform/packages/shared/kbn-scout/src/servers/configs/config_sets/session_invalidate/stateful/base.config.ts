@@ -9,7 +9,12 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
-import { addOrReplaceArg, withSaml1Realm } from '../../session_management/shared';
+import {
+  addOrReplaceArg,
+  preCreateSamlProvider,
+  TEST_ENDPOINTS_PLUGIN_PATH,
+  withSaml1Realm,
+} from '../../session_management/shared';
 
 const kbnServerArgs = [...defaultConfig.kbnTestServer.serverArgs];
 
@@ -20,11 +25,12 @@ addOrReplaceArg(
     basic: { basic1: { order: 0 } },
     saml: {
       saml1: { order: 1, realm: 'saml1' },
-      // Required for Scout's preCreateSecurityIndexesViaSamlAuth step
-      'cloud-saml-kibana': { order: 2, realm: 'cloud-saml-kibana' },
+      ...preCreateSamlProvider(2),
     },
   })
 );
+// Scout's ES client cannot refresh the restricted session index; the plugin's refresh endpoint can.
+kbnServerArgs.push(`--plugin-path=${TEST_ENDPOINTS_PLUGIN_PATH}`);
 
 export const sessionInvalidateConfig: ScoutServerConfig = {
   ...defaultConfig,
