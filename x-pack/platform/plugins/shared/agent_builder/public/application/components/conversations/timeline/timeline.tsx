@@ -21,7 +21,7 @@ import { ExecutionStarted } from './items/execution_started';
 import { ExecutionTerminated } from './items/execution_terminated';
 import { ExecutionFailed } from './items/execution_failed';
 import { ExecutionAborted } from './items/execution_aborted';
-import { ActiveExecution as ActiveExecutionComponent } from './active_execution';
+import { ActiveExecution } from './active_execution';
 import { AgentTurn } from './agent_turn';
 
 const TimelineEventItem: React.FC<{ event: TimelineEvent; origin?: ConversationRoundOrigin }> = ({
@@ -107,7 +107,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       {activeExecution && (
         <EuiFlexItem>
           <AgentTurn isLoading>
-            <ActiveExecutionComponent activeExecution={activeExecution} />
+            <ActiveExecution activeExecution={activeExecution} />
           </AgentTurn>
         </EuiFlexItem>
       )}
