@@ -74,6 +74,7 @@ export class SyntheticsService {
 
   public indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
+  private lastIndexTemplateInstallError?: string;
 
   public isAllowed: boolean;
   public signupUrl: string | null;
@@ -136,19 +137,36 @@ export class SyntheticsService {
         ) {
           this.logger.debug('Installed synthetics index templates');
           this.indexTemplateExists = true;
+          this.lastIndexTemplateInstallError = undefined;
         } else if (
           installedPackage.name === 'synthetics' &&
           installedPackage.install_status === 'install_failed'
         ) {
-          const e = new IndexTemplateInstallationError();
-          this.logger.error(e.message, { error: e });
+          this.logIndexTemplateInstallationError(
+            new IndexTemplateInstallationError('Fleet reported install_status "install_failed".')
+          );
           this.indexTemplateExists = false;
         }
       }
     } catch (e) {
-      this.logger.error(new IndexTemplateInstallationError().message, { error: e });
+      this.logIndexTemplateInstallationError(new IndexTemplateInstallationError(e?.message), e);
       this.indexTemplateInstalling = false;
     }
+  }
+
+  /**
+   * Logs a synthetics index-template installation failure while avoiding a
+   * repeated ERROR on every sync tick. The full ERROR (with the underlying
+   * cause) is logged once per distinct failure; identical consecutive failures
+   * are logged at DEBUG until the failure changes or installation succeeds.
+   */
+  private logIndexTemplateInstallationError(error: IndexTemplateInstallationError, cause?: unknown) {
+    if (this.lastIndexTemplateInstallError === error.message) {
+      this.logger.debug(`${error.message} (repeated failure)`);
+      return;
+    }
+    this.lastIndexTemplateInstallError = error.message;
+    this.logger.error(error.message, { error: cause ?? error });
   }
 
   public async registerServiceLocations() {
@@ -737,9 +755,11 @@ export class SyntheticsService {
 }
 
 class IndexTemplateInstallationError extends Error {
-  constructor() {
+  constructor(cause?: string) {
     super();
-    this.message = 'Failed to install synthetics index templates.';
+    this.message = cause
+      ? `Failed to install synthetics index templates: ${cause}`
+      : 'Failed to install synthetics index templates.';
     this.name = 'IndexTemplateInstallationError';
   }
 }
