@@ -10,20 +10,19 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
-import { createGetStreamFeaturesTool } from './tool';
+import { createGetFeaturesTool } from './tool';
 
 jest.mock('../../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-describe('ki_stream_features_get tool', () => {
+describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as StreamsServer;
   const getFeatures = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       licensing: {},
-      streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     } as unknown as RouteHandlerScopedClients;
   }) as unknown as jest.MockedFunction<GetScopedClients>;
@@ -48,7 +47,7 @@ describe('ki_stream_features_get tool', () => {
   });
 
   const createTool = () =>
-    createGetStreamFeaturesTool({
+    createGetFeaturesTool({
       getScopedClients,
       server,
       logger,
@@ -60,15 +59,15 @@ describe('ki_stream_features_get tool', () => {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.schema.safeParse({ stream_name: 'logs.test', limit: 100 }).success).toBe(true);
-    expect(tool.schema.safeParse({ stream_name: 'logs.test', limit: 101 }).success).toBe(false);
+    expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 100 }).success).toBe(true);
+    expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 101 }).success).toBe(false);
   });
 
-  it('loads and compacts stream features', async () => {
+  it('loads and compacts features', async () => {
     const result = await invokeHandler(
       createTool(),
       {
-        stream_name: 'logs.test',
+        target_id: 'logs.test',
         feature_types: ['entity'],
         min_confidence: 70,
         limit: 25,
@@ -102,8 +101,9 @@ describe('ki_stream_features_get tool', () => {
     ]);
     const firstResult = result.results[0];
     if (firstResult.type !== 'other') throw new Error('Expected other result');
-    expect(firstResult.data.features[0]).not.toHaveProperty('run_id');
-    expect(firstResult.data.features[0]).not.toHaveProperty('stream_name');
+    const data = firstResult.data as { features: Array<Record<string, unknown>>; count: number };
+    expect(data.features[0]).not.toHaveProperty('run_id');
+    expect(data.features[0]).not.toHaveProperty('stream_name');
   });
 
   it('returns an Agent Builder error result', async () => {
@@ -111,7 +111,7 @@ describe('ki_stream_features_get tool', () => {
 
     const result = await invokeHandler(
       createTool(),
-      { stream_name: 'logs.test' },
+      { target_id: 'logs.test' },
       createMockToolContext()
     );
     if (!('results' in result)) {

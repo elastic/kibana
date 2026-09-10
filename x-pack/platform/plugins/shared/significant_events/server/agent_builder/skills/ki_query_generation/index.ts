@@ -13,7 +13,7 @@ import {
   createMemorySearchTool,
   type MemoryToolsOptions,
 } from '../../../memory_and_investigation/tools/memory';
-import { createGetStreamFeaturesTool } from './get_stream_features/tool';
+import { createGetFeaturesTool } from './get_features/tool';
 import { createValidateQueriesTool } from './validate_queries/tool';
 import description from './description.text';
 import content from './skill.md.text';
@@ -36,10 +36,10 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
         createMemorySearchTool(options),
         createMemoryReadTool(options),
         createMemoryListTool(options),
-        createGetStreamFeaturesTool({
+        createGetFeaturesTool({
           getScopedClients,
           server,
-          logger: logger.get('ki_stream_features_get_tool'),
+          logger: logger.get('ki_features_get_tool'),
         }),
         createValidateQueriesTool({
           getScopedClients,

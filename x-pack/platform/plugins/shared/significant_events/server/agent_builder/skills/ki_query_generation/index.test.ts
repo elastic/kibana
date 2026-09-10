@@ -10,7 +10,7 @@ import type { MemoryToolsOptions } from '../../../memory_and_investigation/tools
 import { createKIQueryGenerationSkill } from '.';
 
 describe('createKIQueryGenerationSkill', () => {
-  it('binds query-generation and read-only memory tools inline', () => {
+  it('returns query-generation and memory tools as inline tools', () => {
     const skill = createKIQueryGenerationSkill({
       getScopedClients: jest.fn(),
       server: {},
@@ -21,7 +21,7 @@ describe('createKIQueryGenerationSkill', () => {
       expect.objectContaining({ id: 'platform_sig_events_memory_search' }),
       expect.objectContaining({ id: 'platform_sig_events_memory_read' }),
       expect.objectContaining({ id: 'platform_sig_events_memory_list' }),
-      expect.objectContaining({ id: 'platform_sig_events_ki_stream_features_get' }),
+      expect.objectContaining({ id: 'platform_sig_events_ki_features_get' }),
       expect.objectContaining({ id: 'platform_sig_events_ki_queries_validate' }),
     ]);
     expect(skill.getRegistryTools).toBeUndefined();

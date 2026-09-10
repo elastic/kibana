@@ -42,10 +42,10 @@ const candidateQuerySchema = z.object({
 });
 
 const validateQueriesSchema = z.object({
-  stream_name: z
+  target_id: z
     .string()
     .max(MAX_ID_LENGTH)
-    .describe('Stream against which the candidate ES|QL queries must be validated.'),
+    .describe('Target identifier against which the candidate ES|QL queries must be validated.'),
   queries: z
     .array(candidateQuerySchema)
     .min(1)
@@ -66,9 +66,9 @@ export const createValidateQueriesTool = ({
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Validate candidate KI queries against a stream. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. Use the returned errors to repair rejected queries before finalizing.',
+      'Validate candidate KI queries against a target. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. Use the returned errors to repair rejected queries before finalizing.',
     schema: validateQueriesSchema,
-    handler: async ({ stream_name: streamName, queries }, context) => {
+    handler: async ({ target_id: targetId, queries }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         await assertSignificantEventsAccess({
@@ -76,15 +76,15 @@ export const createValidateQueriesTool = ({
           licensing: scopedClients.licensing,
         });
 
-        const stream = await scopedClients.streamsClient.getStream(streamName);
+        const stream = await scopedClients.streamsClient.getStream(targetId);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];
-        const [{ hits: features }, { [streamName]: existingLinks }] = await Promise.all([
-          kiClient.getFeatures(streamName, {
+        const [{ hits: features }, { [targetId]: existingLinks }] = await Promise.all([
+          kiClient.getFeatures(targetId, {
             id: featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
-          kiClient.getStreamToQueryLinksMap([streamName]),
+          kiClient.getStreamToQueryLinksMap([targetId]),
         ]);
         const existingQueries = existingLinks.map(({ query }) => ({
           id: query.id,

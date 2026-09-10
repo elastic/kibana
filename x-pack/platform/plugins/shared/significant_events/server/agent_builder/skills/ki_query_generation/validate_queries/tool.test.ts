@@ -117,16 +117,16 @@ describe('ki_queries_validate tool', () => {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.schema.safeParse({ stream_name: 'logs.test', queries: [candidate] }).success).toBe(
+    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [candidate] }).success).toBe(
       true
     );
-    expect(tool.schema.safeParse({ stream_name: 'logs.test', queries: [] }).success).toBe(false);
+    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(false);
   });
 
-  it('reloads authoritative state and validates with the stream-data client', async () => {
+  it('resolves stream sources, queries KI state, and returns validated results', async () => {
     const result = await invokeHandler(
       createTool(),
-      { stream_name: 'logs.test', queries: [candidate] },
+      { target_id: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
@@ -182,7 +182,7 @@ describe('ki_queries_validate tool', () => {
 
     const result = await invokeHandler(
       createTool(),
-      { stream_name: 'logs.test', queries: [candidate] },
+      { target_id: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {

@@ -19,11 +19,10 @@ import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 
-export const SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID =
-  'platform.sig_events.ki_stream_features_get';
+export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
-const getStreamFeaturesSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Stream whose KI features should be loaded.'),
+const getFeaturesSchema = z.object({
+  target_id: z.string().max(MAX_ID_LENGTH).describe('Target identifier for KI feature lookup.'),
   feature_types: z
     .array(z.string().max(MAX_ID_LENGTH))
     .max(20)
@@ -33,7 +32,7 @@ const getStreamFeaturesSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 
-export const createGetStreamFeaturesTool = ({
+export const createGetFeaturesTool = ({
   getScopedClients,
   server,
   logger,
@@ -41,20 +40,15 @@ export const createGetStreamFeaturesTool = ({
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}): BuiltinSkillBoundedTool<typeof getStreamFeaturesSchema> => {
+}): BuiltinSkillBoundedTool<typeof getFeaturesSchema> => {
   return {
-    id: SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID,
+    id: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Load the extracted and computed KI features for one stream before generating detection queries.',
-    schema: getStreamFeaturesSchema,
+      'Load the extracted and computed KI features for a target before generating detection queries.',
+    schema: getFeaturesSchema,
     handler: async (
-      {
-        stream_name: streamName,
-        feature_types: featureTypes,
-        min_confidence: minConfidence,
-        limit,
-      },
+      { target_id: targetId, feature_types: featureTypes, min_confidence: minConfidence, limit },
       context
     ) => {
       try {
@@ -63,9 +57,8 @@ export const createGetStreamFeaturesTool = ({
           server,
           licensing: scopedClients.licensing,
         });
-        await scopedClients.streamsClient.getStream(streamName);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const { hits } = await kiClient.getFeatures(streamName, {
+        const { hits } = await kiClient.getFeatures(targetId, {
           type: featureTypes,
           minConfidence,
           limit,
@@ -83,7 +76,7 @@ export const createGetStreamFeaturesTool = ({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`Get stream features failed: ${message}`);
+        logger.warn(`Get features failed: ${message}`);
         return {
           results: [{ type: ToolResultType.error, data: { message } }],
         };
