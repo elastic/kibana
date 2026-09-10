@@ -12,6 +12,7 @@ import type {
   FullResult,
   Suite,
   TestCase,
+  TestError,
   TestResult,
 } from '@playwright/test/reporter';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -74,7 +75,8 @@ const createMockResult = (
     stdout: [],
   } as unknown as TestResult);
 
-const createMockFullResult = (): FullResult => ({ status: 'failed', duration: 1000 } as FullResult);
+const createMockFullResult = (status: FullResult['status'] = 'failed'): FullResult =>
+  ({ status, duration: 1000 } as FullResult);
 
 describe('ScoutFailedTestReporter', () => {
   let reporter: ScoutFailedTestReporter;
@@ -128,6 +130,24 @@ describe('ScoutFailedTestReporter', () => {
 
     expect(excludeTestIds.has(flakyId)).toBe(true);
     expect(excludeTestIds.has(hardFailureId)).toBe(false);
+  });
+
+  it('records global errors and a run timeout as runner errors, not test failures', () => {
+    const saveRunnerErrorsSpy = jest
+      .spyOn(ScoutFailureTracker.prototype, 'saveRunnerErrors')
+      .mockImplementation(() => {});
+    reporter.onBegin(createMockConfig(), createMockSuite([]));
+
+    reporter.onError({ message: 'global teardown threw' } as TestError);
+    reporter.onError({ value: 'string thrown' } as TestError);
+    reporter.onEnd(createMockFullResult('timedout'));
+
+    expect(reportLogEventSpy).not.toHaveBeenCalled();
+    expect(trackerAddFailureSpy).not.toHaveBeenCalled();
+    expect(saveRunnerErrorsSpy).toHaveBeenCalledWith({
+      status: 'timedout',
+      errors: ['global teardown threw', 'string thrown', 'Playwright run timedout'],
+    });
   });
 
   it('stamps distinct attempt numbers on each attempt of a repeatedly-failing test', () => {

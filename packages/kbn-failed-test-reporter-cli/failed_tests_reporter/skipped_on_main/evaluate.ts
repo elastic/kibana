@@ -9,6 +9,7 @@
 
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
+import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -62,6 +63,12 @@ export async function collectJUnitFailures(xmlPaths: string[]): Promise<Evaluabl
   return failures;
 }
 
+/**
+ * Reads Scout failures from `scout-failures-<runId>.ndjson`. Runner-level errors (global
+ * setup/teardown, config, run timeout) are written by the reporter to a sibling
+ * `scout-runner-errors-<runId>.json`; they have no test file, so they always evaluate as real
+ * and prevent the run from being forgiven on the strength of its test failures alone.
+ */
 export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] {
   const failures: EvaluableFailure[] = [];
   for (const ndjsonPath of ndjsonPaths) {
@@ -76,6 +83,22 @@ export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] 
         suite: entry.suite,
         title: entry.title,
       });
+    }
+
+    const runnerErrorsPath = Path.join(
+      Path.dirname(ndjsonPath),
+      Path.basename(ndjsonPath).replace(
+        /^scout-failures-(.*)\.ndjson$/,
+        'scout-runner-errors-$1.json'
+      )
+    );
+    if (runnerErrorsPath !== ndjsonPath && Fs.existsSync(runnerErrorsPath)) {
+      const { errors } = JSON.parse(Fs.readFileSync(runnerErrorsPath, 'utf8')) as {
+        errors: string[];
+      };
+      for (const message of errors) {
+        failures.push({ kind: 'scout', file: '', suite: 'Scout runner', title: message });
+      }
     }
   }
   return failures;

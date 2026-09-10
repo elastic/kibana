@@ -179,4 +179,30 @@ describe('failure adapters', () => {
       { kind: 'scout', file: 'other.spec.ts', suite: 'suite b', title: 'test b' },
     ]);
   });
+
+  it('turns Scout runner errors into failures that are never forgiven', () => {
+    const ndjsonPath = Path.join(tmpDir, 'scout-failures-run1.ndjson');
+    Fs.writeFileSync(
+      ndjsonPath,
+      JSON.stringify({ suite: 'suite a', title: 'test a', location: SCOUT_FILE }) + '\n'
+    );
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'scout-runner-errors-run1.json'),
+      JSON.stringify({ status: 'failed', errors: ['global teardown threw'] })
+    );
+
+    const failures = collectScoutFailures([ndjsonPath]);
+    const evaluation = evaluateFailures(failures, {
+      mainRef: 'main',
+      baseRef: 'base',
+      readFile: (ref) =>
+        ref === 'main'
+          ? 'test.describe.skip("suite a", () => { test("test a", () => {}) })'
+          : 'test.describe("suite a", () => { test("test a", () => {}) })',
+    });
+
+    expect(evaluation.real).toEqual([
+      { kind: 'scout', file: '', suite: 'Scout runner', title: 'global teardown threw' },
+    ]);
+  });
 });

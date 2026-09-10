@@ -13,6 +13,7 @@ import type {
   Reporter,
   Suite,
   TestCase,
+  TestError,
   TestResult,
 } from '@playwright/test/reporter';
 
@@ -57,6 +58,8 @@ export class ScoutFailedTestReporter implements Reporter {
   private kibanaModule: TestFailure['kibanaModule'];
   /** Root suite captured in `onBegin`; walked in `onEnd` to identify tests that ended up flaky. */
   private suite?: Suite;
+  /** Errors reported outside any test (global setup/teardown, config, worker crashes). */
+  private readonly runnerErrors: string[] = [];
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -173,6 +176,12 @@ export class ScoutFailedTestReporter implements Reporter {
     this.failureTracker?.addFailure(testFailure);
   }
 
+  onError(error: TestError) {
+    const message =
+      error.message ?? (error.value !== undefined ? String(error.value) : 'unknown error');
+    this.runnerErrors.push(stripFilePath(message));
+  }
+
   onEnd(result: FullResult) {
     // A test's outcome is only knowable once every attempt has run, so flaky tests are excluded
     // here rather than in onTestEnd. Their failing attempt still stays in the report artifact
@@ -184,11 +193,17 @@ export class ScoutFailedTestReporter implements Reporter {
         .map((test) => getTestIdentity(test).id)
     );
 
+    // 'failed' is explained by the per-test failures; a global timeout or interruption is not.
+    if (result.status === 'timedout' || result.status === 'interrupted') {
+      this.runnerErrors.push(`Playwright run ${result.status}`);
+    }
+
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
       // Save failure tracking file for GitHub issue integration
       this.failureTracker?.save({ excludeTestIds: flakyTestIds });
+      this.failureTracker?.saveRunnerErrors({ status: result.status, errors: this.runnerErrors });
     } finally {
       this.report.conclude();
     }
