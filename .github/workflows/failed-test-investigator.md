@@ -381,8 +381,10 @@ If a fix PR is already up (in draft or in review) in the Kibana repository — t
 
 ```markdown
 > [!TIP]
-> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix PR.
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix PR — `<Team: label>` has opted out of automatic fix requests.
 ```
+
+Fill `<Team: label>` with the issue's opted-out team label, e.g. `Team:Kibana Management`.
 
 ### 1. Visible header (required)
 
