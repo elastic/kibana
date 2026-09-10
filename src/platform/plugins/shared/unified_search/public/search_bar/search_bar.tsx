@@ -154,10 +154,14 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    */
   isDisabled?: boolean;
   /**
-   * Disables only the submit / Search button. Empty ES|QL queries are also
-   * treated as disabled so Discover (and other consumers) cannot run them.
+   * Disables only the submit / Search button, unlike `isDisabled` which
+   * greys out the entire query bar.
    */
   disableSubmitAction?: boolean;
+  /**
+   * Tooltip shown on the Search button when `disableSubmitAction` is true.
+   */
+  disableSubmitActionTooltip?: string;
 
   submitOnBlur?: boolean;
 
@@ -805,6 +809,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showAddFilter={this.props.showFilterBar}
           isDisabled={this.props.isDisabled}
           disableSubmitAction={this.props.disableSubmitAction}
+          disableSubmitActionTooltip={this.props.disableSubmitActionTooltip}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}

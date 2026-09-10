@@ -320,6 +320,29 @@ export const DiscoverTopNav = ({
   const mainDataState = useDataState(dataStateContainer.data$.main$);
   const isUninitializedEsqlTab =
     isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED;
+  const [isLiveEsqlEmpty, setIsLiveEsqlEmpty] = useState(() => isEmptyEsqlQuery(query));
+
+  useEffect(() => {
+    setIsLiveEsqlEmpty(isEmptyEsqlQuery(query));
+  }, [currentTabId, query]);
+
+  const onQueryChange = useCallback(({ query: nextQuery }: { query?: Query | AggregateQuery }) => {
+    setIsLiveEsqlEmpty(isEmptyEsqlQuery(nextQuery));
+  }, []);
+
+  const disableEmptyEsqlControls = isUninitializedEsqlTab && isLiveEsqlEmpty;
+  const emptyEsqlQueryDisabledTooltip = disableEmptyEsqlControls
+    ? i18n.translate('discover.topNav.emptyEsqlQueryDisabledTooltip', {
+        defaultMessage: 'Enter an ES|QL query to enable this.',
+      })
+    : undefined;
+  const datePicker =
+    typeof showDatePicker === 'object'
+      ? {
+          disabled: showDatePicker.disabled || disableEmptyEsqlControls,
+          disabledTooltip: emptyEsqlQueryDisabledTooltip,
+        }
+      : showDatePicker;
   const esqlEditorInitialState = useMemo(
     () =>
       isUninitializedEsqlTab
@@ -384,6 +407,9 @@ export const DiscoverTopNav = ({
         onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
+        disableSubmitAction={disableEmptyEsqlControls}
+        disableSubmitActionTooltip={emptyEsqlQueryDisabledTooltip}
+        onQueryChange={onQueryChange}
         onSavedQueryIdChange={updateSavedQueryId}
         disableSubscribingToGlobalDataServices={true}
         query={query}
@@ -394,7 +420,7 @@ export const DiscoverTopNav = ({
         isRefreshPaused={refreshInterval?.pause}
         savedQueryId={savedQuery}
         screenTitle={persistedDiscoverSession?.title}
-        showDatePicker={showDatePicker}
+        showDatePicker={datePicker}
         enableDateRangePicker
         allowSavingQueries
         showSearchBar={true}
@@ -457,6 +483,8 @@ export const DiscoverTopNav = ({
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
                   defaultMessage: 'Only applies to queries that use one STATS command.',
                 }),
+                disabled: disableEmptyEsqlControls,
+                disabledTooltip: emptyEsqlQueryDisabledTooltip,
               }
             : undefined
         }
