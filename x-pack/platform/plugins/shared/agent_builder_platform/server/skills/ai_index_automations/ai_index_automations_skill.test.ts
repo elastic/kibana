@@ -89,11 +89,19 @@ describe('aiIndexAutomationsSkill', () => {
     expect(toolIds.some((id) => /createKi|updateKi|deleteKi/i.test(id))).toBe(false);
   });
 
-  it('binds no workflow generator, since authoring starts from a template', async () => {
+  it('binds no workflow generator, and names it only to forbid it', async () => {
     const toolIds = (await aiIndexAutomationsSkill.getRegistryTools?.()) ?? [];
 
     expect(toolIds).not.toContain(platformCoreTools.generateWorkflow);
-    expect(aiIndexAutomationsSkill.content).not.toContain('generate_workflow');
+
+    // Unbinding it does not take it away — it is in `defaultAgentToolIds`, and `run_subagent`
+    // gives a subagent the parent's configuration — so every mention has to be a prohibition.
+    const mentions = aiIndexAutomationsSkill.content
+      .split('\n')
+      .filter((line) => line.includes('generate_workflow'));
+
+    expect(mentions.length).toBeGreaterThan(0);
+    expect(mentions.every((line) => /must not call|Do not generate/.test(line))).toBe(true);
   });
 
   it('only instructs the agent to call tools that are actually bound', async () => {
@@ -110,7 +118,13 @@ describe('aiIndexAutomationsSkill', () => {
     ];
 
     expect(referencedToolIds.length).toBeGreaterThan(0);
-    expect(referencedToolIds.filter((toolId) => !boundTools.includes(toolId))).toEqual([]);
+    // `generate_workflow` is the one tool named without being bound, because the skill's purpose
+    // in naming it is to tell the agent not to call the one it already has.
+    const shouldBeBound = referencedToolIds.filter(
+      (toolId) => toolId !== platformCoreTools.generateWorkflow
+    );
+
+    expect(shouldBeBound.filter((toolId) => !boundTools.includes(toolId))).toEqual([]);
   });
 
   describe('content', () => {
@@ -193,18 +207,31 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/at most five attempts/);
     });
 
-    it('tells the brief to say why workflow-authoring is needed, which its own description denies', () => {
-      expect(content).toMatch(/why `workflow-authoring` is needed/);
+    it('has the subagent load the skill by id rather than search for an id it was given', () => {
+      expect(content).toMatch(/`load_skill` on `ai-index-automations`/);
+      expect(content).toMatch(/do not reach for\s+`search_relevant_skills`/);
     });
 
-    it('has the subagent load skills by id rather than search for ids it was given', () => {
-      expect(content).toMatch(/`load_skill` on `ai-index-automations`/);
-      expect(content).toMatch(/do not reach for `search_relevant_skills`/);
+    it('keeps the subagent off workflow-authoring, which teaches the flow this replaces', () => {
+      expect(content).toMatch(/Do not load it to author one of these/);
+      expect(content).toMatch(/do not send it to `workflow-authoring`/);
+      expect(content).toMatch(/One skill is enough/);
+    });
+
+    it('forbids generation outright, since unbinding the tool cannot remove it', () => {
+      expect(content).toMatch(/\*\*Do not generate a workflow\.\*\*/);
+      expect(content).toMatch(/in every agent's default\s+toolset/);
+      expect(content).toMatch(/must not call `platform\.core\.generate_workflow`/);
+    });
+
+    it('keeps the attachment read-only, against the generic guidance that offers an update', () => {
+      expect(content).toMatch(/a handoff, not a workspace/);
+      expect(content).toMatch(/do not try to write back to it with `attachment_update`/);
     });
 
     it('restates the rules in the brief, since a skill loaded late cannot govern earlier calls', () => {
       expect(content).toMatch(/restated in the prompt rather than left to the skill/);
-      expect(content).toMatch(/cannot govern the first two/);
+      expect(content).toMatch(/cannot govern the first/);
     });
 
     it('points at the referenced-file path instead of browsing the filesystem', () => {
@@ -387,8 +414,23 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/approving the save approves the run/);
     });
 
-    it('points at the workflow authoring skill for definition syntax', () => {
-      expect(content).toContain('workflow-authoring');
+    it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
+      expect(content).toContain('The rest of the syntax these automations use');
+      expect(content).toMatch(/An `if` condition is KQL, not Liquid/);
+      expect(content).toContain('iteration-on-failure');
+      expect(content).toContain('on-failure');
+    });
+
+    it('documents every Liquid filter the templates depend on', () => {
+      const templates = (aiIndexAutomationsSkill.referencedContent ?? [])
+        .map(({ content: yaml }) => yaml)
+        .join('\n');
+      const used = new Set(
+        [...templates.matchAll(/\|\s*([a-z_]+)\s*(?::|\}\})/g)].map(([, filter]) => filter)
+      );
+
+      expect(used.size).toBeGreaterThan(0);
+      expect([...used].filter((filter) => !content.includes(`\`${filter}`))).toEqual([]);
     });
 
     it('notes the ES|QL row cap, which otherwise truncates a large corpus silently', () => {

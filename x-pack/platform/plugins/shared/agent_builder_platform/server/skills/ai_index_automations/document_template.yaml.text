@@ -46,6 +46,15 @@ triggers:
   - type: manual
 
 steps:
+  # Fetched once, outside the loop, and handed to every summary. Without it the model only ever
+  # sees one document's text, so the access patterns it writes name fields that do not exist and
+  # the KI fails verification — which costs the whole per-document model call.
+  - name: fetch_mapping
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.source_index }}/_mapping
+
   - name: discover_documents
     type: elasticsearch.esql.query
     with:
@@ -59,6 +68,9 @@ steps:
   - name: loop_documents
     type: foreach
     foreach: "{{ steps.discover_documents.output.values | json }}"
+    # One document that fails to summarise should not cost the rest of the batch.
+    iteration-on-failure:
+      continue: true
     steps:
       # Column order comes from the `KEEP` above: _id, title, body. Changing that list moves
       # these indices.
@@ -88,6 +100,10 @@ steps:
             Body:
             {{ steps.document_context.output.body }}
 
+            Mapping of {{ consts.source_index }} — the only fields that exist, and the only ones
+            your ES|QL may name:
+            {{ steps.fetch_mapping.output | json }}
+
             Produce a structured summary of this document, using only its text above.
 
             This KI sits alongside one per other document in the corpus, so `summary` has to say
@@ -107,8 +123,10 @@ steps:
 
             ES|QL correctness rules — esql_template and esql_example are both executed by the
             verifier, so both must be valid and runnable:
-            - Start with `FROM {{ consts.source_index }}`; use `|` between commands; use real
-              field names only. Reading `_id` requires `FROM {{ consts.source_index }} METADATA _id`.
+            - Start with `FROM {{ consts.source_index }}`; use `|` between commands. Every field
+              you name must appear in the mapping above — a field inferred from the document's
+              subject matter rather than read off the mapping is the most common way this fails.
+              Reading `_id` requires `FROM {{ consts.source_index }} METADATA _id`.
             - Quote string literals with double quotes; do not quote numbers or booleans.
             - Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z"; for relative
               ranges prefer `NOW() - 30 days`.

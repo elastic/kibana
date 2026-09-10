@@ -58,6 +58,9 @@ steps:
   - name: loop_entities
     type: foreach
     foreach: "{{ steps.discover_entities.output.values | json }}"
+    # One entity that fails to profile should not cost the rest of the batch.
+    iteration-on-failure:
+      continue: true
     steps:
       # `KEEP` above leaves one column, so the entity is item[0]. Adding columns to that query
       # moves this index.

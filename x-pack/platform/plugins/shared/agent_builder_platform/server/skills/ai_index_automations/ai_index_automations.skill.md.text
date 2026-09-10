@@ -26,9 +26,15 @@ automations write to the same index, attribute an indicator to one by reading th
 seeing which writes to that destination and id pattern. If that does not settle it, say attribution
 was not established rather than guessing.
 
-For Liquid templating, `on-failure` handling and the semantics of a built-in step type, load
-`workflow-authoring` rather than inferring them from the YAML. The `context-engine` steps are the
-exception: no other skill or tool describes them, so their contracts are written out below.
+The syntax these automations need — Liquid templating, `on-failure` handling, `if` conditions — is
+written out below, alongside the `context-engine` step contracts that no other skill or tool
+describes. Between that and the templates, there is nothing here that needs a second skill loaded
+to read or to write.
+
+`workflow-authoring` covers the workflow engine in general and is worth loading for a validation
+error you cannot place from the message alone. Do not load it to author one of these: it teaches a
+generate-first flow that the templates replace, and it is more specific and more recently read than
+this skill, so it wins the argument by default. See "Do not generate a workflow" below.
 
 ## What every automation must do
 
@@ -131,6 +137,76 @@ field of the structured result is at `steps.<name>.output.content.<field>`. It i
 `steps.<name>.output.<field>`. Referencing the flat path interpolates nothing, and the run completes
 having written indicators whose fields are empty.
 
+## The rest of the syntax these automations use
+
+Everything an automation of this kind needs is here or in a template. The general workflow-engine
+reference is `workflow-authoring`, and it is worth loading for a validation error you cannot place
+— but not for authoring, for the reason given at the top.
+
+**An `if` condition is KQL, not Liquid.** `condition:` is the one place in a workflow where `{{ }}`
+does not apply. The templates gate their write on `condition: "steps.verify_ki.output.passed :
+true"` — a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
+filters, so anything computed goes through a `data.set` first and the condition reads that step's
+output:
+
+```yaml
+- name: set_count
+  type: data.set
+  with:
+    count: '{{ steps.query.output.values | size }}'
+- name: check
+  type: if
+  condition: 'steps.set_count.output.count > 0'
+```
+
+**Every step takes the same optional properties**, whatever its type: `if:` to skip it, `timeout:`,
+and `on-failure:` for error handling. A `foreach` additionally takes `iteration-on-failure`, which
+is what keeps one bad record from ending a batch — worth setting on a loop that writes one
+indicator per document, where the alternative is losing every indicator after the first failure.
+
+```yaml
+- name: loop_documents
+  type: foreach
+  foreach: '{{ steps.discover_documents.output.values | json }}'
+  steps: [] # ...
+  iteration-on-failure:
+    continue: true
+```
+
+```yaml
+on-failure:
+  retry:
+    max-attempts: 3
+    delay: '5s'
+  fallback:
+    - name: handle_error
+      type: console
+      with:
+        message: 'Step failed'
+  continue: true
+```
+
+**Liquid references and the filters the templates rely on.** `{{ steps.<name>.output.<field> }}`
+reads a step's output — only `output` is reachable, never a step's inputs. `{{ consts.<name> }}`,
+`{{ inputs.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the rest. `{%- for x in ... -%}`
+loops build the `content` block.
+
+| Filter | Use |
+|---|---|
+| `json` | Serialise a value — how a whole step output reaches a prompt, and how a list reaches `foreach` |
+| `map: 'field'` | Pull one field out of a list of objects; how `attributes.esql` collects the runnable examples |
+| `join: ', '` | Flatten a list into a string |
+| `size` | Length, for a `data.set` a condition can read |
+| `default: 'value'` | Fall back when a field is missing |
+| `replace: '"', '\"'` | Escape a value being interpolated into an ES\|QL string literal |
+| `slugify` | Normalise a value used in a `ki_id` |
+| `times`, `round` | Format a number for a description |
+
+Escaping matters more than it looks: an entity value interpolated raw into
+`WHERE field == "{{ ... }}"` breaks the query the moment a value contains a quote, and the failure
+lands on whichever entity happens to carry one. The entity template runs every value through
+`replace` before it reaches a query.
+
 ## Templates and shapes for each strategy
 
 `analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow.
@@ -216,19 +292,20 @@ will invent it confidently. Put in the prompt:
   the single highest-value line in the brief: a subagent that has been handed a template edits it,
   and one that has not writes a workflow from nothing and spends its budget rediscovering what the
   template already encodes
-- an instruction to make its first two calls `load_skill` on `ai-index-automations` and then
-  `workflow-authoring`, by id, ahead of every other tool. `load_skill` takes the id directly and
-  returns the skill's content, its tools and the paths of its referenced files, so a subagent that
-  has been handed the ids has nothing to search for
-- why `workflow-authoring` is needed — Liquid templating and `on-failure` handling — since that
-  skill's own description claims it is not required for creating or running workflows, and will
-  otherwise talk it out of loading it
+- an instruction to make its first call `load_skill` on `ai-index-automations`, by id, ahead of
+  every other tool. `load_skill` takes the id directly and returns the skill's content, its tools
+  and the paths of its referenced files, so a subagent that has been handed the id has nothing to
+  search for. That skill is the only one it needs; do not send it to `workflow-authoring`
+- that it must not call `platform.core.generate_workflow`. The tool is in every agent's default
+  toolset, so it is there whether or not any skill offered it, and its own description sells it as
+  the way to author a workflow. Saying nothing leaves that as the only instruction on the subject
+  the subagent has
 - the pilot tag you have chosen for this attempt
 - that the complete final YAML must come back verbatim
 - the three rules below, restated in the prompt rather than left to the skill: start from the named
-  template rather than writing a workflow, never validate a definition you are about to run, and
-  look step types up by exact name. A skill read on the third call cannot govern the first two, and
-  a subagent that discovers these mid-flight has usually spent half its budget by then
+  template rather than writing a workflow, never generate one, and never validate a definition you
+  are about to run. A skill read on the second call cannot govern the first, and a subagent that
+  discovers these mid-flight has usually spent half its budget by then
 
 That last point is worth stating bluntly in the prompt, because `run_subagent` tells the model its
 job is to summarize. A summary of a workflow is worthless here: the YAML *is* the deliverable. Ask
@@ -243,11 +320,13 @@ is still wrong rather than burning the budget silently.
 
 If you are the subagent, this is the work.
 
-**Load the skills before you touch anything else.** `load_skill` takes a skill id — this one, then
-`workflow-authoring` — and returns its content, its tools and the paths of its referenced files. Make
-those two calls first and do not reach for `search_relevant_skills`: the brief named the skills, so
-there is nothing to search for. Everything done before they are loaded is done without the rules, and
-is usually thrown away.
+**Load this skill before you touch anything else.** `load_skill` takes a skill id and returns its
+content, its tools and the paths of its referenced files. Make that call first and do not reach for
+`search_relevant_skills`: the brief named the skill, so there is nothing to search for. Everything
+done before it is loaded is done without the rules, and is usually thrown away.
+
+One skill is enough. This one carries the step contracts, the syntax and the templates; nothing
+else here needs a second one.
 
 The templates arrive the same way. `load_skill` returns them among its `referenced_files` with
 absolute paths, and `read_file` on the one the brief named is the whole retrieval — there is
@@ -269,6 +348,20 @@ have, and none of them announce themselves — the workflow still runs, and stil
 The templates carry no `connector-id` on their `ai.prompt` steps, which is deliberate rather than an
 omission: the field is optional, and leaving it off resolves the deployment's default connector at
 run time. Do not add one.
+
+**Do not generate a workflow.** `platform.core.generate_workflow` is in every agent's default
+toolset, so you have it here whether or not any skill offered it, and both its own description and
+`workflow-authoring` present it as the way to author and to repair a definition. Neither of them
+knows you are holding a workflow that has been run. Generating from a description throws that away
+and returns a draft with the faults the template was written to avoid; generating a *fix* re-rolls
+parts of the definition you had already settled, and every re-roll is a chance to lose something a
+pilot proved. There is no edit it makes that you cannot make yourself in the YAML in front of you.
+
+The same goes for the attachment it produces. An attachment is a handoff, not a workspace: read it
+once and hold the definition as text, and do not try to write back to it with `attachment_update`.
+The generic attachment guidance offers that, and it does not apply here — the automation is created
+from the YAML you hand back, so an edit made to an attachment instead of to your own copy is an
+edit that never reaches what gets saved.
 
 The template is text from the moment you read it. `platform.workflows.validate_workflow`,
 `platform.core.execute_workflow` and `platform.workflows.workflow_execute_step` all take a raw
