@@ -134,10 +134,6 @@ jest.mock('./components/charts', () => ({
   MetricsExplorerCharts: () => <div data-test-subj="metricsExplorerCharts" />,
 }));
 
-jest.mock('./components/saved_views', () => ({
-  SavedViews: () => <div data-test-subj="metricsExplorerSavedViews" />,
-}));
-
 jest.mock('./components/metrics_in_discover_callout', () => ({
   MetricsInDiscoverCallout: () => null,
 }));
@@ -173,7 +169,6 @@ describe('MetricsExplorerPage', () => {
     );
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('metricsExplorerToolbar')).toBeInTheDocument();
-    expect(screen.getByTestId('metricsExplorerSavedViews')).toBeInTheDocument();
     expect(screen.getByTestId('metricsExplorerCharts')).toBeInTheDocument();
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
     expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
@@ -190,7 +185,6 @@ describe('MetricsExplorerPage', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('kbnNoDataPage')).toBeInTheDocument();
     expect(screen.queryByTestId('metricsExplorerToolbar')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('metricsExplorerSavedViews')).not.toBeInTheDocument();
     expect(screen.queryByTestId('metricsExplorerCharts')).not.toBeInTheDocument();
     expect(lastInfraPageTemplateProps.hasDataOverride).toBe(false);
   });

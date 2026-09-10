@@ -24,7 +24,6 @@ import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useExplorerHasData } from './hooks/use_explorer_has_data';
 import { metricsExplorerTitle } from '../../../translations';
-import { SavedViews } from './components/saved_views';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';
 import { MetricsInDiscoverCallout } from './components/metrics_in_discover_callout';
 import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
@@ -168,17 +167,11 @@ const MetricsExplorerContent = () => {
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <SavedViews viewState={viewState} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <MetricsExplorerToolbar
             timeRange={timeRange}
             options={options}
             chartOptions={chartOptions}
+            viewState={viewState}
             onRefresh={refresh}
             onTimeChange={handleTimeChange}
             onGroupByChange={handleGroupByChange}
