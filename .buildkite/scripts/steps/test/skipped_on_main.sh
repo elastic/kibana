@@ -2,13 +2,12 @@
 #
 # Forgives test failures for tests that are skipped on the PR target branch but were not
 # skipped at the PR merge base: had the PR been rebased, those tests would not have run.
-# Opt-in via the `ci:ignore-skipped-on-main` label (IGNORE_SKIPPED_ON_MAIN=true).
+# Applies to every PR build; disabled for flaky-test-runner builds.
 
 SKIPPED_ON_MAIN_TARGET_SHA=""
 
 skipped_on_main_applicable() {
-  [[ "${IGNORE_SKIPPED_ON_MAIN:-}" =~ ^(1|true)$ ]] \
-    && [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] \
+  [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] \
     && [[ -n "${GITHUB_PR_TARGET_BRANCH:-}" ]] \
     && [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]
 }
@@ -16,9 +15,6 @@ skipped_on_main_applicable() {
 # Usage: skipped_on_main_skipped <context> <reason>
 # Logs why a failure was not evaluated so the log distinguishes "did not run" from "ran and kept".
 skipped_on_main_skipped() {
-  if [[ ! "${IGNORE_SKIPPED_ON_MAIN:-}" =~ ^(1|true)$ ]]; then
-    return
-  fi
   echo "[skipped-on-main] not evaluating $1: $2 (target=${GITHUB_PR_TARGET_BRANCH:-unset} merge-base=${GITHUB_PR_MERGE_BASE:-unset})"
 }
 
