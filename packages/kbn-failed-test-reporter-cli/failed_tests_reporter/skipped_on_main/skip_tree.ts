@@ -128,67 +128,88 @@ export function parseSuiteTree(source: string, fileName = 'spec.ts'): SuiteNode[
 
 const HOOK_SUFFIX_RE = / "(?:before|after) (?:all|each)" hook\b.*$/;
 
-/**
- * Whether a mocha full title (space-joined suite titles + test title, as written to JUnit `name`)
- * resolves through a skipped node. FTR full titles start with the suites of the parent
- * `index.ts` files that `loadTestFile` this one, which are unknown here; the part we do know is
- * the tail, so a root-to-node chain from this file must match the *end* of the full title. Hook
- * failures (`... "before all" hook: ...`) resolve to the suite they belong to, so a skipped
- * ancestor covers them as well.
- */
-export function findSkipForFullTitle(nodes: SuiteNode[], fullTitle: string): SuiteNode | undefined {
-  const target = fullTitle.replace(HOOK_SUFFIX_RE, '');
+interface SuiteMatch {
+  chain: string;
+  skipped: SuiteNode | undefined;
+}
 
+/**
+ * Collects the nearest skipped ancestor (or undefined) for every node matching `isMatch`. A title
+ * may occur more than once in a file; the caller forgives only when every occurrence is skipped,
+ * since the failure cannot be attributed to one of them. Subtrees under a dynamic title are pruned
+ * unless `throughDynamic` is set, because the chain cannot be reconstructed.
+ */
+const collectMatches = (
+  nodes: SuiteNode[],
+  throughDynamic: boolean,
+  isMatch: (node: SuiteNode, parent: SuiteNode | undefined, chain: string) => boolean
+): SuiteMatch[] => {
+  const matches: SuiteMatch[] = [];
   const walk = (
     children: SuiteNode[],
+    parent: SuiteNode | undefined,
     parentChain: string | undefined,
     skippedAncestor: SuiteNode | undefined
-  ): SuiteNode | undefined => {
+  ) => {
     for (const node of children) {
+      const skipped = skippedAncestor ?? (node.skipped ? node : undefined);
       if (node.title === null) {
+        if (throughDynamic) {
+          walk(node.children, node, parentChain, skipped);
+        }
         continue;
       }
       const chain = parentChain === undefined ? node.title : `${parentChain} ${node.title}`;
-      const skipped = skippedAncestor ?? (node.skipped ? node : undefined);
-      if (skipped && (target === chain || target.endsWith(` ${chain}`))) {
-        return skipped;
+      if (isMatch(node, parent, chain)) {
+        matches.push({ chain, skipped });
       }
-      const match = walk(node.children, chain, skipped);
-      if (match) {
-        return match;
-      }
+      walk(node.children, node, chain, skipped);
     }
-    return undefined;
   };
-  return walk(nodes, undefined, undefined);
+  walk(nodes, undefined, undefined, undefined);
+  return matches;
+};
+
+const skipIfUnanimous = (matches: SuiteMatch[]): SuiteNode | undefined =>
+  matches.length > 0 && matches.every((match) => match.skipped) ? matches[0].skipped : undefined;
+
+/**
+ * Whether a mocha full title (space-joined suite titles + test title, as written to JUnit `name`)
+ * resolves through a skipped node. Matches any suffix of the tree chain, since JUnit names may be
+ * prefixed with titles from wrapping configs. Hook failures ("before all" hook for "x") are
+ * attributed to the enclosing suite.
+ *
+ * When several chains are suffixes of the title, only the longest ones (most segments aligned)
+ * are considered, and the skip is returned only when all of them are skipped.
+ */
+export function findSkipForFullTitle(nodes: SuiteNode[], fullTitle: string): SuiteNode | undefined {
+  const target = fullTitle.replace(HOOK_SUFFIX_RE, '');
+  const matches = collectMatches(
+    nodes,
+    false,
+    (_node, _parent, chain) => target === chain || target.endsWith(` ${chain}`)
+  );
+  const longest = Math.max(0, ...matches.map((match) => match.chain.length));
+  return skipIfUnanimous(matches.filter((match) => match.chain.length === longest));
 }
 
 /**
  * Whether a Scout failure (immediate parent `suite` title + test `title`) resolves through a
  * skipped node. Playwright reports the nearest describe only, so match on that pair anywhere
  * in the tree and check the ancestors.
+ *
+ * Returns the skipped node only when every matching occurrence in the file is skipped.
  */
 export function findSkipForScoutFailure(
   nodes: SuiteNode[],
   suite: string,
   title: string
 ): SuiteNode | undefined {
-  const walk = (
-    children: SuiteNode[],
-    parent: SuiteNode | undefined,
-    skippedAncestor: SuiteNode | undefined
-  ): SuiteNode | undefined => {
-    for (const node of children) {
-      const skipped = skippedAncestor ?? (node.skipped ? node : undefined);
-      if (node.kind === 'test' && node.title === title && parent?.title === suite && skipped) {
-        return skipped;
-      }
-      const match = walk(node.children, node, skipped);
-      if (match) {
-        return match;
-      }
-    }
-    return undefined;
-  };
-  return walk(nodes, undefined, undefined);
+  return skipIfUnanimous(
+    collectMatches(
+      nodes,
+      true,
+      (node, parent) => node.kind === 'test' && node.title === title && parent?.title === suite
+    )
+  );
 }

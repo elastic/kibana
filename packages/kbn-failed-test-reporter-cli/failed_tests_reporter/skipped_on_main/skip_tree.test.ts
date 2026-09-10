@@ -176,6 +176,16 @@ describe('findSkipForFullTitle', () => {
     );
     expect(findSkipForFullTitle(t, 'root dyn 1 inner t')).toBeUndefined();
   });
+
+  it('does not forgive when the same chain also occurs unskipped', () => {
+    const t = parseSuiteTree(`
+      describe('a', () => { describe('b', () => { it('c', () => {}); }); });
+      describe('x', () => { describe.skip('b', () => { it('c', () => {}); }); });
+    `);
+    expect(findSkipForFullTitle(t, 'root a b c')).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'root b c')).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'root x b c')?.title).toBe('b');
+  });
 });
 
 describe('findSkipForScoutFailure', () => {
@@ -210,5 +220,29 @@ describe('findSkipForScoutFailure', () => {
     expect(findSkipForScoutFailure(tree, 'plain', 'flaky')?.title).toBe('flaky');
     expect(findSkipForScoutFailure(tree, 'plain', 'ok')).toBeUndefined();
     expect(findSkipForScoutFailure(tree, 'outer', 't')).toBeUndefined();
+  });
+
+  it('does not forgive when the same suite/title pair also occurs unskipped', () => {
+    const tree = parseSuiteTree(`
+      test.describe('a', () => {
+        test.describe('b', () => { test('c', async () => {}); });
+      });
+      test.describe.skip('x', () => {
+        test.describe('b', () => { test('c', async () => {}); });
+      });
+    `);
+    expect(findSkipForScoutFailure(tree, 'b', 'c')).toBeUndefined();
+  });
+
+  it('forgives when every occurrence of the suite/title pair is skipped', () => {
+    const tree = parseSuiteTree(`
+      test.describe.skip('a', () => {
+        test.describe('b', () => { test('c', async () => {}); });
+      });
+      test.describe('x', () => {
+        test.describe.skip('b', () => { test('c', async () => {}); });
+      });
+    `);
+    expect(findSkipForScoutFailure(tree, 'b', 'c')?.title).toBe('a');
   });
 });
