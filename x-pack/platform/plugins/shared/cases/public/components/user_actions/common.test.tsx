@@ -120,7 +120,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
     expect(handleOutlineComment).toHaveBeenCalled();
   });
 
-  it('appends the action source to the event', () => {
+it('appends the action source to the event', () => {
     const userAction = getUserAction('title', UserActionActions.update, {
       source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
     });
@@ -140,5 +140,56 @@ describe('createCommonUpdateUserActionBuilder ', () => {
 
     expect(screen.getByText(/A label/)).toBeInTheDocument();
     expect(screen.getByTestId('user-action-via-source')).toHaveTextContent('via Elastic AI Agent');
+  });
+
+  it('renders the documentAction after the copy-link button when provided', () => {
+    const userAction = getUserAction('title', UserActionActions.update, {
+      createdBy: { profileUid: userProfiles[0].uid },
+    });
+    const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
+      userAction,
+      label,
+      icon: 'dot',
+      handleOutlineComment,
+      documentAction: (
+        <button type="button" data-test-subj="doc-action-btn">
+          {'Open document'}
+        </button>
+      ),
+    });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('doc-action-btn')).toBeInTheDocument();
+    // Copy link still present
+    expect(screen.getByLabelText('Copy reference link')).toBeInTheDocument();
+  });
+
+  it('does not render the documentAction slot when not provided', () => {
+    const userAction = getUserAction('title', UserActionActions.update, {
+      createdBy: { profileUid: userProfiles[0].uid },
+    });
+    const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
+      userAction,
+      label,
+      icon: 'dot',
+      handleOutlineComment,
+    });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('doc-action-btn')).not.toBeInTheDocument();
+    // Copy link still present without the extra action
+    expect(screen.getByLabelText('Copy reference link')).toBeInTheDocument();
   });
 });
