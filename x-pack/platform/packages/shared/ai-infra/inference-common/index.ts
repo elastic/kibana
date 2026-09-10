@@ -33,6 +33,8 @@ export {
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
   type ChatCompleteCompositeResponse,
+  type ChatCompletionReasoning,
+  type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
@@ -133,7 +135,7 @@ export {
 
 export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
 
-export { elasticModelDictionary } from './src/const';
+export { elasticModelDictionary, MAX_STREAM_DURATION_MS } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {

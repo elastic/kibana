@@ -2,7 +2,7 @@
 
 exports[`OverwrittenSessionPage renders as expected 1`] = `
 <div
-  class="css-1so7631-fullScreenGraphicsFadeIn"
+  class="css-kdghhb-fullScreenGraphicsFadeIn"
   data-test-subj="secAuthenticationStatePage"
 >
   <header
@@ -10,7 +10,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
     data-test-subj="secAuthenticationStatePageHeader"
   >
     <div
-      class="css-1qqek5p-padding"
+      class="css-1ajt5j3-padding"
       data-test-subj="secAuthenticationStatePageContent"
     >
       <div
@@ -33,7 +33,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
     </div>
   </header>
   <div
-    class="css-1qqek5p-padding"
+    class="css-1ajt5j3-padding"
   >
     <div
       class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"

@@ -17,8 +17,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core/public';
 
 import type { RuntimeField } from '../../types';
@@ -119,11 +119,9 @@ export const RuntimeFieldEditorFlyoutContent = ({
       <EuiFlyoutFooter>
         {isSubmitted && !isFormValid && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18nTexts.formErrorsCalloutTitle}
-              color="danger"
-              iconType="cross"
               data-test-subj="formError"
             />
             <EuiSpacer size="m" />

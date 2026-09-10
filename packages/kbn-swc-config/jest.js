@@ -26,8 +26,7 @@ function getJestSwcConfig(path) {
       experimental: {
         plugins: [
           [
-            // Keep Jest's plugin version independent from Rspack's ABI-locked pin.
-            require.resolve('@swc/plugin-emotion-jest'),
+            require.resolve('@swc/plugin-emotion'),
             {
               sourceMap: false,
               autoLabel: 'always',

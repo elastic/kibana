@@ -38,11 +38,12 @@ describe('ActionPolicySnoozeModal', () => {
   });
 
   it('words the helper copy for notifications rather than alerts', async () => {
+    const user = userEvent.setup({ delay: null });
     renderModal();
 
     expect(screen.getByText('How long should notifications be snoozed?')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByText('8h'));
+    await user.click(screen.getByText('8h'));
 
     expect(screen.getByTestId('quickSnoozeUnsnoozeTime')).toHaveTextContent(
       /Notifications will resume on/
@@ -50,10 +51,11 @@ describe('ActionPolicySnoozeModal', () => {
   });
 
   it('applies the selected duration as an ISO date string', async () => {
+    const user = userEvent.setup({ delay: null });
     renderModal();
 
-    await userEvent.click(screen.getByText('8h'));
-    await userEvent.click(screen.getByTestId('actionPolicySnoozeModalApply'));
+    await user.click(screen.getByText('8h'));
+    await user.click(screen.getByTestId('actionPolicySnoozeModalApply'));
 
     expect(onApplySnooze).toHaveBeenCalledTimes(1);
     const [snoozedUntil] = onApplySnooze.mock.calls[0];
@@ -61,10 +63,11 @@ describe('ActionPolicySnoozeModal', () => {
   });
 
   it('disables apply while the custom duration is invalid', async () => {
+    const user = userEvent.setup({ delay: null });
     renderModal();
 
-    await userEvent.click(screen.getByText('Custom'));
-    await userEvent.clear(screen.getByTestId('durationValue'));
+    await user.click(screen.getByText('Custom'));
+    await user.clear(screen.getByTestId('durationValue'));
 
     expect(screen.getByTestId('actionPolicySnoozeModalApply')).toBeDisabled();
   });

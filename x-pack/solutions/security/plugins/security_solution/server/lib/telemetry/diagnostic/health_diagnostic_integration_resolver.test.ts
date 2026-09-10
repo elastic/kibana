@@ -61,7 +61,7 @@ describe('IntegrationResolverImpl', () => {
       expect(results).toHaveLength(1);
       expect(results[0].kind).toBe('executable');
       if (results[0].kind !== 'executable') throw new Error('type guard');
-      expect(results[0].query.version).toBe(1);
+      expect(results[0].query.kind).toBe('index');
       expect('resolution' in results[0]).toBe(false);
       expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
     });
@@ -75,7 +75,7 @@ describe('IntegrationResolverImpl', () => {
       expect(results).toHaveLength(1);
       expect(results[0].kind).toBe('executable');
       if (results[0].kind !== 'executable') throw new Error('type guard');
-      expect(results[0].query.version).toBe(2);
+      expect(results[0].query.kind).toBe('index');
 
       const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
       expect(resolution.name).toBe('endpoint');
@@ -270,7 +270,7 @@ describe('IntegrationResolverImpl', () => {
       expect(results).toHaveLength(2);
       expect(results[0].kind).toBe('executable');
       if (results[0].kind !== 'executable') throw new Error('type guard');
-      expect(results[0].query.version).toBe(1);
+      expect(results[0].query.kind).toBe('index');
 
       expect(results[1].kind).toBe('skipped');
       if (results[1].kind !== 'skipped') throw new Error('type guard');
@@ -305,7 +305,7 @@ describe('IntegrationResolverImpl', () => {
       expect(results).toHaveLength(1);
       expect(results[0].kind).toBe('executable');
       if (results[0].kind !== 'executable') throw new Error('type guard');
-      expect(results[0].query.version).toBe(2);
+      expect(results[0].query.kind).toBe('index');
       expect('resolution' in results[0]).toBe(false);
     });
 
@@ -368,7 +368,13 @@ describe('IntegrationResolverImpl', () => {
 
   describe('unknown version queries', () => {
     it('returns SkippedQuery for ParseFailureQuery', async () => {
-      const unknown = { version: 99, id: 'future', name: 'future', _raw: {} };
+      const unknown = {
+        version: 99,
+        id: 'future',
+        name: 'future',
+        _raw: {},
+        failureReason: 'invalid_descriptor' as const,
+      };
       const results = await resolver.resolve([unknown]);
 
       expect(results).toHaveLength(1);
@@ -546,7 +552,7 @@ describe('IntegrationResolverImpl', () => {
   describe('v3 index queries (DSL/EQL/ESQL at version 3)', () => {
     it('v3 DSL with integrations resolves identically to v2', async () => {
       const query = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
-      const result = await resolver.resolve([{ ...query, version: 2 }]);
+      const result = await resolver.resolve([{ ...query }]);
       expect(result).toHaveLength(1);
       expect(result[0].kind).toBe('executable');
     });
@@ -556,7 +562,7 @@ describe('IntegrationResolverImpl', () => {
         integrations: undefined,
         index: 'logs-test-*',
       });
-      const result = await resolver.resolve([{ ...query, version: 2 }]);
+      const result = await resolver.resolve([{ ...query }]);
       expect(result).toHaveLength(1);
       expect(result[0].kind).toBe('executable');
       expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
@@ -587,7 +593,13 @@ describe('IntegrationResolverImpl', () => {
       const v1 = createMockQueryV1(QueryType.DSL);
       const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
       const v3api = createMockApiQueryV3({ integrations: ['fleet_server'] });
-      const unknown = { version: 99, id: 'x', name: 'x', _raw: {} };
+      const unknown = {
+        version: 99,
+        id: 'x',
+        name: 'x',
+        _raw: {},
+        failureReason: 'invalid_descriptor' as const,
+      };
 
       const results = await resolver.resolve([v1, v2, v3api, unknown]);
 

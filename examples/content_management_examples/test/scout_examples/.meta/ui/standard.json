@@ -1,5 +1,8 @@
 {
-  "sha1": "73067c6e200de4cc04cc3ee4c076c9e78ceb8d42",
+  "sha1": "7f9ba19d34d137abea6ebb0c74c2675060c14e6a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d757255593aedce-9575d128928e2f0",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "examples/content_management_examples/test/scout_examples/ui/tests/content_management.spec.ts",
-        "line": 22,
-        "column": 7
+        "line": 18,
+        "column": 8
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "examples/content_management_examples/test/scout_examples/ui/tests/content_management.spec.ts",
-        "line": 78,
-        "column": 7
+        "line": 64,
+        "column": 44
       }
     },
     {
@@ -36,8 +39,8 @@
       ],
       "location": {
         "file": "examples/content_management_examples/test/scout_examples/ui/tests/content_management.spec.ts",
-        "line": 103,
-        "column": 7
+        "line": 75,
+        "column": 11
       }
     }
   ]

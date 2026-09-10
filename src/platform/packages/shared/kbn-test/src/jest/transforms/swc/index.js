@@ -23,7 +23,7 @@ const createBabelTransformerConfig = require('../babel/transformer_config');
 const THIS_FILE = Fs.readFileSync(__filename);
 const SWC_CORE_VERSION = require('@swc/core').version;
 const SWC_JEST_VERSION = require('@swc/jest/package.json').version;
-const EMOTION_PLUGIN_VERSION = require('@swc/plugin-emotion-jest/package.json').version;
+const EMOTION_PLUGIN_VERSION = require('@swc/plugin-emotion/package.json').version;
 const SOURCE_START = Symbol('sourceStart');
 const babelEsmTransformer = babelJest.default.createTransformer(
   createBabelTransformerConfig({ modules: false })

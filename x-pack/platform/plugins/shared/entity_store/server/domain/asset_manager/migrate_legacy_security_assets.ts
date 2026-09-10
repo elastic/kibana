@@ -37,14 +37,13 @@ import { getLegacySecurityLatestIndexIngestPipelineId } from './latest_index_ing
 import { getLegacySecurityMetadataComponentTemplateName } from './metadata_component_templates';
 import { getLegacySecurityMetadataIndexTemplateId } from './metadata_index_template';
 import { getLegacySecurityMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
-import { getLegacySecurityUpdatesIndexTemplateId } from './updates_index_template';
+import { getLegacySecurityUpdatesIndexTemplateId } from './updates_data_stream';
 import { getLegacySecurityHistorySnapshotIndexTemplateId } from './history_snapshot_index_template';
+import { getLegacySecurityUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import {
-  getLegacySecurityHistorySnapshotIndexPattern,
-  toNeutralHistorySnapshotIndexName,
-} from './history_snapshot_index';
-import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+  getMetadataEntitiesDataStreamName,
+  getLegacySecurityMetadataEntitiesDataStreamName,
+} from './metadata_data_stream';
 
 interface MigrateLegacySecurityAssetsOptions {
   esClient: ElasticsearchClient;
@@ -55,20 +54,6 @@ interface MigrateLegacySecurityAssetsOptions {
 /** Poll intervals for async reindex — large latest indices can exceed HTTP request timeouts. */
 const REINDEX_POLL_MIN_INTERVAL_MS = 5 * 1000;
 const REINDEX_POLL_MAX_INTERVAL_MS = 30 * 1000;
-
-const getLegacyUpdatesDataStreamName = (namespace: string) =>
-  getLegacySecurityEntityIndexPattern({
-    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-    dataset: ENTITY_UPDATES,
-    namespace,
-  });
-
-const getLegacyMetadataDataStreamName = (namespace: string) =>
-  getLegacySecurityEntityIndexPattern({
-    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-    dataset: ENTITY_METADATA,
-    namespace,
-  });
 
 const getLegacyLatestCompatibilityAlias = (namespace: string) =>
   getLegacySecurityEntityIndexPattern({
@@ -83,19 +68,6 @@ const getLegacyLatestCompatibilityAlias = (namespace: string) =>
  * reliable ownership signal (`entities-latest-security_foo` vs `entities-latest-foo`).
  */
 const getCollidingNeutralNamespace = (namespace: string) => `security_${namespace}`;
-
-const resolveLegacyHistorySnapshotIndices = async (
-  esClient: ElasticsearchClient,
-  namespace: string
-): Promise<string[]> => {
-  const pattern = getLegacySecurityHistorySnapshotIndexPattern(namespace);
-  try {
-    const resolved = await esClient.indices.resolveIndex({ name: pattern });
-    return resolved.indices.map((index) => index.name);
-  } catch {
-    return [];
-  }
-};
 
 async function entityAliasExists(esClient: ElasticsearchClient, alias: string): Promise<boolean> {
   try {
@@ -172,16 +144,15 @@ export async function hasLegacySecurityAssets(
 
   const candidates = [
     getLegacySecurityLatestEntitiesIndexName(namespace),
-    getLegacyUpdatesDataStreamName(namespace),
-    getLegacyMetadataDataStreamName(namespace),
+    getLegacySecurityUpdatesEntitiesDataStreamName(namespace),
+    getLegacySecurityMetadataEntitiesDataStreamName(namespace),
   ];
   for (const name of candidates) {
     if (await isConcreteIndexOrDataStream(esClient, name)) {
       return true;
     }
   }
-  const legacyHistory = await resolveLegacyHistorySnapshotIndices(esClient, namespace);
-  return legacyHistory.length > 0;
+  return false;
 }
 
 /**
@@ -232,7 +203,6 @@ export async function migrateLegacySecurityAssets({
   await migrateLatestIndex({ esClient, logger: log, namespace });
   await migrateUpdatesDataStream({ esClient, logger: log, namespace });
   await migrateMetadataDataStream({ esClient, logger: log, namespace });
-  await migrateHistorySnapshotIndices({ esClient, logger: log, namespace });
   await cleanupLegacyTemplatesAndPipelines({ esClient, logger: log, namespace });
 
   log.info(`Finished migrating legacy security-scoped entity store assets in ${namespace}`);
@@ -261,7 +231,7 @@ export async function ensureLegacyCompatibilityAliases({
   const legacyLatestAlias = getLegacyLatestCompatibilityAlias(namespace);
   const legacyLatestConcrete = getLegacySecurityLatestEntitiesIndexName(namespace);
   const newMetadata = getMetadataEntitiesDataStreamName(namespace);
-  const legacyMetadataAlias = getLegacyMetadataDataStreamName(namespace);
+  const legacyMetadataAlias = getLegacySecurityMetadataEntitiesDataStreamName(namespace);
 
   try {
     if (
@@ -376,19 +346,18 @@ async function migrateUpdatesDataStream({
   logger,
   namespace,
 }: MigrateLegacySecurityAssetsOptions): Promise<void> {
-  const legacyStream = getLegacyUpdatesDataStreamName(namespace);
-  const newStream = getUpdatesEntitiesDataStreamName(namespace);
+  const legacyStream = getLegacySecurityUpdatesEntitiesDataStreamName(namespace);
 
   if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {
     return;
   }
 
-  // Updates is a short-retention extraction buffer — recreate under the new name.
-  if (!(await isConcreteIndexOrDataStream(esClient, newStream))) {
-    await createDataStream(esClient, newStream, { throwIfExists: false });
-  }
+  // Updates is a short-retention extraction buffer. The neutral updates stream no longer
+  // has a dedicated index template (removed with the LOOKUP JOIN refactor -
+  // https://github.com/elastic/kibana/pull/282545) and is not
+  // created during install, so just delete the legacy source.
   await deleteDataStream(esClient, legacyStream);
-  logger.debug(`Replaced legacy updates data stream ${legacyStream} with ${newStream}`);
+  logger.debug(`Deleted legacy updates data stream ${legacyStream}`);
 }
 
 async function migrateMetadataDataStream({
@@ -396,7 +365,7 @@ async function migrateMetadataDataStream({
   logger,
   namespace,
 }: MigrateLegacySecurityAssetsOptions): Promise<void> {
-  const legacyStream = getLegacyMetadataDataStreamName(namespace);
+  const legacyStream = getLegacySecurityMetadataEntitiesDataStreamName(namespace);
   const newStream = getMetadataEntitiesDataStreamName(namespace);
 
   if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {
@@ -424,35 +393,6 @@ async function migrateMetadataDataStream({
 
   // Alias name equals the former data-stream name — only safe after delete.
   await addAliasIfMissing(esClient, newStream, legacyStream, logger);
-}
-
-async function migrateHistorySnapshotIndices({
-  esClient,
-  logger,
-  namespace,
-}: MigrateLegacySecurityAssetsOptions): Promise<void> {
-  const legacyIndices = await resolveLegacyHistorySnapshotIndices(esClient, namespace);
-  if (legacyIndices.length === 0) {
-    return;
-  }
-
-  for (const legacyIndex of legacyIndices) {
-    const newIndex = toNeutralHistorySnapshotIndexName(legacyIndex, namespace);
-    await createIndex(esClient, newIndex, { throwIfExists: false });
-    const reindexResult = await reindex(esClient, {
-      source: { index: legacyIndex },
-      dest: { index: newIndex },
-      waitForTask: {
-        logger,
-        minTimeout: REINDEX_POLL_MIN_INTERVAL_MS,
-        maxTimeout: REINDEX_POLL_MAX_INTERVAL_MS,
-        forever: true,
-      },
-    });
-    assertReindexSucceeded(reindexResult, `History migration ${legacyIndex} → ${newIndex}`);
-    await deleteIndex(esClient, legacyIndex);
-    logger.info(`Migrated history snapshot ${legacyIndex} → ${newIndex}`);
-  }
 }
 
 async function cleanupLegacyTemplatesAndPipelines({

@@ -19,7 +19,7 @@ describe('rollDailyData', () => {
 
   it('returns false if no savedObjectsClient', async () => {
     await rollDailyData(logger, undefined);
-    expect(mockSavedObjectsClient.find).toBeCalledTimes(0);
+    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(0);
   });
 
   it('calls delete on documents older than 3 days', async () => {
@@ -30,7 +30,7 @@ describe('rollDailyData', () => {
     await rollDailyData(logger, mockSavedObjectsClient);
 
     expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.delete).toBeCalledTimes(2);
+    expect(mockSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
     expect(mockSavedObjectsClient.delete).toHaveBeenNthCalledWith(
       1,
       'event_loop_delays_daily',
@@ -48,7 +48,7 @@ describe('rollDailyData', () => {
     mockSavedObjectsClient.find.mockRejectedValueOnce(mockError);
 
     await rollDailyData(logger, mockSavedObjectsClient);
-    expect(logger.debug).toBeCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(2);
     expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       'Failed to rollup transactional to daily entries'
@@ -68,8 +68,8 @@ describe('rollDailyData', () => {
     mockSavedObjectsClient.delete.mockRejectedValueOnce(mockError2);
 
     await rollDailyData(logger, mockSavedObjectsClient);
-    expect(mockSavedObjectsClient.delete).toBeCalledTimes(3);
-    expect(logger.debug).toBeCalledTimes(2);
+    expect(mockSavedObjectsClient.delete).toHaveBeenCalledTimes(3);
+    expect(logger.debug).toHaveBeenCalledTimes(2);
     expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       'Failed to rollup transactional to daily entries'

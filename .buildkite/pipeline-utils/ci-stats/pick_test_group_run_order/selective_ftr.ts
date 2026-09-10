@@ -41,6 +41,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/evals',
   '@kbn/evals-extensions',
   '@kbn/performance-testing-dataset-extractor',
+  '@kbn/dependency-ownership',
 
   // Lint
   '@kbn/eslint-config',
@@ -65,7 +66,7 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'scripts/functional_tests_server.js',
   'scripts/functional_test_runner.js',
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   '.node-version',
   '.nvmrc',
   'config/**/*.yml',

@@ -7,10 +7,6 @@
 
 const NAMESPACE = 'platform.sig_events.memory';
 
-/**
- * Tool IDs for the Streams memory tools. Defined locally because these are internal tools,
- * inlined via skills — they do not need to be registered or defined in the shared agent-builder-common package.
- */
 export const platformStreamsMemoryTools = {
   memorySearch: `${NAMESPACE}.search`,
   memoryRead: `${NAMESPACE}.read`,

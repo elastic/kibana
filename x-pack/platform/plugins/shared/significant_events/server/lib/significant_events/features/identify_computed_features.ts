@@ -14,9 +14,10 @@ import {
   generateAllComputedFeatures,
   CODE_ANALYSIS_PROVIDER_KEY,
   type ComputedFeatureProvider,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { createCodeAnalysisProvider } from '../../semantic_code_search_grounding/compute_code_analysis';
+import { streamToAnalysisTarget } from '../stream_to_analysis_target';
 import type { EbtTelemetryClient } from '../../telemetry/ebt';
 import { reconcileComputedFeatures } from './reconcile_features';
 
@@ -38,6 +39,8 @@ export interface IdentifyComputedFeaturesOptions {
   request?: KibanaRequest;
   /** Optional telemetry client to record code_analysis grounding outcomes. */
   telemetry?: EbtTelemetryClient;
+  signal?: AbortSignal;
+  timeoutMs?: number;
 }
 
 export interface IdentifyComputedFeaturesResult {
@@ -57,6 +60,8 @@ export async function identifyComputedFeatures({
   agentBuilderTools,
   request,
   telemetry,
+  signal,
+  timeoutMs,
 }: IdentifyComputedFeaturesOptions): Promise<IdentifyComputedFeaturesResult> {
   const providers: Record<string, ComputedFeatureProvider> | undefined =
     agentBuilderTools && request
@@ -80,12 +85,14 @@ export async function identifyComputedFeatures({
       : undefined;
 
   const { features: computedFeatures, errors } = await generateAllComputedFeatures({
-    stream,
+    target: streamToAnalysisTarget(stream),
     start,
     end,
     esClient,
     logger: logger.get('computed_features'),
     providers,
+    requestSignal: signal,
+    timeoutMs,
   });
 
   const reconciledComputedFeatures = reconcileComputedFeatures({

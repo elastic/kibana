@@ -70,7 +70,15 @@ const toLensProps = (data: LensAttachmentData) => {
   if (isLensPersistableData(data)) {
     return data.state as LensProps;
   }
-  return { attributes: data.attributes, timeRange: data.timeRange } as unknown as LensProps;
+  // The description isn't persisted on the attachment metadata for by-ref
+  // snapshots -- it already lives on the snapshotted SO `attributes`, same
+  // as the by-value arm's `state.metadata.description`.
+  const description = data.attributes.description as string | undefined;
+  return {
+    attributes: data.attributes,
+    timeRange: data.timeRange,
+    metadata: description ? { description } : undefined,
+  } as unknown as LensProps;
 };
 
 const LensAttachment = React.memo(
@@ -95,7 +103,7 @@ const LensAttachmentsTab = createSavedObjectAttachmentsTab({
   soType: LENS_SO_TYPE,
 });
 
-const getVisualizationAttachmentViewObject = ({
+const getVisualizationCreationActivity = ({
   savedObjectId,
   data,
   attachmentId,
@@ -118,7 +126,6 @@ const getVisualizationAttachmentViewObject = ({
   const showOpenLensAction = lensProps != null && isOpenLensActionCompatible(lensProps.attributes);
   return {
     event,
-    timelineAvatar: 'lensApp',
     ...(showOpenLensAction
       ? { getActions: () => getVisualizationAttachmentActions(openLensId, lensProps) }
       : {}),
@@ -130,11 +137,11 @@ const getVisualizationAttachmentViewObject = ({
 export const getVisualizationAttachmentType = () =>
   defineAttachment({
     id: LENS_ATTACHMENT_TYPE,
-    icon: 'document',
-    displayName: i18n.VISUALIZATIONS,
-    getAttachmentViewObject: getVisualizationAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
-    getAttachmentTabViewObject: () => ({ children: LensAttachmentsTab }),
+    getIcon: () => 'lensApp',
+    getLabel: () => i18n.VISUALIZATIONS,
+    getCreationActivity: getVisualizationCreationActivity,
+    getRemovalActivity: () => ({ event: i18n.REMOVED_VISUALIZATION }),
+    getAttachmentList: () => ({ children: LensAttachmentsTab }),
     schema: LensAttachmentPayloadSchema,
     // Workflow authors reference a lens visualization by SO id; the by-value
     // `data.state` arm and the optional `data` snapshot are embeddable bags they

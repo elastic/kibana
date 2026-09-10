@@ -189,14 +189,21 @@ export function useInvestigationState({
           return;
         }
 
-        const stepExecution = execution.stepExecutions?.find(
+        const investigateStepExecutions = execution.stepExecutions?.filter(
           (step) => step.stepId === INVESTIGATE_STEP_ID
         );
 
-        if (stepExecution?.error) {
-          applySettled({ status: 'failed', error: stepExecution.error.message });
+        // A timeout is reported on the engine's step_level_timeout wrapper, not on the ai.agent
+        // step execution below, so any matching stepId is checked here regardless of stepType.
+        const stepError = investigateStepExecutions?.find((step) => step.error)?.error;
+        if (stepError) {
+          applySettled({ status: 'failed', error: stepError.message });
           return;
         }
+
+        const stepExecution = investigateStepExecutions?.find(
+          (step) => step.stepType === 'ai.agent'
+        );
 
         const output = stepExecution?.output as
           | { structured_output?: unknown; conversation_id?: string }

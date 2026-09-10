@@ -39,6 +39,7 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listInferenceEndpoints: platformCoreTool('list_inference_endpoints'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -54,8 +55,10 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
-  attachments: casesTool('attachments'),
+  getAttachments: casesTool('get_attachments'),
+  manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
+  findTemplates: casesTool('find_templates'),
 } as const;
 
 /**
@@ -68,13 +71,13 @@ export const platformCoreCasesTools = {
  */
 export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
+  searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
-
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
@@ -89,6 +92,7 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
+  sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
@@ -100,6 +104,7 @@ export const internalTools = {
   setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
+  describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
 };
 
@@ -128,6 +133,7 @@ export const isInternalTool = (toolName: string) =>
 const filestoreAllowedInternalToolIds = new Set<string>([
   internalTools.discoverApis,
   internalTools.describeApi,
+  internalTools.describeApiType,
   internalTools.executeApi,
 ]);
 

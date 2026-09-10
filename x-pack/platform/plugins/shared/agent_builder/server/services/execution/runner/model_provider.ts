@@ -20,7 +20,11 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { TrackingService } from '../../../telemetry';
@@ -38,25 +42,40 @@ export interface CreateModelProviderOpts {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
+  reasoningLevel?: ChatCompletionReasoningEffort;
 }
 
 export type CreateModelProviderFactoryFn = (
   opts: Omit<
     CreateModelProviderOpts,
-    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength' | 'reasoningLevel'
   >
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
   opts: Pick<
     CreateModelProviderOpts,
-    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength' | 'reasoningLevel'
   >
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
   let cached: Promise<T> | undefined;
   return () => (cached ??= fn());
+};
+
+const memoizeAsyncByKey = <K, T>(fn: (key: K) => Promise<T>): ((key: K) => Promise<T>) => {
+  const cache = new Map<K, Promise<T>>();
+  return (key: K) => {
+    if (!cache.has(key)) {
+      const pending = fn(key).catch((err) => {
+        cache.delete(key);
+        throw err;
+      });
+      cache.set(key, pending);
+    }
+    return cache.get(key)!;
+  };
 };
 
 /**
@@ -83,6 +102,7 @@ export const createModelProvider = ({
   logger,
   telemetryMetadata,
   maxContentLength,
+  reasoningLevel,
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {
@@ -103,36 +123,31 @@ export const createModelProvider = ({
   });
 
   const getFastModelConnectorId = memoizeAsync(async () => {
-    let connectorId: string | undefined;
-
     const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-      request
+      request,
+      { onlyReturnConfigured: true }
     );
 
-    const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
-    if (recommendedEndpoint.length > 0) {
-      connectorId = recommendedEndpoint[0].connectorId;
+    if (endpoints.length > 0) {
+      return endpoints[0].connectorId;
     }
 
-    if (!connectorId) {
-      connectorId = await getDefaultConnectorId();
-    }
-
-    logger.debug(`[getFastModelConnectorId] Using connectorId: ${connectorId}`);
-
-    return connectorId;
+    const fallbackId = await getDefaultConnectorId();
+    logger.debug(
+      `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: ${fallbackId}. Fast model and default model are the SAME.`
+    );
+    return fallbackId;
   });
 
-  getFastModelConnectorId().catch(() => undefined);
-
-  const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
+  const selectModelId = async (
+    opts: ModelSelectionPreferences
+  ): Promise<{ connectorId: string; viaFastPath: boolean }> => {
     const { effortLevel = EffortLevels.medium } = opts;
     if (effortLevel === EffortLevels.low) {
-      return await getFastModelConnectorId();
-    } else {
-      return await getDefaultConnectorId();
+      return { connectorId: await getFastModelConnectorId(), viaFastPath: true };
     }
+    return { connectorId: await getDefaultConnectorId(), viaFastPath: false };
   };
 
   const completedCalls: ModelCallInfo[] = [];
@@ -143,7 +158,13 @@ export const createModelProvider = ({
     };
   };
 
-  const getModelById = async (connectorId: string): Promise<ScopedModel> => {
+  // Cache key encodes (connectorId, applyReasoning) so the same connector can serve both a
+  // reasoning-enabled and reasoning-free variant when it is reached through both the default path and the fast path
+  const buildScopedModel = memoizeAsyncByKey(async (key: string): Promise<ScopedModel> => {
+    const [connectorId, applyReasoningFlag] = key.split('|');
+    const applyReasoning = applyReasoningFlag === 'true';
+    const reasoning = applyReasoning && reasoningLevel ? { effort: reasoningLevel } : undefined;
+
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
@@ -180,10 +201,11 @@ export const createModelProvider = ({
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
         ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+        ...(reasoning ? { reasoning } : {}),
       },
     });
 
-    const inferenceClient = inference.getClient({
+    const rawInferenceClient = inference.getClient({
       request,
       bindTo: {
         connectorId,
@@ -193,6 +215,9 @@ export const createModelProvider = ({
         complete: [completionCallback],
       },
     });
+    const inferenceClient = reasoning
+      ? wrapBoundInferenceClientWithReasoning(rawInferenceClient, reasoning)
+      : rawInferenceClient;
     const connector = await inferenceClient.getConnectorById(connectorId);
 
     return {
@@ -200,6 +225,13 @@ export const createModelProvider = ({
       chatModel,
       inferenceClient,
     };
+  });
+
+  const getModelById = (
+    connectorId: string,
+    applyReasoning: boolean = true
+  ): Promise<ScopedModel> => {
+    return buildScopedModel(`${connectorId}|${applyReasoning && reasoningLevel !== undefined}`);
   };
 
   const hasFastModel = memoizeAsync(async () => {
@@ -207,16 +239,48 @@ export const createModelProvider = ({
       getFastModelConnectorId(),
       getDefaultConnectorId(),
     ]);
-    // getFastModelConnectorId falls back to the default connector when no recommended fast endpoint
-    // is configured, so a distinct id means a genuinely dedicated (cheaper) fast model exists.
+    // getFastModelConnectorId falls back to the default connector when no fast endpoint is
+    // configured (no SO override, no EIS recommended endpoint), so a distinct id means a
+    // genuinely dedicated (cheaper/faster) fast model exists.
     return fastConnectorId !== resolvedDefaultConnectorId;
   });
 
   return {
-    selectModel: async (opts) => getModelById(await selectModelId(opts)),
+    selectModel: async (opts) => {
+      const { connectorId, viaFastPath } = await selectModelId(opts);
+      // Fast path never carries reasoning — cheap models are cheap on purpose. When the fast
+      // connector falls back to the default, we still return a reasoning-free variant here.
+      return getModelById(connectorId, !viaFastPath);
+    },
     getDefaultModel: async () => getModelById(await getDefaultConnectorId()),
     getModelById: ({ connectorId }) => getModelById(connectorId),
     hasFastModel,
     getUsageStats,
+  };
+};
+
+/**
+ * Wraps a {@link BoundInferenceClient} so that `chatComplete` calls (direct and via `bindTo`)
+ * default to the provider-scoped reasoning config. Caller-supplied `reasoning` on a call always
+ * wins — the wrapper only injects when the caller did not provide one.
+ */
+const wrapBoundInferenceClientWithReasoning = (
+  client: BoundInferenceClient,
+  reasoning: { effort: ChatCompletionReasoningEffort }
+): BoundInferenceClient => {
+  const originalChatComplete = client.chatComplete;
+  const wrappedChatComplete = ((options: Parameters<BoundInferenceClient['chatComplete']>[0]) => {
+    const withReasoning = options.reasoning === undefined ? { ...options, reasoning } : options;
+    return originalChatComplete(withReasoning);
+  }) as BoundInferenceClient['chatComplete'];
+
+  return {
+    ...client,
+    chatComplete: wrappedChatComplete,
+    // Preserve reasoning through further binds so downstream callers keep the injected default.
+    bindTo: (boundOptions) => {
+      const bound = client.bindTo(boundOptions);
+      return wrapBoundInferenceClientWithReasoning(bound, reasoning);
+    },
   };
 };

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@playwright/test';
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { DataGrid } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -54,6 +53,25 @@ export class DocViewer {
   async openAndWaitForFlyout({ rowIndex }: { rowIndex: number }) {
     await this.dataGrid.openDocumentDetails({ rowIndex });
     await this.waitForFlyoutOpen();
+  }
+
+  async copyDirectLink(): Promise<string> {
+    await this.page.evaluate(() => navigator.clipboard.writeText(''));
+    await this.page.testSubj
+      .locator('discoverDocFlyoutShareDirectLink')
+      .getByRole('button')
+      .click();
+
+    const clipboardValue = await this.page.waitForFunction(async () => {
+      return (await navigator.clipboard.readText()) || undefined;
+    });
+    const sharedUrl = await clipboardValue.jsonValue();
+
+    if (typeof sharedUrl !== 'string') {
+      throw new Error('Direct document link was not copied to the clipboard');
+    }
+
+    return sharedUrl;
   }
 
   async close() {
@@ -234,6 +252,17 @@ export class DocViewer {
 
   getFieldNames(): Locator {
     return this.page.testSubj.locator('docViewerFlyout').locator('.kbnDocViewer__fieldName');
+  }
+
+  /**
+   * Scrolls the virtualized fields-table grid to its last row. Rows outside the
+   * mounted window are absent from the DOM until they are scrolled into view.
+   */
+  async scrollFieldsTableToBottom() {
+    await this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('.euiDataGrid__virtualized')
+      .evaluate((el) => el.scrollTo(0, el.scrollHeight));
   }
 
   async openFieldTypeFilter() {
