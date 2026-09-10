@@ -24,6 +24,12 @@ export interface DeduplicateScheduledDiscoveriesParams {
   /** The persist step handover, in workflow (snake_case) shape. */
   discoveriesToPersist: unknown[];
   esClient: ElasticsearchClient;
+  /**
+   * Optional producer identity, forwarded to the alert hash so one producer never
+   * suppresses an attack another producer built from the same detection alerts.
+   * MUST match the value the persistence path contributes to the hash.
+   */
+  generationSource?: string;
   logger: Logger;
   replacements: Replacements | undefined;
   /** The trusted in-process rule id (schedule owner). */
@@ -48,6 +54,7 @@ export const deduplicateScheduledDiscoveries = async ({
   connectorId,
   discoveriesToPersist,
   esClient,
+  generationSource,
   logger,
   replacements,
   ruleId,
@@ -67,6 +74,7 @@ export const deduplicateScheduledDiscoveries = async ({
       computeSha256Hash,
       connectorId,
       esClient,
+      generationSource,
       indexPattern: getScheduledIndexPattern(spaceId),
       logger,
       ownerInfo: { id: ruleId, isSchedule: true },
