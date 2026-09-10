@@ -25,13 +25,6 @@ const RULES_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions(\/
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
  */
-/*
- * `alerting:v2:enabled` is a *global* advanced setting, read via
- * `core.settings.globalClient` — the regular `uiSettings` fixture writes to
- * the per-space settings store instead, so it never takes effect. Toggle it
- * via the dedicated global-settings endpoint, as in
- * `rule_management_skill_gating.spec.ts`.
- */
 const ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH = '/api/kibana/global_settings/alerting:v2:enabled';
 
 test.describe(

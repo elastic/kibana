@@ -140,7 +140,6 @@ export const RulesListHeader = ({
       },
     ];
 
-    // Keeps the tab from pointing at a privileges wall.
     if (canAccessTriggersActionsRules(application.capabilities)) {
       headerTabs.push({
         id: 'v1Rules',

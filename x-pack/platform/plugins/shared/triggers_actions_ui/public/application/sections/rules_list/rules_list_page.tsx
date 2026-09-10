@@ -78,7 +78,7 @@ export const RulesListContainer = () => {
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
     const extraItems: NonNullable<AppMenuConfig['items']> =
-      mode !== RULES_PAGE_MODE.v1Tabs && authorizedToReadAnyRules
+      mode !== RULES_PAGE_MODE.triggersActionsTabs && authorizedToReadAnyRules
         ? [
             {
               id: 'rulesLogs',

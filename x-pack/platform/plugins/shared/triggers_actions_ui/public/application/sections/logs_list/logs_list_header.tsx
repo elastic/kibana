@@ -12,7 +12,7 @@ import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 
 export interface LogsListHeaderProps {
   backHref: string;
-  canShowSettings: boolean;
+  shouldShowSettings: boolean;
   docLink: string;
   onOpenSettings: () => void;
 }
@@ -34,7 +34,7 @@ const BACK_TO_RULES_LABEL = i18n.translate(
  */
 export const LogsListHeader = ({
   backHref,
-  canShowSettings,
+  shouldShowSettings,
   docLink,
   onOpenSettings,
 }: LogsListHeaderProps) => {
@@ -42,10 +42,10 @@ export const LogsListHeader = ({
     () =>
       getRulesPageMenu({
         authorizedToCreateAnyRules: false,
-        canShowSettings,
+        canShowSettings: shouldShowSettings,
         onOpenSettings,
       }),
-    [canShowSettings, onOpenSettings]
+    [shouldShowSettings, onOpenSettings]
   );
 
   return (

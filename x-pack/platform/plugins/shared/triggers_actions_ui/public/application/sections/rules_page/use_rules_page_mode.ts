@@ -14,7 +14,7 @@ import { useKibana } from '../../../common/lib/kibana';
  */
 export const RULES_PAGE_MODE = {
   /** v2 disabled: classic Rules/Logs tabs. */
-  v1Tabs: 'v1Tabs',
+  triggersActionsTabs: 'triggersActionsTabs',
   /** v2 enabled and the user can read v2 rules: show the v2 Rules tab. */
   v1AndV2Tabs: 'v1AndV2Tabs',
   /** v2 enabled but the user lacks the v2 rules capability: suppress tabs. */
@@ -39,5 +39,5 @@ export const useRulesPageMode = (): RulesPageMode => {
     return RULES_PAGE_MODE.noTabs;
   }
 
-  return RULES_PAGE_MODE.v1Tabs;
+  return RULES_PAGE_MODE.triggersActionsTabs;
 };

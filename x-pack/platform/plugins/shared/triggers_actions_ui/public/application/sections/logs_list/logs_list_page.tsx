@@ -75,10 +75,10 @@ export const LogsListContainer = () => {
   );
 
   const heading =
-    mode !== RULES_PAGE_MODE.v1Tabs ? (
+    mode !== RULES_PAGE_MODE.triggersActionsTabs ? (
       <LogsListHeader
         backHref={rulesListHref}
-        canShowSettings={canShowSettings}
+        shouldShowSettings={canShowSettings}
         docLink={docLink}
         onOpenSettings={openSettingsFlyout}
       />
