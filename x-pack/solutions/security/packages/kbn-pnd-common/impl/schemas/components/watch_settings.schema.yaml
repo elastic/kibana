@@ -14,6 +14,15 @@ components:
         There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see
         https://github.com/elastic/security-team/issues/18718.
 
+    WorkerScheduleInterval:
+      type: string
+      pattern: '^[1-9][0-9]*[mhd]$'
+      maxLength: 6
+      description: >-
+        Interval between runs for a schedule-driven Worker, as a positive count and a unit of
+        minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled`
+        trigger. Seconds are not supported.
+
     WorkerRunState:
       type: string
       enum: [ok, paused, degraded, unavailable]
@@ -255,6 +264,11 @@ components:
           type: string
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+          description: >-
+            Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
+            render the interval control.
 
     Worker:
       type: object
