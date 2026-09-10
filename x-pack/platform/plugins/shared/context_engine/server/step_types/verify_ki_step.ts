@@ -13,9 +13,10 @@ import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_
 import {
   createKiVerifierRegistry,
   createWorkflowVerifier,
+  KiVerificationInputError,
   KiVerificationService,
 } from '../ki_verification';
-import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
+import type { KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
@@ -25,22 +26,7 @@ export const createVerifyKiStepDefinition = (
   analyticsService: ContextEngineAnalyticsService,
   workflowsManagement?: KiVerifierWorkflowRunner
 ) => {
-  const registry = createKiVerifierRegistry();
-  const service = new KiVerificationService(registry);
-
-  const resolveBuiltIn = (id: string): KiVerifier => {
-    const verifier = registry.get(id);
-    if (!verifier) {
-      throw new ExecutionError({
-        type: 'ValidationError',
-        message: `Unknown built-in KI verifier '${id}'. Known verifiers: ${registry
-          .getAll()
-          .map((v) => v.id)
-          .join(', ')}`,
-      });
-    }
-    return verifier;
-  };
+  const service = new KiVerificationService(createKiVerifierRegistry());
 
   return createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
@@ -57,10 +43,9 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const { spaceId } = context.contextManager.getContext().workflow;
       const verifiers = context.input.verifiers?.map((entry) => {
-        if (!('workflow_id' in entry)) {
-          return resolveBuiltIn(entry.id);
+        if (typeof entry === 'string') {
+          return entry;
         }
         if (!workflowsManagement) {
           throw new ExecutionError({
@@ -72,24 +57,32 @@ export const createVerifyKiStepDefinition = (
         return createWorkflowVerifier(entry, {
           workflowsManagement,
           request: fakeRequest,
-          spaceId,
+          spaceId: context.contextManager.getContext().workflow.spaceId,
         });
       });
 
       const summary = await withKiVerificationTelemetry({
         analyticsService,
         logger,
-        run: () =>
-          service.verifyKi(
-            context.input.ki,
-            {
+        run: async () => {
+          try {
+            return await service.verifyKi(context.input.ki, {
               isEnabled,
               esClient: context.contextManager.getScopedEsClient(),
               logger,
               abortSignal: context.abortSignal,
-            },
-            verifiers
-          ),
+              verifiers,
+            });
+          } catch (error) {
+            if (error instanceof KiVerificationInputError) {
+              throw new ExecutionError({
+                type: 'InputValidationError',
+                message: error.message,
+              });
+            }
+            throw error;
+          }
+        },
       });
 
       return { output: summary };

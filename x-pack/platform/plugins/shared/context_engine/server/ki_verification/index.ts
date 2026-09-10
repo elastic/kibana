@@ -15,13 +15,17 @@ export type {
   KiVerificationSummary,
 } from './types';
 export { KiVerifierRegistry } from './registry';
+export { KiVerificationInputError } from './errors';
 export { KiVerificationService } from './service';
 export { createKiVerifierRegistry } from './create_registry';
 export {
   createEsqlValidSyntaxVerifier,
+  createEsqlValidRuntimeVerifier,
   createWorkflowVerifier,
   ESQL_ATTRIBUTE_KEY,
   ESQL_VALID_SYNTAX_VERIFIER_ID,
+  ESQL_VALID_RUNTIME_VERIFIER_ID,
+  ESQL_EXECUTION_ROW_LIMIT,
   WORKFLOW_VERIFIER_ID_PREFIX,
   WORKFLOW_VERIFIER_TRIGGERED_BY,
 } from './verifiers';

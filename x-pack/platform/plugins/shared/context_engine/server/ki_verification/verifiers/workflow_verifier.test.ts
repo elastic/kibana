@@ -64,22 +64,22 @@ describe('createWorkflowVerifier', () => {
 
   describe('applies', () => {
     it('applies to every KI by default', () => {
-      expect(makeVerifier().applies({})).toBe(true);
+      expect(makeVerifier().applies({}, context)).toBe(true);
     });
 
     it('filters by type', () => {
       const verifier = makeVerifier({ applies_to: { types: ['runbook'] } });
 
-      expect(verifier.applies({ type: 'runbook' })).toBe(true);
-      expect(verifier.applies({ type: 'faq' })).toBe(false);
-      expect(verifier.applies({})).toBe(false);
+      expect(verifier.applies({ type: 'runbook' }, context)).toBe(true);
+      expect(verifier.applies({ type: 'faq' }, context)).toBe(false);
+      expect(verifier.applies({}, context)).toBe(false);
     });
 
     it('filters by attribute keys', () => {
       const verifier = makeVerifier({ applies_to: { attributes: ['esql', 'owner'] } });
 
-      expect(verifier.applies({ attributes: { esql: 'FROM x', owner: 'me' } })).toBe(true);
-      expect(verifier.applies({ attributes: { esql: 'FROM x' } })).toBe(false);
+      expect(verifier.applies({ attributes: { esql: 'FROM x', owner: 'me' } }, context)).toBe(true);
+      expect(verifier.applies({ attributes: { esql: 'FROM x' } }, context)).toBe(false);
     });
   });
 

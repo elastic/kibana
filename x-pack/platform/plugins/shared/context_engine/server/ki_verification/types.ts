@@ -33,6 +33,11 @@ export interface KiVerifierContext {
  */
 export interface KiVerificationContext extends KiVerifierContext {
   isEnabled: boolean;
+  /**
+   * Verifiers to run, in order; at least one is required. A string selects a
+   * registered verifier by id; a {@link KiVerifier} instance runs as given.
+   */
+  verifiers?: Array<string | KiVerifier>;
 }
 
 /** Outcome a verifier reports for one KI. A failure must carry a reason. */
@@ -44,7 +49,7 @@ export type KiVerifierResult = KiVerifierOutcome & { verifier: string };
 export interface KiVerifier {
   readonly id: string;
   /** Whether this verifier has anything to check for the given KI. */
-  applies(ki: KnowledgeIndicator): boolean;
+  applies(ki: KnowledgeIndicator, context: KiVerifierContext): boolean;
   verify(ki: KnowledgeIndicator, context: KiVerifierContext): Promise<KiVerifierOutcome>;
 }
 
