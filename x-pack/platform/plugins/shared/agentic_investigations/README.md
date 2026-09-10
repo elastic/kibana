@@ -56,7 +56,7 @@ When a second entity lands and needs to be grantable on its own, its capabilitie
 
 ```mermaid
 flowchart TB
-    subgraph solution["Solution plugin (e.g. pnd)"]
+    subgraph solution["Solution plugin (e.g. alertzero)"]
         worker["Worker workflow"]
         ui["Pending-proposals UI"]
     end
@@ -175,7 +175,7 @@ An action workflow is an ordinary managed workflow that:
 
 Rule 3 is the non-obvious one and the easiest to get wrong: the gate passes exactly one key, `actionInput`. An action that declares `name`, `query` and `index` as top-level inputs will receive none of them. Declare them as properties of `actionInput` instead, and mark the ones that define the action's scope `required` — a default that matches everything is a demo shortcut, not a catalog entry.
 
-See `definitions/pnd/action_create_detection_rule.yaml` for a worked example.
+See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a worked example.
 
 ### API
 
@@ -228,10 +228,10 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 **Steps:**
 
-1. Start Kibana. On start this plugin installs `system-create-investigation-proposal` globally, and `pnd` installs `system-alertzero-action-create-rule`. Confirm both appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
+1. Start Kibana. On start this plugin installs `system-create-investigation-proposal` globally, and `alertzero` installs `system-alertzero-action-create-rule`. Confirm both appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
 2. Trigger the gate workflow directly with `conversationId`, `actionWorkflowId: system-alertzero-action-create-rule`, and an `actionInput` carrying `name`, `description`, `query` and `index`.
 3. Confirm the record: `GET .kibana-investigation-proposals/_search` should show `status: pending`, `category: tune`, the `actionWorkflowId`, and a `workflowExecutionId` pointing at a gate execution that is `waiting_for_input`.
-4. Approve from the AlertZero app (`/app/pnd`) — under "Awaiting your decision" on the landing page, or the investigation's Proposals tab.
+4. Approve from the AlertZero app (`/app/alertzero`) — under "Awaiting your decision" on the landing page, or the investigation's Proposals tab.
 5. Assert the outcome: the proposal reaches `succeeded`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
 6. Repeat in a non-default space. Space scoping is invisible in `default`: every query filters on `spaceId`, and a missing filter would only show up elsewhere.
 

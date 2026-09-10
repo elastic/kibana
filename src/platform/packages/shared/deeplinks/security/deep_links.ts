@@ -133,22 +133,22 @@ export enum SecurityPageName {
   onboarding = 'onboarding',
 
   /**
-   * PND pages.
+   * AlertZero pages.
    *
-   * These live on the `pnd` plugin rather than `securitySolutionUI`, so their link ids are built with
-   * `pndLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
+   * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
+   * `alertZeroLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
    * name is the same concept, and the app prefix is what distinguishes the two links.
    */
-  pndChats = 'chats',
-  pndRecords = 'records',
-  pndThreatHunt = 'threat_hunt',
-  pndStreams = 'streams',
-  pndWatches = 'watches',
-  pndWatchesWorkers = 'watches_workers',
-  pndWatchesSkills = 'watches_skills',
-  pndWatchFloor = 'watch_floor',
-  pndWatchOfficer = 'watch_officer',
-  pndWatchDark = 'watch_dark',
-  pndWatchDeep = 'watch_deep',
-  pndWatchDetection = 'watch_detection',
+  alertZeroChats = 'chats',
+  alertZeroRecords = 'records',
+  alertZeroThreatHunt = 'threat_hunt',
+  alertZeroStreams = 'streams',
+  alertZeroWatches = 'watches',
+  alertZeroWatchesWorkers = 'watches_workers',
+  alertZeroWatchesSkills = 'watches_skills',
+  alertZeroWatchFloor = 'watch_floor',
+  alertZeroWatchOfficer = 'watch_officer',
+  alertZeroWatchDark = 'watch_dark',
+  alertZeroWatchDeep = 'watch_deep',
+  alertZeroWatchDetection = 'watch_detection',
 }
