@@ -54,9 +54,4 @@ export type ChatResponse = Omit<
   };
 };
 
-export type ChatConverseResponse = ConversationWithPermissions | MessagePersistedResponse;
-
-export interface MessagePersistedResponse {
-  conversation_id: string;
-  message_id: string;
-}
+export type ChatConverseResponse = ConversationWithPermissions;

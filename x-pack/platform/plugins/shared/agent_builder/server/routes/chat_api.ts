@@ -116,7 +116,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message (streaming)',
       description:
-        'Send a message to an agent and stream the response as server-sent events as the agent works. With trigger_mode: never, emits one message_persisted event containing { conversation_id, message_id } after persistence and closes. Public message-only requests do not deduplicate retries.',
+        'Send a message to an agent and stream the response as server-sent events as the agent works. With trigger_mode: never, returns the updated conversation after persistence. Public message-only requests do not deduplicate retries.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,

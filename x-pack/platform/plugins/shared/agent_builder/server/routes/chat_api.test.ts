@@ -230,7 +230,8 @@ describe('message-only endpoint acknowledgements', () => {
     'persists through %s without execution or callback setup',
     async (path) => {
       const { router, handlers } = captureHandlers();
-      const appendUserMessage = jest.fn();
+      const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
+      const appendUserMessage = jest.fn().mockResolvedValue(conversation);
       const executeAgent = jest.fn();
       const validateCallbackUrl = jest.fn();
       const getStartServices = jest.fn();
@@ -268,16 +269,14 @@ describe('message-only endpoint acknowledgements', () => {
       );
       expect(result.status).toBe(200);
       expect(appendUserMessage).toHaveBeenCalledTimes(1);
-      const persisted = appendUserMessage.mock.calls[0][0];
-      const acknowledgement = { conversation_id: persisted.id, message_id: persisted.messageId };
       if (path.endsWith('/async')) {
         const stream = result.payload as Readable;
         const chunks = await stream.toArray();
         const text = chunks.join('');
         expect(text.match(/event: message_persisted/g)).toHaveLength(1);
-        expect(text).toContain(JSON.stringify(acknowledgement));
+        expect(text).toContain(JSON.stringify(conversation));
       } else {
-        expect(result.payload).toEqual(acknowledgement);
+        expect(result.payload).toEqual(conversation);
       }
       expect(executeAgent).not.toHaveBeenCalled();
       expect(validateCallbackUrl).not.toHaveBeenCalled();

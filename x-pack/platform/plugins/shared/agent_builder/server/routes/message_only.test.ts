@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
-import { createConversationClientMock } from '../test_utils/conversations';
+import { createConversationClientMock, createEmptyConversation } from '../test_utils/conversations';
 import { getMessageOnlyHandler } from './message_only';
 import { conversePayloadSchema, callbackConversePayloadSchema } from './chat';
 import { chatPayloadSchema } from './chat_api';
@@ -32,6 +32,9 @@ describe('message-only contract', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     client.getByOrigin.mockResolvedValue(undefined);
+    client.appendUserMessage.mockImplementation(async ({ id, messageId }) =>
+      createEmptyConversation({ id, events: [{ id: messageId }] as never })
+    );
   });
 
   it.each([
@@ -68,8 +71,8 @@ describe('message-only contract', () => {
     };
     const first = await persist({ request, spaceId: 'default', payload });
     const second = await persist({ request, spaceId: 'default', payload });
-    expect(second.conversation_id).not.toBe(first.conversation_id);
-    expect(second.message_id).not.toBe(first.message_id);
+    expect(second.id).not.toBe(first.id);
+    expect(second.events?.[0].id).not.toBe(first.events?.[0].id);
     expect(getInternalServices().execution.executeAgent).not.toHaveBeenCalled();
   });
 

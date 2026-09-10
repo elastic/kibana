@@ -9,7 +9,8 @@ import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { ChatRequestBodyPayload, MessagePersistedResponse } from '../../common/http_api/chat';
+import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
+import type { ConversationWithPermissions } from '../../common/http_api/conversations';
 import { getConversation } from '../services/execution/utils/conversations';
 import type { RouteDependencies } from './types';
 
@@ -26,7 +27,7 @@ export const getMessageOnlyHandler =
     request: KibanaRequest;
     spaceId: string;
     messageId?: string;
-  }): Promise<MessagePersistedResponse> => {
+  }): Promise<ConversationWithPermissions> => {
     const executionOptions = [
       'prompts',
       'action',
@@ -66,7 +67,7 @@ export const getMessageOnlyHandler =
       const attachment = result.attachment as Attachment;
       attachments.push({ ...input, id: attachment.id ?? uuidv4(), data: attachment.data });
     }
-    await client.appendUserMessage({
+    return await client.appendUserMessage({
       id: conversation.id,
       ...(conversation.operation === 'CREATE' ? { create: conversation } : {}),
       messageId,
@@ -78,5 +79,4 @@ export const getMessageOnlyHandler =
       attachments,
       getTypeDefinition: services.attachments.getTypeDefinition,
     });
-    return { conversation_id: conversation.id, message_id: messageId };
   };

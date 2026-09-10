@@ -126,7 +126,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  appendUserMessage(request: AppendUserMessageRequest): Promise<void>;
+  appendUserMessage(request: AppendUserMessageRequest): Promise<ConversationWithPermissions>;
   appendEvents(
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
@@ -533,7 +533,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /** Appends timeline events onto a conversation.*/
-  async appendUserMessage(request: AppendUserMessageRequest): Promise<void> {
+  async appendUserMessage(request: AppendUserMessageRequest): Promise<ConversationWithPermissions> {
     const {
       id,
       create,
@@ -585,15 +585,20 @@ class ConversationClientImpl implements ConversationClient {
         updated_at: createdAt,
       };
       try {
-        await this.create({ ...create, id, user: this.user, ...(await materialize(initial)) });
-        return;
+        return await this.create({
+          ...create,
+          id,
+          user: this.user,
+          ...(await materialize(initial)),
+        });
       } catch (error) {
         if (!isConversationAlreadyExistsError(error)) throw error;
       }
     }
 
     const writer = this.createWriter({ access: 'converse', maxRetries: 0 });
-    for (let attempt = 0; attempt <= 5; attempt++) {
+    const maxRetries = 5;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       const document = await this.getDocumentWithAccess({ conversationId: id, access: 'converse' });
       const current = fromEs(document, this.user);
       if (current.read_only) throw createBadRequestError('Conversation is read-only');
@@ -601,7 +606,7 @@ class ConversationClientImpl implements ConversationClient {
         throw createInternalError('Standalone messages require canonical event storage');
       }
       // Replays must return before modifying attachments or unread state, including after a conflict.
-      if (current.events?.some((event) => event.id === messageId)) return;
+      if (current.events?.some((event) => event.id === messageId)) return await this.get(id);
       const fields = await materialize(current);
       try {
         await writer.write({
@@ -615,13 +620,15 @@ class ConversationClientImpl implements ConversationClient {
           ifSeqNo: document._seq_no,
           ifPrimaryTerm: document._primary_term,
         });
-        return;
+        return await this.get(id);
       } catch (error) {
         if (!isElasticsearchWriteConflict(error)) throw error;
-        if (attempt === 5) throw createConversationWriteConflictError({ conversationId: id });
+        if (attempt === maxRetries)
+          throw createConversationWriteConflictError({ conversationId: id });
         await delay(400);
       }
     }
+    throw createConversationWriteConflictError({ conversationId: id });
   }
 
   async appendEvents(
