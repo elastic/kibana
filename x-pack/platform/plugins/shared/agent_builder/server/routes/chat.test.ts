@@ -13,6 +13,7 @@ import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
   chatPayloadSchema,
+  contextMessagePayloadSchema,
   conversePayloadSchema,
   promptResponseEntrySchema,
   registerChatRoutes,
@@ -141,13 +142,47 @@ describe('conversePayloadSchema', () => {
 describe('chatPayloadSchema', () => {
   it('accepts trigger_mode for sync chat requests', () => {
     expect(chatPayloadSchema.validate({ input: 'hi' }).trigger_mode).toBe('always');
-    expect(chatPayloadSchema.validate({ input: 'hi', trigger_mode: 'never' })).toMatchObject({
-      trigger_mode: 'never',
-    });
+    expect(
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+      })
+    ).toMatchObject({ trigger_mode: 'never' });
   });
 
   it('rejects unsupported trigger_mode values', () => {
     expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
+  });
+});
+
+describe('contextMessagePayloadSchema', () => {
+  it('accepts only context message fields', () => {
+    expect(() =>
+      contextMessagePayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'context',
+        attachments: [],
+      })
+    ).not.toThrow();
+  });
+
+  it('requires conversation_id', () => {
+    expect(() => contextMessagePayloadSchema.validate({ trigger_mode: 'never' })).toThrow(
+      /conversation_id/
+    );
+  });
+
+  it.each(['agent_id', 'access_control', 'read_only', 'connector_id'])('rejects %s', (field) => {
+    expect(() =>
+      contextMessagePayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'context',
+        [field]: {},
+      })
+    ).toThrow(new RegExp(field));
   });
 });
 

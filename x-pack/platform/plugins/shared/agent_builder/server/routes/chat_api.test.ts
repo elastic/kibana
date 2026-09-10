@@ -264,6 +264,7 @@ describe('context message acknowledgements', () => {
       {
         body: {
           trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
           input: 'context',
         },
       },
@@ -278,6 +279,9 @@ describe('context message acknowledgements', () => {
   });
 
   it.each([
+    'agent_id',
+    'access_control',
+    'read_only',
     'prompts',
     'action',
     '_execution_mode',
@@ -302,7 +306,14 @@ describe('context message acknowledgements', () => {
     const response = buildResponse();
     const result = await handlers[`${chatApiPath}/converse`](
       activeContext(true),
-      { body: { trigger_mode: 'never', input: 'context', [field]: {} } },
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          input: 'context',
+          [field]: {},
+        },
+      },
       response
     );
 
@@ -325,7 +336,12 @@ describe('context message acknowledgements', () => {
     const response = buildResponse();
     const result = await handlers[`${chatApiPath}/converse`](
       activeContext(true),
-      { body: { trigger_mode: 'never' } },
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+        },
+      },
       response
     );
 

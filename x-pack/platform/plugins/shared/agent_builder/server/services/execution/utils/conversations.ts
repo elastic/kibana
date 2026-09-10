@@ -402,49 +402,33 @@ export const isNewConversation = (conversation: ConversationWithOperation): bool
 };
 
 export interface PersistContextMessageParams {
-  agentId: string;
-  conversationId?: string;
+  conversationId: string;
   message: string;
   attachments: AttachmentInput[];
   conversationClient: ConversationClient;
   getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
-  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
-  readOnly?: boolean;
   author?: ConversationRoundAuthor;
   messageId?: string;
   createdAt?: Date;
 }
 
 export const persistContextMessage = async ({
-  agentId,
   conversationId,
   message,
   attachments,
   conversationClient,
   getTypeDefinition,
-  accessControl,
-  readOnly,
   author,
   messageId = uuidv4(),
   createdAt = new Date(),
 }: PersistContextMessageParams): Promise<ConversationWithPermissions> => {
-  const conversation = await getConversation({
-    agentId,
-    conversationId,
-    autoCreateConversationWithId: true,
-    conversationClient,
-    accessControl,
-    readOnly,
-  });
-
   return await conversationClient.appendContextMessage({
-    id: conversation.id,
+    id: conversationId,
     messageId,
     createdAt,
     message,
     attachments,
     getTypeDefinition,
-    ...(isNewConversation(conversation) ? { create: conversation } : {}),
     author,
   });
 };

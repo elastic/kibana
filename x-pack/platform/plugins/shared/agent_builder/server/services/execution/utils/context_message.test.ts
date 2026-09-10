@@ -22,9 +22,9 @@ describe('persistContextMessage', () => {
     );
   });
 
-  it('assigns distinct public identities', async () => {
+  it('assigns distinct message ids', async () => {
     const first = await persistContextMessage({
-      agentId: 'agent-1',
+      conversationId: 'conversation-1',
       message: 'hello',
       attachments: [],
       conversationClient: client,
@@ -32,14 +32,14 @@ describe('persistContextMessage', () => {
     });
 
     const second = await persistContextMessage({
-      agentId: 'agent-1',
+      conversationId: 'conversation-1',
       message: 'hello',
       attachments: [],
       conversationClient: client,
       getTypeDefinition: jest.fn(),
     });
 
-    expect(second.id).not.toBe(first.id);
+    expect(second.id).toBe(first.id);
     expect(second.events?.[0].id).not.toBe(first.events?.[0].id);
   });
 });

@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
@@ -24,30 +24,25 @@ import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { persistContextMessage } from '../services/execution/utils/conversations';
-import { chatPayloadSchema, conversePayloadSchema } from './chat';
+import { chatPayloadSchema, contextMessagePayloadSchema, conversePayloadSchema } from './chat';
 
-const contextMessageUnsupportedPayloadFields = [
-  'prompts',
-  'action',
-  '_execution_mode',
-  'execution_id',
-  'connector_id',
-  'inference_id',
-  'browser_api_tools',
-  'configuration_overrides',
-  'project_routing',
-] as const satisfies ReadonlyArray<keyof ChatRequestBodyPayload>;
+type ContextMessagePayload = ChatRequestBodyPayload & {
+  trigger_mode: 'never';
+  conversation_id: string;
+};
 
-const validateContextMessagePayload = (payload: ChatRequestBodyPayload) => {
-  for (const field of contextMessageUnsupportedPayloadFields) {
-    if (payload[field] !== undefined) {
-      throw createBadRequestError(`${field} is not supported when trigger_mode is never`);
-    }
+const validateContextMessagePayload = (payload: ChatRequestBodyPayload): ContextMessagePayload => {
+  try {
+    contextMessagePayloadSchema.validate(payload);
+  } catch (error) {
+    throw createBadRequestError(error instanceof Error ? error.message : String(error));
   }
 
   if (!payload.input?.trim() && !payload.attachments?.length) {
     throw createBadRequestError('Context message requests require input or attachments');
   }
+
+  return payload as ContextMessagePayload;
 };
 
 const validateContextMessageAttachments = async ({
@@ -120,28 +115,25 @@ export function registerChatApiRoutes({
           const payload = request.body as ChatRequestBodyPayload;
 
           if (payload.trigger_mode === 'never') {
-            validateContextMessagePayload(payload);
+            const contextMessagePayload = validateContextMessagePayload(payload);
 
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
             const client = await conversationsService.getScopedClient({ request });
 
             const attachments = await validateContextMessageAttachments({
-              attachments: payload.attachments ?? [],
+              attachments: contextMessagePayload.attachments ?? [],
               attachmentsService,
               request,
             });
 
             const author = await conversationsService.getConversationRoundAuthor({ request });
             const body = await persistContextMessage({
-              agentId: payload.agent_id ?? agentBuilderDefaultAgentId,
-              conversationId: payload.conversation_id,
-              message: payload.input ?? '',
+              conversationId: contextMessagePayload.conversation_id,
+              message: contextMessagePayload.input ?? '',
               attachments,
               conversationClient: client,
               getTypeDefinition: attachmentsService.getTypeDefinition,
-              accessControl: payload.access_control,
-              readOnly: payload.read_only,
               author,
             });
 
