@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
   - '@kbn/utility-types'
-  - '@kbn/zod'
 tags:
   - shared-browser
   - package
