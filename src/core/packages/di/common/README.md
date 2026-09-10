@@ -603,5 +603,185 @@ export const module = new KibanaContainerModule(({ onSetup }) => {
   }, [Config, HttpClient]);
   ```
 
+- Make sure not to access services that are supposed to be available only after the start stage from services used during the setup stage.
+  This will cause a runtime error.
+  ```ts
+  class AuthService {
+    // fails because `CoreStart('http')` is not available when injected in `Setup`
+    constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
+
+    registerProvider(provider: AuthProvider) {
+      // ...
+    }
+  }
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(AuthService).toSelf();
+    bind(Setup).toResolvedValue((authService) => ({
+      auth: {
+        registerProvider: (provider) => authService.registerProvider(provider),
+      },
+    }), [AuthService]);
+  });
+  ```
+
+  Here is another example where the runtime error is not obvious:
+  ```ts
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Setup).toDynamicValue(({ get }) => ({
+      auth: {
+        enable: () => {
+          get(HttpServer).registerMiddleware(() => {
+            // may fail because `PluginStart` services are not available if the registered callback called too early
+            const { someService } = get(PluginStart('somePlugin'));
+
+            // ...
+          });
+        },
+      }
+    }));
+  });
+  ```
+
+- Keep the container module configuration simple and don't construct objects inline.
+  ```ts
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Setup).toResolvedValue((authService, configService) => ({
+      auth: {
+        registerProvider: () => { /* ... */ },
+      },
+      config: {
+        get: () => { /* ... */ },
+      },
+    }), [AuthService, ConfigService]);
+  });
+  ```
+
+  It is better to extract all the factories and keep only the binding configuration in the container module.
+  ```ts
+  import { setupFactory } from './setup-factory';
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Setup).toResolvedValue(setupFactory, [AuthService, ConfigService]);
+  });
+  ```
+
+- Try to avoid imperative code in the container module configuration.
+  There is always a better way to achieve the same result declaratively, and it will be easier to maintain and test.
+  ```ts
+  async function getFeatures(request, authService, configService, httpService) {
+    const config = await configService.get();
+    const features = config.getEnabledFeatures();
+    const experiments = await httpService.get('/api/features', { user: authService.getUser(request) });
+
+    return [...features, ...experiments];
+  }
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Start).toResolvedValue((authService, configService, httpService) => ({
+      improvedSearch: {
+        isEnabled: () => {
+          return getFeatures(request, authService, configService, httpService).includes('improvedSearch'),
+        },
+      }
+    }), [AuthService, ConfigService, HttpService]);
+  });
+  ```
+
+  Instead, we can extract some calls into separate services and declare a dedicated service responsible for the features resolution.
+  ```ts
+  const ConfigToken = createToken<Config>('ConfigToken');
+  const ExperimentsToken = createToken<Experiments>('ExperimentsToken');
+  const UserToken = createToken<User>('UserToken');
+
+  class Features {
+    constructor(
+      @inject(ConfigToken) private readonly config: Config,
+      @inject(ExperimentsToken) private readonly experiments: Experiments,
+    ) {}
+
+    public has(feature: string): boolean {
+      return [...this.config.getEnabledFeatures(), ...this.experiments].includes(feature);
+    }
+  }
+
+  class ImprovedSearch {
+    constructor(
+      @inject(Features) private readonly features: Features,
+    ) {}
+
+    public isEnabled(): boolean {
+      return this.features.has('improvedSearch');
+    }
+  }
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(ConfigToken).toResolvedValue((configService) => configService.get(), [ConfigService]);
+    bind(UserToken)
+      .toResolvedValue((authService, request) => authService.getUser(request), [AuthService, Request])
+      .inRequestScope();
+    bind(ExperimentsToken)
+      .toResolvedValue((httpService, user) => httpService.get('/api/features', { user }), [HttpService, UserToken])
+      .inRequestScope();
+
+    bind(Features).toSelf();
+    bind(Start).toResolvedValue((improvedSearch) => ({ improvedSearch }), [ImprovedSearch]);
+  });
+  ```
+
+  The refactored code is longer, but it is easier to extend and reuse some parts of it.
+  In practice, the services are usually more complex and have more dependencies, so extracting them will likely reduce the amount of code.
+  Another advantage is that InversifyJS handles asynchronous code automatically, and we have a flat structure.
+  If the implementation of one of the services changes, it will not affect the rest of the code.
+  All of this, combined with loose coupling, will make the code easier to test and hence more maintainable.
+
+- Avoid mocking DI functions to inject mocked services.
+  That may bring side effects and make the tests more brittle.
+  Instead, invest some time in binding mocked services in the test container.
+
+  ```ts
+  jest.mock('@kbn/core-di-browser', () => ({
+    useService: (token: unknown) => {
+      if (token === SomeServiceToken) {
+        return {
+          doSomething: jest.fn(),
+        };
+      }
+
+      return null;
+    }
+  });
+  ```
+
+  ```tsx
+  import type { ServiceTypeOf } from '@kbn/core-di';
+  import { Context } from '@kbn/core-di-browser';
+  import { injectionServiceMock } from '@kbn/core-di-mocks';
+
+  describe('MyComponent', () => {
+    let container: Container;
+    let someServiceMock: jest.Mocked<ServiceTypeOf<typeof SomeServiceToken>>;
+
+    beforeEach(() => {
+      someServiceMock = {
+        doSomething: jest.fn(),
+      };
+
+      container = injectionServiceMock.createStartContract().getContainer();
+      container.bind(SomeServiceToken).toConstantValue(someServiceMock);
+    });
+
+    it('should do something', () => {
+      const { getByText } = render(
+        <Context.Provider value={container}>
+          <MyComponent />
+        </Context.Provider>
+      );
+
+      expect(someServiceMock.doSomething).toHaveBeenCalled();
+    });
+  });
+  ```
+
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
