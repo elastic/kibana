@@ -67,6 +67,7 @@ plugins:
     - nightshift_investigations
     - notification_center
     - observability
+    - observability_alerting
     - observability_onboarding
     - osquery
     - painless_lab
