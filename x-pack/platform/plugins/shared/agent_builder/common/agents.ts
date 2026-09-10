@@ -7,7 +7,6 @@
 
 import type {
   AgentAccessControl,
-  AgentAccessControlEntry,
   AgentConfiguration,
   AgentDefinition,
 } from '@kbn/agent-builder-common';
@@ -40,6 +39,4 @@ export type AgentUpdateRequest = Partial<
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;
 
-export interface AgentAccessControlUpdateRequest {
-  entries: AgentAccessControlEntry[];
-}
+export type AgentAccessControlUpdateRequest = Pick<AgentAccessControl, 'entries'>;

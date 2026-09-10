@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiAvatar,
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -22,33 +21,28 @@ import {
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
-  isLegacyAgentAccessControlEntry,
+  getAccessControlEntryKey,
   type AgentAccessControlEntry,
   AgentAccessControlRole,
   type AgentDefinition,
-  type LegacyAgentAccessControlEntry,
 } from '@kbn/agent-builder-common';
 import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
 import {
-  accessFlyoutLegacyEntriesBody,
-  accessFlyoutLegacyEntriesTitle,
   accessFlyoutNoPeople,
   accessFlyoutPeopleHelp,
   accessFlyoutPeopleSection,
 } from './access_i18n';
 
-type AccessFormEntry = AgentAccessControlEntry | LegacyAgentAccessControlEntry;
-
 interface AccessFormProps {
   agent: Pick<AgentDefinition, 'access_control'>;
-  entries: AccessFormEntry[];
+  entries: AgentAccessControlEntry[];
   /** Resolved user profiles for id-backed entries, keyed by profile uid. */
   profileByUid: Map<string, UserProfileWithAvatar>;
   ownerName?: string;
   isDisabled?: boolean;
-  onChange: (entries: AccessFormEntry[]) => void;
+  onChange: (entries: AgentAccessControlEntry[]) => void;
 }
 
 const sectionStyles = (euiTheme: EuiThemeComputed) => css`
@@ -95,10 +89,8 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
   );
 };
 
-const entryKey = (entry: AccessFormEntry): string =>
-  isLegacyAgentAccessControlEntry(entry) ? `name:${entry.name}` : `id:${entry.id}`;
-
-const sameEntry = (a: AccessFormEntry, b: AccessFormEntry): boolean => entryKey(a) === entryKey(b);
+const sameEntry = (a: AgentAccessControlEntry, b: AgentAccessControlEntry): boolean =>
+  getAccessControlEntryKey(a) === getAccessControlEntryKey(b);
 
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
@@ -116,17 +108,16 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  const hasLegacyEntries = entries.some(isLegacyAgentAccessControlEntry);
-
-  const excludedUids = useMemo(() => {
-    const uids = new Set<string>();
-    for (const entry of entries) {
-      if (!isLegacyAgentAccessControlEntry(entry)) {
-        uids.add(entry.id);
-      }
-    }
-    return Array.from(uids);
-  }, [entries]);
+  // Legacy name-only entries are excluded by username so the same person is not offered twice.
+  const excluded = useMemo(
+    () => ({
+      uids: entries.flatMap((entry) => (entry.id !== undefined ? [entry.id] : [])),
+      usernames: entries.flatMap((entry) =>
+        entry.id === undefined && entry.name !== undefined ? [entry.name] : []
+      ),
+    }),
+    [entries]
+  );
 
   const handleAdd = (profile: UserProfileWithAvatar) => {
     const nextEntry: AgentAccessControlEntry = {
@@ -137,31 +128,22 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     onChange([...entries, nextEntry]);
   };
 
-  const handleChangeRole = (target: AccessFormEntry, role: AgentAccessControlRole) => {
-    onChange(entries.map((e) => (sameEntry(e, target) ? ({ ...e, role } as AccessFormEntry) : e)));
+  const handleChangeRole = (target: AgentAccessControlEntry, role: AgentAccessControlRole) => {
+    onChange(entries.map((e) => (sameEntry(e, target) ? { ...e, role } : e)));
   };
 
-  const handleRemove = (target: AccessFormEntry) => {
+  const handleRemove = (target: AgentAccessControlEntry) => {
     onChange(entries.filter((e) => !sameEntry(e, target)));
   };
 
   return (
     <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
-      <UserPicker excludedUids={excludedUids} isDisabled={isDisabled} onAdd={handleAdd} />
-      {hasLegacyEntries ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            iconType="warning"
-            title={accessFlyoutLegacyEntriesTitle}
-            data-test-subj="agentBuilderAclLegacyCallout"
-          >
-            <EuiText size="s">{accessFlyoutLegacyEntriesBody}</EuiText>
-          </EuiCallOut>
-        </>
-      ) : null}
+      <UserPicker
+        excludedUids={excluded.uids}
+        excludedUsernames={excluded.usernames}
+        isDisabled={isDisabled}
+        onAdd={handleAdd}
+      />
       {entries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}
@@ -190,11 +172,9 @@ export const AccessForm: React.FC<AccessFormProps> = ({
               )}
               {entries.map((entry) => (
                 <PrincipalRow
-                  key={entryKey(entry)}
+                  key={getAccessControlEntryKey(entry)}
                   entry={entry}
-                  profile={
-                    isLegacyAgentAccessControlEntry(entry) ? undefined : profileByUid.get(entry.id)
-                  }
+                  profile={entry.id !== undefined ? profileByUid.get(entry.id) : undefined}
                   accessControlMode={accessControlMode}
                   isDisabled={isDisabled}
                   onChangeRole={(role) => handleChangeRole(entry, role)}

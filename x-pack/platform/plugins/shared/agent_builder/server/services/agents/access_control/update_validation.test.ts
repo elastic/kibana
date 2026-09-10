@@ -61,16 +61,29 @@ describe('validateAccessControlUpdate', () => {
     );
   });
 
-  test('rejects missing id (legacy name-only entries are not writable)', () => {
+  test('accepts legacy name-only entries so existing grants can be round-tripped', () => {
     expect(
       validateAccessControlUpdate([
-        { type: 'user', role: AgentAccessControlRole.User } as unknown as AgentAccessControlEntry,
+        { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
+        entry({ id: 'u_bob' }),
       ])
-    ).toMatch(/non-empty id/);
+    ).toBeUndefined();
+  });
+
+  test('rejects entries with neither id nor name', () => {
+    expect(
+      validateAccessControlUpdate([{ type: 'user', role: AgentAccessControlRole.User }])
+    ).toMatch(/non-empty id or name/);
   });
 
   test('rejects empty principal id', () => {
     expect(validateAccessControlUpdate([entry({ id: '' })])).toMatch(/non-empty id/);
+  });
+
+  test('rejects empty principal name', () => {
+    expect(
+      validateAccessControlUpdate([{ type: 'user', name: '', role: AgentAccessControlRole.User }])
+    ).toMatch(/non-empty name/);
   });
 
   test('rejects principal id longer than the maximum length', () => {
@@ -78,7 +91,19 @@ describe('validateAccessControlUpdate', () => {
       validateAccessControlUpdate([
         entry({ id: 'u_'.padEnd(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1, 'a') }),
       ])
-    ).toMatch(/maximum length/);
+    ).toMatch(/id exceeds maximum length/);
+  });
+
+  test('rejects principal name longer than the maximum length', () => {
+    expect(
+      validateAccessControlUpdate([
+        {
+          type: 'user',
+          name: 'a'.repeat(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1),
+          role: AgentAccessControlRole.User,
+        },
+      ])
+    ).toMatch(/name exceeds maximum length/);
   });
 
   test('rejects unknown role', () => {
@@ -92,6 +117,15 @@ describe('validateAccessControlUpdate', () => {
       validateAccessControlUpdate([
         entry({ id: 'u_alice' }),
         entry({ id: 'u_alice', role: AgentAccessControlRole.Manager }),
+      ])
+    ).toMatch(/Duplicate/);
+  });
+
+  test('rejects duplicate (type, name) pairs', () => {
+    expect(
+      validateAccessControlUpdate([
+        { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
+        { type: 'user', name: 'alice', role: AgentAccessControlRole.Manager },
       ])
     ).toMatch(/Duplicate/);
   });

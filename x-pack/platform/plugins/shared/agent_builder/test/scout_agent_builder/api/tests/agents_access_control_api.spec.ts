@@ -823,12 +823,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'PUT /agents/{id}/access_control rejects entries without id (400)',
+      'PUT /agents/{id}/access_control accepts legacy name-only entries and rejects entries with neither id nor name',
       async ({ apiClient }) => {
-        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-noid-${randomUUID()}`;
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-name-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
 
-        const missingId = await apiClient.put(
+        const nameOnly = await apiClient.put(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}/access_control`,
           {
             headers: headersFor(alice),
@@ -838,7 +838,74 @@ apiTest.describe(
             responseType: 'json',
           }
         );
-        expect(missingId).toHaveStatusCode(400);
+        expect(nameOnly).toHaveStatusCode(200);
+        expect(nameOnly.body.access_control.entries).toHaveLength(1);
+        expect(nameOnly.body.access_control.entries[0]).toMatchObject({
+          type: 'user',
+          name: bob.username,
+          role: AgentAccessControlRole.User,
+        });
+
+        const bobRead = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+          { headers: headersFor(bob), responseType: 'json' }
+        );
+        expect(bobRead).toHaveStatusCode(200);
+
+        const noPrincipal = await apiClient.put(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}/access_control`,
+          {
+            headers: headersFor(alice),
+            body: { entries: [{ type: 'user', role: AgentAccessControlRole.User }] },
+            responseType: 'json',
+          }
+        );
+        expect(noPrincipal).toHaveStatusCode(400);
+      }
+    );
+
+    apiTest(
+      'PUT /agents/{id}/access_control round-trips a legacy name-only entry alongside new id-backed entries',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-roundtrip-${randomUUID()}`;
+        await seedIdLessAccessControlEntry({
+          agentId,
+          entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.User }],
+        });
+        const eveId = await resolveStableUserId(apiClient, eve);
+
+        const res = await apiClient.put(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}/access_control`,
+          {
+            headers: headersFor(alice),
+            body: {
+              entries: [
+                { type: 'user', name: bob.username, role: AgentAccessControlRole.Editor },
+                { type: 'user', id: eveId, role: AgentAccessControlRole.User },
+              ],
+            },
+            responseType: 'json',
+          }
+        );
+        expect(res).toHaveStatusCode(200);
+        expect(res.body.access_control.entries).toHaveLength(2);
+        expect(res.body.access_control.entries[0]).toMatchObject({
+          type: 'user',
+          name: bob.username,
+          role: AgentAccessControlRole.Editor,
+        });
+        expect(res.body.access_control.entries[1]).toMatchObject({
+          type: 'user',
+          id: eveId,
+          role: AgentAccessControlRole.User,
+        });
+
+        const bobRead = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+          { headers: headersFor(bob), responseType: 'json' }
+        );
+        expect(bobRead).toHaveStatusCode(200);
+        expect(bobRead.body.permissions).toMatchObject({ update_agent: true });
       }
     );
 

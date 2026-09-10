@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -24,17 +24,16 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import {
-  isLegacyAgentAccessControlEntry,
+  getAccessControlEntryKey,
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type AgentDefinition,
-  type LegacyAgentAccessControlEntry,
 } from '@kbn/agent-builder-common';
 import { AccessForm } from './access_form';
 import { AccessControlModeContextStrip } from './access_control_mode_context_strip';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
 import { useAgentAccessControl } from '../../../hooks/agents/use_agent_access_control';
 import { useUpdateAgentAccessControl } from '../../../hooks/agents/use_update_agent_access_control';
-import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import {
   accessFlyoutCancel,
   accessFlyoutHiddenBody,
@@ -51,15 +50,12 @@ interface AccessFlyoutProps {
   onClose: () => void;
 }
 
-const entryKey = (entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry): string =>
-  isLegacyAgentAccessControlEntry(entry) ? `name:${entry.name}` : `id:${entry.id}`;
+const EMPTY_ENTRIES: AgentAccessControlEntry[] = [];
 
-const entriesSignature = (
-  entries: Array<AgentAccessControlEntry | LegacyAgentAccessControlEntry>
-): string =>
+const entriesSignature = (entries: AgentAccessControlEntry[]): string =>
   JSON.stringify(
     [...entries]
-      .map((e) => ({ key: entryKey(e), role: e.role }))
+      .map((e) => ({ key: getAccessControlEntryKey(e), role: e.role }))
       .sort((a, b) => a.key.localeCompare(b.key))
   );
 
@@ -113,23 +109,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
     },
   });
 
-  const draftUids = useMemo(
-    () =>
-      (draft?.entries ?? [])
-        .filter(
-          (entry): entry is AgentAccessControlEntry => !isLegacyAgentAccessControlEntry(entry)
-        )
-        .map((entry) => entry.id),
-    [draft]
-  );
-  const { data: profiles = [] } = useUserProfiles({
-    uids: draftUids,
-    enabled: draftUids.length > 0,
-  });
-  const profileByUid = useMemo(
-    () => new Map(profiles.map((profile) => [profile.uid, profile])),
-    [profiles]
-  );
+  const profileByUid = useAccessControlEntryProfiles(draft?.entries ?? EMPTY_ENTRIES);
 
   const isBusy = isLoading || updateMutation.isLoading;
   const isDirty =
@@ -140,10 +120,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
   const handleSave = () => {
     if (!draft) return;
     setSaveErrorMessage(null);
-    const nextEntries = draft.entries.filter(
-      (entry): entry is AgentAccessControlEntry => !isLegacyAgentAccessControlEntry(entry)
-    );
-    updateMutation.mutate({ entries: nextEntries });
+    updateMutation.mutate({ entries: draft.entries });
   };
 
   const renderBody = () => {

@@ -12,8 +12,7 @@ import {
   type AgentAccessControlEntry,
   type AgentDefinition,
   AgentAccessControlMode,
-  isLegacyAgentAccessControlEntry,
-  type LegacyAgentAccessControlEntry,
+  getAccessControlEntryKey,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -56,13 +55,10 @@ const emptyState = (): AgentEditState => ({
   },
 });
 
-const entryStableKey = (entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry): string =>
-  isLegacyAgentAccessControlEntry(entry) ? `name:${entry.name}` : `id:${entry.id}`;
-
 const accessControlEntriesSignature = (entries: AgentAccessControl['entries'] = []): string =>
   JSON.stringify(
     [...entries]
-      .map((entry) => ({ key: entryStableKey(entry), role: entry.role }))
+      .map((entry) => ({ key: getAccessControlEntryKey(entry), role: entry.role }))
       .sort((a, b) => a.key.localeCompare(b.key))
   );
 
@@ -161,11 +157,7 @@ export function useAgentEdit({
             accessControlEntriesSignature(nextEntries);
 
         if (shouldUpdateAccessControl) {
-          // The write API only accepts id-backed entries; legacy name-only entries are dropped.
-          const idBackedNextEntries = nextEntries.filter(
-            (entry): entry is AgentAccessControlEntry => !isLegacyAgentAccessControlEntry(entry)
-          );
-          await updateAccessControlMutation.mutateAsync(idBackedNextEntries);
+          await updateAccessControlMutation.mutateAsync(nextEntries);
         }
 
         queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });

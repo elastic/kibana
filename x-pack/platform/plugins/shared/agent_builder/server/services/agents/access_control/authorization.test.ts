@@ -97,6 +97,15 @@ describe('agent access-control authorization', () => {
       ).toBe(false);
     });
 
+    it('ignores name when the entry also carries an id', () => {
+      expect(
+        matchesAccessControlEntry(
+          { type: 'user', id: 'other-id', name: 'bob', role: AgentAccessControlRole.User },
+          bob
+        )
+      ).toBe(false);
+    });
+
     it('matches a legacy name-only entry by username', () => {
       expect(
         matchesAccessControlEntry(

@@ -134,35 +134,55 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
 );
 
 const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
-  schema.object({
-    type: schema.literal('user'),
-    id: schema.string({
-      minLength: 1,
-      maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
-      meta: {
-        description:
-          'Stable identifier of the user to grant access to: a Kibana user profile uid. Users without a profile cannot be granted access.',
-      },
-    }),
-    role: schema.oneOf(
-      [
-        schema.literal(AgentAccessControlRole.User),
-        schema.literal(AgentAccessControlRole.Editor),
-        schema.literal(AgentAccessControlRole.Manager),
-      ],
-      {
-        meta: {
-          description:
-            'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.',
-        },
-      }
-    ),
-  }),
+  schema.object(
+    {
+      type: schema.literal('user'),
+      id: schema.maybe(
+        schema.string({
+          minLength: 1,
+          maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+          meta: {
+            description:
+              'Stable identifier of the user to grant access to (Kibana user profile uid). Preferred over `name`.',
+          },
+        })
+      ),
+      name: schema.maybe(
+        schema.string({
+          minLength: 1,
+          maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+          meta: {
+            description:
+              'Deprecated. Case-sensitive Kibana username of the user to grant access to. Use `id` instead; `name` is only kept so existing entries can be sent back unchanged.',
+          },
+        })
+      ),
+      role: schema.oneOf(
+        [
+          schema.literal(AgentAccessControlRole.User),
+          schema.literal(AgentAccessControlRole.Editor),
+          schema.literal(AgentAccessControlRole.Manager),
+        ],
+        {
+          meta: {
+            description:
+              'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.',
+          },
+        }
+      ),
+    },
+    {
+      validate: (entry) =>
+        entry.id === undefined && entry.name === undefined
+          ? 'Each ACL entry requires an `id` or a `name`'
+          : undefined,
+    }
+  ),
   {
     maxSize: AGENT_ACCESS_CONTROL_MAX_ENTRIES,
     meta: {
       description:
-        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), an `id` (the principal profile uid), and a `role`. Entries created before agent access control adopted stable user ids are returned by GET with a `name` field and cannot be sent back — the next PUT replaces them.',
+        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `role`, and either an `id` (the principal user profile uid, preferred) or a deprecated `name` (username).',
     },
   }
 );
@@ -663,7 +683,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        'Replace the per-agent access-control entries. Grants are keyed on the stable user profile `id`; each entry names one user by their profile uid. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Replace the per-agent access-control entries. Each entry identifies one user by their stable user profile `id` (preferred) or, for entries created before ids were adopted, by `name`. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },

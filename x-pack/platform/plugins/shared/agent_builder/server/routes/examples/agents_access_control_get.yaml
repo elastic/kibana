@@ -30,7 +30,7 @@ responses:
               permissions:
                 update_access_control: false
           getAgentAccessControlLegacyResponseExample:
-            description: "Example response where the agent still carries an entry stored by username before agent access control adopted stable user ids. Legacy entries are returned with a `name` and cannot be sent back in a PUT — saving the access control replaces them."
+            description: "Example response where the agent still carries an entry stored by username before agent access control adopted stable user ids. Legacy entries are returned with a `name` instead of an `id` and can be sent back unchanged in a PUT."
             value:
               access_control:
                 access_mode: private

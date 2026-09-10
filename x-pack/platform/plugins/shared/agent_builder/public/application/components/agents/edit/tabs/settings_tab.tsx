@@ -33,9 +33,7 @@ import {
   AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
   ACCESS_CONTROL_MODE_ICON,
-  isLegacyAgentAccessControlEntry,
   type AgentAccessControlEntry,
-  type LegacyAgentAccessControlEntry,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -43,7 +41,7 @@ import type { Control, FormState } from 'react-hook-form';
 import { Controller, useWatch } from 'react-hook-form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { AccessForm } from '../../access/access_form';
-import { useUserProfiles } from '../../../../hooks/use_user_profiles';
+import { useAccessControlEntryProfiles } from '../../../../hooks/agents/use_access_control_entry_profiles';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -552,11 +550,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 render={({ field }) => (
                   <AccessFormWithProfiles
                     accessFormAgent={accessFormAgent}
-                    entries={
-                      (field.value ?? []) as Array<
-                        AgentAccessControlEntry | LegacyAgentAccessControlEntry
-                      >
-                    }
+                    entries={field.value ?? []}
                     ownerName={owner?.username}
                     isDisabled={isFormDisabled || !canChangeAccessControl}
                     onChange={field.onChange}
@@ -914,31 +908,13 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
 /** Resolves user profiles for id-backed entries before rendering `AccessForm`. */
 const AccessFormWithProfiles: React.FC<{
-  accessFormAgent: {
-    access_control: {
-      access_mode: AgentAccessControlMode;
-      entries: Array<AgentAccessControlEntry | LegacyAgentAccessControlEntry>;
-    };
-  };
-  entries: Array<AgentAccessControlEntry | LegacyAgentAccessControlEntry>;
+  accessFormAgent: React.ComponentProps<typeof AccessForm>['agent'];
+  entries: AgentAccessControlEntry[];
   ownerName?: string;
   isDisabled?: boolean;
-  onChange: (entries: Array<AgentAccessControlEntry | LegacyAgentAccessControlEntry>) => void;
+  onChange: (entries: AgentAccessControlEntry[]) => void;
 }> = ({ accessFormAgent, entries, ownerName, isDisabled, onChange }) => {
-  const uids = useMemo(
-    () =>
-      entries
-        .filter(
-          (entry): entry is AgentAccessControlEntry => !isLegacyAgentAccessControlEntry(entry)
-        )
-        .map((entry) => entry.id),
-    [entries]
-  );
-  const { data: profiles = [] } = useUserProfiles({ uids, enabled: uids.length > 0 });
-  const profileByUid = useMemo(
-    () => new Map(profiles.map((profile) => [profile.uid, profile])),
-    [profiles]
-  );
+  const profileByUid = useAccessControlEntryProfiles(entries);
 
   return (
     <AccessForm

@@ -98,13 +98,12 @@ export const agentFormSchema = z.object({
   }),
   access_control: z.object({
     access_mode: z.enum(['private', 'public', 'shared']),
-    // Legacy entries loaded from an existing agent carry only `name`; new entries carry `id`.
     entries: z.array(
       z
         .object({
           type: z.literal('user'),
           id: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
-          name: z.string().min(1).optional(),
+          name: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
           role: z.enum(['user', 'editor', 'manager']),
         })
         .refine((entry) => entry.id !== undefined || entry.name !== undefined, {

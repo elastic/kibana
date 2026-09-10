@@ -23,13 +23,12 @@ export {
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   isAgentAccessControlRole,
-  isLegacyAgentAccessControlEntry,
+  getAccessControlEntryKey,
   accessControlRoleMeets,
   maxAccessControlRole,
   getDefaultAgentAccessControl,
   type AgentAccessControl,
   type AgentAccessControlEntry,
-  type LegacyAgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
 } from './access_control';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';

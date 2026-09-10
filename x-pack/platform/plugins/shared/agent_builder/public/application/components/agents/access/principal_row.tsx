@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,26 +21,20 @@ import {
   getUserDisplayName,
   type UserProfileWithAvatar,
 } from '@kbn/user-profile-components';
-import {
-  isLegacyAgentAccessControlEntry,
-  type AgentAccessControlEntry,
-  type AgentAccessControlRole,
-  type AgentAccessControlMode,
-  type LegacyAgentAccessControlEntry,
+import type {
+  AgentAccessControlEntry,
+  AgentAccessControlRole,
+  AgentAccessControlMode,
 } from '@kbn/agent-builder-common';
 import {
   ROLE_DESCRIPTION,
   ROLE_LABEL,
   selectableRolesForAccessControlMode,
 } from './role_to_capabilities';
-import {
-  accessFlyoutLegacyBadge,
-  accessFlyoutRemoveAriaLabel,
-  accessFlyoutRoleAriaLabel,
-} from './access_i18n';
+import { accessFlyoutRemoveAriaLabel, accessFlyoutRoleAriaLabel } from './access_i18n';
 
 interface PrincipalRowProps {
-  entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry;
+  entry: AgentAccessControlEntry;
   /** Resolved user profile for id-backed entries. Undefined while it loads or for legacy rows. */
   profile?: UserProfileWithAvatar;
   /** Used to constrain the selectable roles for Public/Shared agents. */
@@ -50,10 +43,6 @@ interface PrincipalRowProps {
   onChangeRole: (next: AgentAccessControlRole) => void;
   onRemove: () => void;
 }
-
-const entrySubjectSuffix = (
-  entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry
-): string => (isLegacyAgentAccessControlEntry(entry) ? `legacy-${entry.name}` : entry.id);
 
 /**
  * One row in the People section. Layout:
@@ -107,13 +96,12 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
     }
   `;
 
-  const isLegacy = isLegacyAgentAccessControlEntry(entry);
-
-  const displayName = profile ? getUserDisplayName(profile.user) : isLegacy ? entry.name : entry.id;
+  // Fall back to the raw identifier while the profile loads or for legacy name-only entries.
+  const displayName = profile ? getUserDisplayName(profile.user) : entry.name ?? entry.id ?? '';
   const secondary = profile?.user.email ?? profile?.user.username;
   const showSecondary = Boolean(secondary && secondary !== displayName);
 
-  const testSubjectSuffix = entrySubjectSuffix(entry);
+  const testSubjectSuffix = entry.id ?? entry.name;
 
   return (
     <div css={rowStyles} data-test-subj={`agentBuilderAclRow-${entry.type}-${testSubjectSuffix}`}>
@@ -132,18 +120,9 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>{displayName}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            {isLegacy ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">{accessFlyoutLegacyBadge}</EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          <EuiText size="s">
+            <strong>{displayName}</strong>
+          </EuiText>
           {showSecondary ? (
             <EuiText size="xs" color="subdued">
               {secondary}
@@ -164,8 +143,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                 aria-label={accessFlyoutRoleAriaLabel}
                 valueOfSelected={entry.role}
                 options={roleOptions}
-                // Legacy entries cannot be written back, so their role is read-only.
-                disabled={isDisabled || isLegacy}
+                disabled={isDisabled}
                 onChange={(next) => onChangeRole(next)}
                 popoverProps={{
                   panelPaddingSize: 's',

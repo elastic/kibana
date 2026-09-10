@@ -144,25 +144,6 @@ export const accessSummaryLoading = i18n.translate('xpack.agentBuilder.acl.summa
   defaultMessage: 'Loading access…',
 });
 
-// ──────────────── Legacy (pre-id) entries ────────────────────────────────────
-
-export const accessFlyoutLegacyEntriesTitle = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.legacyEntriesTitle',
-  { defaultMessage: 'Some access grants use an older format' }
-);
-
-export const accessFlyoutLegacyEntriesBody = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.legacyEntriesBody',
-  {
-    defaultMessage:
-      'A few entries below were granted before user IDs were required. They still work, but saving replaces them. Re-add the person from the picker above to keep their access.',
-  }
-);
-
-export const accessFlyoutLegacyBadge = i18n.translate('xpack.agentBuilder.acl.flyout.legacyBadge', {
-  defaultMessage: 'Legacy',
-});
-
 // ──────────────── List badge ─────────────────────────────────────────────────
 
 export const accessFlyoutCustomBadge = i18n.translate(

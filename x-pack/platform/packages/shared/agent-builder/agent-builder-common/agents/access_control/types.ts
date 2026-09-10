@@ -54,32 +54,29 @@ export enum AgentAccessControlRole {
  */
 export type AgentAccessControlPrincipalType = 'user';
 
+/**
+ * An entry carries at least one of `id` or `name`. New entries are written with a stable `id`;
+ * entries persisted before stable ids were adopted only have `name` and are matched on username
+ * until they are removed and re-added (lazy migration).
+ */
 export interface AgentAccessControlEntry {
   type: AgentAccessControlPrincipalType;
   /** Stable user id (profile uid, or the realm-qualified fallback from `toStableUserId`). */
-  id: string;
+  id?: string;
+  /** Case-sensitive Kibana username. Legacy; only present on entries written before `id`. */
+  name?: string;
   role: AgentAccessControlRole;
 }
 
-/**
- * Entry persisted before agent ACLs adopted stable user ids. Matched on `name`; read-only and
- * never written back.
- */
-export interface LegacyAgentAccessControlEntry {
-  type: AgentAccessControlPrincipalType;
-  /** Case-sensitive Kibana username. */
-  name: string;
-  role: AgentAccessControlRole;
-  id?: undefined;
-}
-
-export const isLegacyAgentAccessControlEntry = (
-  entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry
-): entry is LegacyAgentAccessControlEntry => entry.id === undefined;
+/** Identity key for an entry: `id` when present, otherwise the legacy `name`. */
+export const getAccessControlEntryKey = (
+  entry: Pick<AgentAccessControlEntry, 'type' | 'id' | 'name'>
+): string =>
+  entry.id !== undefined ? `${entry.type}:id:${entry.id}` : `${entry.type}:name:${entry.name}`;
 
 export interface AgentAccessControl {
   access_mode: AgentAccessControlMode;
-  entries: Array<AgentAccessControlEntry | LegacyAgentAccessControlEntry>;
+  entries: AgentAccessControlEntry[];
 }
 
 /**

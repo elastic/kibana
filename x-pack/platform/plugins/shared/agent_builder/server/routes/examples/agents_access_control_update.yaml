@@ -12,6 +12,16 @@ requestBody:
               - type: user
                 id: u_bob_profile_uid
                 role: user
+        keepLegacyAgentAccessControlRequestExample:
+          description: "Example request that keeps an existing legacy entry (identified by `name`, as returned by GET) while adding a new user by profile uid. `name` is deprecated for new grants; use `id`."
+          value:
+            entries:
+              - type: user
+                name: legacy_bob
+                role: user
+              - type: user
+                id: u_alice_profile_uid
+                role: editor
         clearAgentAccessControlRequestExample:
           description: "Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control mode."
           value:
