@@ -18,7 +18,9 @@ export const WorkflowPayloadSchema = z.object({
 export const WorkflowOriginSchema = z.object({
   type: z.enum(CASE_WORKFLOW_RUN_ORIGIN_TYPES),
   id: z.string(),
+  attachmentType: z.string().optional(),
   index: z.string().optional(),
+  count: z.number().optional(),
   typeKey: z.string().optional(),
   value: z.string().optional(),
 });

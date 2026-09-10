@@ -4429,14 +4429,21 @@ components:
               enum:
                 - cases.case
                 - cases.observable
-                - cases.alert
-                - cases.alerts
+                - cases.observables
+                - cases.attachment
+                - cases.attachments
             id:
               type: string
-              description: The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
+              description: The primary identifier of the case, observable, or attachment from which the workflow was triggered.
+            attachmentType:
+              type: string
+              description: For generic attachment origins, the normalized registered attachment type.
             index:
               type: string
-              description: For alert origins, the Elasticsearch index the alert lives in.
+              description: For document-backed attachment origins, the Elasticsearch index the document lives in.
+            count:
+              type: number
+              description: For bulk attachment or observable origins, the number of selected targets.
             typeKey:
               type: string
               description: For observable origins, the observable type key.

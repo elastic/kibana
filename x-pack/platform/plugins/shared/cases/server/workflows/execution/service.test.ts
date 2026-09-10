@@ -8,12 +8,15 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { z } from '@kbn/zod/v4';
 import type { DocumentResponse, RunCaseWorkflowRequest } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../../client/mocks';
 import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
+import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
+import type { WorkflowAttachmentValidationContext } from '../../attachment_framework/types';
 
 jest.mock('../../client/client', () => ({
   ...jest.requireActual('../../client/client'),
@@ -60,10 +63,40 @@ describe('CasesWorkflowRunService', () => {
     getWorkflow: jest.fn(),
     runWorkflowWithAlertPreprocessing: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  const attachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+  const validateAlertTargets = ({ targets, inputs }: WorkflowAttachmentValidationContext): void => {
+    const event = inputs.event as Record<string, unknown> | undefined;
+    const pairs = event?.alertIds;
+    const selectedIds = Array.isArray(pairs)
+      ? pairs.map((pair) => (pair as { _id: string })._id)
+      : [];
+    if (selectedIds.length === 0) {
+      throw new Error('Alert attachment workflow origins require selected alert inputs.');
+    }
+    const targetIds = new Set(targets.map(({ id }) => id));
+    const selectedIdSet = new Set(selectedIds);
+    if (
+      targetIds.size !== selectedIdSet.size ||
+      [...targetIds].some((id) => !selectedIdSet.has(id))
+    ) {
+      throw new Error('Alert workflow origin targets must match the selected alerts.');
+    }
+  };
+  attachmentTypeRegistry.register({
+    id: 'security.alert',
+    schema: z.any(),
+    workflow: { validateTargets: validateAlertTargets },
+  });
+  attachmentTypeRegistry.register({
+    id: 'security.event',
+    schema: z.any(),
+    workflow: {},
+  });
   const service = new CasesWorkflowRunService({
     management,
     logger,
     audit,
+    attachmentTypeRegistry,
   });
   const theCase = {
     id: 'case-1',
@@ -78,6 +111,31 @@ describe('CasesWorkflowRunService', () => {
       index,
       attached_at: '2026-08-26T00:00:00.000Z',
     }));
+  const setCaseAlerts = (
+    ...attachments: Array<{ type: 'alert'; alertId: string; index: string }>
+  ) => {
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      comments: attachments,
+    } as unknown as Case);
+    casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
+      createAttachedAlerts(...attachments)
+    );
+  };
+  const alertOrigin = (attachmentId: string) =>
+    ({
+      type: 'cases.attachment',
+      caseId: 'case-1',
+      attachmentType: 'security.alert',
+      attachmentId,
+    } as const);
+  const alertsOrigin = (attachmentIds: string[]) =>
+    ({
+      type: 'cases.attachments',
+      caseId: 'case-1',
+      attachmentType: 'security.alert',
+      attachmentIds,
+    } as const);
   const defaultBody: RunCaseWorkflowRequest = {
     caseIds: ['case-1'],
     inputs: { event: { caseIds: ['case-1'] } },
@@ -216,11 +274,9 @@ describe('CasesWorkflowRunService', () => {
           alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
         },
       },
-      origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
+      origin: alertOrigin('alert-1'),
     };
-    casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
-      createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' })
-    );
+    setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' });
     management.runWorkflowWithAlertPreprocessing.mockResolvedValue({
       workflowExecutionId: 'execution-1',
     });
@@ -407,23 +463,23 @@ describe('CasesWorkflowRunService', () => {
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    it('rejects cases.alert with multiple caseIds', async () => {
+    it('rejects cases.attachment with multiple caseIds', async () => {
       await expect(
         run({
           caseIds: ['case-a', 'case-b'],
           inputs: {},
-          origin: { type: 'cases.alert', caseId: 'case-a', alertId: 'alert-1' },
+          origin: { ...alertOrigin('alert-1'), caseId: 'case-a' },
         })
       ).rejects.toThrow('can only be used with a single case');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    it('rejects cases.alerts with multiple caseIds', async () => {
+    it('rejects cases.attachments with multiple caseIds', async () => {
       await expect(
         run({
           caseIds: ['case-a', 'case-b'],
           inputs: {},
-          origin: { type: 'cases.alerts', caseId: 'case-a' },
+          origin: { ...alertsOrigin(['alert-1']), caseId: 'case-a' },
         })
       ).rejects.toThrow('can only be used with a single case');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -489,6 +545,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects an observable that does not belong to the case', async () => {
+    // theCase has observables: [] by default, so 'observable-1' is absent.
     await expect(
       run({
         caseIds: ['case-1'],
@@ -499,19 +556,103 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
-  it('accepts an observable that belongs to the case', async () => {
+  it('passes observableIds and observableTypeKeys (not values) via eventOverrides for cases.observable', async () => {
+    // The `value` field must never reach the workflow execution so that users without Cases read
+    // access cannot observe case data through a workflow or the persisted trigger-events data stream.
     casesClient.cases.get.mockResolvedValue({
       ...theCase,
-      observables: [{ id: 'observable-1' }],
+      observables: [{ id: 'observable-1', typeKey: 'observable-type-ipv4', value: '1.2.3.4' }],
     } as unknown as Case);
 
     await expect(
       run({
         caseIds: ['case-1'],
-        inputs: { event: { observables: [{ id: 'observable-1' }] } },
+        inputs: {},
         origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
       })
     ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+    // Exact-shape assertion: any extra key (e.g. `value` or `description`) would fail this check.
+    expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventOverrides: {
+          caseIds: ['case-1'],
+          observableIds: ['observable-1'],
+          observableTypeKeys: ['observable-type-ipv4'],
+        },
+      })
+    );
+  });
+
+  it('passes index-aligned observableIds and observableTypeKeys for cases.observables, repeating type keys', async () => {
+    // Two observables share the same type key; the arrays must stay index-aligned so
+    // observableTypeKeys[i] is the type of observableIds[i].
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      observables: [
+        { id: 'obs-1', typeKey: 'observable-type-ipv4', value: '1.2.3.4' },
+        { id: 'obs-2', typeKey: 'observable-type-ipv4', value: '5.6.7.8' },
+        { id: 'obs-3', typeKey: 'observable-type-url', value: 'https://example.com' },
+      ],
+    } as unknown as Case);
+
+    await expect(
+      run({
+        caseIds: ['case-1'],
+        inputs: {},
+        origin: {
+          type: 'cases.observables',
+          caseId: 'case-1',
+          observableIds: ['obs-1', 'obs-2', 'obs-3'],
+        },
+      })
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+    expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventOverrides: {
+          caseIds: ['case-1'],
+          observableIds: ['obs-1', 'obs-2', 'obs-3'],
+          // obs-1 and obs-2 share a type key; it repeats to keep the arrays index-aligned.
+          observableTypeKeys: [
+            'observable-type-ipv4',
+            'observable-type-ipv4',
+            'observable-type-url',
+          ],
+        },
+      })
+    );
+  });
+
+  it('strips client-supplied event.observableIds / event.observableTypeKeys and re-injects server-resolved values', async () => {
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      observables: [{ id: 'observable-1', typeKey: 'observable-type-ipv4', value: '1.2.3.4' }],
+    } as unknown as Case);
+
+    await run({
+      caseIds: ['case-1'],
+      inputs: {
+        event: {
+          observableIds: ['spoofed-id'],
+          observableTypeKeys: ['spoofed-type'],
+          extra: 'keep-me',
+        },
+      },
+      origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
+    });
+
+    expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // Client-supplied observableIds / observableTypeKeys are stripped; extra is preserved.
+        inputs: { event: { extra: 'keep-me' } },
+        eventOverrides: {
+          caseIds: ['case-1'],
+          observableIds: ['observable-1'],
+          observableTypeKeys: ['observable-type-ipv4'],
+        },
+      })
+    );
   });
 
   it('rejects alert inputs for a case origin when alerts are not attached', async () => {
@@ -534,7 +675,7 @@ describe('CasesWorkflowRunService', () => {
   it('rejects alert inputs for an observable origin when alerts are not attached', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,
-      observables: [{ id: 'observable-1' }],
+      observables: [{ id: 'observable-1', typeKey: 'observable-type-ipv4', value: '1.2.3.4' }],
     } as unknown as Case);
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
       createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' })
@@ -551,73 +692,67 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects a selected alert that is not attached to the case', async () => {
-    casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
-      createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' })
-    );
+    setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' });
 
     await expect(
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-2', _index: '.alerts' }] } },
-        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-2' },
+        origin: alertOrigin('alert-2'),
       })
-    ).rejects.toThrow('All selected alerts must belong to the case.');
+    ).rejects.toThrow('Attachment target "alert-2"');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
   it('rejects a selected alert with a matching id but wrong index', async () => {
     // Alert membership is validated as (id, index) pairs so that an alert id from
     // one index cannot be used to access data from a different index.
-    casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
-      createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts-real' })
-    );
+    setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts-real' });
 
     await expect(
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-spoofed' }] } },
-        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
+        origin: alertOrigin('alert-1'),
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
   it('rejects an alert origin without selected alerts with a specific validation error', async () => {
+    setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' });
+
     await expect(
       run({
         caseIds: ['case-1'],
         inputs: {},
-        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
+        origin: alertOrigin('alert-1'),
       })
-    ).rejects.toThrow('Alert workflow origins require at least one selected alert.');
+    ).rejects.toThrow('Alert attachment workflow origins require selected alert inputs.');
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
   it('rejects a single-alert origin whose alertId is not among the selected alerts', async () => {
-    casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
-      createAttachedAlerts(
-        { type: 'alert', alertId: 'alert-1', index: '.alerts' },
-        { type: 'alert', alertId: 'alert-2', index: '.alerts' }
-      )
+    setCaseAlerts(
+      { type: 'alert', alertId: 'alert-1', index: '.alerts' },
+      { type: 'alert', alertId: 'alert-2', index: '.alerts' }
     );
 
     await expect(
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
-        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-2' },
+        origin: alertOrigin('alert-2'),
       })
-    ).rejects.toThrow('Alert workflow origin "alert-2" is not selected.');
+    ).rejects.toThrow('Alert workflow origin targets must match the selected alerts.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
   it('accepts selected alerts that are attached to the case', async () => {
-    casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
-      createAttachedAlerts(
-        { type: 'alert', alertId: 'alert-1', index: '.alerts' },
-        { type: 'alert', alertId: 'alert-2', index: '.alerts' }
-      )
+    setCaseAlerts(
+      { type: 'alert', alertId: 'alert-1', index: '.alerts' },
+      { type: 'alert', alertId: 'alert-2', index: '.alerts' }
     );
 
     await expect(
@@ -631,7 +766,7 @@ describe('CasesWorkflowRunService', () => {
             ],
           },
         },
-        origin: { type: 'cases.alerts', caseId: 'case-1' },
+        origin: alertsOrigin(['alert-1', 'alert-2']),
       })
     ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
   });

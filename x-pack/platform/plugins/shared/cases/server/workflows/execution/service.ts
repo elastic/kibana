@@ -15,6 +15,8 @@ import {
   CASE_SAVED_OBJECT,
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/workflow/v1';
 import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
@@ -27,8 +29,60 @@ import {
   recordWorkflowExecution,
 } from '../../client/user_actions/record_workflow_execution';
 import type { CasesRequestHandlerContext } from '../../types';
+import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { buildActivityOrigin } from './build_activity_origin';
-import { parseSelectedAlertPairs, validateOrigin } from './validate_origin';
+import type { ResolvedWorkflowAttachmentOrigin } from './validate_origin';
+import {
+  parseSelectedAlertPairs,
+  parseSelectedDocumentPairs,
+  validateOrigin,
+} from './validate_origin';
+
+/**
+ * Resolves observable IDs and type keys from the case for observable-scoped origins.
+ *
+ * Observable values and descriptions are deliberately omitted so that users without Cases read
+ * access cannot observe case data through the persisted workflow execution. To read current values,
+ * use a `cases.getCase` step after the workflow runs. This holds the same invariant as the
+ * `cases.observablesAdded` trigger event schema (PR #288224) and `cases.extendedFieldsUpdated`.
+ *
+ * The explicit return type rejects any extra field at the construction site via TypeScript's
+ * excess-property check, so a future spread of a full Observable object is caught at compile time.
+ *
+ * `validateOrigin` has already confirmed every requested observable ID belongs to the case and is
+ * free of duplicates, so we map in request order without a defensive fallback.
+ *
+ * Both origin variants produce index-aligned arrays — `cases.observable` yields one-element
+ * arrays so the shape is uniform for workflow templating (`{{ event.observableIds }}`).
+ */
+const resolveObservableEventFields = (
+  origin: RunCaseWorkflowRequest['origin'],
+  theCase: Awaited<ReturnType<CasesClient['cases']['get']>> | undefined
+): { observableIds: string[]; observableTypeKeys: string[] } | undefined => {
+  if (!origin || !theCase) return undefined;
+
+  if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
+    const obs = theCase.observables.find(({ id }) => id === origin.observableId);
+    if (!obs) return undefined;
+    return { observableIds: [obs.id], observableTypeKeys: [obs.typeKey] };
+  }
+
+  if (origin.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE) {
+    const byId = new Map(theCase.observables.map((o) => [o.id, o]));
+    const observableIds: string[] = [];
+    const observableTypeKeys: string[] = [];
+    for (const id of origin.observableIds) {
+      const obs = byId.get(id);
+      if (obs) {
+        observableIds.push(obs.id);
+        observableTypeKeys.push(obs.typeKey);
+      }
+    }
+    return observableIds.length > 0 ? { observableIds, observableTypeKeys } : undefined;
+  }
+
+  return undefined;
+};
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -43,17 +97,20 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
+  attachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
+  private readonly attachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 
-  constructor({ management, logger, audit }: CasesWorkflowRunServiceDeps) {
+  constructor({ management, logger, audit, attachmentTypeRegistry }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
+    this.attachmentTypeRegistry = attachmentTypeRegistry;
   }
 
   public async run({
@@ -122,16 +179,21 @@ export class CasesWorkflowRunService {
     const authorizedEntities = await ensureAuthorizedToRunWorkflow({ ids: caseIds }, clientArgs);
 
     // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
-    // was not looking at any specific sub-entity, alert inputs are not permitted, and no
-    // case fetch is needed. When present the run is scoped to a single case with a specific
-    // sub-entity context; origin-entity membership and alert attachment are validated.
-    // Parse and validate alertIds shape eagerly — any malformed entry throws 400 here,
-    // before any case fetch, so the validated set equals what preprocessing later fetches.
+    // was not looking at any specific sub-entity, alert/document inputs are not permitted,
+    // and no case fetch is needed. When present the run is scoped to a single case with a
+    // specific sub-entity context; origin-entity membership and attachment are validated.
+    // Parse and validate input shapes eagerly — any malformed entry throws 400 here,
+    // before any case fetch, so the validated sets equal what processing later uses.
     const selectedAlerts = parseSelectedAlertPairs(body.inputs);
+    const selectedDocuments = parseSelectedDocumentPairs(body.inputs);
     let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
+    let resolvedAttachmentOrigin: ResolvedWorkflowAttachmentOrigin | undefined;
     if (body.origin === undefined) {
       if (selectedAlerts.length > 0) {
         throw Boom.badRequest('Alert inputs can only be used with a single case.');
+      }
+      if (selectedDocuments.length > 0) {
+        throw Boom.badRequest('Document inputs can only be used with a single case.');
       }
     } else {
       if (caseIds.length > 1) {
@@ -140,19 +202,33 @@ export class CasesWorkflowRunService {
         );
       }
       theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: true });
-      const attachedAlerts =
+      // Fetch alert and event attachments in parallel, each only when their inputs are present.
+      // Separate fetches (instead of a combined [alert, event] call) prevent cross-type false matches
+      // — an event attachment should never satisfy an alert membership check, and vice versa.
+      const [attachedAlerts, attachedEvents] = await Promise.all([
         selectedAlerts.length > 0
-          ? await casesClient.attachments.getAllDocumentsAttachedToCase({
+          ? casesClient.attachments.getAllDocumentsAttachedToCase({
               caseId: caseIds[0],
               attachmentTypes: [AttachmentType.alert],
             })
-          : [];
-      validateOrigin({
+          : Promise.resolve([]),
+        selectedDocuments.length > 0
+          ? casesClient.attachments.getAllDocumentsAttachedToCase({
+              caseId: caseIds[0],
+              attachmentTypes: [AttachmentType.event],
+            })
+          : Promise.resolve([]),
+      ]);
+      resolvedAttachmentOrigin = validateOrigin({
         origin: body.origin,
         caseId: caseIds[0],
         selectedAlerts,
         theCase,
         attachedAlerts,
+        selectedDocuments,
+        attachedEvents,
+        attachmentTypeRegistry: this.attachmentTypeRegistry,
+        inputs: body.inputs,
       });
     }
 
@@ -170,16 +246,27 @@ export class CasesWorkflowRunService {
       throw Boom.badRequest('Workflow is disabled. Enable it to run it.');
     }
 
-    // Strip any client-supplied event.caseIds so the client cannot pre-seed the value;
-    // the server re-injects the authorized set via eventOverrides after preprocessing.
+    // Strip client-supplied values for server-owned event keys so callers cannot
+    // pre-seed them. The server re-injects the authoritative values via eventOverrides
+    // after alert preprocessing runs (which replaces the whole `event` object).
+    // Keep this set in sync with the keys injected in eventOverrides below.
+    const SERVER_OWNED_EVENT_KEYS = new Set(['caseIds', 'observableIds', 'observableTypeKeys']);
     const { event: rawEvent, ...otherInputs } = body.inputs;
     const strippedEvent = isPlainObject(rawEvent)
-      ? (({ caseIds: _dropped, ...rest }: Record<string, unknown>) => rest)(
-          rawEvent as Record<string, unknown>
+      ? Object.fromEntries(
+          Object.entries(rawEvent as Record<string, unknown>).filter(
+            ([k]) => !SERVER_OWNED_EVENT_KEYS.has(k)
+          )
         )
       : rawEvent;
     const sanitizedInputs =
       strippedEvent !== undefined ? { ...otherInputs, event: strippedEvent } : otherInputs;
+
+    // Resolve observable IDs and type keys from the already-fetched case for observable-scoped
+    // origins. Values and descriptions are deliberately excluded — see resolveObservableEventFields.
+    // Enrichment is always derived from the case object (not from client inputs) so a
+    // case-authorized caller cannot inject arbitrary observable data into the workflow.
+    const resolvedObservableEventFields = resolveObservableEventFields(body.origin, theCase);
 
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -203,7 +290,10 @@ export class CasesWorkflowRunService {
       request,
       preprocessingContext: context,
       metadata,
-      eventOverrides: { caseIds },
+      eventOverrides: {
+        caseIds,
+        ...(resolvedObservableEventFields !== undefined ? resolvedObservableEventFields : {}),
+      },
     });
 
     // One audit event per case keeps the audit trail queryable by individual case ID.
@@ -226,7 +316,11 @@ export class CasesWorkflowRunService {
             name: workflow.name,
             executionId: workflowExecutionId,
           },
-          origin: buildActivityOrigin({ origin: body.origin, theCase }),
+          origin: buildActivityOrigin({
+            origin: body.origin,
+            theCase,
+            resolvedAttachmentOrigin,
+          }),
           // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
           // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
           entities: authorizedEntities,
