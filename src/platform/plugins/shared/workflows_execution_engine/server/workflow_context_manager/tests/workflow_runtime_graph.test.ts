@@ -114,8 +114,8 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     );
   });
 
-  describe('sequential copies vs foreach remint', () => {
-    it('topo-next after the first iteration exit is the owner exit before a second mint', () => {
+  describe('wrap once, rename the pair', () => {
+    it('topo-next after the first iteration exit is the owner exit', () => {
       const overlay = createOverlay();
       const enter0 = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
       const exit0 = enter0.replace(/^enter/, 'exit');
@@ -124,44 +124,39 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
       expect(order[order.indexOf(exit0) + 1]).toBe('exitForeach_outerLoop');
     });
 
-    it('topo-next after the first iteration exit becomes the second enter once appended', () => {
+    it('rewires the same pair when a later stepId is minted', () => {
+      const compiledCount = createOverlay().topologicalOrder.length;
       const overlay = createOverlay();
       const enter0 = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
       const enter1 = overlay.insertSyntheticScope('enterForeach_outerLoop', '1', 'iteration');
-      const exit0 = enter0.replace(/^enter/, 'exit');
+      const exit1 = enter1.replace(/^enter/, 'exit');
       const order = overlay.topologicalOrder;
 
-      expect(order[order.indexOf(exit0) + 1]).toBe(enter1);
-      expect(order[order.indexOf(enter1.replace(/^enter/, 'exit')) + 1]).toBe(
-        'exitForeach_outerLoop'
-      );
+      expect(overlay.getNode(enter0)).toBeUndefined();
+      expect(overlay.getNode(enter0.replace(/^enter/, 'exit'))).toBeUndefined();
+      expect(overlay.getNode(enter1)?.stepType).toBe('iteration');
+      expect(order).not.toContain(enter0);
+      expect(order[order.indexOf(enter1) + 1]).not.toBe(exit1);
+      expect(order[order.indexOf(exit1) + 1]).toBe('exitForeach_outerLoop');
+      expect(order.length).toBe(compiledCount + 2);
     });
-  });
 
-  describe('cloned body pair pointers', () => {
-    it('does not rewrite startNodeId / exitNodeId on a cloned inner foreach', () => {
+    it('does not clone the inner foreach when the outer pair is rewired', () => {
       const overlay = createOverlay();
       overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
       overlay.insertSyntheticScope('enterForeach_outerLoop', '1', 'iteration');
 
-      const compiledInnerExit = overlay.getNode('exitForeach_innerLoop') as
-        | ExitForeachNode
-        | undefined;
-      const clonedInnerEnter = overlay.topologicalOrder
-        .filter((id) => id.startsWith('enterForeach_innerLoop_'))
-        .map((id) => overlay.getNode(id));
-      const clonedInnerExit = overlay.topologicalOrder
-        .filter((id) => id.startsWith('exitForeach_innerLoop_'))
-        .map((id) => overlay.getNode(id) as ExitForeachNode | undefined);
+      const innerEnter = overlay.getNode('enterForeach_innerLoop');
+      const innerExit = overlay.getNode('exitForeach_innerLoop') as ExitForeachNode | undefined;
+      const clonedInnerIds = overlay.topologicalOrder.filter(
+        (id) => id.startsWith('enterForeach_innerLoop_') || id.startsWith('exitForeach_innerLoop_')
+      );
 
-      expect(compiledInnerExit?.startNodeId).toBe('enterForeach_innerLoop');
-      expect(clonedInnerEnter.length).toBe(1);
-      expect(clonedInnerExit.length).toBe(1);
-      expect(clonedInnerExit[0]?.id).not.toBe('exitForeach_innerLoop');
-      expect(clonedInnerExit[0]?.startNodeId).toBe('enterForeach_innerLoop');
-      expect(clonedInnerEnter[0] && 'exitNodeId' in clonedInnerEnter[0]).toBe(true);
-      if (clonedInnerEnter[0] && 'exitNodeId' in clonedInnerEnter[0]) {
-        expect(clonedInnerEnter[0].exitNodeId).toBe('exitForeach_innerLoop');
+      expect(clonedInnerIds).toEqual([]);
+      expect(innerExit?.startNodeId).toBe('enterForeach_innerLoop');
+      expect(innerEnter && 'exitNodeId' in innerEnter).toBe(true);
+      if (innerEnter && 'exitNodeId' in innerEnter) {
+        expect(innerEnter.exitNodeId).toBe('exitForeach_innerLoop');
       }
     });
   });

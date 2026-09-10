@@ -49,9 +49,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private executing = true;
   private stackFrames: StackFrame[];
   private workflowError: Error | undefined;
-  private pendingSynthetic:
-    | { currentNodeId: string; stepId: string; stepType?: string }
-    | undefined;
+  private pendingSynthetic: { currentNodeId: string; stepId: string; stepType: string } | undefined;
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.workflowGraph = init.workflowExecutionGraph;

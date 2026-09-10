@@ -46,6 +46,7 @@ export type RuntimeGraphView = Pick<
 export class WorkflowRuntimeGraph {
   private readonly compiledGraph: WorkflowGraph;
   private internalGraph: graphlib.Graph;
+  private cachedTopologicalOrder: string[] | undefined;
 
   constructor(compiledGraph: WorkflowGraph, stackFrames: StackFrame[]) {
     this.compiledGraph = compiledGraph;
@@ -55,19 +56,24 @@ export class WorkflowRuntimeGraph {
 
   /** Walk order for the current graph. The execution loop uses this to advance. */
   public get topologicalOrder(): string[] {
-    return graphlib.alg.topsort(this.internalGraph);
+    if (!this.cachedTopologicalOrder) {
+      this.cachedTopologicalOrder = graphlib.alg.topsort(this.internalGraph);
+    }
+    return this.cachedTopologicalOrder;
   }
 
   /**
    * Adds a runtime scope under `ownerNodeId` (one loop iteration) and returns the
    * enter node the cursor should move to.
+   *
+   * Wraps the compiled body the first time. Later mints rewire that same pair to
+   * the new hashed ids — the body is not cloned.
    */
-  public insertSyntheticScope(ownerNodeId: string, stepId: string, stepType?: string): string {
-    const ownerExitNodeId = ownerNodeId.replace(/^enter/, 'exit');
-    const ownerExitInEdges = this.internalGraph.inEdges(ownerExitNodeId) ?? [];
-    const lastBeforeOwnerExit = ownerExitInEdges[0];
+  public insertSyntheticScope(ownerNodeId: string, stepId: string, stepType: string): string {
+    const ownerOutEdges = this.internalGraph.outEdges(ownerNodeId) ?? [];
+    const firstChildId = ownerOutEdges[0]?.w;
 
-    if (!this.internalGraph.hasNode(ownerNodeId) || !lastBeforeOwnerExit) {
+    if (!this.internalGraph.hasNode(ownerNodeId) || !firstChildId) {
       throw new Error(`Owner enter node ${ownerNodeId} has no outgoing edge to a child`);
     }
 
@@ -85,31 +91,25 @@ export class WorkflowRuntimeGraph {
       id: enterSyntheticId,
       type: enterType,
       stepId,
-      stepType: stepId,
+      stepType,
     } as GraphNodeUnion;
 
     const exitSyntheticNode = {
       id: exitSyntheticId,
       type: exitType,
       stepId,
-      stepType: stepId,
+      stepType,
     } as GraphNodeUnion;
+
+    if (firstChildId.startsWith(ENTER_SYNTHETIC_PREFIX)) {
+      this.rewireSyntheticPair(firstChildId, enterSyntheticNode, exitSyntheticNode);
+      return enterSyntheticId;
+    }
 
     this.internalGraph.setNode(enterSyntheticNode.id, enterSyntheticNode);
     this.internalGraph.setNode(exitSyntheticNode.id, exitSyntheticNode);
 
-    if (lastBeforeOwnerExit.v.startsWith(EXIT_SYNTHETIC_PREFIX)) {
-      this.appendSyntheticScope(
-        ownerNodeId,
-        lastBeforeOwnerExit.v,
-        ownerExitNodeId,
-        enterSyntheticNode,
-        exitSyntheticNode,
-        stepId
-      );
-      return enterSyntheticId;
-    }
-
+    const ownerExitNodeId = ownerNodeId.replace(/^enter/, 'exit');
     this.wrapOwnerWithSyntheticScope(
       ownerNodeId,
       ownerExitNodeId,
@@ -279,66 +279,49 @@ export class WorkflowRuntimeGraph {
     this.internalGraph.removeEdge(ownerExitEdge.v, ownerExitEdge.w);
     this.internalGraph.setEdge(ownerExitEdge.v, exitSyntheticNode.id);
     this.internalGraph.setEdge(exitSyntheticNode.id, ownerExitNodeId);
+    this.invalidateTopologicalOrder();
   }
 
-  private appendSyntheticScope(
-    ownerNodeId: string,
-    previousExitId: string,
-    ownerExitNodeId: string,
+  /**
+   * Replaces an existing synthetic pair with new hashed ids. Neighbors stay the
+   * same so the compiled body is not cloned.
+   */
+  private rewireSyntheticPair(
+    oldEnterId: string,
     enterSyntheticNode: GraphNodeUnion,
-    exitSyntheticNode: GraphNodeUnion,
-    stepId: string
+    exitSyntheticNode: GraphNodeUnion
   ): void {
-    const ownerOutEdges = this.internalGraph.outEdges(ownerNodeId) ?? [];
-    const firstEnterId = ownerOutEdges[0]?.w;
+    const oldExitId = oldEnterId.replace(/^enter/, 'exit');
 
-    if (!firstEnterId || !firstEnterId.startsWith(ENTER_SYNTHETIC_PREFIX)) {
-      throw new Error(`Owner enter node ${ownerNodeId} has no synthetic scope to append after`);
+    if (!this.internalGraph.hasNode(oldExitId)) {
+      throw new Error(`Synthetic enter node ${oldEnterId} has no paired exit`);
     }
 
-    const firstExitId = firstEnterId.replace(/^enter/, 'exit');
-    const clonedByOriginalId = this.cloneInterior(
-      firstEnterId,
-      firstExitId,
-      this.syntheticScopeHash(ownerNodeId, stepId)
-    );
+    const enterPreds = this.internalGraph.predecessors(oldEnterId) ?? [];
+    const enterSuccs = this.internalGraph.successors(oldEnterId) ?? [];
+    const exitPreds = this.internalGraph.predecessors(oldExitId) ?? [];
+    const exitSuccs = this.internalGraph.successors(oldExitId) ?? [];
 
-    this.internalGraph.removeEdge(previousExitId, ownerExitNodeId);
-    this.internalGraph.setEdge(previousExitId, enterSyntheticNode.id);
+    this.internalGraph.removeNode(oldEnterId);
+    this.internalGraph.removeNode(oldExitId);
 
-    const firstEnterOutEdges = this.internalGraph.outEdges(firstEnterId) ?? [];
+    this.internalGraph.setNode(enterSyntheticNode.id, enterSyntheticNode);
+    this.internalGraph.setNode(exitSyntheticNode.id, exitSyntheticNode);
 
-    if (firstEnterOutEdges.length === 0) {
-      throw new Error(`Synthetic enter node ${firstEnterId} has no outgoing edge to a child`);
+    for (const pred of enterPreds) {
+      this.internalGraph.setEdge(pred, enterSyntheticNode.id);
+    }
+    for (const succ of enterSuccs) {
+      this.internalGraph.setEdge(enterSyntheticNode.id, succ);
+    }
+    for (const pred of exitPreds) {
+      this.internalGraph.setEdge(pred, exitSyntheticNode.id);
+    }
+    for (const succ of exitSuccs) {
+      this.internalGraph.setEdge(exitSyntheticNode.id, succ);
     }
 
-    for (const edge of firstEnterOutEdges) {
-      if (edge.w === firstExitId) {
-        this.internalGraph.setEdge(enterSyntheticNode.id, exitSyntheticNode.id);
-      } else {
-        const clonedStartId = clonedByOriginalId.get(edge.w);
-        if (!clonedStartId) {
-          throw new Error(`Failed to clone child graph node ${edge.w}`);
-        }
-        this.internalGraph.setEdge(enterSyntheticNode.id, clonedStartId);
-      }
-    }
-
-    for (const [originalId, clonedId] of clonedByOriginalId) {
-      const originalOutEdges = this.internalGraph.outEdges(originalId) ?? [];
-      for (const edge of originalOutEdges) {
-        if (edge.w === firstExitId) {
-          this.internalGraph.setEdge(clonedId, exitSyntheticNode.id);
-        } else {
-          const clonedSuccessorId = clonedByOriginalId.get(edge.w);
-          if (clonedSuccessorId) {
-            this.internalGraph.setEdge(clonedId, clonedSuccessorId);
-          }
-        }
-      }
-    }
-
-    this.internalGraph.setEdge(exitSyntheticNode.id, ownerExitNodeId);
+    this.invalidateTopologicalOrder();
   }
 
   private syntheticScopeHash(ownerNodeId: string, stepId: string): string {
@@ -363,50 +346,8 @@ export class WorkflowRuntimeGraph {
     return createSHA256Hash(JSON.stringify(frames)).slice(0, SCOPE_HASH_LENGTH);
   }
 
-  private cloneInterior(enterId: string, exitId: string, scopeHash: string): Map<string, string> {
-    const clonedByOriginalId = new Map<string, string>();
-
-    for (const originalId of this.nodesBetween(enterId, exitId)) {
-      const originalNode = this.getNode(originalId);
-
-      if (!originalNode) {
-        throw new Error(`Node not found for node id: ${originalId}`);
-      }
-
-      const clonedId = `${originalId}_${scopeHash}`;
-
-      if (this.internalGraph.hasNode(clonedId)) {
-        throw new Error(`Cloned node id ${clonedId} already exists in the graph`);
-      }
-
-      clonedByOriginalId.set(originalId, clonedId);
-      this.internalGraph.setNode(clonedId, { ...originalNode, id: clonedId });
-    }
-
-    return clonedByOriginalId;
-  }
-
-  private nodesBetween(enterId: string, exitId: string): string[] {
-    const visited = new Set<string>();
-    const interior: string[] = [];
-
-    const visit = (nodeId: string) => {
-      if (nodeId === exitId || visited.has(nodeId)) {
-        return;
-      }
-
-      visited.add(nodeId);
-
-      if (nodeId !== enterId) {
-        interior.push(nodeId);
-      }
-
-      const successors = this.internalGraph.successors(nodeId) ?? [];
-      successors.forEach((successorId) => visit(successorId));
-    };
-
-    visit(enterId);
-    return interior;
+  private invalidateTopologicalOrder(): void {
+    this.cachedTopologicalOrder = undefined;
   }
 }
 
