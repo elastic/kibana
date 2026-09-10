@@ -10,7 +10,12 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
-import { EMPTY_LABEL, getMissingValueLabel, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
+import {
+  EMPTY_LABEL,
+  getMissingValueLabel,
+  MISSING_TOKEN,
+  NULL_LABEL,
+} from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
 import { asPrettyString, formatReactArray, formatTextArray } from './utils';
 import type {

@@ -73,9 +73,9 @@ describe('filter manager utilities', () => {
       expect(getPhraseDisplayValue({ meta: { value: '' } } as PhraseFilter, formatter)).toBe(
         'formatted:'
       );
-      expect(
-        getPhraseDisplayValue({ meta: { params: {} } } as PhraseFilter, formatter)
-      ).toBe('formatted:undefined');
+      expect(getPhraseDisplayValue({ meta: { params: {} } } as PhraseFilter, formatter)).toBe(
+        'formatted:undefined'
+      );
     });
   });
 });
