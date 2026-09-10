@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import {
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  AgentAccessControlMode,
+  AgentAccessControlRole,
+} from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
@@ -131,11 +136,12 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
 const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
   schema.object({
     type: schema.literal('user'),
-    name: schema.string({
+    id: schema.string({
       minLength: 1,
-      maxLength: 1024,
+      maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
       meta: {
-        description: 'Case-sensitive Kibana username of the principal to grant access to.',
+        description:
+          'Stable identifier of the user to grant access to: a Kibana user profile uid. Users without a profile cannot be granted access.',
       },
     }),
     role: schema.oneOf(
@@ -153,10 +159,10 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
     ),
   }),
   {
-    maxSize: 100,
+    maxSize: AGENT_ACCESS_CONTROL_MAX_ENTRIES,
     meta: {
       description:
-        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.',
+        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), an `id` (the principal profile uid), and a `role`. Entries created before agent access control adopted stable user ids are returned by GET with a `name` field and cannot be sent back — the next PUT replaces them.',
     },
   }
 );
@@ -657,7 +663,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        'Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Replace the per-agent access-control entries. Grants are keyed on the stable user profile `id`; each entry names one user by their profile uid. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },

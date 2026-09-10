@@ -8,9 +8,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
-  type AgentDefinition,
+  type AgentAccessControl,
   type AgentAccessControlEntry,
+  type AgentDefinition,
   AgentAccessControlMode,
+  isLegacyAgentAccessControlEntry,
+  type LegacyAgentAccessControlEntry,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -53,11 +56,14 @@ const emptyState = (): AgentEditState => ({
   },
 });
 
-const accessControlEntriesSignature = (entries: AgentAccessControlEntry[] = []): string =>
+const entryStableKey = (entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry): string =>
+  isLegacyAgentAccessControlEntry(entry) ? `name:${entry.name}` : `id:${entry.id}`;
+
+const accessControlEntriesSignature = (entries: AgentAccessControl['entries'] = []): string =>
   JSON.stringify(
     [...entries]
-      .map((entry) => ({ type: entry.type, name: entry.name, role: entry.role }))
-      .sort((a, b) => `${a.type}:${a.name}`.localeCompare(`${b.type}:${b.name}`))
+      .map((entry) => ({ key: entryStableKey(entry), role: entry.role }))
+      .sort((a, b) => a.key.localeCompare(b.key))
   );
 
 export function useAgentEdit({
@@ -155,7 +161,11 @@ export function useAgentEdit({
             accessControlEntriesSignature(nextEntries);
 
         if (shouldUpdateAccessControl) {
-          await updateAccessControlMutation.mutateAsync(nextEntries);
+          // The write API only accepts id-backed entries; legacy name-only entries are dropped.
+          const idBackedNextEntries = nextEntries.filter(
+            (entry): entry is AgentAccessControlEntry => !isLegacyAgentAccessControlEntry(entry)
+          );
+          await updateAccessControlMutation.mutateAsync(idBackedNextEntries);
         }
 
         queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });

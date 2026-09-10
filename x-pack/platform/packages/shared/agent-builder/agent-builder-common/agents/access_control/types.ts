@@ -56,14 +56,30 @@ export type AgentAccessControlPrincipalType = 'user';
 
 export interface AgentAccessControlEntry {
   type: AgentAccessControlPrincipalType;
-  /** Case-sensitive Kibana username. */
-  name: string;
+  /** Stable user id (profile uid, or the realm-qualified fallback from `toStableUserId`). */
+  id: string;
   role: AgentAccessControlRole;
 }
 
+/**
+ * Entry persisted before agent ACLs adopted stable user ids. Matched on `name`; read-only and
+ * never written back.
+ */
+export interface LegacyAgentAccessControlEntry {
+  type: AgentAccessControlPrincipalType;
+  /** Case-sensitive Kibana username. */
+  name: string;
+  role: AgentAccessControlRole;
+  id?: undefined;
+}
+
+export const isLegacyAgentAccessControlEntry = (
+  entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry
+): entry is LegacyAgentAccessControlEntry => entry.id === undefined;
+
 export interface AgentAccessControl {
   access_mode: AgentAccessControlMode;
-  entries: AgentAccessControlEntry[];
+  entries: Array<AgentAccessControlEntry | LegacyAgentAccessControlEntry>;
 }
 
 /**
@@ -76,7 +92,8 @@ export const getDefaultAgentAccessControl = (): AgentAccessControl => ({
 });
 
 export const AGENT_ACCESS_CONTROL_MAX_ENTRIES = 100;
-export const AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH = 1024;
+/** Matches the conversation ACL principal id cap (`CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH`). */
+export const AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH = 1024;
 
 const ROLE_RANK: Record<AgentAccessControlRole, number> = {
   [AgentAccessControlRole.User]: 1,

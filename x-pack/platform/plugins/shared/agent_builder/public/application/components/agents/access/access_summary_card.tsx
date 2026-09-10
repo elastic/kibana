@@ -20,9 +20,15 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import {
+  agentBuilderDefaultAgentId,
+  isLegacyAgentAccessControlEntry,
+  type AgentDefinition,
+} from '@kbn/agent-builder-common';
 import { useAgentAccessControl } from '../../../hooks/agents/use_agent_access_control';
 import { useCanUpdateAgentAccess } from '../../../hooks/agents/use_can_update_agent_access';
+import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { ROLE_LABEL } from './role_to_capabilities';
 import {
   accessSummaryCardTitle,
@@ -70,6 +76,22 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
   );
   const overflow = (data?.access_control.entries.length ?? 0) - previewEntries.length;
 
+  const previewUids = useMemo(
+    () =>
+      previewEntries
+        .filter((entry) => !isLegacyAgentAccessControlEntry(entry))
+        .map((entry) => (entry as { id: string }).id),
+    [previewEntries]
+  );
+  const { data: profiles = [] } = useUserProfiles({
+    uids: previewUids,
+    enabled: previewUids.length > 0,
+  });
+  const profileByUid = useMemo(
+    () => new Map(profiles.map((profile) => [profile.uid, profile])),
+    [profiles]
+  );
+
   if (isDefaultAgent) {
     return null;
   }
@@ -101,14 +123,25 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <div css={tokenStackStyles(euiTheme)} aria-hidden>
-              {previewEntries.map((entry) => (
-                <EuiToolTip
-                  key={`${entry.type}:${entry.name}`}
-                  content={`${entry.name} — ${ROLE_LABEL[entry.role]}`}
-                >
-                  <EuiAvatar name={entry.name} size="s" />
-                </EuiToolTip>
-              ))}
+              {previewEntries.map((entry) => {
+                const isLegacy = isLegacyAgentAccessControlEntry(entry);
+                const profile = isLegacy ? undefined : profileByUid.get(entry.id);
+                const key = isLegacy ? `name:${entry.name}` : `id:${entry.id}`;
+                const displayName = profile
+                  ? getUserDisplayName(profile.user)
+                  : isLegacy
+                  ? entry.name
+                  : entry.id;
+                return (
+                  <EuiToolTip key={key} content={`${displayName} — ${ROLE_LABEL[entry.role]}`}>
+                    {profile ? (
+                      <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+                    ) : (
+                      <EuiAvatar name={displayName} size="s" />
+                    )}
+                  </EuiToolTip>
+                );
+              })}
               {overflow > 0 ? (
                 <EuiText
                   size="xs"

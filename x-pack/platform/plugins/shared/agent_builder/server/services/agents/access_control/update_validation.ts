@@ -7,7 +7,7 @@
 
 import {
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
-  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   isAgentAccessControlRole,
   type AgentAccessControlEntry,
 } from '@kbn/agent-builder-common';
@@ -31,18 +31,18 @@ export const validateAccessControlUpdate = (
     if (!entry || entry.type !== 'user') {
       return 'Each ACL entry requires a type of "user"';
     }
-    if (typeof entry.name !== 'string' || entry.name.length === 0) {
-      return 'Each ACL entry requires a non-empty name';
+    if (typeof entry.id !== 'string' || entry.id.length === 0) {
+      return 'Each ACL entry requires a non-empty id';
     }
-    if (entry.name.length > AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH) {
-      return `ACL principal name exceeds maximum length of ${AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH}`;
+    if (entry.id.length > AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+      return `ACL principal id exceeds maximum length of ${AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`;
     }
     if (!isAgentAccessControlRole(entry.role)) {
       return `Unknown ACL role: ${String(entry.role)}`;
     }
-    const key = `${entry.type}:${entry.name}`;
+    const key = `${entry.type}:${entry.id}`;
     if (seen.has(key)) {
-      return `Duplicate ACL entry for ${entry.type} "${entry.name}"`;
+      return `Duplicate ACL entry for ${entry.type} "${entry.id}"`;
     }
     seen.add(key);
   }

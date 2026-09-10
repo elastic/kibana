@@ -10,9 +10,12 @@ import {
   AgentAccessControlMode,
   AgentAccessControlRole,
   accessControlRoleMeets,
+  isLegacyAgentAccessControlEntry,
   maxAccessControlRole,
   type AgentAccessControl,
+  type AgentAccessControlEntry,
   type CurrentUser,
+  type LegacyAgentAccessControlEntry,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 
@@ -80,6 +83,23 @@ const accessControlModeRole = (
 };
 
 /**
+ * Matches an access-control entry against the current user: by stable id for id-backed entries,
+ * by username for legacy name-only entries.
+ */
+export const matchesAccessControlEntry = (
+  entry: AgentAccessControlEntry | LegacyAgentAccessControlEntry,
+  user: UserIdAndName | null | undefined
+): boolean => {
+  if (!user || entry.type !== 'user') {
+    return false;
+  }
+  if (isLegacyAgentAccessControlEntry(entry)) {
+    return user.username !== undefined && entry.name === user.username;
+  }
+  return user.id !== undefined && entry.id === user.id;
+};
+
+/**
  * Returns the strongest explicit access-control entry that applies to the current user.
  */
 const accessControlRoleForUser = (
@@ -92,7 +112,7 @@ const accessControlRoleForUser = (
   // V1: only user-type entries. Role-type grants land in V2.
   let best: AgentAccessControlRole | undefined;
   for (const entry of accessControl.entries) {
-    if (entry.type === 'user' && currentUser.username && entry.name === currentUser.username) {
+    if (matchesAccessControlEntry(entry, currentUser)) {
       best = maxAccessControlRole(best, entry.role);
     }
   }
