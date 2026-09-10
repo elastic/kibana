@@ -7,6 +7,13 @@
 
 import type { DynamicSettings } from '../runtime_types';
 
+export const DEFAULT_RULE_SETTINGS = [
+  'defaultConnectors',
+  'defaultEmail',
+  'defaultStatusRuleEnabled',
+  'defaultTLSRuleEnabled',
+] as const;
+
 export const MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL = 5;
 export const MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL = 1440;
 

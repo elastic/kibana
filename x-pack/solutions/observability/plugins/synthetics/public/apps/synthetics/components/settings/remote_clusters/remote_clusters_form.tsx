@@ -94,7 +94,8 @@ export const RemoteClustersForm = () => {
 
   const loading = loadingSettings || loadingClusters;
 
-  const canEdit: boolean = !!services?.application?.capabilities.uptime.configureSettings;
+  const capabilities = services?.application?.capabilities.uptime;
+  const canEdit = Boolean(capabilities.configureSettings || capabilities.canManageSettings);
 
   // Build the current form values for dirty checking and saving
   const currentFormValues = useMemo(

@@ -8,8 +8,10 @@
 import { takeLeading, put, call, select, takeLatest } from 'redux-saga/effects';
 import type { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import { updateDefaultAlertingAction } from '../alert_rules';
 import type { DynamicSettings } from '../../../../../common/runtime_types';
+import { DEFAULT_RULE_SETTINGS } from '../../../../../common/constants';
 import { kibanaService } from '../../../../utils/kibana_service';
 import {
   getConnectorsAction,
@@ -54,31 +56,25 @@ export function* setDynamicSettingsEffect() {
   });
   yield takeLatest(
     String(setDynamicSettingsAction.get),
-    function* (action: Action<DynamicSettings>) {
+    function* (action: Action<Partial<DynamicSettings>>) {
       try {
         const { settings: prevSettings } = (yield select(selectDynamicSettings)) as {
           settings: DynamicSettings | null;
         };
-        yield call(setDynamicSettings, { settings: action.payload });
+        const savedSettings = (yield call(setDynamicSettings, {
+          settings: action.payload,
+        })) as DynamicSettings;
 
-        const {
-          privateLocationsSyncInterval: _prevSync,
-          rebalancePrivateLocationShardsEnabled: _prevRebalance,
-          ...prevAlertSettings
-        } = prevSettings ?? {};
-        const {
-          privateLocationsSyncInterval: _nextSync,
-          rebalancePrivateLocationShardsEnabled: _nextRebalance,
-          ...nextAlertSettings
-        } = action.payload;
-        const alertSettingsChanged =
-          JSON.stringify(prevAlertSettings) !== JSON.stringify(nextAlertSettings);
+        const alertSettingsChanged = DEFAULT_RULE_SETTINGS.some(
+          (setting) =>
+            setting in action.payload && !isEqual(prevSettings?.[setting], action.payload[setting])
+        );
 
         if (alertSettingsChanged) {
           yield put(updateDefaultAlertingAction.get());
         }
 
-        yield put(setDynamicSettingsAction.success(action.payload));
+        yield put(setDynamicSettingsAction.success(savedSettings));
         kibanaService.coreSetup.notifications.toasts.addSuccess(
           i18n.translate('xpack.synthetics.settings.saveSuccess', {
             defaultMessage: 'Settings saved!',

@@ -46,8 +46,11 @@ export const AlertDefaultsForm = () => {
   const [formFields, setFormFields] = useState<FormFields>(DYNAMIC_SETTINGS_DEFAULTS as FormFields);
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
 
-  const canEdit: boolean =
-    !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  const canEdit = Boolean(
+    capabilities?.configureSettings ||
+      (capabilities?.canManageSettings && capabilities?.canManageRules)
+  );
 
   const isDisabled = !canEdit;
 
@@ -74,7 +77,25 @@ export const AlertDefaultsForm = () => {
   );
 
   const onApply = () => {
-    dispatch(setDynamicSettingsAction.get(formFields as DynamicSettings));
+    const {
+      certAgeThreshold,
+      certExpirationThreshold,
+      defaultConnectors,
+      defaultEmail,
+      defaultStatusRuleEnabled,
+      defaultTLSRuleEnabled,
+    } = formFields;
+
+    dispatch(
+      setDynamicSettingsAction.get({
+        certAgeThreshold,
+        certExpirationThreshold,
+        defaultConnectors,
+        defaultEmail: defaultEmail as DynamicSettings['defaultEmail'],
+        defaultStatusRuleEnabled,
+        defaultTLSRuleEnabled,
+      })
+    );
     setShowDisableConfirm(false);
   };
 

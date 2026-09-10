@@ -37,7 +37,7 @@ jest.mock('../../../../utils/kibana_service', () => ({
 function getSetDynamicSettingsWorker() {
   const gen = setDynamicSettingsEffect();
   const effect = gen.next().value as ForkEffect;
-  return effect.payload.args[1] as (action: Action<DynamicSettings>) => Generator;
+  return effect.payload.args[1] as (action: Action<Partial<DynamicSettings>>) => Generator;
 }
 
 const savedSettings: DynamicSettings = {
@@ -55,48 +55,57 @@ describe('setDynamicSettingsEffect', () => {
   });
 
   it('does not refresh default alert rules when only shard rebalancing changes', () => {
-    const payload: DynamicSettings = {
-      ...savedSettings,
-      rebalancePrivateLocationShardsEnabled: false,
-    };
+    const payload = { rebalancePrivateLocationShardsEnabled: false };
     const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
 
     expect(gen.next().value).toEqual(select(selectDynamicSettings));
     expect(gen.next({ settings: savedSettings }).value).toEqual(
       call(setDynamicSettings, { settings: payload })
     );
-    expect(gen.next().value).toEqual(put(setDynamicSettingsAction.success(payload)));
+    expect(gen.next(savedSettings).value).toEqual(
+      put(setDynamicSettingsAction.success(savedSettings))
+    );
     expect(gen.next().done).toBe(true);
   });
 
   it('does not refresh default alert rules when only the sync interval changes', () => {
-    const payload: DynamicSettings = {
-      ...savedSettings,
-      privateLocationsSyncInterval: 15,
-    };
+    const payload = { privateLocationsSyncInterval: 15 };
     const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
 
     expect(gen.next().value).toEqual(select(selectDynamicSettings));
     expect(gen.next({ settings: savedSettings }).value).toEqual(
       call(setDynamicSettings, { settings: payload })
     );
-    expect(gen.next().value).toEqual(put(setDynamicSettingsAction.success(payload)));
+    expect(gen.next(savedSettings).value).toEqual(
+      put(setDynamicSettingsAction.success(savedSettings))
+    );
     expect(gen.next().done).toBe(true);
   });
 
-  it('refreshes default alert rules when alerting fields change', () => {
-    const payload: DynamicSettings = {
-      ...savedSettings,
-      certAgeThreshold: 365,
-    };
+  it('does not refresh default rules when only certificate thresholds change', () => {
+    const payload = { certAgeThreshold: 365 };
     const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
 
     expect(gen.next().value).toEqual(select(selectDynamicSettings));
     expect(gen.next({ settings: savedSettings }).value).toEqual(
       call(setDynamicSettings, { settings: payload })
     );
-    expect(gen.next().value).toEqual(put(updateDefaultAlertingAction.get()));
-    expect(gen.next().value).toEqual(put(setDynamicSettingsAction.success(payload)));
+    expect(gen.next(savedSettings).value).toEqual(
+      put(setDynamicSettingsAction.success(savedSettings))
+    );
+    expect(gen.next().done).toBe(true);
+  });
+
+  it('refreshes default alert rules when default connectors change', () => {
+    const payload = { defaultConnectors: ['connector-id'] };
+    const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
+
+    expect(gen.next().value).toEqual(select(selectDynamicSettings));
+    expect(gen.next({ settings: savedSettings }).value).toEqual(
+      call(setDynamicSettings, { settings: payload })
+    );
+    expect(gen.next(savedSettings).value).toEqual(put(updateDefaultAlertingAction.get()));
+    expect(gen.next().value).toEqual(put(setDynamicSettingsAction.success(savedSettings)));
     expect(gen.next().done).toBe(true);
   });
 });

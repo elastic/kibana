@@ -1,5 +1,5 @@
 {
-  "sha1": "9581ab6c7811b5c7e0d80b38f8e70868b9bdb414",
+  "sha1": "8bad6eb42862c8aef42dbedaf121c8505d23abb5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -884,6 +884,76 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api.spec.ts",
         "line": 158,
         "column": 14
+      }
+    },
+    {
+      "id": "1ff94da9444b405-9d8f05505d8cf49",
+      "title": "Synthetics manage settings privilege does not let a read-only user update settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/manage_settings_privilege.spec.ts",
+        "line": 77,
+        "column": 16
+      }
+    },
+    {
+      "id": "1ff94da9444b405-52f1a98594107a7",
+      "title": "Synthetics manage settings privilege lets the granular privilege update settings without broad write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/manage_settings_privilege.spec.ts",
+        "line": 83,
+        "column": 29
+      }
+    },
+    {
+      "id": "1ff94da9444b405-458ef5543804786",
+      "title": "Synthetics manage settings privilege requires rule management for default-rule settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/manage_settings_privilege.spec.ts",
+        "line": 95,
+        "column": 9
+      }
+    },
+    {
+      "id": "1ff94da9444b405-c6aa7311ba63894",
+      "title": "Synthetics manage settings privilege preserves settings access for all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/manage_settings_privilege.spec.ts",
+        "line": 105,
+        "column": 16
+      }
+    },
+    {
+      "id": "1ff94da9444b405-e0259cac616e302",
+      "title": "Synthetics manage settings privilege preserves settings access for minimalAll",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/manage_settings_privilege.spec.ts",
+        "line": 105,
+        "column": 16
       }
     },
     {
