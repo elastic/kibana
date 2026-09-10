@@ -236,6 +236,7 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   const factory: PublicMethodsOf<CasesClientFactory> = {
     initialize: jest.fn(),
     create: jest.fn(),
+    createWorkflowRunContext: jest.fn(),
   };
 
   return factory as unknown as CasesClientFactoryMock;
