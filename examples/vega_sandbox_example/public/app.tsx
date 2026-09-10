@@ -105,7 +105,7 @@ const categoryFromAddFilter = (
 };
 
 interface IsolationProbe {
-  parentDocumentBlocked: boolean;
+  opaqueOrigin: boolean;
 }
 
 const isExampleMessage = (
@@ -248,7 +248,7 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
       if (isExampleMessage(event.data)) {
         if (event.data.type === 'isolationProbe') {
           setIsolation({
-            parentDocumentBlocked: event.data.parentDocumentBlocked === true,
+            opaqueOrigin: event.data.opaqueOrigin === true,
           });
         }
         if (event.data.type === 'bootstrapReady') {
@@ -331,9 +331,9 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
   };
 
   const isolationLabel = isolation
-    ? isolation.parentDocumentBlocked
-      ? 'parent document blocked'
-      : 'parent document reachable (fail)'
+    ? isolation.opaqueOrigin
+      ? 'opaque origin (isolated)'
+      : 'non-opaque origin (fail)'
     : undefined;
 
   return (

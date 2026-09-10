@@ -11,6 +11,8 @@ jest.mock('./render', () => ({
   renderVegaDescriptor: jest.fn(),
 }));
 
+// Side-effect import must precede bootstrap so isolationOk sees origin === 'null'.
+import './bootstrap_test_null_origin';
 import { renderVegaDescriptor } from './render';
 import { VegaSandboxErrorCode } from './common';
 import { VEGA_SANDBOX_PROTOCOL_VERSION, type VegaSandboxOutboundMessage } from './protocol';
@@ -42,7 +44,7 @@ const createController = (
   resize: jest.fn().mockResolvedValue(undefined),
   view: {
     getState: jest.fn(),
-    setState: jest.fn().mockResolvedValue(undefined),
+    setState: jest.fn(),
     addSignalListener: jest.fn(),
     removeSignalListener: jest.fn(),
     _runtime: { data: {}, signals: {} },
@@ -54,6 +56,8 @@ const initSandbox = (): void => {
   window.dispatchEvent(
     new MessageEvent('message', {
       data: { type: 'init', protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION },
+      origin: 'https://kibana.example',
+      source: window.parent,
     })
   );
 };
@@ -62,6 +66,8 @@ const postRender = (renderId: string): void => {
   window.dispatchEvent(
     new MessageEvent('message', {
       data: { type: 'render', renderId, descriptor },
+      origin: 'https://kibana.example',
+      source: window.parent,
     })
   );
 };

@@ -31,20 +31,16 @@ declare global {
   }
 }
 
-// Self-check: refuse to process any messages if the parent document is reachable.
-// This indicates sandbox="allow-scripts" is missing from the embedding iframe.
-const isolationOk: boolean = (() => {
-  try {
-    void window.parent.document;
-    window.parent.postMessage(
-      { type: 'error', error: { code: VegaSandboxErrorCode.IsolationFailure } },
-      '*'
-    );
-    return false;
-  } catch {
-    return true;
-  }
-})();
+// Opaque sandboxed iframes (no allow-same-origin) report origin as the string "null".
+// A normal same-origin or cross-origin parent does not — that is not proper isolation.
+const isolationOk: boolean = window.origin === 'null';
+
+if (!isolationOk) {
+  window.parent.postMessage(
+    { type: 'error', error: { code: VegaSandboxErrorCode.IsolationFailure } },
+    '*'
+  );
+}
 
 let controller: VegaSandboxRenderController | undefined;
 let initialized = false;
@@ -203,8 +199,9 @@ const handleInit = (
     return;
   }
 
-  // Narrow targetOrigin for all subsequent outbound posts to the verified parent origin.
-  parentOrigin = origin || '*';
+  // Narrow targetOrigin for subsequent outbound posts. Opaque/'null' parent origins
+  // (e.g. Kibana itself embedded in a sandboxed frame) must fall back to '*'.
+  parentOrigin = origin && origin !== 'null' ? origin : '*';
 
   if (colorMode) {
     document.documentElement.style.colorScheme = colorMode === 'DARK' ? 'dark' : 'light';
@@ -316,7 +313,7 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
   pendingRestoreState = undefined;
 
   if (stateToRestore !== undefined && controller.view) {
-    await controller.view.setState(stateToRestore as never);
+    controller.view.setState(stateToRestore as never);
   }
 
   if (!isCurrent()) {
@@ -335,7 +332,7 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
   postToParent({ type: 'rendered', renderId });
 };
 
-const handleRestoreState = async (state: unknown): Promise<void> => {
+const handleRestoreState = (state: unknown): void => {
   if (!initialized || !state) {
     return;
   }
@@ -343,7 +340,7 @@ const handleRestoreState = async (state: unknown): Promise<void> => {
     pendingRestoreState = state;
     return;
   }
-  await controller.view.setState(state as any);
+  controller.view.setState(state as never);
 };
 
 const handleMessage = (message: MessageEvent): void => {
@@ -382,7 +379,9 @@ const handleMessage = (message: MessageEvent): void => {
       controller?.resize(message.data.dimensions);
       return;
     case 'restoreState':
-      handleRestoreState(message.data.state).catch((error) => {
+      try {
+        handleRestoreState(message.data.state);
+      } catch (error) {
         postToParent({
           type: 'error',
           error: {
@@ -390,7 +389,7 @@ const handleMessage = (message: MessageEvent): void => {
             values: { message: error instanceof Error ? error.message : String(error) },
           },
         });
-      });
+      }
       return;
     case 'validateExternalUrlResult':
       handleValidateExternalUrlResult(message.data);

@@ -25,7 +25,7 @@ export enum VegaSandboxErrorCode {
   UnsupportedProtocolVersion = 'unsupported_protocol_version',
   ExternalUrlDenied = 'external_url_denied',
   ExternalUrlsNotEnabled = 'external_urls_not_enabled',
-  /** Bootstrap detected that window.parent.document is reachable — sandbox attribute is missing. */
+  /** Bootstrap detected a non-opaque iframe origin — sandbox isolation is missing. */
   IsolationFailure = 'isolation_failure',
   /** Vega data.url fetches are not supported in the sandbox (no connect-src in phase 1). */
   DataUrlsUnsupported = 'data_urls_unsupported',

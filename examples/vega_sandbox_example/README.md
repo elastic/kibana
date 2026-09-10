@@ -9,5 +9,5 @@ data and sends a new `render`. It does not use Kibana Filter Manager. **Resize**
 the iframe height and posts `resize` (no outbound `rendered`). **Reset** reloads the iframe
 and clears the log.
 Each `render` includes a `renderId`; matching outbound `rendered` is the completion signal PNG
-and PDF reporting wait on. The isolation probe should report that `window.parent.document` is
-blocked. This playground is not the production visTypeVega host.
+and PDF reporting wait on. The isolation probe should report an opaque origin
+(`window.origin === 'null'`). This playground is not the production visTypeVega host.

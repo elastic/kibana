@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { escape } from 'he';
 import { formatValue as createTooltipContent } from 'vega-tooltip';
 import type { View } from 'vega';
 import type { VegaSandboxTooltipConfig } from './types';
 
 const tooltipId = 'vega-kibana-sandbox-tooltip';
 
-const escapeHtml = (value: unknown): string =>
-  String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+const escapeHtml = (value: unknown): string => escape(String(value));
 
 const normalizePadding = (padding: VegaSandboxTooltipConfig['padding']): number => {
   if (typeof padding === 'number') {

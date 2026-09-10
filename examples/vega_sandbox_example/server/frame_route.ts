@@ -63,16 +63,13 @@ const renderFrameDocument = (nonce: string, bundleSrc: string): string => `<!doc
       const script = document.createElement('script');
       script.src = ${JSON.stringify(bundleSrc)};
       script.onload = function () {
-        var parentDocumentBlocked = false;
-        try {
-          void window.parent.document;
-        } catch (e) {
-          parentDocumentBlocked = true;
-        }
+        // Opaque sandboxed frames report origin as the string "null". Cross-origin parents
+        // also block parent.document access, so that is not a reliable isolation signal.
+        var opaqueOrigin = window.origin === 'null';
         window.parent.postMessage({
           source: 'vega-sandbox-example',
           type: 'isolationProbe',
-          parentDocumentBlocked: parentDocumentBlocked,
+          opaqueOrigin: opaqueOrigin,
         }, '*');
         window.parent.postMessage({
           source: 'vega-sandbox-example',
