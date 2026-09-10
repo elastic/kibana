@@ -13,7 +13,7 @@ import type {
   Severity,
   TriggerFeedback,
 } from '@kbn/significant-events-schema';
-import type { InvestigationTriggerType } from './workflows/triggers';
+import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
 /**
  * Re-exported so consumers of these responses do not need their own dependency on
