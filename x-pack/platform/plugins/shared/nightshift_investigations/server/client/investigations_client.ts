@@ -20,6 +20,8 @@ import type {
   InvestigationSubject,
   InvestigationSubjectType,
   InvestigationTriggerType,
+  ImpactedEntitiesRequest,
+  ImpactedEntitiesResponse,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
@@ -720,5 +722,25 @@ export class NightshiftInvestigationsClient {
     });
 
     return { severity_counts: severityCounts };
+  }
+
+  async getImpactedEntities({
+    created_after,
+    created_before,
+    started_after,
+    started_before,
+    completed_after,
+    completed_before,
+  }: ImpactedEntitiesRequest = {}): Promise<ImpactedEntitiesResponse> {
+    const impactedEntities = await this.investigationRepository.findImpactedEntities({
+      createdAfter: created_after,
+      createdBefore: created_before,
+      startedAfter: started_after,
+      startedBefore: started_before,
+      completedAfter: completed_after,
+      completedBefore: completed_before,
+    });
+
+    return { impacted_entities: impactedEntities };
   }
 }
