@@ -8,7 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { createProposalAttachmentDefinition } from './proposal_attachment_definition';
-import { PROPOSAL_ATTACHMENT_TYPE } from '../../common';
+import { PROPOSAL_ATTACHMENT_TYPE } from '../../../common';
 
 export const registerProposalAttachmentTypes = (
   agentBuilder: AgentBuilderPluginStart,
