@@ -255,6 +255,6 @@ Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over rais
 Measure with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --filter alertzero --dist --no-cache --no-examples
-# inspect …/alertzero/target/public/metrics.json → "page load bundle size"
+node scripts/build_kibana_platform_plugins.js --dist --no-cache
+# inspect target/optimizer_bundle_metrics.json → "page load bundle size" for alertzero
 ```

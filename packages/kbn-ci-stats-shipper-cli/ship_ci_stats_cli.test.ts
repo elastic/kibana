@@ -84,38 +84,6 @@ describe('ship_ci_stats_cli', () => {
     });
   };
 
-  it('when limitConfigPath includes kbn-rspack-optimizer, update command uses build_rspack_bundles --update-limits', async () => {
-    const metrics: CiStatsMetric[] = [
-      {
-        group: 'g',
-        id: 'somePlugin',
-        value: 200,
-        limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
-      },
-    ];
-
-    await expect(runWithMetrics(metrics, { validate: true })).rejects.toThrow(
-      /build_rspack_bundles --update-limits/
-    );
-  });
-
-  it('when limitConfigPath does not include kbn-rspack-optimizer, update command uses build_kibana_platform_plugins --focus with plugin id', async () => {
-    const metrics: CiStatsMetric[] = [
-      {
-        group: 'g',
-        id: 'myPlugin',
-        value: 200,
-        limit: 100,
-        limitConfigPath: 'src/dev/build/limits.json',
-      },
-    ];
-
-    await expect(runWithMetrics(metrics, { validate: true })).rejects.toThrow(
-      /build_kibana_platform_plugins --focus myPlugin --update-limits/
-    );
-  });
-
   it('over-limit metric includes the correct update command in the error message', async () => {
     const metrics: CiStatsMetric[] = [
       {
@@ -123,7 +91,7 @@ describe('ship_ci_stats_cli', () => {
         id: 'discover',
         value: 999,
         limit: 1,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/foo',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
     ];
 
@@ -132,7 +100,7 @@ describe('ship_ci_stats_cli', () => {
       'bundle size for discover plugin is greater than the limit of 1'
     );
     await expect(runWithMetrics(metrics, { validate: true })).rejects.toThrow(
-      'node scripts/build_rspack_bundles --update-limits'
+      'node scripts/build_kibana_platform_plugins --update-limits'
     );
   });
 
@@ -143,28 +111,28 @@ describe('ship_ci_stats_cli', () => {
         id: 'p',
         value: 50,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
     ];
 
     await expect(runWithMetrics(metrics, { validate: true })).resolves.toBeUndefined();
   });
 
-  it('lists rspack update command once when multiple rspack metrics are over limit', async () => {
+  it('lists the update command once when multiple metrics are over limit', async () => {
     const metrics: CiStatsMetric[] = [
       {
         group: 'page load bundle size',
         id: 'pluginA',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
       {
         group: 'page load bundle size',
         id: 'pluginB',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
     ];
 
@@ -178,9 +146,9 @@ describe('ship_ci_stats_cli', () => {
     expect(caught).toBeDefined();
     const message = (caught as Error).message;
     expect(message).toContain('Metric overages:');
-    expect(message.match(/node scripts\/build_rspack_bundles --update-limits/g)?.length ?? 0).toBe(
-      1
-    );
+    expect(
+      message.match(/node scripts\/build_kibana_platform_plugins --update-limits/g)?.length ?? 0
+    ).toBe(1);
     expect(
       message.match(/To update the limit, run the following command locally:/g)?.length ?? 0
     ).toBe(1);

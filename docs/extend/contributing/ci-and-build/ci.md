@@ -235,11 +235,11 @@ You can report new metrics via the `CiStatsReporter` class provided by the `@kbn
 
 Limits are usually high enough that PRs shouldn't trigger overages, but when they do:
 
-1. Run the optimizer locally with `--profile` to produce webpack `stats.json` files. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric (currently unlimited), which is the main way to move code off the initial page load.
+1. Run the optimizer locally with `--profile-stats-only --profile-focus {pluginId}` to produce a webpack-compatible `stats.json` scoped to your plugin. Focus on the chunk named `plugin-{pluginId}`; the async chunks make up the `async chunks size` metric (currently unlimited), which is the main way to move code off the initial page load.
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginId} --profile
-    # builds and creates {pluginDir}/target/public/stats.json for {pluginId} and its dependencies
+    node scripts/build_kibana_platform_plugins --dist --profile-stats-only --profile-focus {pluginId}
+    # full build; writes target/public/bundles/stats.json with module-level detail for {pluginId}
     ```
 
     Tools:
@@ -251,15 +251,15 @@ Limits are usually high enough that PRs shouldn't trigger overages, but when the
 4. If the diff is too large, reduce each `stats.json` to a sorted module-id list via [jq](https://github.com/stedolan/jq):
 
     ```shell
-    jq -r .modules[].id {pluginDir}/target/public/stats.json | sort - > moduleids.txt
+    jq -r .modules[].id target/public/bundles/stats.json | sort - > moduleids.txt
     ```
 
 5. As a last resort, compare the bundle source directly using the production build:
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
+    node scripts/build_kibana_platform_plugins --dist
     npm install -g prettier
-    prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
+    prettier -w target/public/bundles/chunks/*.js
     # repeat for upstream and compare in Beyond Compare
     ```
 
@@ -268,10 +268,10 @@ Limits are usually high enough that PRs shouldn't trigger overages, but when the
 After identifying the files that were added, stick them behind an async import. If the size increase is unavoidable, raise the limit in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) directly, or run:
 
 ```shell
-node scripts/build_kibana_platform_plugins --focus {pluginId} --update-limits
+node scripts/build_kibana_platform_plugins --update-limits
 ```
 
-This runs the optimizer in distributable mode, which takes longer and spawns a worker per CPU. Changes to `limits.yml` trigger review from the Operations team, who verify the increase is justified — findings from the steps above help that review.
+This runs a full optimizer build in distributable mode, which takes longer than a dev build. Changes to `limits.yml` trigger review from the Operations team, who verify the increase is justified — findings from the steps above help that review.
 
 For broader guidance on lazy-loading patterns, see [Plugin performance and optimization](/extend/key-concepts/performance/plugin-performance-and-optimization.md).
 
@@ -284,18 +284,18 @@ In many regressions, a short workflow is enough to avoid raising limits:
 If you are using a coding agent with repository skills, run the `/optimize-bundle-size` skill command to start this workflow for you and help reduce plugin `page load bundle size`.
 :::::
 
-1. Build dist metrics and confirm the current value for your plugin in `target/public/metrics.json`:
+1. Build dist metrics and confirm the current value for your plugin in `target/optimizer_bundle_metrics.json`:
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
+    node scripts/build_kibana_platform_plugins --dist
     ```
 
 2. Profile the plugin and identify the largest modules in the entry chunk:
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginId} --dist --profile --no-cache
-    entry_id=$(jq -r '.chunks[] | select((.names|index("{pluginId}")) != null) | .id' {pluginDir}/target/public/stats.json)
-    jq -r --argjson cid "$entry_id" '.modules[] | select((.chunks|index($cid)) != null) | [.size, (.name // .identifier)] | @tsv' {pluginDir}/target/public/stats.json | sort -nr | head -40
+    node scripts/build_kibana_platform_plugins --dist --profile-stats-only --profile-focus {pluginId}
+    entry_id=$(jq -r '.chunks[] | select((.names|index("plugin-{pluginId}")) != null) | .id' target/public/bundles/stats.json)
+    jq -r --argjson cid "$entry_id" '.modules[] | select((.chunks|index($cid)) != null) | [.size, (.name // .identifier)] | @tsv' target/public/bundles/stats.json | sort -nr | head -40
     ```
 
 3. Move optional UI and large dependencies behind `async import()` boundaries.
@@ -308,15 +308,15 @@ If you are using a coding agent with repository skills, run the `/optimize-bundl
 While you're tracking down changes that will improve the bundle size, run this locally:
 
 ```shell
-node scripts/build_kibana_platform_plugins --dist --watch --focus {pluginId}
+node scripts/build_kibana_platform_plugins --dist --watch
 ```
 
-This builds the front-end bundles for your plugin and the plugins it depends on. When you make changes, the bundles rebuild and you can inspect `target/public/metrics.json` to see if your changes lower `page load bundle size`.
+This builds the front-end bundles in distributable mode. When you make changes, the bundles rebuild and you can inspect `target/optimizer_bundle_metrics.json` to see if your changes lower `page load bundle size`.
 
-To run the build once:
+To check `limits.yml` against the discovered plugins without building:
 
 ```shell
-node scripts/build_kibana_platform_plugins --validate-limits --focus {pluginId}
+node scripts/build_kibana_platform_plugins --validate-limits
 ```
 
-This applies production optimizations to get the right sizes, which means the optimizer takes significantly longer to run. On most developer machines it consumes all resources for 20+ minutes. Use `--workers` to cap concurrency if you want to multi-task.
+Distributable builds apply production optimizations to get the right sizes, so they take significantly longer than a dev build.

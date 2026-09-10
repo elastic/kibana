@@ -62,7 +62,7 @@
     // knip can't trace dynamic require.resolve() calls.
     "typescript-7",
     // @rsdoctor/rspack-plugin is loaded lazily via nativeRequire() in the
-    // @kbn/rspack-optimizer rspack_runtime shim; knip can't trace dynamic require.
+    // @kbn/optimizer rspack_runtime shim; knip can't trace dynamic require.
     "@rsdoctor/rspack-plugin",
     // Owned by @kbn/connector-specs (which declares its own graphql) and referenced
     // as a dynamic string by @kbn/evals-phoenix-executor's codegen script; the root
@@ -105,7 +105,6 @@
       },
       "webpack": {
         "config": [
-          "packages/kbn-optimizer/src/worker/webpack.config.ts",
           "src/platform/plugins/shared/console/packaging/webpack.config.js",
           "src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js",
           "src/platform/packages/private/kbn-ui-shared-deps-src/webpack.config.js",

@@ -8,19 +8,23 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import { fork } from 'child_process';
 
-import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { OptimizerConfig } from '@kbn/optimizer';
-import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
-import { observeLines } from '@kbn/stdio-dev-helpers';
+import { rspack, createExternalPluginConfig } from '@kbn/optimizer';
 
 import type { TaskContext } from '../task_context';
 
-type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
-
+/**
+ * Build the plugin's browser bundle with RSPack.
+ *
+ * This creates a bundle that:
+ * - Externalizes shared deps to __kbnSharedDeps__ (React, EUI, etc.)
+ * - Externalizes cross-plugin imports to __kbnBundles__.get()
+ * - Registers itself with __kbnBundles__.define()
+ *
+ * The output can be loaded after kibana.bundle.js and integrates
+ * with Kibana's plugin system.
+ */
 export async function optimize({
   log,
   dev,
@@ -35,124 +39,103 @@ export async function optimize({
   }
 
   log.info(`running @kbn/optimizer${!!watch ? ' in watch mode (use CTRL+C to quit)' : ''}`);
+
   await log.indent(2, async () => {
-    const optimizerConfig = OptimizerConfig.create({
+    const outputDir = Path.resolve(dev ? sourceDir : buildDir, 'target/public');
+
+    const config = await createExternalPluginConfig({
       repoRoot: REPO_ROOT,
-      examples: false,
-      testPlugins: false,
-      includeCoreBundle: true,
+      pluginDir: sourceDir,
+      pluginId: plugin.manifest.id,
+      outputDir,
       dist: !!dist,
       watch: !!watch,
+      cache: !dist, // Disable cache for dist builds
     });
 
-    const bundle = new Bundle({
-      id: plugin.manifest.id,
-      contextDir: sourceDir,
-      ignoreMetrics: true,
-      outputDir: Path.resolve(dev ? sourceDir : buildDir, 'target/public'),
-      sourceRoot: sourceDir,
-      type: 'plugin',
-      manifestPath: Path.resolve(sourceDir, 'kibana.json'),
-      remoteInfo: {
-        pkgId: 'not-importable',
-        targets: ['public', 'common'],
-      },
-    });
+    const compiler = rspack(config);
+    const rel = Path.relative(REPO_ROOT, outputDir);
 
-    const remotes = BundleRemotes.fromBundles([...optimizerConfig.bundles, bundle]);
-    const worker = optimizerConfig.getWorkerConfig('cache disabled');
+    if (watch) {
+      // Watch mode
+      return new Promise<void>((resolve, reject) => {
+        const watching = compiler.watch({}, (err, stats) => {
+          if (err) {
+            log.error(`RSPack error: ${err.message}`);
+            return;
+          }
 
-    const proc = fork(require.resolve('./optimize_worker'), {
-      cwd: REPO_ROOT,
-      execArgv: ['--require=@kbn/swc-register/install'],
-      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-    });
+          if (stats?.hasErrors()) {
+            const info = stats.toJson();
+            info.errors?.forEach((error) => {
+              log.error(`RSPack error: ${error.message}`);
+            });
+            return;
+          }
 
-    const rel = Path.relative(REPO_ROOT, bundle.outputDir);
+          if (stats?.hasWarnings()) {
+            const info = stats.toJson();
+            log.warning(`browser bundle created at ${rel}, but with warnings:`);
+            info.warnings?.forEach((warning) => {
+              log.warning(warning.message);
+            });
+          } else {
+            log.success(`browser bundle created at ${rel}`);
+          }
+        });
 
-    // Observe all events from child process
-    const eventObservable = Rx.merge(
-      observeLines(proc.stdout!).pipe(Rx.map((line) => ({ type: 'stdout', data: line }))),
-      observeLines(proc.stderr!).pipe(Rx.map((line) => ({ type: 'stderr', data: line }))),
-      Rx.fromEvent<[WorkerMsg]>(proc, 'message').pipe(
-        Rx.map((msg) => ({ type: 'message', data: msg[0] }))
-      ),
-      Rx.fromEvent<Error>(proc, 'error').pipe(Rx.map((error) => ({ type: 'error', data: error })))
-    );
+        // Handle process exit
+        process.once('SIGINT', () => {
+          watching.close(() => {
+            log.info('stopping @kbn/optimizer');
+            resolve();
+          });
+        });
 
-    const simpleOrWatchObservable = watch
-      ? eventObservable
-      : eventObservable.pipe(
-          Rx.take(1),
-          Rx.tap({
-            complete() {
-              proc.kill('SIGKILL');
-            },
-          })
-        );
+        process.once('exit', () => {
+          watching.close(() => {
+            resolve();
+          });
+        });
+      });
+    } else {
+      // Single build
+      return new Promise<void>((resolve, reject) => {
+        compiler.run((err, stats) => {
+          // Close compiler
+          compiler.close((closeErr) => {
+            if (closeErr) {
+              log.error(`RSPack close error: ${closeErr.message}`);
+            }
+          });
 
-    // Subscribe to eventObservable to log events
-    const eventSubscription = simpleOrWatchObservable.subscribe((event) => {
-      if (event.type === 'stdout') {
-        log.debug(event.data as string);
-      } else if (event.type === 'stderr') {
-        log.error(event.data as Error);
-      } else if (event.type === 'message') {
-        const result = event.data as WorkerMsg;
-        // Handle message event
-        if (!result.success) {
-          log.error(`Optimizer failure: ${result.error}`);
-        } else if (result.warnings) {
-          log.warning(`browser bundle created at ${rel}, but with warnings:\n${result.warnings}`);
-        } else {
-          log.success(`browser bundle created at ${rel}`);
-        }
-      } else if (event.type === 'error') {
-        log.error(event.data as Error);
-      }
-    });
+          if (err) {
+            log.error(`RSPack error: ${err.message}`);
+            reject(err);
+            return;
+          }
 
-    // Send message to child process
-    proc.send({
-      workerConfig: worker,
-      bundles: JSON.stringify([bundle.toSpec()]),
-      bundleRemotes: remotes.toSpecJson(),
-    });
+          if (stats?.hasErrors()) {
+            const info = stats.toJson();
+            const errorMessages = info.errors?.map((e) => e.message).join('\n') || 'Unknown error';
+            log.error(`RSPack build failed:\n${errorMessages}`);
+            reject(new Error('RSPack build failed'));
+            return;
+          }
 
-    // Cleanup fn definition
-    const cleanup = () => {
-      // Cleanup unnecessary files
-      try {
-        Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
-      } catch {
-        // no-op
-      }
+          if (stats?.hasWarnings()) {
+            const info = stats.toJson();
+            log.warning(`browser bundle created at ${rel}, but with warnings:`);
+            info.warnings?.forEach((warning) => {
+              log.warning(warning.message);
+            });
+          } else {
+            log.success(`browser bundle created at ${rel}`);
+          }
 
-      // Unsubscribe from eventObservable
-      eventSubscription.unsubscribe();
-
-      log.info('stopping @kbn/optimizer');
-    };
-
-    // if watch mode just wait for the first event then cleanup and exit
-    if (!watch) {
-      // Wait for parent process to exit if not in watch mode
-      await new Promise<void>((resolve) => {
-        proc.once('exit', () => {
-          cleanup();
           resolve();
         });
       });
-
-      return;
     }
-
-    // Wait for parent process to exit if not in watch mode
-    await new Promise<void>((resolve) => {
-      process.once('exit', () => {
-        cleanup();
-        resolve();
-      });
-    });
   });
 }

@@ -20,37 +20,35 @@ import { getImportResolver } from '../get_import_resolver';
 /**
  * ESLint rule that validates cross-plugin imports target declared `extraPublicDirs`.
  *
- * This is the lint-time complement to the build-time validation in the rspack
- * optimizer's `createCrossPluginExternals` (callback-style externals) and the
- * legacy webpack optimizer's `BundleRemotesPlugin`. It catches undeclared
- * target imports early, before they reach the bundler.
+ * This is the lint-time complement to the build-time validation in the
+ * optimizer's `createCrossPluginExternals` (callback-style externals) and
+ * `CrossPluginTargetValidationPlugin`. It catches undeclared target imports
+ * early, before they reach the bundler.
  *
- * **Safety guards matching legacy `BundleRemotesPlugin` semantics:**
+ * **Safety guards matching the bundler's semantics:**
  *
- * - Guard 1: Only validate browser and common code — the legacy
- *   `BundleRemotesPlugin` was a webpack plugin that only ran during browser
- *   bundle compilation. Server code, non-package code (CLI tools, build
- *   scripts), test fixtures, and tooling resolve imports via Node.js module
- *   resolution and were never subject to target validation.
+ * - Guard 1: Only validate browser and common code — target validation only
+ *   applies during browser bundle compilation. Server code, non-package code
+ *   (CLI tools, build scripts), test fixtures, and tooling resolve imports via
+ *   Node.js module resolution and are never subject to target validation.
  *
  * - Guard 2: Skip type-only imports — TypeScript erases these before
- *   bundling, so the legacy optimizer never saw them. Runtime-only check.
+ *   bundling, so the bundler never sees them. Runtime-only check.
  *
  * - Guard 3: Skip non-@kbn imports — `parseKbnImportReq` returns undefined
  *   for non-scoped imports; nothing to validate.
  *
- * - Guard 4: Skip same-plugin imports — legacy `BundleRemotesPlugin` only
- *   validated remotes (other bundles). Self-imports resolve via normal
- *   module resolution within the same compilation.
+ * - Guard 4: Skip same-plugin imports — only remotes (other bundles) are
+ *   validated. Self-imports resolve via normal module resolution within the
+ *   same compilation.
  *
  * - Guard 5: Only validate browser plugin packages — Non-browser (server-only)
  *   plugins like `@kbn/data-catalog-plugin` are not part of the
- *   `__kbnBundles__` system and were never included in legacy BundleRemotes.
- *   Their common/ code is importable from anywhere via normal module
- *   resolution (e.g., shared constants in common/).
+ *   `__kbnBundles__` system. Their common/ code is importable from anywhere
+ *   via normal module resolution (e.g., shared constants in common/).
  *
- * - Guard 6: Skip .json and ?raw imports — Legacy `BundleRemotesPlugin`
- *   excluded these from factorization (lines 111-113).
+ * - Guard 6: Skip .json and ?raw imports — these are never cross-plugin
+ *   externals.
  *
  * - Validation uses **prefix matching**: `parsed.target` must either equal a
  *   declared target exactly, or start with `target + '/'`. This handles both
@@ -58,8 +56,8 @@ import { getImportResolver } from '../get_import_resolver';
  *   targets (`common/trigger_ids` matches `common/trigger_ids` exactly but
  *   NOT `common/other`). Bare plugin imports (empty target) never match.
  *
- * @see packages/kbn-optimizer/src/worker/bundle_remotes_plugin.ts (legacy equivalent)
- * @see packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
+ * @see packages/kbn-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
+ * @see packages/kbn-optimizer/src/plugins/cross_plugin_target_validation_plugin.ts (dist-build validation)
  */
 export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
   meta: {
@@ -86,15 +84,14 @@ export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
       // Guard 1: only validate browser and common code — these are the types that
       // go through the browser bundler and are affected by __kbnBundles__ resolution.
       // Server code, non-package code (CLI tools, build scripts), test fixtures, and
-      // tooling all resolve imports via Node.js module resolution and were never
-      // validated by the legacy BundleRemotesPlugin (a webpack plugin that only ran
-      // during browser bundle compilation).
+      // tooling all resolve imports via Node.js module resolution and are never
+      // subject to target validation.
       if (self.type !== 'browser package' && self.type !== 'common package') return;
 
       // Guard 2: skip type-only imports (erased before bundling)
       if (isTypeOnlyImport(importer)) return;
 
-      // Guard 6: skip .json and ?raw imports (legacy exclusion)
+      // Guard 6: skip .json and ?raw imports (never cross-plugin externals)
       if (req.endsWith('.json') || req.endsWith('?raw')) return;
 
       // Guard 3: skip non-@kbn imports

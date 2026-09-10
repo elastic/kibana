@@ -21,12 +21,7 @@ const V2_TO_V1_ALIASES: Record<string, string> = {
 };
 
 /** Paths that are part of bundler infrastructure and intentionally use the v2 packages */
-const INFRA_PATH_PATTERNS = [
-  /kbn-ui-shared-deps-npm/,
-  /kbn-ui-shared-deps-src/,
-  /kbn-optimizer/,
-  /kbn-rspack-optimizer/,
-];
+const INFRA_PATH_PATTERNS = [/kbn-ui-shared-deps-npm/, /kbn-ui-shared-deps-src/, /kbn-optimizer/];
 
 export const NoReduxToolkitV2ImportsRule: Rule.RuleModule = {
   meta: {

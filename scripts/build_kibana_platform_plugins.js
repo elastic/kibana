@@ -11,7 +11,7 @@ require('@kbn/setup-node-env');
 
 var Path = require('path');
 
-require('@kbn/optimizer').runKbnOptimizerCli({
+require('@kbn/optimizer').runRspackCli({
   defaultLimitsPath: Path.resolve(
     require('@kbn/repo-info').REPO_ROOT,
     'packages/kbn-optimizer/limits.yml'

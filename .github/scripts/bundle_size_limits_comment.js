@@ -9,10 +9,7 @@
 
 const THRESHOLD = 0.15;
 const MARKER = '<!-- bundle-size-limits-comment -->';
-const LIMITS_PATHS = [
-  'packages/kbn-optimizer/limits.yml',
-  'packages/kbn-rspack-optimizer/limits.yml',
-];
+const LIMITS_PATHS = ['packages/kbn-optimizer/limits.yml'];
 
 const getContent = async ({ github, context }, ref, path) => {
   const { data } = await github.rest.repos.getContent({

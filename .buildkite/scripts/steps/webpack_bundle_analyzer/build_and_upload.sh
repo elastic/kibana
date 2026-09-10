@@ -6,12 +6,12 @@ set -euo pipefail
 
 export NODE_OPTIONS="--max-old-space-size=8192"
 
-node scripts/build_kibana_platform_plugins.js --dist --profile
+node scripts/build_kibana_platform_plugins.js --dist --profile-stats-only
 
+# The Rspack optimizer emits a single unified stats.json for all plugin bundles.
+# Without --profile-focus the stats carry chunk/asset detail only (module-level
+# detail for every plugin exceeds the JS string length limit).
 mkdir -p built_assets/webpack_bundle_analyzer
-find . -path "*target/public/*" -name "stats.json" | while read line; do
-  PLUGIN=$(echo $line | xargs dirname | xargs dirname | xargs dirname | xargs basename)
-  ./node_modules/.bin/webpack-bundle-analyzer $line --report "built_assets/webpack_bundle_analyzer/$PLUGIN.html" --mode static --no-open
-done
+./node_modules/.bin/webpack-bundle-analyzer target/public/bundles/stats.json --report "built_assets/webpack_bundle_analyzer/kibana.html" --mode static --no-open
 
 ts-node .buildkite/scripts/steps/webpack_bundle_analyzer/upload.ts

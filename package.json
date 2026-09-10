@@ -1915,7 +1915,6 @@
     "@kbn/repo-source-classifier": "workspace:*",
     "@kbn/repo-source-classifier-cli": "workspace:*",
     "@kbn/reporting-mocks-server": "workspace:*",
-    "@kbn/rspack-optimizer": "workspace:*",
     "@kbn/sample-log-parser": "workspace:*",
     "@kbn/scout": "workspace:*",
     "@kbn/scout-info": "workspace:*",

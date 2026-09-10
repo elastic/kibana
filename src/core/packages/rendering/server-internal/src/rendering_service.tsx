@@ -40,7 +40,7 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import {
   getSettingValue,
   getCommonStylesheetPaths,
@@ -323,25 +323,22 @@ export class RenderingService {
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
 
-    const useRspack = isRspackModeEnabled();
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
 
-    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
-    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
-    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
-    // array already ensures all scripts are fetched with "High" priority via
-    // dynamic <script async=false> tags, so preloads provide no benefit and
-    // actively harm performance.
+    // Script preloads are intentionally omitted. Under HTTP/1.1 (dev mode),
+    // <link rel="preload" as="script"> tags saturate the 6-connection limit and
+    // delay critical CSS, regressing FCP by ~4x. The bootstrap load() array
+    // already ensures all scripts are fetched with "High" priority via dynamic
+    // <script async=false> tags, so preloads provide no benefit and actively
+    // harm performance.
     //
     // Font preloads are kept: they are small, high-priority, and give the browser
     // a head start on WOFF2 downloads during HTML parsing.
-    const preloadFonts = useRspack
-      ? [
-          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
-          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
-          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
-        ]
-      : undefined;
+    const preloadFonts = [
+      `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+      `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+      `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+    ];
 
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
@@ -353,7 +350,7 @@ export class RenderingService {
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       preloadFonts,
-      optimizeFontLoading: useRspack || undefined,
+      optimizeFontLoading: true,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,

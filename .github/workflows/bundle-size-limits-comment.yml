@@ -7,7 +7,6 @@ on:
       - synchronize
     paths:
       - 'packages/kbn-optimizer/limits.yml'
-      - 'packages/kbn-rspack-optimizer/limits.yml'
 
 jobs:
   comment:

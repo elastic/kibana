@@ -5460,9 +5460,6 @@ importers:
       '@kbn/reporting-mocks-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-reporting/mocks_server
-      '@kbn/rspack-optimizer':
-        specifier: workspace:*
-        version: link:packages/kbn-rspack-optimizer
       '@kbn/sample-log-parser':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-sample-parser
@@ -6768,8 +6765,6 @@ importers:
   packages/kbn-repo-source-classifier: {}
 
   packages/kbn-repo-source-classifier-cli: {}
-
-  packages/kbn-rspack-optimizer: {}
 
   packages/kbn-set-map: {}
 
