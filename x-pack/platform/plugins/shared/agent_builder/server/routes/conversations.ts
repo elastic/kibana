@@ -16,6 +16,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   agentBuilderDefaultAgentId,
+  agentIdMaxLength,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationAlreadyExistsError,
@@ -32,7 +33,41 @@ import type {
   UpdateConversationAccessControlResponse,
 } from '../../common/http_api/conversations';
 import { apiPrivileges } from '../../common/features';
-import { publicApiPath } from '../../common/constants';
+import {
+  publicApiPath,
+  MAX_CONVERSATIONS_PER_PAGE,
+  MAX_RESULT_WINDOW,
+} from '../../common/constants';
+
+const CONVERSATION_TEMPLATE_ID_MAX_LENGTH = 256;
+const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
+const CONVERSATION_METADATA_VALUE_MAX_LENGTH = 10_000;
+const CONVERSATION_METADATA_ARRAY_ITEM_MAX_LENGTH = 2_000;
+const CONVERSATION_METADATA_ARRAY_MAX_SIZE = 100;
+const CONVERSATION_METADATA_MAX_KEYS = 100;
+
+const CONVERSATION_METADATA_SCHEMA = schema.recordOf(
+  schema.string({ maxLength: CONVERSATION_METADATA_KEY_MAX_LENGTH }),
+  schema.oneOf([
+    schema.string({ maxLength: CONVERSATION_METADATA_VALUE_MAX_LENGTH }),
+    schema.number(),
+    schema.boolean(),
+    schema.arrayOf(schema.string({ maxLength: CONVERSATION_METADATA_ARRAY_ITEM_MAX_LENGTH }), {
+      maxSize: CONVERSATION_METADATA_ARRAY_MAX_SIZE,
+    }),
+  ]),
+  {
+    validate: (record) => {
+      if (Object.keys(record).length > CONVERSATION_METADATA_MAX_KEYS) {
+        return `metadata may not have more than ${CONVERSATION_METADATA_MAX_KEYS} keys`;
+      }
+    },
+    meta: {
+      description:
+        'Initial metadata values. Each key must be declared by the referenced template; each value is validated against the field definition (type, options, min/max, regex, max_length). Requires `template_id`.',
+    },
+  }
+);
 
 const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
@@ -114,15 +149,50 @@ export function registerConversationRoutes({
         version: '2023-10-31',
         validate: {
           request: {
-            query: schema.object({
-              agent_id: schema.maybe(
-                schema.string({
+            query: schema.object(
+              {
+                agent_id: schema.maybe(
+                  schema.string({
+                    maxLength: agentIdMaxLength,
+                    meta: {
+                      description: 'Optional agent ID to filter conversations by a specific agent.',
+                    },
+                  })
+                ),
+                page: schema.number({
+                  defaultValue: 1,
+                  min: 1,
+                  meta: { description: 'Page number, 1-based.' },
+                }),
+                per_page: schema.number({
+                  defaultValue: MAX_CONVERSATIONS_PER_PAGE,
+                  min: 1,
+                  max: MAX_CONVERSATIONS_PER_PAGE,
                   meta: {
-                    description: 'Optional agent ID to filter conversations by a specific agent.',
+                    description: `Number of results per page. Maximum ${MAX_CONVERSATIONS_PER_PAGE}.`,
                   },
-                })
-              ),
-            }),
+                }),
+                sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                  defaultValue: 'desc',
+                  meta: { description: 'Sort direction for results, ordered by updated_at.' },
+                }),
+                pinned: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'Filter to pinned (true) or unpinned (false) conversations. Omit to return all.',
+                    },
+                  })
+                ),
+              },
+              {
+                validate: ({ page, per_page: perPage }) => {
+                  if (page * perPage > MAX_RESULT_WINDOW) {
+                    return `page * per_page must not exceed ${MAX_RESULT_WINDOW}; conversations beyond that are not reachable through this API`;
+                  }
+                },
+              }
+            ),
           },
         },
         options: {
@@ -131,14 +201,21 @@ export function registerConversationRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
-        const { agent_id: agentId } = request.query;
+        const {
+          agent_id: agentId,
+          page,
+          per_page: perPage,
+          sort_order: sortOrder,
+          pinned,
+        } = request.query;
 
         const client = await conversationsService.getScopedClient({ request });
-        const conversations = await client.list({ agentId });
+        const { results, total } = await client.list({ agentId, page, perPage, sortOrder, pinned });
 
         return response.ok<ListConversationsResponse>({
           body: {
-            results: conversations,
+            pagination: { total, page, per_page: perPage },
+            results,
           },
         });
       })
@@ -263,50 +340,70 @@ export function registerConversationRoutes({
         version: '2023-10-31',
         validate: {
           request: {
-            body: schema.object({
-              agent_id: schema.maybe(
-                schema.string({
-                  maxLength: 256,
-                  meta: {
-                    description:
-                      'The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.',
-                  },
-                })
-              ),
-              conversation_id: schema.maybe(
-                schema.string({
-                  maxLength: CONVERSATION_ID_MAX_LENGTH,
-                  validate: (v) =>
-                    uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID',
-                  meta: {
-                    description:
-                      'Optional client-supplied UUID for the conversation. Server-generated if omitted.',
-                  },
-                })
-              ),
-              title: schema.maybe(
-                schema.string({
-                  maxLength: CONVERSATION_TITLE_MAX_LENGTH,
-                  meta: {
-                    description: 'Title for the conversation. Defaults to "New conversation".',
-                  },
-                })
-              ),
-              access_control: schema.maybe(
-                schema.object(
-                  {
-                    access_mode: ACCESS_CONTROL_MODE_SCHEMA,
-                    entries: schema.maybe(ACCESS_CONTROL_ENTRIES_SCHEMA),
-                  },
-                  {
-                    validate: validateAccessControlEntries,
+            body: schema.object(
+              {
+                agent_id: schema.maybe(
+                  schema.string({
+                    maxLength: agentIdMaxLength,
                     meta: {
-                      description: 'Optional access control settings. Defaults to private.',
+                      description:
+                        'The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.',
                     },
+                  })
+                ),
+                conversation_id: schema.maybe(
+                  schema.string({
+                    maxLength: CONVERSATION_ID_MAX_LENGTH,
+                    validate: (v) =>
+                      uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID',
+                    meta: {
+                      description:
+                        'Optional client-supplied UUID for the conversation. Server-generated if omitted.',
+                    },
+                  })
+                ),
+                title: schema.maybe(
+                  schema.string({
+                    maxLength: CONVERSATION_TITLE_MAX_LENGTH,
+                    meta: {
+                      description: 'Title for the conversation. Defaults to "New conversation".',
+                    },
+                  })
+                ),
+                access_control: schema.maybe(
+                  schema.object(
+                    {
+                      access_mode: ACCESS_CONTROL_MODE_SCHEMA,
+                      entries: schema.maybe(ACCESS_CONTROL_ENTRIES_SCHEMA),
+                    },
+                    {
+                      validate: validateAccessControlEntries,
+                      meta: {
+                        description: 'Optional access control settings. Defaults to private.',
+                      },
+                    }
+                  )
+                ),
+                template_id: schema.maybe(
+                  schema.string({
+                    minLength: 1,
+                    maxLength: CONVERSATION_TEMPLATE_ID_MAX_LENGTH,
+                    meta: {
+                      description:
+                        'Optional ID of a conversation template to apply. When set, the template seeds default metadata and any caller-supplied `metadata` is validated against the template field definitions.',
+                    },
+                  })
+                ),
+                metadata: schema.maybe(CONVERSATION_METADATA_SCHEMA),
+              },
+              {
+                validate: (val) => {
+                  if (val.metadata && !val.template_id) {
+                    return '`metadata` requires `template_id`: metadata values are validated against the referenced template';
                   }
-                )
-              ),
-            }),
+                },
+              }
+            ),
           },
         },
         options: {
@@ -321,6 +418,8 @@ export function registerConversationRoutes({
           conversation_id: conversationId,
           title,
           access_control: accessControl,
+          template_id: templateId,
+          metadata,
         } = request.body;
 
         const [client, agentRegistry] = await Promise.all([
@@ -336,6 +435,8 @@ export function registerConversationRoutes({
             id: conversationId,
             title,
             accessControl,
+            templateId,
+            metadata,
           });
         } catch (e) {
           if (isAgentNotFoundError(e) || isAgentUnavailableError(e)) {

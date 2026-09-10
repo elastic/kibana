@@ -487,6 +487,27 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 };
 ```
 
+#### Conversation details flyout
+
+Register `renderConversationDetailsContent` to render your attachment in a conversation details tab:
+
+```tsx
+const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: (attachment) => attachment.description ?? 'My attachment',
+  renderConversationDetailsContent: ({ attachment }) => (
+    <MyAttachmentDetails attachment={attachment} />
+  ),
+};
+
+agentBuilder.attachments.addAttachmentType('my.attachment', myAttachmentDefinition);
+```
+
+The renderer receives `ConversationDetailsRenderProps<TAttachment>`, containing `attachment`.
+The consuming tab selects which attachment version data to pass to the renderer; the registry
+neither selects versions nor filters attachments. Consumers may render the current version or a historical version. This renderer is optional and independent of
+inline and canvas rendering. Capture any plugin services your component needs at registration
+and mount its providers explicitly, since the flyout can open outside the Agent Builder application.
+
 #### Viewport
 
 The `getActionButtons` params include flags to customize behavior per viewport:
@@ -887,21 +908,21 @@ Register tabs and template UI definitions using the `conversationTemplates` API 
 class MyPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     // Register a reusable tab
-    agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
+    agentBuilder.conversationTemplates.registerTab('security.entities', () => entitiesTabDefinition);
 
     // Assign a display name, icon, and tabs (in render order) to a template
-    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
       icon: 'mail',
       tabs: ['security.entities', 'security.overview'],
-    });
+    }));
   }
 }
 ```
 
-Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its own built-in `attachments` and `timeline` tabs through this same API (from the `agentBuilderPlatform` plugin).
+Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its built-in `timeline` tab through this same API (from the `agentBuilderPlatform` plugin).
 
 ### Complete example
 
@@ -909,41 +930,175 @@ Tabs and templates register separately, so the same tab can be reused across tem
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
+import type { ConversationTemplateTabDefinition, ConversationTemplateUIContext } from '@kbn/agent-builder-browser';
 
 // Tab content must be self-contained: capture the services you need in a closure at
 // registration and mount your own providers inside `content`. The flyout can render
 // outside any KibanaContextProvider, so ambient context (useKibana() etc.) is not available OOTB.
-const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition => ({
+const createOverviewTab = (
+  core: CoreStart,
+  { attachmentsService }: ConversationTemplateUIContext
+): ConversationTemplateTabDefinition => ({
   label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
     defaultMessage: 'Overview',
   }),
-  // A React component receiving the full conversation. It may use hooks.
+  // Conversation data arrives at render time; the attachments service is captured at registration.
   content: ({ conversation }) => (
     <SecurityProviders core={core}>
-      <OverviewView templateId={conversation.template_id} metadata={conversation.metadata} />
+      <OverviewView conversation={conversation} attachmentsService={attachmentsService} />
     </SecurityProviders>
   ),
 });
 
 class SecurityPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
-    agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
-    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+    agentBuilder.conversationTemplates.registerTab('security.overview', (context) => createOverviewTab(core, context));
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
       icon: 'mail',
       tabs: ['security.overview'],
-    });
+    }));
   }
 }
+```
+
+The `content` component receives `conversation` as a prop and captures `attachmentsService`
+from the registration context. This works in both the
+live chat flyout and the snapshot opened with `agentBuilder.openConversationDetails({ conversationId })`. The snapshot loads the conversation
+when opened; the live flyout follows conversation updates.
+
+Inside your tab, select the attachments and versions to display, then look up their renderer.
+This example uses `getLatestVersion` from `@kbn/agent-builder-common/attachments` to render the
+current version; use `getVersion` when displaying a specific historical version:
+
+```tsx
+const latestVersion = getLatestVersion(versionedAttachment);
+const definition = attachmentsService.getAttachmentUiDefinition(versionedAttachment.type);
+
+return latestVersion && definition?.renderConversationDetailsContent
+  ? definition.renderConversationDetailsContent({
+      attachment: {
+        id: versionedAttachment.id,
+        type: versionedAttachment.type,
+        description: versionedAttachment.description,
+        origin: versionedAttachment.origin,
+        data: latestVersion.data,
+      },
+    })
+  : null;
+```
+
+### Shared registration context
+
+Both `registerTab` and `registerTemplateUIDefinition` accept a callback that Agent Builder
+invokes once with the same `ConversationTemplateUIContext`. This shared interface is the
+extension point for additional capabilities. It exposes navigation methods and the public
+`attachmentsService`; consumers only use the capabilities they need.
+Callbacks that do not need any capabilities can ignore the argument.
+
+```tsx
+agentBuilder.conversationTemplates.registerTab('security.overview', (context) => ({
+  label: overviewTabLabel,
+  content: ({ conversation }) => (
+    <OverviewTab
+      conversation={conversation}
+      attachmentsService={context.attachmentsService}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+The registry stores the returned definitions directly. Components capture capabilities at
+registration; hosts only supply conversation data at render time. Attachment lookups remain
+live, so types registered after the callback runs are also available. No context provider or component wrapper is required.
+
+### Brief cards
+
+A template UI definition can include an optional `briefCard` React component receiving
+`{ conversation }`, where `conversation` is a list endpoint result without rounds.
+Agent Builder calls the registration callback once with its navigation methods. The returned card can capture those methods when needed:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', (context) => ({
+  name: phishingTemplateName,
+  tabs: ['security.overview'],
+  briefCard: ({ conversation }) => (
+    <PhishingBriefCard
+      conversation={conversation}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+Sidebar navigation accepts a conversation ID and delegates to the existing sidebar opening behavior.
+Fullscreen navigation accepts `{ conversationId, agentId }`, closes the sidebar, and opens the
+canonical conversation route in the Agent Builder app without fetching the conversation.
+Callers should apply the same access checks as other programmatic chat entry points.
+Consumers pass an inline registration callback; they do not construct the navigation methods.
+Callbacks that do not need navigation can ignore the context argument.
+Cards may use hooks and, like tabs, must supply any solution-specific providers they need.
+
+The registry stores the returned definition directly. The host retrieves the original component
+and supplies only the conversation; no context prop, wrapper, or provider is needed:
+
+```tsx
+const BriefCard = conversation.template_id
+  ? conversationTemplates.getTemplateUIDefinition(conversation.template_id)?.briefCard
+  : undefined;
+return BriefCard ? (
+  <BriefCard conversation={conversation} />
+) : null;
+```
+
+The registry does not fetch card data or provide a default card when none is registered.
+
+### Conversation details header and footer
+
+Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
+`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
+`openConversationDetails`. It is supplied at render time, not through registration context.
+
+Template UI definitions can provide optional `detailsFlyout.header` and
+`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
+hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
+only the content for each slot. Without a custom header, the default title remains.
+Without a custom footer, no footer is rendered.
+
+Capture Agent Builder capabilities from the existing registration context, and
+provide any solution-specific React providers inside your components:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    header: InvestigationHeader,
+    footer: ({ conversation }) => (
+      <InvestigationFooter
+        conversation={conversation}
+        onOpenChat={() => context.openSidebarConversation(conversation.id)}
+      />
+    ),
+  },
+}));
 ```
 
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
-- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `attachments` and `timeline` are reserved for Agent Builder's built-in tabs.
+- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `timeline` is reserved for Agent Builder's built-in tab.
 - **Duplicates**: Registering a duplicate tab id or template id throws.
 - **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
 - **Ordering**: Template tabs render in array order. The built-in tabs always render after them.

@@ -25,4 +25,14 @@ export const EXECUTION_ID_BAGGAGE_KEY = 'kibana.evals.execution_id';
  */
 export const EVAL_EXPERIMENT_ID_BAGGAGE_KEY = 'kibana.evals.experiment_id';
 
+/**
+ * W3C baggage key used to tag spans emitted while an evaluator is running (e.g. its own
+ * LLM-judge call) with the evaluator's name.
+ *
+ * This lets trace-sampling queries (e.g. the online-eval workflow) exclude an evaluator's
+ * own byproduct traces from being picked up as evaluation subjects, by filtering on the
+ * exported `attributes.evaluator.name` span attribute.
+ */
+export const EVALUATOR_NAME_BAGGAGE_KEY = 'kibana.evals.evaluator_name';
+
 export const CONVERSATION_ID_BAGGAGE_KEY = 'gen_ai.conversation.id';

@@ -11,6 +11,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 29788
+  alertzero: 13291
   apm: 53172
   apmShared: 5852
   apmSourcesAccess: 2747
@@ -127,6 +128,7 @@ pageLoadAssetSize:
   maps: 36004
   mapsEms: 6734
   metricsDataAccess: 44950
+  mitreAttack: 2022
   ml: 99842
   mockIdpPlugin: 7421
   monitoring: 28983
@@ -146,7 +148,6 @@ pageLoadAssetSize:
   observabilityShared: 86067
   osquery: 48500
   painlessLab: 6299
-  pnd: 13291
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860
