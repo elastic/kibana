@@ -18,6 +18,7 @@ import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-p
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiData,
+  DiscoverSessionApiDataInput,
   DiscoverSessionApiEsqlTab,
 } from '../schema';
 import { discoverSessionApiDataSchema } from '../schema';
@@ -641,11 +642,159 @@ describe('discover session API transforms', () => {
   });
 
   describe('round-trip', () => {
-    it('round-trips fixture API data through persistence', () => {
-      const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
+    it('round-trips legacy pinned filters as app filters', () => {
+      const pinnedFilter = {
+        meta: {
+          index: 'logs-data-view',
+          type: FILTERS.PHRASE,
+          key: 'service.name',
+          disabled: true,
+          negate: true,
+          alias: 'Saved condition',
+        },
+        query: { match_phrase: { 'service.name': 'checkout' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const appFilter = {
+        meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+        query: { exists: { field: 'bytes' } },
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+      const searchSourceJSON = JSON.stringify({
+        index: 'logs-data-view',
+        query: { language: 'kuery', query: '' },
+        filter: [pinnedFilter, appFilter],
+      });
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const storedTab = {
+        ...classicTab,
+        attributes: { ...classicTab.attributes, kibanaSavedObjectMeta: { searchSourceJSON } },
+      };
 
-      expect(roundTripped).toEqual(discoverSessionApiData);
+      // The session API keeps both conditions, without exposing the pin marker.
+      const { sessionState, warnings } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [storedTab],
+      });
+      const expectedApiFilters = [
+        {
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'is', value: 'checkout', negate: true },
+          data_view_id: 'logs-data-view',
+          disabled: true,
+          negate: true,
+          label: 'Saved condition',
+        },
+        {
+          type: 'condition',
+          condition: { field: 'bytes', operator: 'exists' },
+          data_view_id: 'foreign-data-view',
+        },
+      ];
+
+      expect(warnings).toEqual([]);
+      expect(sessionState.tabs[0]).toMatchObject({ filters: expectedApiFilters });
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toEqual(sessionState);
+
+      const { attributes, references } = transformDiscoverSessionIn(sessionState);
+      const restoredSearchSource = injectReferences(
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+
+      expect(restoredSearchSource.filter).toMatchObject([
+        { meta: pinnedFilter.meta, query: pinnedFilter.query },
+        { meta: appFilter.meta, query: appFilter.query },
+      ]);
+      expect(restoredSearchSource.filter?.map((filter) => filter.$state)).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(transformDiscoverSessionOut(attributes, references).sessionState).toEqual(
+        sessionState
+      );
+
+      // Reading the session changes neither the source document nor the shared panel conversion.
+      expect(storedTab.attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(searchSourceJSON);
+      expect(fromStoredTab(storedTab.attributes)).toMatchObject({
+        filters: [expectedApiFilters[1]],
+      });
+    });
+
+    it('round-trips validated fixture API data through persistence without warnings', () => {
+      // Include request validation and defaults, as POST and PUT do before calling the service.
+      const request = discoverSessionApiDataSchema.parse(discoverSessionApiData);
+      const { attributes, references } = transformDiscoverSessionIn(request);
+      const { sessionState, warnings } = transformDiscoverSessionOut(attributes, references);
+      const roundTripped = discoverSessionApiDataSchema.parse(sessionState);
+
+      expect(sessionState).toEqual(discoverSessionApiData);
+      expect(roundTripped).toStrictEqual(request);
+      expect(warnings).toEqual([]);
+    });
+
+    it('applies request defaults without changing authored values during persistence', () => {
+      const input: DiscoverSessionApiDataInput = {
+        title: 'Session with omitted defaults',
+        tags: [],
+        tabs: [
+          {
+            id: 'classic',
+            label: 'Classic',
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-data-view' },
+            column_order: ['message'],
+            row_height: 'auto',
+            sample_size: 250,
+            hide_chart: true,
+          },
+          {
+            id: 'esql',
+            label: 'ES|QL',
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: [],
+            control_panels: [
+              {
+                id: 'service',
+                type: ESQL_CONTROL,
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: 'service',
+                  variable_type: 'values',
+                  available_options: ['api', 'web'],
+                  selected_options: ['web'],
+                  single_select: true,
+                },
+              },
+            ],
+          },
+        ],
+      };
+      const request = discoverSessionApiDataSchema.parse(input);
+      const { attributes, references } = transformDiscoverSessionIn(request);
+      const { sessionState, warnings } = transformDiscoverSessionOut(attributes, references);
+
+      expect(request).toMatchObject({
+        description: '',
+        tabs: [
+          {
+            filters: [],
+            sort: [],
+            view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            hide_chart: true,
+            hide_table: false,
+          },
+          {
+            sort: [],
+            hide_chart: false,
+            hide_table: false,
+            control_panels: [{ width: 'medium', grow: false }],
+          },
+        ],
+      });
+      expect(sessionState).toStrictEqual(request);
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toStrictEqual(request);
+      expect(attributes.tabs[0].attributes.rowHeight).toBe(-1);
+      expect(warnings).toEqual([]);
     });
 
     it('round-trips fixture saved object attributes through API', () => {

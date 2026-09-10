@@ -368,6 +368,119 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
     }
   );
 
+  apiTest(
+    'preserves stored pinned filter conditions through GET, PUT, and GET',
+    async ({ apiClient, kbnClient }) => {
+      const id = createId('pinned-filter-round-trip');
+      const url = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
+      const headers = { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader };
+      const pinnedFilter = {
+        meta: {
+          index: 'logs-data-view',
+          type: FILTERS.PHRASE,
+          key: 'service.name',
+          disabled: true,
+          negate: true,
+          alias: 'Saved condition',
+        },
+        query: { match_phrase: { 'service.name': 'checkout' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const appFilter = {
+        meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+        query: { exists: { field: 'bytes' } },
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+
+      // Seed the stored format: the API cannot create a filter with a pin marker.
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id,
+        overwrite: false,
+        attributes: {
+          title: 'Session with a stored pinned filter',
+          description: '',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Main',
+              attributes: {
+                hideChart: false,
+                hideTable: false,
+                columns: [],
+                sort: [],
+                grid: {},
+                isTextBasedQuery: false,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'logs-data-view',
+                    query: { language: 'kuery', query: '' },
+                    filter: [pinnedFilter, appFilter],
+                  }),
+                },
+              },
+            },
+          ],
+        },
+        references: [],
+      });
+
+      const initialResponse = await apiClient.get(url, { headers, responseType: 'json' });
+
+      expect(initialResponse).toHaveStatusCode(200);
+      expect(initialResponse.body.data.tabs[0].filters).toStrictEqual([
+        expect.objectContaining({
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'is', value: 'checkout', negate: true },
+          data_view_id: 'logs-data-view',
+          disabled: true,
+          negate: true,
+          label: 'Saved condition',
+        }),
+        expect.objectContaining({
+          type: 'condition',
+          condition: { field: 'bytes', operator: 'exists' },
+          data_view_id: 'foreign-data-view',
+        }),
+      ]);
+
+      const saveResponse = await apiClient.put(url, {
+        headers,
+        body: initialResponse.body.data,
+        responseType: 'json',
+      });
+
+      expect(saveResponse).toHaveStatusCode(200);
+      expect(saveResponse.body.data).toStrictEqual(initialResponse.body.data);
+
+      const reloadedResponse = await apiClient.get(url, { headers, responseType: 'json' });
+
+      expect(reloadedResponse).toHaveStatusCode(200);
+      expect(reloadedResponse.body.data).toStrictEqual(initialResponse.body.data);
+
+      // Check the actual write, not just the API response: conditions remain, pin markers do not.
+      const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+      });
+      const storedSearchSource = injectReferences(
+        parseSearchSourceJSON(
+          storedSession.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ),
+        storedSession.references
+      );
+
+      expect(storedSearchSource.filter).toMatchObject([
+        { meta: pinnedFilter.meta, query: pinnedFilter.query },
+        { meta: appFilter.meta, query: appFilter.query },
+      ]);
+      expect(storedSearchSource.filter?.map((filter) => filter.$state)).toStrictEqual([
+        undefined,
+        undefined,
+      ]);
+    }
+  );
+
   apiTest('returns 400 for an invalid ID when creating a session', async ({ apiClient }) => {
     const response = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/INVALID-ID`, {
       headers: {
