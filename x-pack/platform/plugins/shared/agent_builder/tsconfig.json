@@ -16,6 +16,7 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/core-ui-settings-browser",
     "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/logging",
@@ -148,5 +149,6 @@
     "@kbn/context-engine-plugin",
     "@kbn/files-plugin",
     "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks",
   ]
 }
