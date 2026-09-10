@@ -369,6 +369,54 @@ describe('EvaluatorDefinitionClient', () => {
       expect(docs.size).toBe(sizeAfterCreate);
     });
 
+    it('treats an omitted reference_data_keys and an empty one as the same judge', async () => {
+      const { client, docs } = createClient();
+      const { reference_data_keys: _omitted, ...judgeWithoutKeys } = JUDGE;
+      await client.create({ name: 'tone', description: 'Tone', judge: judgeWithoutKeys });
+      const sizeAfterCreate = docs.size;
+
+      // The form always sends the key, so a definition created through the API would
+      // otherwise mint a version the first time anyone opened and saved it unchanged.
+      const unchanged = await client.update('tone', {
+        judge: { ...judgeWithoutKeys, reference_data_keys: [] },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('ignores the order of evidence, which is a set of requirements', async () => {
+      const { client, docs } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, evidence: ['input', 'response'] },
+      });
+      const sizeAfterCreate = docs.size;
+
+      const unchanged = await client.update('tone', {
+        judge: { ...JUDGE, evidence: ['response', 'input'] },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('still writes when the evidence set itself changes', async () => {
+      const { client } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, evidence: ['response'] },
+      });
+
+      const updated = await client.update('tone', {
+        judge: { ...JUDGE, evidence: ['response', 'steps'] },
+      });
+
+      expect(updated.version).toBe('1.1.0');
+    });
+
     it('still writes when only the judge config changes', async () => {
       const { client } = createClient();
       await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });

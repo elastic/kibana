@@ -30,6 +30,22 @@ import type { EvaluatorStorageProperties, evaluatorsStorageSettings } from './ev
 
 type EvaluatorStorageDocument = EvaluatorStorageProperties & { _id?: string };
 
+/**
+ * Compares two judge configs by meaning rather than representation, so a definition written
+ * through the API and one round-tripped through a form agree. `evidence` and
+ * `reference_data_keys` are sets the evaluator is given, so neither order nor an omitted
+ * empty list distinguishes them. Score order is left alone: it is the order a reader sees.
+ */
+const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
+  const normalize = (judge: LlmJudgeConfig) => ({
+    ...judge,
+    evidence: [...judge.evidence].sort(),
+    reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
+  });
+
+  return isEqual(normalize(a), normalize(b));
+};
+
 export type EvaluatorsStorageAdapter = StorageIndexAdapter<
   typeof evaluatorsStorageSettings,
   EvaluatorStorageDocument
@@ -224,7 +240,7 @@ export class EvaluatorDefinitionClient {
       // Saving without changing anything would otherwise mint a version identical to the one
       // below it, inflating a history `listVersions` caps and making `name@version` ambiguous
       // about which edit it represents.
-      if (nextDescription === current.description && isEqual(nextJudge, current.judge)) {
+      if (nextDescription === current.description && isSameJudge(nextJudge, current.judge)) {
         return current;
       }
 

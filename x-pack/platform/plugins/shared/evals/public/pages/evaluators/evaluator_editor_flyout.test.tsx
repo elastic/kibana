@@ -55,6 +55,7 @@ jest.mock('@elastic/eui', () => {
 
 const mockAddSuccess = jest.fn();
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({ services: { notifications: { toasts: { addSuccess: mockAddSuccess } } } }),
 }));
 
@@ -289,6 +290,18 @@ describe('EvaluatorEditorFlyout', () => {
       expect(mockAddSuccess).toHaveBeenCalledWith('Saved tone-judge as version 1.1.0');
     });
 
+    it('does not claim a version was written when nothing changed', async () => {
+      updateMutateAsync.mockResolvedValueOnce({
+        evaluator: { name: 'tone-judge', version: '1.0.0' },
+      });
+      renderEdit();
+
+      save();
+
+      await waitFor(() => expect(updateMutateAsync).toHaveBeenCalled());
+      expect(mockAddSuccess).toHaveBeenCalledWith('No changes to save');
+    });
+
     it('shows a failed load instead of an empty form', () => {
       mockedUseEvaluator.mockReturnValue({
         data: undefined,
@@ -368,6 +381,98 @@ describe('EvaluatorEditorFlyout', () => {
       );
       expect(createMutateAsync).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('falls back to a profile that supplies the declared evidence', async () => {
+      resolveMutateAsync.mockResolvedValueOnce({
+        recommended_instrumentation: null,
+        profiles: [
+          {
+            profile: 'otel-genai-events',
+            evidence: {
+              user_query: { status: 'not_found' },
+              agent_response: { status: 'not_found' },
+              tool_calls: { status: 'not_found' },
+            },
+          },
+          {
+            profile: 'elastic-inference',
+            evidence: {
+              user_query: { status: 'found' },
+              agent_response: { status: 'found' },
+              tool_calls: { status: 'found' },
+            },
+          },
+        ],
+      });
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      await waitFor(() => expect(testMutateAsync).toHaveBeenCalled());
+      expect(testMutateAsync.mock.calls[0][0].subject.instrumentation).toEqual({
+        profile: 'elastic-inference',
+      });
+    });
+
+    it('stops when no profile can supply the declared evidence', async () => {
+      resolveMutateAsync.mockResolvedValueOnce({
+        recommended_instrumentation: null,
+        profiles: [
+          {
+            profile: 'elastic-inference',
+            evidence: {
+              user_query: { status: 'not_found' },
+              agent_response: { status: 'content_redacted' },
+              tool_calls: { status: 'not_found' },
+            },
+          },
+        ],
+      });
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      expect(
+        await screen.findByText('No supported instrumentation profile could resolve this trace.')
+      ).toBeInTheDocument();
+      expect(testMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('discards a result for a draft the user has since edited', async () => {
+      let resolveTest: (value: unknown) => void = () => {};
+      testMutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveTest = resolve;
+          })
+      );
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await waitFor(() => expect(testMutateAsync).toHaveBeenCalled());
+
+      // The draft on screen is no longer the one being tested.
+      setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
+      resolveTest({
+        result: {
+          status: 'ok',
+          evaluator: { name: 'tone-judge', kind: 'llm' },
+          scores: [{ name: 'tone', score: 0.8, explanation: 'Stale result.' }],
+        },
+      });
+
+      await waitFor(() => expect(screen.queryByText('Stale result.')).not.toBeInTheDocument());
+      expect(screen.queryByTestId('evalsEvaluatorTestResult')).not.toBeInTheDocument();
     });
 
     it('explains a failed test run', async () => {

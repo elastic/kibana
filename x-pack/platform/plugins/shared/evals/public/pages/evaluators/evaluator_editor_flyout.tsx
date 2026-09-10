@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -135,8 +135,12 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   // routing it through EuiForm would title it "address the highlighted errors".
   const [submitError, setSubmitError] = useState<{ title: string; message: string } | null>(null);
   const [testResult, setTestResult] = useState<TestEvaluatorResponse['result'] | null>(null);
+  const testRunIdRef = useRef(0);
 
   useEffect(() => {
+    // Any edit invalidates a result or error describing the previous draft, including one
+    // from a run still in flight.
+    testRunIdRef.current += 1;
     setFormError(null);
     setFieldErrors({});
     setSubmitError(null);
@@ -267,7 +271,13 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
           name: evaluatorName,
           updates: { description: description.trim(), judge },
         });
-        toasts?.addSuccess(i18n.UPDATE_SUCCESS(updated.evaluator.name, updated.evaluator.version));
+        // The server declines to write a version identical to the current one, so reporting
+        // a version here would claim an edit that never happened.
+        toasts?.addSuccess(
+          updated.evaluator.version === evaluatorData?.evaluator.version
+            ? i18n.NO_CHANGES_TO_SAVE
+            : i18n.UPDATE_SUCCESS(updated.evaluator.name, updated.evaluator.version)
+        );
       }
       onClose();
     } catch (error) {
@@ -276,6 +286,12 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const onTest = async () => {
+    // Editing a field clears the result, so a run that finishes afterwards describes a draft
+    // that is no longer on screen. Only the newest run may report.
+    const runId = testRunIdRef.current + 1;
+    testRunIdRef.current = runId;
+    const isStaleRun = () => testRunIdRef.current !== runId;
+
     setFormError(null);
     setFieldErrors({});
     setSubmitError(null);
@@ -322,8 +338,14 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
           instrumentation: { profile: resolvedProfile },
         },
       });
+      if (isStaleRun()) {
+        return;
+      }
       setTestResult(response.result);
     } catch (error) {
+      if (isStaleRun()) {
+        return;
+      }
       setSubmitError({ title: i18n.TEST_ERROR_TITLE, message: getErrorMessage(error) });
     }
   };

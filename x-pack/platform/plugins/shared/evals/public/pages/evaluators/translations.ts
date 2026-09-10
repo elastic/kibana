@@ -99,6 +99,9 @@ export const UPDATE_SUCCESS = (name: string, version: string) =>
     defaultMessage: 'Saved {name} as version {version}',
     values: { name, version },
   });
+export const NO_CHANGES_TO_SAVE = i18n.translate('xpack.evals.evaluators.noChangesToSaveMessage', {
+  defaultMessage: 'No changes to save',
+});
 export const DELETE_SUCCESS = (name: string) =>
   i18n.translate('xpack.evals.evaluators.deleteSuccessMessage', {
     defaultMessage: 'Deleted evaluator {name}',

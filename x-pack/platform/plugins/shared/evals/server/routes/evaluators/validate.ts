@@ -17,7 +17,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { hasTraceDocuments, normalizeEvidence } from '../../evaluators/evidence/evidence_service';
+import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { getIssuePath } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
@@ -124,19 +124,9 @@ export const registerValidateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
-        // A trace with no documents at all is a bad trace id, not missing instrumentation.
-        // Separating the two keeps the remediation below pointing at a real cause.
-        if (!(await hasTraceDocuments(traceAccessor))) {
-          return response.notFound({
-            body: {
-              message: `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
-            },
-          });
-        }
-
-        // Reports the evidence present now rather than waiting for it, unlike grading:
-        // "not there yet" is this route's answer, and a caller diagnosing instrumentation
-        // should not pay a readiness budget to hear it.
+        // A dry run, so it neither waits for the trace nor requires one to exist: callers use
+        // it to check whether an evaluator's evidence requirements *could* be satisfied, and
+        // an absent trace is reported per evaluator as unmet rather than as a failed request.
         const round = await normalizeEvidence(traceAccessor, resolvedMapping);
 
         const validationResults: ValidateResponse['evaluators'] = resolvedEvaluators.map(
