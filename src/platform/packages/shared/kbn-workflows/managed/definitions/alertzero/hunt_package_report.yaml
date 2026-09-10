@@ -1,0 +1,114 @@
+version: "1"
+name: Continuous Threat Hunt - Package Report
+description: >
+  Untagged child workflow invoked by continuous_threat_hunt once hunt and
+  correlation have appended their findings. Decides create vs. dismiss, writes
+  the security.coverage KI that hands coverage to Detection Watch, and, when
+  reviewable, creates the report's Proposal(s) concurrently via its own
+  `parallel` step (legal — not nested inside another `parallel` branch,
+  elastic/security-team#18208). Only creates Proposal records; never starts
+  hunt_proposal_gate itself (the Worker's start_proposal_gates step does that
+  right after this workflow returns).
+enabled: true
+tags: []
+triggers:
+  - type: manual
+inputs:
+  additionalProperties: false
+  properties:
+    report_id:
+      description: Threat report id (hunt:report:{report_id}).
+      type: string
+    investigation_id:
+      description: Conversation id of the report's Investigation.
+      type: string
+  required:
+    - report_id
+    - investigation_id
+consts:
+  # Context Engine AI index the coverage KI lands in. Detection Watch's pickup
+  # sweep polls the same id, so the two sides must agree on it.
+  coverage_ai_index_id: security-investigations
+steps:
+  # Decides server-side: reviewable -> array of Proposals to create; not
+  # reviewable -> dismisses the Investigation, returns []. Always an array,
+  # so create_proposals needs no `if` — empty is just a zero-item fan-out.
+  # Also returns `coverage`, the subject/technique the route already derives
+  # from the report to make that call, which write_coverage_ki hands to
+  # Detection Watch.
+  - name: decide_and_package
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        # TODO(follow-up): route does not exist yet. AlertZero's investigations
+        # routes today are GET-only; there is no POST package handler.
+        path: /internal/alertzero/investigations/{{ inputs.investigation_id }}/package
+        body:
+          report_id: "{{ inputs.report_id }}"
+
+  # Coverage handoff to Detection Watch. Written for every swept report, hit
+  # or no hit, reviewable or dismissed — Hunt reports the subject it swept and
+  # does not decide whether a rule is warranted. Detection Watch's pickup
+  # sweep must match on type + status:pending alone and must not filter on the
+  # Investigation.
+  #
+  # The id is stable per coverage subject so a re-sweep replaces the KI rather
+  # than appending a near-duplicate.
+  #
+  # TODO(follow-up): a replace also resets status to pending, so a subject
+  # Detection already processed is re-dispatched on the next sweep past the
+  # 4h hunt cooldown. Needs either a read-before-write skip on
+  # status:processed or a terminal state Detection owns outside the KI.
+  - name: write_coverage_ki
+    type: context-engine.createKi
+    with:
+      ai_index_id: "{{ consts.coverage_ai_index_id }}"
+      ki_id: "ki-cov-{{ steps.decide_and_package.output.coverage.subject }}"
+      ki:
+        type: security.coverage
+        title: "{{ steps.decide_and_package.output.coverage.title }}"
+        description: >-
+          Coverage subject {{ steps.decide_and_package.output.coverage.technique }}
+          swept by Hunt Watch. Investigation {{ inputs.investigation_id }}.
+        content: "{{ steps.decide_and_package.output.coverage.gap_description }}"
+        tags:
+          - consumer:detection
+          - status:pending
+          - watch:hunt
+        attributes:
+          status: pending
+          subject: "{{ steps.decide_and_package.output.coverage.subject }}"
+          technique: "{{ steps.decide_and_package.output.coverage.technique }}"
+          report_id: "{{ inputs.report_id }}"
+          investigation_id: "{{ inputs.investigation_id }}"
+          watch_id: hunt
+          producer: hunt.package_report.v1
+
+  # One branch per Proposal draft. `concurrency.max` is small — this isn't
+  # the 10-report fan-out, just a low-single-digit Proposal count.
+  - name: create_proposals
+    type: parallel
+    foreach: "{{ steps.decide_and_package.output.proposals | json }}"
+    concurrency:
+      max: 5
+    steps:
+      # Returns { proposal_id, investigation_id } — echoing investigation_id
+      # so format_result below carries what start_proposal_gates needs.
+      - name: create_proposal
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            # TODO(follow-up): route does not exist yet. AlertZero's
+            # list_proposals route is GET-only; there is no POST create
+            # handler.
+            path: /internal/alertzero/investigations/{{ inputs.investigation_id }}/proposals
+            body: "{{ foreach.item | json }}"
+
+  # Flattens create_proposals' per-branch results into the plain list
+  # start_proposal_gates fans out over.
+  - name: format_result
+    type: data.set
+    with:
+      proposals_to_gate: "{{ steps.create_proposals.output | map: 'create_proposal.output' | json }}"
