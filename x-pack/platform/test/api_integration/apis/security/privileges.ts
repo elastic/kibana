@@ -100,7 +100,6 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       agentBuilderSml: ['all', 'read', 'minimal_all', 'minimal_read'],
       contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],
-      agenticInvestigations: ['all', 'read', 'minimal_all', 'minimal_read'],
       automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
