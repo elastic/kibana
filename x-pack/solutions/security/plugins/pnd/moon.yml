@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/pnd
 dependsOn:
+  - '@kbn/agentic-investigations-common'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/logging'
@@ -26,7 +27,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
-  - '@kbn/i18n-react'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-browser'
@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/deeplinks-security'
   - '@kbn/spaces-plugin'
   - '@kbn/workflows'
+  - '@kbn/workflows-yaml'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-browser'
