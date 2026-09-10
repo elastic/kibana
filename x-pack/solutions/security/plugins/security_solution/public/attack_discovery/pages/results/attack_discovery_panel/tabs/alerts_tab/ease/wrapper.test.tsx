@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { CONTENT_TEST_ID, EaseAlertsTab, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
-import { TestProviders } from '../../../../../../../common/mock';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useCreateEaseAlertsDataView } from '../../../../../../../detections/hooks/alert_summary/use_create_data_view';
 
@@ -84,16 +83,7 @@ describe('<EaseAlertsTab />', () => {
       loading: false,
     });
 
-    jest.mock('react', () => ({
-      ...jest.requireActual('react'),
-      useEffect: jest.fn((f) => f()),
-    }));
-
-    render(
-      <TestProviders>
-        <EaseAlertsTab id={id} query={query} />
-      </TestProviders>
-    );
+    render(<EaseAlertsTab id={id} query={query} />);
 
     expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
   });
