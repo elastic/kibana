@@ -177,8 +177,7 @@ describe('WorkflowExecutionCursor synthetic commit', () => {
 
     cursor.navigateToSynthetic({
       stepId: '0',
-      nodeType: 'iteration',
-      nodeId: 'iteration:0',
+      stepType: 'iteration',
     });
     cursor.commitPendingNavigation();
 
