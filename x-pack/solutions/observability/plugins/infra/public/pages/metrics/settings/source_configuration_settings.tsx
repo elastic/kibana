@@ -120,7 +120,10 @@ export const SourceConfigurationSettings = ({
   const showLoading = isLoading && !source;
 
   return (
-    <PageTemplate data-test-subj="sourceConfigurationContent" pageSectionProps={{ paddingSize: 'none'}}>
+    <PageTemplate
+      data-test-subj="sourceConfigurationContent"
+      pageSectionProps={{ paddingSize: 'none' }}
+    >
       <AppHeader title={settingsTitle} menu={menu} spacing="standard" />
       {flyouts}
       <EuiPageSection restrictWidth paddingSize="l">
