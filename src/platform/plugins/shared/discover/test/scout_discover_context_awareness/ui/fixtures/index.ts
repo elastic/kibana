@@ -9,4 +9,5 @@
 
 export { spaceTest } from '../../../scout/common/ui/fixtures';
 export * from './constants';
+export { openSurroundingDocs } from './helpers';
 export { setupContextAwareness, teardownContextAwareness } from './setup';
