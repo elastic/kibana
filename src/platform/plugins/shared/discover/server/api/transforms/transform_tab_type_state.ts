@@ -9,13 +9,13 @@
 
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
-import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
   DiscoverSessionApiTabTypeState,
 } from '@kbn/as-code-discover-schema';
+import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 
 type StoredTabTypeState = DiscoverSessionTabAttributes['tabTypeState'];
 type TabWithoutTypeState =
