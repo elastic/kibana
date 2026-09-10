@@ -17,6 +17,7 @@ describe('when using parsed command input utils', () => {
         input: '',
         name: 'foo',
         args: {},
+        params: [],
         hasArgs: Object.keys(overrides.args || {}).length > 0,
         ...overrides,
       } as unknown as ParsedCommandInterface;
@@ -163,6 +164,70 @@ describe('when using parsed command input utils', () => {
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand.args).toEqual({ path: [expected ?? path] });
+    });
+
+    describe('and positional (un-prefixed) parameters are entered', () => {
+      it('should default `params` to an empty array when no arguments are entered', () => {
+        const parsedCommand = parseCommandInput('foo');
+
+        expect(parsedCommand.params).toEqual([]);
+      });
+
+      it('should default `params` to an empty array when only named arguments are entered', () => {
+        const parsedCommand = parseCommandInput('foo --one 1 --two');
+
+        expect(parsedCommand.params).toEqual([]);
+      });
+
+      it('should store a single un-prefixed argument in `params`', () => {
+        const input = 'foo bar';
+        const parsedCommand = parseCommandInput(input);
+
+        expect(parsedCommand).toEqual(
+          parsedCommandWith({
+            input,
+            args: {},
+            params: ['bar'],
+          })
+        );
+        expect(parsedCommand.hasArgs).toBe(false);
+      });
+
+      it('should store multiple words entered before any named argument in `params`', () => {
+        const input = 'foo one two three';
+        const parsedCommand = parseCommandInput(input);
+
+        expect(parsedCommand.params).toEqual(['one two three']);
+      });
+
+      it('should capture positional params and still parse named arguments that follow', () => {
+        const input = 'foo bar --one 1 --two=2';
+        const parsedCommand = parseCommandInput(input);
+
+        expect(parsedCommand).toEqual(
+          parsedCommandWith({
+            input,
+            args: {
+              one: ['1'],
+              two: ['2'],
+            },
+            params: ['bar '],
+          })
+        );
+        expect(parsedCommand.hasArgs).toBe(true);
+      });
+
+      it('should only capture the text prior to the first named argument as a positional param', () => {
+        const parsedCommand = parseCommandInput('foo one two --one 1 three');
+
+        expect(parsedCommand.params).toEqual(['one two ']);
+      });
+
+      it('should not populate `params` when the first argument is `--` prefixed', () => {
+        const parsedCommand = parseCommandInput('foo --one value');
+
+        expect(parsedCommand.params).toEqual([]);
+      });
     });
   });
 });
