@@ -54,14 +54,15 @@ describe('Slack', () => {
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should use oauth_authorization_code auth type', () => {
+  it('should support expected auth types', () => {
     expect(Slack.auth).toBeDefined();
     expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);
     const types = (Slack.auth?.types as Array<string | { type: string }>).map((t) =>
       typeof t === 'string' ? t : t.type
     );
     expect(types).toContain('oauth_authorization_code');
-    expect(types).not.toContain('bearer');
+    expect(types).toContain('ears');
+    expect(types).toContain('bearer');
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {
@@ -199,6 +200,17 @@ describe('Slack', () => {
       await expect(
         Slack.actions.searchMessages.handler(mockContext, { query: 'test' })
       ).rejects.toThrow('Slack searchMessages error: invalid_auth');
+    });
+
+    it('should throw a descriptive error when called with bot token auth', async () => {
+      const botTokenContext = {
+        ...mockContext,
+        secrets: { authType: 'bearer', token: 'xoxb-fake' },
+      } as unknown as ActionContext;
+
+      await expect(
+        Slack.actions.searchMessages.handler(botTokenContext, { query: 'test' })
+      ).rejects.toThrow('getConversationHistory');
     });
   });
 
