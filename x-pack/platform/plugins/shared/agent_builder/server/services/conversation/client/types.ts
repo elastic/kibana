@@ -29,6 +29,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 import type {
   ConversationRoundAuthor,
@@ -147,6 +148,18 @@ export interface AddAttachmentsToLastRoundRequest {
   attachments: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
 }
 
+export interface AppendContextMessageRequest {
+  id: string;
+  messageId: string;
+  createdAt: Date;
+  message: string;
+  attachments: AttachmentInput[];
+  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
+  create?: ConversationCreateRequest;
+  author?: ConversationRoundAuthor;
+  origin?: ConversationRoundOrigin;
+}
+
 export interface ConversationListOptions {
   agentId?: string;
   page?: number;
@@ -240,17 +253,3 @@ export type NormalizedConversation = Conversation & {
   read_by?: ConversationReadByEntry[];
   pinned_by?: ConversationPinnedByEntry[];
 };
-
-export interface AppendContextMessageRequest {
-  id: string;
-  create?: ConversationCreateRequest;
-  messageId: string;
-  createdAt: string;
-  message: string;
-  author?: ConversationRoundAuthor;
-  origin?: ConversationRoundOrigin;
-  attachments: AttachmentInput[];
-  getTypeDefinition: (
-    type: string
-  ) => import('@kbn/agent-builder-server/attachments').AttachmentTypeDefinition | undefined;
-}

@@ -538,15 +538,17 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<ConversationWithPermissions> {
     const {
       id,
-      create,
       messageId,
       createdAt,
       message,
-      author,
-      origin,
       attachments,
       getTypeDefinition,
+      create,
+      author,
+      origin,
     } = request;
+    const createdAtIso = createdAt.toISOString();
+
     const materialize = async (
       current: Conversation
     ): Promise<Pick<NormalizedConversation, 'events' | 'attachments' | 'read' | 'read_by'>> => {
@@ -566,7 +568,7 @@ class ConversationClientImpl implements ConversationClient {
           {
             id: messageId,
             type: TimelineEventType.userMessage,
-            created_at: createdAt,
+            created_at: createdAtIso,
             actor: userMessageActor({ ...current, user: this.user }, { author, origin }),
             data: { message, attachment_refs: manager.getAccessedRefs() },
           },
@@ -583,8 +585,8 @@ class ConversationClientImpl implements ConversationClient {
         ...create,
         id,
         user: this.user,
-        created_at: createdAt,
-        updated_at: createdAt,
+        created_at: createdAtIso,
+        updated_at: createdAtIso,
       };
       try {
         return await this.create({

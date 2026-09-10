@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap, from, firstValueFrom } from 'rxjs';
 import type {
@@ -401,33 +401,33 @@ export const isNewConversation = (conversation: ConversationWithOperation): bool
   return conversation.operation === 'CREATE';
 };
 
+export interface PersistContextMessageParams {
+  agentId: string;
+  conversationId?: string;
+  message: string;
+  attachments: AttachmentInput[];
+  conversationClient: ConversationClient;
+  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+  readOnly?: boolean;
+  author?: ConversationRoundAuthor;
+  messageId?: string;
+  createdAt?: Date;
+}
+
 export const persistContextMessage = async ({
   agentId,
   conversationId,
-  accessControl,
-  readOnly,
-  spaceId,
-  conversationClient,
   message,
   attachments,
-  author,
+  conversationClient,
   getTypeDefinition,
+  accessControl,
+  readOnly,
+  author,
   messageId = uuidv4(),
   createdAt = new Date(),
-}: {
-  agentId: string;
-  conversationId?: string;
-  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
-  readOnly?: boolean;
-  spaceId: string;
-  conversationClient: ConversationClient;
-  message: string;
-  attachments: AttachmentInput[];
-  author?: ConversationRoundAuthor;
-  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
-  messageId?: string;
-  createdAt?: Date;
-}): Promise<ConversationWithPermissions> => {
+}: PersistContextMessageParams): Promise<ConversationWithPermissions> => {
   const conversation = await getConversation({
     agentId,
     conversationId,
@@ -437,19 +437,15 @@ export const persistContextMessage = async ({
     readOnly,
   });
 
-  if (isNewConversation(conversation) && !conversationId) {
-    conversation.id = uuidv5(JSON.stringify([spaceId, messageId]), uuidv5.URL);
-  }
-
   return await conversationClient.appendContextMessage({
     id: conversation.id,
-    ...(isNewConversation(conversation) ? { create: conversation } : {}),
     messageId,
-    createdAt: createdAt.toISOString(),
+    createdAt,
     message,
-    author,
     attachments,
     getTypeDefinition,
+    ...(isNewConversation(conversation) ? { create: conversation } : {}),
+    author,
   });
 };
 

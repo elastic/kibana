@@ -25,19 +25,17 @@ describe('persistContextMessage', () => {
   it('assigns distinct public identities', async () => {
     const first = await persistContextMessage({
       agentId: 'agent-1',
-      spaceId: 'default',
-      conversationClient: client,
       message: 'hello',
       attachments: [],
+      conversationClient: client,
       getTypeDefinition: jest.fn(),
     });
 
     const second = await persistContextMessage({
       agentId: 'agent-1',
-      spaceId: 'default',
-      conversationClient: client,
       message: 'hello',
       attachments: [],
+      conversationClient: client,
       getTypeDefinition: jest.fn(),
     });
 

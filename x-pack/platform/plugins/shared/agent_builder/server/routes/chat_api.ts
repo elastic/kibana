@@ -133,18 +133,16 @@ export function registerChatApiRoutes({
             });
 
             const author = await conversationsService.getConversationRoundAuthor({ request });
-            const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
             const body = await persistContextMessage({
               agentId: payload.agent_id ?? agentBuilderDefaultAgentId,
               conversationId: payload.conversation_id,
-              accessControl: payload.access_control,
-              readOnly: payload.read_only,
-              spaceId,
-              conversationClient: client,
               message: payload.input ?? '',
               attachments,
-              author,
+              conversationClient: client,
               getTypeDefinition: attachmentsService.getTypeDefinition,
+              accessControl: payload.access_control,
+              readOnly: payload.read_only,
+              author,
             });
 
             return response.ok({ body });

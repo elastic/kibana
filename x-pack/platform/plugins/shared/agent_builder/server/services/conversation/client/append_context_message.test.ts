@@ -50,8 +50,8 @@ const initialConversation = {
 const request = (messageId: string): AppendContextMessageRequest => ({
   id: 'conversation',
   messageId,
+  createdAt: new Date(),
   message: messageId,
-  createdAt: new Date().toISOString(),
   attachments: [],
   getTypeDefinition: () => textType,
 });
