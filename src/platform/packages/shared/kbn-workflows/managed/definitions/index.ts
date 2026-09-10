@@ -11,6 +11,7 @@ import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from './agentic_investigations
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
+  ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_RULE_CREATION_WORKFLOW,
   ALERTZERO_RULE_PREVIEW_WORKFLOW,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW,
@@ -100,6 +101,7 @@ export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_inves
 export { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID } from './agentic_investigations';
 export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -169,6 +171,7 @@ export const managedWorkflowDefinitions = [
   CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
   // AlertZero action catalog.
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
+  ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
   // in start() only when `threatIntelSupplyEnabled` is on.
