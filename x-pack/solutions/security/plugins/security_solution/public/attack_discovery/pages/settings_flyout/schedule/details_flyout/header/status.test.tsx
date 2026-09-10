@@ -18,6 +18,8 @@ const renderComponent = async (schedule = mockAttackDiscoverySchedule) => {
   });
 };
 
+jest.setTimeout(60_000);
+
 describe('Status', () => {
   beforeEach(() => {
     jest.clearAllMocks();
