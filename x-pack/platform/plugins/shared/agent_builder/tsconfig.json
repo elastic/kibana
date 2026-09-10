@@ -16,6 +16,7 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/core-ui-settings-browser",
     "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/logging",
