@@ -100,8 +100,10 @@ describe('ki_stream_features_get tool', () => {
         },
       },
     ]);
-    expect(result.results[0].data.features[0]).not.toHaveProperty('run_id');
-    expect(result.results[0].data.features[0]).not.toHaveProperty('stream_name');
+    const firstResult = result.results[0];
+    if (firstResult.type !== 'other') throw new Error('Expected other result');
+    expect(firstResult.data.features[0]).not.toHaveProperty('run_id');
+    expect(firstResult.data.features[0]).not.toHaveProperty('stream_name');
   });
 
   it('returns an Agent Builder error result', async () => {
