@@ -13,8 +13,8 @@ import {
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSAL_WITHOUT_ACTION,
   isDecided,
-} from '../../../common/proposals';
-import type { ProposalWithMetadata } from '../../../common/proposals';
+} from '../../../common';
+import type { ProposalWithMetadata } from '../../../common';
 import { ProposalApprovalCard } from '../components/proposal_approval_card';
 
 /** The attachment as stored in agent_builder conversations. */
@@ -48,7 +48,7 @@ const STATUS_BADGE_COLORS: Record<string, string> = {
  * can reach the API at any point after mount.
  *
  * The renderer runs inside Agent Builder's React tree. It manages its own
- * lightweight HTTP state rather than bridging into an AlertZero QueryClient.
+ * lightweight HTTP state rather than bridging into an external QueryClient.
  */
 export const createProposalAttachmentDefinition = ({
   http,

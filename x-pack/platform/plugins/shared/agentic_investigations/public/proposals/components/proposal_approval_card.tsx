@@ -17,8 +17,8 @@ import {
   PROPOSAL_WITHOUT_ACTION,
   PROPOSALS_INTERNAL_URL,
   isDecided,
-} from '../../../common/proposals';
-import type { DismissReason, ProposalWithMetadata } from '../../../common/proposals';
+} from '../../../common';
+import type { DismissReason, ProposalWithMetadata } from '../../../common';
 import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
 import { useProposalDecision } from '../hooks/use_proposal_decision';
 import { ProposalDismissForm } from './proposal_dismiss_form';
@@ -115,7 +115,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     if (isPending && !isAlreadyDecided) {
       if (mode === 'view') {
         primaryAction = {
-          label: i18n.translate('xpack.alertzero.proposalCard.approve', {
+          label: i18n.translate('xpack.agenticInvestigations.proposalCard.approve', {
             defaultMessage: 'Approve',
           }),
           color: 'success',
@@ -126,7 +126,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
         };
         secondaryActions = [
           {
-            label: i18n.translate('xpack.alertzero.proposalCard.dismiss', {
+            label: i18n.translate('xpack.agenticInvestigations.proposalCard.dismiss', {
               defaultMessage: 'Dismiss',
             }),
             color: 'danger',
@@ -138,7 +138,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
       } else {
         // mode === 'dismissing'
         primaryAction = {
-          label: i18n.translate('xpack.alertzero.proposalCard.confirmDismiss', {
+          label: i18n.translate('xpack.agenticInvestigations.proposalCard.confirmDismiss', {
             defaultMessage: 'Confirm dismiss',
           }),
           color: 'danger',
@@ -149,7 +149,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
         };
         secondaryActions = [
           {
-            label: i18n.translate('xpack.alertzero.proposalCard.cancel', {
+            label: i18n.translate('xpack.agenticInvestigations.proposalCard.cancel', {
               defaultMessage: 'Cancel',
             }),
             color: 'text',
@@ -186,7 +186,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
                   announceOnMount
                   color="warning"
                   size="s"
-                  title={i18n.translate('xpack.alertzero.proposalCard.expiredCallout', {
+                  title={i18n.translate('xpack.agenticInvestigations.proposalCard.expiredCallout', {
                     defaultMessage:
                       'The decision deadline has passed. This proposal can no longer be actioned.',
                   })}
@@ -202,11 +202,14 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
                   announceOnMount
                   color="primary"
                   size="s"
-                  title={i18n.translate('xpack.alertzero.proposalCard.decidedCallout', {
-                    defaultMessage:
-                      'This proposal has already been decided ({status}). No further action is needed.',
-                    values: { status: liveProposal.status },
-                  })}
+                  title={i18n.translate(
+                    'xpack.agenticInvestigations.proposalCard.decidedCallout',
+                    {
+                      defaultMessage:
+                        'This proposal has already been decided ({status}). No further action is needed.',
+                      values: { status: liveProposal.status },
+                    }
+                  )}
                 />
               </div>
             </>

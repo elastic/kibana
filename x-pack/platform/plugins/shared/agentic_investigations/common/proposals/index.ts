@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { PROPOSAL_ATTACHMENT_TYPE, PROPOSAL_WITHOUT_ACTION } from './attachment';
+
 export {
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,

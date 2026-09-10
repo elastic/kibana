@@ -9,31 +9,33 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFormRow, EuiSelect, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { dismissReasonSchema } from '../../../common/proposals';
-import type { DismissReason } from '../../../common/proposals';
+import { dismissReasonSchema } from '../../../common';
+import type { DismissReason } from '../../../common';
 
 /** Human-readable labels for each dismiss reason value. */
 const DISMISS_REASON_LABELS: Record<DismissReason, string> = {
-  wrong: i18n.translate('xpack.alertzero.proposalCard.dismissReason.wrong', {
+  wrong: i18n.translate('xpack.agenticInvestigations.proposalCard.dismissReason.wrong', {
     defaultMessage: 'Wrong',
   }),
-  duplicate: i18n.translate('xpack.alertzero.proposalCard.dismissReason.duplicate', {
+  duplicate: i18n.translate('xpack.agenticInvestigations.proposalCard.dismissReason.duplicate', {
     defaultMessage: 'Duplicate',
   }),
   insufficient_evidence: i18n.translate(
-    'xpack.alertzero.proposalCard.dismissReason.insufficientEvidence',
+    'xpack.agenticInvestigations.proposalCard.dismissReason.insufficientEvidence',
     { defaultMessage: 'Insufficient evidence' }
   ),
-  low_value: i18n.translate('xpack.alertzero.proposalCard.dismissReason.lowValue', {
+  low_value: i18n.translate('xpack.agenticInvestigations.proposalCard.dismissReason.lowValue', {
     defaultMessage: 'Low value',
   }),
-  out_of_scope: i18n.translate('xpack.alertzero.proposalCard.dismissReason.outOfScope', {
-    defaultMessage: 'Out of scope',
-  }),
-  already_handled: i18n.translate('xpack.alertzero.proposalCard.dismissReason.alreadyHandled', {
-    defaultMessage: 'Already handled',
-  }),
-  other: i18n.translate('xpack.alertzero.proposalCard.dismissReason.other', {
+  out_of_scope: i18n.translate(
+    'xpack.agenticInvestigations.proposalCard.dismissReason.outOfScope',
+    { defaultMessage: 'Out of scope' }
+  ),
+  already_handled: i18n.translate(
+    'xpack.agenticInvestigations.proposalCard.dismissReason.alreadyHandled',
+    { defaultMessage: 'Already handled' }
+  ),
+  other: i18n.translate('xpack.agenticInvestigations.proposalCard.dismissReason.other', {
     defaultMessage: 'Other',
   }),
 };
@@ -71,7 +73,7 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
         data-test-subj={dataTestSubj}
       >
         <EuiFormRow
-          label={i18n.translate('xpack.alertzero.proposalCard.dismissReasonLabel', {
+          label={i18n.translate('xpack.agenticInvestigations.proposalCard.dismissReasonLabel', {
             defaultMessage: 'Reason',
           })}
         >
@@ -83,19 +85,21 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.alertzero.proposalCard.rationaleLabel', {
+          label={i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleLabel', {
             defaultMessage: 'Rationale',
           })}
-          helpText={i18n.translate('xpack.alertzero.proposalCard.rationaleHelpText', {
-            defaultMessage: 'Optional — explain why this proposal is being dismissed.',
-          })}
+          helpText={i18n.translate(
+            'xpack.agenticInvestigations.proposalCard.rationaleHelpText',
+            { defaultMessage: 'Optional — explain why this proposal is being dismissed.' }
+          )}
         >
           <EuiTextArea
             value={rationale}
             onChange={(e) => onRationaleChange(e.target.value)}
-            placeholder={i18n.translate('xpack.alertzero.proposalCard.rationalePlaceholder', {
-              defaultMessage: 'Why is this proposal being dismissed?',
-            })}
+            placeholder={i18n.translate(
+              'xpack.agenticInvestigations.proposalCard.rationalePlaceholder',
+              { defaultMessage: 'Why is this proposal being dismissed?' }
+            )}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-rationale` : undefined}
           />
         </EuiFormRow>

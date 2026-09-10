@@ -11,12 +11,12 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
-} from '../../../common/proposals';
+} from '../../../common';
 import type {
   ApproveProposalRequest,
   DismissProposalRequest,
   Proposal,
-} from '../../../common/proposals';
+} from '../../../common';
 
 export type DecisionState =
   | { status: 'idle' }
@@ -31,9 +31,8 @@ export type DecisionState =
  * Builder attachment card.
  *
  * The card renders inside Agent Builder's React tree, so it cannot reuse any
- * AlertZero QueryClient context.  It manages its own lightweight state and calls
+ * investigation QueryClient context. It manages its own lightweight state and calls
  * the Kibana HTTP client directly.
- *
  */
 export const useProposalDecision = (http: HttpSetup) => {
   const [decisionState, setDecisionState] = useState<DecisionState>({ status: 'idle' });

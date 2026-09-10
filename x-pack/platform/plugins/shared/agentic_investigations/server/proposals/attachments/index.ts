@@ -6,17 +6,9 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import { proposalAttachmentType } from './attachments/proposal_attachment_type';
+import { proposalAttachmentType } from './proposal_attachment_type';
 
-/**
- * Registers all AlertZero attachment types with Agent Builder.
- * Called from `server/plugin.ts` setup(), alongside `registerAgentType`.
- */
-export const registerAlertZeroAttachments = ({
-  agentBuilder,
-}: {
-  agentBuilder: AgentBuilderPluginSetup;
-}): void => {
+export const registerProposalAttachment = (agentBuilder: AgentBuilderPluginSetup): void => {
   agentBuilder.attachments.registerType(
     proposalAttachmentType as Parameters<typeof agentBuilder.attachments.registerType>[0]
   );

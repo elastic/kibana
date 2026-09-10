@@ -36,7 +36,6 @@ import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
-import { registerAlertZeroAttachments } from './agent_builder';
 
 export class AlertZeroPlugin
   implements
@@ -76,7 +75,6 @@ export class AlertZeroPlugin
 
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
-    registerAlertZeroAttachments({ agentBuilder });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
-import { PROPOSAL_ATTACHMENT_TYPE, proposalSchema } from '../../../common/proposals';
+import { PROPOSAL_ATTACHMENT_TYPE, proposalSchema } from '../../common/proposals';
 
 /** Snapshot stored inside the attachment, mirroring `ProposalWithMetadata`. */
 const proposalAttachmentDataSchema = proposalSchema.extend({

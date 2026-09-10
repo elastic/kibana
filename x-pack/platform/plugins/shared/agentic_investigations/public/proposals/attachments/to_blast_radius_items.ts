@@ -6,7 +6,7 @@
  */
 
 import type { BlastRadiusItemProps } from '@kbn/agentic-investigations-common';
-import type { ProposalWithMetadata } from '../../../common/proposals';
+import type { ProposalWithMetadata } from '../../../common';
 
 type BlastRadiusItem = BlastRadiusItemProps['item'];
 

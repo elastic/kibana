@@ -34,4 +34,3 @@ export type {
   ProposalWithMetadata,
 } from '@kbn/agentic-investigations-plugin/common';
 
-export { PROPOSAL_ATTACHMENT_TYPE, PROPOSAL_WITHOUT_ACTION } from './attachment';
