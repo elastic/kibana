@@ -74,6 +74,7 @@ export type {
   LoopContinueNode,
   LoopContinueNodeSchema,
   GraphNodeUnion,
+  SyntheticGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
@@ -84,6 +85,7 @@ export type {
 } from './types';
 
 export {
+  isSynthetic,
   isAtomic,
   isDataSet,
   isElasticsearch,

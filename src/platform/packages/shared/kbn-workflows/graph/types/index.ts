@@ -28,6 +28,7 @@ export type {
   WorkflowExecuteAsyncGraphNodeSchema,
   WorkflowOutputGraphNode,
   WorkflowOutputGraphNodeSchema,
+  SyntheticGraphNode,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,

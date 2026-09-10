@@ -56,7 +56,8 @@ import type { GraphNodeUnion } from './nodes/union';
 import type { LoopStepType } from '../../spec/schema';
 import { LoopStepTypes } from '../../spec/schema';
 
-export const isSynthetic = (node: GraphNodeUnion): node is SyntheticGraphNode => node.isSynthetic;
+export const isSynthetic = (node: GraphNodeUnion): node is SyntheticGraphNode =>
+  'isSynthetic' in node && node.isSynthetic === true;
 
 export const isAtomic = (node: GraphNodeUnion): node is AtomicGraphNode => node.type === 'atomic';
 
