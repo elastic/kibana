@@ -7,11 +7,21 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
 import { renderWithTestingProviders } from '../../common/mock';
 
+// Partial mock: keep createCaseWorkflowFilter / createCaseWorkflowComparator / useRunCaseWorkflow
+// real; only pin useCanRunCaseWorkflow so we don't need to wire up its four dependencies.
+jest.mock('../workflows/use_run_case_workflow', () => ({
+  ...jest.requireActual('../workflows/use_run_case_workflow'),
+  useCanRunCaseWorkflow: jest.fn(),
+}));
+
 describe('ObservablesTable', () => {
+  const { useCanRunCaseWorkflow } = jest.requireMock('../workflows/use_run_case_workflow');
+
   const props: ObservablesTableProps = {
     caseData: {
       ...mockCase,
@@ -23,6 +33,8 @@ describe('ObservablesTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default: workflow runs disabled (mirrors a read-only user or feature-off state).
+    (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
   });
 
   it('renders correctly', async () => {
@@ -39,5 +51,32 @@ describe('ObservablesTable', () => {
     renderWithTestingProviders(<ObservablesTable {...props} isLoading={true} />);
     expect(screen.queryByTestId('cases-observables-table')).not.toBeInTheDocument();
     expect(screen.getByTestId('cases-observables-table-loading')).toBeInTheDocument();
+  });
+
+  describe('row selection gating', () => {
+    it('shows selection checkboxes when the user can run workflows', () => {
+      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+      // EuiInMemoryTable adds a checkbox for each row plus one "select all" header checkbox.
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes.length).toBeGreaterThan(0);
+    });
+
+    it('does not show selection checkboxes for read-only users', () => {
+      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+      expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    });
+
+    it('surfaces the bulk-actions bar after selecting a row', async () => {
+      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      // Click the first row checkbox (index 0 is the "select all" header checkbox).
+      const checkboxes = screen.getAllByRole('checkbox');
+      await userEvent.click(checkboxes[1]);
+
+      expect(await screen.findByTestId('cases-observables-selected-count')).toBeInTheDocument();
+    });
   });
 });
