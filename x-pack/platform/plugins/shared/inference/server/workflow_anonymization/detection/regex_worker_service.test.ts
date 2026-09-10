@@ -78,12 +78,11 @@ describe('PiiRegexWorkerService', () => {
     ).rejects.toThrow();
   });
 
-  it('aborts the task and recreates the pool when taskTimeout elapses', async () => {
+  it('aborts the timed-out task and throws when taskTimeout elapses', async () => {
     service = new PiiRegexWorkerService(
       createTestConfig({ taskTimeout: { asMilliseconds: () => 1 } } as any),
       logger
     );
-    const workerBefore = (service as any).worker;
 
     // (?=a)(a+)+$ falls back to native RegExp (RE2 rejects the lookahead) and
     // backtracks catastrophically on a long all-'a' string — guaranteed timeout.
@@ -93,9 +92,6 @@ describe('PiiRegexWorkerService', () => {
         records: [{ content: 'a'.repeat(10_000) + 'b' }],
       })
     ).rejects.toThrow('timed out');
-
-    // Pool is rebuilt after abort — the new instance is a different object
-    expect((service as any).worker).not.toBe(workerBefore);
   });
 
   it('returns [] and logs when failureMode is allow_unsafe', async () => {

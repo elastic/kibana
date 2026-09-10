@@ -87,8 +87,6 @@ export class PiiRegexWorkerService {
         return await this.worker.run(payload, { signal: controller.signal });
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
-          await this.worker.destroy().catch(() => {});
-          this.worker = this.createWorkerPool();
           throw new Error(
             `PII regex detection task timed out after ${this.config.taskTimeout.asMilliseconds()}ms`
           );
