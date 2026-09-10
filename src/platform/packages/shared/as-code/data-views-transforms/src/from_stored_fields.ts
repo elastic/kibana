@@ -28,8 +28,7 @@ import {
   type AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
 import { isNil, isPlainObject, omitBy, snakeCase } from 'lodash';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import {
   COLOR_FORMAT_DEFAULT_PARAMS,
   DURATION_FORMAT_DEFAULT_PARAMS,
@@ -218,14 +217,14 @@ function fromStoredFieldFormatParams(
   }
 
   if (format.id === 'static_lookup') {
-    const lookupEntries = ((params.lookupEntries ?? []) as SerializableArray)
+    const lookupEntries = ((params.lookupEntries ?? []) as Serializable[])
       .filter((entry) => {
         if (!isPlainObject(entry)) return false;
         return !!(entry as SerializableRecord).key;
       })
       .map((entry) => ({
         key: (entry as SerializableRecord).key?.toString(),
-        value: ((entry as SerializableRecord).value || '').toString(),
+        value: ((entry as SerializableRecord).value ?? '').toString(),
       }));
 
     return {
