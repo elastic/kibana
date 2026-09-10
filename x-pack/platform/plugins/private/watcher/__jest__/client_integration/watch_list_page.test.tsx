@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,8 +27,7 @@ const renderWatchListPage = (httpSetup: HttpSetup) => {
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/290017
-describe.skip('<WatchListPage />', () => {
+describe('<WatchListPage />', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
@@ -44,13 +43,9 @@ describe.skip('<WatchListPage />', () => {
     jest.useRealTimers();
   });
 
-  afterEach(async () => {
-    // Suite hygiene for fake timers
-    if (jest.getTimerCount() > 0) {
-      await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
-      });
-    }
+  afterEach(() => {
+    // Unmount first so useRequest clears its poll timer and the overflow menu is torn down — nothing left to drain.
+    cleanup();
     jest.clearAllTimers();
   });
 
