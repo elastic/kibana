@@ -30,10 +30,10 @@ import {
   AiIndexAlreadyExistsError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
-import { createAiIndexStorageClient } from './storage';
+import { buildAiIndexDocId, createAiIndexStorageClient } from './storage';
 
-const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
-  id,
+const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
+  id: document.id,
   ...(document.description !== undefined && { description: document.description }),
   ...(document.feedback_analysis !== undefined && {
     feedback_analysis: document.feedback_analysis,
@@ -89,19 +89,25 @@ export class AiIndexService {
   }
 
   /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
-  async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
+  async create(aiIndexId: string, spaceId: string, properties: AiIndexProperties): Promise<void> {
     await this.assertValidDest(properties.dest);
 
     const now = new Date().toISOString();
     const document: AiIndexDocument = {
       ...properties,
+      id: aiIndexId,
+      space: spaceId,
       managed: false,
       date_created: now,
       date_modified: now,
     };
 
     try {
-      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+      await this.storageClient.index({
+        id: buildAiIndexDocId(spaceId, aiIndexId),
+        document,
+        op_type: 'create',
+      });
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
         throw new AiIndexAlreadyExistsError(aiIndexId);
@@ -116,22 +122,31 @@ export class AiIndexService {
    * writer gets an {@link AiIndexConflictError}. Managed entries (registered
    * by a plugin at startup) are immutable via this method.
    */
-  async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
+  async put(
+    aiIndexId: string,
+    spaceId: string,
+    properties: AiIndexProperties
+  ): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
 
-    const existing = await this.findDocument(aiIndexId);
+    const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing?.document.managed) {
       throw new AiIndexManagedError(aiIndexId);
     }
 
-    return this.writeDocument(aiIndexId, { ...properties, managed: false }, existing);
+    return this.writeDocument(
+      aiIndexId,
+      spaceId,
+      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      existing
+    );
   }
 
   /**
    * Creates or fully replaces a managed AI index. Managed entries are owned by
    * the registering plugin and cannot be mutated via the public API.
    *
-   * This is an idempotent upsert: it is safe to call on every startup, so a
+   * This is an idempotent upsert: it is safe to call on every access, so a
    * managed entry always reflects the latest registration (the source of truth
    * lives in code). It will overwrite an existing managed entry, but refuses to
    * clobber a user-owned (unmanaged) entry that squats the same id, throwing
@@ -140,18 +155,25 @@ export class AiIndexService {
    */
   async putManaged(
     aiIndexId: string,
+    spaceId: string,
     properties: AiIndexProperties
   ): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
-    const existing = await this.findDocument(aiIndexId);
+    const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
     }
-    return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
+    return this.writeDocument(
+      aiIndexId,
+      spaceId,
+      { ...properties, id: aiIndexId, space: spaceId, managed: true },
+      existing
+    );
   }
 
   private async writeDocument(
     aiIndexId: string,
+    spaceId: string,
     document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
     existing: Awaited<ReturnType<typeof this.findDocument>>
   ): Promise<'created' | 'updated'> {
@@ -161,11 +183,12 @@ export class AiIndexService {
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
+    const docId = buildAiIndexDocId(spaceId, aiIndexId);
 
     try {
       if (existing) {
         await this.storageClient.index({
-          id: aiIndexId,
+          id: docId,
           document: fullDocument,
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
@@ -173,7 +196,7 @@ export class AiIndexService {
         return 'updated';
       }
 
-      await this.storageClient.index({ id: aiIndexId, document: fullDocument, op_type: 'create' });
+      await this.storageClient.index({ id: docId, document: fullDocument, op_type: 'create' });
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -195,9 +218,10 @@ export class AiIndexService {
    */
   async setFeedbackAnalysis(
     aiIndexId: string,
+    spaceId: string,
     feedbackAnalysis: AiIndexFeedbackAnalysis
   ): Promise<AiIndexFeedbackAnalysis> {
-    const existing = await this.findDocument(aiIndexId);
+    const existing = await this.findDocument(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
@@ -207,6 +231,7 @@ export class AiIndexService {
     // off.
     await this.writeDocument(
       aiIndexId,
+      spaceId,
       { ...existing.document, feedback_analysis: feedbackAnalysis },
       existing
     );
@@ -214,12 +239,12 @@ export class AiIndexService {
     return feedbackAnalysis;
   }
 
-  async get(aiIndexId: string): Promise<AiIndexHttpItem> {
-    const existing = await this.findDocument(aiIndexId);
+  async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return toAiIndexItem(aiIndexId, existing.document);
+    return toAiIndexItem(existing.document);
   }
 
   /**
@@ -227,9 +252,10 @@ export class AiIndexService {
    */
   async assertCanAcceptAutomation(
     aiIndexId: string,
+    spaceId: string,
     automation?: { type: 'workflow'; value: string }
   ): Promise<void> {
-    const existing = await this.findDocument(aiIndexId);
+    const existing = await this.findDocument(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
@@ -242,11 +268,12 @@ export class AiIndexService {
    */
   async addAutomation(
     aiIndexId: string,
+    spaceId: string,
     automation: { type: 'workflow'; value: string }
   ): Promise<'attached' | 'already_attached'> {
     return pRetry(
       async () => {
-        const existing = await this.findDocument(aiIndexId);
+        const existing = await this.findDocument(aiIndexId, spaceId);
         if (!existing) {
           throw new AiIndexNotFoundError(aiIndexId);
         }
@@ -262,6 +289,7 @@ export class AiIndexService {
 
         await this.writeDocument(
           aiIndexId,
+          spaceId,
           {
             ...existing.document,
             automations: [...existing.document.automations, automation],
@@ -282,15 +310,16 @@ export class AiIndexService {
     );
   }
 
-  async list(): Promise<AiIndexHttpItem[]> {
+  async list(spaceId: string): Promise<AiIndexHttpItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
+      query: { term: { space: spaceId } },
     });
     // Sorted by id in memory: Elasticsearch disallows sorting on `_id`, and the
     // result set is bounded by MAX_AI_INDICES.
     return response.hits.hits
-      .flatMap((hit) => (hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []))
+      .flatMap((hit) => (hit._source ? [toAiIndexItem(hit._source as AiIndexDocument)] : []))
       .sort((a, b) => a.id.localeCompare(b.id));
   }
 
@@ -298,8 +327,8 @@ export class AiIndexService {
    * Deletes the AI index entry only; backing indices are left untouched.
    * Managed entries cannot be deleted via the API.
    */
-  async delete(aiIndexId: string): Promise<void> {
-    const existing = await this.findDocument(aiIndexId);
+  async delete(aiIndexId: string, spaceId: string): Promise<void> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
@@ -308,13 +337,18 @@ export class AiIndexService {
     }
     // Re-check the delete result: the entry may have been removed concurrently
     // between the existence lookup above and this call.
-    const { result } = await this.storageClient.delete({ id: aiIndexId });
+    const { result } = await this.storageClient.delete({
+      id: buildAiIndexDocId(spaceId, aiIndexId),
+    });
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);
     }
   }
 
-  private async findDocument(aiIndexId: string): Promise<
+  private async findDocument(
+    aiIndexId: string,
+    spaceId: string
+  ): Promise<
     | {
         document: AiIndexDocument;
         seqNo?: number;
@@ -326,7 +360,10 @@ export class AiIndexService {
       // seq_no_primary_term is required for the OCC assertions in `put`: the
       // storage client's get is search-based, and search hits only carry
       // _seq_no/_primary_term when explicitly requested.
-      const response = await this.storageClient.get({ id: aiIndexId, seq_no_primary_term: true });
+      const response = await this.storageClient.get({
+        id: buildAiIndexDocId(spaceId, aiIndexId),
+        seq_no_primary_term: true,
+      });
       if (!response.found || !response._source) {
         return undefined;
       }

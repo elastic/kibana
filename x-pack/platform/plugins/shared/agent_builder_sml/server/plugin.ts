@@ -107,13 +107,16 @@ export class AgentBuilderSmlPlugin
 
   start(
     coreStart: CoreStart,
-    { taskManager, spaces, security }: AgentBuilderSmlStartDependencies
+    { taskManager, spaces, security, contextEngine }: AgentBuilderSmlStartDependencies
   ): AgentBuilderSmlPluginStart {
     const { elasticsearch, savedObjects } = coreStart;
 
     this.smlService = this.smlServiceInstance.start({
       logger: this.logger.get('sml'),
       securityAuthz: security?.authz,
+      ensureDefaultAiIndex: contextEngine
+        ? (spaceId: string) => contextEngine.ensureAiIndex(agentBuilderDefaultAiIndexId, spaceId)
+        : undefined,
     });
 
     const smlService = this.smlService;

@@ -19,6 +19,7 @@ import {
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
+  getSpaces,
   isContextEngineEnabled,
   checkWritePrivilege,
   analyticsService,
@@ -29,6 +30,7 @@ export const getCreateKiStepDefinition = ({
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
+      const spaceId = (await getSpaces())?.spacesService.getSpaceId(request) ?? 'default';
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
       return withKiWriteTelemetry({
@@ -39,7 +41,11 @@ export const getCreateKiStepDefinition = ({
         run: async (setManaged) => {
           await assertKiWritePrivilege(checkWritePrivilege, request);
 
-          const { dest, managed } = await resolveOrCreateAiIndex(getAiIndexService, aiIndexId);
+          const { dest, managed } = await resolveOrCreateAiIndex(
+            getAiIndexService,
+            aiIndexId,
+            spaceId
+          );
           setManaged(managed);
           assertWritableDest(aiIndexId, dest);
           if (kiId !== undefined && dest.type === 'data_stream') {

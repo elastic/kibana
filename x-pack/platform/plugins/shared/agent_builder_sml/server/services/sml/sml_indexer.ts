@@ -29,6 +29,7 @@ import { SmlUnregisteredTypeError } from './sml_errors';
 interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
   logger: Logger;
+  ensureDefaultAiIndex?: (spaceId: string) => Promise<void>;
 }
 
 export interface SmlIndexer {
@@ -118,17 +119,24 @@ const namespaceForSpaces = (spaces: string[]): string | undefined => {
   return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
 };
 
-export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
-  return new SmlIndexerImpl({ registry, logger });
+export const createSmlIndexer = ({
+  registry,
+  logger,
+  ensureDefaultAiIndex,
+}: SmlIndexerDeps): SmlIndexer => {
+  return new SmlIndexerImpl({ registry, logger, ensureDefaultAiIndex });
 };
 
 class SmlIndexerImpl implements SmlIndexer {
   private readonly registry: SmlTypeRegistry;
   private readonly logger: Logger;
+  private readonly ensureDefaultAiIndex?: (spaceId: string) => Promise<void>;
+  private readonly ensuredSpaces = new Set<string>();
 
-  constructor({ registry, logger }: SmlIndexerDeps) {
+  constructor({ registry, logger, ensureDefaultAiIndex }: SmlIndexerDeps) {
     this.registry = registry;
     this.logger = logger;
+    this.ensureDefaultAiIndex = ensureDefaultAiIndex;
   }
 
   async indexAttachment(params: SmlIndexerParams): Promise<void> {
@@ -244,6 +252,26 @@ class SmlIndexerImpl implements SmlIndexer {
         `SML indexer: origin '${originId}' (type='${attachmentType}') has no spaces — skipping (fail closed), existing entry left intact`
       );
       return;
+    }
+
+    if (this.ensureDefaultAiIndex) {
+      await Promise.all(
+        spaces.map(async (space) => {
+          if (this.ensuredSpaces.has(space)) {
+            return;
+          }
+          try {
+            await this.ensureDefaultAiIndex!(space);
+            this.ensuredSpaces.add(space);
+          } catch (err) {
+            this.logger.warn(
+              `SML indexer: failed to ensure the default AI index in space '${space}': ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+        })
+      );
     }
 
     await this.deleteEntry({ originUri, esClient });
