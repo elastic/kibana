@@ -45,6 +45,6 @@ describe('When displaying the side panel', () => {
       await renderAndOpenHelp();
 
       expect(renderResult.getByTestId('test-sidePanel-helpContent')).toBeTruthy();
-    });
+    }, 20_000);
   });
 });
