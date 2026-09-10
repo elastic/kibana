@@ -7,6 +7,7 @@
 
 import type { ApplicationStart, ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_COUNT_ENABLED } from '../../common/constants';
 import type { DeploymentStats } from '../hooks/use_deployment_stats';
 import { formatBytes, formatNumber } from '../utils/format';
 import { STAT_TILE_LABELS } from '../constants';
@@ -24,6 +25,7 @@ type HomePageStats = Omit<HomePageStatPanelProps, 'newIndex'>;
 const INDEX_MANAGEMENT_NAV_LINK_ID = 'management:index_management';
 
 const showVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
+  VECTOR_COUNT_ENABLED &&
   application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
 
 const showIndexManagement = ({ chrome }: Pick<StatCardDeps, 'chrome'>): boolean =>

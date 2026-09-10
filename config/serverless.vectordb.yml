@@ -42,5 +42,7 @@ xpack.ml.nlp.enabled: false   # Disables NLP/Trained Models
 
 ## Hide index mode in index management UI. vectorDB is the only allowed mode in this project type
 xpack.index_management.enableIndexMode: false
-## Show the indexed vector count in index management UI. Limited to this project type for now
-xpack.index_management.enableVectorCount: true
+## Vector count is disabled: Elasticsearch reports dense vector counts as 0 on
+## stateless (https://github.com/elastic/elasticsearch/pull/158563). Keep the
+## implementation and this flag so it can be re-enabled or reused for a replacement.
+xpack.index_management.enableVectorCount: false

@@ -10,6 +10,7 @@ import type {
   IndicesStatsShardStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { VECTOR_COUNT_ENABLED } from '../../common/constants';
 import type { NewIndexDetails } from '../../common/types';
 
 interface ApiKeysStats {
@@ -102,9 +103,9 @@ const sumVectorCounts = (indices: Record<string, IndicesStatsIndicesStats> | und
 /**
  * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
  * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
- * Returns null when not all shards responded.
+ * Returns null when not all shards responded. Kept for when vector counts can be re-enabled or replaced.
  */
-const countVectors = async (
+export const countVectors = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<number | null> => {
@@ -256,18 +257,20 @@ export const fetchIndexStats = async (
         0
       ) ?? null;
 
+    const shouldFetchVectorCount = VECTOR_COUNT_ENABLED && canMonitorAllIndices;
+
     if (indicesCount === 0) {
       return {
         indicesCount,
         storeSizeBytes,
-        vectorCount: canMonitorAllIndices ? 0 : null,
+        vectorCount: shouldFetchVectorCount ? 0 : null,
         documentsCount: 0,
         newIndex: null,
       };
     }
 
     const [vectorCount, documentsCount, newIndex] = await Promise.all([
-      canMonitorAllIndices
+      shouldFetchVectorCount
         ? countVectors(client, logger).catch((error) => {
             logger.warn(
               `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
