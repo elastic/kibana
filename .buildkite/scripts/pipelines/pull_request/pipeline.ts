@@ -338,12 +338,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml', cancelable)
-      );
-    }
-
     if (
       ((await doAnySuiteRelevantChangesMatch([
         /\.docnav\.json$/,
