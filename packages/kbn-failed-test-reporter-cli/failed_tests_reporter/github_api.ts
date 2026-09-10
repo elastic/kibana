@@ -36,17 +36,12 @@ export interface GithubIssue {
   body: string;
 }
 
-export interface SearchIssuesOptions {
-  /** Search qualifiers; the repository and `is:issue` are added automatically. */
-  query: string;
-  /** GitHub caps search results at 1000, i.e. 10 pages of 100. */
+export interface ListIssuesOptions {
+  /** Only issues carrying every one of these labels. */
+  labels: string[];
+  state: 'open' | 'closed' | 'all';
+  /** Safety valve against unbounded pagination; 100 issues per page. */
   maxPages?: number;
-}
-
-interface SearchIssuesResponse {
-  total_count: number;
-  incomplete_results: boolean;
-  items: Array<GithubIssue & { pull_request?: unknown }>;
 }
 
 /**
@@ -159,30 +154,22 @@ export class GithubApi {
   }
 
   /**
-   * Issues of the repository matching a GitHub search query, most recently updated first,
-   * following `Link: rel="next"` pagination. Read-only, so it also runs in dry-run mode. Pull
-   * requests share the issue shape and are dropped. GitHub caps search results at 1000.
+   * All issues of the repository with the given labels and state, following `Link: rel="next"`
+   * pagination. Read-only, so it also runs in dry-run mode. Pull requests share the issue shape
+   * in this endpoint and are dropped.
    */
-  async searchIssues({ query, maxPages = 10 }: SearchIssuesOptions): Promise<GithubIssue[]> {
-    const params = new URLSearchParams({
-      q: `repo:${this.repo} is:issue ${query}`,
-      sort: 'updated',
-      order: 'desc',
-      per_page: '100',
-    });
+  async listIssues({ labels, state, maxPages = 50 }: ListIssuesOptions): Promise<GithubIssue[]> {
+    const query = new URLSearchParams({ labels: labels.join(','), state, per_page: '100' });
     const issues: GithubIssue[] = [];
-    let url: string | undefined = `https://api.github.com/search/issues?${params}`;
+    let url: string | undefined = Url.resolve(this.baseUrl, `issues?${query}`);
 
     for (let page = 1; page <= maxPages && url; page++) {
-      const resp = await this.request<SearchIssuesResponse>(
+      const resp = await this.request<Array<GithubIssue & { pull_request?: unknown }>>(
         { method: 'GET', url, safeForDryRun: true },
-        { total_count: 0, incomplete_results: false, items: [] }
+        []
       );
-      if (resp.data.incomplete_results) {
-        this.log.warning(`GitHub search timed out for "${query}"; results may be incomplete`);
-      }
 
-      for (const issue of resp.data.items) {
+      for (const issue of resp.data) {
         if (!issue.pull_request) {
           issues.push({ ...issue, body: issue.body ?? '' });
         }
@@ -194,7 +181,9 @@ export class GithubApi {
 
     if (url) {
       this.log.warning(
-        `Stopped searching issues matching "${query}" after ${maxPages} pages; results are incomplete`
+        `Stopped listing issues labelled ${labels.join(
+          ','
+        )} after ${maxPages} pages; results are incomplete`
       );
     }
     return issues;

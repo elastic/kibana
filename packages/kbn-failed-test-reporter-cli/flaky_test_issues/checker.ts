@@ -10,7 +10,12 @@
 import type { FlakyTestReport } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GithubApi, GithubIssue } from '../failed_tests_reporter/github_api';
-import { FLAKY_TEST_SUITE_TITLE_TERMS, readSuiteFilePath } from './issue_title';
+import {
+  describeFailedTestIssue,
+  findRelatedFailedTestIssues,
+  type FailedTestIssueMatch,
+} from './failed_test_issues';
+import { readSuiteFilePath } from './issue_title';
 import { groupIntoSuites } from './suites';
 
 /**
@@ -19,36 +24,40 @@ import { groupIntoSuites } from './suites';
  */
 export const FAILED_TEST_LABEL = 'failed-test';
 
-/**
- * Search query for open flaky suite issues. Listing every `failed-test` issue would page through
- * thousands, so the title words narrow it down and the title format confirms the match.
- */
-export const suiteIssuesQuery = (): string =>
-  `label:${FAILED_TEST_LABEL} is:open in:title ${FLAKY_TEST_SUITE_TITLE_TERMS.map(
-    (term) => `"${term}"`
-  ).join(' ')}`;
-
 export interface CheckFlakySuiteIssuesOptions {
   report: FlakyTestReport;
   github: GithubApi;
   log: ToolingLog;
 }
 
-interface IssueRef {
+export interface IssueRef {
   number: number;
   url: string;
+  title: string;
 }
 
 export type FlakySuiteIssueStatus =
+  /** An open issue about the whole suite exists (`Flaky … test suite: <file>`). */
   | { status: 'tracked'; filePath: string; issue: IssueRef }
+  /** No suite issue, but open per-test `failed-test` issues are about this file. */
+  | {
+      status: 'related';
+      filePath: string;
+      issues: Array<IssueRef & { match: FailedTestIssueMatch }>;
+    }
+  /** No open issue mentions the suite at all. */
   | { status: 'untracked'; filePath: string };
 
 export interface FlakySuiteIssuesSummary {
   generatedAt: Date;
   suites: number;
+  /** Open `failed-test` issues that were checked. */
+  openIssues: number;
   counts: Record<FlakySuiteIssueStatus['status'], number>;
   results: FlakySuiteIssueStatus[];
 }
+
+const toRef = ({ number, html_url: url, title }: GithubIssue): IssueRef => ({ number, url, title });
 
 /** Index of open flaky suite issues by the suite file path in their title; newest wins. */
 export const indexSuiteIssues = (issues: readonly GithubIssue[]): Map<string, GithubIssue> => {
@@ -67,8 +76,9 @@ export const indexSuiteIssues = (issues: readonly GithubIssue[]): Map<string, Gi
 };
 
 /**
- * Tells, for every flaky suite in the report, whether an open GitHub issue already tracks it.
- * Read-only: nothing is filed, edited or commented on.
+ * Tells, for every flaky suite in the report, whether an open GitHub issue already tracks it:
+ * a suite issue, per-test `failed-test` issues, or nothing. Read-only: nothing is filed,
+ * edited or commented on.
  */
 export const checkFlakySuiteIssues = async ({
   report,
@@ -78,22 +88,39 @@ export const checkFlakySuiteIssues = async ({
   const suites = groupIntoSuites(report.flaky);
   log.info(`${report.flaky.length} flaky tests in ${suites.length} suites`);
 
-  const existing = indexSuiteIssues(await github.searchIssues({ query: suiteIssuesQuery() }));
-  log.info(`Found ${existing.size} open flaky suite issues`);
+  const openIssues = await github.listIssues({ labels: [FAILED_TEST_LABEL], state: 'open' });
+  const suiteIssues = indexSuiteIssues(openIssues);
+  const suiteIssueNumbers = new Set([...suiteIssues.values()].map(({ number }) => number));
+  const testIssues = openIssues
+    .filter(({ number }) => !suiteIssueNumbers.has(number))
+    .map(describeFailedTestIssue);
+  log.info(
+    `Found ${openIssues.length} open ${FAILED_TEST_LABEL} issues, ${suiteIssues.size} of them about a flaky suite`
+  );
 
   const results: FlakySuiteIssueStatus[] = [];
-  const counts: FlakySuiteIssuesSummary['counts'] = { tracked: 0, untracked: 0 };
+  const counts: FlakySuiteIssuesSummary['counts'] = { tracked: 0, related: 0, untracked: 0 };
 
-  for (const { filePath } of suites) {
-    const issue = existing.get(filePath);
-    if (issue) {
-      log.info(`tracked by #${issue.number}: ${filePath}`);
-      results.push({
-        status: 'tracked',
-        filePath,
-        issue: { number: issue.number, url: issue.html_url },
-      });
+  for (const suite of suites) {
+    const { filePath } = suite;
+    const suiteIssue = suiteIssues.get(filePath);
+    if (suiteIssue) {
+      log.info(`tracked by #${suiteIssue.number}: ${filePath}`);
+      results.push({ status: 'tracked', filePath, issue: toRef(suiteIssue) });
       counts.tracked += 1;
+      continue;
+    }
+
+    const related = findRelatedFailedTestIssues(suite, testIssues);
+    if (related.length > 0) {
+      const numbers = related.map(({ issue, match }) => `#${issue.number} (${match})`).join(', ');
+      log.info(`related failed-test issues ${numbers}: ${filePath}`);
+      results.push({
+        status: 'related',
+        filePath,
+        issues: related.map(({ issue, match }) => ({ ...toRef(issue), match })),
+      });
+      counts.related += 1;
       continue;
     }
 
@@ -102,5 +129,11 @@ export const checkFlakySuiteIssues = async ({
     counts.untracked += 1;
   }
 
-  return { generatedAt: report.generatedAt, suites: suites.length, counts, results };
+  return {
+    generatedAt: report.generatedAt,
+    suites: suites.length,
+    openIssues: openIssues.length,
+    counts,
+    results,
+  };
 };

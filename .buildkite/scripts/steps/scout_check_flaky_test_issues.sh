@@ -40,10 +40,11 @@ buildkite-agent artifact upload "$SUMMARY_PATH"
 
 echo "--- Annotate build"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
-counts="$(jq -r '.counts | "**\(.tracked)** tracked by an open issue, **\(.untracked)** without one"' "$SUMMARY_PATH")"
+open_issues="$(jq -r '.openIssues' "$SUMMARY_PATH")"
+counts="$(jq -r '.counts | "**\(.tracked)** tracked by a suite issue, **\(.related)** with related per-test issues, **\(.untracked)** without any open issue"' "$SUMMARY_PATH")"
 
-# Markdown section with one bullet per suite of the given status, linking the issue when there is
-# one; collapsed when it is likely to be long
+# Markdown section with one bullet per suite of the given status, linking the suite issue or the
+# related per-test issues (strongest match first); collapsed when it is likely to be long
 section() {
   local status="$1" title="$2" collapsed="$3"
   local count
@@ -59,7 +60,9 @@ section() {
   fi
   echo
   jq -r --arg status "$status" '.results[] | select(.status == $status)
-    | "- " + (if .issue then "[#\(.issue.number)](\(.issue.url)) " else "" end) + "`\(.filePath)`"' "$SUMMARY_PATH"
+    | "- `\(.filePath)`"
+      + (if .issue then " [#\(.issue.number)](\(.issue.url))" else "" end)
+      + (if .issues then " " + (.issues | map("[#\(.number)](\(.url)) (\(.match))") | join(", ")) else "" end)' "$SUMMARY_PATH"
   if [[ "$collapsed" == "true" ]]; then
     echo
     echo "</details>"
@@ -67,9 +70,10 @@ section() {
 }
 
 {
-  echo "Open \`failed-test\` issues in \`${FLAKY_TESTS_GITHUB_REPO}\` for ${suites} flaky suites: ${counts}."
-  section tracked "Tracked by an open issue" false
-  section untracked "No open issue yet" true
+  echo "Checked ${open_issues} open \`failed-test\` issues in \`${FLAKY_TESTS_GITHUB_REPO}\` against ${suites} flaky suites: ${counts}."
+  section tracked "Tracked by a suite issue" false
+  section related "Related per-test issues" true
+  section untracked "No open issue" true
   echo
   echo "Summary: <a href=\"artifact://${SUMMARY_PATH}\">${SUMMARY_PATH}</a>"
 } | buildkite-agent annotate --style info --context flaky-test-issues

@@ -9,7 +9,8 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
-import { checkFlakySuiteIssues, indexSuiteIssues, suiteIssuesQuery } from './checker';
+import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { checkFlakySuiteIssues, FAILED_TEST_LABEL, indexSuiteIssues } from './checker';
 import { flakyReport, flakyTest, githubIssue, SUITE_PATH } from './test_fixtures';
 
 jest.mock('../failed_tests_reporter/github_api');
@@ -17,14 +18,25 @@ const { GithubApi } = jest.requireMock('../failed_tests_reporter/github_api');
 
 const log = new ToolingLog();
 
-const createGithubApi = (suiteIssues: GithubIssue[] = []) => {
+const createGithubApi = (openIssues: GithubIssue[] = []) => {
   const api = new GithubApi();
-  api.searchIssues.mockResolvedValue(suiteIssues);
+  api.listIssues.mockResolvedValue(openIssues);
   return api;
 };
 
 const suiteIssue = (number: number, filePath = SUITE_PATH) =>
   githubIssue({ number, title: `Flaky Scout test suite: ${filePath}` });
+
+const scoutTestIssue = (number: number, testId: string, filePath = SUITE_PATH) =>
+  githubIssue({
+    number,
+    title: `Failing test: Suite - test ${testId}`,
+    body: updateIssueMetadata(`| Test ID | ${testId} |\n| Location | ${filePath} |`, {
+      'test.class': 'Suite',
+      'test.name': `test ${testId}`,
+      'test.type': 'scout',
+    }),
+  });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -44,36 +56,63 @@ describe('indexSuiteIssues', () => {
   });
 });
 
-describe('suiteIssuesQuery', () => {
-  it('narrows open failed-test issues down by the title words', () => {
-    expect(suiteIssuesQuery()).toBe('label:failed-test is:open in:title "Flaky" "test suite"');
-  });
-});
-
 describe('checkFlakySuiteIssues', () => {
-  it('tells tracked suites from untracked ones, worst suites first', async () => {
-    const github = createGithubApi([suiteIssue(42, 'tracked.spec.ts')]);
+  it('tells tracked, related and untracked suites apart, worst suites first', async () => {
+    const github = createGithubApi([
+      suiteIssue(42, 'tracked.spec.ts'),
+      scoutTestIssue(43, 'mid-1', 'mid.spec.ts'),
+      scoutTestIssue(44, 'unrelated', 'elsewhere.spec.ts'),
+    ]);
     const report = flakyReport([
-      flakyTest({ filePath: 'low.spec.ts', failedBuilds: 2 }),
-      flakyTest({ filePath: 'tracked.spec.ts', failedBuilds: 20 }),
-      flakyTest({ filePath: 'mid.spec.ts', failedBuilds: 10 }),
-      flakyTest({ filePath: 'mid.spec.ts', failedBuilds: 3, testId: 'other' }),
+      flakyTest({ filePath: 'low.spec.ts', testId: 'low-1', failedBuilds: 2 }),
+      flakyTest({ filePath: 'tracked.spec.ts', testId: 'tracked-1', failedBuilds: 20 }),
+      flakyTest({ filePath: 'mid.spec.ts', testId: 'mid-1', failedBuilds: 10 }),
+      flakyTest({ filePath: 'mid.spec.ts', testId: 'mid-2', failedBuilds: 3 }),
     ]);
 
     const summary = await checkFlakySuiteIssues({ report, github, log });
 
-    expect(github.searchIssues).toHaveBeenCalledWith({ query: suiteIssuesQuery() });
+    expect(github.listIssues).toHaveBeenCalledWith({ labels: [FAILED_TEST_LABEL], state: 'open' });
     expect(summary.suites).toBe(3);
-    expect(summary.counts).toEqual({ tracked: 1, untracked: 2 });
+    expect(summary.openIssues).toBe(3);
+    expect(summary.counts).toEqual({ tracked: 1, related: 1, untracked: 1 });
     expect(summary.results).toEqual([
       {
         status: 'tracked',
         filePath: 'tracked.spec.ts',
-        issue: { number: 42, url: 'https://github.com/elastic/kibana/issues/42' },
+        issue: {
+          number: 42,
+          url: 'https://github.com/elastic/kibana/issues/42',
+          title: 'Flaky Scout test suite: tracked.spec.ts',
+        },
       },
-      { status: 'untracked', filePath: 'mid.spec.ts' },
+      {
+        status: 'related',
+        filePath: 'mid.spec.ts',
+        issues: [
+          {
+            number: 43,
+            url: 'https://github.com/elastic/kibana/issues/43',
+            title: 'Failing test: Suite - test mid-1',
+            match: 'test',
+          },
+        ],
+      },
       { status: 'untracked', filePath: 'low.spec.ts' },
     ]);
+  });
+
+  it('prefers the suite issue and does not also list it as a related issue', async () => {
+    const github = createGithubApi([
+      githubIssue({ number: 1, title: `Flaky Scout test suite: ${SUITE_PATH}`, body: SUITE_PATH }),
+    ]);
+    const summary = await checkFlakySuiteIssues({
+      report: flakyReport([flakyTest()]),
+      github,
+      log,
+    });
+
+    expect(summary.results[0].status).toBe('tracked');
   });
 
   it('never writes to GitHub', async () => {

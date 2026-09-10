@@ -49,18 +49,19 @@ export function runCheckFlakyTestIssuesCli() {
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
-      const { tracked, untracked } = summary.counts;
+      const { tracked, related, untracked } = summary.counts;
       log.info(
-        `${summary.suites} flaky suites: ${tracked} tracked by an open issue, ` +
-          `${untracked} without one (summary in ${summaryPath})`
+        `${summary.suites} flaky suites: ${tracked} tracked by a suite issue, ` +
+          `${related} with related failed-test issues, ${untracked} without any open issue ` +
+          `(summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
     },
     {
       description: `
         Tell, for every flaky test suite in a report written by
-        \`node scripts/scout discover-flaky-tests\`, whether an open GitHub issue already tracks it.
-        Read-only: nothing is filed or edited.
+        \`node scripts/scout discover-flaky-tests\`, whether an open GitHub issue already tracks it:
+        a suite issue, per-test failed-test issues, or nothing. Read-only: nothing is filed or edited.
 
         Examples:
           GITHUB_TOKEN=... node scripts/check_flaky_test_issues --input .scout/flaky_tests.json
