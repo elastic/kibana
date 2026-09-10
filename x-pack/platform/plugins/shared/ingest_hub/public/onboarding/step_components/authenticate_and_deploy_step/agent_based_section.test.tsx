@@ -16,16 +16,10 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAwsStaticKeysForm: jest.fn(),
   LazyAwsTemporaryKeysForm: jest.fn(),
   useGetAgentPoliciesQuery: jest.fn(),
-  useGetAgentStatus: jest.fn(),
 }));
 
 jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
-}));
-
-// ServiceTile is cross-step imported — mock it to a simple div
-jest.mock('../detect_and_review_step/deployment_summary/service_tile', () => ({
-  ServiceTile: jest.fn(),
 }));
 
 import {
@@ -33,28 +27,28 @@ import {
   LazyAwsStaticKeysForm,
   LazyAwsTemporaryKeysForm,
   useGetAgentPoliciesQuery,
-  useGetAgentStatus,
 } from '@kbn/fleet-plugin/public';
-import { useOnboardingFlow, type ServiceChipState } from '../../onboarding_flow_context';
-import { ServiceTile } from '../detect_and_review_step/deployment_summary/service_tile';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as jest.Mock;
 const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as jest.Mock;
 const MockTemporaryKeysForm = LazyAwsTemporaryKeysForm as unknown as jest.Mock;
 const mockUseGetAgentPoliciesQuery = useGetAgentPoliciesQuery as jest.Mock;
-const mockUseGetAgentStatus = useGetAgentStatus as jest.Mock;
-const MockServiceTile = ServiceTile as unknown as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 import { AgentBasedSection } from './agent_based_section';
-import type { AgentBasedTarget } from './agent_based_deploy';
 
 interface OnboardingFlowOptions {
   agentHostsMode?: 'new' | 'existing';
   agentPolicyId?: string;
   selectedAgentPolicyIds?: string[];
+  agentCredentialMethod?:
+    | 'direct_access_keys'
+    | 'temporary_keys'
+    | 'shared_credentials'
+    | 'assume_role';
   setAgentBasedDeployment?: jest.Mock;
 }
 
@@ -62,6 +56,7 @@ function setupMocks({
   agentHostsMode = 'new',
   agentPolicyId = undefined,
   selectedAgentPolicyIds = [],
+  agentCredentialMethod = 'direct_access_keys',
   setAgentBasedDeployment = jest.fn(),
 }: OnboardingFlowOptions = {}) {
   MockAgentEnrollmentFlyout.mockImplementation(() => (
@@ -85,15 +80,13 @@ function setupMocks({
   );
 
   mockUseGetAgentPoliciesQuery.mockReturnValue({ data: { items: [] }, isLoading: false });
-  mockUseGetAgentStatus.mockReturnValue({ data: { results: { all: 0 } } });
-
-  MockServiceTile.mockImplementation(() => <div data-test-subj="service-tile" />);
 
   mockUseOnboardingFlow.mockReturnValue({
     agentBasedDeployment: {
       agentHostsMode,
       agentPolicyId,
       selectedAgentPolicyIds,
+      agentCredentialMethod,
     },
     setAgentBasedDeployment,
   });
@@ -101,9 +94,6 @@ function setupMocks({
 
 interface RenderOptions {
   serviceCount?: number;
-  targets?: AgentBasedTarget[];
-  serviceStatuses?: Record<string, ServiceChipState>;
-  servicesMap?: Map<string, unknown>;
   onDeploy?: jest.Mock;
   isDeploying?: boolean;
   isDone?: boolean;
@@ -119,9 +109,6 @@ function renderSection(props: RenderOptions = {}) {
       <React.Suspense fallback={null}>
         <AgentBasedSection
           serviceCount={props.serviceCount ?? 2}
-          targets={props.targets ?? []}
-          serviceStatuses={props.serviceStatuses ?? {}}
-          servicesMap={props.servicesMap ?? new Map()}
           onDeploy={onDeploy}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
@@ -205,10 +192,9 @@ describe('AgentBasedSection', () => {
     });
   });
 
-  describe('post-deploy, no agent enrolled — new policy mode', () => {
+  describe('post-deploy — new policy mode', () => {
     beforeEach(() => {
       setupMocks({ agentHostsMode: 'new', agentPolicyId: 'policy-123' });
-      // agentCount = 0 (default mock)
     });
 
     it('shows post-deploy description ("A new Agent Policy is created for this integration")', () => {
@@ -232,13 +218,6 @@ describe('AgentBasedSection', () => {
       expect(btn).not.toBeDisabled();
     });
 
-    it('does NOT show AgentEnrollmentStatus (agentCount=0)', () => {
-      renderSection();
-      expect(
-        screen.queryByTestId('agentBasedSection-addAnotherAgentButton')
-      ).not.toBeInTheDocument();
-    });
-
     it('clicking "Add agent" opens the flyout directly (no onDeploy call)', () => {
       const onDeploy = jest.fn();
       renderSection({ onDeploy });
@@ -246,40 +225,18 @@ describe('AgentBasedSection', () => {
       expect(onDeploy).not.toHaveBeenCalled();
       expect(screen.getByTestId('agent-enrollment-flyout')).toBeInTheDocument();
     });
-  });
 
-  describe('post-deploy, agent enrolled — new policy mode', () => {
-    beforeEach(() => {
-      setupMocks({ agentHostsMode: 'new', agentPolicyId: 'policy-123' });
-      mockUseGetAgentStatus.mockReturnValue({ data: { results: { all: 2 } } });
-    });
-
-    it('shows AgentEnrollmentStatus with "2 agents enrolled" text', () => {
+    it('does NOT show "+ Add another agent" button', () => {
       renderSection();
-      expect(screen.getByText(/2 agents enrolled/i)).toBeInTheDocument();
-    });
-
-    it('does NOT show "Add agent" button', () => {
-      renderSection();
-      expect(screen.queryByTestId('agentBasedSection-addAgentButton')).not.toBeInTheDocument();
-    });
-
-    it('shows "+ Add another agent" button', () => {
-      renderSection();
-      expect(screen.getByTestId('agentBasedSection-addAnotherAgentButton')).toBeInTheDocument();
-    });
-
-    it('clicking "+ Add another agent" opens the flyout', () => {
-      renderSection();
-      fireEvent.click(screen.getByTestId('agentBasedSection-addAnotherAgentButton'));
-      expect(screen.getByTestId('agent-enrollment-flyout')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('agentBasedSection-addAnotherAgentButton')
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('radio always interactive', () => {
-    it('radio buttons are not disabled when agentPolicyId is set and agent enrolled', () => {
+    it('radio buttons are not disabled when agentPolicyId is set', () => {
       setupMocks({ agentHostsMode: 'new', agentPolicyId: 'policy-123' });
-      mockUseGetAgentStatus.mockReturnValue({ data: { results: { all: 2 } } });
       renderSection();
       const radios = screen.getAllByRole('radio');
       radios.forEach((radio) => {
@@ -298,14 +255,12 @@ describe('AgentBasedSection', () => {
 
   describe('isDeployedForCurrentMode mode switching', () => {
     it('after switching from "new" (with agentPolicyId set) to "existing", pre-deploy combobox appears', () => {
-      // Render with agentHostsMode='existing' and no existingPolicyDeployDone — not yet deployed
       setupMocks({
         agentHostsMode: 'existing',
         agentPolicyId: undefined,
         selectedAgentPolicyIds: [],
       });
       renderSection();
-      // The existing-mode combobox should be visible since no deploy has completed for existing mode
       expect(screen.getByTestId('agentBasedSection-agentPoliciesComboBox')).toBeInTheDocument();
     });
   });
@@ -327,7 +282,6 @@ describe('AgentBasedSection', () => {
   describe('section accordion never auto-collapses', () => {
     it('when isDone transitions false→true, section content stays visible (autoCollapse=false)', () => {
       const { rerender } = renderSection({ isDone: false });
-      // Credential form should be visible (section open)
       expect(screen.getByTestId('static-keys-form')).toBeInTheDocument();
 
       act(() => {
@@ -336,9 +290,6 @@ describe('AgentBasedSection', () => {
             <React.Suspense fallback={null}>
               <AgentBasedSection
                 serviceCount={2}
-                targets={[]}
-                serviceStatuses={{}}
-                servicesMap={new Map()}
                 onDeploy={jest.fn()}
                 isDeploying={false}
                 isDone={true}
@@ -351,7 +302,6 @@ describe('AgentBasedSection', () => {
         );
       });
 
-      // Section should still be open because AgentBasedSection passes autoCollapse={false}
       expect(screen.getByTestId('agentBasedSection-whereToAddPanel')).toBeInTheDocument();
     });
   });

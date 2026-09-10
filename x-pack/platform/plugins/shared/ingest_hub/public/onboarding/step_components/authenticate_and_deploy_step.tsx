@@ -115,6 +115,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     failedInstances: agentFailedInstances,
     isAlreadyDeployed: isAgentAlreadyDeployed,
     handleDeploy: handleAgentDeploy,
+    setAgentCredentials,
   } = useAgentBasedDeploy();
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
@@ -195,10 +196,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {showAgentSection && (
         <AgentBasedSection
           serviceCount={agentTargets.length}
-          targets={agentTargets}
-          serviceStatuses={detectAndReviewStep.serviceStatuses}
-          servicesMap={awsServicesMap ?? new Map()}
           onDeploy={handleAgentDeployClick}
+          onCredentialsChange={setAgentCredentials}
           isDeploying={isAgentDeploying}
           isDone={isAgentDone}
           hasFailed={agentHasFailed}

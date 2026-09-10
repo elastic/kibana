@@ -30,7 +30,7 @@ import type {
 } from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import type { PackageInputEntry } from './package_inputs';
+import type { PackageInputEntry, AgentCredentialVars } from './package_inputs';
 // Reused so the prune bar stays identical to the one step 2 applies when it decides a service
 // is fully configured. Diverging here produces "configure it in step 2" for an already-valid form.
 import { REGION_FIELD_NAMES } from '../service_settings_step/field_config';
@@ -96,6 +96,7 @@ interface BuildPackagePolicyOpts {
   storedServiceVars: Record<string, ServiceVars>;
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   pkgVersion: string;
+  agentCredentials?: AgentCredentialVars;
 }
 
 interface PkgInfo {
@@ -153,7 +154,7 @@ async function buildInstancePackagePolicy(
   inputs: Record<string, unknown>;
 }> {
   const { instance, service } = target;
-  const { globalRegion, storedServiceVars, authenticateAndDeployStep, pkgVersion } = opts;
+  const { globalRegion, storedServiceVars, authenticateAndDeployStep, pkgVersion, agentCredentials } = opts;
 
   // Var lookup: instanceId first; fall back to serviceId for sessions predating instance keying.
   // Same legacy fallback as deploy_groups.ts:169-174.
@@ -201,7 +202,8 @@ async function buildInstancePackagePolicy(
       const vars = buildPackageVars(
         globalRegion,
         authenticateAndDeployStep.staticKeys,
-        pkgVarNames
+        pkgVarNames,
+        agentCredentials
       );
       return {
         name: buildPackagePolicyName(instance),
@@ -220,7 +222,7 @@ async function buildInstancePackagePolicy(
 
   const pkgVarNames = getPackageVarNames(pkgInfo);
   // staticKeys may be undefined if the user chose a different credential method.
-  const vars = buildPackageVars(globalRegion, authenticateAndDeployStep.staticKeys, pkgVarNames);
+  const vars = buildPackageVars(globalRegion, authenticateAndDeployStep.staticKeys, pkgVarNames, agentCredentials);
 
   // Disable all inputs from other policy templates in the package. Fleet's simplified-to-legacy
   // expansion (simplifiedPackagePolicytoNewPackagePolicy → packageToPackagePolicy) adds ALL policy

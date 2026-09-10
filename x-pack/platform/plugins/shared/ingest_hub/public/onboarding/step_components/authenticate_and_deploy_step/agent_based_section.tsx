@@ -10,11 +10,7 @@ import {
   EuiButton,
   EuiComboBox,
   EuiFieldText,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiRadioGroup,
@@ -31,19 +27,16 @@ import {
   LazyAwsStaticKeysForm,
   LazyAwsTemporaryKeysForm,
   useGetAgentPoliciesQuery,
-  useGetAgentStatus,
 } from '@kbn/fleet-plugin/public';
-import type { AgentPolicy } from '@kbn/fleet-plugin/public';
+import type {
+  AgentPolicy,
+  AwsStaticKeyCredentials,
+  AwsTemporaryKeyCredentials,
+} from '@kbn/fleet-plugin/public';
+import type { AgentCredentialVars } from './package_inputs';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { AgentBasedTarget } from './agent_based_deploy';
 import { SectionAccordion } from './section_accordion';
-// Cross-step import: ServiceTile lives in deployment_summary because it was built for step 4.
-// It has no context deps (4 props, fully presentational) so it imports cleanly here.
-// Revisit this import location when there is a third consumer.
-import { ServiceTile } from '../detect_and_review_step/deployment_summary/service_tile';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceChipState } from '../../onboarding_flow_context';
 
 // ── Credential method type ────────────────────────────────────────────────────
 
@@ -79,29 +72,95 @@ const CREDENTIAL_OPTIONS = [
     value: 'assume_role' as AgentCredentialMethod,
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.assumeRole',
-      { defaultMessage: 'IAM role ARN' }
+      { defaultMessage: 'Assume role' }
     ),
   },
 ];
 
-// ── Credential form state ─────────────────────────────────────────────────────
+// ── Local credential forms ────────────────────────────────────────────────────
 
-interface SharedCredentialsValues {
-  credentialProfileName: string;
+function SharedCredentialsForm({
+  sharedCredentialFile,
+  credentialProfileName,
+  onSharedCredentialFileChange,
+  onCredentialProfileNameChange,
+}: {
   sharedCredentialFile: string;
+  credentialProfileName: string;
+  onSharedCredentialFileChange: (val: string) => void;
+  onCredentialProfileNameChange: (val: string) => void;
+}) {
+  return (
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.sharedCredentials.fileLabel',
+          { defaultMessage: 'Shared Credential File' }
+        )}
+        helpText={i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.sharedCredentials.fileHelp',
+          { defaultMessage: 'Directory of the shared credentials file' }
+        )}
+        fullWidth
+      >
+        <EuiFieldText
+          fullWidth
+          value={sharedCredentialFile}
+          onChange={(e) => onSharedCredentialFileChange(e.target.value)}
+          data-test-subj="agentBasedSection-sharedCredentialFile"
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.sharedCredentials.profileLabel',
+          { defaultMessage: 'Credential Profile Name' }
+        )}
+        fullWidth
+      >
+        <EuiFieldText
+          fullWidth
+          value={credentialProfileName}
+          onChange={(e) => onCredentialProfileNameChange(e.target.value)}
+          data-test-subj="agentBasedSection-credentialProfileName"
+        />
+      </EuiFormRow>
+    </>
+  );
 }
-interface AssumeRoleValues {
+
+function AssumeRoleForm({
+  roleArn,
+  onRoleArnChange,
+}: {
   roleArn: string;
+  onRoleArnChange: (val: string) => void;
+}) {
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.assumeRole.roleArnLabel',
+        { defaultMessage: 'Role ARN' }
+      )}
+      fullWidth
+    >
+      <EuiFieldText
+        fullWidth
+        value={roleArn}
+        onChange={(e) => onRoleArnChange(e.target.value)}
+        data-test-subj="agentBasedSection-roleArn"
+      />
+    </EuiFormRow>
+  );
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface AgentBasedSectionProps {
   serviceCount: number;
-  targets: AgentBasedTarget[];
-  serviceStatuses: Record<string, ServiceChipState>;
-  servicesMap: Map<string, AwsServiceMatrixEntry>;
   onDeploy: (instanceIds?: string[]) => void;
+  /** Called whenever the credential form values change — keeps secrets in memory, never persisted. */
+  onCredentialsChange?: (creds: AgentCredentialVars | undefined) => void;
   isDeploying: boolean;
   isDone: boolean;
   hasFailed: boolean;
@@ -112,10 +171,8 @@ interface AgentBasedSectionProps {
 
 export function AgentBasedSection({
   serviceCount,
-  targets,
-  serviceStatuses,
-  servicesMap,
   onDeploy,
+  onCredentialsChange,
   isDeploying,
   isDone,
   hasFailed,
@@ -123,23 +180,105 @@ export function AgentBasedSection({
   deployErrors,
 }: AgentBasedSectionProps) {
   const { agentBasedDeployment, setAgentBasedDeployment } = useOnboardingFlow();
-  const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } = agentBasedDeployment;
+  const {
+    agentHostsMode,
+    agentPolicyId,
+    selectedAgentPolicyIds,
+    agentCredentialMethod: persistedCredentialMethod,
+    sharedCredentialFile: persistedSharedCredentialFile,
+    credentialProfileName: persistedCredentialProfileName,
+    roleArn: persistedRoleArn,
+  } = agentBasedDeployment;
 
   // ── Credential method ──────────────────────────────────────────────────────
-  const [credentialMethod, setCredentialMethod] =
-    useState<AgentCredentialMethod>('direct_access_keys');
-  const [isCredentialReady, setIsCredentialReady] = useState(false);
-
-  // ── Credential values for locally-managed forms (memory-only — secrets never persisted) ──────
-  const [sharedCreds, setSharedCreds] = useState<SharedCredentialsValues>({
-    credentialProfileName: '',
-    sharedCredentialFile: '',
+  const credentialMethod = persistedCredentialMethod;
+  const [isCredentialReady, setIsCredentialReady] = useState(() => {
+    // For methods backed by persisted text fields, initialize ready from stored values.
+    if (persistedCredentialMethod === 'shared_credentials') {
+      return !!(persistedSharedCredentialFile || persistedCredentialProfileName);
+    }
+    if (persistedCredentialMethod === 'assume_role') {
+      return !!persistedRoleArn;
+    }
+    return false;
   });
-  const [assumeRole, setAssumeRole] = useState<AssumeRoleValues>({ roleArn: '' });
+
+  // In-memory secrets — never persisted.
+  const [staticKeyCreds, setStaticKeyCreds] = useState<AwsStaticKeyCredentials | undefined>(
+    undefined
+  );
+  const [temporaryKeyCreds, setTemporaryKeyCreds] = useState<
+    AwsTemporaryKeyCredentials | undefined
+  >(undefined);
+
+  // Notify the parent whenever credentials change so the deploy function can read them.
+  const notifyCredentialChange = useCallback(
+    (
+      method: AgentCredentialMethod,
+      overrides?: {
+        staticCreds?: AwsStaticKeyCredentials | undefined;
+        tempCreds?: AwsTemporaryKeyCredentials | undefined;
+        sharedFile?: string;
+        profileName?: string;
+        arn?: string;
+      }
+    ) => {
+      if (!onCredentialsChange) return;
+      const resolvedStatic =
+        overrides?.staticCreds !== undefined ? overrides.staticCreds : staticKeyCreds;
+      const resolvedTemp =
+        overrides?.tempCreds !== undefined ? overrides.tempCreds : temporaryKeyCreds;
+      const resolvedSharedFile =
+        overrides?.sharedFile !== undefined ? overrides.sharedFile : persistedSharedCredentialFile;
+      const resolvedProfileName =
+        overrides?.profileName !== undefined
+          ? overrides.profileName
+          : persistedCredentialProfileName;
+      const resolvedArn = overrides?.arn !== undefined ? overrides.arn : persistedRoleArn;
+
+      if (method === 'direct_access_keys' && resolvedStatic) {
+        onCredentialsChange({ method, ...resolvedStatic });
+      } else if (method === 'temporary_keys' && resolvedTemp) {
+        onCredentialsChange({ method, ...resolvedTemp });
+      } else if (method === 'shared_credentials') {
+        onCredentialsChange({
+          method,
+          shared_credential_file: resolvedSharedFile,
+          credential_profile_name: resolvedProfileName,
+        });
+      } else if (method === 'assume_role') {
+        onCredentialsChange({ method, role_arn: resolvedArn });
+      } else {
+        onCredentialsChange(undefined);
+      }
+    },
+    [
+      onCredentialsChange,
+      staticKeyCreds,
+      temporaryKeyCreds,
+      persistedSharedCredentialFile,
+      persistedCredentialProfileName,
+      persistedRoleArn,
+    ]
+  );
+
+  // On mount, seed the deploy ref for persisted text-field methods so a Back/Next round-trip
+  // doesn't silently deploy with undefined credentials.
+  useEffect(() => {
+    if (credentialMethod === 'shared_credentials' || credentialMethod === 'assume_role') {
+      notifyCredentialChange(credentialMethod);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount only
 
   const handleCredentialMethodChange = (method: AgentCredentialMethod) => {
-    setCredentialMethod(method);
+    setAgentBasedDeployment({ agentCredentialMethod: method });
     setIsCredentialReady(false);
+    // Reset in-memory secrets on method switch (safety: don't carry static keys into temporary slot).
+    setStaticKeyCreds(undefined);
+    setTemporaryKeyCreds(undefined);
+    // Notify with the new method so the deploy ref is cleared.
+    notifyCredentialChange(method, { staticCreds: undefined, tempCreds: undefined });
   };
 
   // ── Hosts mode (new / existing) ────────────────────────────────────────────
@@ -257,23 +396,6 @@ export function AgentBasedSection({
     return true;
   }, [isDeployedForCurrentMode, isCredentialReady, agentHostsMode, selectedAgentPolicyIds]);
 
-  // ── Enrollment status ─────────────────────────────────────────────────────
-  // Poll the real agent count from Fleet so "N agents enrolled" reflects actual enrollments, not
-  // the initial 'detecting' status (set on all instances immediately after a successful deploy).
-  // For existing-policy path, poll against the first selected policy (same one pre-selected in flyout).
-  const pollPolicyId =
-    agentPolicyId ?? (existingPolicyDeployDone ? selectedAgentPolicyIds[0] : undefined);
-  const { data: agentStatusData } = useGetAgentStatus(
-    { policyId: pollPolicyId ?? '' },
-    { pollIntervalMs: pollPolicyId ? 10_000 : undefined }
-  );
-  const agentCount = pollPolicyId ? agentStatusData?.results?.all ?? 0 : 0;
-  // UI locks (radio frozen, button hidden) only once an agent has actually enrolled.
-  // Before that, the user can still change the radio or click "Add agent" to open the flyout again.
-  const isAgentEnrolled = agentCount > 0;
-
-  const receivingCount = Object.values(serviceStatuses).filter((s) => s === 'receiving').length;
-
   const handleRetry = useCallback(() => {
     onDeploy(failedInstances.length > 0 ? failedInstances : undefined);
   }, [onDeploy, failedInstances]);
@@ -300,31 +422,21 @@ export function AgentBasedSection({
         headerButtonTestSubj="agentBasedSection-headerButton"
       >
         <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          {(!isAgentEnrolled || !isDeployedForCurrentMode) && (
+          {!isDeployedForCurrentMode && (
             <EuiText size="s">
               <p>
                 <FormattedMessage
                   id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.description"
-                  defaultMessage="Deploy an Elastic Agent on your hosts to collect AWS data directly. Use this method for VPC-internal services, credentials that cannot leave your account, or log files on disk. Refer to our {gettingStartedLink} for details."
-                  values={{
-                    gettingStartedLink: (
-                      <EuiLink target="_blank" external>
-                        <FormattedMessage
-                          id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.gettingStartedLink"
-                          defaultMessage="Getting Started"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
+                  defaultMessage="Deploy an Elastic Agent on your hosts to collect AWS data directly. Use this method for VPC-internal services, credentials that cannot leave your account, or log files on disk."
                 />
               </p>
             </EuiText>
           )}
 
-          {/* Credential fields — hidden once an agent enrolls on the current mode. When the user
+          {/* Credential fields — hidden once the current mode has a completed deploy. When the user
               switches to "new" after an existing-policy deploy (no agentPolicyId yet), credentials
               must be shown again so they can configure and deploy the new policy. */}
-          {(!isAgentEnrolled || !isDeployedForCurrentMode) && (
+          {!isDeployedForCurrentMode && (
             <>
               <EuiSpacer size="m" />
 
@@ -354,32 +466,47 @@ export function AgentBasedSection({
                 {credentialMethod === 'direct_access_keys' && (
                   <LazyAwsStaticKeysForm
                     onReadyChange={setIsCredentialReady}
+                    onFieldsChange={(creds) => {
+                      setStaticKeyCreds(creds ?? undefined);
+                      notifyCredentialChange('direct_access_keys', {
+                        staticCreds: creds ?? undefined,
+                      });
+                    }}
                     data-test-subj="agentBasedSection-directAccessKeysForm"
                   />
                 )}
                 {credentialMethod === 'temporary_keys' && (
                   <LazyAwsTemporaryKeysForm
                     onReadyChange={setIsCredentialReady}
+                    onFieldsChange={(creds) => {
+                      setTemporaryKeyCreds(creds ?? undefined);
+                      notifyCredentialChange('temporary_keys', { tempCreds: creds ?? undefined });
+                    }}
                     data-test-subj="agentBasedSection-temporaryKeysForm"
                   />
                 )}
                 {credentialMethod === 'shared_credentials' && (
                   <SharedCredentialsForm
-                    values={sharedCreds}
-                    onChange={(v) => {
-                      setSharedCreds(v);
-                      setIsCredentialReady(
-                        Boolean(v.credentialProfileName || v.sharedCredentialFile)
-                      );
+                    sharedCredentialFile={persistedSharedCredentialFile ?? ''}
+                    credentialProfileName={persistedCredentialProfileName ?? ''}
+                    onSharedCredentialFileChange={(val) => {
+                      setAgentBasedDeployment({ sharedCredentialFile: val });
+                      notifyCredentialChange('shared_credentials', { sharedFile: val });
+                      setIsCredentialReady(true);
+                    }}
+                    onCredentialProfileNameChange={(val) => {
+                      setAgentBasedDeployment({ credentialProfileName: val });
+                      notifyCredentialChange('shared_credentials', { profileName: val });
                     }}
                   />
                 )}
                 {credentialMethod === 'assume_role' && (
                   <AssumeRoleForm
-                    values={assumeRole}
-                    onChange={(v) => {
-                      setAssumeRole(v);
-                      setIsCredentialReady(Boolean(v.roleArn));
+                    roleArn={persistedRoleArn ?? ''}
+                    onRoleArnChange={(val) => {
+                      setAgentBasedDeployment({ roleArn: val });
+                      notifyCredentialChange('assume_role', { arn: val });
+                      setIsCredentialReady(!!val);
                     }}
                   />
                 )}
@@ -496,49 +623,27 @@ export function AgentBasedSection({
               </>
             )}
 
-            {/* Primary CTA: Add agent — hidden once an agent has enrolled AND the current mode
-                is already deployed. If the user switches to "new" after an existing-policy deploy,
-                show it again so they can deploy+enroll on the new policy. */}
-            {(!isAgentEnrolled || !isDeployedForCurrentMode) && (
-              <EuiButton
-                fill
-                isDisabled={!isAddAgentReady || isDeploying}
-                isLoading={isDeploying}
-                onClick={handleAddAgentClick}
-                data-test-subj="agentBasedSection-addAgentButton"
-              >
-                {isDeploying ? (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAgentButton.loading"
-                    defaultMessage="Setting up..."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAgentButton"
-                    defaultMessage="Add agent"
-                  />
-                )}
-              </EuiButton>
-            )}
-
-            {/* Post-enrollment status — shown only once at least one agent has actually enrolled.
-                agentCount comes from useGetAgentStatus (live polling), not service statuses, so
-                it stays 0 until a real agent connects — even though serviceStatuses immediately
-                set instances to 'detecting' after a successful deploy. */}
-            {isDeployedForCurrentMode && agentCount > 0 && (
-              <>
-                <EuiSpacer size="m" />
-                <AgentEnrollmentStatus
-                  enrolledCount={agentCount}
-                  receivingCount={receivingCount}
-                  totalCount={targets.length}
-                  targets={targets}
-                  serviceStatuses={serviceStatuses}
-                  servicesMap={servicesMap}
-                  onAddAgent={handleAddAgentClick}
+            {/* Primary CTA: Add agent — always visible. Pre-deploy: deploys and opens flyout.
+                Post-deploy: opens flyout directly so users can enroll additional agents. */}
+            <EuiButton
+              fill
+              isDisabled={!isAddAgentReady || isDeploying}
+              isLoading={isDeploying}
+              onClick={handleAddAgentClick}
+              data-test-subj="agentBasedSection-addAgentButton"
+            >
+              {isDeploying ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAgentButton.loading"
+                  defaultMessage="Setting up..."
                 />
-              </>
-            )}
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAgentButton"
+                  defaultMessage="Add agent"
+                />
+              )}
+            </EuiButton>
           </div>
 
           {/* Error callout + retry */}
@@ -608,157 +713,6 @@ export function AgentBasedSection({
           />
         </Suspense>
       )}
-    </>
-  );
-}
-
-// ── Local credential forms ────────────────────────────────────────────────────
-
-function SharedCredentialsForm({
-  values,
-  onChange,
-}: {
-  values: SharedCredentialsValues;
-  onChange: (v: SharedCredentialsValues) => void;
-}) {
-  return (
-    <>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.sharedCreds.profileLabel"
-            defaultMessage="Credential profile name"
-          />
-        }
-      >
-        <EuiFieldText
-          value={values.credentialProfileName}
-          onChange={(e) => onChange({ ...values, credentialProfileName: e.target.value })}
-          data-test-subj="agentBasedSection-credentialProfileName"
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.sharedCreds.fileLabel"
-            defaultMessage="Shared credential file"
-          />
-        }
-      >
-        <EuiFieldText
-          value={values.sharedCredentialFile}
-          onChange={(e) => onChange({ ...values, sharedCredentialFile: e.target.value })}
-          placeholder="~/.aws/credentials"
-          data-test-subj="agentBasedSection-sharedCredentialFile"
-        />
-      </EuiFormRow>
-    </>
-  );
-}
-
-function AssumeRoleForm({
-  values,
-  onChange,
-}: {
-  values: AssumeRoleValues;
-  onChange: (v: AssumeRoleValues) => void;
-}) {
-  return (
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.assumeRole.arnLabel"
-          defaultMessage="Role ARN"
-        />
-      }
-    >
-      <EuiFieldText
-        value={values.roleArn}
-        onChange={(e) => onChange({ roleArn: e.target.value })}
-        placeholder="arn:aws:iam::123456789012:role/MyRole"
-        data-test-subj="agentBasedSection-roleArn"
-      />
-    </EuiFormRow>
-  );
-}
-
-// ── Post-enrollment status ────────────────────────────────────────────────────
-
-interface AgentEnrollmentStatusProps {
-  enrolledCount: number;
-  receivingCount: number;
-  totalCount: number;
-  targets: AgentBasedTarget[];
-  serviceStatuses: Record<string, ServiceChipState>;
-  servicesMap: Map<string, AwsServiceMatrixEntry>;
-  onAddAgent: () => void;
-}
-
-function AgentEnrollmentStatus({
-  enrolledCount,
-  receivingCount,
-  totalCount,
-  targets,
-  serviceStatuses,
-  servicesMap,
-  onAddAgent,
-}: AgentEnrollmentStatusProps) {
-  return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="success">
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.enrolledCount"
-              defaultMessage="{count, plural, one {✓ # agent enrolled} other {✓ # agents enrolled}}"
-              values={{ count: enrolledCount }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="text"
-            size="m"
-            onClick={onAddAgent}
-            data-test-subj="agentBasedSection-addAnotherAgentButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAnotherAgent"
-              defaultMessage="+ Add another agent"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
-      <EuiText size="s" color="subdued" aria-live="polite">
-        <FormattedMessage
-          id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.dataReceivedCount"
-          defaultMessage="{receiving} of {total} - data received"
-          values={{ receiving: receivingCount, total: totalCount }}
-        />
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
-      {/* Per-instance service tiles — keyed on instance not service so duplicates appear */}
-      <EuiFlexGrid columns={2} gutterSize="m">
-        {targets.map(({ instance, service }) => {
-          const entry = servicesMap.get(service.id) ?? service;
-          const status = serviceStatuses[instance.instanceId] ?? 'detecting';
-          return (
-            <ServiceTile
-              key={instance.instanceId}
-              name={instance.name}
-              status={status}
-              entry={entry}
-              deploymentMethod="agent_based"
-            />
-          );
-        })}
-      </EuiFlexGrid>
     </>
   );
 }

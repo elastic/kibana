@@ -47,6 +47,17 @@ interface PersistedAuthenticateAndDeployStep {
   agentPolicyId?: string; // set after new-policy deploy; used as double-creation guard on retry
   agentPolicyName?: string; // denormalised so step 4 needs no GET
   selectedAgentPolicyIds?: string[]; // for existing-policy mode
+  // Agent-based credential method — persisted so switching steps preserves the selection.
+  agentCredentialMethod?:
+    | 'direct_access_keys'
+    | 'temporary_keys'
+    | 'shared_credentials'
+    | 'assume_role';
+  // Non-secret credential fields for shared_credentials and assume_role methods.
+  // secret_access_key / session_token are never persisted (memory only).
+  sharedCredentialFile?: string;
+  credentialProfileName?: string;
+  roleArn?: string;
 }
 
 export interface ServicesStepState {
@@ -74,6 +85,14 @@ export interface AgentBasedDeploymentState {
   agentPolicyId?: string;
   agentPolicyName?: string;
   selectedAgentPolicyIds: string[];
+  agentCredentialMethod:
+    | 'direct_access_keys'
+    | 'temporary_keys'
+    | 'shared_credentials'
+    | 'assume_role';
+  sharedCredentialFile?: string;
+  credentialProfileName?: string;
+  roleArn?: string;
 }
 
 interface OnboardingFlowState {
@@ -169,6 +188,16 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...(update.selectedAgentPolicyIds !== undefined
           ? { selectedAgentPolicyIds: update.selectedAgentPolicyIds }
           : {}),
+        ...(update.agentCredentialMethod !== undefined
+          ? { agentCredentialMethod: update.agentCredentialMethod }
+          : {}),
+        ...(update.sharedCredentialFile !== undefined
+          ? { sharedCredentialFile: update.sharedCredentialFile }
+          : {}),
+        ...(update.credentialProfileName !== undefined
+          ? { credentialProfileName: update.credentialProfileName }
+          : {}),
+        ...(update.roleArn !== undefined ? { roleArn: update.roleArn } : {}),
       });
     },
     [setPersistedAuthenticateAndDeployStep]
@@ -332,6 +361,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     agentPolicyName: persistedAuthenticateAndDeployStep?.agentPolicyName,
     selectedAgentPolicyIds:
       persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? ([] as string[]),
+    agentCredentialMethod:
+      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'direct_access_keys',
+    sharedCredentialFile: persistedAuthenticateAndDeployStep?.sharedCredentialFile,
+    credentialProfileName: persistedAuthenticateAndDeployStep?.credentialProfileName,
+    roleArn: persistedAuthenticateAndDeployStep?.roleArn,
   };
 
   const detectAndReviewStep: DetectAndReviewStepState = {

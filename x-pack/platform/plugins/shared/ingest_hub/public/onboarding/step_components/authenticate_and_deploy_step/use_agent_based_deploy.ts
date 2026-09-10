@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -20,6 +20,7 @@ import {
   buildAgentPolicyName,
 } from './agent_based_deploy';
 import type { AgentBasedTarget } from './agent_based_deploy';
+import type { AgentCredentialVars } from './package_inputs';
 
 export interface UseAgentBasedDeployResult {
   targets: AgentBasedTarget[];
@@ -31,6 +32,9 @@ export interface UseAgentBasedDeployResult {
   handleDeploy: (instanceIds?: string[]) => void;
   namespace: string;
   setNamespace: (ns: string) => void;
+  /** Update the in-memory credential values used on the next deploy. Secrets (secret_access_key,
+   *  session_token) are kept in a ref — never written to session storage. */
+  setAgentCredentials: (creds: AgentCredentialVars | undefined) => void;
 }
 
 export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
@@ -54,6 +58,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
+  // In-memory credential ref — secrets (secret_access_key, session_token) are never persisted.
+  const agentCredentialsRef = useRef<AgentCredentialVars | undefined>(undefined);
+  const setAgentCredentials = useCallback((creds: AgentCredentialVars | undefined) => {
+    agentCredentialsRef.current = creds;
+  }, []);
   // Deliberately NOT seeded from detectAndReviewStep.failedInstances, unlike useDeploy.
   // failedInstances is one shared session key that the managed-integration path also writes, so
   // seeding would surface a stale MI failure as an agent-based "Deployment failed" callout that
@@ -106,6 +115,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           storedServiceVars,
           authenticateAndDeployStep,
           pkgVersion: '', // overridden per-package inside deploy functions
+          agentCredentials: agentCredentialsRef.current,
         };
 
         let policyIdsByInstance: Record<string, string> = {};
@@ -201,5 +211,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     handleDeploy,
     namespace,
     setNamespace,
+    setAgentCredentials,
   };
 }
