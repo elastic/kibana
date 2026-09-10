@@ -27,8 +27,7 @@ const renderWatchListPage = (httpSetup: HttpSetup) => {
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/290017
-describe.skip('<WatchListPage />', () => {
+describe('<WatchListPage />', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
@@ -36,26 +35,27 @@ describe.skip('<WatchListPage />', () => {
     jest.clearAllMocks();
   });
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  afterEach(async () => {
-    // Suite hygiene for fake timers
-    if (jest.getTimerCount() > 0) {
-      await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
-      });
-    }
-    jest.clearAllTimers();
-  });
-
   describe('on component mount', () => {
     describe('watches', () => {
+      const watch1 = fixtures.getWatch({
+        name: `watchA-${getRandomString()}`,
+        id: `a-${getRandomString()}`,
+        type: 'threshold',
+      });
+      const watch2 = fixtures.getWatch({
+        name: `watchB-${getRandomString()}`,
+        id: `b-${getRandomString()}`,
+        type: 'json',
+      });
+      const watch3 = fixtures.getWatch({
+        name: `watchC-${getRandomString()}`,
+        id: `c-${getRandomString()}`,
+        type: 'monitoring',
+        isSystemWatch: true,
+      });
+
+      const watches = [watch1, watch2, watch3];
+
       describe('when there are no watches', () => {
         beforeEach(async () => {
           ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
@@ -73,25 +73,6 @@ describe.skip('<WatchListPage />', () => {
 
       // create a threshold and advanced watch type and monitoring
       describe('when there are watches', () => {
-        const watch1 = fixtures.getWatch({
-          name: `watchA-${getRandomString()}`,
-          id: `a-${getRandomString()}`,
-          type: 'threshold',
-        });
-        const watch2 = fixtures.getWatch({
-          name: `watchB-${getRandomString()}`,
-          id: `b-${getRandomString()}`,
-          type: 'json',
-        });
-        const watch3 = fixtures.getWatch({
-          name: `watchC-${getRandomString()}`,
-          id: `c-${getRandomString()}`,
-          type: 'monitoring',
-          isSystemWatch: true,
-        });
-
-        const watches = [watch1, watch2, watch3];
-
         beforeEach(async () => {
           ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches });
@@ -108,31 +89,6 @@ describe.skip('<WatchListPage />', () => {
           fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
 
           expect(await screen.findByTestId('watcherListSearchError')).toBeInTheDocument();
-        });
-
-        test('should retain the search query', async () => {
-          const container = screen.getByTestId('watchesTableContainer');
-          const searchInput = within(container).getByRole('searchbox');
-
-          fireEvent.change(searchInput, { target: { value: watch1.name } });
-          fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
-
-          await waitFor(() => {
-            expect(screen.getAllByTestId('row')).toHaveLength(1);
-          });
-
-          expect(screen.getByTestId(`watchIdColumn-${watch1.id}`)).toBeInTheDocument();
-          expect(screen.getByTestId(`watchNameColumn-${watch1.id}`)).toHaveTextContent(watch1.name);
-
-          await act(async () => {
-            await jest.advanceTimersByTimeAsync(REFRESH_INTERVALS.WATCH_LIST);
-          });
-
-          await waitFor(() => {
-            expect(screen.getAllByTestId('row')).toHaveLength(1);
-          });
-          expect(screen.getByTestId(`watchIdColumn-${watch1.id}`)).toBeInTheDocument();
-          expect(screen.getByTestId(`watchNameColumn-${watch1.id}`)).toHaveTextContent(watch1.name);
         });
 
         test('should set the correct app title', () => {
@@ -222,6 +178,51 @@ describe.skip('<WatchListPage />', () => {
               );
             });
           });
+        });
+      });
+
+      describe('when the watch list refreshes', () => {
+        beforeEach(async () => {
+          jest.useFakeTimers();
+          ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+          httpRequestsMockHelpers.setLoadWatchesResponse({ watches });
+
+          renderWatchListPage(httpSetup);
+          // Flush the promise-based initial load so the 60s refresh poll registers as a fake timer.
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(0);
+          });
+          await screen.findByTestId('watchesTable');
+        });
+
+        afterEach(() => {
+          jest.clearAllTimers();
+          jest.useRealTimers();
+        });
+
+        test('should retain the search query', async () => {
+          const container = screen.getByTestId('watchesTableContainer');
+          const searchInput = within(container).getByRole('searchbox');
+
+          fireEvent.change(searchInput, { target: { value: watch1.name } });
+          fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
+
+          await waitFor(() => {
+            expect(screen.getAllByTestId('row')).toHaveLength(1);
+          });
+
+          expect(screen.getByTestId(`watchIdColumn-${watch1.id}`)).toBeInTheDocument();
+          expect(screen.getByTestId(`watchNameColumn-${watch1.id}`)).toHaveTextContent(watch1.name);
+
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(REFRESH_INTERVALS.WATCH_LIST);
+          });
+
+          await waitFor(() => {
+            expect(screen.getAllByTestId('row')).toHaveLength(1);
+          });
+          expect(screen.getByTestId(`watchIdColumn-${watch1.id}`)).toBeInTheDocument();
+          expect(screen.getByTestId(`watchNameColumn-${watch1.id}`)).toHaveTextContent(watch1.name);
         });
       });
     });
