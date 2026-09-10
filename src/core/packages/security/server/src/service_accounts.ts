@@ -26,7 +26,7 @@ export interface CoreServiceAccountsService {
    * bound to the provided request.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name and role assignments for the new service account.
+   * @param params The name for the new service account.
    */
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 }

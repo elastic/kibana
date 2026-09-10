@@ -29,7 +29,7 @@ export interface CoreServiceAccountsService {
    * Create a service account whose privileges are bounded by those of the
    * current user.
    *
-   * @param params The name and role assignments for the new service account.
+   * @param params The name for the new service account.
    */
   create(params: CreateServiceAccountParams): Promise<ServiceAccount>;
 }
