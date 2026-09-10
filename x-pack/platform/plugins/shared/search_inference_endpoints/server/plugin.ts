@@ -24,6 +24,7 @@ import { getForFeature as getForFeatureFn } from './inference_endpoints';
 import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
+  GetForFeatureOptions,
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginSetupDependencies,
   SearchInferenceEndpointsPluginStart,
@@ -190,14 +191,19 @@ export class SearchInferenceEndpointsPlugin
           featureRegistry.updateRecommendedEndpoints.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: async (featureId: string, request: KibanaRequest) => {
+        getForFeature: async (
+          featureId: string,
+          request: KibanaRequest,
+          opts?: GetForFeatureOptions
+        ) => {
           const soClient = core.savedObjects.getScopedClient(request, {
             includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
           });
+          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
           );
-          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
@@ -210,6 +216,7 @@ export class SearchInferenceEndpointsPlugin
             uiSettingsClient,
             featureId,
             ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
+            opts,
             logger: this.logger,
           });
 
