@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { kiAutomationGenerationSkill } from './ki_automation_generation_skill';
+export { aiIndexSourcesSkill } from './ai_index_sources_skill';
