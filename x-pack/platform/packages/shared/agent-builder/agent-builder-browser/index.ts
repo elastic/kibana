@@ -29,10 +29,10 @@ export type {
 } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
-  ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './templates';
