@@ -13,72 +13,14 @@ import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
-import { getEmptyTemplatesTelemetry, getTemplatesTelemetryData } from './queries/templates';
-import {
-  getEmptyFieldLibraryTelemetry,
-  getFieldLibraryTelemetryData,
-} from './queries/field_definitions';
-import type {
-  CasesTelemetry,
-  CollectCasesTelemetryParams,
-  FieldLibraryTelemetry,
-  TemplatesTelemetry,
-} from './types';
-
-/**
- * The templates area, reporting the flag state alongside the counts.
- *
- * When the flag is off the reads are skipped rather than left to come back empty. With the
- * flag off, `getSavedObjectsTypes` leaves the templates type out of the telemetry
- * repository, so the two template reads would return nothing — but the case-adoption read
- * is over the cases type, which is always included, and would report real counts inside a
- * payload that claims the feature is off.
- *
- * Throws on a read failure. The caller owns the error boundary.
- */
-const collectTemplatesTelemetry = async ({
-  savedObjectsClient,
-  logger,
-  templatesEnabled,
-}: CollectCasesTelemetryParams): Promise<TemplatesTelemetry> => {
-  if (!templatesEnabled) {
-    return { featureEnabled: false, ...getEmptyTemplatesTelemetry() };
-  }
-
-  return {
-    featureEnabled: true,
-    ...(await getTemplatesTelemetryData({ savedObjectsClient, logger })),
-  };
-};
-
-/**
- * Skipped when the flag is off by choice, not by constraint. Unlike templates, the
- * field-definition type stays in the telemetry repository either way — see the `templates` flag
- * in `server/config.ts` — so this would otherwise report the definitions a deployment kept after
- * disabling the feature. Reporting the flag keeps that decision visible.
- *
- * Throws on a read failure; the caller owns the error boundary.
- */
-const collectFieldLibraryTelemetry = async ({
-  savedObjectsClient,
-  logger,
-  templatesEnabled,
-}: CollectCasesTelemetryParams): Promise<FieldLibraryTelemetry> => {
-  if (!templatesEnabled) {
-    return { featureEnabled: false, ...getEmptyFieldLibraryTelemetry() };
-  }
-
-  return {
-    featureEnabled: true,
-    ...(await getFieldLibraryTelemetryData({ savedObjectsClient, logger })),
-  };
-};
+import { getTemplatesTelemetryData } from './queries/templates';
+import { getFieldLibraryTelemetryData } from './queries/field_definitions';
+import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
   savedObjectsClient,
   logger,
-  templatesEnabled,
-}: CollectCasesTelemetryParams): Promise<Partial<CasesTelemetry>> => {
+}: CollectTelemetryDataParams): Promise<Partial<CasesTelemetry>> => {
   try {
     const [
       cases,
@@ -100,19 +42,17 @@ export const collectTelemetryData = async ({
       getPushedTelemetryData({ savedObjectsClient, logger }),
       getConfigurationTelemetryData({ savedObjectsClient, logger }),
       getCasesSystemActionData({ savedObjectsClient, logger }),
-      collectTemplatesTelemetry({ savedObjectsClient, logger, templatesEnabled }).catch((err) => {
+      getTemplatesTelemetryData({ savedObjectsClient, logger }).catch((err) => {
         logger.debug('Failed collecting Cases templates telemetry data');
         logger.debug(err);
         return undefined;
       }),
-      collectFieldLibraryTelemetry({ savedObjectsClient, logger, templatesEnabled }).catch(
-        (err) => {
-          logger.debug('Failed collecting Cases field library telemetry data');
-          logger.debug(err);
+      getFieldLibraryTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases field library telemetry data');
+        logger.debug(err);
 
-          return undefined;
-        }
-      ),
+        return undefined;
+      }),
     ]);
 
     return {

@@ -59,35 +59,23 @@ describe('createCasesTelemetry', () => {
     collectTelemetryDataMock.mockResolvedValue({});
   });
 
-  describe('templatesEnabled', () => {
-    /**
-     * Both halves are asserted from a single run on purpose. `featureEnabled` in the payload
-     * is only truthful while the flag passed to the collection and the templates type in the
-     * telemetry repository's allow-list agree, and these are read at two separate call sites.
-     */
+  describe('saved object type allow-list', () => {
     it.each<[string, ConfigType['templates'] | undefined, boolean]>([
-      ['is true when the flag is enabled', { enabled: true }, true],
-      ['is false when the flag is disabled', { enabled: false }, false],
-      ['falls back to false when the templates config is absent', undefined, false],
-    ])(
-      '%s, and the templates type is read to match',
-      async (_description, templatesConfig, expected) => {
-        const { allowedSavedObjectTypes } = await runTelemetryTask(templatesConfig);
+      ['includes the templates type when the flag is enabled', { enabled: true }, true],
+      ['excludes the templates type when the flag is disabled', { enabled: false }, false],
+      ['excludes the templates type when the templates config is absent', undefined, false],
+    ])('%s', async (_description, templatesConfig, expected) => {
+      const { allowedSavedObjectTypes } = await runTelemetryTask(templatesConfig);
 
-        expect(collectTelemetryDataMock).toHaveBeenCalledWith(
-          expect.objectContaining({ templatesEnabled: expected })
-        );
-        expect(allowedSavedObjectTypes.includes(CASE_TEMPLATE_SAVED_OBJECT)).toBe(expected);
-      }
-    );
+      expect(allowedSavedObjectTypes.includes(CASE_TEMPLATE_SAVED_OBJECT)).toBe(expected);
+    });
 
     /**
-     * The gate is a product choice, not a technical one: the field-definition type is in the
-     * telemetry repository whether or not the flag is on, so with it off the read would return
-     * the definitions a deployment kept after disabling the feature.
+     * The field-definition type is in the telemetry repository whether or not the flag is on,
+     * so it is always readable.
      */
     it.each([true, false])(
-      'keeps the field definition type readable regardless of the flag being %s',
+      'always includes the field definition type regardless of the flag being %s',
       async (enabled) => {
         const { allowedSavedObjectTypes } = await runTelemetryTask({ enabled });
 

@@ -44,14 +44,6 @@ export interface CollectTelemetryDataParams {
   logger: Logger;
 }
 
-/**
- * Params for the collection boundary only. Deliberately separate from
- * `CollectTelemetryDataParams` so the individual query modules stay unaware of the flag.
- */
-export interface CollectCasesTelemetryParams extends CollectTelemetryDataParams {
-  templatesEnabled: boolean;
-}
-
 export interface TypeLong {
   type: 'long';
 }
@@ -287,7 +279,6 @@ export interface TemplatesSolutionTelemetry {
 }
 
 export interface TemplatesTelemetry {
-  featureEnabled: boolean;
   all: TemplatesSolutionTelemetry;
   sec: TemplatesSolutionTelemetry;
   obs: TemplatesSolutionTelemetry;
@@ -301,7 +292,6 @@ export interface FieldLibrarySolutionTelemetry {
 }
 
 export interface FieldLibraryTelemetry {
-  featureEnabled: boolean;
   all: FieldLibrarySolutionTelemetry;
   sec: FieldLibrarySolutionTelemetry;
   obs: FieldLibrarySolutionTelemetry;

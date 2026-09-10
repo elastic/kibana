@@ -67,26 +67,15 @@ const buildSolutionTelemetry = (scope?: ScopeAggregationResult): FieldLibrarySol
   return { total: totalGlobal + totalReusable, totalGlobal, totalReusable };
 };
 
-/** The zeroed area for the caller's flag-off path. */
-export const getEmptyFieldLibraryTelemetry = (): Omit<FieldLibraryTelemetry, 'featureEnabled'> => ({
-  all: buildSolutionTelemetry(),
-  sec: buildSolutionTelemetry(),
-  obs: buildSolutionTelemetry(),
-  main: buildSolutionTelemetry(),
-});
-
 /**
  * Snapshot of the Field Library: how many field definitions exist per solution, and how that
  * splits into global and reusable (available to be referenced by a template, not necessarily
  * referenced by one). Aggregations only; no author-supplied value is read.
- *
- * Reports no feature-flag state and swallows nothing — the caller owns both the flag and the
- * error boundary. See `collect_telemetry_data.ts`.
  */
 export const getFieldLibraryTelemetryData = async ({
   savedObjectsClient,
   logger,
-}: CollectTelemetryDataParams): Promise<Omit<FieldLibraryTelemetry, 'featureEnabled'>> => {
+}: CollectTelemetryDataParams): Promise<FieldLibraryTelemetry> => {
   try {
     const res = await savedObjectsClient.find<unknown, FieldLibraryAggregationResult>({
       page: 0,
