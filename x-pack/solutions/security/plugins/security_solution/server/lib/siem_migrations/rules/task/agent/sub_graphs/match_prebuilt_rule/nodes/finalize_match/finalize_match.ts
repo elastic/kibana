@@ -18,7 +18,9 @@ import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
 } from '../../../../../../constants';
-import { NO_MATCH_SUMMARY, type MatchPrebuiltRuleState } from '../../state';
+import type { MatchPrebuiltRuleState } from '../../state';
+
+const NO_MATCH_SUMMARY = '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.';
 
 interface GetFinalizeMatchNodeParams {
   telemetryClient: RuleMigrationTelemetryClient;

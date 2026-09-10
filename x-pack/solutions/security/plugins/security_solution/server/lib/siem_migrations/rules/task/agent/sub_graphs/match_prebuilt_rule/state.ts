@@ -20,9 +20,6 @@ import type {
  */
 export const MAX_TOOL_CALL_ATTEMPTS = 3;
 
-export const NO_MATCH_SUMMARY =
-  '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.';
-
 /** The model's parsed final answer; `undefined` until valid JSON is received or if it never arrives. */
 export interface MatchPrebuiltRulesResult {
   match?: string;

@@ -171,6 +171,10 @@ export const RETRY_SEARCH_PROMPT_PREFIX =
 export const isRetrySearchPromptMessage = (message: { content?: unknown }): boolean =>
   typeof message.content === 'string' && message.content.startsWith(RETRY_SEARCH_PROMPT_PREFIX);
 
+/** Injected inside one agent turn when the model answered without a tool call and the text was not valid JSON. */
+export const RETRY_ON_MALFORMED_JSON_PROMPT =
+  'Your last reply was not valid JSON. Reply with a JSON object inside three backticks as instructed.';
+
 /**
  * Injected by the agent node when the router sends the run back after a no-match JSON answer.
  * Remaining searches is leftover `MAX_TOOL_CALL_ATTEMPTS` so the 1st and 2nd no-match can

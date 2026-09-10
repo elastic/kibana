@@ -6,11 +6,10 @@
  */
 
 import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ChatModel } from '../../../../../../../common/task/util/actions_client_chat';
-import type { RuleSemanticSearchResult } from '../../../../../../types';
 import {
   CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2,
   MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2,
@@ -19,12 +18,10 @@ import {
   formatPreviousQueriesPrompt,
   formatRetrySearchPrompt,
   formatSearchInstructionsPrompt,
+  RETRY_ON_MALFORMED_JSON_PROMPT,
 } from '../../prompts';
-import type {
-  MatchPrebuiltRuleState,
-  MatchPrebuiltRulesResult,
-  PreviousSearchAttempt,
-} from '../../state';
+import type { MatchPrebuiltRuleState, MatchPrebuiltRulesResult } from '../../state';
+import { getPreviousSearchAttempts, hasCandidatesToEvaluate } from './search_history';
 
 interface GetMatchPrebuiltRuleAgentNodeParams {
   model: ChatModel;
@@ -51,14 +48,61 @@ const parseFinalResponse = async (
 // Including the first attempt.
 const MAX_FINAL_ANSWER_ATTEMPTS = 2;
 
-const RETRY_ON_MALFORMED_JSON_MESSAGE = new HumanMessage(
-  'Your last reply was not valid JSON. Reply with a JSON object inside three backticks as instructed.'
-);
-
 interface FinalAnswerResult {
   aiMessage: AIMessage;
   matchResult?: MatchPrebuiltRulesResult;
 }
+
+const formatCreateSemanticQueryMessages = (state: MatchPrebuiltRuleState) => {
+  // Splunk has no nl_query, so we use the raw title/description/query.
+  const ruleContext =
+    state.nl_query ||
+    `Title: ${state.original_rule.title}\nDescription: ${state.original_rule.description}\nQuery: ${state.original_rule.query}`;
+
+  return CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2.formatMessages({
+    ruleContext,
+    vendor: state.original_rule.vendor,
+    mitreAttackIds: state.original_rule.annotations?.mitre_attack?.join(',') ?? '',
+    searchInstructions: formatSearchInstructionsPrompt(
+      getPreviousSearchAttempts(state.match_prebuilt_rules_messages)
+    ),
+  });
+};
+
+/**
+ * Messages appended this turn. First turn also includes the system prompt. Later turns inject
+ * exactly one of: retry prompt (no-match JSON), match prompt (candidates), or query prompt (empty
+ * search).
+ */
+const getPromptMessages = async (state: MatchPrebuiltRuleState): Promise<BaseMessage[]> => {
+  const history = state.match_prebuilt_rules_messages;
+
+  if (history.length === 0) {
+    return [
+      ...(await MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2.formatMessages({})),
+      ...(await formatCreateSemanticQueryMessages(state)),
+    ];
+  }
+
+  const lastMessage = history.at(-1);
+  const previousSearchAttempts = getPreviousSearchAttempts(history);
+
+  if (AIMessage.isInstance(lastMessage) && !lastMessage.tool_calls?.length) {
+    return [new HumanMessage(formatRetrySearchPrompt(previousSearchAttempts))];
+  }
+
+  if (hasCandidatesToEvaluate(history)) {
+    const matchPrompt =
+      state.original_rule.vendor === 'splunk'
+        ? MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2
+        : MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2;
+    return matchPrompt.formatMessages({
+      previousQueries: formatPreviousQueriesPrompt(previousSearchAttempts),
+    });
+  }
+
+  return formatCreateSemanticQueryMessages(state);
+};
 
 /**
  * LangGraph invokes the returned `agent` node under these scenarios:
@@ -90,105 +134,21 @@ export const getMatchPrebuiltRuleAgentNode = ({
     }
 
     return invokeAndValidateFinalAnswer(
-      [...messages, aiMessage, RETRY_ON_MALFORMED_JSON_MESSAGE],
+      [...messages, aiMessage, new HumanMessage(RETRY_ON_MALFORMED_JSON_PROMPT)],
       attempt + 1
     );
   };
 
   return async (state: MatchPrebuiltRuleState): Promise<Partial<MatchPrebuiltRuleState>> => {
-    const matchPrebuiltRulesMessages = state.match_prebuilt_rules_messages;
-    // Splunk has no nl_query, so we use the raw title/description/query.
-    const ruleContext =
-      state.nl_query ||
-      `Title: ${state.original_rule.title}\nDescription: ${state.original_rule.description}\nQuery: ${state.original_rule.query}`;
-    const techniqueIds = state.original_rule.annotations?.mitre_attack?.join(',') ?? '';
-    const previousSearchAttempts = getPreviousSearchAttempts(matchPrebuiltRulesMessages);
-    // Only needed on the first turn and when the last search returned no candidates.
-    const formatCreateSemanticQueryMessages = () =>
-      CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2.formatMessages({
-        ruleContext,
-        vendor: state.original_rule.vendor,
-        mitreAttackIds: techniqueIds,
-        searchInstructions: formatSearchInstructionsPrompt(previousSearchAttempts),
-      });
+    const history = state.match_prebuilt_rules_messages;
+    const promptMessages = await getPromptMessages(state);
+    const { aiMessage, matchResult } = await invokeAndValidateFinalAnswer(
+      history.length === 0 ? promptMessages : [...history, ...promptMessages]
+    );
 
-    if (matchPrebuiltRulesMessages.length > 0) {
-      const matchPrompt =
-        state.original_rule.vendor === 'splunk'
-          ? MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2
-          : MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2;
-
-      // Detects the router's retry path: last message is a no-match AIMessage with no tool calls.
-      const lastMessage = matchPrebuiltRulesMessages.at(-1);
-      const isRetryAfterNoMatch =
-        AIMessage.isInstance(lastMessage) && !lastMessage.tool_calls?.length;
-
-      // Match prompt with candidates, query prompt on empty search, retry prompt after a no-match.
-      const injectedMessages = isRetryAfterNoMatch
-        ? [new HumanMessage(formatRetrySearchPrompt(previousSearchAttempts))]
-        : hasCandidatesToEvaluate(matchPrebuiltRulesMessages)
-        ? await matchPrompt.formatMessages({
-            previousQueries: formatPreviousQueriesPrompt(previousSearchAttempts),
-          })
-        : await formatCreateSemanticQueryMessages();
-
-      const { aiMessage, matchResult } = await invokeAndValidateFinalAnswer([
-        ...matchPrebuiltRulesMessages,
-        ...injectedMessages,
-      ]);
-
-      return {
-        match_prebuilt_rules_messages: [...injectedMessages, aiMessage],
-        match_prebuilt_rules_result: matchResult,
-      };
-    }
-
-    const prompt = [
-      ...(await MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2.formatMessages({})),
-      ...(await formatCreateSemanticQueryMessages()),
-    ];
-
-    const { aiMessage, matchResult } = await invokeAndValidateFinalAnswer(prompt);
-    // First turn — starts the conversation and issues the initial search
     return {
-      match_prebuilt_rules_messages: [...prompt, aiMessage],
+      match_prebuilt_rules_messages: [...promptMessages, aiMessage],
       match_prebuilt_rules_result: matchResult,
     };
   };
-};
-
-/** True when the last search returned candidates; checks only the last message, not earlier searches. */
-const hasCandidatesToEvaluate = (messages: BaseMessage[]): boolean => {
-  const lastMessage = messages.at(-1);
-  return (
-    ToolMessage.isInstance(lastMessage) &&
-    Array.isArray(lastMessage.artifact) &&
-    lastMessage.artifact.length > 0
-  );
-};
-
-const getPreviousSearchAttempts = (messages: BaseMessage[]): PreviousSearchAttempt[] => {
-  const toolResultsByCallId = new Map<string, RuleSemanticSearchResult[]>();
-  messages.forEach((message) => {
-    if (ToolMessage.isInstance(message) && message.name === 'searchPrebuiltRules') {
-      toolResultsByCallId.set(
-        message.tool_call_id,
-        Array.isArray(message.artifact) ? (message.artifact as RuleSemanticSearchResult[]) : []
-      );
-    }
-  });
-
-  return messages.filter(AIMessage.isInstance).flatMap((message) =>
-    (message.tool_calls ?? [])
-      .filter(
-        (toolCall) =>
-          toolCall.name === 'searchPrebuiltRules' && typeof toolCall.args.query === 'string'
-      )
-      .map((toolCall) => ({
-        query: toolCall.args.query as string,
-        candidateNames: (toolCall.id ? toolResultsByCallId.get(toolCall.id) ?? [] : []).map(
-          ({ name }) => name
-        ),
-      }))
-  );
 };
