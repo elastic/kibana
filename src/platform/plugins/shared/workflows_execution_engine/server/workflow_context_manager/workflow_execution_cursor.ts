@@ -32,14 +32,7 @@ export interface WorkflowExecutionCursorApi {
   navigateToNode(nodeId: string): void;
   navigateToNextNode(): void;
   navigateToAfterNode(nodeId: string): void;
-  navigateToSynthetic(params: {
-    stepId: string;
-    nodeType: string;
-    nodeId: string;
-    scopeId?: string;
-    exitNodeId?: string;
-    stepType?: string;
-  }): void;
+  navigateToSynthetic(params: { stepId: string; stepType: string }): void;
   readonly currentStackFrames: StackFrame[];
   setCurrentScopeId(scopeId?: string): void;
 }
@@ -164,7 +157,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Queues a synthetic enter/exit pair under the current node.
    * The overlay insert and cursor move happen on the next `commitPendingNavigation`.
    */
-  public navigateToSynthetic(params: { stepId: string; stepType?: string }): void {
+  public navigateToSynthetic(params: { stepId: string; stepType: string }): void {
     if (!this.currentNodeId) {
       throw new Error('Cannot insert a synthetic scope without a current node');
     }
