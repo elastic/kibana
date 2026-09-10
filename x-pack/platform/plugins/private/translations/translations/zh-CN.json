@@ -54877,7 +54877,6 @@
     "xpack.streams.enrichment.editMode.interactive": "交互",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "当前 YAML 配置包含交互式编辑器无法表示的功能。",
     "xpack.streams.enrichment.editMode.legend": "编辑模式选择",
-    "xpack.streams.enrichment.editMode.yaml": "YAML",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "加载更多匹配样本",
     "xpack.streams.enrichment.fetchMore.error": "未能加载更多匹配样本。",
     "xpack.streams.enrichment.processor.deleteProcessor.cancelButtonText": "取消",
