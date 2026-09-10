@@ -230,6 +230,24 @@ describe('createWorkflowVerifier', () => {
       );
     });
 
+    it('cancels the execution and rethrows when aborted while a poll is in flight', async () => {
+      const controller = new AbortController();
+      workflowsManagement.getWorkflowExecution.mockImplementation(async () => {
+        controller.abort();
+        return execution(ExecutionStatus.RUNNING);
+      });
+
+      await expect(
+        makeVerifier().verify({}, { ...context, abortSignal: controller.signal })
+      ).rejects.toMatchObject({ name: 'AbortError' });
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(workflowsManagement.cancelWorkflowExecution).toHaveBeenCalledWith(
+        executionId,
+        spaceId,
+        request
+      );
+    });
+
     it('truncates long reasons', async () => {
       completed({ passed: false, reason: 'x'.repeat(5000) });
 

@@ -67,9 +67,13 @@ const fail = (reason: string): KiVerifierOutcome => ({
   reason: reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH)}…` : reason,
 });
 
-/** Resolves after `ms`, or rejects with the signal's reason as soon as it aborts. */
+/** Resolves after `ms`, or rejects with the signal's reason as soon as (or if already) aborted. */
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason);
+      return;
+    }
     const onAbort = () => {
       clearTimeout(timer);
       reject(signal?.reason);
@@ -149,6 +153,7 @@ export const createWorkflowVerifier = (
 
       try {
         while (true) {
+          abortSignal?.throwIfAborted();
           const execution = await workflowsManagement.getWorkflowExecution(
             workflowExecutionId,
             spaceId,
