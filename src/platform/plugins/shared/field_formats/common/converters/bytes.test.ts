@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
 import { BytesFormat } from './bytes';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import type { FieldFormatsGetConfigFn } from '../types';
@@ -37,8 +36,8 @@ describe('BytesFormat', () => {
   test('missing value', () => {
     const formatter = new BytesFormat({}, getConfig);
 
-    expect(formatter.convertToText(null)).toBe(NULL_LABEL);
-    expect(formatter.convertToText(undefined)).toBe(NULL_LABEL);
+    expect(formatter.convertToText(null)).toBe('(null)');
+    expect(formatter.convertToText(undefined)).toBe('(null)');
     expectReactElementWithNull(formatter.convertToReact(null));
     expectReactElementWithNull(formatter.convertToReact(undefined));
   });

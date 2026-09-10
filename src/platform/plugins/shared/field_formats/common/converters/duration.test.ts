@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
 import { DurationFormat } from './duration';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 import { asPrettyString } from '../utils';
@@ -21,8 +20,8 @@ describe('Duration Format', () => {
       },
       jest.fn()
     );
-    expect(duration.convertToText(null)).toBe(NULL_LABEL);
-    expect(duration.convertToText(undefined)).toBe(NULL_LABEL);
+    expect(duration.convertToText(null)).toBe('(null)');
+    expect(duration.convertToText(undefined)).toBe('(null)');
     expectReactElementWithNull(duration.convertToReact(null));
     expectReactElementWithNull(duration.convertToReact(undefined));
   });
@@ -96,11 +95,11 @@ describe('Duration Format', () => {
       },
       {
         input: null,
-        output: NULL_LABEL,
+        output: '(null)',
       },
       {
         input: undefined,
-        output: NULL_LABEL,
+        output: '(null)',
       },
     ],
   });
@@ -640,7 +639,7 @@ describe('Duration Format', () => {
         );
         expect(duration.convertToText(input)).toBe(output);
 
-        if (output === NULL_LABEL) {
+        if (output === '(null)') {
           expectReactElementWithNull(duration.convertToReact(input));
         } else {
           expect(duration.convertToReact(input)).toBe(output);

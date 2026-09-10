@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
 import moment from 'moment-timezone';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
 import type { FieldFormatsGetConfigFn } from '../types';
@@ -75,8 +74,8 @@ describe('Date Nanos Format', () => {
   });
 
   test('decoding a missing value', () => {
-    expect(convert(null)).toBe(NULL_LABEL);
-    expect(convert(undefined)).toBe(NULL_LABEL);
+    expect(convert(null)).toBe('(null)');
+    expect(convert(undefined)).toBe('(null)');
     expectReactElementWithNull(date.convertToReact(null));
     expectReactElementWithNull(date.convertToReact(undefined));
   });
