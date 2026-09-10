@@ -12,7 +12,6 @@ import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/publi
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
@@ -21,13 +20,13 @@ const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
   CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
 ]);
 
+/**
+ * The user reads this message in the conversation, so it says what they asked for and nothing more.
+ * Which skills to load and how to work is carried by the `ai_index` attachment instead.
+ */
 const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',
-  {
-    defaultMessage:
-      "Load [/{skillId}](skill://{skillId}) and follow its **When an ai_index attachment is present** section for the attached AI index. Skip discovery and only use the attachment's destination, sources, and automations.",
-    values: { skillId: KI_AUTOMATION_GENERATION_SKILL_ID },
-  }
+  { defaultMessage: 'Suggest an automation for this AI index.' }
 );
 
 const getAutomationToolAiIndexId = (result: ToolResult): string | undefined => {
@@ -62,7 +61,7 @@ export const createSuggestAutomationProvider = ({
 
     agentBuilder.openChat({
       newConversation: true,
-      autoSendInitialMessage: false,
+      autoSendInitialMessage: true,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
       sessionTag: `context-engine-ai-index-${aiIndex.id}`,
       attachments: [

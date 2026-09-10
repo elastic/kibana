@@ -105,7 +105,7 @@ apiTest.describe(
       }
     });
 
-    apiTest('each result has list fields without structured output', async ({ apiClient }) => {
+    apiTest('each result includes list fields, not detailed output', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
         query: times.createdRange,
       });
@@ -121,7 +121,7 @@ apiTest.describe(
       expect(inv.completed_at).toBe(times.iso({ day: 0, hour: 11 }));
       expect(inv.subject).toStrictEqual({ type: 'alert', id: 'alert-1' });
       expect(inv.trigger_type).toBeUndefined();
-      expect(inv.summary).toBeUndefined();
+      expect(inv.summary).toBe('First investigation.');
       expect(inv.conclusion).toBeUndefined();
       expect(inv.error).toBeUndefined();
     });
