@@ -12,7 +12,8 @@ import { getUrlDrilldown } from './get_url_drilldown';
 import { rowClickData } from './test/data';
 
 const mockExternalUrl = {
-  validateUrl: (url) => new URL(url),
+  validateUrl: (url: string) => new URL(url),
+  isInternalUrl: (_url: string) => false,
 };
 
 const createDrilldown = () =>
