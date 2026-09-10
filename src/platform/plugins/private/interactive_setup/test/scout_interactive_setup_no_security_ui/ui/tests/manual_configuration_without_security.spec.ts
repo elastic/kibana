@@ -14,6 +14,7 @@ import {
   SETUP_COMPLETION_TIMEOUT_MS,
   SETUP_SPEC_TIMEOUT_MS,
 } from '../../../helpers/constants';
+import { isFipsEnabled } from '../../../helpers/fips';
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 import { test } from '../fixtures';
 
@@ -21,7 +22,11 @@ test.describe(
   'Interactive setup - manual configuration without security',
   { tag: ['@local-stateful-classic'] },
   () => {
-    // Pre-migration tag 'skipFIPS'
+    test.skip(
+      () => isFipsEnabled(),
+      'interactive setup rewrites kibana.yml and drops xpack.security.fipsMode.enabled — fatal under FIPS'
+    );
+
     test('configures Kibana against a cluster with security disabled', async ({
       pageObjects,
       apiClient,
