@@ -24,7 +24,6 @@ import {
 import { expect } from 'expect';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import {
-  deleteAllCaseItems,
   findAttachments,
   findCaseUserActions,
   findCases,
@@ -65,7 +64,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const find = getService('find');
-  const es = getService('es');
   const common = getPageObject('common');
   const retry = getService('retry');
   const dashboard = getPageObject('dashboard');
@@ -253,7 +251,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         after(async () => {
-          await deleteAllCaseItems(es);
+          await cases.api.deleteAllCases();
         });
 
         it('renders solutions selection', async () => {
@@ -294,7 +292,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const openModal = async () => {
           await common.clickAndValidate('case-fixture-attach-to-existing-case', 'all-cases-modal');
-          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.waitForNthToBeListed(createdCases.size * 2);
         };
 
         const closeModal = async () => {
@@ -303,6 +301,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         before(async () => {
+          await cases.api.deleteAllCases();
+
           for (const owner of TOTAL_OWNERS) {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
@@ -314,7 +314,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await deleteAllCaseItems(es);
+          await cases.api.deleteAllCases();
         });
 
         it('renders different solutions', async () => {
@@ -334,11 +334,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
             await cases.casesTable.filterByOwner(owner);
             await cases.casesTable.getCaseById(currentCaseId);
-            /**
-             * The select button matched the query of the
-             * [data-test-subj*="cases-table-row-" query
-             */
-            await cases.casesTable.validateCasesTableHasNthRows(2);
             await closeModal();
           }
         });
@@ -365,7 +360,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
 
-            await cases.casesTable.waitForTableToFinishLoading();
             await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
