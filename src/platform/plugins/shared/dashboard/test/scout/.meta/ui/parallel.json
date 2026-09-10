@@ -1,8 +1,7 @@
 {
-  "sha1": "a5588345d86913d4ec91862e824e54fe77f705eb",
+  "sha1": "2ee3fa5ee357b3699ea21cf3bf3a846c6b4c3f8b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -48,7 +47,7 @@
     {
       "id": "3e4259fe911aa15-3d9ded58f5789be",
       "title": "Dashboard add panel flyout renders add panel flyout",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -61,7 +60,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 71
       }
     },
@@ -162,7 +161,7 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
         "line": 75,
-        "column": 25
+        "column": 27
       }
     },
     {
@@ -181,7 +180,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 13
       }
     },

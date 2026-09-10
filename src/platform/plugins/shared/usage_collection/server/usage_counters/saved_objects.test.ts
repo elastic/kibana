@@ -67,7 +67,7 @@ describe('storeCounter', () => {
 
     await storeCounter({ metric, soRepository: internalRepository });
 
-    expect(internalRepository.incrementCounter).toBeCalledTimes(1);
+    expect(internalRepository.incrementCounter).toHaveBeenCalledTimes(1);
     expect(internalRepository.incrementCounter.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "usage-counter",

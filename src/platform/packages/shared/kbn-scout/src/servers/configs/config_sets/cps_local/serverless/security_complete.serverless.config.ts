@@ -14,10 +14,7 @@ import {
 } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-
-const isSecurityTestEndpointsPluginPath = (arg: string) =>
-  arg.startsWith('--plugin-path=') &&
-  arg.includes('x-pack/platform/test/security_functional/plugins/test_endpoints');
+import { withoutSecurityTestEndpoints } from './utils';
 
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
@@ -46,11 +43,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      // The inherited UIAM config adds securityTestEndpoints for API tests. CPS local
-      // manual/UI testing does not use it, and loading its browser plugin can break boot.
-      ...uiamConfig.kbnTestServer.serverArgs.filter(
-        (arg) => !isSecurityTestEndpointsPluginPath(arg)
-      ),
+      ...withoutSecurityTestEndpoints(uiamConfig.kbnTestServer.serverArgs),
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
       // UIAM API keys for task-manager: required for background tasks to be eligible

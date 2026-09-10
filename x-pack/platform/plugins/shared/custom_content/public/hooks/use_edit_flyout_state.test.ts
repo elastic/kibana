@@ -6,18 +6,20 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../services');
-jest.mock('../utils/fetch_esql_data');
-jest.mock('../utils/fill_template');
-jest.mock('../utils/prepare_html');
+jest.mock('@kbn/custom-content-renderer');
 jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
 
 import type { HttpStart } from '@kbn/core/public';
+import {
+  fetchEsqlData,
+  fillTemplate,
+  sanitizeHtml,
+  applyHtmlTheme,
+} from '@kbn/custom-content-renderer';
 import { getServices } from '../services';
-import { fetchEsqlData } from '../utils/fetch_esql_data';
-import { fillTemplate } from '../utils/fill_template';
-import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
@@ -43,7 +45,7 @@ beforeEach(() => {
 
 const mockOnRunPreview = jest.fn();
 
-const mockEuiTheme = {} as any;
+const mockEuiTheme = {} as unknown as EuiThemeComputed;
 
 const baseParams = {
   esqlQuery: 'FROM logs | LIMIT 10',
@@ -55,6 +57,7 @@ const baseParams = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   onRunPreview: mockOnRunPreview,
 };
 
@@ -78,6 +81,7 @@ describe('useEditFlyoutState', () => {
           projectRouting: undefined,
           query: undefined,
           filters: undefined,
+          esqlVariables: undefined,
           onRunPreview: mockOnRunPreview,
         })
       );
@@ -147,6 +151,7 @@ describe('useEditFlyoutState', () => {
           projectRouting: undefined,
           query: undefined,
           filters: undefined,
+          esqlVariables: undefined,
           onRunPreview: mockOnRunPreview,
         })
       );
@@ -174,42 +179,6 @@ describe('useEditFlyoutState', () => {
       expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>');
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
-    });
-
-    it('sets hasPreviewedCurrentDraft to true on success', async () => {
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-
-      expect(result.current.hasPreviewedCurrentDraft).toBe(true);
-    });
-
-    it('resets hasPreviewedCurrentDraft when query is edited', async () => {
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-      expect(result.current.hasPreviewedCurrentDraft).toBe(true);
-
-      act(() => {
-        result.current.setDraftEsqlQuery('FROM other');
-      });
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
-    });
-
-    it('does not set hasPreviewedCurrentDraft on render failure', async () => {
-      mockFetchEsqlData.mockRejectedValue(new Error('fetch failed'));
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
     });
 
     it('skips fetch and uses draft template directly when no esql query', async () => {
@@ -259,7 +228,7 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledTimes(1);
     });
 
-    it('does not set hasPreviewedCurrentDraft or call onRunPreview when the draft changed mid-flight', async () => {
+    it('does not call onRunPreview when the draft changed mid-flight', async () => {
       let resolveRender!: () => void;
       mockFetchEsqlData.mockReturnValue(
         new Promise((resolve) => {
@@ -277,14 +246,12 @@ describe('useEditFlyoutState', () => {
       act(() => {
         result.current.setDraftEsqlQuery('FROM logs | LIMIT 5');
       });
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
 
       await act(async () => {
         resolveRender();
       });
 
       expect(result.current.isRenderLoading).toBe(false);
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
       expect(mockOnRunPreview).not.toHaveBeenCalled();
     });
 

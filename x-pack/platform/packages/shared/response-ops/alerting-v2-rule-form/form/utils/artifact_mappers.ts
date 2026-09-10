@@ -21,16 +21,11 @@ export interface RuleArtifactSlices {
 
 export const mapArtifacts = (
   artifacts: RuleArtifactPayload | undefined
-): RuleArtifactPayload | undefined => (artifacts?.length ? artifacts : undefined);
-
-const createArtifactId = (type: string): string =>
-  `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-/**
- * Returns `existingId` when it holds a real value, otherwise a fresh id.
- */
-export const resolveArtifactId = (type: string, existingId?: string): string =>
-  existingId?.trim() ? existingId : createArtifactId(type);
+): RuleArtifactPayload | undefined =>
+  artifacts?.length
+    ? // Drop any leftover legacy keys (e.g. migrated `value`) before write.
+      artifacts.map(({ id, type, data }) => ({ id, type, data }))
+    : undefined;
 
 export const splitArtifactsByType = (
   artifacts: RuleArtifactPayload | undefined

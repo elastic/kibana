@@ -18,10 +18,13 @@ import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
@@ -73,6 +76,11 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { euiTheme } = useEuiTheme();
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -82,7 +90,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
-  const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { flyout, confirmationModal, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
@@ -223,7 +231,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         badges={badges}
         metadata={headerMetadata}
         menu={menu}
-        spacing="flush"
+        spacing="bleed"
         sticky={false}
       />
       <KibanaPageTemplate.Section
@@ -315,6 +323,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         />
       )}
       {flyout}
+      {confirmationModal}
       {changeHistoryModal}
     </KibanaPageTemplate>
   );

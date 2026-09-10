@@ -37,7 +37,7 @@ describe('ProcessMetricsCollector', () => {
       const metrics = collector.collect();
       expect(metrics).toHaveLength(1);
       expect(metrics[0].event_loop_delay).toBe(18);
-      expect(mockEventLoopDelayMonitor.collect).toBeCalledTimes(1);
+      expect(mockEventLoopDelayMonitor.collect).toHaveBeenCalledTimes(1);
     });
 
     it('collects event loop utilization', () => {
@@ -46,7 +46,7 @@ describe('ProcessMetricsCollector', () => {
       const metrics = collector.collect();
       expect(metrics).toHaveLength(1);
       expect(metrics[0].event_loop_utilization).toEqual(mockData);
-      expect(mockEventLoopUtilizationMonitor.collect).toBeCalledTimes(1);
+      expect(mockEventLoopUtilizationMonitor.collect).toHaveBeenCalledTimes(1);
     });
 
     it('collects uptime info from the process', () => {
@@ -97,12 +97,12 @@ describe('ProcessMetricsCollector', () => {
   describe('#reset', () => {
     it('resets event loop delay', () => {
       collector.reset();
-      expect(mockEventLoopDelayMonitor.reset).toBeCalledTimes(1);
+      expect(mockEventLoopDelayMonitor.reset).toHaveBeenCalledTimes(1);
     });
 
     it('resets event loop utilization', () => {
       collector.reset();
-      expect(mockEventLoopUtilizationMonitor.reset).toBeCalledTimes(1);
+      expect(mockEventLoopUtilizationMonitor.reset).toHaveBeenCalledTimes(1);
     });
   });
 
