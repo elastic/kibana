@@ -40,6 +40,7 @@ const INVESTIGATION_TOOLS = [
   'observability.get_services',
   'observability.get_alerts',
   'observability.get_service_topology',
+  'attachments.add',
 ];
 
 const SERVICE_MAP_CONTEXT_ATTACHMENT_TYPE = 'observability.service-map-context';
@@ -103,7 +104,7 @@ evaluate.describe(
           dataset: {
             name: 'service-map investigation — whole scope',
             description:
-              'Validates that the investigate-service-map skill surveys all services, orders issues by severity, explains the architecture in prose, and provides deep links. Uses the payment-unreachable snapshot where checkout degrades because payment is unreachable. Phase 1 deliberately renders no service-map attachment — the user is already looking at the map.',
+              'Validates that the investigate-service-map skill surveys all services, orders issues by severity, renders the service-map attachment, explains the architecture, and provides deep links. Uses the payment-unreachable snapshot where checkout degrades because payment is unreachable.',
             examples: [
               {
                 input: {
@@ -118,6 +119,7 @@ evaluate.describe(
                     'Does not flag frontend, cart, currency, shipping, or product-catalog as having problems (they are healthy)',
                     'Explains the overall architecture: frontend as an entry point calling checkout, checkout fanning out to payment and other downstream services',
                     'Provides at least one concrete `/app/apm/` deep link to the payment or checkout service',
+                    'Renders a service map attachment of the topology (not only a prose description)',
                     'Orders issues by severity — problem services appear before structural observations',
                     'Does not invent services, alerts, or anomalies that are not present in the data',
                   ],
@@ -142,8 +144,8 @@ evaluate.describe(
             name: 'service-map investigation — highlighted healthy service',
             description:
               'Validates that when the user has highlighted the frontend service (which is healthy), ' +
-              'the agent investigates that service first, reports it as healthy, and still surfaces ' +
-              'the genuinely degraded payment service.',
+              'the agent investigates that service first, reports it as healthy, still surfaces the ' +
+              'genuinely degraded payment service, and renders the service-map attachment.',
             examples: [
               {
                 input: {
@@ -158,6 +160,7 @@ evaluate.describe(
                     'Reports that the frontend service is healthy — no active alerts, no SLO violations, no significant anomalies',
                     'Still identifies the payment service as the primary problem in the wider map (its degradation is the most significant issue even though it is not the highlighted service)',
                     'Does not invent alerts, SLO violations, or anomalies for the frontend service',
+                    'Renders a service map attachment of the topology',
                     'Provides at least one concrete `/app/apm/` deep link',
                   ],
                   expectedTools: INVESTIGATION_TOOLS,
