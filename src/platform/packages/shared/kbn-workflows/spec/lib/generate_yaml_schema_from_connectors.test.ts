@@ -12,6 +12,7 @@ import {
   CONNECTOR_ID_MAX_LENGTH,
   type ConnectorContractUnion,
   generateYamlSchemaFromConnectors,
+  TEMPLATE_EXPRESSION_MAX_LENGTH,
 } from '../..';
 
 const BASE_WORKFLOW = {
@@ -216,6 +217,124 @@ describe('generateYamlSchemaFromConnectors', () => {
 
       expect(result.success).toBe(false);
       expect(elapsed).toBeLessThan(500);
+    });
+  });
+
+  describe('withTemplateStringSupport (array field widening)', () => {
+    const arrayConnector: ConnectorContractUnion = {
+      summary: 'Notifier',
+      description: null,
+      type: 'notify',
+      paramsSchema: z.object({
+        recipients: z.array(z.string()),
+        subject: z.string(),
+      }),
+      outputSchema: z.unknown(),
+    };
+
+    const parse = (withValue: unknown) =>
+      generateYamlSchemaFromConnectors([arrayConnector]).safeParse({
+        ...BASE_WORKFLOW,
+        steps: [{ name: 'step', type: 'notify', with: withValue }],
+      });
+
+    it('accepts a {{ expr }} template for an array param', () => {
+      expect(parse({ recipients: '{{ workflow.inputs.recipients }}', subject: 'hi' }).success).toBe(
+        true
+      );
+    });
+
+    it('accepts a ${{ expr }} template for an array param', () => {
+      expect(
+        parse({ recipients: '${{ workflow.inputs.recipients }}', subject: 'hi' }).success
+      ).toBe(true);
+    });
+
+    it('rejects a plain string for an array param', () => {
+      expect(parse({ recipients: 'not-a-template', subject: 'hi' }).success).toBe(false);
+    });
+
+    it('rejects a partial template string (text before {{ }}) for an array param', () => {
+      expect(parse({ recipients: 'prefix-{{ expr }}', subject: 'hi' }).success).toBe(false);
+    });
+
+    it('rejects a template string exceeding TEMPLATE_EXPRESSION_MAX_LENGTH', () => {
+      const long = `{{ ${'x'.repeat(TEMPLATE_EXPRESSION_MAX_LENGTH)} }}`;
+      expect(parse({ recipients: long, subject: 'hi' }).success).toBe(false);
+    });
+
+    it('does not widen non-array fields — string params remain string-only', () => {
+      expect(parse({ recipients: ['a@b.com'], subject: '{{ not-widened }}' }).success).toBe(true);
+      // A real Liquid expression is still valid as a string value, but a plain array is not
+      expect(parse({ recipients: ['a@b.com'], subject: ['array', 'not', 'ok'] }).success).toBe(
+        false
+      );
+    });
+
+    it('widens optional array params and preserves optionality', () => {
+      const connector: ConnectorContractUnion = {
+        summary: 'Opt',
+        description: null,
+        type: 'opt.step',
+        paramsSchema: z.object({ tags: z.array(z.string()).optional() }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      // template string accepted
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'opt.step', with: { tags: '{{ workflow.inputs.tags }}' } }],
+        }).success
+      ).toBe(true);
+      // omitting the optional field is still valid
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'opt.step', with: {} }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('widens default-wrapped array params', () => {
+      const connector: ConnectorContractUnion = {
+        summary: 'Def',
+        description: null,
+        type: 'def.step',
+        paramsSchema: z.object({ tags: z.array(z.string()).default([]) }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'def.step', with: { tags: '{{ workflow.inputs.tags }}' } }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('preserves the object unknownKeys policy of the original paramsSchema', () => {
+      // A strict paramsSchema should still reject unknown keys after widening.
+      const connector: ConnectorContractUnion = {
+        summary: 'Strict',
+        description: null,
+        type: 'strict.step',
+        paramsSchema: z.strictObject({ ids: z.array(z.string()) }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'strict.step',
+              with: { ids: '{{ workflow.inputs.ids }}', unknown_key: 'bad' },
+            },
+          ],
+        }).success
+      ).toBe(false);
     });
   });
 });
