@@ -62,14 +62,7 @@ export interface OverlaySystemFlyoutStart {
  */
 export type OverlayFlyoutTemplateOpenOptions = Omit<FlyoutTemplateProps, 'children' | 'onClose'> & {
   /**
-   * Called when the flyout is dismissed, just before the returned {@link OverlayRef} is
-   * closed. Purely a notification: the flyout manager has already dropped the flyout by the
-   * time this runs, so returning without doing anything does not keep it open.
-   *
-   * Note this differs from `openFlyout`, where `onClose` replaces the close and a handler
-   * that declines to call `flyout.close()` keeps the flyout open. That is not achievable for
-   * a managed flyout; supporting it needs an upstream hook that runs before the manager
-   * mutates. See <backlog issue> for the veto use case.
+   * Called when the flyout is dismissed, just before the returned {@link OverlayRef} is closed.
    */
   onClose?: () => void;
 };
