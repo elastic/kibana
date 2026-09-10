@@ -83,8 +83,11 @@ export const registerAnonymizationSettingsRoutes = ({
       const client = await getClient();
 
       const [status, state] = await Promise.all([
-        client.getWorkflowStatus(INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID, { spaceId }),
-        client.getInstalledWorkflowState(INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID, spaceId),
+        client.getWorkflowStatus(INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        }),
+        client.getInstalledWorkflowState(WORKFLOW_ID_FOR_SPACE(spaceId), spaceId),
       ]);
 
       const templateValues =
@@ -135,6 +138,7 @@ export const registerAnonymizationSettingsRoutes = ({
       // Reject writes when the managed workflow has been cloned/replaced.
       const status = await client.getWorkflowStatus(INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID, {
         spaceId,
+        workflowIdSuffix: spaceId,
       });
       if (status.status !== 'intact' && status.status !== 'disabled') {
         return response.conflict({
@@ -147,7 +151,7 @@ export const registerAnonymizationSettingsRoutes = ({
       // If any template values are being updated, reinstall with the merged values.
       if (builtInRules !== undefined || customRules !== undefined || failureMode !== undefined) {
         const state = await client.getInstalledWorkflowState(
-          INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+          WORKFLOW_ID_FOR_SPACE(spaceId),
           spaceId
         );
         const existing =

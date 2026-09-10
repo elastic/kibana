@@ -201,7 +201,7 @@ export const createWorkflowAnonymizationProvider = ({
           }
 
           const state = await getInstalledWorkflowState(
-            INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+            `${INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID}-${namespace}`,
             namespace
           );
           const value = (state?.templateValues as InferencePiiAnonymizationTemplateValues | null)

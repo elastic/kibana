@@ -107,8 +107,7 @@ const buildYaml = ({
     .join('\n');
 
   const activeCustomRules = customRules
-    .filter((rule) => rule.enabled)
-    .map((rule) => renderRule(rule.entityClass, rule.pattern, true))
+    .map((rule) => renderRule(rule.entityClass, rule.pattern, rule.enabled))
     .join('\n');
 
   const allRules = [activeBuiltInRules, activeCustomRules].filter(Boolean).join('\n');

@@ -43,7 +43,7 @@ export const createInferenceAnonymizationManagedWorkflowInstaller = ({
         // handle this too, but only if `values` is omitted — the typed install API requires
         // a value for yamlTemplate workflows, so we resolve it here instead.
         const state = await client.getInstalledWorkflowState(
-          INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+          `${INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID}-${spaceId}`,
           spaceId
         );
         const values: InferencePiiAnonymizationTemplateValues =
