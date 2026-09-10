@@ -16,13 +16,13 @@ import {
 import type {
   BrowserApiToolMetadata,
   ChatAgentEvent,
+  ConversationRound,
   MetadataFieldValue,
   RoundInput,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
-  ConversationRoundStatus,
   AgentExecutionMode,
   isToolCallStep,
   isRelevantSkillsStep,
@@ -32,7 +32,6 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
-import type { ProcessedConversation } from './utils/prepare_conversation';
 import { createResultTransformer } from './utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
@@ -65,7 +64,7 @@ import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
-import { roundsForContext } from '../../conversation';
+import { eventsForContext, groupTimelineRounds, roundResponse } from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -127,9 +126,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversationClient,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation, action });
+  // The context is built from the normalized event timeline (legacy conversations serialized
+  // through roundsToEvents) so preflight, pending-round detection and message building read one
+  // source. Regenerate replaces the last round, so a paused one is never resumed.
+  const timeline = conversation ? eventsForContext(conversation) : [];
 
-  const pendingRound = getPendingRound(conversation);
+  ensureValidInput({ input: nextInput, timeline, action });
+
+  const pendingRound = action === 'regenerate' ? undefined : getPendingRound(timeline);
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -187,12 +191,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
-  const previousRounds = conversation ? roundsForContext(conversation) : [];
-
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds,
+    timeline,
     nextInputAuthor: pendingRound?.author ?? author,
     context,
     action,
@@ -214,7 +216,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           skills: filteredSkills,
           context: {
             userMessage: processedConversation.nextInput.message,
-            recentContext: buildRecentContext(processedConversation.previousRounds),
+            recentContext: buildRecentContext(
+              groupTimelineRounds(processedConversation.timeline).map((round) => ({
+                input: round.userMessage.data,
+                response: roundResponse(round),
+              }))
+            ),
           },
           modelProvider,
           logger,
@@ -288,7 +295,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.previousRounds, {
+  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.timeline, {
     toolManager,
     toolRegistry,
   });
@@ -384,7 +391,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
-      conversation: processedConversation,
+      pendingRound,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
       promptManager,
@@ -521,13 +528,13 @@ const getConversationState = ({
 };
 
 const createInitializerCommand = ({
-  conversation,
+  pendingRound,
   cycleLimit,
   agentBuilderToLangchainIdMap,
   promptManager,
   eventEmitter,
 }: {
-  conversation: ProcessedConversation;
+  pendingRound?: ConversationRound;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
   promptManager: PromptManager;
@@ -536,13 +543,9 @@ const createInitializerCommand = ({
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
-  const lastRound = conversation.previousRounds.length
-    ? conversation.previousRounds[conversation.previousRounds.length - 1]
-    : undefined;
-
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
+  if (pendingRound) {
     const { actions, consumedPromptIds } = buildPendingRoundActions({
-      round: lastRound,
+      round: pendingRound,
       promptState: promptManager.dump(),
       toolIdMapping: agentBuilderToLangchainIdMap,
       eventEmitter,
@@ -554,15 +557,15 @@ const createInitializerCommand = ({
     }
     // If any tool-call step is still pending (empty results), executeTool must run it.
     // Otherwise the only thing that was paused was ask_user_question - so we go straight to the agent loop
-    const hasPendingToolCall = lastRound.steps.some(
+    const hasPendingToolCall = pendingRound.steps.some(
       (step) => isToolCallStep(step) && step.results.length === 0
     );
     startAt = hasPendingToolCall ? steps.executeTool : steps.researchAgent;
   }
 
-  if (lastRound?.state) {
-    initialState.currentCycle = lastRound.state.agent.current_cycle;
-    initialState.errorCount = lastRound.state.agent.error_count;
+  if (pendingRound?.state) {
+    initialState.currentCycle = pendingRound.state.agent.current_cycle;
+    initialState.errorCount = pendingRound.state.agent.error_count;
   }
 
   return new Command({
