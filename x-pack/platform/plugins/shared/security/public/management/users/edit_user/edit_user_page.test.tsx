@@ -183,17 +183,15 @@ describe('EditUserPage', () => {
       },
     };
 
-    render(
+    const { findByText, queryByRole } = render(
       coreStart.rendering.addContext(
-        <MockAppHeaderProvider>
-          <Providers services={coreStart} authc={authc} history={history}>
-            <EditUserPage username={userMock.username} />
-          </Providers>
-        </MockAppHeaderProvider>
+        <Providers services={coreStart} authc={authc} history={history}>
+          <EditUserPage username={userMock.username} />
+        </Providers>
       )
     );
 
-    await screen.findByText(/User has been deactivated/i);
-    expect(screen.queryByRole('button', { name: 'Activate user' })).not.toBeInTheDocument();
+    await findByText(/User has been deactivated/i);
+    expect(queryByRole('button', { name: 'Activate user' })).not.toBeInTheDocument();
   });
 });
