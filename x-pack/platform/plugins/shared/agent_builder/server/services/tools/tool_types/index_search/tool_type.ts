@@ -37,7 +37,10 @@ export const getIndexSearchToolType = (
     getDynamicProps: (config) => {
       return {
         getHandler: () => {
-          return async ({ nlQuery }, { esClient, modelProvider, logger, events, request }) => {
+          return async (
+            { nlQuery },
+            { esClient, modelProvider, logger, events, request, abortSignal }
+          ) => {
             const {
               pattern,
               row_limit: rowLimit,
@@ -73,6 +76,7 @@ export const getIndexSearchToolType = (
               events,
               logger,
               topSnippetsConfig,
+              abortSignal,
             });
             return { results };
           };

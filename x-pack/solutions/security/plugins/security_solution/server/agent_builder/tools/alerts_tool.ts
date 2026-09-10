@@ -89,7 +89,7 @@ export const alertsTool = (
     },
     handler: async (
       { query: nlQuery, index, isCount, time_window_hours: timeWindowHours },
-      { esClient, modelProvider, spaceId, events }
+      { esClient, modelProvider, spaceId, events, abortSignal }
     ) => {
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
@@ -114,6 +114,7 @@ export const alertsTool = (
         events,
         logger,
         timeRange,
+        abortSignal,
       });
 
       return { results };

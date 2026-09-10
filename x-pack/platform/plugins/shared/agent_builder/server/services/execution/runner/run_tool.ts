@@ -355,6 +355,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     parentExecutionId: manager.deps.parentExecutionId,
     agentConfiguration: manager.deps.agentConfiguration,
     experimentalFeatures,
+    abortSignal: manager.deps.abortSignal,
   };
 };
 

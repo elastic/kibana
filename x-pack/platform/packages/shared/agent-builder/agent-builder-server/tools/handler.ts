@@ -187,4 +187,9 @@ export interface ToolHandlerContext {
    * runtime configuration overrides already applied.
    */
   agentConfiguration?: AgentConfiguration;
+  /**
+   * Abort signal tied to the current execution, which can be used to cancel
+   * in-flight work (e.g. model calls) when the run is cancelled or times out.
+   */
+  abortSignal?: AbortSignal;
 }

@@ -91,6 +91,7 @@ Note:
         attachments,
         savedObjectsClient,
         experimentalFeatures,
+        abortSignal,
       }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
@@ -127,6 +128,7 @@ Note:
         topSnippetsConfig,
         includeDatasets: experimentalFeatures.datasets,
         rowLimit: 100,
+        abortSignal,
       });
       return { results };
     },

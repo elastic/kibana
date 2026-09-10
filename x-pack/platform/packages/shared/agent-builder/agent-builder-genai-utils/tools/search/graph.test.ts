@@ -24,32 +24,34 @@ interface BoundToolsOptions {
 }
 
 const createModelProvider = (response: AIMessage) => {
+  const invoke = jest.fn(async (_input: unknown, _config?: { signal?: AbortSignal }) => response);
   const bindTools = jest.fn((_tools: unknown, _options?: BoundToolsOptions) => ({
-    withConfig: () => ({ invoke: jest.fn(async () => response) }),
+    withConfig: () => ({ invoke }),
   }));
 
   const modelProvider = {
     getDefaultModel: jest.fn(async () => ({ chatModel: { bindTools } })),
   } as unknown as ModelProvider;
 
-  return { modelProvider, bindTools };
+  return { modelProvider, bindTools, invoke };
 };
 
 describe('createSearchToolGraph', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let events: ToolEventEmitter;
 
-  const invokeGraph = async (response: AIMessage) => {
-    const { modelProvider, bindTools } = createModelProvider(response);
+  const invokeGraph = async (response: AIMessage, abortSignal?: AbortSignal) => {
+    const { modelProvider, bindTools, invoke } = createModelProvider(response);
     const graph = await createSearchToolGraph({
       modelProvider,
       esClient: elasticsearchServiceMock.createElasticsearchClient(),
       logger,
       events,
+      abortSignal,
     });
     const state = await graph.invoke({ nlQuery: 'find log.dll side-loading' });
 
-    return { state, bindTools };
+    return { state, bindTools, invoke };
   };
 
   beforeEach(() => {
@@ -77,6 +79,30 @@ describe('createSearchToolGraph', () => {
       expect(options?.tool_choice).toBeUndefined();
       expect(state.error).toBeUndefined();
       expect(state.results).toHaveLength(1);
+    });
+  });
+
+  describe('abort signal', () => {
+    const toolCallResponse = () =>
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: '1', name: noMatchingResourceToolName, args: {} }],
+      });
+
+    it('forwards the execution abort signal to the dispatcher model call', async () => {
+      const abortController = new AbortController();
+      const { invoke } = await invokeGraph(toolCallResponse(), abortController.signal);
+
+      expect(invoke).toHaveBeenCalledTimes(1);
+      const [, config] = invoke.mock.calls[0];
+      expect(config?.signal).toBe(abortController.signal);
+    });
+
+    it('passes an undefined signal through when the execution provides none', async () => {
+      const { invoke } = await invokeGraph(toolCallResponse());
+
+      const [, config] = invoke.mock.calls[0];
+      expect(config?.signal).toBeUndefined();
     });
   });
 

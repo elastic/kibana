@@ -27,6 +27,7 @@ export const runSearchTool = async ({
   events,
   topSnippetsConfig,
   includeDatasets = false,
+  abortSignal,
 }: {
   nlQuery: string;
   index?: string;
@@ -41,6 +42,8 @@ export const runSearchTool = async ({
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
   includeDatasets?: boolean;
+  /** Abort signal tied to the current execution, used to cancel the dispatcher's inner model call. */
+  abortSignal?: AbortSignal;
 }): Promise<ToolHandlerResult[]> => {
   const toolGraph = await createSearchToolGraph({
     modelProvider,
@@ -49,6 +52,7 @@ export const runSearchTool = async ({
     events,
     topSnippetsConfig,
     includeDatasets,
+    abortSignal,
   });
 
   return withActiveInferenceSpan(

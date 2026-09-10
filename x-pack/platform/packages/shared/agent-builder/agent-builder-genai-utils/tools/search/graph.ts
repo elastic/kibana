@@ -69,6 +69,7 @@ export const createSearchToolGraph = async ({
   events,
   topSnippetsConfig,
   includeDatasets = false,
+  abortSignal,
 }: {
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
@@ -76,6 +77,8 @@ export const createSearchToolGraph = async ({
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
   includeDatasets?: boolean;
+  /** Abort signal tied to the current execution, used to cancel the dispatcher's inner model call. */
+  abortSignal?: AbortSignal;
 }) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
@@ -159,7 +162,8 @@ export const createSearchToolGraph = async ({
         nlQuery: state.nlQuery,
         resources,
         customInstructions: state.customInstructions,
-      })
+      }),
+      { signal: abortSignal }
     );
 
     // With unforced tool choice the dispatcher may answer in prose instead of
