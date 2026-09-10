@@ -26,9 +26,9 @@
  * Derived from https://github.com/probot/metadata/blob/6ae1523d5035ba727d09c0e7f77a6a154d9a4777/index.js
  *
  * `body` is a string that contains markdown and any existing metadata (eg. an issue or comment body)
- * `prefix` is a string that can be used to namespace the metadata, defaults to `failed-test`.
+ * `prefix` is a string that can be used to namespace the metadata, defaults to `ci`.
  */
-export const FAILED_TEST_METADATA_PREFIX = 'failed-test';
+const PREFIX = 'failed-test';
 const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
 
 function safeJsonParse(json: string, onError: any) {
@@ -42,16 +42,11 @@ function safeJsonParse(json: string, onError: any) {
 /**
  * Parse metadata from issue body
  */
-export function getIssueMetadata(
-  body: string,
-  key: string,
-  defaultValue: any = undefined,
-  prefix: string = FAILED_TEST_METADATA_PREFIX
-) {
+export function getIssueMetadata(body: string, key: string, defaultValue: any = undefined) {
   const match = body.match(REGEX);
 
   if (match) {
-    const data = safeJsonParse(match[1], {})[prefix];
+    const data = safeJsonParse(match[1], {})[PREFIX];
     return data && data[key] !== undefined ? data[key] : defaultValue;
   } else {
     return defaultValue;
@@ -61,18 +56,14 @@ export function getIssueMetadata(
 /**
  * Set data on the body.
  */
-export function updateIssueMetadata(
-  body: string,
-  values: Record<string, any>,
-  prefix: string = FAILED_TEST_METADATA_PREFIX
-) {
+export function updateIssueMetadata(body: string, values: Record<string, any>) {
   if (REGEX.test(body)) {
     return body.replace(REGEX, (match, json) => {
       const data = safeJsonParse(json, {});
-      data[prefix] = Object.assign(data[prefix] || {}, values);
+      data[PREFIX] = Object.assign(data[PREFIX] || {}, values);
       return match.replace(json, JSON.stringify(data));
     });
   }
 
-  return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify({ [prefix]: values })} -->`;
+  return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify({ [PREFIX]: values })} -->`;
 }

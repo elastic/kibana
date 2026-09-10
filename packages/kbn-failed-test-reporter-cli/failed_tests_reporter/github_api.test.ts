@@ -102,7 +102,6 @@ describe('GithubApi#searchIssues()', () => {
     title: `#${number}`,
     labels: [],
     body: `body ${number}`,
-    state: 'open',
     ...extra,
   });
 

@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-scout-report-flaky-tests
-  description: Aggregates test events from the AppEx QA cluster into a flaky test report, publishes it as a build artifact and files a GitHub issue per flaky suite
+  description: Aggregates test events from the AppEx QA cluster into a flaky test report, publishes it as a build artifact and checks which flaky suites already have a GitHub issue
   links:
     - url: 'https://buildkite.com/elastic/kibana-scout-report-flaky-tests'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / scout / report-flaky-tests
-      description: Aggregates test events from the AppEx QA cluster into a flaky test report, publishes it as a build artifact and files a GitHub issue per flaky suite
+      description: Aggregates test events from the AppEx QA cluster into a flaky test report, publishes it as a build artifact and checks which flaky suites already have a GitHub issue
     spec:
       env:
         # Set a channel and flip to 'true' once the report has an owning channel
@@ -26,11 +26,9 @@ spec:
         FLAKY_TESTS_PIPELINES: 'kibana-on-merge'
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
-        # Inputs of .buildkite/scripts/steps/scout_report_flaky_tests_github.sh. Issues are filed
-        # in FLAKY_TESTS_GITHUB_REPO: the appex-qa-ai sandbox while the format settles, then
-        # 'elastic/kibana' to go live. Empty means dry run (requests logged, nothing filed).
-        FLAKY_TESTS_GITHUB_REPO: 'elastic/appex-qa-ai'
-        FLAKY_TESTS_MAX_NEW_ISSUES: '10'
+        # Repository whose open issues .buildkite/scripts/steps/scout_check_flaky_test_issues.sh
+        # searches for the flaky suites; read-only
+        FLAKY_TESTS_GITHUB_REPO: 'elastic/kibana'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

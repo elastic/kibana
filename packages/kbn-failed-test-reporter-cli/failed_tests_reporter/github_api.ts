@@ -27,8 +27,6 @@ export function nextPageUrl(linkHeader: string | null): string | undefined {
   return undefined;
 }
 
-export type GithubIssueState = 'open' | 'closed';
-
 export interface GithubIssue {
   html_url: string;
   number: number;
@@ -36,7 +34,6 @@ export interface GithubIssue {
   title: string;
   labels: unknown[];
   body: string;
-  state: GithubIssueState;
 }
 
 export interface SearchIssuesOptions {

@@ -7,12 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { formatRate } from './format';
-
-describe('formatRate', () => {
-  it('renders a ratio as a percentage with one decimal', () => {
-    expect(formatRate(0.096)).toBe('9.6%');
-    expect(formatRate(0)).toBe('0.0%');
-    expect(formatRate(1)).toBe('100.0%');
-  });
-});
+require('@kbn/setup-node-env');
+require('@kbn/failed-test-reporter-cli').runCheckFlakyTestIssuesCli();

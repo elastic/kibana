@@ -13,23 +13,13 @@ import { flakyTest } from './test_fixtures';
 describe('groupIntoSuites', () => {
   it('groups tests by file, ranks tests within a suite and suites by their worst test', () => {
     const suites = groupIntoSuites([
-      flakyTest({ testId: 'a1', filePath: 'a.spec.ts', failedBuilds: 2, owners: ['elastic/a'] }),
+      flakyTest({ testId: 'a1', filePath: 'a.spec.ts', failedBuilds: 2 }),
       flakyTest({ testId: 'b1', filePath: 'b.spec.ts', failedBuilds: 5 }),
-      flakyTest({
-        testId: 'a2',
-        filePath: 'a.spec.ts',
-        failedBuilds: 9,
-        owners: ['elastic/b', 'elastic/a'],
-        configPath: undefined,
-      }),
+      flakyTest({ testId: 'a2', filePath: 'a.spec.ts', failedBuilds: 9 }),
     ]);
 
     expect(suites.map((suite) => suite.filePath)).toEqual(['a.spec.ts', 'b.spec.ts']);
     expect(suites[0].tests.map((test) => test.testId)).toEqual(['a2', 'a1']);
-    expect(suites[0].owners).toEqual(['elastic/b', 'elastic/a']);
-    // Falls back to the first test that has a config path
-    expect(suites[0].configPath).toBe(flakyTest().configPath);
-    expect(suites[0].framework).toBe('playwright');
   });
 
   it('returns no suites for an empty report', () => {

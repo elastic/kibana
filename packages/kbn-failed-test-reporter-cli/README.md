@@ -7,42 +7,25 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 Reads JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job.
 
-## `node scripts/report_flaky_tests`
+## `node scripts/check_flaky_test_issues`
 
-Reads a flaky test report written by `node scripts/scout discover-flaky-tests` and files one
-`failed-test` issue per flaky test file that has no open issue yet, titled
-`Flaky <Scout|Jest|FTR|Cypress> test suite: <file>`. Files that already have an open issue are
-left untouched, and so are issues of files that dropped out of the report: the
-[stale sweep](../../.github/workflows/close-stale-failed-test-issues.yml) closes them after three
-weeks without activity, like any other `failed-test` issue.
+Reads a flaky test report written by `node scripts/scout discover-flaky-tests`, groups the flaky
+tests by file and tells, for every file, whether an open `failed-test` issue titled
+`Flaky <framework> test suite: <file>` already tracks it. Read-only: nothing is filed or edited.
+Filing issues for the untracked suites is a separate step that does not exist yet.
 
 A test counts as flaky when, within the report window, it ran in at least `minBuilds` builds
 (default 10), failed in at least `minFailedBuilds` of them (default 2) and passed at least once
 or recovered on an in-run retry. Tests that never passed in the window are consistently failing
-rather than flaky and are not reported. To regenerate the report behind an issue locally:
+rather than flaky and are not reported.
 
 ```bash
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge --lookbackDays 7 --classifications flaky
+GITHUB_TOKEN=... node scripts/check_flaky_test_issues --input .scout/flaky_tests.json
 ```
 
-```bash
-# Preview what would be filed, without touching GitHub
-node scripts/report_flaky_tests --input .scout/flaky_tests.json --dry-run
-
-# File issues, linking the report they came from
-GITHUB_TOKEN=... node scripts/report_flaky_tests --input target/flaky_tests/flaky_tests.json --report-url https://buildkite.com/...
-```
-
-Each issue opens with one line of impact: the suite's rank among all flaky tests of the report,
-failed builds out of total builds, last failure and the branches it fails on. Below that come
-the suite details, a per-test table for files with several flaky tests, and a hidden
-`kibanaCiData` footer under the `flaky-test-suite` key that the next run uses to find the issue
-again (`suite.filePath`). `--max-new-issues` (default 10) caps how many issues one run may
-create, worst suites first. A JSON summary of what was done is written to `--summary-path`. To
-try the output on a sandbox repository, pass `--github-repo owner/name` with a token that has
-write access to its issues.
+The result is logged per suite and written as JSON to `--summary-path`. `--github-repo owner/name`
+searches another repository, e.g. a sandbox.
 
 The [kibana / scout / report-flaky-tests](https://buildkite.com/elastic/kibana-scout-report-flaky-tests)
-pipeline runs both commands daily. Its second step files the issues in the repository named by
-`FLAKY_TESTS_GITHUB_REPO`: the `elastic/appex-qa-ai` sandbox while the format settles, then
-`elastic/kibana` to go live. Leaving the variable empty makes the step a dry run.
+pipeline runs both commands daily and annotates the build with the tracked and untracked suites.

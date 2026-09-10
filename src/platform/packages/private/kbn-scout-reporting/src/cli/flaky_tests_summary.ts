@@ -13,7 +13,6 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
-  formatRate,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
@@ -109,6 +108,8 @@ export const formatAge = (from: Date, to: Date): string => {
   if (minutes < 24 * 60) return `${Math.round(minutes / 60)}h ago`;
   return `${Math.round(minutes / (24 * 60))}d ago`;
 };
+
+const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
 
 /**
  * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only

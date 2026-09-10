@@ -15,9 +15,9 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/scout_report_flaky_tests_github.sh
-    label: ':github: Report flaky suites to GitHub'
-    key: report-flaky-tests-github
+  - command: .buildkite/scripts/steps/scout_check_flaky_test_issues.sh
+    label: ':github: Check GitHub issues of flaky suites'
+    key: check-flaky-test-issues
     depends_on: discover-flaky-tests
     timeout_in_minutes: 30
     agents:

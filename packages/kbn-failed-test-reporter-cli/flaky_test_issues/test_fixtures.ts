@@ -64,10 +64,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   ...overrides,
 });
 
-export const flakyReport = (
-  flaky: FlakyTestEntry[],
-  overrides: Partial<FlakyTestReport> = {}
-): FlakyTestReport => ({
+export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
   schemaVersion: 1,
   generatedAt: GENERATED_AT,
   window: {
@@ -89,7 +86,6 @@ export const flakyReport = (
   },
   flaky,
   consistentlyFailing: [],
-  ...overrides,
 });
 
 export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }): GithubIssue => ({
@@ -98,6 +94,5 @@ export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }
   title: `Issue #${overrides.number}`,
   labels: [],
   body: '',
-  state: 'open',
   ...overrides,
 });

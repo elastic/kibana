@@ -7,23 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  compareByFailedBuilds,
-  rankTests,
-  type FlakyTestEntry,
-  type TestFramework,
-} from '@kbn/scout-reporting';
+import { compareByFailedBuilds, rankTests, type FlakyTestEntry } from '@kbn/scout-reporting';
 
 /**
- * All flaky tests of one test file. Issues are filed per suite rather than per test: the tests
+ * All flaky tests of one test file. Issues are tracked per suite rather than per test: the tests
  * of a file usually share a fixture, a page object or a setup hook, and that is what gets fixed.
  */
 export interface FlakySuite {
   filePath: string;
-  framework: TestFramework;
-  configPath?: string;
-  /** Union of the code owners of the tests, in first-seen order. */
-  owners: string[];
   /** Ranked by failed builds, worst first. */
   tests: FlakyTestEntry[];
 }
@@ -35,16 +26,9 @@ export const groupIntoSuites = (entries: readonly FlakyTestEntry[]): FlakySuite[
     byFile.set(entry.filePath, [...(byFile.get(entry.filePath) ?? []), entry]);
   }
 
-  const suites = [...byFile.entries()].map(([filePath, tests]): FlakySuite => {
-    const ranked = rankTests(tests);
-    return {
-      filePath,
-      framework: ranked[0].framework,
-      configPath: ranked.find((test) => test.configPath !== undefined)?.configPath,
-      owners: [...new Set(ranked.flatMap((test) => test.owners))],
-      tests: ranked,
-    };
-  });
+  const suites = [...byFile.entries()].map(
+    ([filePath, tests]): FlakySuite => ({ filePath, tests: rankTests(tests) })
+  );
 
   return suites.sort((a, b) => compareByFailedBuilds(a.tests[0], b.tests[0]));
 };
