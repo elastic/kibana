@@ -31,11 +31,7 @@ export const WORKFLOW_VERIFIER_POLL_INTERVAL_MS = 1_000;
 
 export const MAX_REASON_LENGTH = 2048;
 
-/**
- * How many levels of verifier workflows may nest (a verifier whose own
- * `verifyKi` step runs verifier workflows, and so on). `runWorkflow`
- * bypasses the engine's event-chain depth guard, so the step enforces this.
- */
+/** Max nesting depth for verifier workflows; enforced here because `runWorkflow` bypasses the engine's depth guard. */
 export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 3;
 
 /** Execution metadata carrying the verifier nesting state into child workflows. */
@@ -172,7 +168,6 @@ const fail = (reason: string): KiVerifierOutcome => ({
   reason: reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH)}…` : reason,
 });
 
-/** Resolves after `ms`, or rejects with the signal's reason as soon as (or if already) aborted. */
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
@@ -190,11 +185,7 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 
-/**
- * Loads the verifier workflow and applies the same composition rules as
- * `workflow.execute` for an unmanaged parent: only an enabled, valid,
- * unmanaged workflow visible in the executing space may run.
- */
+// Mirrors the composition rules `workflow.execute` applies for an unmanaged parent.
 const resolveRunnableWorkflow = async (
   workflowId: string,
   { workflowsManagement, spaceId }: WorkflowVerifierDependencies

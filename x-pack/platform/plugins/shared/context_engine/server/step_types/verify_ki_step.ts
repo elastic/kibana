@@ -52,7 +52,6 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      /** Resolves the listed entries to verifiers, guarding custom workflow verifiers first. */
       const buildVerifiers = async (): Promise<Array<string | KiVerifier> | undefined> => {
         const entries = context.input.verifiers;
         if (entries === undefined) {

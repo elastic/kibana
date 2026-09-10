@@ -33,10 +33,7 @@ export interface KiVerifierContext {
  */
 export interface KiVerificationContext extends KiVerifierContext {
   isEnabled: boolean;
-  /**
-   * Verifiers to run, in order; at least one is required. A string selects a
-   * registered verifier by id; a {@link KiVerifier} instance runs as given.
-   */
+  /** Verifiers to run; a string selects a registered id, a {@link KiVerifier} instance runs directly. */
   verifiers?: Array<string | KiVerifier>;
 }
 
