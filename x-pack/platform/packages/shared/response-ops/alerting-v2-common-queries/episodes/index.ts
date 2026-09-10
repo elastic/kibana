@@ -54,3 +54,6 @@ export type {
 
 export { buildEpisodeFlappingQuery } from './episode_flapping_query';
 export type { EpisodeFlappingRow } from './episode_flapping_query';
+
+export { buildEpisodeTransitionsQuery } from './episode_transitions_query';
+export type { EpisodeTransitionEsqlRow } from './episode_transitions_query';

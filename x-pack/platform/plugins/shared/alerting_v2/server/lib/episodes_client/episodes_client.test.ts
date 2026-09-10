@@ -6,7 +6,11 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisodeEsqlRow, EpisodeGroupHashEsqlRow } from '@kbn/alerting-v2-common-queries';
+import type {
+  AlertEpisodeEsqlRow,
+  EpisodeGroupHashEsqlRow,
+  EpisodeTransitionEsqlRow,
+} from '@kbn/alerting-v2-common-queries';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { EpisodesClient } from './episodes_client';
 
@@ -94,6 +98,66 @@ describe('EpisodesClient', () => {
       const { client } = createClient({ episodeRows: [createRow({ last_tags: null })] });
 
       await expect(client.get(EPISODE_ID)).resolves.toMatchObject({ last_tags: [] });
+    });
+  });
+
+  describe('getEpisodeTransitions', () => {
+    const createTransition = (
+      overrides: Partial<EpisodeTransitionEsqlRow> = {}
+    ): EpisodeTransitionEsqlRow => ({
+      'episode.id': EPISODE_ID,
+      'rule.id': 'rule-1',
+      group_hash: GROUP_HASH,
+      status_started_at: '2026-08-03T00:00:00.000Z',
+      previous_status: null,
+      episode_status: ALERT_EPISODE_STATUS.ACTIVE,
+      duration_ms: 10_000,
+      status_ended_at: '2026-08-03T00:00:10.000Z',
+      data: { host: 'web-01' },
+      ...overrides,
+    });
+
+    it('returns transition rows for the episode', async () => {
+      const rows = [
+        createTransition(),
+        createTransition({
+          previous_status: ALERT_EPISODE_STATUS.ACTIVE,
+          episode_status: ALERT_EPISODE_STATUS.INACTIVE,
+          status_started_at: '2026-08-03T00:00:10.000Z',
+          status_ended_at: null,
+          duration_ms: 0,
+        }),
+      ];
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: jest.fn().mockResolvedValue(rows),
+      };
+      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+
+      await expect(client.getEpisodeTransitions(EPISODE_ID)).resolves.toEqual(rows);
+    });
+
+    it('filters the transitions query by space and episode id', async () => {
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: jest.fn().mockResolvedValue([]),
+      };
+      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+
+      await client.getEpisodeTransitions(EPISODE_ID);
+
+      expect(queryService.executeQueryRows).toHaveBeenCalledTimes(1);
+      const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+      expect(query).toContain(`space_id == "${SPACE_ID}"`);
+      expect(query).toContain(`episode.id == "${EPISODE_ID}"`);
+      expect(query).toContain('DATE_DIFF("ms"');
+    });
+
+    it('returns an empty list when the episode has no status-bearing events', async () => {
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: jest.fn().mockResolvedValue([]),
+      };
+      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+
+      await expect(client.getEpisodeTransitions(EPISODE_ID)).resolves.toEqual([]);
     });
   });
 });
