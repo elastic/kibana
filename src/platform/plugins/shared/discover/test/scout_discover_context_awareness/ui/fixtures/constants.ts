@@ -28,5 +28,14 @@ export const CONTEXT_AWARENESS_TIME_RANGE = {
   to: '2024-06-10T16:30:00.000Z',
 };
 
+/**
+ * Covers the `logstash_functional` documents, for the cases that query `logstash*` instead of the
+ * context awareness indices.
+ */
+export const LOGSTASH_TIME_RANGE = {
+  from: '2015-09-20T01:00:00.000Z',
+  to: '2015-09-24T16:30:00.000Z',
+};
+
 /** Query the `example-root-profile` supplies through `getDefaultEsqlQuery`. */
 export const ROOT_PROFILE_DEFAULT_ESQL_QUERY = 'FROM my-example-* | LIMIT 10';
