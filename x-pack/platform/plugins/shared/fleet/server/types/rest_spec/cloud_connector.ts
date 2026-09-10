@@ -9,6 +9,26 @@ import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 
+import { RenderIacTemplateIntegrationSchema } from './iac_provisioner';
+
+// Upper bounds prevent unbounded-input DoS: the key is a prefixed sha256 digest, the deployment id an ARN.
+const IacRequestFieldsSchema = {
+  iac_key: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 512,
+      meta: { description: 'Opaque IaC template key returned by the IaC Provisioner.' },
+    })
+  ),
+  iac_deployment_id: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 2048,
+      meta: { description: 'Provider deployment identity (AWS: CloudFormation stack ARN).' },
+    })
+  ),
+};
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -49,6 +69,7 @@ export const CreateCloudConnectorRequestSchema = {
         }),
       ])
     ),
+    ...IacRequestFieldsSchema,
   }),
 };
 
@@ -60,6 +81,13 @@ const VerificationFieldsSchema = {
   verification_status: schema.maybe(schema.string()),
   verification_started_at: schema.maybe(schema.string()),
   verification_failed_at: schema.maybe(schema.string()),
+};
+
+const IacResponseFieldsSchema = {
+  iac_key: schema.maybe(schema.string()),
+  iac_deployment_id: schema.maybe(schema.string()),
+  iac_upgrade_status: schema.maybe(schema.string()),
+  iac_upgrade_checked_at: schema.maybe(schema.string()),
 };
 
 export const CreateCloudConnectorResponseSchema = schema.object({
@@ -74,6 +102,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacResponseFieldsSchema,
   }),
 });
 
@@ -110,6 +139,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       created_at: schema.string(),
       updated_at: schema.string(),
       ...VerificationFieldsSchema,
+      ...IacResponseFieldsSchema,
     }),
     { maxSize: 10000 }
   ),
@@ -135,6 +165,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacResponseFieldsSchema,
   }),
 });
 
@@ -200,6 +231,7 @@ export const UpdateCloudConnectorRequestSchema = {
         ])
       )
     ),
+    ...IacRequestFieldsSchema,
   }),
 };
 
@@ -215,6 +247,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacResponseFieldsSchema,
   }),
 });
 
@@ -261,4 +294,27 @@ export const GetCloudConnectorUsageResponseSchema = schema.object({
   total: schema.number(),
   page: schema.number(),
   perPage: schema.number(),
+});
+
+export const VerifyCloudConnectorIacKeyRequestSchema = {
+  params: schema.object({
+    cloudConnectorId: schema.string({
+      maxLength: 255,
+      meta: { description: 'The unique identifier of the cloud connector.' },
+    }),
+  }),
+  body: schema.object({
+    // The integration being added carries the same shape the render route takes:
+    // the policy templates the user enabled, with only the inputs they enabled.
+    integration: schema.maybe(RenderIacTemplateIntegrationSchema),
+  }),
+};
+
+export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
+  matches: schema.boolean(),
+  reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
+  deploymentId: schema.maybe(schema.string()),
+  region: schema.maybe(schema.string()),
+  // Same shape the render route takes, so the browser can re-render exactly this set.
+  integrations: schema.arrayOf(RenderIacTemplateIntegrationSchema),
 });

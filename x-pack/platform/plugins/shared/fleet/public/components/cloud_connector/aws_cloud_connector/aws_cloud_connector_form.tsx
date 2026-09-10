@@ -5,22 +5,38 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiSpacer,
+  EuiButton,
+  EuiLink,
+  EuiFieldText,
+  EuiFormRow,
+} from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
   CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
   getCredentialKeyFromVarName,
+  parseAwsRegionFromArn,
 } from '../../../../common/services/cloud_connectors';
+import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
 import { type CloudConnectorFormProps } from '../types';
 
-import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
-import { ORGANIZATION_ACCOUNT } from '../constants';
+import {
+  updateInputVarsWithCredentials,
+  isAwsCredentials,
+  INVALID_STACK_ARN_MESSAGE,
+} from '../utils';
+import { AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -39,28 +55,42 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
-  // The rendered template must cover every policy template the user enabled
-  // in this policy — not just the first enabled input's.
+  // The rendered template must cover every input the user enabled — no more.
+  const inputs = newPolicy?.inputs;
   const enabledPolicyTemplates = useMemo(
-    () => [
-      ...new Set(
-        newPolicy?.inputs
-          ?.filter((input) => input.enabled)
-          .map((input) => input.policy_template)
-          .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate)) ?? []
-      ),
-    ],
-    [newPolicy?.inputs]
+    () => getEnabledInputsByPolicyTemplate({ inputs }),
+    [inputs]
   );
 
-  const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
-    useCloudConnectorTemplate({
-      cloud,
-      accountType,
-      iacTemplateUrl,
-      packageName: packageInfo?.name,
-      policyTemplates: enabledPolicyTemplates,
-    });
+  // Always keep a ref to the latest credentials and setCredentials so that
+  // onTemplateRendered (called after an async render) never closes over a
+  // stale snapshot. Without this, a name edit made while the render is in
+  // flight would be silently reverted when the callback fires.
+  const latestRef = useRef({ credentials, setCredentials });
+  latestRef.current = { credentials, setCredentials };
+
+  const onTemplateRendered = useCallback(({ key }: { key?: string }) => {
+    const { credentials: current, setCredentials: set } = latestRef.current;
+    if (key && current && isAwsCredentials(current) && set) {
+      set({ ...current, iacKey: key });
+    }
+  }, []);
+
+  const {
+    launchButtonProps,
+    isDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+    isIacProvisionerEnabled,
+  } = useCloudConnectorTemplate({
+    provider: AWS_PROVIDER,
+    cloud,
+    accountType,
+    iacTemplateUrl,
+    packageName: packageInfo?.name,
+    policyTemplates: enabledPolicyTemplates,
+    onTemplateRendered,
+  });
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -71,6 +101,11 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     : inputVars;
 
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);
+
+  // Derive the stack ARN field state from the credentials object.
+  const stackArn =
+    credentials && isAwsCredentials(credentials) ? credentials.iacDeploymentId ?? '' : '';
+  const stackArnInvalid = stackArn !== '' && parseAwsRegionFromArn(stackArn) === undefined;
 
   return (
     <>
@@ -112,14 +147,43 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       {templateGenerationError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
             title={templateGenerationError}
-            color="danger"
-            iconType="error"
             size="s"
           />
+        </>
+      )}
+      {isIacProvisionerEnabled && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.fleet.cloudConnector.aws.stackArnLabel', {
+              defaultMessage: 'CloudFormation stack ARN',
+            })}
+            helpText={i18n.translate('xpack.fleet.cloudConnector.aws.stackArnHelp', {
+              defaultMessage:
+                'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
+            })}
+            isInvalid={stackArnInvalid}
+            error={stackArnInvalid ? INVALID_STACK_ARN_MESSAGE : undefined}
+          >
+            <EuiFieldText
+              fullWidth
+              value={stackArn}
+              isInvalid={stackArnInvalid}
+              onChange={(e) => {
+                if (!credentials || !isAwsCredentials(credentials) || !setCredentials) return;
+                setCredentials({
+                  ...credentials,
+                  iacDeploymentId: e.target.value.trim() || undefined,
+                });
+              }}
+              data-test-subj={CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ}
+            />
+          </EuiFormRow>
         </>
       )}
       <EuiSpacer size="m" />

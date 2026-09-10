@@ -458,6 +458,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [updatePackagePolicy, setFormState]
   );
 
+  // Tracked apart from formState: the cloud connector section can block submission (IaC key
+  // mismatch, https://github.com/elastic/ingest-dev/issues/9415) and form validation must not
+  // be able to clear that block, nor the block hide a real validation error.
+  const [isCloudConnectorBlocked, setIsCloudConnectorBlocked] = useState(false);
+
+  // Belt and braces: the Save button is already disabled while the block is set.
+  const handleSubmit = useCallback(
+    (options?: Parameters<typeof onSubmit>[0]) => {
+      if (isCloudConnectorBlocked) {
+        return Promise.resolve();
+      }
+      return onSubmit(options);
+    },
+    [isCloudConnectorBlocked, onSubmit]
+  );
+
   const { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest } = useDevToolsRequest({
     newAgentPolicy,
     packagePolicy,
@@ -653,6 +669,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
             }
             hideInVarGroupOptions={hiddenVarGroupOptions}
+            onCloudConnectorBlockingChange={setIsCloudConnectorBlocked}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -1026,10 +1043,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                     ) : null}
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        onClick={() => onSubmit()}
+                        onClick={() => handleSubmit()}
                         isLoading={formState === 'LOADING'}
                         disabled={
                           formState !== 'VALID' ||
+                          isCloudConnectorBlocked ||
                           hasAgentPolicyError ||
                           !validationResults ||
                           isFleetExtensionLoaded === false

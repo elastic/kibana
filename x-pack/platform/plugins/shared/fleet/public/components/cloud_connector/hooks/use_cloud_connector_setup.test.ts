@@ -19,6 +19,7 @@ jest.mock('../utils', () => ({
   updateInputVarsWithCredentials: jest.fn(),
   isAzureCloudConnectorVars: jest.fn(),
   isGcpCloudConnectorVars: jest.fn(),
+  isAwsCredentials: jest.requireActual('../utils').isAwsCredentials,
   isCloudConnectorNameValid: jest.fn((name: string | undefined) => {
     if (!name) return false;
     const trimmedLength = name.trim().length;
@@ -132,9 +133,84 @@ describe('useCloudConnectorSetup', () => {
         }),
       });
     });
+
+    it('should write iac key and deployment id into the policy when AWS credentials include them', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      const credentialsWithIac: CloudConnectorCredentials = {
+        name: 'n',
+        roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+        iacKey: 'sha256:abc',
+        iacDeploymentId: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+      };
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials(credentialsWithIac);
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedPolicy: expect.objectContaining({
+            cloud_connector_iac_key: 'sha256:abc',
+            cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+          }),
+        })
+      );
+    });
+
+    it('should set both iac transient fields to undefined when credentials have no iac fields', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      const credentialsWithoutIac: CloudConnectorCredentials = {
+        name: 'n',
+        roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      };
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials(credentialsWithoutIac);
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedPolicy: expect.objectContaining({
+            cloud_connector_iac_key: undefined,
+            cloud_connector_iac_deployment_id: undefined,
+          }),
+        })
+      );
+    });
   });
 
   describe('updatePolicyWithExistingCredentials', () => {
+    it('should leave both iac transient fields undefined when setting cloud_connector_id', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      const existingCredentials: CloudConnectorCredentials = {
+        roleArn: 'arn:aws:iam::123456789012:role/ExistingRole',
+        cloudConnectorId: 'existing-connector-123',
+      };
+
+      act(() => {
+        result.current.updatePolicyWithExistingCredentials(existingCredentials);
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedPolicy: expect.objectContaining({
+            cloud_connector_id: 'existing-connector-123',
+            cloud_connector_iac_key: undefined,
+            cloud_connector_iac_deployment_id: undefined,
+          }),
+        })
+      );
+    });
+
     it('should call utility functions and update policy with existing credentials without validation', () => {
       const { result } = renderHook(() =>
         useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)

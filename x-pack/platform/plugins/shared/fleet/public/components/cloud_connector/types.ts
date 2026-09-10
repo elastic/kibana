@@ -35,6 +35,10 @@ interface BaseCloudConnectorCredentials {
 export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredentials {
   roleArn?: string;
   externalId?: string | CloudConnectorSecretReference;
+  /** IaC key returned by the JIT render; travels to the server as cloud_connector_iac_key. */
+  iacKey?: string;
+  /** CloudFormation stack ARN pasted by the user; travels as cloud_connector_iac_deployment_id. */
+  iacDeploymentId?: string;
 }
 
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {

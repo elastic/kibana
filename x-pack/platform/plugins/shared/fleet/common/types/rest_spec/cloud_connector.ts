@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { IacKeyCheckReason } from '../../telemetry/iac_provisioner_events';
+
 import type {
   CloudConnector,
   CloudProvider,
   CloudConnectorVars,
   AccountType,
 } from '../models/cloud_connector';
+
+import type { RenderIacTemplateIntegration } from './iac_provisioner';
 
 // Request interfaces
 export interface CreateCloudConnectorRequest {
@@ -19,6 +23,8 @@ export interface CreateCloudConnectorRequest {
   vars: CloudConnectorVars;
   cloudProvider: CloudProvider;
   accountType?: AccountType;
+  iac_key?: string;
+  iac_deployment_id?: string;
 }
 
 export interface UpdateCloudConnectorRequest {
@@ -26,6 +32,8 @@ export interface UpdateCloudConnectorRequest {
   vars?: CloudConnectorVars;
   cloudProvider?: CloudProvider;
   accountType?: AccountType;
+  iac_key?: string;
+  iac_deployment_id?: string;
 }
 
 // Response interfaces following Fleet conventions
@@ -67,4 +75,20 @@ export interface GetCloudConnectorUsageResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface VerifyCloudConnectorIacKeyRequest {
+  /** The integration being added (wizard). Omit to check the connector's current set (flyout). */
+  integration?: RenderIacTemplateIntegration;
+}
+
+export interface VerifyCloudConnectorIacKeyResponse {
+  matches: boolean;
+  reason?: IacKeyCheckReason;
+  /** Provider deployment identity from the connector (AWS: stack ARN); absent for legacy connectors. */
+  deploymentId?: string;
+  /** Parsed from deploymentId; absent when it is absent or malformed. */
+  region?: string;
+  /** The merged integration set that was compared — render exactly this on update. */
+  integrations: RenderIacTemplateIntegration[];
 }

@@ -101,6 +101,10 @@ export interface NewPackagePolicy {
   output_id?: string | null;
   cloud_connector_id?: string | null;
   cloud_connector_name?: string | null;
+  /** Transient, create-only (like cloud_connector_name): IaC key of the template the user deployed. */
+  cloud_connector_iac_key?: string | null;
+  /** Transient, create-only: provider deployment identity (AWS: CloudFormation stack ARN). */
+  cloud_connector_iac_deployment_id?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;

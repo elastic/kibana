@@ -8,9 +8,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import { iacProvisionerService } from '../../services';
-import type { IacProvisionerRenderIntegration } from '../../services/iac_provisioner';
+import { resolveIacRenderIntegrations } from '../../services/cloud_connectors';
 import { appContextService } from '../../services/app_context';
-import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
@@ -41,68 +40,20 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     });
   }
 
-  // The render request must not repeat a package name, so entries sharing a
-  // package are merged into one with the union of their policy templates.
-  const templatesByPackage = new Map<string, Set<string>>();
-  for (const { name, policyTemplates } of requestedIntegrations) {
-    const templates = templatesByPackage.get(name) ?? new Set<string>();
-    for (const template of policyTemplates) {
-      templates.add(template);
-    }
-    templatesByPackage.set(name, templates);
-  }
-
   const startTime = Date.now();
   try {
-    const integrations: IacProvisionerRenderIntegration[] = await Promise.all(
-      Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
-        // Empty pkgVersion resolves to the installed version, falling back to
-        // the latest available: at connector-creation time the package may not
-        // be installed yet. skipArchive: registry info covers everything read
-        // here; without it each request downloads and unpacks the archive.
-        const packageInfo = await getPackageInfo({
-          savedObjectsClient: internalSoClient,
-          pkgName,
-          pkgVersion: '',
-          skipArchive: true,
-        });
-
-        // MVP heuristic pending confirmation with the provisioner team
-        // (OQ-A in security-team#18632): only provider-relevant input types
-        // are sent, since mixed-provider policy templates (e.g. CSPM) would
-        // otherwise pull blueprints targeting other canonical templates.
-        const resolvedPolicyTemplates = (packageInfo.policy_templates ?? [])
-          .filter(({ name }) => policyTemplates.has(name))
-          .map((template) => {
-            const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-            const enabledInputs = Array.from(
-              new Set(
-                inputs
-                  .map(({ type }) => type)
-                  .filter((type) => type.toLowerCase().includes(provider))
-              )
-            );
-            return { name: template.name, enabledInputs };
-          })
-          // Drop templates that contribute nothing for this provider so the
-          // outbound request only carries renderable policy templates.
-          .filter(({ enabledInputs }) => enabledInputs.length > 0);
-
-        return {
-          name: pkgName,
-          version: packageInfo.version,
-          policyTemplates: resolvedPolicyTemplates,
-        };
-      })
+    const { integrations, skipped } = await resolveIacRenderIntegrations(
+      internalSoClient,
+      provider,
+      requestedIntegrations
     );
 
-    // An integration with no provider-relevant inputs cannot contribute to
-    // the template; sending it would only produce confusing provider errors.
-    const emptyIntegration = integrations.find(({ policyTemplates }) => !policyTemplates.length);
-    if (emptyIntegration) {
+    // A package whose manifest declares none of the requested policy templates has
+    // nothing to render from; sending it would only produce confusing provider errors.
+    if (skipped.length > 0) {
       return response.badRequest({
         body: {
-          message: `${emptyIntegration.name} has no ${provider} inputs under the requested policy templates`,
+          message: `${skipped[0]} declares none of the requested policy templates`,
         },
       });
     }
@@ -112,7 +63,9 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       integrationCount: integrations.length,
     });
 
-    const rendered = await iacProvisionerService.renderTemplate({ provider, integrations });
+    // No stored digest is sent: this route only serves browser-initiated renders,
+    // where the user is about to apply the template regardless of the comparison.
+    const rendered = await iacProvisionerService.render({ provider, integrations });
 
     reportIacProvisionerRenderCompleted({
       flow,

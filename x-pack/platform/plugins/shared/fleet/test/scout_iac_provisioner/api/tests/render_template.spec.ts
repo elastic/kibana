@@ -33,7 +33,12 @@ apiTest.describe(
           body: {
             provider: 'aws',
             flow: 'cloud_connector',
-            integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+            integrations: [
+              {
+                name: 'cloud_security_posture',
+                policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+              },
+            ],
           },
           responseType: 'json',
         });
@@ -49,7 +54,12 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+          integrations: [
+            {
+              name: 'cloud_security_posture',
+              policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+            },
+          ],
         },
         responseType: 'json',
       });
@@ -85,7 +95,7 @@ apiTest.describe(
             flow: 'cloud_connector',
             integrations: Array.from({ length: 11 }, (_, i) => ({
               name: `pkg_${i}`,
-              policyTemplates: ['tpl'],
+              policyTemplates: [{ name: 'tpl', enabledInputs: ['aws-s3'] }],
             })),
           },
           responseType: 'json',
@@ -105,7 +115,12 @@ apiTest.describe(
           body: {
             provider: 'aws',
             flow: 'cloud_connector',
-            integrations: [{ name: 'this_package_does_not_exist', policyTemplates: ['whatever'] }],
+            integrations: [
+              {
+                name: 'this_package_does_not_exist',
+                policyTemplates: [{ name: 'whatever', enabledInputs: ['aws-s3'] }],
+              },
+            ],
           },
           responseType: 'json',
         });

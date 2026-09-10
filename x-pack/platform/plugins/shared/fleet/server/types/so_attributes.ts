@@ -47,6 +47,7 @@ import type {
   CloudConnectorVars,
   AccountType,
   VerificationStatus,
+  CloudConnectorIacFields,
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentMechanism,
@@ -358,7 +359,7 @@ export interface DownloadSourceSOAttributes {
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
 
-export interface CloudConnectorSOAttributes {
+export interface CloudConnectorSOAttributes extends CloudConnectorIacFields {
   name: string;
   namespace?: string;
   cloudProvider: CloudProvider;

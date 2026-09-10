@@ -131,5 +131,37 @@ describe('agentless policy request schemas', () => {
         ).not.toThrow();
       }
     );
+
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])('should reject iac_key together with cloud_connector_id on %s', (_name, bodySchema) => {
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          cloud_connector: { enabled: true, cloud_connector_id: 'cc-1', iac_key: 'sha256:abc' },
+        })
+      ).toThrow(/iac_key.*iac_deployment_id.*cannot be set together with cloud_connector_id/);
+    });
+
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])(
+      'should accept iac_key and iac_deployment_id for a new connector on %s',
+      (_name, bodySchema) => {
+        expect(() =>
+          bodySchema.validate({
+            ...validBody,
+            cloud_connector: {
+              enabled: true,
+              name: 'n',
+              iac_key: 'sha256:abc',
+              iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+            },
+          })
+        ).not.toThrow();
+      }
+    );
   });
 });

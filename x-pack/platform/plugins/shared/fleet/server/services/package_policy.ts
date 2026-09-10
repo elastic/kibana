@@ -769,7 +769,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'spaceIds'),
+          ...omit(
+            enrichedPackagePolicy,
+            'cloud_connector_name',
+            'cloud_connector_iac_key',
+            'cloud_connector_iac_deployment_id',
+            'spaceIds'
+          ),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -2959,6 +2965,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           supports_cloud_connector: newPolicy.supports_cloud_connector,
           cloud_connector_id: newPolicy.cloud_connector_id,
           cloud_connector_name: newPolicy.cloud_connector_name,
+          cloud_connector_iac_key: newPolicy.cloud_connector_iac_key,
+          cloud_connector_iac_deployment_id: newPolicy.cloud_connector_iac_deployment_id,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
           condition: newPolicy.condition,
         };
@@ -3682,16 +3690,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // Extract account type from package policy vars
         const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
         try {
-          // Extract cloud connector name from package policy
-          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
+          const cloudConnectorName =
+            enrichedPackagePolicy.cloud_connector_name ||
+            `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`;
+          const iacKey = enrichedPackagePolicy.cloud_connector_iac_key ?? undefined;
+          const iacDeploymentId =
+            enrichedPackagePolicy.cloud_connector_iac_deployment_id ?? undefined;
+
+          if (iacKey || iacDeploymentId) {
+            logger.debug(
+              `Creating cloud connector "${cloudConnectorName}" from IaC template: key ${iacKey}, deployment id ${
+                iacDeploymentId ? 'present' : 'absent'
+              }`
+            );
+          }
 
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name:
-              cloudConnectorName ||
-              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            name: cloudConnectorName,
             vars: cloudConnectorVars,
             cloudProvider,
             accountType,
+            iac_key: iacKey,
+            iac_deployment_id: iacDeploymentId,
           });
           logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
           return cloudConnector;

@@ -23,6 +23,9 @@ import {
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
   getAnyCloudConnectorIacTemplateUrl,
+  getIacLaunchUrl,
+  getAwsStackConsoleUrl,
+  hasTemplateUrlParam,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -1027,5 +1030,76 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
       ],
     } as any;
     expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
+  });
+});
+
+describe('IaC launch URL helpers', () => {
+  const STATIC_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&param_X=1';
+  const ARTIFACT = 'https://s3.example/rendered?X-Amz-Signature=abc';
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('getIacLaunchUrl swaps templateURL on the quick-create scaffold when no deployment id', () => {
+    expect(getIacLaunchUrl({ provider: 'aws', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_X=1`
+    );
+  });
+
+  it('getIacLaunchUrl builds the stack-update deep link when a deployment id is known', () => {
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+  });
+
+  it('getIacLaunchUrl returns undefined for non-AWS providers and scaffolds without templateURL', () => {
+    expect(
+      getIacLaunchUrl({ provider: 'azure', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })
+    ).toBeUndefined();
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: 'https://x.example/no-param',
+        artifactUrl: ARTIFACT,
+      })
+    ).toBeUndefined();
+  });
+
+  it('getIacLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: 'not-an-arn',
+      })
+    ).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl links to the stack info page', () => {
+    expect(getAwsStackConsoleUrl(STACK_ARN)).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}`
+    );
+    expect(getAwsStackConsoleUrl(undefined)).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl returns undefined for a malformed ARN', () => {
+    expect(getAwsStackConsoleUrl('not-an-arn')).toBeUndefined();
+  });
+
+  it('hasTemplateUrlParam returns false for undefined', () => {
+    expect(hasTemplateUrlParam(undefined)).toBe(false);
   });
 });

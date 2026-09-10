@@ -83,7 +83,24 @@ export type CloudConnectorVars =
 
 export type VerificationStatus = 'pending' | 'success' | 'failed';
 
-export interface CloudConnector {
+export type IacUpgradeStatus = 'up_to_date' | 'upgrade_available';
+
+/**
+ * IaC template tracking. All fields are unset on connectors that deployed the static
+ * template — absence of `iac_key` is the "upgrade available" signal once IaCP can render.
+ */
+export interface CloudConnectorIacFields {
+  /** Opaque key from the IaC Provisioner: SHA of the canonicalised rendered template. */
+  iac_key?: string;
+  /** Provider-interpreted deployment identity. AWS: the CloudFormation stack ARN. */
+  iac_deployment_id?: string;
+  /** Set by the periodic IaC upgrade check; absent until it has run for this connector. */
+  iac_upgrade_status?: IacUpgradeStatus;
+  /** ISO timestamp of the last successful IaCP key comparison. */
+  iac_upgrade_checked_at?: string;
+}
+
+export interface CloudConnector extends CloudConnectorIacFields {
   id: string;
   name: string;
   cloudProvider: CloudProvider;

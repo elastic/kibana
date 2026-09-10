@@ -67,7 +67,7 @@ export const CreateAgentlessPolicyRequestSchema = {
                 defaultValue: false,
                 meta: {
                   description:
-                    'Set to `true` to attach a cloud connector to this policy. Must be `true` to set any of `cloud_connector_id`, `name`, or `target_csp`.',
+                    'Set to `true` to attach a cloud connector to this policy. Must be `true` to set any of `cloud_connector_id`, `name`, `target_csp`, `iac_key`, or `iac_deployment_id`.',
                 },
               }),
               cloud_connector_id: schema.maybe(
@@ -100,21 +100,52 @@ export const CreateAgentlessPolicyRequestSchema = {
                   }
                 )
               ),
+              iac_key: schema.maybe(
+                schema.string({
+                  minLength: 1,
+                  maxLength: 512,
+                  meta: {
+                    description:
+                      'IaC template key of the template deployed for a new connector. Requires `enabled: true` and cannot be combined with `cloud_connector_id`.',
+                  },
+                })
+              ),
+              iac_deployment_id: schema.maybe(
+                schema.string({
+                  minLength: 1,
+                  maxLength: 2048,
+                  meta: {
+                    description:
+                      'Provider deployment identity for a new connector (AWS: CloudFormation stack ARN). Requires `enabled: true` and cannot be combined with `cloud_connector_id`.',
+                  },
+                })
+              ),
             },
             {
-              validate: ({ enabled, cloud_connector_id: id, name, target_csp: targetCsp }) => {
+              validate: ({
+                enabled,
+                cloud_connector_id: id,
+                name,
+                target_csp: targetCsp,
+                iac_key: iacKey,
+                iac_deployment_id: iacDeploymentId,
+              }) => {
                 // `enabled` defaults to false, so a body like `{ cloud_connector_id: 'X' }` would
                 // silently detach the connector despite the caller clearly intending to attach it.
                 // Reject the attach-only fields unless `enabled` is explicitly true to surface the
                 // contradiction as a 400 instead of a silent no-op.
-                if (!enabled && (id || name || targetCsp)) {
-                  return 'cloud_connector.enabled must be true to set cloud_connector_id, name, or target_csp';
+                if (!enabled && (id || name || targetCsp || iacKey || iacDeploymentId)) {
+                  return 'cloud_connector.enabled must be true to set cloud_connector_id, name, target_csp, iac_key, or iac_deployment_id';
                 }
                 // `cloud_connector_id` selects an existing connector to reuse; `name` only applies
                 // when creating a new one, so it is silently ignored alongside an id. Reject the
                 // combination rather than dropping `name` without feedback.
                 if (id && name) {
                   return 'cloud_connector.name cannot be set together with cloud_connector_id (name only applies when creating a new connector)';
+                }
+                // IaC fields are only valid when creating a new connector.
+                if (id && (iacKey || iacDeploymentId)) {
+                  return 'cloud_connector.iac_key and iac_deployment_id cannot be set together with cloud_connector_id (they only apply when creating a new connector)';
                 }
               },
             }

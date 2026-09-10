@@ -1651,6 +1651,65 @@ describe('Package policy service', () => {
       }
     });
 
+    it('should forward cloud_connector_iac_key and cloud_connector_iac_deployment_id to cloudConnectorService.create', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-iac-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        cloud_connector_iac_key: 'sha256:abc',
+        cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
+      } as any;
+
+      const mockCloudConnector = {
+        id: 'cloud-connector-iac-id',
+        name: 'aws-cloud-connector: test-iac-policy',
+        cloudProvider: 'aws',
+        vars: {},
+      };
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(
+          soClient,
+          expect.objectContaining({
+            iac_key: 'sha256:abc',
+            iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+          })
+        );
+      } finally {
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
     it('should create GCP cloud connector when all conditions are met', async () => {
       const soClient = createSavedObjectClientMock();
       const enrichedPackagePolicy = {
@@ -1959,6 +2018,51 @@ describe('Package policy service', () => {
 
       const createdAttributes = soClient.create.mock.calls[0][1] as any;
       expect(createdAttributes).not.toHaveProperty('spaceIds');
+    });
+
+    it('should not persist cloud_connector_iac_key or cloud_connector_iac_deployment_id in SO attributes', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+      const packagePolicySO = {
+        id: 'test-package-policy',
+        attributes: { inputs: [] },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      };
+
+      soClient.create.mockResolvedValueOnce(packagePolicySO);
+      soClient.get.mockResolvedValueOnce(packagePolicySO);
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValueOnce({
+        name: 'test',
+        version: '0.0.1',
+        policy_templates: [{ name: 'test', inputs: [] }],
+      });
+      try {
+        await packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [],
+            package: { name: 'test', title: 'Test', version: '0.0.1' },
+            cloud_connector_iac_key: 'sha256:abc',
+            cloud_connector_iac_deployment_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/u',
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        );
+      } finally {
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      }
+
+      const createdAttributes = soClient.create.mock.calls[0][1] as any;
+      expect(createdAttributes).not.toHaveProperty('cloud_connector_iac_key');
+      expect(createdAttributes).not.toHaveProperty('cloud_connector_iac_deployment_id');
     });
   });
 

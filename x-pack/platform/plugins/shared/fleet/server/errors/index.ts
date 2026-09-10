@@ -206,8 +206,9 @@ export class IacProvisionerRenderError extends FleetError {
 }
 
 /**
- * The IaC Provisioner could not be reached or returned a 5xx — a retryable
- * availability problem rather than a contract rejection.
+ * The IaC Provisioner could not be reached, returned a 5xx, or responded
+ * without the expected payload — a retryable availability problem rather
+ * than a contract rejection.
  */
 export class IacProvisionerUnavailableError extends FleetError {
   constructor(message: string, public readonly statusCode?: number) {

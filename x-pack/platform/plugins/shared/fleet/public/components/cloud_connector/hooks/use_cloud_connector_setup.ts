@@ -26,6 +26,7 @@ import {
   isGcpCloudConnectorVars,
   updateInputVarsWithCredentials,
   isCloudConnectorNameValid,
+  isAwsCredentials,
 } from '../utils';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
@@ -229,10 +230,13 @@ export const useCloudConnectorSetup = (
       );
 
       // Set cloud_connector_name directly on the policy object (not in input vars)
+      const awsCredentials = isAwsCredentials(credentials) ? credentials : undefined;
       updatedPolicy = {
         ...updatedPolicy,
         cloud_connector_name: credentials.name,
         cloud_connector_id: undefined,
+        cloud_connector_iac_key: awsCredentials?.iacKey,
+        cloud_connector_iac_deployment_id: awsCredentials?.iacDeploymentId || undefined,
       };
 
       updatePolicy({
@@ -263,11 +267,14 @@ export const useCloudConnectorSetup = (
         updatedPolicy = updatePolicyVarsByScope({ ...newPolicy }, updatedInputVars, packageInfo);
       }
 
-      // Set cloud connector ID if provided
+      // Set cloud connector ID if provided; clear transient iac fields so a stale
+      // value from a prior new-connector render never survives into the existing path.
       if (credentials.cloudConnectorId) {
         updatedPolicy = {
           ...updatedPolicy,
           cloud_connector_id: credentials.cloudConnectorId,
+          cloud_connector_iac_key: undefined,
+          cloud_connector_iac_deployment_id: undefined,
         };
       }
 

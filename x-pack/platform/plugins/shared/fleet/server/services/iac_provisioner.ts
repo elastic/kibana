@@ -26,6 +26,13 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
 
+/**
+ * IaCP's `workflow` is the Kibana connector-type name and is required on every
+ * render request; Federated Identity is the only workflow Fleet renders for.
+ * https://github.com/elastic/ingest-dev/issues/9415
+ */
+export const FEDERATED_IDENTITY_WORKFLOW = 'federated_identity' as const;
+
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
 const formatIacProvisionerNetworkError = (error: unknown): string => {
   if (!(error instanceof Error)) {
@@ -43,20 +50,41 @@ export interface IacProvisionerRenderPolicyTemplate {
 export interface IacProvisionerRenderIntegration {
   name: string;
   version: string;
-  /** Policy templates the caller enabled, each with its provider-relevant inputs. */
+  /** Policy templates the caller enabled, each with its enabled input types. */
   policyTemplates: IacProvisionerRenderPolicyTemplate[];
 }
 
+/** Caller-supplied part of a render request; the service adds `workflow`. */
 export interface IacProvisionerRenderRequest {
   // Only AWS is supported today; typed off the shared constant so the value
   // and type can't drift and adding a provider is a one-line change.
   provider: typeof AWS_CLOUD_PROVIDER;
   integrations: IacProvisionerRenderIntegration[];
+  /**
+   * The digest stored on the connector, so IaCP can tell us whether the deployed
+   * template is still current. Omitted on a first render and when nothing is stored.
+   */
+  templateSha?: string;
 }
 
+/** What actually goes on the wire: the caller's request plus the required `workflow`. */
+interface IacProvisionerRenderBody extends IacProvisionerRenderRequest {
+  workflow: typeof FEDERATED_IDENTITY_WORKFLOW;
+}
+
+/**
+ * `templateSha`, `render` and `blueprint` are required by the provider's spec, but
+ * stay optional here so a provider predating the contract fails open instead of
+ * throwing. https://github.com/elastic/ingest-dev/issues/9415
+ */
 export interface IacProvisionerRenderResponse {
   artifactUrl: string;
   expiresAt: string;
+  /** Digest of the rendered template — what the connector's `iac_key` stores. */
+  templateSha?: string;
+  /** True when the user must apply the template; false when the sent digest still matches. */
+  render?: boolean;
+  blueprint?: { id: string; version: string };
 }
 
 interface IacProvisionerErrorBody {
@@ -66,7 +94,7 @@ interface IacProvisionerErrorBody {
 }
 
 export interface IacProvisionerService {
-  renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
+  render(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
 }
 
 /**
@@ -91,9 +119,22 @@ export const parseIacProvisionerErrors = (
 };
 
 class IacProvisionerServiceImpl implements IacProvisionerService {
-  public async renderTemplate(
-    request: IacProvisionerRenderRequest
-  ): Promise<IacProvisionerRenderResponse> {
+  /**
+   * Renders the template for this integration set. Passing the connector's stored
+   * `templateSha` lets IaCP answer whether it is still current (`render: false`)
+   * without a second endpoint, so the digest cannot drift between check and deploy.
+   */
+  public async render({
+    provider,
+    integrations,
+    templateSha,
+  }: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse> {
+    const requestBody: IacProvisionerRenderBody = {
+      provider,
+      workflow: FEDERATED_IDENTITY_WORKFLOW,
+      integrations,
+      ...(templateSha !== undefined ? { templateSha } : {}),
+    };
     const logger = appContextService.getLogger().get('IacProvisionerService');
     const traceId = apm.currentTransaction?.traceparent;
     const iacProvisionerConfig = appContextService.getConfig()?.iacProvisioner;
@@ -110,9 +151,9 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     // The response's artifactUrl embeds signing credentials and must never be
     // logged; the request body contains only safe-to-log fields.
     logger.info(
-      `[IaC Provisioner] Rendering template for provider ${
-        request.provider
-      }, integrations: ${JSON.stringify(request.integrations)}`
+      `[IaC Provisioner] Render requested for provider ${provider}, integrations: ${JSON.stringify(
+        integrations
+      )}`
     );
 
     let dispatcher;
@@ -132,7 +173,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       `[IaC Provisioner] Render request config ${this.createRequestConfigDebug(
         url,
         headers,
-        request,
+        requestBody,
         iacProvisionerConfig
       )}`
     );
@@ -147,7 +188,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       const response = await undiciFetch(url, {
         method: 'POST',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(requestBody),
         signal: abortController.signal,
         dispatcher,
       });
@@ -157,15 +198,21 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         throw await this.responseToError(response, logger, latencyMs, traceId);
       }
 
-      const rendered = (await response.json()) as IacProvisionerRenderResponse;
-      logger.info(
-        `[IaC Provisioner] Render succeeded for provider ${request.provider} in ${latencyMs}ms`
-      );
+      const responseBody = (await response.json()) as IacProvisionerRenderResponse;
+      logger.info(`[IaC Provisioner] Render succeeded for provider ${provider} in ${latencyMs}ms`);
+      if (responseBody.templateSha === undefined || responseBody.render === undefined) {
+        // Both are required by the provider's spec, so a 200 without them means the
+        // provider predates it. Callers fail open rather than treating the connector
+        // as out of date. https://github.com/elastic/ingest-dev/issues/9415
+        logger.warn(
+          `[IaC Provisioner] Render response from provider contained no templateSha/render (pre-contract provider?) [Request Id: ${traceId}]`
+        );
+      }
       // artifactUrl embeds signing credentials — only the expiry is loggable.
       logger.debug(
-        `[IaC Provisioner] Render response: status ${response.status}, artifact expires at ${rendered.expiresAt} [Request Id: ${traceId}]`
+        `[IaC Provisioner] Render response: status ${response.status}, artifact expires at ${responseBody.expiresAt}, templateSha ${responseBody.templateSha}, render ${responseBody.render} [Request Id: ${traceId}]`
       );
-      return rendered;
+      return responseBody;
     } catch (error) {
       if (
         error instanceof IacProvisionerRenderError ||
@@ -223,7 +270,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
   private createRequestConfigDebug(
     url: string,
     headers: Record<string, string>,
-    request: IacProvisionerRenderRequest,
+    requestBody: IacProvisionerRenderBody,
     iacProvisionerConfig: IacProvisionerConfig | undefined
   ) {
     const tls = iacProvisionerConfig?.api?.tls;
@@ -232,7 +279,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       method: 'POST',
       headers,
       timeoutMs: RENDER_TIMEOUT_MS,
-      body: request,
+      body: requestBody,
       tls: {
         certificate: tls?.certificate ? 'REDACTED' : undefined,
         key: tls?.key ? 'REDACTED' : undefined,

@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import type { NewPackagePolicy } from '../../../../common';
+import type { NewPackagePolicy, PackageInfo } from '../../../../common';
 import type { CloudProvider, AccountType } from '../../../types';
 import { AWSReusableConnectorForm } from '../aws_cloud_connector/aws_reusable_connector_form';
 import { AzureReusableConnectorForm } from '../azure_cloud_connector/azure_reusable_connector_form';
 import { GCPReusableConnectorForm } from '../gcp_cloud_connector/gcp_reusable_connector_form';
-import type { CloudConnectorCredentials } from '../types';
+import type { CloudConnectorCredentials, CloudSetupForCloudConnector } from '../types';
 import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from '../constants';
 
 export const ReusableCloudConnectorForm: React.FC<{
@@ -23,6 +23,10 @@ export const ReusableCloudConnectorForm: React.FC<{
   isEditPage: boolean;
   accountType?: AccountType;
   packageName?: string;
+  cloud?: CloudSetupForCloudConnector;
+  iacTemplateUrl?: string;
+  packageInfo?: PackageInfo;
+  onValidityChange?: (isValid: boolean) => void;
 }> = ({
   credentials,
   setCredentials,
@@ -31,6 +35,10 @@ export const ReusableCloudConnectorForm: React.FC<{
   isEditPage,
   accountType,
   packageName,
+  cloud,
+  iacTemplateUrl,
+  packageInfo,
+  onValidityChange,
 }) => {
   const provider = cloudProvider || AWS_PROVIDER;
 
@@ -44,6 +52,11 @@ export const ReusableCloudConnectorForm: React.FC<{
           setCredentials={setCredentials}
           accountType={accountType}
           packageName={packageName}
+          newPolicy={newPolicy}
+          cloud={cloud}
+          iacTemplateUrl={iacTemplateUrl}
+          packageInfo={packageInfo}
+          onValidityChange={onValidityChange}
         />
       );
     case AZURE_PROVIDER:

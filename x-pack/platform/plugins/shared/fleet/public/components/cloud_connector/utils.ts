@@ -16,13 +16,17 @@ import type {
   CloudConnectorVars,
 } from '../../../common/types';
 import { isCloudProvider } from '../../../common/types';
-import { getIacTemplateUrlFromVarGroupSelection } from '../../../common/services/cloud_connectors';
+import {
+  getIacTemplateUrlFromVarGroupSelection,
+  parseAwsRegionFromArn,
+} from '../../../common/services/cloud_connectors';
 
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
   GcpCloudConnectorCredentials,
   CloudConnectorCredentials,
+  CloudProviders,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
@@ -559,3 +563,80 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
 
 export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
   hasInvalidRequiredVars && !value;
+
+// IaC launch URL helpers
+
+const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
+
+/** Returns true when a URL carries a `templateURL=` query parameter. */
+export const hasTemplateUrlParam = (url: string | undefined): boolean =>
+  Boolean(url && TEMPLATE_URL_PARAM_REGEX.test(url));
+
+export interface IacLaunchUrlParams {
+  provider: CloudProviders;
+  /** Static quick-create URL from the package manifest (token-substituted). */
+  staticUrl: string | undefined;
+  /** Pre-signed artifact URL from IaCP — embeds credentials, never persist it. */
+  artifactUrl: string;
+  /**
+   * Provider deployment identity; AWS: CloudFormation stack ARN. When set, the result is a
+   * stack-update deep link. A malformed ARN (no parseable region) returns undefined.
+   */
+  deploymentId?: string;
+}
+
+/**
+ * Per-provider seam for turning a rendered artifact into a console launch URL.
+ * Only AWS is implemented: IaCP has no Azure/GCP blueprints yet
+ * (https://github.com/elastic/ingest-dev/issues/9415).
+ */
+export const getIacLaunchUrl = ({
+  provider,
+  staticUrl,
+  artifactUrl,
+  deploymentId,
+}: IacLaunchUrlParams): string | undefined => {
+  if (provider !== AWS_PROVIDER) {
+    return undefined;
+  }
+  const encodedArtifact = encodeURIComponent(artifactUrl);
+  const region = parseAwsRegionFromArn(deploymentId);
+  if (deploymentId && region) {
+    // Console deep link. AWS does not document this format; it must be verified manually
+    // against the console before shipping (https://github.com/elastic/ingest-dev/issues/9415).
+    return `https://console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
+      deploymentId
+    )}&templateURL=${encodedArtifact}`;
+  }
+  // A truthy deploymentId with no parseable region means the ARN is malformed;
+  // do not fall through to the quick-create path or a new stack would be created.
+  if (deploymentId) {
+    return undefined;
+  }
+  if (!staticUrl || !hasTemplateUrlParam(staticUrl)) {
+    return undefined;
+  }
+  return staticUrl.replace(TEMPLATE_URL_PARAM_REGEX, `templateURL=${encodedArtifact}`);
+};
+
+/** Shared by the wizard's stack ARN field and the flyout's Deployment ID field. */
+export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.stackArnInvalid',
+  {
+    defaultMessage:
+      'Enter a CloudFormation stack ARN, for example arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/…',
+  }
+);
+
+/** Read-only link to the deployed stack; needs no render. */
+export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {
+  const region = parseAwsRegionFromArn(deploymentId);
+  if (!deploymentId || !region) {
+    return undefined;
+  }
+  // Console deep link. AWS does not document this format; it must be verified manually
+  // against the console before shipping (https://github.com/elastic/ingest-dev/issues/9415).
+  return `https://console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${encodeURIComponent(
+    deploymentId
+  )}`;
+};
