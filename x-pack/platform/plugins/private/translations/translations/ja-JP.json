@@ -54871,7 +54871,6 @@
     "xpack.streams.enrichment.editMode.interactive": "インタラクティブ",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "現在のYAML構成には、インタラクティブエディターで表現できない機能が含まれています。",
     "xpack.streams.enrichment.editMode.legend": "編集モードの選択",
-    "xpack.streams.enrichment.editMode.yaml": "YAML",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "一致したサンプルをさらに読み込む",
     "xpack.streams.enrichment.fetchMore.error": "これ以上の一致するサンプルを読み込めませんでした。",
     "xpack.streams.enrichment.processor.deleteProcessor.cancelButtonText": "キャンセル",
