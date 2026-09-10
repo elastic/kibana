@@ -16,7 +16,7 @@ const mockRoundLayoutMount = jest.fn();
 
 jest.mock('./conversation_date_divider', () => ({
   ConversationDateDivider: ({ date }: { date: string }) => (
-    <div data-testid="dateDivider" data-date={date} />
+    <div data-test-subj="dateDivider" data-date={date} />
   ),
 }));
 
