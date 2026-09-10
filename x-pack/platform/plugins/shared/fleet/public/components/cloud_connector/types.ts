@@ -9,6 +9,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
+import type { RenderIacTemplatePolicyTemplate } from '../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType, CloudConnectorSecretReference, CloudProvider } from '../../types';
 
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -39,6 +40,8 @@ export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredenti
   iacKey?: string;
   /** CloudFormation stack ARN pasted by the user; travels as cloud_connector_iac_deployment_id. */
   iacDeploymentId?: string;
+  /** Policy templates + inputs the stored iacKey was rendered for; browser-only, used to detect edits after Launch. */
+  iacRenderedPolicyTemplates?: RenderIacTemplatePolicyTemplate[];
 }
 
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
@@ -72,6 +75,8 @@ export interface NewCloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Reports whether the provider form allows submission. Only the AWS form reports today. */
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 // Define the interface for connector options

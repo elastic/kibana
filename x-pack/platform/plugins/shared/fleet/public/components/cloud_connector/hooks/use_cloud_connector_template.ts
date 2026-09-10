@@ -62,8 +62,22 @@ export interface UseCloudConnectorTemplateParams {
   integrations?: RenderIacTemplateIntegration[];
   /** Existing stack to update; makes the launch URL a stack-update deep link. */
   deploymentId?: string;
-  /** Called right before the console opens, with the templateSha IaCP returned for the rendered template (undefined for a pre-contract provider). Stored on the connector as iac_key. */
-  onTemplateRendered?: (rendered: { key?: string }) => void;
+  /**
+   * Open the package's static template when the render fails or cannot run. First-time
+   * onboarding wants this; update flows must not downgrade an identity that already has a
+   * generated template.
+   */
+  staticTemplateFallback?: boolean;
+  /**
+   * Called right before the console opens, with the templateSha IaCP returned for the rendered
+   * template (undefined for a pre-contract provider) and the integration set it was rendered for.
+   * The key is stored on the connector as iac_key; the set lets callers detect a later edit to the
+   * enabled inputs.
+   */
+  onTemplateRendered?: (rendered: {
+    key?: string;
+    integrations: RenderIacTemplateIntegration[];
+  }) => void;
 }
 
 export type CloudConnectorLaunchButtonProps =
@@ -96,6 +110,7 @@ export const useCloudConnectorTemplate = ({
   policyTemplates,
   integrations,
   deploymentId,
+  staticTemplateFallback = true,
   onTemplateRendered,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
@@ -131,10 +146,12 @@ export const useCloudConnectorTemplate = ({
     if (renderIntegrations.length === 0 || !hasScaffold) {
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
-        window.open(staticTemplateUrl, '_blank');
-      } else {
-        setTemplateGenerationError(MISSING_CONTEXT_ERROR);
+        if (staticTemplateFallback) {
+          window.open(staticTemplateUrl, '_blank');
+          return;
+        }
       }
+      setTemplateGenerationError(MISSING_CONTEXT_ERROR);
       return;
     }
 
@@ -163,7 +180,7 @@ export const useCloudConnectorTemplate = ({
 
       if (error || !data) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
-        if (staticTemplateUrl) {
+        if (staticTemplateUrl && staticTemplateFallback) {
           navigateTo(staticTemplateUrl);
         } else {
           cloudFormationTab?.close();
@@ -185,7 +202,7 @@ export const useCloudConnectorTemplate = ({
         setTemplateGenerationError(MISSING_CONTEXT_ERROR);
         return;
       }
-      onTemplateRendered?.({ key: data.templateSha });
+      onTemplateRendered?.({ key: data.templateSha, integrations: renderIntegrations });
       navigateTo(launchUrl);
     } catch (e) {
       cloudFormationTab?.close();
@@ -201,6 +218,7 @@ export const useCloudConnectorTemplate = ({
     packageName,
     policyTemplates,
     provider,
+    staticTemplateFallback,
     staticTemplateUrl,
   ]);
 

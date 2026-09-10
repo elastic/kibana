@@ -17,6 +17,7 @@ import {
 } from '../../../../common/services/cloud_connectors/test_subjects';
 
 import type { AwsCloudConnectorCredentials } from '../types';
+import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from '../test/mock';
@@ -557,7 +558,9 @@ describe('AWSReusableConnectorForm', () => {
 
       const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-      let capturedOnTemplateRendered: ((r: { key?: string }) => void) | undefined;
+      let capturedOnTemplateRendered:
+        | ((r: { key?: string; integrations: RenderIacTemplateIntegration[] }) => void)
+        | undefined;
       mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => {
         capturedOnTemplateRendered = onTemplateRendered;
         return {
@@ -580,7 +583,7 @@ describe('AWSReusableConnectorForm', () => {
       );
 
       await act(async () => {
-        capturedOnTemplateRendered?.({ key: 'sha256:new' });
+        capturedOnTemplateRendered?.({ key: 'sha256:new', integrations: [] });
       });
 
       expect(mockUpdateCloudConnector).toHaveBeenCalledWith(mockHttp, 'connector-1', {
@@ -622,6 +625,74 @@ describe('AWSReusableConnectorForm', () => {
           deploymentId,
         })
       );
+    });
+
+    it('(i2) useCloudConnectorTemplate opts out of the static template fallback', () => {
+      // This identity already has a generated template; the static one would downgrade it.
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+
+      renderWithIntl(
+        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
+      );
+
+      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ staticTemplateFallback: false })
+      );
+    });
+
+    it('(i3) renders the template generation error below the check callout', async () => {
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: false, reason: 'key_mismatch', integrations: [] },
+        isFetching: false,
+        refetch: mockRefetch,
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        launchButtonProps: { onClick: mockLaunchOnClick },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        templateGenerationError: 'boom',
+        isIacProvisionerEnabled: true,
+      });
+
+      renderWithIntl(
+        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(
+            CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.IAC_CHECK_TEMPLATE_ERROR_CALLOUT
+          )
+        ).toBeInTheDocument();
+      });
+      expect(screen.getByText('boom')).toBeInTheDocument();
+    });
+
+    it('(i4) does not render the template generation error when there is no check callout', () => {
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, integrations: [] },
+        isFetching: false,
+        refetch: mockRefetch,
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        launchButtonProps: { onClick: mockLaunchOnClick },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        templateGenerationError: 'boom',
+        isIacProvisionerEnabled: true,
+      });
+
+      renderWithIntl(
+        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
+      );
+
+      expect(
+        screen.queryByTestId(
+          CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.IAC_CHECK_TEMPLATE_ERROR_CALLOUT
+        )
+      ).not.toBeInTheDocument();
     });
   });
 });

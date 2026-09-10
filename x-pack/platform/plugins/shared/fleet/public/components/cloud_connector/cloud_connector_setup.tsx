@@ -175,6 +175,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             setCredentials={updatePolicyWithNewCredentials}
             accountType={accountType}
             iacTemplateUrl={iacTemplateUrl}
+            onValidityChange={onValidityChange}
           />
         </>
       ),
@@ -238,6 +239,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithNewCredentials}
           accountType={accountType}
           iacTemplateUrl={iacTemplateUrl}
+          onValidityChange={onValidityChange}
         />
       )}
       {reusableFeatureEnabled && (

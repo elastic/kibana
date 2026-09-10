@@ -15,7 +15,6 @@ import type {
 
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { IAC_UPGRADE_TASK_FLOW } from '../../common/telemetry/iac_provisioner_events';
-import type { IacKeyVerificationOutcome } from '../../common/telemetry/iac_provisioner_events';
 import { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
 import type { IacUpgradeStatus } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
@@ -23,6 +22,7 @@ import { appContextService } from '../services';
 import {
   compareIacKey,
   getCloudConnectorIntegrationSelections,
+  toUpgradeStatus,
 } from '../services/cloud_connectors';
 import { reportIacProvisionerUpgradeCheckCompleted } from '../services/telemetry/iac_provisioner_telemetry';
 import { isIacProvisionerEnabled } from '../services/utils/iac_provisioner';
@@ -152,18 +152,6 @@ export const runIacUpgradeCheckTask = async (
   );
   reportIacProvisionerUpgradeCheckCompleted({ ...counts, durationMs });
   return counts;
-};
-
-const toUpgradeStatus = (outcome: IacKeyVerificationOutcome): IacUpgradeStatus | undefined => {
-  switch (outcome) {
-    case 'matches':
-      return 'up_to_date';
-    case 'no_key':
-    case 'key_mismatch':
-      return 'upgrade_available';
-    default:
-      return undefined;
-  }
 };
 
 const checkConnector = async (

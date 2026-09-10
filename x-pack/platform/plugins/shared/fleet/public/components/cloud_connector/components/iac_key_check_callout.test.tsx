@@ -29,14 +29,20 @@ describe('IacKeyCheckCallout', () => {
 
   it('renders null when result.matches is true', () => {
     const { container } = renderWithIntl(
-      <IacKeyCheckCallout {...baseProps} result={{ matches: true, integrations: [] }} />
+      <IacKeyCheckCallout
+        {...baseProps}
+        result={{ matches: true, outcome: 'matches', integrations: [] }}
+      />
     );
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders null when result has no reason', () => {
     const { container } = renderWithIntl(
-      <IacKeyCheckCallout {...baseProps} result={{ matches: false, integrations: [] }} />
+      <IacKeyCheckCallout
+        {...baseProps}
+        result={{ matches: false, outcome: 'key_unavailable', integrations: [] }}
+      />
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -45,7 +51,7 @@ describe('IacKeyCheckCallout', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
-        result={{ matches: false, reason: 'no_key', integrations: [] }}
+        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
       />
     );
     expect(
@@ -58,7 +64,12 @@ describe('IacKeyCheckCallout', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
-        result={{ matches: false, reason: 'key_mismatch', integrations: [] }}
+        result={{
+          matches: false,
+          reason: 'key_mismatch',
+          outcome: 'key_mismatch',
+          integrations: [],
+        }}
         integrationTitle="Cloud Security Posture"
       />
     );
@@ -71,7 +82,12 @@ describe('IacKeyCheckCallout', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
-        result={{ matches: false, reason: 'key_mismatch', integrations: [] }}
+        result={{
+          matches: false,
+          reason: 'key_mismatch',
+          outcome: 'key_mismatch',
+          integrations: [],
+        }}
       />
     );
     expect(screen.getByText(/stack ARN for this identity isn't recorded/i)).toBeInTheDocument();
@@ -84,6 +100,7 @@ describe('IacKeyCheckCallout', () => {
         result={{
           matches: false,
           reason: 'key_mismatch',
+          outcome: 'key_mismatch',
           integrations: [],
           deploymentId: 'arn:aws:cloudformation:us-east-1:123:stack/my-stack/abc',
         }}
@@ -100,7 +117,12 @@ describe('IacKeyCheckCallout', () => {
       <IacKeyCheckCallout
         {...baseProps}
         onUpdateStack={onUpdateStack}
-        result={{ matches: false, reason: 'key_mismatch', integrations: [] }}
+        result={{
+          matches: false,
+          reason: 'key_mismatch',
+          outcome: 'key_mismatch',
+          integrations: [],
+        }}
       />
     );
     await userEvent.click(
@@ -115,7 +137,7 @@ describe('IacKeyCheckCallout', () => {
       <IacKeyCheckCallout
         {...baseProps}
         onVerify={onVerify}
-        result={{ matches: false, reason: 'no_key', integrations: [] }}
+        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
       />
     );
     await userEvent.click(

@@ -10,10 +10,16 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../../common';
-import { CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
+import {
+  CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ,
+} from '../../../../common/services/cloud_connectors/test_subjects';
 
 import type { AwsCloudConnectorCredentials } from '../types';
-import type { UseCloudConnectorTemplateResult } from '../hooks/use_cloud_connector_template';
+import type {
+  UseCloudConnectorTemplateParams,
+  UseCloudConnectorTemplateResult,
+} from '../hooks/use_cloud_connector_template';
 
 import { AWSCloudConnectorForm } from './aws_cloud_connector_form';
 
@@ -42,6 +48,10 @@ jest.mock('./aws_cloud_connector_options', () => ({
   getAwsCloudConnectorsCredentialsFormOptions: jest.fn().mockReturnValue(null),
 }));
 
+const { getEnabledInputsByPolicyTemplate } = jest.requireMock(
+  '../../../../common/services/policy_template'
+) as { getEnabledInputsByPolicyTemplate: jest.Mock };
+
 const { useCloudConnectorTemplate } = jest.requireMock('../hooks/use_cloud_connector_template') as {
   useCloudConnectorTemplate: jest.MockedFunction<
     (
@@ -67,6 +77,14 @@ const iacDisabledResult: UseCloudConnectorTemplateResult = {
   templateGenerationError: undefined,
   isIacProvisionerEnabled: false,
 };
+
+type OnTemplateRendered = NonNullable<UseCloudConnectorTemplateParams['onTemplateRendered']>;
+
+const TWO_TEMPLATES = [
+  { name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] },
+  { name: 's3', enabledInputs: ['aws-s3'] },
+];
+const ONE_TEMPLATE = [TWO_TEMPLATES[0]];
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -114,6 +132,7 @@ describe('AWSCloudConnectorForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCloudConnectorTemplate.mockReturnValue(iacEnabledResult);
+    getEnabledInputsByPolicyTemplate.mockReturnValue([]);
   });
 
   describe('stack ARN field visibility', () => {
@@ -169,7 +188,7 @@ describe('AWSCloudConnectorForm', () => {
 
   describe('onTemplateRendered callback', () => {
     it('calls setCredentials with iacKey when the template hook calls onTemplateRendered', () => {
-      let capturedOnTemplateRendered: ((rendered: { key?: string }) => void) | undefined;
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
 
       useCloudConnectorTemplate.mockImplementation((params) => {
         capturedOnTemplateRendered = params.onTemplateRendered;
@@ -179,11 +198,40 @@ describe('AWSCloudConnectorForm', () => {
       renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
 
       act(() => {
-        capturedOnTemplateRendered?.({ key: 'sha256:abc' });
+        capturedOnTemplateRendered?.({ key: 'sha256:abc', integrations: [] });
       });
 
       expect(mockSetCredentials).toHaveBeenCalledWith(
         expect.objectContaining({ iacKey: 'sha256:abc' })
+      );
+    });
+
+    it('stores the policy templates of the rendered package alongside the key', () => {
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:abc',
+          integrations: [
+            // Only the package being configured is relevant; any other entry is ignored.
+            { name: 'aws', policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }] },
+            { name: 'cloud_security_posture', policyTemplates: TWO_TEMPLATES },
+          ],
+        });
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iacKey: 'sha256:abc',
+          iacRenderedPolicyTemplates: TWO_TEMPLATES,
+        })
       );
     });
 
@@ -196,7 +244,7 @@ describe('AWSCloudConnectorForm', () => {
       // the one captured after rerender) so it would fail against the old
       // useCallback([credentials, setCredentials]) implementation, which would have
       // closed over the stale first-render credentials.
-      let capturedOnTemplateRendered: ((rendered: { key?: string }) => void) | undefined;
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
 
       useCloudConnectorTemplate.mockImplementation((params) => {
         capturedOnTemplateRendered = params.onTemplateRendered;
@@ -227,12 +275,165 @@ describe('AWSCloudConnectorForm', () => {
       // Invoke the callback captured from the FIRST render — it must see the edited name
       // because the latest-value ref (not the closure) is read at call time.
       act(() => {
-        callbackFromFirstRender?.({ key: 'sha256:abc' });
+        callbackFromFirstRender?.({ key: 'sha256:abc', integrations: [] });
       });
 
       expect(mockSetCredentials).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Edited', iacKey: 'sha256:abc' })
       );
+    });
+  });
+
+  describe('enabled inputs edited after the template was rendered', () => {
+    // The Launch button renders from the inputs enabled at click time, but the service selection
+    // sits below it, so the user can still change it afterwards.
+    const renderedCredentials = (
+      renderedSet: Array<{ name: string; enabledInputs: string[] }>
+    ): AwsCloudConnectorCredentials => ({
+      ...defaultCredentials,
+      iacKey: 'sha256:abc',
+      iacRenderedPolicyTemplates: renderedSet,
+    });
+
+    const rerenderWith = (
+      rerender: (ui: React.ReactElement) => void,
+      credentials: AwsCloudConnectorCredentials,
+      onValidityChange: (isValid: boolean) => void
+    ) =>
+      rerender(
+        <I18nProvider>
+          <AWSCloudConnectorForm
+            {...defaultProps}
+            // A fresh policy object so the enabled-inputs memo recomputes.
+            newPolicy={makePolicy()}
+            credentials={credentials}
+            onValidityChange={onValidityChange}
+          />
+        </I18nProvider>
+      );
+
+    it('warns and reports invalid once a service is disabled after the render', () => {
+      const onValidityChange = jest.fn();
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+      getEnabledInputsByPolicyTemplate.mockReturnValue(TWO_TEMPLATES);
+
+      const { rerender } = renderWithIntl(
+        <AWSCloudConnectorForm {...defaultProps} onValidityChange={onValidityChange} />
+      );
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:abc',
+          integrations: [{ name: 'cloud_security_posture', policyTemplates: TWO_TEMPLATES }],
+        });
+      });
+
+      getEnabledInputsByPolicyTemplate.mockReturnValue(ONE_TEMPLATE);
+      rerenderWith(rerender, renderedCredentials(TWO_TEMPLATES), onValidityChange);
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('clears the warning and reports valid after the template is rendered again', () => {
+      const onValidityChange = jest.fn();
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+      getEnabledInputsByPolicyTemplate.mockReturnValue(ONE_TEMPLATE);
+
+      const { rerender } = renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={renderedCredentials(TWO_TEMPLATES)}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+
+      // A fresh Launch renders the currently enabled set and records it.
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:def',
+          integrations: [{ name: 'cloud_security_posture', policyTemplates: ONE_TEMPLATE }],
+        });
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iacKey: 'sha256:def',
+          iacRenderedPolicyTemplates: ONE_TEMPLATE,
+        })
+      );
+
+      rerenderWith(rerender, renderedCredentials(ONE_TEMPLATE), onValidityChange);
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('never warns without both a key and a recorded rendered set', () => {
+      const onValidityChange = jest.fn();
+      getEnabledInputsByPolicyTemplate.mockReturnValue(ONE_TEMPLATE);
+
+      // The static template path stores no key, so nothing is known to be out of date.
+      const { rerender } = renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={{ ...defaultCredentials, iacRenderedPolicyTemplates: TWO_TEMPLATES }}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+
+      // A key with no recorded set (e.g. restored from an earlier session) is not actionable.
+      rerenderWith(rerender, { ...defaultCredentials, iacKey: 'sha256:abc' }, onValidityChange);
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+      expect(onValidityChange).not.toHaveBeenCalledWith(false);
+    });
+
+    it('does not warn when the same services are listed in a different order', () => {
+      const onValidityChange = jest.fn();
+      getEnabledInputsByPolicyTemplate.mockReturnValue(TWO_TEMPLATES);
+
+      renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={renderedCredentials([TWO_TEMPLATES[1], TWO_TEMPLATES[0]])}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
     });
   });
 });

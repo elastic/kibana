@@ -25,6 +25,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
   hasInvalidRequiredVars,
   accountType,
   iacTemplateUrl,
+  onValidityChange,
 }) => {
   // Default to AWS if no cloudProvider is specified
   const provider = cloudProvider || AWS_PROVIDER;
@@ -44,6 +45,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           setCredentials={setCredentials}
           accountType={accountType}
           iacTemplateUrl={iacTemplateUrl}
+          onValidityChange={onValidityChange}
         />
       );
     case AZURE_PROVIDER:

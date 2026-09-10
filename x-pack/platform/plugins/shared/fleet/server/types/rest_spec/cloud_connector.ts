@@ -313,6 +313,16 @@ export const VerifyCloudConnectorIacKeyRequestSchema = {
 export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
   matches: schema.boolean(),
   reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
+  // `matches` is true for both a definite match and a check that could not run (fail open);
+  // `outcome` lets the flyout hide its upgrade callout only on the former.
+  outcome: schema.oneOf([
+    schema.literal('matches'),
+    schema.literal('no_key'),
+    schema.literal('key_mismatch'),
+    schema.literal('unsupported_provider'),
+    schema.literal('no_integrations'),
+    schema.literal('key_unavailable'),
+  ]),
   deploymentId: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),
   // Same shape the render route takes, so the browser can re-render exactly this set.

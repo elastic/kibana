@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IacKeyCheckReason } from '../../telemetry/iac_provisioner_events';
+import type {
+  IacKeyCheckReason,
+  IacKeyVerificationOutcome,
+} from '../../telemetry/iac_provisioner_events';
 
 import type {
   CloudConnector,
@@ -83,8 +86,11 @@ export interface VerifyCloudConnectorIacKeyRequest {
 }
 
 export interface VerifyCloudConnectorIacKeyResponse {
+  /** False only when the deployed template must be updated; true also covers "could not check" (fail open). */
   matches: boolean;
   reason?: IacKeyCheckReason;
+  /** The full verdict, so callers can tell a definite match from a check that could not run. */
+  outcome: IacKeyVerificationOutcome;
   /** Provider deployment identity from the connector (AWS: stack ARN); absent for legacy connectors. */
   deploymentId?: string;
   /** Parsed from deploymentId; absent when it is absent or malformed. */

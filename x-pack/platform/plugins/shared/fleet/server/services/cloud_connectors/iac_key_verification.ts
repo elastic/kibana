@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { parseAwsRegionFromArn } from '../../../common/services/cloud_connectors';
@@ -17,6 +17,7 @@ import {
   type IacProvisionerRenderFlow,
 } from '../../../common/telemetry/iac_provisioner_events';
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
+import type { IacUpgradeStatus } from '../../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
 import {
   IacProvisionerRenderError,
@@ -41,8 +42,11 @@ import {
 } from './iac_integrations';
 
 export interface IacKeyVerification {
+  /** False only when the deployed template must be updated; true also when the check could not run. */
   matches: boolean;
   reason?: IacKeyCheckReason;
+  /** The full verdict — lets callers tell a definite match from a fail-open. */
+  outcome: IacKeyVerificationOutcome;
   /** From `iac_deployment_id`; absent for legacy connectors. */
   deploymentId?: string;
   /** Parsed from the deployment id (AWS ARN); absent when the id is absent or malformed. */
@@ -186,6 +190,70 @@ export const compareIacKey = async (
   return result.render ? 'key_mismatch' : 'matches';
 };
 
+/**
+ * The stored `iac_upgrade_status` for a verification outcome, or undefined when the outcome says
+ * nothing about the connector (provider unreachable, unsupported, nothing attached) and the last
+ * known status must stay as it is.
+ */
+export const toUpgradeStatus = (
+  outcome: IacKeyVerificationOutcome
+): IacUpgradeStatus | undefined => {
+  switch (outcome) {
+    case 'matches':
+      return 'up_to_date';
+    case 'no_key':
+    case 'key_mismatch':
+      return 'upgrade_available';
+    default:
+      return undefined;
+  }
+};
+
+/**
+ * A re-check of the connector as it stands asks exactly what the daily upgrade task asks, so a
+ * definite answer replaces the stored status instead of waiting up to a day for the task. A failed
+ * write is logged and swallowed: the caller still gets its answer and the task will retry.
+ */
+const persistUpgradeStatus = async (
+  soClient: SavedObjectsClientContract,
+  cloudConnectorId: string,
+  /**
+   * Read before the render and used only for the log line, so an upgrade-task write landing in
+   * between makes the logged "from" value stale — never the stored one, which is this outcome.
+   */
+  previousStatus: IacUpgradeStatus | undefined,
+  outcome: IacKeyVerificationOutcome,
+  surface: IacKeySurface,
+  logger: Logger
+): Promise<void> => {
+  const status = toUpgradeStatus(outcome);
+  if (status === undefined) {
+    return;
+  }
+  try {
+    await soClient.update<CloudConnectorSOAttributes>(
+      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      cloudConnectorId,
+      { iac_upgrade_status: status, iac_upgrade_checked_at: new Date().toISOString() }
+    );
+  } catch (error) {
+    logger.error(
+      `Failed to store IaC upgrade status for connector ${cloudConnectorId}: ${getErrorMessage(
+        error
+      )}`
+    );
+    return;
+  }
+  const message = `IaC upgrade status for connector ${cloudConnectorId}: ${
+    previousStatus ?? '<unset>'
+  } → ${status} (${surface} verify)`;
+  if (previousStatus === status) {
+    logger.debug(message);
+    return;
+  }
+  logger.info(message);
+};
+
 export const verifyCloudConnectorIacKey = async (
   soClient: SavedObjectsClientContract,
   cloudConnectorId: string,
@@ -226,13 +294,24 @@ export const verifyCloudConnectorIacKey = async (
       latencyMs: Date.now() - startTime,
     });
     const reason = outcome === 'no_key' || outcome === 'key_mismatch' ? outcome : undefined;
-    return { matches: !reason, reason, deploymentId, region, integrations };
+    return { matches: !reason, reason, outcome, deploymentId, region, integrations };
   };
 
-  return finish(
-    await compareIacKey(soClient, attributes, integrations, {
-      flow: IAC_KEY_CHECK_FLOW,
-      contextForLog: `connector ${cloudConnectorId}`,
-    })
-  );
+  const outcome = await compareIacKey(soClient, attributes, integrations, {
+    flow: IAC_KEY_CHECK_FLOW,
+    contextForLog: `connector ${cloudConnectorId}`,
+  });
+  // Only a plain re-check describes the connector as it is stored; a wizard check carries an
+  // integration the user has not saved yet, so its verdict must not be written down.
+  if (!newIntegration) {
+    await persistUpgradeStatus(
+      soClient,
+      cloudConnectorId,
+      attributes.iac_upgrade_status,
+      outcome,
+      surface,
+      logger
+    );
+  }
+  return finish(outcome);
 };

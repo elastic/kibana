@@ -26,6 +26,7 @@ import {
   getIacLaunchUrl,
   getAwsStackConsoleUrl,
   hasTemplateUrlParam,
+  isSameTemplateSet,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -1030,6 +1031,53 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
       ],
     } as any;
     expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
+  });
+});
+
+describe('isSameTemplateSet', () => {
+  const CSPM = { name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] };
+  const S3 = { name: 's3', enabledInputs: ['aws-s3', 'aws/metrics'] };
+
+  it('treats two empty sets as the same', () => {
+    expect(isSameTemplateSet([], [])).toBe(true);
+  });
+
+  it('ignores the order of policy templates and of their enabled inputs', () => {
+    expect(
+      isSameTemplateSet(
+        [CSPM, S3],
+        [{ name: 's3', enabledInputs: ['aws/metrics', 'aws-s3'] }, CSPM]
+      )
+    ).toBe(true);
+  });
+
+  it('detects a policy template that was added', () => {
+    expect(isSameTemplateSet([CSPM], [CSPM, S3])).toBe(false);
+  });
+
+  it('detects a policy template that was removed', () => {
+    expect(isSameTemplateSet([CSPM, S3], [CSPM])).toBe(false);
+  });
+
+  it('detects a changed input type within the same policy template', () => {
+    expect(isSameTemplateSet([S3], [{ name: 's3', enabledInputs: ['aws-s3'] }])).toBe(false);
+  });
+
+  it('detects a renamed policy template that keeps the same inputs', () => {
+    expect(
+      isSameTemplateSet([CSPM], [{ name: 'asset_inventory', enabledInputs: CSPM.enabledInputs }])
+    ).toBe(false);
+  });
+
+  it('does not mutate the arrays it compares', () => {
+    const left = [{ name: 's3', enabledInputs: ['aws/metrics', 'aws-s3'] }, CSPM];
+    const right = [CSPM, S3];
+
+    isSameTemplateSet(left, right);
+
+    expect(left[0]).toEqual({ name: 's3', enabledInputs: ['aws/metrics', 'aws-s3'] });
+    expect(left[1]).toBe(CSPM);
+    expect(right[0]).toBe(CSPM);
   });
 });
 

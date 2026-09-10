@@ -393,7 +393,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
-          // Read-only: loads the connector + its policies and proxies a comparison render.
+          // Loads the connector + its policies and proxies a comparison render. Called without an
+          // integration it also stores the upgrade status it just derived — the same two fields
+          // the daily upgrade task writes. Privileges stay READ because the caller supplies no
+          // part of that value: it is derived server-side from what is already stored.
           requiredPrivileges: [
             {
               anyRequired: [

@@ -192,9 +192,13 @@ describe('checkIacTemplate', () => {
 });
 
 describe('verifyCloudConnectorIacKey', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+    logger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    soClient.update.mockResolvedValue({} as any);
     mockedSupported.mockReturnValue(true);
     mockedSelections.mockResolvedValue([
       { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
@@ -236,6 +240,7 @@ describe('verifyCloudConnectorIacKey', () => {
     expect(mockedResolve).toHaveBeenCalledWith(soClient, 'aws', merged);
     expect(result).toEqual({
       matches: true,
+      outcome: 'matches',
       deploymentId: undefined,
       region: undefined,
       integrations: merged,
@@ -407,6 +412,118 @@ describe('verifyCloudConnectorIacKey', () => {
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
     expect(result).toMatchObject({ deploymentId: 'not-an-arn', region: undefined });
+  });
+
+  describe('persisting the upgrade status', () => {
+    const expectStatusWritten = (status: string) => {
+      expect(soClient.update).toHaveBeenCalledWith('fleet-cloud-connector', 'cc-1', {
+        iac_upgrade_status: status,
+        iac_upgrade_checked_at: expect.any(String),
+      });
+    };
+
+    it('stores up_to_date when a re-check matches', async () => {
+      soClient.get.mockResolvedValueOnce(
+        connector({ iac_key: 'sha256:same', iac_upgrade_status: 'upgrade_available' })
+      );
+      mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
+
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(result.matches).toBe(true);
+      expectStatusWritten('up_to_date');
+      expect(logger.info).toHaveBeenCalledWith(
+        'IaC upgrade status for connector cc-1: upgrade_available → up_to_date (flyout verify)'
+      );
+    });
+
+    it('stores upgrade_available when a re-check finds no stored key', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_upgrade_status: 'up_to_date' }));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expectStatusWritten('upgrade_available');
+    });
+
+    it('stores upgrade_available when a re-check finds a key mismatch', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expectStatusWritten('upgrade_available');
+      // Nothing was stored before, so the transition is worth an info line.
+      expect(logger.info).toHaveBeenCalledWith(
+        'IaC upgrade status for connector cc-1: <unset> → upgrade_available (flyout verify)'
+      );
+    });
+
+    it('logs at debug when the status is unchanged', async () => {
+      soClient.get.mockResolvedValueOnce(
+        connector({ iac_key: 'sha256:old', iac_upgrade_status: 'upgrade_available' })
+      );
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'IaC upgrade status for connector cc-1: upgrade_available → upgrade_available (flyout verify)'
+      );
+      expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('flyout verify'));
+    });
+
+    it('leaves the stored status alone when IaCP cannot answer', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
+      mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('down', 503));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves the stored status alone for an unsupported provider', async () => {
+      mockedSupported.mockReturnValue(false);
+      soClient.get.mockResolvedValueOnce(connector({ cloudProvider: 'azure' }));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves the stored status alone when the connector has no integrations', async () => {
+      soClient.get.mockResolvedValueOnce(connector({}));
+      mockedSelections.mockResolvedValueOnce([]);
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('does not persist a wizard check, whose integration is not saved yet', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
+
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', {
+        name: 'aws',
+        policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
+      });
+
+      expect(result).toMatchObject({ matches: false, reason: 'key_mismatch' });
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('still returns the verification when the write fails', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
+      soClient.update.mockRejectedValueOnce(new Error('so is down'));
+
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(result).toMatchObject({ matches: false, reason: 'key_mismatch' });
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to store IaC upgrade status for connector cc-1: so is down'
+      );
+    });
   });
 });
 

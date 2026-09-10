@@ -13,6 +13,8 @@ export const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
 export const CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ = 'cloudConnectorEditIcon';
 export const CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ =
   'cloudConnectorTemplateGenerationErrorCallout';
+export const CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ =
+  'cloudConnectorStaleTemplateCallout';
 export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
   `${CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ}-${connectorId}`;
 
@@ -48,6 +50,7 @@ export const CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS = {
   CALLOUT: 'cloudConnectorIacCheckCallout',
   UPDATE_STACK_BUTTON: 'cloudConnectorIacCheckUpdateStackButton',
   VERIFY_BUTTON: 'cloudConnectorIacCheckVerifyButton',
+  IAC_CHECK_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacCheckTemplateErrorCallout',
 };
 
 export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
@@ -73,4 +76,6 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   IAC_VIEW_STACK_LINK: 'cloudConnectorIacViewStackLink',
   IAC_UPGRADE_CALLOUT: 'cloudConnectorIacUpgradeCallout',
   IAC_UPDATE_STACK_BUTTON: 'cloudConnectorIacUpdateStackButton',
+  IAC_VERIFY_BUTTON: 'cloudConnectorIacVerifyButton',
+  IAC_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacTemplateErrorCallout',
 };

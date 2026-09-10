@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,12 +16,13 @@ import {
   EuiFieldText,
   EuiFormRow,
 } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
   CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
   CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
@@ -29,11 +30,13 @@ import {
   parseAwsRegionFromArn,
 } from '../../../../common/services/cloud_connectors';
 import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
+import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import { type CloudConnectorFormProps } from '../types';
 
 import {
   updateInputVarsWithCredentials,
   isAwsCredentials,
+  isSameTemplateSet,
   INVALID_STACK_ARN_MESSAGE,
 } from '../utils';
 import { AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
@@ -45,7 +48,12 @@ import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 
-export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
+interface AWSCloudConnectorFormProps extends CloudConnectorFormProps {
+  /** Reports whether this form allows submission; false while the rendered template is out of date. */
+  onValidityChange?: (isValid: boolean) => void;
+}
+
+export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
   newPolicy,
   packageInfo,
   cloud,
@@ -54,6 +62,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
+  onValidityChange,
 }) => {
   // The rendered template must cover every input the user enabled — no more.
   const inputs = newPolicy?.inputs;
@@ -62,19 +71,35 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     [inputs]
   );
 
-  // Always keep a ref to the latest credentials and setCredentials so that
+  // Always keep a ref to the latest credentials, setCredentials and package name so that
   // onTemplateRendered (called after an async render) never closes over a
   // stale snapshot. Without this, a name edit made while the render is in
   // flight would be silently reverted when the callback fires.
-  const latestRef = useRef({ credentials, setCredentials });
-  latestRef.current = { credentials, setCredentials };
+  const packageName = packageInfo?.name;
+  const latestRef = useRef({ credentials, setCredentials, packageName });
+  latestRef.current = { credentials, setCredentials, packageName };
 
-  const onTemplateRendered = useCallback(({ key }: { key?: string }) => {
-    const { credentials: current, setCredentials: set } = latestRef.current;
-    if (key && current && isAwsCredentials(current) && set) {
-      set({ ...current, iacKey: key });
-    }
-  }, []);
+  const onTemplateRendered = useCallback(
+    ({ key, integrations }: { key?: string; integrations: RenderIacTemplateIntegration[] }) => {
+      const {
+        credentials: current,
+        setCredentials: set,
+        packageName: currentPackageName,
+      } = latestRef.current;
+      if (key && current && isAwsCredentials(current) && set) {
+        set({
+          ...current,
+          iacKey: key,
+          // The wizard renders a single package — the one being configured. Left undefined when
+          // it cannot be found so the stale check stays off rather than blocking Save for good.
+          iacRenderedPolicyTemplates: integrations.find(
+            (integration) => integration.name === currentPackageName
+          )?.policyTemplates,
+        });
+      }
+    },
+    []
+  );
 
   const {
     launchButtonProps,
@@ -87,10 +112,36 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     cloud,
     accountType,
     iacTemplateUrl,
-    packageName: packageInfo?.name,
+    packageName,
     policyTemplates: enabledPolicyTemplates,
     onTemplateRendered,
   });
+
+  const awsCredentials = credentials && isAwsCredentials(credentials) ? credentials : undefined;
+  const renderedPolicyTemplates = awsCredentials?.iacRenderedPolicyTemplates;
+  // The Launch button renders the template from the inputs enabled at click time, but the input
+  // selection sits below it, so the user can widen or narrow the selection afterwards. Saving then
+  // stores a key describing a stack that no longer matches the integration.
+  const renderedSetIsStale = Boolean(
+    awsCredentials?.iacKey &&
+      renderedPolicyTemplates &&
+      !isSameTemplateSet(renderedPolicyTemplates, enabledPolicyTemplates)
+  );
+
+  // Report validity only when it changes. The wizard's updatePolicy is re-created on every policy
+  // update, so depending on the callback identity here would re-fire this effect after each update
+  // it causes — an infinite render loop.
+  const onValidityChangeRef = useRef(onValidityChange);
+  onValidityChangeRef.current = onValidityChange;
+  const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+    const isValid = !renderedSetIsStale;
+    if (lastReportedValidityRef.current === isValid) {
+      return;
+    }
+    lastReportedValidityRef.current = isValid;
+    onValidityChangeRef.current?.(isValid);
+  }, [renderedSetIsStale]);
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -103,8 +154,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);
 
   // Derive the stack ARN field state from the credentials object.
-  const stackArn =
-    credentials && isAwsCredentials(credentials) ? credentials.iacDeploymentId ?? '' : '';
+  const stackArn = awsCredentials?.iacDeploymentId ?? '';
   const stackArnInvalid = stackArn !== '' && parseAwsRegionFromArn(stackArn) === undefined;
 
   return (
@@ -152,6 +202,24 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
             title={templateGenerationError}
             size="s"
+          />
+        </>
+      )}
+      {renderedSetIsStale && (
+        <>
+          <EuiSpacer size="m" />
+          <KbnWarningCallout
+            announceOnMount
+            data-test-subj={CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ}
+            title={i18n.translate('xpack.fleet.cloudConnector.aws.staleTemplateTitle', {
+              defaultMessage: 'Selected services changed after the template was generated',
+            })}
+            // Medium, not small: EUI renders a small callout's `text` inline (title · text).
+            size="m"
+            text={i18n.translate('xpack.fleet.cloudConnector.aws.staleTemplateBody', {
+              defaultMessage:
+                'The CloudFormation template you launched was generated for a different set of services. Launch CloudFormation again so the stack grants exactly what this integration needs, then save.',
+            })}
           />
         </>
       )}

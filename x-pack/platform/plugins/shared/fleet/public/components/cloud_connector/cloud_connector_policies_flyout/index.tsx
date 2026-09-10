@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -144,10 +144,46 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     }
   );
 
-  const { data: verification } = useVerifyIacKey({
+  const {
+    data: verification,
+    isFetching: isVerifying,
+    refetch: refetchVerification,
+  } = useVerifyIacKey({
     cloudConnectorId,
     enabled: showIac && iacUpgradeStatus === 'upgrade_available',
   });
+
+  const handleVerify = useCallback(async () => {
+    analytics.reportEvent(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT.eventType, {
+      surface: 'flyout',
+      action: 'verify_clicked',
+      reason: iacKey ? 'key_mismatch' : 'no_key',
+      hasDeploymentId: Boolean(editedIacDeploymentId),
+    });
+    // Invalidated here as well as in the effect below: an unchanged verdict comes back as the
+    // same object (React Query keeps the old reference for deep-equal data), so the effect would
+    // not fire and the callout's "Checked" line would still show the previous run.
+    await refetchVerification();
+    queryClient.invalidateQueries(['get-cloud-connectors']);
+    queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
+  }, [
+    analytics,
+    cloudConnectorId,
+    editedIacDeploymentId,
+    iacKey,
+    queryClient,
+    refetchVerification,
+  ]);
+
+  // Opening the flyout runs the check on its own, and the server stores the status it derives.
+  // Nothing else re-reads that, so any arriving verdict refreshes the queries that carry it.
+  useEffect(() => {
+    if (!verification) {
+      return;
+    }
+    queryClient.invalidateQueries(['get-cloud-connectors']);
+    queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
+  }, [verification, queryClient, cloudConnectorId]);
 
   const onTemplateRendered = useCallback(
     ({ key }: { key?: string }) => {
@@ -171,13 +207,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [cloudConnectorId, http, iacDeploymentIdToSave, queryClient]
   );
 
-  const { launchButtonProps, isGeneratingTemplate } = useCloudConnectorTemplate({
-    provider: AWS_PROVIDER,
-    accountType: accountType ?? 'single-account',
-    integrations: verification?.integrations,
-    deploymentId: deploymentIdInvalid ? undefined : editedIacDeploymentId || undefined,
-    onTemplateRendered,
-  });
+  const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =
+    useCloudConnectorTemplate({
+      provider: AWS_PROVIDER,
+      accountType: accountType ?? 'single-account',
+      integrations: verification?.integrations,
+      deploymentId: deploymentIdInvalid ? undefined : editedIacDeploymentId || undefined,
+      // This identity already has a generated template; sending the user to the static one
+      // would downgrade it (https://github.com/elastic/ingest-dev/issues/9415).
+      staticTemplateFallback: false,
+      onTemplateRendered,
+    });
 
   const handleDeleteConnector = useCallback(() => {
     setIsDeleteModalVisible(true);
@@ -406,32 +446,53 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {showIac && iacUpgradeStatus === 'upgrade_available' && (
-          <>
-            <IacUpgradeCallout
-              checkedAt={iacUpgradeCheckedAt}
-              hasKey={Boolean(iacKey)}
-              canUpdate={
-                Boolean(editedIacDeploymentId) &&
-                !deploymentIdInvalid &&
-                Boolean(verification?.integrations?.length)
-              }
-              isUpdating={isGeneratingTemplate}
-              onUpdateStack={() => {
-                analytics.reportEvent(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT.eventType, {
-                  surface: 'flyout',
-                  action: 'update_stack_clicked',
-                  reason: iacKey ? 'key_mismatch' : 'no_key',
-                  hasDeploymentId: Boolean(editedIacDeploymentId),
-                });
-                if ('onClick' in launchButtonProps) {
-                  launchButtonProps.onClick();
+        {/* The stored status can be up to a day old; a definite live verdict of "current" hides the
+            callout right away, without waiting for the connector list to be re-read. `matches`
+            alone is not enough: it is also true when the check could not run (fail open), and the
+            stored status must stand then. */}
+        {showIac &&
+          iacUpgradeStatus === 'upgrade_available' &&
+          verification?.outcome !== 'matches' && (
+            <>
+              <IacUpgradeCallout
+                checkedAt={iacUpgradeCheckedAt}
+                hasKey={Boolean(iacKey)}
+                canUpdate={
+                  Boolean(editedIacDeploymentId) &&
+                  !deploymentIdInvalid &&
+                  Boolean(verification?.integrations?.length)
                 }
-              }}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+                isUpdating={isGeneratingTemplate}
+                onUpdateStack={() => {
+                  analytics.reportEvent(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT.eventType, {
+                    surface: 'flyout',
+                    action: 'update_stack_clicked',
+                    reason: iacKey ? 'key_mismatch' : 'no_key',
+                    hasDeploymentId: Boolean(editedIacDeploymentId),
+                  });
+                  if ('onClick' in launchButtonProps) {
+                    launchButtonProps.onClick();
+                  }
+                }}
+                onVerify={handleVerify}
+                isVerifying={isVerifying}
+              />
+              {templateGenerationError && (
+                <>
+                  <EuiSpacer size="m" />
+                  <KbnDangerCallout
+                    announceOnMount
+                    data-test-subj={
+                      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_TEMPLATE_ERROR_CALLOUT
+                    }
+                    title={templateGenerationError}
+                    size="s"
+                  />
+                </>
+              )}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {showIac && (
           <>
             <IacTemplateDetails

@@ -26,6 +26,7 @@ export {
 export {
   checkIacTemplate,
   compareIacKey,
+  toUpgradeStatus,
   verifyCloudConnectorIacKey,
   type CheckIacTemplateOptions,
   type IacKeyVerification,

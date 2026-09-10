@@ -336,7 +336,7 @@ describe('useCloudConnectorTemplate', () => {
       );
     });
 
-    it('calls onTemplateRendered with the key returned by IaCP', async () => {
+    it('calls onTemplateRendered with the key returned by IaCP and the integrations it rendered', async () => {
       mockedSendRenderIacTemplate.mockResolvedValue({
         data: {
           artifactUrl: 'https://s3.example/rendered?sig=SECRET',
@@ -354,7 +354,42 @@ describe('useCloudConnectorTemplate', () => {
       );
       await launch(result);
 
-      expect(onTemplateRendered).toHaveBeenCalledWith({ key: 'sha256:abc' });
+      // The rendered set travels with the key so callers can tell when the enabled
+      // inputs were edited after the template was generated.
+      expect(onTemplateRendered).toHaveBeenCalledWith({
+        key: 'sha256:abc',
+        integrations: [
+          {
+            name: 'cloud_security_posture',
+            policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+          },
+        ],
+      });
+    });
+
+    it('reports the integrations override as the rendered set', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: {
+          artifactUrl: 'https://s3.example/rendered?sig=SECRET',
+          expiresAt: '2026-07-28T12:00:00Z',
+          templateSha: 'sha256:abc',
+        },
+        error: null,
+      } as any);
+
+      const integrations = [
+        {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+        },
+      ];
+      const onTemplateRendered = jest.fn();
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, integrations, onTemplateRendered })
+      );
+      await launch(result);
+
+      expect(onTemplateRendered).toHaveBeenCalledWith({ key: 'sha256:abc', integrations });
     });
 
     it('navigates to the stack-update deep link when a deploymentId is provided', async () => {
@@ -429,6 +464,73 @@ describe('useCloudConnectorTemplate', () => {
       // The tab should not have been navigated anywhere.
       expect(cloudFormationTab.location.href).toBe('');
       expect(result.current.templateGenerationError).toBeDefined();
+    });
+
+    describe('and the static template fallback is turned off', () => {
+      // Update flows (the wizard's mismatch callout, the flyout's upgrade callout) act on an
+      // identity that already has a generated template: opening the static one would downgrade it.
+      it('closes the pre-opened tab and surfaces an error instead of opening the static URL when the render fails', async () => {
+        mockedSendRenderIacTemplate.mockResolvedValue({
+          data: null,
+          error: { message: 'unrenderable', statusCode: 422 },
+        } as any);
+
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, staticTemplateFallback: false })
+        );
+        await launch(result);
+
+        expect(cloudFormationTab.close).toHaveBeenCalled();
+        expect(cloudFormationTab.location.href).toBe('');
+        // Only the blank tab was opened; nothing navigated to the static template.
+        expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+        expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
+        expect(result.current.templateGenerationError).toBeDefined();
+        // The fallback still happened as far as telemetry is concerned: the render failed.
+        expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
+          flow: 'cloud_connector',
+          reason: 'render_failed',
+        });
+      });
+
+      it('surfaces an error instead of opening the static URL when the render context is missing', async () => {
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            packageName: undefined,
+            staticTemplateFallback: false,
+          })
+        );
+        await launch(result);
+
+        expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+        expect(windowOpenSpy).not.toHaveBeenCalled();
+        expect(result.current.templateGenerationError).toBeDefined();
+        expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
+          flow: 'cloud_connector',
+          reason: 'missing_render_context',
+        });
+      });
+
+      it('still swaps the rendered artifact into the quick-create scaffold on success', async () => {
+        mockedSendRenderIacTemplate.mockResolvedValue({
+          data: {
+            artifactUrl: 'https://s3.example/rendered?sig=SECRET',
+            expiresAt: '2026-07-28T12:00:00Z',
+          },
+          error: null,
+        } as any);
+
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, staticTemplateFallback: false })
+        );
+        await launch(result);
+
+        expect(cloudFormationTab.location.href).toContain(
+          `templateURL=${encodeURIComponent('https://s3.example/rendered?sig=SECRET')}`
+        );
+        expect(result.current.templateGenerationError).toBeUndefined();
+      });
     });
 
     it('uses integrations override instead of packageName/policyTemplates when provided', async () => {

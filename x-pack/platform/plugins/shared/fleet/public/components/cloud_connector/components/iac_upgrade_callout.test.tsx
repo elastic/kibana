@@ -21,6 +21,8 @@ describe('IacUpgradeCallout', () => {
     canUpdate: true,
     isUpdating: false,
     onUpdateStack: jest.fn(),
+    onVerify: jest.fn(),
+    isVerifying: false,
   };
 
   const renderComponent = (props = {}) =>
@@ -88,5 +90,29 @@ describe('IacUpgradeCallout', () => {
     await user.click(button);
 
     expect(onUpdateStack).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onVerify when the verify button is clicked', async () => {
+    const user = userEvent.setup();
+    const onVerify = jest.fn();
+    renderComponent({ onVerify });
+
+    await user.click(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
+    );
+
+    expect(onVerify).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the verify button loading while isVerifying', () => {
+    renderComponent({ isVerifying: true });
+
+    // The update button must stay usable: only the re-check is in flight.
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
+    ).toBeDisabled();
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON)
+    ).toBeEnabled();
   });
 });

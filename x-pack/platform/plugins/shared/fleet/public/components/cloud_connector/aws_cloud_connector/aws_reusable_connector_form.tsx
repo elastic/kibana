@@ -9,9 +9,11 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../../common';
 import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
+import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT,
   type IacKeyCheckAction,
@@ -89,15 +91,19 @@ const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     [cloudConnectorId, http, queryClient]
   );
 
-  const { launchButtonProps, isGeneratingTemplate } = useCloudConnectorTemplate({
-    provider: AWS_PROVIDER,
-    cloud,
-    accountType: accountType ?? 'single-account',
-    iacTemplateUrl,
-    integrations: data?.integrations,
-    deploymentId: data?.deploymentId,
-    onTemplateRendered,
-  });
+  const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =
+    useCloudConnectorTemplate({
+      provider: AWS_PROVIDER,
+      cloud,
+      accountType: accountType ?? 'single-account',
+      iacTemplateUrl,
+      integrations: data?.integrations,
+      deploymentId: data?.deploymentId,
+      // This identity already has a generated template; sending the user to the static one
+      // would downgrade it (https://github.com/elastic/ingest-dev/issues/9415).
+      staticTemplateFallback: false,
+      onTemplateRendered,
+    });
 
   const isBlocking = data?.matches === false && data.reason === 'key_mismatch';
 
@@ -139,22 +145,37 @@ const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   }
 
   return (
-    <IacKeyCheckCallout
-      result={data}
-      integrationTitle={packageInfo?.title}
-      onUpdateStack={() => {
-        reportAction('update_stack_clicked');
-        if ('onClick' in launchButtonProps) {
-          launchButtonProps.onClick();
-        }
-      }}
-      isUpdating={isGeneratingTemplate}
-      onVerify={() => {
-        reportAction('verify_clicked');
-        refetch();
-      }}
-      isVerifying={isFetching}
-    />
+    <>
+      <IacKeyCheckCallout
+        result={data}
+        integrationTitle={packageInfo?.title}
+        onUpdateStack={() => {
+          reportAction('update_stack_clicked');
+          if ('onClick' in launchButtonProps) {
+            launchButtonProps.onClick();
+          }
+        }}
+        isUpdating={isGeneratingTemplate}
+        onVerify={() => {
+          reportAction('verify_clicked');
+          refetch();
+        }}
+        isVerifying={isFetching}
+      />
+      {templateGenerationError && (
+        <>
+          <EuiSpacer size="m" />
+          <KbnDangerCallout
+            announceOnMount
+            data-test-subj={
+              CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.IAC_CHECK_TEMPLATE_ERROR_CALLOUT
+            }
+            title={templateGenerationError}
+            size="s"
+          />
+        </>
+      )}
+    </>
   );
 };
 

@@ -57,7 +57,7 @@ describe('useVerifyIacKey', () => {
 
   it('resolves with matches === false and reason no_key', async () => {
     mockSendVerify.mockResolvedValue({
-      data: { matches: false, reason: 'no_key', integrations: [] },
+      data: { matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] },
       error: null,
     } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
 
@@ -87,7 +87,7 @@ describe('useVerifyIacKey', () => {
 
   it('sends the integration in the request body', async () => {
     mockSendVerify.mockResolvedValue({
-      data: { matches: true, integrations: [] },
+      data: { matches: true, outcome: 'matches', integrations: [] },
       error: null,
     } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
 

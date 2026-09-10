@@ -6,9 +6,11 @@
  */
 
 import gte from 'semver/functions/gte';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import type { PackageInfo, PackagePolicyConfigRecord } from '../../../common';
+import type { RenderIacTemplatePolicyTemplate } from '../../../common/types/rest_spec/iac_provisioner';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
@@ -563,6 +565,22 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
 
 export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
   hasInvalidRequiredVars && !value;
+
+const normalizeTemplateSet = (
+  templates: RenderIacTemplatePolicyTemplate[]
+): RenderIacTemplatePolicyTemplate[] =>
+  templates
+    .map(({ name, enabledInputs }) => ({ name, enabledInputs: [...enabledInputs].sort() }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+
+/**
+ * True when both sides enable the same policy templates with the same input types, regardless of
+ * order. Used to tell whether the enabled inputs still match the set a template was rendered for.
+ */
+export const isSameTemplateSet = (
+  left: RenderIacTemplatePolicyTemplate[],
+  right: RenderIacTemplatePolicyTemplate[]
+): boolean => isEqual(normalizeTemplateSet(left), normalizeTemplateSet(right));
 
 // IaC launch URL helpers
 

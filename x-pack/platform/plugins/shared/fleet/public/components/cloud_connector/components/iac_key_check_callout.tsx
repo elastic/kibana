@@ -89,7 +89,9 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   return (
     <KbnWarningCallout
       title={title}
-      size="s"
+      // Medium, not small: EUI renders a small callout's `text` inline (title · text), which
+      // would run these paragraphs together on one line.
+      size="m"
       announceOnMount
       data-test-subj={CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT}
       text={text}

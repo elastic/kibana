@@ -746,6 +746,45 @@ describe('CloudConnectorSetup', () => {
       });
     };
 
+    // The New Identity form blocks too, when the enabled inputs change after the template render.
+    const reportNewConnectionValidity = (isValid: boolean) => {
+      const { calls } = mockCloudConnectorTabs.mock;
+      const { tabs } = calls[calls.length - 1][0];
+      const newTab = tabs.find((tab) => tab.id === 'new-connection');
+      const content = newTab?.content as React.ReactElement;
+      const newForm = React.Children.toArray(content.props.children).find(
+        (child): child is React.ReactElement<{ onValidityChange: (isValid: boolean) => void }> =>
+          React.isValidElement(child) && child.type === NewCloudConnectorForm
+      );
+
+      act(() => {
+        newForm?.props.onValidityChange(isValid);
+      });
+    };
+
+    it('should pass onValidityChange to NewCloudConnectorForm on the New Identity tab', () => {
+      setupMocks([]);
+      const onIacBlockingChange = jest.fn();
+
+      renderComponent({ newPolicy: policyWithSupport, onIacBlockingChange });
+      reportNewConnectionValidity(false);
+
+      expect(onIacBlockingChange).toHaveBeenCalledWith(true);
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
+    });
+
+    it('should pass onValidityChange to NewCloudConnectorForm when the reusable feature is off', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
+      setupMocks([]);
+
+      renderComponent({ newPolicy: policyWithSupport });
+
+      expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
+        expect.objectContaining({ onValidityChange: expect.any(Function) }),
+        {}
+      );
+    });
+
     it('should report a block through onIacBlockingChange and leave the policy validity alone', () => {
       setupMocks([]);
       const onIacBlockingChange = jest.fn();
