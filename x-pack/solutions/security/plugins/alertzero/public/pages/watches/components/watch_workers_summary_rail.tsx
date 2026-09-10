@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Use of this file is governed by the
+ * Elastic License 2.0.
+ */
+
 import React, { useEffect, useRef } from 'react';
 import { css, keyframes } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiPanel,
   EuiText,
-  EuiTitle,
   useEuiTheme,
   type EuiHealthProps,
 } from '@elastic/eui';
@@ -61,6 +65,54 @@ const resolveStatus = (worker: Worker): WorkerStatus => {
   }
 };
 
+/** Label column width for the per-Worker data rows, kept wide enough for the longest label. */
+const DATA_LABEL_COL_PX = 72;
+
+function DataLine({ label, value }: { label: string; value: string }) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        display: grid;
+        grid-template-columns: ${DATA_LABEL_COL_PX}px minmax(0, 1fr);
+        gap: ${euiTheme.size.s};
+        align-items: baseline;
+        padding-block: 5px;
+      `}
+    >
+      <span
+        css={css`
+          font-size: 10.5px;
+          font-weight: 600;
+          line-height: 1.3;
+          color: ${euiTheme.colors.textSubdued};
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          white-space: nowrap;
+        `}
+      >
+        {label}
+      </span>
+      <span
+        css={css`
+          font-size: 12.5px;
+          font-weight: 400;
+          line-height: 1.3;
+          color: ${euiTheme.colors.textParagraph};
+          text-align: left;
+          font-variant-numeric: tabular-nums;
+        `}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+const statusDotColor = (color: EuiHealthProps['color'], textSubdued: string) =>
+  color === 'subdued' ? textSubdued : color;
+
 interface WatchWorkersSummaryRailProps {
   workers: Worker[];
   activeWorkerId: string | null;
@@ -85,85 +137,126 @@ export const WatchWorkersSummaryRail: React.FC<WatchWorkersSummaryRailProps> = (
       `}
       data-test-subj="alertZeroWatchWorkersRail"
     >
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h3>{i18n.WORKERS_RAIL_HEADING}</h3>
-          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <strong
+              css={css`
+                display: block;
+                padding-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+              `}
+            >
+              {i18n.WORKERS_RAIL_HEADING}
+            </strong>
+          </EuiText>
         </EuiFlexItem>
-        {workers.map((worker) => {
-          const name = workerName(worker.id, worker.name);
-          const status = resolveStatus(worker);
-          const isActive = worker.id === activeWorkerId;
-          return (
-            <EuiFlexItem key={worker.id} grow={false}>
-              <EuiPanel
-                hasBorder
-                paddingSize="s"
-                color={isActive ? 'primary' : 'transparent'}
-                onClick={() => onSelectWorker(worker.id)}
-                onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    onSelectWorker(worker.id);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-current={isActive ? 'true' : undefined}
-                aria-label={i18n.railGoToWorker(name)}
-                data-test-subj={`alertZeroWatchWorkerSummary-${worker.id}`}
-                css={css`
-                  cursor: pointer;
-                  outline-offset: 2px;
-                `}
-              >
-                <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="s"
-                      responsive={false}
-                      wrap={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiHealth color={status.color} />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong>{name}</strong>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {status.label}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs">
-                          <strong>{i18n.RAIL_LAST_RUN}</strong>{' '}
-                          {worker.lastRun != null
-                            ? formatRelativeTime(worker.lastRun)
-                            : watchesI18n.NOT_RUN_YET}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs">
-                          <strong>{i18n.RAIL_AUTONOMY}</strong>{' '}
-                          {i18n.autonomyLevelName(worker.settings.autonomy)}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          );
-        })}
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          `}
+        >
+          {workers.map((worker) => {
+            const name = workerName(worker.id, worker.name);
+            const status = resolveStatus(worker);
+            const isActive = worker.id === activeWorkerId;
+            return (
+              <EuiFlexItem key={worker.id} grow={false}>
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  element="button"
+                  type="button"
+                  color="transparent"
+                  onClick={() => onSelectWorker(worker.id)}
+                  aria-current={isActive ? 'true' : undefined}
+                  aria-label={i18n.railGoToWorker(name)}
+                  data-test-subj={`alertZeroWatchWorkerSummary-${worker.id}`}
+                  css={css`
+                    display: block;
+                    width: 100%;
+                    padding: 14px 16px;
+                    text-align: left;
+                    cursor: pointer;
+                    border-color: ${isActive ? euiTheme.colors.primary : euiTheme.border.color};
+                    &:hover {
+                      border-color: ${euiTheme.colors.primary};
+                    }
+                    &:focus-visible {
+                      outline: 2px solid ${euiTheme.colors.primary};
+                      outline-offset: 2px;
+                    }
+                  `}
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    wrap={false}
+                    css={css`
+                      padding-bottom: 10px;
+                      margin-bottom: 10px;
+                      border-bottom: ${euiTheme.border.thin};
+                    `}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <span
+                        aria-hidden
+                        css={css`
+                          width: 8px;
+                          height: 8px;
+                          border-radius: 50%;
+                          background: ${euiTheme.colors[
+                            statusDotColor(status.color, 'textSubdued') as 'success'
+                          ]};
+                          flex-shrink: 0;
+                        `}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <EuiText size="s">
+                        <strong
+                          css={css`
+                            color: ${worker.enabled ? undefined : euiTheme.colors.textSubdued};
+                          `}
+                        >
+                          {name}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <span
+                        css={css`
+                          font-size: 11px;
+                          line-height: 1.2;
+                          color: ${euiTheme.colors.textSubdued};
+                        `}
+                      >
+                        {status.label}
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <DataLine
+                    label={i18n.RAIL_LAST_RUN}
+                    value={
+                      worker.lastRun != null
+                        ? formatRelativeTime(worker.lastRun)
+                        : watchesI18n.NOT_RUN_YET
+                    }
+                  />
+                  <DataLine
+                    label={i18n.RAIL_AUTONOMY}
+                    value={i18n.autonomyLevelName(worker.settings.autonomy)}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            );
+          })}
+        </div>
       </EuiFlexGroup>
     </aside>
   );

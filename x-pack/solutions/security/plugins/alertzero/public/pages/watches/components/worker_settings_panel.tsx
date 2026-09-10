@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -16,6 +17,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { Worker } from '@kbn/alertzero-common';
 import { useUpdateWorker } from '../../../hooks/use_workers_api';
@@ -45,6 +47,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
   onToggle,
 }) => {
   const { mutate: updateWorker } = useUpdateWorker();
+  const { euiTheme } = useEuiTheme();
   const settingsLocked = worker.state === 'unavailable';
   const name = workerName(worker.id, worker.name);
 
@@ -117,7 +120,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
         <EuiAccordion
           id={`${worker.id}-settings`}
           arrowDisplay="left"
-          paddingSize="l"
+          paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}
           onToggle={onToggle}
           buttonContent={
@@ -132,6 +135,17 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
           }
           extraAction={enabledSwitch}
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
+          css={css`
+            .euiAccordion__triggerWrapper {
+              align-items: center;
+              padding: ${euiTheme.size.base};
+              /* Full-width rule under the header, mirroring the static single-Worker band. */
+              border-bottom: ${isExpanded ? euiTheme.border.thin : 'none'};
+            }
+            .euiAccordion__children {
+              padding: ${euiTheme.size.base};
+            }
+          `}
         >
           {settingsBody}
         </EuiAccordion>
