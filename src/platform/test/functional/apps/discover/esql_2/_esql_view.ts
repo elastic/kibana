@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/esql/_esql_view.ts
-
 /**
  * Everything else in this suite has been migrated to Scout, under
  * src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/.
