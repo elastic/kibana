@@ -11,20 +11,17 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const QUERY_PATH = testData.AI_INDEX_QUERY_PATH;
-const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
+const {
+  AI_INDEX_QUERY_PATH: QUERY_PATH,
+  API_HEADERS,
+  CONTEXT_ENGINE_ENABLED_SETTING,
+  CONTEXT_ENGINE_READ,
+} = testData;
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const SPACE_AWARE_INDEX = `ai-index-idx-scout-query-spaced-${RUN_ID}`;
 const PLAIN_INDEX = `ai-index-idx-scout-query-plain-${RUN_ID}`;
 const OTHER_SPACE_ID = `ce-query-other-${RUN_ID}`;
-
-const API_HEADERS = {
-  ...testData.COMMON_HEADERS,
-  'elastic-api-version': '2023-10-31',
-};
-
-const CONTEXT_ENGINE_READ = { base: [], feature: { contextEngine: ['read'] }, spaces: ['*'] };
 
 /** The documented caller: `contextEngine:read` plus ES `read` on the backing indices. */
 const QUERY_ROLE: KibanaRole = {
