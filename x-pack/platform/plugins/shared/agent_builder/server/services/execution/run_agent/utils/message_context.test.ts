@@ -27,7 +27,7 @@ import {
 } from './context_timeline';
 import { prepareConversation } from './prepare_conversation';
 import { prepareMessages } from './to_langchain_messages';
-import { estimatePerRoundTokens } from './estimate_conversation_tokens';
+import { estimateTimelineEntryTokens } from './estimate_conversation_tokens';
 import { compactConversation } from './conversation_compactor';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -118,7 +118,7 @@ describe('standalone message context', () => {
       nextInput: { message: 'next' },
       context: context(),
     });
-    const counts = await estimatePerRoundTokens(conversation.timeline, {
+    const counts = await estimateTimelineEntryTokens(conversation.timeline, {
       toolRegistry: context().toolRegistry,
       toolManager: context().toolManager,
     });
@@ -145,7 +145,7 @@ describe('standalone message context', () => {
       processedConversation: conversation,
       chatModel,
       contextBudget: { totalBudget: 10000, historyBudget: 7000, triggerThreshold: 100 },
-      perRoundTokenCounts: [100, 100, 100, 100, 100],
+      timelineEntryTokenCounts: [100, 100, 100, 100, 100],
       logger: loggerMock.create(),
     });
     expect(result.summary).toMatchObject({
@@ -163,7 +163,7 @@ describe('standalone message context', () => {
       processedConversation: conversation,
       chatModel,
       contextBudget: { totalBudget: 10000, historyBudget: 7000, triggerThreshold: 6000 },
-      perRoundTokenCounts: [100, 100, 100, 100, 100],
+      timelineEntryTokenCounts: [100, 100, 100, 100, 100],
       existingSummary: result.summary,
       logger: loggerMock.create(),
     });
@@ -195,14 +195,14 @@ describe('standalone message context', () => {
       processedConversation: conversation,
       chatModel: {} as never,
       contextBudget: { totalBudget: 10, historyBudget: 7, triggerThreshold: 5 },
-      perRoundTokenCounts: [100, 100, 100, 100],
+      timelineEntryTokenCounts: [100, 100, 100, 100],
       logger: loggerMock.create(),
     });
     expect(result.processedConversation.timeline).toEqual(conversation.timeline);
     expect(groupTimelineRounds(result.processedConversation.timeline)).toHaveLength(1);
   });
 
-  it('rebuilds old summaries from history instead of treating round counts as message counts', async () => {
+  it('rebuilds old summaries from history instead of treating round counts as entry counts', async () => {
     const conversation = await prepareConversation({
       timeline: [message('a'), message('b')],
       nextInput: { message: 'next' },
@@ -227,7 +227,7 @@ describe('standalone message context', () => {
       processedConversation: conversation,
       chatModel: context().modelProvider as never,
       contextBudget: { totalBudget: 10000, historyBudget: 7000, triggerThreshold: 6000 },
-      perRoundTokenCounts: [10, 10],
+      timelineEntryTokenCounts: [10, 10],
       existingSummary,
       logger: loggerMock.create(),
     });

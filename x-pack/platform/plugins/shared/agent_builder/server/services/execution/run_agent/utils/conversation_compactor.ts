@@ -45,11 +45,11 @@ export interface CompactConversationOptions {
   chatModel: InferenceChatModel;
   contextBudget: ContextBudget;
   /**
-   * Per-round token counts for the rounds of `processedConversation.timeline`, in round order.
+   * Per-entry token counts for `processedConversation.timeline`, in context-entry order.
    * Computed once upstream so the trigger, before/after reporting, and hard truncation
    * all share the same summarization-aware estimate.
    */
-  perRoundTokenCounts: number[];
+  timelineEntryTokenCounts: number[];
   existingSummary?: CompactionSummary;
   logger: Logger;
   abortSignal?: AbortSignal;
@@ -148,7 +148,7 @@ export const compactConversation = async ({
   processedConversation,
   chatModel,
   contextBudget,
-  perRoundTokenCounts,
+  timelineEntryTokenCounts,
   existingSummary,
   logger,
   abortSignal,
@@ -165,7 +165,7 @@ export const compactConversation = async ({
       : undefined;
   // Under threshold: apply existing summary if present (so the LLM sees
   // the compacted view) but don't report a new compaction event.
-  if (!shouldTriggerCompaction(perRoundTokenCounts, contextBudget, existingSummary)) {
+  if (!shouldTriggerCompaction(timelineEntryTokenCounts, contextBudget, existingSummary)) {
     if (existingSummary) {
       const compacted = applyExistingSummary(processedConversation, existingSummary);
       return {
@@ -177,10 +177,10 @@ export const compactConversation = async ({
     return { processedConversation, compactionTriggered: false };
   }
 
-  const rawTokens = sumTokens(perRoundTokenCounts);
+  const rawTokens = sumTokens(timelineEntryTokenCounts);
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
-      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_entry_count))
+      sumTokens(timelineEntryTokenCounts.slice(existingSummary.summarized_entry_count))
     : rawTokens;
   logger.info(
     `Compaction triggered: ${effectiveTokens} effective tokens (${rawTokens} raw) exceeds threshold of ${contextBudget.triggerThreshold}`
@@ -203,11 +203,12 @@ export const compactConversation = async ({
   );
 
   if (summarizationResult.summary) {
-    // Remaining rounds are the suffix after the summarized prefix, so their counts
-    // are perRoundTokenCounts sliced at summarized_round_count.
+    // Remaining entries are the suffix after the summarized prefix, so their counts
+    // are sliced at summarized_entry_count.
     const afterTokens =
-      sumTokens(perRoundTokenCounts.slice(summarizationResult.summary.summarized_entry_count)) +
-      summarizationResult.summary.token_count;
+      sumTokens(
+        timelineEntryTokenCounts.slice(summarizationResult.summary.summarized_entry_count)
+      ) + summarizationResult.summary.token_count;
     if (afterTokens <= contextBudget.historyBudget) {
       logger.debug(
         `Summarization sufficient: ${afterTokens} tokens (budget: ${contextBudget.historyBudget})`
@@ -232,10 +233,10 @@ export const compactConversation = async ({
   }
 
   // Hard truncation fallback. When summarization produced a summary only the recent
-  // (suffix) rounds remain, so truncate over their counts; otherwise the full set.
+  // (suffix) entries remain, so truncate over their counts; otherwise the full set.
   const postSummaryCounts = summarizationResult.summary
-    ? perRoundTokenCounts.slice(summarizationResult.summary.summarized_entry_count)
-    : perRoundTokenCounts;
+    ? timelineEntryTokenCounts.slice(summarizationResult.summary.summarized_entry_count)
+    : timelineEntryTokenCounts;
   const truncation = applyHardTruncation(
     summarizationResult.processedConversation,
     postSummaryCounts,
@@ -416,17 +417,17 @@ const generateLlmSummary = async (
 };
 
 /**
- * Drop oldest rounds one by one until the conversation fits within the history
- * budget, always preserving at least the most recent rounds. `perRoundCounts`
- * is index-aligned with the timeline's rounds; truncation is O(n) via a
+ * Drop oldest entries one by one until the conversation fits within the history
+ * budget, always preserving at least the most recent entries. `timelineEntryTokenCounts`
+ * is index-aligned with the timeline's entries; truncation is O(n) via a
  * rolling total and a start index (no per-step re-estimation or array shifting).
  */
 const applyHardTruncation = (
   conversation: ProcessedConversation,
-  perRoundCounts: number[],
+  timelineEntryTokenCounts: number[],
   budget: ContextBudget
 ): { conversation: ProcessedConversation; tokens: number } => {
-  let currentTokens = sumTokens(perRoundCounts);
+  let currentTokens = sumTokens(timelineEntryTokenCounts);
 
   if (currentTokens <= budget.historyBudget) {
     return { conversation, tokens: currentTokens };
@@ -436,7 +437,7 @@ const applyHardTruncation = (
   let start = 0;
 
   while (start < minStart && currentTokens > budget.historyBudget) {
-    currentTokens -= perRoundCounts[start];
+    currentTokens -= timelineEntryTokenCounts[start];
     start++;
   }
 

@@ -48,21 +48,21 @@ export const estimateMessagesTokens = (messages: BaseMessage[]): number => {
   return total;
 };
 
-/** Token estimates for the timeline's rounds, in round order (the order compaction indexes). */
-export const estimatePerRoundTokens = async (
+/** Token estimates for timeline entries, in the same order compaction indexes. */
+export const estimateTimelineEntryTokens = async (
   timeline: ProcessedTimelineEvent[],
   deps: ToolSummarizationDeps
 ): Promise<number[]> => {
   const resultTransformer = createSummarizationTransformer(deps);
   return Promise.all(
-    groupTimelineEntries(timeline).map(async (round) =>
+    groupTimelineEntries(timeline).map(async (entry) =>
       estimateMessagesTokens(
-        'terminated' in round
-          ? await roundToLangchain(round, { resultTransformer })
+        'terminated' in entry
+          ? await roundToLangchain(entry, { resultTransformer })
           : [
               formatRoundInput({
-                input: round.userMessage.data,
-                timestamp: round.userMessage.created_at,
+                input: entry.userMessage.data,
+                timestamp: entry.userMessage.created_at,
               }),
             ]
       )

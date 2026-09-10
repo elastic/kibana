@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConverseInput } from '@kbn/agent-builder-common';
+import type { ConverseInput, UserMessageEvent } from '@kbn/agent-builder-common';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
@@ -165,21 +165,19 @@ describe('preflight_checks', () => {
 
       it('should not treat later standalone messages as prompt responses', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
-        const timeline = [
-          ...roundsToEvents(conversation),
-          {
-            id: 'standalone-message',
-            type: TimelineEventType.userMessage,
-            created_at: '2026-01-01T00:00:00.000Z',
-            actor: {
-              type: EventActorType.external,
-              id: 'alice',
-              full_name: 'Alice',
-              origin: { type: ConversationOriginType.Slack },
-            },
-            data: { message: 'Approved in Slack' },
+        const standaloneMessage: UserMessageEvent = {
+          id: 'standalone-message',
+          type: TimelineEventType.userMessage,
+          created_at: '2026-01-01T00:00:00.000Z',
+          actor: {
+            type: EventActorType.external,
+            id: 'alice',
+            full_name: 'Alice',
+            origin: { type: ConversationOriginType.Slack },
           },
-        ];
+          data: { message: 'Approved in Slack' },
+        };
+        const timeline = [...roundsToEvents(conversation), standaloneMessage];
         const input: ConverseInput = { message: 'continue' };
 
         expect(() => ensureValidInput({ input, timeline })).toThrow(
