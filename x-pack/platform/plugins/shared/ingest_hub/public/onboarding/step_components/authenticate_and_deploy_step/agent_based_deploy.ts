@@ -21,7 +21,7 @@ import {
   sendCreatePackagePolicy,
   sendGetAgentPolicies,
 } from '@kbn/fleet-plugin/public';
-import { sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
+import { sendGetPackageInfoByKeyForRq } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type {
@@ -455,7 +455,7 @@ export async function deployNewAgentPolicy(
   const pkgInfoByPackage: Record<string, PkgInfo> = {};
   await Promise.all(
     packageNames.map(async (pkgName) => {
-      const resp = await sendGetPackageInfoByKey(pkgName);
+      const resp = await sendGetPackageInfoByKeyForRq(pkgName);
       const version = resp.item?.version;
       if (!version) throw new Error(`Package ${pkgName} is not installed`);
       pkgVersionByPackage[pkgName] = version;
@@ -533,7 +533,7 @@ export async function deployToExistingAgentPolicies(
   const pkgInfoByPackage: Record<string, { vars?: Array<{ name: string }> }> = {};
   await Promise.all(
     packageNames.map(async (pkgName) => {
-      const resp = await sendGetPackageInfoByKey(pkgName);
+      const resp = await sendGetPackageInfoByKeyForRq(pkgName);
       const version = resp.item?.version;
       if (!version) throw new Error(`Package ${pkgName} is not installed`);
       pkgVersionByPackage[pkgName] = version;

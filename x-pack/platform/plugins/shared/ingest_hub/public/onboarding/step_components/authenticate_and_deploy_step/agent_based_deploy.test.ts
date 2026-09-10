@@ -11,13 +11,13 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentPolicyWithPackagePolicies: jest.fn(),
   sendCreatePackagePolicy: jest.fn(),
-  sendGetPackageInfoByKey: jest.fn(),
+  sendGetPackageInfoByKeyForRq: jest.fn(),
 }));
 
 import {
   sendCreateAgentPolicyWithPackagePolicies,
   sendCreatePackagePolicy,
-  sendGetPackageInfoByKey,
+  sendGetPackageInfoByKeyForRq,
 } from '@kbn/fleet-plugin/public';
 import {
   buildAgentBasedTargets,
@@ -30,7 +30,7 @@ import type { ServiceInstance } from '../service_settings_step/use_service_setti
 
 const mockSendCreateAgentPolicy = sendCreateAgentPolicyWithPackagePolicies as jest.Mock;
 const mockSendCreatePackagePolicy = sendCreatePackagePolicy as jest.Mock;
-const mockSendGetPackageInfo = sendGetPackageInfoByKey as jest.Mock;
+const mockSendGetPackageInfo = sendGetPackageInfoByKeyForRq as jest.Mock;
 
 function makeVarDef(name: string, opts: Partial<RegistryVarsEntry> = {}): RegistryVarsEntry {
   return { name, type: 'text', title: name, ...opts } as RegistryVarsEntry;
@@ -120,9 +120,8 @@ const BASE_OPTS = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockSendGetPackageInfo.mockResolvedValue({
-    data: { item: { version: '3.0.0', vars: [] } },
-  });
+  // sendGetPackageInfoByKeyForRq uses sendRequestForRq — returns unwrapped { item } directly, no envelope.
+  mockSendGetPackageInfo.mockResolvedValue({ item: { version: '3.0.0', vars: [] } });
   mockSendCreateAgentPolicy.mockResolvedValue({
     item: { id: 'agent-policy-1', package_policies: [] },
   });
@@ -479,21 +478,19 @@ describe('disabled inputs for other policy templates', () => {
 
     // Simulate a package with two templates: 'config' (ours) and 'securityhub' (other).
     mockSendGetPackageInfo.mockResolvedValue({
-      data: {
-        item: {
-          version: '3.0.0',
-          vars: [],
-          policy_templates: [
-            {
-              name: 'config',
-              inputs: [{ type: 'aws-s3' }],
-            },
-            {
-              name: 'securityhub',
-              inputs: [{ type: 'httpjson' }],
-            },
-          ],
-        },
+      item: {
+        version: '3.0.0',
+        vars: [],
+        policy_templates: [
+          {
+            name: 'config',
+            inputs: [{ type: 'aws-s3' }],
+          },
+          {
+            name: 'securityhub',
+            inputs: [{ type: 'httpjson' }],
+          },
+        ],
       },
     });
 
