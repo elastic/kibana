@@ -136,52 +136,6 @@ describe('visualizeEmbeddable', () => {
   });
 
   describe('esql$', () => {
-    test('should be empty by default when the vis type does not provide getEsqlQuery', () => {
-      expect(embeddableApi.esql$.getValue()).toEqual([]);
-    });
-
-    const buildEmbeddableWithVisType = async (type: string) => {
-      const parent = {};
-      const uuid = '1';
-      const finalizeApi = (api: any) => ({
-        ...api,
-        uuid,
-        parent,
-        type: VISUALIZE_EMBEDDABLE_TYPE,
-        phase$: new BehaviorSubject(undefined),
-      });
-      const { api } = await visualizeEmbeddableFactory.buildEmbeddable({
-        initializeDrilldownsManager,
-        initialState: {
-          savedVis: {
-            title: 'esql test',
-            type,
-            data: {
-              aggs: [],
-              searchSource: {},
-            },
-            params: {},
-          },
-        },
-        finalizeApi,
-        uuid: '1',
-        parentApi: {},
-      });
-      return api;
-    };
-
-    test('should be non-empty when the vis type reports it uses ES|QL', async () => {
-      const api = await buildEmbeddableWithVisType('vega-esql');
-      expect(api.esql$.getValue().length).toBeGreaterThan(0);
-    });
-
-    test('should be empty when the vis type reports it does not use ES|QL', async () => {
-      const api = await buildEmbeddableWithVisType('vega-no-esql');
-      expect(api.esql$.getValue()).toEqual([]);
-    });
-  });
-
-  describe('esql$', () => {
     const buildEmbeddableWithVisType = async (type: string, spec?: string) => {
       const parent = {};
       const uuid = '1';
