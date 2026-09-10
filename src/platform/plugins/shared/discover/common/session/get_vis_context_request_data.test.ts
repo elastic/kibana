@@ -103,6 +103,7 @@ describe('getVisContextRequestData', () => {
 const createTab = (attributes: Record<string, unknown>): DiscoverSessionApiEsqlTab => ({
   id: 'esql-tab',
   label: 'ES|QL',
+  type: 'default',
   data_source: { type: 'esql', query: 'FROM logs-*' },
   sort: [],
   hide_chart: false,

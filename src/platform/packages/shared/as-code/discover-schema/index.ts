@@ -20,6 +20,8 @@ export {
   discoverSessionControlPanelsSchema,
   discoverSessionClassicTabSchema,
   discoverSessionEsqlTabSchema,
+  discoverSessionMetricsTabSchema,
+  discoverSessionMetricsTabTypeStateSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './src/schemas';
@@ -29,5 +31,7 @@ export type {
   DiscoverSessionApiInput,
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
+  DiscoverSessionApiMetricsTab,
   DiscoverSessionApiTab,
+  DiscoverSessionApiTabTypeState,
 } from './src/types';

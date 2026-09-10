@@ -22,6 +22,7 @@ import { toStoredTab } from '../../../common/embeddable/transform_utils';
 import { getVisContextRequestData } from '../../../common/session/get_vis_context_request_data';
 import type { DiscoverSessionApiData } from '../schema';
 import { transformControlPanelsIn } from './transform_control_panels';
+import { transformTabTypeStateIn } from './transform_tab_type_state';
 import { fromApiVisContext } from '../../../common/session/vis_context';
 
 const isEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsqlTab =>
@@ -37,6 +38,7 @@ export const transformDiscoverSessionIn = (
     const { state: tabAttributes, references: tabReferences } = toStoredTab(tab, {
       refNamePrefix: `tab_${tab.id}`,
     });
+    const tabTypeState = transformTabTypeStateIn(tab);
 
     references.push(...tabReferences);
 
@@ -60,6 +62,7 @@ export const transformDiscoverSessionIn = (
           tab.esql_approximation !== undefined && {
             esqlApproximation: tab.esql_approximation,
           }),
+        ...(tabTypeState !== undefined && { tabTypeState }),
       },
     };
   });

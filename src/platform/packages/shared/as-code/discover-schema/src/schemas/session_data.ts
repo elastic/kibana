@@ -15,14 +15,21 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { MAX_DISCOVER_SESSION_TABS } from '@kbn/discover-session-constants';
 import {
+  MAX_DISCOVER_SESSION_TABS,
   MAX_SESSION_TITLE_LENGTH,
   MAX_SESSION_DESCRIPTION_LENGTH,
   MAX_TAB_LABEL_LENGTH,
   MAX_BREAKDOWN_FIELD_LENGTH,
   MAX_DISCOVER_SESSION_TAGS,
+  MAX_METRICS_TAB_DIMENSIONS,
+  MAX_METRICS_TAB_STATE_STRING_LENGTH,
+  DiscoverTabType,
 } from '@kbn/discover-session-constants';
+import {
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_SIMPLE_AGGREGATIONS,
+} from '@kbn/discover-utils';
 import { classicTabSchema, esqlTabSchema } from './tab';
 import { visContextSchema } from './vis_context';
 import { discoverSessionControlPanelsSchema } from './control_panel';
@@ -82,11 +89,55 @@ const discoverSessionTabIdentitySchema = z
   })
   .strict();
 
+const discoverSessionDefaultTabTypeStateSchema = z
+  .object({
+    type: z
+      .literal(`${DiscoverTabType.Default}`)
+      .default(DiscoverTabType.Default)
+      .meta({
+        description:
+          'A tab with no type-specific saved state. ' +
+          'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
+      }),
+  })
+  .strict();
+
+const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
+
+export const discoverSessionMetricsTabTypeStateSchema = z
+  .object({
+    type: z.literal(`${DiscoverTabType.Metrics}`).meta({
+      description:
+        'A tab with saved metrics grid settings. Requires an ES|QL data source. ' +
+        'These settings are used only when the query supports the metrics experience.',
+    }),
+    dimensions: z
+      .array(z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH))
+      .max(MAX_METRICS_TAB_DIMENSIONS)
+      .meta({
+        description: 'Fields used to group metrics in the metrics grid.',
+      }),
+    search_term: z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH).meta({
+      description: 'Search term used to filter metrics in the metrics grid.',
+    }),
+    counter_aggregation: simpleAggregationSchema.meta({
+      description: 'Aggregation applied to counter metric fields.',
+    }),
+    gauge_aggregation: simpleAggregationSchema.meta({
+      description: 'Aggregation applied to gauge metric fields.',
+    }),
+    histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
+      description: 'Percentile displayed for histogram metric fields.',
+    }),
+  })
+  .strict();
+
 export const discoverSessionClassicTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
     ...classicTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    ...discoverSessionDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
@@ -96,13 +147,29 @@ export const discoverSessionEsqlTabSchema = z
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
     ...asCodeEsqlApproximationSchema.shape,
+    ...discoverSessionDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
-export const discoverSessionApiTabSchema = z.union([
-  discoverSessionClassicTabSchema,
-  discoverSessionEsqlTabSchema,
-]);
+export const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
+  .extend(discoverSessionMetricsTabTypeStateSchema.shape)
+  .meta({
+    title: 'Metrics tab',
+    description: 'An ES|QL tab with saved metrics grid settings.',
+  });
+
+export const discoverSessionApiTabSchema = z
+  .union([
+    discoverSessionClassicTabSchema,
+    discoverSessionEsqlTabSchema,
+    discoverSessionMetricsTabSchema,
+  ])
+  .meta({
+    description:
+      'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
+      'The tab type describes saved state and does not select the active Discover experience. ' +
+      'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
+  });
 
 export const discoverSessionApiDataSchema = z
   .object({

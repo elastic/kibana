@@ -17,6 +17,7 @@ export interface EditDetailsFormData {
   configuration: {
     enable_elastic_capabilities: boolean;
     workflow_ids: string[];
+    post_execution_workflow_ids: string[];
     instructions: string;
     ai_indices: string[];
   };

@@ -24,23 +24,23 @@ const SequenceBuilderFallback = () => (
   />
 );
 
-export const RulesApp = () => {
+export const RulesApp = ({ basePath = '' }: { basePath?: string }) => {
   return (
     <RequireAlertingPrivilege
       features={['rules']}
       pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', { defaultMessage: 'Rules' })}
     >
       <Routes>
-        <Route exact path="/sequence/create">
+        <Route exact path={`${basePath}/sequence/create`}>
           <Suspense fallback={<SequenceBuilderFallback />}>
             <SequenceBuilderPage />
           </Suspense>
         </Route>
 
-        <Route exact path="/:ruleId">
+        <Route exact path={`${basePath}/:ruleId`}>
           <RuleDetailsRoute />
         </Route>
-        <Route exact path="/">
+        <Route exact path={`${basePath}/`}>
           <RulesListPage />
         </Route>
       </Routes>

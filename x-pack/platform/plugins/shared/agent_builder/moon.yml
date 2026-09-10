@@ -17,7 +17,9 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder
 dependsOn:
+  - '@kbn/core-ui-settings-browser'
   - '@kbn/core'
+  - '@kbn/datemath'
   - '@kbn/alerting-plugin'
   - '@kbn/logging'
   - '@kbn/config-schema'

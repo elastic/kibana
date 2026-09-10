@@ -29,6 +29,7 @@ export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
 export const MAX_DISCOVER_SESSION_TAGS = 1000;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
 export const MAX_METRICS_TAB_DIMENSIONS = 5;
+export const MAX_METRICS_TAB_STATE_STRING_LENGTH = 1000;
 
 export type SavedSearchContentType = typeof SavedSearchType;
 
