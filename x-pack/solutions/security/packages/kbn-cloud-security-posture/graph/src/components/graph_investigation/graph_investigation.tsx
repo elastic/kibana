@@ -26,7 +26,7 @@ import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
+import { ENTITY_ID, EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import {
@@ -264,10 +264,31 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       dataView?.id ?? ''
     );
     const defaultFilters = useMemo<Filter[]>(() => {
-      if (!originEventIds || originEventIds.length === 0 || !dataView?.id) return [];
-      const eventIds = originEventIds.map(({ id }) => id);
+      if (!dataView?.id) return [];
 
-      if (eventIds.length === 1) {
+      // Event mode: show origin event/alert IDs as non-interactive filter pills.
+      if (originEventIds && originEventIds.length > 0) {
+        const eventIds = originEventIds.map(({ id }) => id);
+
+        if (eventIds.length === 1) {
+          return [
+            {
+              $state: { store: FilterStateStore.APP_STATE },
+              meta: {
+                key: EVENT_ID,
+                index: dataView.id,
+                negate: false,
+                disabled: false,
+                type: 'phrase' as const,
+                field: EVENT_ID,
+                controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+                params: { query: eventIds[0] },
+              },
+              query: { match_phrase: { [EVENT_ID]: eventIds[0] } },
+            },
+          ];
+        }
+
         return [
           {
             $state: { store: FilterStateStore.APP_STATE },
@@ -276,12 +297,35 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               index: dataView.id,
               negate: false,
               disabled: false,
-              type: 'phrase' as const,
+              type: 'phrases' as const,
               field: EVENT_ID,
               controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
-              params: { query: eventIds[0] },
+              params: eventIds,
             },
-            query: { match_phrase: { [EVENT_ID]: eventIds[0] } },
+            query: { terms: { [EVENT_ID]: eventIds } },
+          },
+        ];
+      }
+
+      // Entity mode: show origin entity IDs as non-interactive filter pills.
+      const originEntityIds = entityIds?.filter(({ isOrigin }) => isOrigin).map(({ id }) => id) ?? [];
+      if (originEntityIds.length === 0) return [];
+
+      if (originEntityIds.length === 1) {
+        return [
+          {
+            $state: { store: FilterStateStore.APP_STATE },
+            meta: {
+              key: ENTITY_ID,
+              index: dataView.id,
+              negate: false,
+              disabled: false,
+              type: 'phrase' as const,
+              field: ENTITY_ID,
+              controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+              params: { query: originEntityIds[0] },
+            },
+            query: { match_phrase: { [ENTITY_ID]: originEntityIds[0] } },
           },
         ];
       }
@@ -290,19 +334,19 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            key: EVENT_ID,
+            key: ENTITY_ID,
             index: dataView.id,
             negate: false,
             disabled: false,
             type: 'phrases' as const,
-            field: EVENT_ID,
+            field: ENTITY_ID,
             controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
-            params: eventIds,
+            params: originEntityIds,
           },
-          query: { terms: { [EVENT_ID]: eventIds } },
+          query: { terms: { [ENTITY_ID]: originEntityIds } },
         },
       ];
-    }, [originEventIds, dataView?.id]);
+    }, [originEventIds, entityIds, dataView?.id]);
 
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
