@@ -20,7 +20,7 @@ const mapping = {
 
 const StyledEuiBadge = styled(EuiBadge)`
   text-transform: capitalize;
-`;
+` as unknown as typeof EuiBadge;
 
 interface BaseProps {
   value: string | number | undefined | null;
