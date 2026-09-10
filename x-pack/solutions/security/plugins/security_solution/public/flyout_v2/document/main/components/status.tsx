@@ -11,6 +11,8 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { FlyoutHeaderBlock } from '../../../shared/components/flyout_header_block';
 import {
   type CellActionRenderer,
@@ -50,6 +52,15 @@ interface StatusProps {
 export const Status = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: StatusProps) => {
     const isPreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+    // v2 episodes carry a system-derived `episode.status` (active/pending/recovering/inactive). The
+    // v1 status popover mutates via the detection-alert API keyed by `_id`, which doesn't apply to
+    // an episode, so we render the RnA status badge read-only (episode status changes live in the
+    // table's row actions for now).
+    const isEpisode = useMemo(() => getFieldValue(hit, 'episode.id') != null, [hit]);
+    const episodeStatus = useMemo(
+      () => getFieldValue(hit, 'episode.status') as AlertEpisodeStatus | undefined,
+      [hit]
+    );
     const eventId = hit.raw._id as string;
     const isRemoteDocument = useMemo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
@@ -84,9 +95,16 @@ export const Status = memo(
         }
         data-test-subj={STATUS_TITLE_TEST_ID}
       >
-        {!statusFieldInfo
-          ? getEmptyTagValue()
-          : renderCellActions({
+        {isEpisode ? (
+          episodeStatus ? (
+            <AlertEpisodeStatusBadges status={episodeStatus} />
+          ) : (
+            getEmptyTagValue()
+          )
+        ) : !statusFieldInfo ? (
+          getEmptyTagValue()
+        ) : (
+          renderCellActions({
               field: ALERT_WORKFLOW_STATUS,
               value: statusFieldInfo.values[0],
               scopeId: '',
@@ -100,7 +118,8 @@ export const Status = memo(
                   disabled={isRemoteDocument}
                 />
               ),
-            })}
+            })
+        )}
       </FlyoutHeaderBlock>
     );
   }
