@@ -51,7 +51,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
-
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
@@ -180,6 +179,7 @@ import {
 } from './services/agentless/agentless_policies';
 import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
 import { VersionSpecificPolicyAssignmentTask } from './tasks/version_specific_policy_assignment_task';
+
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;

@@ -9,6 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../lib/product_features_service/product_features_service';
+import type { GetSiemMigrationContext } from '../../../lib/siem_migrations/get_siem_migration_context';
 import { getRuleMigrationTool } from './rules/get_rule_migration_tool';
 import { startRuleMigrationTool } from './rules/start_rule_migration_tool';
 import { getAllRuleMigrationStatsTool } from './rules/get_all_rule_migration_stats_tool';
@@ -19,12 +20,15 @@ import { getMissingRuleMigrationResourcesTool } from './rules/get_missing_rule_m
 import { stopRuleMigrationTool } from './rules/stop_rule_migration_tool';
 import { updateRuleMigrationTool } from './rules/update_rule_migration_tool';
 import { deleteRuleMigrationTool } from './rules/delete_rule_migration_tool';
+import { groupRulesByIntegrationsTool } from './rules/group_rules_by_integrations_tool';
+import { installMigrationRulesTool } from './rules/install_migration_rules_tool';
 
 export const registerSiemMigrationTools = (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   productFeaturesService: ProductFeaturesService,
-  logger: Logger
+  logger: Logger,
+  getSiemMigrationContext: GetSiemMigrationContext
 ) => {
   agentBuilder.tools.register(getRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(startRuleMigrationTool(core, logger, productFeaturesService));
@@ -40,4 +44,8 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(stopRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(updateRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(deleteRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(
+    groupRulesByIntegrationsTool(core, logger, productFeaturesService, getSiemMigrationContext)
+  );
+  agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
 };

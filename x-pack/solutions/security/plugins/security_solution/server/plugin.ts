@@ -29,6 +29,7 @@ import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
+import { createSiemMigrationContextFactory } from './lib/siem_migrations/get_siem_migration_context';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
@@ -306,6 +307,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
+    // SIEM migration clients for agent-builder tools, so they can use the migrations clients
+    // directly instead of round-tripping through an HTTP route. Safe to build during `setup()`:
+    // the factory only memoizes thunks, so nothing reads `esClusterClient` — assigned later in
+    // the deferred `getStartServices()` callback — until a tool handler calls a getter.
+    const getSiemMigrationContext = createSiemMigrationContextFactory({
+      core,
+      siemMigrationsService: this.siemMigrationsService,
+      experimentalFeatures,
+    });
+
     registerTools(
       agentBuilder,
       core,
@@ -323,9 +334,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless,
-      this.pluginContext.env.packageInfo.version,
-      plugins.encryptedSavedObjects?.canEncrypt === true
+      getSiemMigrationContext,
+      {
+        isServerless: this.isServerless,
+        kibanaVersion: this.pluginContext.env.packageInfo.version,
+        hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
+      }
     );
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);

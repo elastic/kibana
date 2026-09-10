@@ -763,6 +763,80 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
   });
 
+  describe('groupByIntegrations', () => {
+    test('returns per-integration installation counts and the no-integration group', async () => {
+      esClient.asInternalUser.search = jest.fn().mockResolvedValue({
+        aggregations: {
+          integrationIds: {
+            buckets: [
+              {
+                key: 'endpoint',
+                doc_count: 3,
+                installed: { doc_count: 1 },
+                notInstalled: { doc_count: 2 },
+              },
+              {
+                key: 'system',
+                doc_count: 2,
+                installed: { doc_count: 0 },
+                notInstalled: { doc_count: 2 },
+              },
+            ],
+          },
+          withoutIntegrations: {
+            doc_count: 1,
+            installed: { doc_count: 0 },
+            notInstalled: { doc_count: 1 },
+          },
+        },
+      });
+
+      const result = await ruleMigrationsDataRulesClient.groupByIntegrations('migration1', [
+        'rule1',
+        'rule2',
+      ]);
+
+      expect(result).toEqual({
+        groups: [
+          {
+            integration_id: 'endpoint',
+            total_rules: 3,
+            installed_rules: 1,
+            not_installed_rules: 2,
+          },
+          {
+            integration_id: 'system',
+            total_rules: 2,
+            installed_rules: 0,
+            not_installed_rules: 2,
+          },
+        ],
+        without_integrations: {
+          total_rules: 1,
+          installed_rules: 0,
+          not_installed_rules: 1,
+        },
+      });
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { migration_id: 'migration1' } },
+                { terms: { _id: ['rule1', 'rule2'] } },
+              ],
+            },
+          },
+          aggregations: expect.objectContaining({
+            integrationIds: expect.objectContaining({
+              terms: expect.objectContaining({ field: 'elastic_rule.integration_ids' }),
+            }),
+          }),
+        })
+      );
+    });
+  });
+
   describe('prepareDelete', () => {
     test('should prepare bulk delete operations', async () => {
       const migrationId = 'migration1';

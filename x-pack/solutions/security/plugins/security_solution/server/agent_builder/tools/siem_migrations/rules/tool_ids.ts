@@ -43,3 +43,9 @@ export const SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID = securityTool(
 export const SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID = securityTool(
   'siem_migration.delete_rule_migration'
 );
+export const SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID = securityTool(
+  'siem_migration.group_rules_by_integrations'
+);
+export const SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID = securityTool(
+  'siem_migration.install_migration_rules'
+);
