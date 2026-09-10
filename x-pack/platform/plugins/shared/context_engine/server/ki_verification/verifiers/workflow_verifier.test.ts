@@ -75,7 +75,7 @@ describe('resolveKiVerifierChain', () => {
 
     await expect(
       resolve({ parent: { workflowId: 'dad', executionId: 'dad-exec' } })
-    ).rejects.toThrow("ancestor execution 'dad-exec' is not readable");
+    ).rejects.toThrow("parent workflow run 'dad-exec' is not readable");
   });
 
   it('throws when there are too many parent workflows to trace', async () => {
@@ -84,7 +84,7 @@ describe('resolveKiVerifierChain', () => {
     );
 
     await expect(resolve({ parent: { workflowId: 'dad', executionId: 'e' } })).rejects.toThrow(
-      'more than 10 ancestor workflows'
+      'more than 10 parent workflows'
     );
   });
 });

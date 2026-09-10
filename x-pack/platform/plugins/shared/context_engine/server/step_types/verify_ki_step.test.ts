@@ -582,7 +582,7 @@ describe('verify_ki workflow step', () => {
             parent: { workflowId: 'verifier-wf', executionId: 'gone' },
           }
         )
-      ).rejects.toThrow("ancestor execution 'gone' is not readable");
+      ).rejects.toThrow("parent workflow run 'gone' is not readable");
       expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
@@ -593,7 +593,7 @@ describe('verify_ki workflow step', () => {
         { title: 'x' },
         {
           verifiers: [{ workflow_id: 'deeper' }],
-          metadata: { ki_verifier_chain: ['a', 'b', 'c'] },
+          metadata: { ki_verifier_chain: ['a', 'b', 'c', 'd', 'e'] },
         }
       ).catch((error) => error);
 

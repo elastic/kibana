@@ -32,7 +32,7 @@ export const WORKFLOW_VERIFIER_POLL_INTERVAL_MS = 1_000;
 export const MAX_REASON_LENGTH = 2048;
 
 /** Max nesting depth for verifier workflows; enforced here because `runWorkflow` bypasses the engine's depth guard. */
-export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 3;
+export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 5;
 
 export const KI_VERIFIER_CHAIN_METADATA_KEY = 'ki_verifier_chain';
 
@@ -42,10 +42,9 @@ export const readKiVerifierChain = (metadata: Record<string, unknown> | undefine
   return Array.isArray(chain) ? chain.filter((id): id is string => typeof id === 'string') : [];
 };
 
-/** Bounds the ancestor lookups; matches the engine's default `maxWorkflowDepth`. */
 const MAX_LINEAGE_LOOKUPS = 10;
 
-/** Returns the full list of caller workflow ids, outermost first; throws if any ancestor run record is unreadable. */
+/** Returns the full list of caller workflow ids, outermost first; throws if any parent workflow run record cannot be read. */
 export const resolveKiVerifierChain = async ({
   workflowId,
   metadata,
@@ -60,26 +59,26 @@ export const resolveKiVerifierChain = async ({
   workflowsManagement: Pick<KiVerifierWorkflowRunner, 'getWorkflowExecution'>;
 }): Promise<string[]> => {
   const lineage: string[] = [];
-  let ancestor = parent;
-  for (let lookups = 0; ancestor; lookups++) {
+  let caller = parent;
+  for (let lookups = 0; caller; lookups++) {
     if (lookups >= MAX_LINEAGE_LOOKUPS) {
       throw new Error(
-        `Cannot resolve the verifier workflow chain for '${workflowId}': more than ${MAX_LINEAGE_LOOKUPS} ancestor workflows`
+        `Cannot resolve the verifier workflow chain for '${workflowId}': more than ${MAX_LINEAGE_LOOKUPS} parent workflows`
       );
     }
-    const execution = await workflowsManagement.getWorkflowExecution(ancestor.executionId, spaceId);
+    const execution = await workflowsManagement.getWorkflowExecution(caller.executionId, spaceId);
     if (!execution) {
       throw new Error(
-        `Cannot resolve the verifier workflow chain for '${workflowId}': ancestor execution '${ancestor.executionId}' is not readable`
+        `Cannot resolve the verifier workflow chain for '${workflowId}': parent workflow run '${caller.executionId}' is not readable`
       );
     }
     const context = execution.context ?? {};
     lineage.unshift(
       ...readKiVerifierChain(context.metadata as Record<string, unknown> | undefined),
-      ancestor.workflowId
+      caller.workflowId
     );
     const { parentWorkflowId, parentWorkflowExecutionId } = context;
-    ancestor =
+    caller =
       typeof parentWorkflowId === 'string' && typeof parentWorkflowExecutionId === 'string'
         ? { workflowId: parentWorkflowId, executionId: parentWorkflowExecutionId }
         : undefined;
