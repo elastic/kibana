@@ -169,9 +169,26 @@ describe('EditableMarkdown', () => {
       jest.clearAllMocks();
     });
 
-    // Failing: https://github.com/elastic/kibana/issues/288576
-    it.skip('Save button click clears session storage', async () => {
-      renderWithTestingProviders(<EditableMarkdown {...defaultProps} />);
+    // https://github.com/elastic/kibana/issues/288576
+    it('Save button click clears session storage', async () => {
+      // Wrap in a component that unmounts the editor when onChangeEditable fires,
+      // mirroring real usage where the parent switches from edit to view mode.
+      // Without unmounting, react-use's useSessionStorage (no-dep useEffect) re-writes
+      // its internal state to sessionStorage on every render, undoing the removal.
+      const EditableWrapper = () => {
+        const [isEditable, setIsEditable] = React.useState(true);
+        return isEditable ? (
+          <EditableMarkdown
+            {...defaultProps}
+            onChangeEditable={(id) => {
+              onChangeEditable(id);
+              setIsEditable(false);
+            }}
+          />
+        ) : null;
+      };
+
+      renderWithTestingProviders(<EditableWrapper />);
 
       fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
         target: { value: newValue },
@@ -183,11 +200,7 @@ describe('EditableMarkdown', () => {
 
       expect(window.sessionStorage.getItem(draftStorageKey)).toBe(newValue);
 
-      await user.click(await screen.findByTestId(`editable-save-markdown`));
-
-      await waitFor(() => {
-        expect(window.sessionStorage.getItem(draftStorageKey)).toBe(null);
-      });
+      fireEvent.click(await screen.findByTestId(`editable-save-markdown`));
 
       await waitFor(() => {
         expect(onSaveContent).toHaveBeenCalledWith(newValue);
