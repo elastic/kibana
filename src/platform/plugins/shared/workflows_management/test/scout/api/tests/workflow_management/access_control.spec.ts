@@ -187,4 +187,92 @@ steps:
       expect(hiddenExecutions.body.total).toBe(0);
     }
   );
+
+  for (const { name, featureId, privileges, recipientSpace, canRead, canExecute, canEdit } of [
+    {
+      name: 'no Workflows access',
+      featureId: 'dashboard_v2',
+      privileges: ['read'],
+      recipientSpace: spaceId,
+      canRead: false,
+      canExecute: false,
+      canEdit: false,
+    },
+    {
+      name: 'Workflows access in another space',
+      featureId: 'workflowsManagement',
+      privileges: ['all'],
+      recipientSpace: 'default',
+      canRead: false,
+      canExecute: false,
+      canEdit: false,
+    },
+    {
+      name: 'Workflows Read access',
+      featureId: 'workflowsManagement',
+      privileges: ['read'],
+      recipientSpace: spaceId,
+      canRead: true,
+      canExecute: false,
+      canEdit: false,
+    },
+    {
+      name: 'custom Workflows Read and Execute access',
+      featureId: 'workflowsManagement',
+      privileges: ['minimal_read', 'workflow_read', 'workflow_execute'],
+      recipientSpace: spaceId,
+      canRead: true,
+      canExecute: true,
+      canEdit: false,
+    },
+    {
+      name: 'Workflows All access',
+      featureId: 'workflowsManagement',
+      privileges: ['all'],
+      recipientSpace: spaceId,
+      canRead: true,
+      canExecute: true,
+      canEdit: true,
+    },
+  ]) {
+    apiTest(`checks suggestions and grants for ${name}`, async ({ apiClient, samlAuth }) => {
+      const recipient = await samlAuth.asInteractiveUser({
+        elasticsearch: { cluster: [] },
+        kibana: [{ base: [], feature: { [featureId]: privileges }, spaces: [recipientSpace] }],
+      });
+      const profile = await apiClient.get('internal/security/user_profile', {
+        headers: { ...headers, ...recipient.cookieHeader },
+      });
+      expect(profile).toHaveStatusCode(200);
+      const suggestions = await apiClient.post(
+        `s/${spaceId}/internal/workflows/_suggest_user_profiles`,
+        {
+          headers: ownerHeaders,
+          body: { name: profile.body.user.username, size: 20 },
+        }
+      );
+      expect(suggestions).toHaveStatusCode(200);
+      expect(
+        suggestions.body.map(({ uid }: { uid: string }) => uid).includes(profile.body.uid)
+      ).toBe(canRead);
+
+      for (const { role, allowed } of [
+        { role: 'viewer', allowed: canRead },
+        { role: 'executor', allowed: canExecute },
+        { role: 'editor', allowed: canEdit },
+      ]) {
+        const grant = await apiClient.put(
+          `s/${spaceId}/internal/workflows/${workflowId}/access_control`,
+          {
+            headers: ownerHeaders,
+            body: {
+              access_mode: 'private',
+              entries: [{ type: 'user', id: profile.body.uid, role }],
+            },
+          }
+        );
+        expect(grant).toHaveStatusCode(allowed ? 200 : 400);
+      }
+    });
+  }
 });

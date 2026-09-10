@@ -106,6 +106,14 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await editor.setAccessMode('private');
     await editor.addAccessUser('test viewer');
     await editor.setAccessRole('elastic_viewer', 'executor');
+    await page.testSubj.click('workflowAccessSave');
+    await expect(
+      page.getByText(
+        'Selected users must have the Workflows privileges required for their access roles in this space.',
+        { exact: true }
+      )
+    ).toBeVisible();
+    await editor.setAccessRole('elastic_viewer', 'viewer');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
     await page.screenshot({
       path: testInfo.outputPath('workflow_access.png'),
@@ -115,7 +123,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await editor.gotoWorkflow(workflowId);
     await editor.openAccessDialog();
     await expect(editor.accessMode).toContainText('Private');
-    await expect(editor.accessRole('elastic_viewer')).toContainText('Executor');
+    await expect(editor.accessRole('elastic_viewer')).toContainText('Viewer');
     await editor.setAccessMode('public');
     await editor.saveAccess();
     await editor.gotoWorkflow(workflowId);

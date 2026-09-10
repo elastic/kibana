@@ -324,7 +324,11 @@ export class WorkflowsService {
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {
     await this.ensureInitialized();
-    return new WorkflowAccessControlService(this.coreStart, this.crudService);
+    return new WorkflowAccessControlService(
+      this.coreStart,
+      this.crudService,
+      this.pluginsStart.security?.authz
+    );
   }
 
   public async getWorkflow(

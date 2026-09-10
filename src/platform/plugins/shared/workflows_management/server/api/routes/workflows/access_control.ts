@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { workflowAccessControlSchema } from '@kbn/workflows';
+import { workflowAccessControlSchema, WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
@@ -59,7 +59,17 @@ export const registerWorkflowAccessControlRoutes = ({
     withAvailabilityCheck(async (context, request, response) => {
       try {
         const { userProfile } = await workflowsService.getCoreStart();
-        const profiles = await userProfile.suggest(request.body);
+        const { security } = await workflowsService.getPluginsStart();
+        if (!security) return response.ok({ body: [] });
+        const profiles = await userProfile.suggest({
+          ...request.body,
+          requiredPrivileges: {
+            spaceId: spaces.getSpaceId(request),
+            privileges: {
+              kibana: [security.authz.actions.api.get(WorkflowsManagementApiActions.read)],
+            },
+          },
+        });
         return response.ok({ body: profiles });
       } catch (error) {
         return handleRouteError(response, error);

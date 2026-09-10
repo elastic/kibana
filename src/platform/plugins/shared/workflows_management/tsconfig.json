@@ -15,6 +15,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/security-plugin",
     "@kbn/ui-callout",
     "@kbn/entity-access-control-ui",
     "@kbn/entity-access-control",

@@ -389,6 +389,9 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
+User suggestions require Workflows Read in that space. Saving private access checks
+each recipient's RBAC: Viewer requires Read, Executor also requires Execute, and
+Editor also requires Update. A rejected grant leaves the access settings unchanged.
 Public workflows use the existing RBAC permissions for viewing, running, editing,
 and deletion. ACL entries apply only to private workflows. The owner controls
 visibility and sharing. Managed workflows keep their existing plugin access rules.

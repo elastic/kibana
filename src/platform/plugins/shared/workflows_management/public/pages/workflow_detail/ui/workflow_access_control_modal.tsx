@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { AccessControlInput } from '@kbn/entity-access-control';
 import { AccessControlForm } from '@kbn/entity-access-control-ui';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +72,7 @@ export const WorkflowAccessControlModal = ({
   const debouncedSearch = useDebouncedValue(search, 200);
   const [isSaving, setIsSaving] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isInvalidAccess, setIsInvalidAccess] = useState(false);
   const uids = [ownerId, ...(value.entries ?? []).map(({ id }) => id)].filter((id): id is string =>
     Boolean(id)
   );
@@ -99,6 +101,7 @@ export const WorkflowAccessControlModal = ({
   const save = async () => {
     setIsSaving(true);
     setHasError(false);
+    setIsInvalidAccess(false);
     try {
       await http.put(`/internal/workflows/${encodeURIComponent(workflow.id)}/access_control`, {
         body: JSON.stringify(value),
@@ -109,8 +112,9 @@ export const WorkflowAccessControlModal = ({
       );
       dispatch(setWorkflow(updated));
       onClose();
-    } catch {
+    } catch (error) {
       setHasError(true);
+      setIsInvalidAccess(isHttpFetchError(error) && error.response?.status === 400);
     } finally {
       setIsSaving(false);
     }
@@ -135,6 +139,14 @@ export const WorkflowAccessControlModal = ({
               title={i18n.translate('workflows.access.saveErrorMessage', {
                 defaultMessage: 'Could not update access or load users. Try again.',
               })}
+              text={
+                isInvalidAccess
+                  ? i18n.translate('workflows.access.recipientPrivilegesError', {
+                      defaultMessage:
+                        'Selected users must have the Workflows privileges required for their access roles in this space.',
+                    })
+                  : undefined
+              }
             />
             <EuiSpacer size="m" />
           </>

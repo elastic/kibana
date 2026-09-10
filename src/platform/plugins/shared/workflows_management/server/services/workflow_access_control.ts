@@ -9,9 +9,19 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { buildEntityReadAccessQuery, prepareAccessControl } from '@kbn/entity-access-control';
+import {
+  buildEntityReadAccessQuery,
+  InvalidAccessControlError,
+  prepareAccessControl,
+} from '@kbn/entity-access-control';
 import type { AccessControlInput } from '@kbn/entity-access-control';
-import { getWorkflowPermissions, WORKFLOW_ACCESS_CONTROL_ROLES } from '@kbn/workflows';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import {
+  getWorkflowPermissions,
+  WORKFLOW_ACCESS_CONTROL_ROLES,
+  workflowAccessControlSchema,
+  WorkflowsManagementApiActions,
+} from '@kbn/workflows';
 import type {
   WorkflowAccessControl,
   WorkflowAccessControlRole,
@@ -23,6 +33,16 @@ import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { workflowIndexName } from '../storage/workflow_storage';
+
+const rolePrivileges = {
+  viewer: [WorkflowsManagementApiActions.read],
+  executor: [WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.execute],
+  editor: [
+    WorkflowsManagementApiActions.read,
+    WorkflowsManagementApiActions.execute,
+    WorkflowsManagementApiActions.update,
+  ],
+} as const;
 
 export const assertWorkflowOperation = (
   workflow: WorkflowAccessSubject,
@@ -41,7 +61,8 @@ export const assertWorkflowOperation = (
 export class WorkflowAccessControlService {
   constructor(
     private readonly core: CoreStart,
-    private readonly crud: Pick<WorkflowCrudService, 'readModifyWriteWorkflowDocument'>
+    private readonly crud: Pick<WorkflowCrudService, 'readModifyWriteWorkflowDocument'>,
+    private readonly authz?: SecurityPluginStart['authz']
   ) {}
 
   async getProfileId(request: KibanaRequest): Promise<string | undefined> {
@@ -137,6 +158,29 @@ export class WorkflowAccessControlService {
   ): Promise<WorkflowAccessControl> {
     const profileId = await this.getProfileId(request);
     if (!profileId) throw new WorkflowAccessDeniedError();
+    const { access_mode, entries } = workflowAccessControlSchema.parse(input);
+    const { authz } = this;
+    if (access_mode === 'private') {
+      for (const role of WORKFLOW_ACCESS_CONTROL_ROLES) {
+        const uids = new Set(
+          entries
+            .filter((entry) => entry.role === role && entry.id !== profileId)
+            .map(({ id: uid }) => uid)
+        );
+        if (uids.size > 0) {
+          const result = authz
+            ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
+                kibana: rolePrivileges[role].map((privilege) => authz.actions.api.get(privilege)),
+              })
+            : undefined;
+          if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
+            throw new InvalidAccessControlError(
+              `Selected users must have the Workflows privileges required for ${role} access in this space.`
+            );
+          }
+        }
+      }
+    }
     const document = await this.crud.readModifyWriteWorkflowDocument(id, spaceId, {
       mutate: (existing) => {
         const legacyOwner =

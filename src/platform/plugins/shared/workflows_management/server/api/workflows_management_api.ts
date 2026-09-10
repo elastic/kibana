@@ -359,9 +359,10 @@ export class WorkflowsManagementApi {
     input: AccessControlInput<WorkflowAccessControlRole>,
     request: KibanaRequest
   ): Promise<WorkflowAccessControl> {
-    if (!(await this.workflowsService.getWorkflow(id, spaceId)))
-      throw new WorkflowNotFoundError(id);
+    const workflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
+    await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
     this.notifySml(id, 'update', request);
     return result;
