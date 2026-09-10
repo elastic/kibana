@@ -20,7 +20,7 @@ import { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeApproximationManager } from './approximation_manager';
-import type { DashboardPanel } from '../../server';
+import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSaveEvent } from './types';
 import { getSampleDashboardState } from '../mocks';
 

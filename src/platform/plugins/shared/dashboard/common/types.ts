@@ -18,7 +18,7 @@ import type {
   DashboardPinnedPanelInput,
   DashboardOptionsInput,
   GridDataInput,
-} from '../server';
+} from '@kbn/as-code-dashboard-schema';
 
 export type {
   DashboardState,

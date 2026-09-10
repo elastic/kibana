@@ -8,7 +8,7 @@
  */
 
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
-import type { DiscoverSessionApiEsqlTab } from '../../server';
+import type { DiscoverSessionApiEsqlTab } from '@kbn/as-code-discover-schema';
 import { getVisContextRequestData } from './get_vis_context_request_data';
 
 describe('getVisContextRequestData', () => {

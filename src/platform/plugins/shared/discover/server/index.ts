@@ -54,11 +54,6 @@ export type {
 export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-} from '@kbn/as-code-discover-schema';
-export type {
   DiscoverSessionApiResponse,
   DiscoverSessionApiData,
   DiscoverSessionApiDataInput,

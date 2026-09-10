@@ -8,8 +8,8 @@
  */
 
 import { v4 } from 'uuid';
+import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
 import { type DashboardState, isDashboardSection } from '../../../common';
-import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
