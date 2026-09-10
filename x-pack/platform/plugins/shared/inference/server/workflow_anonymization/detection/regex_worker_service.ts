@@ -6,19 +6,16 @@
  */
 
 import Piscina from 'piscina';
-import { RE2JS } from 're2js';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowAnonymizationWorkerConfig } from '../../config';
 import type { PiiRegexWorkerTaskPayload, PiiRegexMatch, PiiDetectionFailureMode } from './types';
 import { executeRegexRules } from './execute_regex_rules';
 
 function runSync(payload: PiiRegexWorkerTaskPayload): PiiRegexMatch[] {
-  // Worker pool provides ReDoS containment via task timeout; on the sync path we
-  // enforce RE2-only patterns so catastrophic backtracking cannot block the event loop.
-  for (const rule of payload.rules) {
-    RE2JS.compile(rule.pattern);
-  }
-  return executeRegexRules(payload);
+  // On the sync path there is no timeout to contain catastrophic backtracking, so
+  // enforce RE2-only patterns. executeRegexRules throws from compileRule on first
+  // non-RE2 pattern when re2Only is true.
+  return executeRegexRules(payload, { re2Only: true });
 }
 
 /**
@@ -89,6 +86,11 @@ export class PiiRegexWorkerService {
         if (err instanceof Error && err.name === 'AbortError') {
           throw new Error(
             `PII regex detection task timed out after ${this.config.taskTimeout.asMilliseconds()}ms`
+          );
+        }
+        if (err instanceof Error && err.message === 'Task queue is at capacity') {
+          throw new Error(
+            `PII regex detection rejected: worker queue at capacity (maxQueue=${this.config.maxQueue})`
           );
         }
         throw err;
