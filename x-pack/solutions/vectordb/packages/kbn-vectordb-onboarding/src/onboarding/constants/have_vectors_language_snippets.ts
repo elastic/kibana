@@ -698,15 +698,13 @@ var response = await client.SearchAsync<object>(s => s
                         .Field("vector")
                         .QueryVector(0.10f, -0.02f, 0.91f, 0.18f, 0.60f)
                         .K(10)))
-                    .Normalizer(ScoreNormalizer.Minmax)
-                    .Weight(1f),
+                    .Normalizer(ScoreNormalizer.Minmax),
                 ir => ir
                     .Retriever(rr => rr.Standard(st => st
                         .Query(q => q.Match(m => m
                             .Field("text")
                             .Query("What is a good national park for backpacking?")))))
                     .Normalizer(ScoreNormalizer.Minmax)
-                    .Weight(1f)
             )
         )
     )
