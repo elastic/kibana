@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderFlakySuiteIssueBody renders the headline, trend, tables, samples and metadata footer 1`] = `
+exports[`renderFlakySuiteIssueBody renders the headline, details, per-test table and metadata footer 1`] = `
 "> **2 flaky tests** in this file; the worst is **#2 of 148** flaky tests on \`kibana-on-merge\` in the last 7 days. It failed **49 of 509 builds (9.6%)**, last on 2026-09-09 06:12 UTC. Fails on \`main\`, \`9.1\`.
-
-> Flagged by **3 reports** so far, fail rate 2.1% → 6.1% → **9.6%** (rising).
 
 | Field | Value |
 |---|---|
@@ -14,23 +12,12 @@ exports[`renderFlakySuiteIssueBody renders the headline, trend, tables, samples 
 
 **Flaky tests** (ranked by failed builds)
 
-| Test | Failed builds | Fail rate | Retry flakes | Flakiest branch |
-|---|---|---|---|---|
-| creates default alert, triggers on down status, and recovers | 49/509 | 9.6% | 12 | main (9.6%) |
-| applies a maintenance \\\\| window in bulk | 11/509 | 2.2% | 4 | 9.1 (2.8%) |
+| Test | Failed builds | Fail rate |
+|---|---|---|
+| creates default alert, triggers on down status, and recovers | 49/509 | 9.6% |
+| applies a maintenance \\\\| window in bulk | 11/509 | 2.2% |
 
-<details>
-<summary>Recent failures: creates default alert, triggers on down status, and recovers (1 sample)</summary>
+Reproduce with the [flaky test runner](https://buildkite.com/elastic/kibana-flaky) · Source: [flaky_tests.json](https://buildkite.com/elastic/kibana-scout-report-flaky-tests/builds/42), generated 2026-09-09 09:04 UTC · [How this issue is generated](https://github.com/elastic/kibana/blob/main/packages/kbn-failed-test-reporter-cli/README.md#node-scriptsreport_flaky_tests)
 
-[kibana-on-merge #12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC
-
-\`\`\`\`
-Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
-\`\`\`\`
-
-</details>
-
-Reproduce with the [flaky test runner](https://buildkite.com/elastic/kibana-flaky) · Source: [flaky_tests.json](https://buildkite.com/elastic/kibana-scout-report-flaky-tests/builds/42), generated 2026-09-09 09:04 UTC · [How this issue is generated and kept up to date](https://github.com/elastic/kibana/blob/main/packages/kbn-failed-test-reporter-cli/README.md#node-scriptsreport_flaky_tests)
-
-<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\",\\"playwright:default_status_alert:bulk\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":3,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-07T09:04:41.000Z\\",\\"builds\\":480,\\"failedBuilds\\":10},{\\"generatedAt\\":\\"2026-09-08T09:04:41.000Z\\",\\"builds\\":495,\\"failedBuilds\\":30},{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":509,\\"failedBuilds\\":49}]}} -->"
+<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\",\\"playwright:default_status_alert:bulk\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\"}} -->"
 `;

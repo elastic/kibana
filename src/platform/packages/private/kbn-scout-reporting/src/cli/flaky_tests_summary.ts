@@ -13,8 +13,6 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
-  flakiestBranch,
-  formatAge,
   formatRate,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
@@ -102,6 +100,28 @@ export const wrapOn = (text: string, separator: string, width: number): string =
   }
   flush();
   return lines.join('\n');
+};
+
+/** Coarse relative age such as `5m ago`, `3h ago` or `2d ago`. */
+export const formatAge = (from: Date, to: Date): string => {
+  const minutes = Math.max(0, Math.round((to.getTime() - from.getTime()) / 60_000));
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 24 * 60) return `${Math.round(minutes / 60)}h ago`;
+  return `${Math.round(minutes / (24 * 60))}d ago`;
+};
+
+/**
+ * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
+ * count when no branch has enough, so one failure on a barely exercised branch does not win.
+ */
+export const flakiestBranch = (
+  byBranch: FlakyTestEntry['byBranch'],
+  minBuilds: number
+): FlakyTestBranchStats | undefined => {
+  const exercised = byBranch.filter((stats) => stats.builds >= minBuilds);
+  return [...(exercised.length > 0 ? exercised : byBranch)].sort(
+    (a, b) => b.buildFailRate - a.buildFailRate
+  )[0];
 };
 
 const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>

@@ -64,7 +64,10 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   ...overrides,
 });
 
-export const flakyReport = (flaky: FlakyTestEntry[], overrides: Partial<FlakyTestReport> = {}): FlakyTestReport => ({
+export const flakyReport = (
+  flaky: FlakyTestEntry[],
+  overrides: Partial<FlakyTestReport> = {}
+): FlakyTestReport => ({
   schemaVersion: 1,
   generatedAt: GENERATED_AT,
   window: {

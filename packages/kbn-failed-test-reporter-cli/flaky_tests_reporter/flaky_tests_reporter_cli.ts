@@ -16,16 +16,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutFlakyTests } from '@kbn/scout-reporting';
 
 import { DEFAULT_GITHUB_REPO, GithubApi } from '../failed_tests_reporter/github_api';
-import {
-  FAILED_TEST_ISSUE_POLICIES,
-  FAILED_TEST_LABEL,
-  reportFlakySuitesToGithub,
-} from './reporter';
+import { FAILED_TEST_LABEL, reportFlakySuitesToGithub } from './reporter';
 
 const DEFAULT_INPUT = 'target/flaky_tests/flaky_tests.json';
 const DEFAULT_SUMMARY_PATH = 'target/flaky_tests/github_issues.json';
 const DEFAULT_MAX_NEW_ISSUES = 10;
-const DEFAULT_FAILED_TEST_ISSUE_POLICY = 'skip';
 
 const readList = (flagsReader: FlagsReader, key: string): string[] => [
   ...new Set(
@@ -57,9 +52,6 @@ export function runFlakyTestsReporterCli() {
           `--labels must include ${FAILED_TEST_LABEL}, otherwise issues cannot be found again`
         );
       }
-      const failedTestIssuePolicy =
-        flagsReader.enum('failed-test-issues', FAILED_TEST_ISSUE_POLICIES) ??
-        DEFAULT_FAILED_TEST_ISSUE_POLICY;
       const reportUrl = flagsReader.string('report-url');
       const repo = flagsReader.requiredString('github-repo');
       if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
@@ -81,7 +73,6 @@ export function runFlakyTestsReporterCli() {
         log,
         labels,
         maxNewIssues,
-        failedTestIssuePolicy,
         reportUrl,
         dryRun,
       });
@@ -89,19 +80,18 @@ export function runFlakyTestsReporterCli() {
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
-      const { created, updated, reopened, skipped } = summary.counts;
+      const { created, existing, skipped } = summary.counts;
       log.info(
-        `${summary.suites} flaky suites: ${created} issues created, ${updated} updated, ` +
-          `${reopened} reopened, ${skipped} skipped (summary in ${summaryPath})`
+        `${summary.suites} flaky suites: ${created} issues created, ${existing} already tracked, ` +
+          `${skipped} skipped (summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
     },
     {
       description: `
         File one GitHub issue per flaky test suite found in a report written by
-        \`node scripts/scout discover-flaky-tests\`, or bring the issue filed earlier for that suite
-        up to date (reopening it when closed). Suites whose tests already have an open failed-test
-        issue are skipped unless --failed-test-issues link is passed.
+        \`node scripts/scout discover-flaky-tests\`. Suites that already have an open issue are
+        left untouched.
 
         Examples:
           # Preview what would be filed, without touching GitHub
@@ -111,21 +101,12 @@ export function runFlakyTestsReporterCli() {
           GITHUB_TOKEN=... node scripts/report_flaky_tests --report-url https://buildkite.com/...
       `,
       flags: {
-        string: [
-          'input',
-          'labels',
-          'max-new-issues',
-          'failed-test-issues',
-          'report-url',
-          'summary-path',
-          'github-repo',
-        ],
+        string: ['input', 'labels', 'max-new-issues', 'report-url', 'summary-path', 'github-repo'],
         boolean: ['dry-run'],
         default: {
           input: DEFAULT_INPUT,
           labels: FAILED_TEST_LABEL,
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
-          'failed-test-issues': DEFAULT_FAILED_TEST_ISSUE_POLICY,
           'summary-path': DEFAULT_SUMMARY_PATH,
           'github-repo': DEFAULT_GITHUB_REPO,
           'dry-run': false,
@@ -134,10 +115,7 @@ export function runFlakyTestsReporterCli() {
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
           --dry-run             Log the GitHub requests instead of sending them; GITHUB_TOKEN becomes optional
           --labels              Comma-separated labels for new issues [default: ${FAILED_TEST_LABEL}]
-          --max-new-issues      Maximum issues created per run; existing ones are always updated [default: ${DEFAULT_MAX_NEW_ISSUES}]
-          --failed-test-issues  ${FAILED_TEST_ISSUE_POLICIES.join(
-            ' or '
-          )} suites that already have an open failed-test issue [default: ${DEFAULT_FAILED_TEST_ISSUE_POLICY}]
+          --max-new-issues      Maximum issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
           --report-url          Link to the report, shown in every issue (e.g. the Buildkite artifact)
           --summary-path        Where to write the JSON summary of what was filed [default: ${DEFAULT_SUMMARY_PATH}]
           --github-repo         owner/name of the repository to file issues in, e.g. a sandbox for testing [default: ${DEFAULT_GITHUB_REPO}]

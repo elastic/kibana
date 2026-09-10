@@ -39,14 +39,6 @@ export interface GithubIssue {
   state: GithubIssueState;
 }
 
-export interface ListIssuesOptions {
-  /** Only issues carrying every one of these labels. */
-  labels: string[];
-  state: GithubIssueState | 'all';
-  /** Safety valve against unbounded pagination; 100 issues per page. */
-  maxPages?: number;
-}
-
 export interface SearchIssuesOptions {
   /** Search qualifiers; the repository and `is:issue` are added automatically. */
   query: string;
@@ -170,24 +162,9 @@ export class GithubApi {
   }
 
   /**
-   * List issues by label, following pagination. Read-only, so it also runs in dry-run mode. Pull
-   * requests share the issues endpoint and are filtered out.
-   */
-  async listIssues({ labels, state, maxPages = 50 }: ListIssuesOptions): Promise<GithubIssue[]> {
-    const query = new URLSearchParams({ labels: labels.join(','), state, per_page: '100' });
-    return await this.collectIssues({
-      firstPageUrl: Url.resolve(this.baseUrl, `issues?${query}`),
-      maxPages,
-      itemsOf: (page: Array<GithubIssue & { pull_request?: unknown }>) => page,
-      emptyPage: [],
-      description: `issues labelled ${labels.join(',')}`,
-    });
-  }
-
-  /**
-   * Issues of the repository matching a GitHub search query, most recently updated first.
-   * Read-only, so it also runs in dry-run mode. Use it when listing by label would page through
-   * far more issues than the query matches; GitHub caps search results at 1000.
+   * Issues of the repository matching a GitHub search query, most recently updated first,
+   * following `Link: rel="next"` pagination. Read-only, so it also runs in dry-run mode. Pull
+   * requests share the issue shape and are dropped. GitHub caps search results at 1000.
    */
   async searchIssues({ query, maxPages = 10 }: SearchIssuesOptions): Promise<GithubIssue[]> {
     const params = new URLSearchParams({
@@ -196,38 +173,19 @@ export class GithubApi {
       order: 'desc',
       per_page: '100',
     });
-    return await this.collectIssues({
-      firstPageUrl: `https://api.github.com/search/issues?${params}`,
-      maxPages,
-      itemsOf: (page: SearchIssuesResponse) => {
-        if (page.incomplete_results) {
-          this.log.warning(`GitHub search timed out for "${query}"; results may be incomplete`);
-        }
-        return page.items;
-      },
-      emptyPage: { total_count: 0, incomplete_results: false, items: [] },
-      description: `issues matching "${query}"`,
-    });
-  }
-
-  /** Follows `Link: rel="next"` headers, dropping pull requests (which share the issue shape). */
-  private async collectIssues<TPage>(options: {
-    firstPageUrl: string;
-    maxPages: number;
-    itemsOf: (page: TPage) => Array<GithubIssue & { pull_request?: unknown }>;
-    emptyPage: TPage;
-    description: string;
-  }): Promise<GithubIssue[]> {
     const issues: GithubIssue[] = [];
-    let url: string | undefined = options.firstPageUrl;
+    let url: string | undefined = `https://api.github.com/search/issues?${params}`;
 
-    for (let page = 1; page <= options.maxPages && url; page++) {
-      const resp = await this.request<TPage>(
+    for (let page = 1; page <= maxPages && url; page++) {
+      const resp = await this.request<SearchIssuesResponse>(
         { method: 'GET', url, safeForDryRun: true },
-        options.emptyPage
+        { total_count: 0, incomplete_results: false, items: [] }
       );
+      if (resp.data.incomplete_results) {
+        this.log.warning(`GitHub search timed out for "${query}"; results may be incomplete`);
+      }
 
-      for (const issue of options.itemsOf(resp.data)) {
+      for (const issue of resp.data.items) {
         if (!issue.pull_request) {
           issues.push({ ...issue, body: issue.body ?? '' });
         }
@@ -239,7 +197,7 @@ export class GithubApi {
 
     if (url) {
       this.log.warning(
-        `Stopped listing ${options.description} after ${options.maxPages} pages; results are incomplete`
+        `Stopped searching issues matching "${query}" after ${maxPages} pages; results are incomplete`
       );
     }
     return issues;

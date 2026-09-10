@@ -90,7 +90,7 @@ describe('nextPageUrl()', () => {
   });
 });
 
-describe('GithubApi#listIssues()', () => {
+describe('GithubApi#searchIssues()', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -106,85 +106,77 @@ describe('GithubApi#listIssues()', () => {
     ...extra,
   });
 
+  const searchPage = (items: unknown[], nextUrl?: string) =>
+    new Response(JSON.stringify({ total_count: items.length, incomplete_results: false, items }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(nextUrl ? { Link: `<${nextUrl}>; rel="next"` } : {}),
+      },
+    });
+
+  it('scopes the query to the repository and unwraps the items', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockImplementation(async () => searchPage([issue(5), issue(6)]));
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false, repo: 'elastic/sandbox' });
+    const issues = await api.searchIssues({ query: 'label:failed-test in:title "Flaky"' });
+
+    const url = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(url.origin + url.pathname).toBe('https://api.github.com/search/issues');
+    expect(url.searchParams.get('q')).toBe(
+      'repo:elastic/sandbox is:issue label:failed-test in:title "Flaky"'
+    );
+    expect(url.searchParams.get('sort')).toBe('updated');
+    expect(url.searchParams.get('per_page')).toBe('100');
+    expect(issues.map(({ number }) => number)).toEqual([5, 6]);
+  });
+
   it('follows the Link header, drops pull requests and normalizes missing bodies', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async (url) => {
-      const page = new URL(String(url)).searchParams.get('page');
-      if (page === '2') {
-        return jsonResponse([issue(3, { body: null })]);
+      if (new URL(String(url)).searchParams.get('page') === '2') {
+        return searchPage([issue(3, { body: null })]);
       }
       // A short first page that is not the last one
-      return new Response(JSON.stringify([issue(1), issue(2, { pull_request: {} })]), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          Link: '<https://api.github.com/repos/elastic/kibana/issues?labels=failed-test&state=open&per_page=100&page=2>; rel="next"',
-        },
-      });
+      return searchPage(
+        [issue(1), issue(2, { pull_request: {} })],
+        'https://api.github.com/search/issues?q=x&per_page=100&page=2'
+      );
     });
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open' });
+    const issues = await api.searchIssues({ query: 'x' });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(String(fetchMock.mock.calls[0][0])).toBe(
-      'https://api.github.com/repos/elastic/kibana/issues?labels=failed-test&state=open&per_page=100'
-    );
     expect(issues.map(({ number, body }) => [number, body])).toEqual([
       [1, 'body 1'],
       [3, ''],
     ]);
   });
 
-  it('still fetches in dry-run mode because listing is read-only', async () => {
+  it('still fetches in dry-run mode because searching is read-only', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
-      .mockImplementation(async () => jsonResponse([issue(1)]));
+      .mockImplementation(async () => searchPage([issue(1)]));
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'all' });
+    const issues = await api.searchIssues({ query: 'x' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(issues).toHaveLength(1);
   });
 
-  it('searches issues scoped to the repository and unwraps the items', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () =>
-      jsonResponse({
-        total_count: 2,
-        incomplete_results: false,
-        items: [issue(5), issue(6, { pull_request: {} })],
-      })
-    );
-
-    const api = new GithubApi({ log, token: 'secret', dryRun: false, repo: 'elastic/sandbox' });
-    const issues = await api.searchIssues({
-      query: 'label:failed-test in:title "Flaky test suite"',
-    });
-
-    const url = new URL(String(fetchMock.mock.calls[0][0]));
-    expect(url.origin + url.pathname).toBe('https://api.github.com/search/issues');
-    expect(url.searchParams.get('q')).toBe(
-      'repo:elastic/sandbox is:issue label:failed-test in:title "Flaky test suite"'
-    );
-    expect(url.searchParams.get('sort')).toBe('updated');
-    expect(issues.map(({ number }) => number)).toEqual([5]);
-  });
-
   it('stops after maxPages and warns', async () => {
-    jest.spyOn(global, 'fetch').mockImplementation(
-      async () =>
-        new Response(JSON.stringify([issue(1)]), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            Link: '<https://api.github.com/repos/elastic/kibana/issues?page=99>; rel="next"',
-          },
-        })
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockImplementation(async () =>
+        searchPage([issue(1)], 'https://api.github.com/search/issues?q=x&page=99')
+      );
     const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open', maxPages: 2 });
+    const issues = await api.searchIssues({ query: 'x', maxPages: 2 });
 
     expect(issues).toHaveLength(2);
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('results are incomplete'));

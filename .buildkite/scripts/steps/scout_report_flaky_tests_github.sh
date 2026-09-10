@@ -14,8 +14,6 @@ cd "${KIBANA_DIR:-$(pwd)}"
 
 FLAKY_TESTS_REPORT_TO_GITHUB="${FLAKY_TESTS_REPORT_TO_GITHUB:-false}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
-# `skip` (default) or `link`: what to do with suites that already have an open failed-test issue
-FLAKY_TESTS_FAILED_TEST_ISSUES="${FLAKY_TESTS_FAILED_TEST_ISSUES:-skip}"
 
 REPORT_DIR="target/flaky_tests"
 # Uploaded by the discover-flaky-tests step; keep the paths in sync
@@ -31,15 +29,13 @@ echo "--- Download flaky test report"
 download_artifact "$REPORT_PATH" . --step discover-flaky-tests
 
 echo "+++ Report flaky suites to GitHub"
-echo "    Mode                : $([[ "$FLAKY_TESTS_REPORT_TO_GITHUB" == "true" ]] && echo "live" || echo "dry run")"
-echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
-echo "    failed-test issues  : $FLAKY_TESTS_FAILED_TEST_ISSUES"
+echo "    Mode           : $([[ "$FLAKY_TESTS_REPORT_TO_GITHUB" == "true" ]] && echo "live" || echo "dry run")"
+echo "    Max new issues : $FLAKY_TESTS_MAX_NEW_ISSUES"
 
 args=(
   --input "$REPORT_PATH"
   --summary-path "$SUMMARY_PATH"
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
-  --failed-test-issues "$FLAKY_TESTS_FAILED_TEST_ISSUES"
   --report-url "$BUILDKITE_BUILD_URL"
 )
 if [[ "$FLAKY_TESTS_REPORT_TO_GITHUB" != "true" ]]; then
@@ -52,21 +48,20 @@ echo "--- Upload issue summary"
 buildkite-agent artifact upload "$SUMMARY_PATH"
 
 echo "--- Annotate build"
-counts="$(jq -r '.counts | "**\(.created)** created, **\(.updated)** updated, **\(.reopened)** reopened, **\(.skipped)** skipped"' "$SUMMARY_PATH")"
+counts="$(jq -r '.counts | "**\(.created)** created, **\(.existing)** already tracked, **\(.skipped)** skipped by the cap"' "$SUMMARY_PATH")"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
 
 {
   if [[ "$FLAKY_TESTS_REPORT_TO_GITHUB" == "true" ]]; then
     echo "GitHub issues for ${suites} flaky suites: ${counts}."
     echo
-    # Only the issues that need eyes; updates of open issues are routine
-    jq -r '.actions[] | select(.action == "created" or .action == "reopened")
-      | "- \(.action): [#\(.issue.number)](\(.issue.url)) `\(.filePath)`"' "$SUMMARY_PATH"
+    jq -r '.actions[] | select(.action == "created")
+      | "- created: [#\(.issue.number)](\(.issue.url)) `\(.filePath)`"' "$SUMMARY_PATH"
   else
     echo "Dry run for ${suites} flaky suites (set \`FLAKY_TESTS_REPORT_TO_GITHUB=true\` to file issues): ${counts}."
     echo
-    jq -r '.actions[] | select(.action == "created" or .action == "reopened")
-      | "- would be \(.action): `\(.filePath)`"' "$SUMMARY_PATH"
+    jq -r '.actions[] | select(.action == "created")
+      | "- would be created: `\(.filePath)`"' "$SUMMARY_PATH"
   fi
   echo
   echo "Summary: <a href=\"artifact://${SUMMARY_PATH}\">${SUMMARY_PATH}</a>"

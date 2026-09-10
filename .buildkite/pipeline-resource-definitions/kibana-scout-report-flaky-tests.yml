@@ -30,7 +30,6 @@ spec:
         # filed when FLAKY_TESTS_REPORT_TO_GITHUB is 'true'; otherwise the step logs a dry run.
         FLAKY_TESTS_REPORT_TO_GITHUB: 'false'
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
-        FLAKY_TESTS_FAILED_TEST_ISSUES: 'skip'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true
