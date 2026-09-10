@@ -46,7 +46,9 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({ hit, onShowRuleSum
   );
   const ruleSummaryDisabled = isRulePreview || !canReadRules || isRemoteDocument;
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
 

@@ -41,7 +41,9 @@ export const Title: FC<TitleProps> = memo(({ hit, hideLink = false }) => {
   const { services } = useKibana();
 
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
   const title = useMemo(() => getDocumentTitle(hit), [hit]);

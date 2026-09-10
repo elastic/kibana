@@ -61,7 +61,9 @@ export const InvestigationSection = memo(
     const { openDocumentInvestigationGuide, openDocumentFlyoutFromPattern } = useFlyoutApi();
 
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
     const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';

@@ -124,7 +124,9 @@ export const TakeActionButton = memo(
       [hit]
     );
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
     const alertStatus = useMemo(() => getFieldValue(hit, ALERT_WORKFLOW_STATUS) as Status, [hit]);

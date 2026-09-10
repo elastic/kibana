@@ -84,7 +84,9 @@ export const Header: FC<HeaderProps> = memo(
     // this same header is rendered inside Discover.
     const isSecurityApp = useIsInSecurityApp();
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);

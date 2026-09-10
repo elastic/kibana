@@ -51,7 +51,8 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
   const { openRuleFlyout } = useFlyoutApi();
 
   const eventKind = useMemo(() => getFieldValue(hit, EVENT_KIND) as string, [hit]);
-  const isAlert = eventKind === EventKind.signal;
+  const isAlert =
+    eventKind === EventKind.signal || (getFieldValue(hit, 'type') as string) === 'alert';
   const eventKindInECS = eventKind ? isEcsAllowedValue(EVENT_KIND, eventKind) : false;
 
   const ruleId = useMemo(

@@ -72,7 +72,9 @@ export const useDocumentFlyoutTitle = ({
   const isPreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
 
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
 
