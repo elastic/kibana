@@ -83,7 +83,8 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
           flex-direction: column;
           height: 100%;
           border: ${euiTheme.border.thin};
-          border-radius: ${euiTheme.size.xs};
+          border-radius: ${euiTheme.border.radius.panel};
+          overflow: hidden;
         `}
       >
         {/* Header: pinned at top, does not scroll */}

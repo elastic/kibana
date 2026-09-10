@@ -57,7 +57,7 @@ export const FilterPopoverHeader = ({
   'data-test-subj': dataTestSubj,
 }: FilterPopoverHeaderProps) => {
   return (
-    <EuiPanel hasShadow={false} paddingSize="s">
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       {search}
       <FilterSelectionHeader
         activeCount={activeCount}

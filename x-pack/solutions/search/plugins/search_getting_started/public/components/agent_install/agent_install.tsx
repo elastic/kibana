@@ -43,7 +43,7 @@ const AgentInstallPanel: React.FC<{
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" direction="column">
       <EuiFlexItem grow={false}>
-        <EuiPanel color="subdued" paddingSize="s" grow={false}>
+        <EuiPanel color="subdued" paddingSize="s" grow={false} hasBorder={false}>
           <EuiIcon color="subdued" size="m" type={icon} aria-hidden />
         </EuiPanel>
       </EuiFlexItem>
@@ -101,7 +101,7 @@ export const AgentInstallSection = () => {
       <EuiPanel color="plain" hasShadow={true} paddingSize="none">
         <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="row">
           <EuiFlexItem>
-            <EuiPanel color="transparent" paddingSize="l">
+            <EuiPanel color="transparent" hasBorder={false} paddingSize="l">
               <AgentInstallPanel
                 icon="code"
                 title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
@@ -215,7 +215,7 @@ export const AgentInstallSection = () => {
 
           {services.agentBuilder ? (
             <EuiFlexItem css={AgentBuilderPanelContainer}>
-              <EuiPanel color="transparent" paddingSize="l">
+              <EuiPanel color="transparent" hasBorder={false} paddingSize="l">
                 <AgentInstallPanel
                   icon="productAgent"
                   title={i18n.translate(

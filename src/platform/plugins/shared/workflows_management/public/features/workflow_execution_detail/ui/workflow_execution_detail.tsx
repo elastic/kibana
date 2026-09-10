@@ -313,7 +313,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution, selectedStepExecutionId, lightweightStep, fullStepData]);
 
     return (
-      <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
+      <EuiPanel
+        paddingSize="none"
+        color="plain"
+        hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
+        style={{ height: '100%' }}
+      >
         <ResizableLayout
           fixedPanel={
             <WorkflowExecutionPanel

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
@@ -77,7 +77,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
         ref={ref}
         extraAction={
           onShowAll ? (
-            <EuiButtonEmpty
+            <EuiLink
               aria-label={i18n.translate(
                 'xpack.infra.assetDetails.charts.host.showAllButton.ariaLabel',
                 {
@@ -87,16 +87,12 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
               )}
               data-test-subj="infraAssetDetailsHostChartsShowAllButton"
               onClick={() => onShowAll(metric)}
-              size="xs"
-              flush="both"
-              iconSide="right"
-              iconType="sortRight"
             >
               <FormattedMessage
                 id="xpack.infra.assetDetails.charts.host.showAllButton"
                 defaultMessage="Show all"
               />
-            </EuiButtonEmpty>
+            </EuiLink>
           ) : null
         }
       >

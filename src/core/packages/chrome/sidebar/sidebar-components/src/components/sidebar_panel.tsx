@@ -36,7 +36,7 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
 
     ${isProjectStyle &&
     css`
-      border-radius: ${theme.euiTheme.border.radius.medium};
+      border-radius: ${theme.euiTheme.border.radius.frame};
       outline: ${getHighContrastBorder(theme)};
       ${euiShadow(theme, 'xs', { border: 'none' })};
     `}

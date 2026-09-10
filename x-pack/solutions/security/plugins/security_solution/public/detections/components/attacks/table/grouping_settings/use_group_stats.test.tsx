@@ -89,7 +89,6 @@ describe('useGroupStats', () => {
         title: 'Alerts:',
         badge: {
           value: 5,
-          width: 50,
           color: 'red',
         },
       });
@@ -117,7 +116,6 @@ describe('useGroupStats', () => {
         title: 'Alerts:',
         badge: {
           value: 3,
-          width: 50,
           color: 'red',
         },
       });

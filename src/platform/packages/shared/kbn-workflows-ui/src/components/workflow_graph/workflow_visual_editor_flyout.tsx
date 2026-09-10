@@ -148,9 +148,9 @@ export function WorkflowVisualEditorFlyout({
         display: 'flex',
         flexDirection: 'column',
         background: euiTheme.colors.backgroundBasePlain,
-        borderRadius: 8,
+        borderRadius: euiTheme.border.radius.panel,
         overflow: 'hidden',
-        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        border: euiTheme.border.thin,
       }}
     >
       <div
@@ -160,7 +160,7 @@ export function WorkflowVisualEditorFlyout({
           display: 'flex',
           alignItems: 'center',
           gap: 16,
-          borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+          borderBottom: euiTheme.border.thin,
           flexShrink: 0,
         }}
       >
@@ -175,10 +175,8 @@ export function WorkflowVisualEditorFlyout({
               css={{
                 width: 40,
                 height: 40,
-                // Same light-gray inner-box stroke the graph step uses
-                // (Figma FIGMA_STEP_INNER_BOX_BORDER) so the flyout header
-                // visually echoes the row that opened it.
-                border: `1px solid #e4e7f1`,
+                // Same default border the graph step icon box uses.
+                border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
                 borderRadius: 8,
                 background: euiTheme.colors.backgroundBasePlain,
                 display: 'flex',
@@ -350,7 +348,7 @@ export function WorkflowVisualEditorFlyout({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+            borderTop: euiTheme.border.thin,
             flexShrink: 0,
             background: euiTheme.colors.backgroundBasePlain,
           }}

@@ -89,7 +89,7 @@ describe('Template (boot splash)', () => {
     it('inlines a single set of splash colors for an explicit dark mode', () => {
       const css = getSplashCss(render({ ...baseMetadata, darkMode: true }));
       expect(css).toContain('background-color: #07101F;'); // borealis dark page background
-      expect(css).not.toContain('#F6F9FC'); // no light background
+      expect(css).not.toContain('#ECF1F9'); // no light background
       expect(css).not.toContain('@media (prefers-color-scheme');
     });
 
@@ -97,7 +97,7 @@ describe('Template (boot splash)', () => {
       const $ = render({ ...baseMetadata, darkMode: 'system' });
       const css = getSplashCss($);
       // light defaults applied at first paint, dark applied via the CSS engine (no JS, no flash)
-      expect(css).toContain('background-color: #F6F9FC;'); // light default page background
+      expect(css).toContain('background-color: #ECF1F9;'); // light default page background
       expect(css).toContain('@media (prefers-color-scheme: dark)');
       expect(css).toContain('background-color: #07101F;'); // dark override page background
       // the old JS-based system theme bootstrap must no longer be injected

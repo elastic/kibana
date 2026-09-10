@@ -67,7 +67,7 @@ export function ESQLMenu({
       justifyContent="center"
       responsive={false}
       css={css`
-        border-radius: ${euiTheme.border.radius.small};
+        border-radius: ${euiTheme.border.radius.control};
         border: ${euiTheme.border.thin};
         background: ${euiTheme.colors.emptyShade};
         padding: ${euiTheme.size.xs};

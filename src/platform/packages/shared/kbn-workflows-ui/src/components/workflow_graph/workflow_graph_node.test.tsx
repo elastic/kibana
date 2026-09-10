@@ -204,7 +204,7 @@ describe('resolveNodeColors', () => {
   const theme = {
     colors: {
       backgroundLightPrimary: 'step-outer-bg',
-      borderBaseSubdued: 'step-inner-border',
+      borderBasePlain: 'step-inner-border',
       primary: 'primary-color',
       backgroundLightAccent: 'trigger-outer-bg',
       backgroundBaseAccent: 'trigger-icon-bg',

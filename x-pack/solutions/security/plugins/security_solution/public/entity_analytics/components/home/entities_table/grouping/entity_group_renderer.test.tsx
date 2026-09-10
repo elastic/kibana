@@ -231,7 +231,7 @@ describe('createGroupStatsRenderer', () => {
 
       expect(stats).toHaveLength(1);
       expect(stats[0].title).toBe('Entities:');
-      expect(stats[0].badge).toEqual({ value: 42, width: 50 });
+      expect(stats[0].badge).toEqual({ value: 42 });
     });
 
     it('returns empty array when doc_count is 0', () => {

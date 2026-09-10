@@ -32,19 +32,19 @@ export const getIconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
 
   return css`
     .euiButtonGroup__buttons {
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
 
       > :first-child > .euiButtonGroupButton,
       > .euiButtonGroupButton:first-child {
-        border-top-left-radius: ${euiTheme.border.radius.medium} !important;
-        border-bottom-left-radius: ${euiTheme.border.radius.medium} !important;
+        border-top-left-radius: ${euiTheme.border.radius.control} !important;
+        border-bottom-left-radius: ${euiTheme.border.radius.control} !important;
       }
 
       > :last-child > .euiButtonGroupButton,
       > .euiButtonGroupButton:last-child {
         border-right: ${border} !important;
-        border-top-right-radius: ${euiTheme.border.radius.medium} !important;
-        border-bottom-right-radius: ${euiTheme.border.radius.medium} !important;
+        border-top-right-radius: ${euiTheme.border.radius.control} !important;
+        border-bottom-right-radius: ${euiTheme.border.radius.control} !important;
       }
     }
   `;
