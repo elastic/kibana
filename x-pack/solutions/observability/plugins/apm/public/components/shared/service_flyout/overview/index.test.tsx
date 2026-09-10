@@ -51,6 +51,13 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
+const mockServiceFlyoutApmCharts = jest.fn((_props: unknown) => (
+  <div data-test-subj="apmChartsMock" />
+));
+jest.mock('./apm_charts', () => ({
+  ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
+}));
+
 const service: ServiceNodeData = {
   id: 'opbeans-java',
   label: 'opbeans-java',
@@ -83,6 +90,218 @@ function renderOverview(overrides: Partial<typeof defaultProps> = {}) {
 beforeEach(() => {
   jest.clearAllMocks();
   transactionsSectionProps = null;
+});
+
+describe('ServiceFlyoutOverview capabilities loading and error states', () => {
+  it('renders a skeleton while capabilities are loading', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue(),
+      capabilities: {
+        loading: true,
+        error: undefined,
+        schema: undefined,
+        header: undefined,
+        overview: undefined,
+        footer: undefined,
+      },
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({
+      hasSystemMetrics: undefined,
+      isLoading: true,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('serviceFlyoutOverviewSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutOverview')).not.toBeInTheDocument();
+  });
+
+  it('renders the overview with full capabilities when the capabilities fetch fails', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue(),
+      capabilities: {
+        loading: false,
+        error: undefined,
+        schema: 'unknown' as const,
+        header: { serviceNameLink: true, badges: true },
+        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+        footer: { alerts: true, slos: true },
+      },
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('serviceFlyoutOverview')).toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutOverviewSkeleton')).not.toBeInTheDocument();
+  });
+});
+
+describe('ServiceFlyoutOverview key metrics chart implementation per schema', () => {
+  it('renders the shared APM chart components for ECS services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'ecs' }));
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics')).toBeInTheDocument();
+  });
+
+  it('renders the shared APM chart components for unknown-schema services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'unknown' }));
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for ECS services in document-based hosts (Discover)', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'ecs', preferDocumentBasedCharts: true }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for OTel services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'otel' }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('seeds the latency aggregation type from the flyout filters', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({ filters: { latencyAggregationType: 'p95' } })
+    );
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(mockServiceFlyoutApmCharts).toHaveBeenCalledWith(
+      expect.objectContaining({ latencyAggregationType: 'p95' })
+    );
+  });
+});
+
+describe('ServiceFlyoutOverview OTel key metrics indices loading and error states', () => {
+  it('renders a skeleton for key metrics while indices are loading', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'otel' }),
+      indices: undefined,
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics-skeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-error')).not.toBeInTheDocument();
+  });
+
+  it('renders a warning callout for key metrics when indices fail to load', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'otel' }),
+      indices: null,
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders key metrics charts when indices are available', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'otel' }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(
+      screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-error')).not.toBeInTheDocument();
+  });
 });
 
 describe('ServiceFlyoutOverview transactions section props', () => {
