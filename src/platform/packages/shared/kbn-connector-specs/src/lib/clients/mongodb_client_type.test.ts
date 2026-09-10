@@ -124,13 +124,15 @@ describe('mongodbClientType', () => {
 
     it('preserves other query params and an explicit tls=false when pinning an SRV connection', async () => {
       const ctx = makeBuildContext({
-        config: { uri: 'mongodb+srv://cluster0.example.com/mydb?srvServiceName=customname' },
+        config: {
+          uri: 'mongodb+srv://cluster0.example.com/mydb?srvServiceName=customname&tls=false',
+        },
       });
       mockResolveSrvHosts.mockResolvedValue([{ name: 'shard1.example.com', port: 27017 }]);
       await mongodbClientType.build(ctx);
 
       expect(MockMongoClient).toHaveBeenCalledWith(
-        'mongodb://shard1.example.com:27017/mydb?srvServiceName=customname&tls=true',
+        'mongodb://shard1.example.com:27017/mydb?srvServiceName=customname&tls=false',
         expect.objectContaining({})
       );
     });
