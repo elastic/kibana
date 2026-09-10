@@ -1620,9 +1620,23 @@ def launch(ip: str, model: str, shard: Optional[str] = None) -> subprocess.Popen
 def _score_id_candidates(canon: str) -> list:
     """Connector ids hyphenate versions (claude-4-5, glm-5-2). Score docs
     dot some (anthropic-claude-4.5-sonnet) and keep hyphens on others
-    (zai-glm-5-2), so never assume one spelling -- try both."""
-    dotted = re.sub(r"(?<=[0-9])-(?=[0-9])", ".", canon)
-    return [canon] if dotted == canon else [dotted, canon]
+    (zai-glm-5-2), so never assume one spelling -- try both.
+
+    The EIS connector runs write task.model.id WITH the "eis-" prefix and
+    hyphenated ("eis-anthropic-claude-4-5-haiku"), while the reference
+    artifact the board recreates wrote it WITHOUT the prefix and dotted
+    ("anthropic-claude-4.5-haiku"). task.model.id is keyword-mapped so a
+    match_phrase is exact: dropping the prefix left only the stale reference
+    exec (117 docs) in scope and gated the fresh 130-doc run against it
+    (2026-09-10 dense canary FAIL 117/130). Emit every prefix x version."""
+    bare = canon[4:] if canon.startswith("eis-") else canon
+    dotted = re.sub(r"(?<=[0-9])-(?=[0-9])", ".", bare)
+    core = [bare] if dotted == bare else [dotted, bare]
+    out = []
+    for c in core:
+        out.append(c)
+        out.append("eis-" + c)
+    return out
 
 
 def _resolve_from_golden(model: str, ip: str) -> dict:
@@ -1633,7 +1647,7 @@ def _resolve_from_golden(model: str, ip: str) -> dict:
     versions while score docs dot them, so match a phrase instead of
     reconstructing the id.
     """
-    canon = model[4:] if model.startswith("eis-") else model
+    canon = model
     # id spelling varies per vendor, so match any candidate
     body = {
         "size": 0,
