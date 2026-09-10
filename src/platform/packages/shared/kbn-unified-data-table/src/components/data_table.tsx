@@ -260,9 +260,17 @@ interface InternalUnifiedDataTableProps {
    */
   showKeyboardShortcuts?: boolean;
   /**
+   * Determines whether the display options button should be displayed
+   */
+  showDisplaySelector?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
+  /**
+   * Manage column selector control
+   */
+  isColumnSelectorEnabled?: boolean;
   /**
    * Only for ES|QL mode for now.
    * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
@@ -591,8 +599,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       showTimeCol,
       showKeyboardShortcuts = true,
       showFullScreenButton = true,
+      showDisplaySelector: showDisplaySelectorProp = true,
       sort,
       isSortEnabled = true,
+      isColumnSelectorEnabled = true,
       isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
@@ -1401,10 +1411,11 @@ const InternalUnifiedDataTable = React.forwardRef<
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
       | undefined => {
       if (
-        !onUpdateDataGridDensity &&
-        !onUpdateRowHeight &&
-        !onUpdateHeaderRowHeight &&
-        !onUpdateSampleSize
+        !showDisplaySelectorProp ||
+        (!onUpdateDataGridDensity &&
+          !onUpdateRowHeight &&
+          !onUpdateHeaderRowHeight &&
+          !onUpdateSampleSize)
       ) {
         return;
       }
@@ -1438,6 +1449,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         ),
       };
     }, [
+      showDisplaySelectorProp,
       headerRowHeight,
       maxAllowedSampleSize,
       onChangeHeaderRowHeight,
@@ -1463,7 +1475,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       () => ({
         ...toolbarVisibilityDefaults,
         showSortSelector: isSortEnabled && !isJsonSourceMode,
-        showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
+        showColumnSelector: isJsonSourceMode
+          ? false
+          : isColumnSelectorEnabled && toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
@@ -1472,6 +1486,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       [
         isJsonSourceMode,
         isSortEnabled,
+        isColumnSelectorEnabled,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,

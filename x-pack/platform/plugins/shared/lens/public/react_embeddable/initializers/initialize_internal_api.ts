@@ -41,7 +41,7 @@ export function initializeInternalApi(
   );
   const overrides$ = new BehaviorSubject(initialState.overrides);
   const disableTriggers$ = apiHasDisableTriggers(parentApi)
-    ? parentApi.disableTriggers
+    ? parentApi.disableTriggers$
     : new BehaviorSubject(initialState.disableTriggers ?? false);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 

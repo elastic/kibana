@@ -27,7 +27,7 @@ export function prepareCallbacks(
   callbacks: LensPublicCallbacks
 ) {
   const disableTriggers = apiHasDisableTriggers(parentApi)
-    ? parentApi.disableTriggers.getValue()
+    ? parentApi.disableTriggers$.getValue()
     : undefined;
 
   return {
