@@ -182,8 +182,8 @@ export function ServiceFlyoutOverview() {
     rangeFrom,
     rangeTo,
   });
-  // CPS: embed the active project routing in the generated ES|QL so the Lens charts query
-  // the same projects as the surrounding APM APIs (which forward it via `x-project-routing`).
+  // CPS: pass project routing to ES|QL charts and the transactions table HTTP calls
+  // so they query the same projects as APM APIs (`x-project-routing`).
   const projectRouting = useProjectRouting();
 
   const { keyMetrics, infrastructureMetrics } = useMemo(
@@ -281,6 +281,7 @@ export function ServiceFlyoutOverview() {
               transactionType={transactionType ?? ''}
               latencyAggregationType={latencyAggregationType}
               refreshToken={refreshToken}
+              projectRouting={projectRouting}
             />
           </EuiFlexItem>
         )}
