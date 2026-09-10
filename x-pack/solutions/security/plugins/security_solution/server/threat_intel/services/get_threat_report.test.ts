@@ -120,21 +120,21 @@ describe('getThreatReport', () => {
     );
   });
 
-  describe('space-keyed attribution projection', () => {
+  describe('space-keyed corroboration projection', () => {
     const twoSpaceSource = {
       revision: 3,
       space_id: '*',
       content: { title: 'Shared report' },
-      attribution: [
+      corroboration: [
         {
           space_id: 'default',
-          environment_hits: { window: '7d', layer_1_ioc_match: 1, layer_2_behavioral: 2 },
-          environment_hits_total: 3,
+          alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 2 },
+          alert_hits_total: 3,
         },
         {
           space_id: 'team-b',
-          environment_hits: { window: '7d', layer_1_ioc_match: 9, layer_2_behavioral: 9 },
-          environment_hits_total: 18,
+          alert_hits: { window: '7d', ioc_match_hits: 9, technique_overlap_hits: 9 },
+          alert_hits_total: 18,
         },
       ],
     };
@@ -152,39 +152,39 @@ describe('getThreatReport', () => {
     it('returns only the caller space element, flattened, on a shared report', async () => {
       const result = await getThreatReport(mockHit(twoSpaceSource), defaultArgs);
 
-      expect(result.attribution).toEqual({
+      expect(result.corroboration).toEqual({
         space_id: 'default',
-        environment_hits: { window: '7d', layer_1_ioc_match: 1, layer_2_behavioral: 2 },
-        environment_hits_total: 3,
+        alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 2 },
+        alert_hits_total: 3,
       });
       // The other space's element must not leak through.
       expect(JSON.stringify(result)).not.toContain('team-b');
     });
 
-    it('omits attribution when no element exists for the caller space', async () => {
+    it('omits corroboration when no element exists for the caller space', async () => {
       const esClient = mockHit(twoSpaceSource);
       const result = await getThreatReport(esClient, { ...defaultArgs, spaceId: 'team-c' });
 
-      expect(result.attribution).toBeUndefined();
-      expect('attribution' in result).toBe(false);
+      expect(result.corroboration).toBeUndefined();
+      expect('corroboration' in result).toBe(false);
     });
 
-    it('passes a legacy flat attribution object through unchanged rather than hiding it', async () => {
-      // A stale (not recreated) index holds the pre-v29 flat shape. Collapsing
+    it('passes a legacy flat corroboration object through unchanged rather than hiding it', async () => {
+      // A stale (not recreated) index holds the pre-v30 flat shape. Collapsing
       // that into "absent" would make a broken deployment look like "not hunted
       // here", so the legacy object is returned as-is.
       const legacy = {
         revision: 1,
         space_id: 'default',
-        attribution: {
-          environment_hits: { window: '7d', layer_1_ioc_match: 5, layer_2_behavioral: 0 },
-          environment_hits_total: 5,
+        corroboration: {
+          alert_hits: { window: '7d', ioc_match_hits: 5, technique_overlap_hits: 0 },
+          alert_hits_total: 5,
         },
       };
 
       const result = await getThreatReport(mockHit(legacy), defaultArgs);
 
-      expect(result.attribution).toEqual(legacy.attribution);
+      expect(result.corroboration).toEqual(legacy.corroboration);
     });
   });
 });

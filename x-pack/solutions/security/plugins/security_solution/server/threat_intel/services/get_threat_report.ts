@@ -61,20 +61,20 @@ export const getThreatReport = async (
     revision,
   };
 
-  // Nested per-space array (v29). Project the caller's element only (never '*');
+  // Nested per-space array (v30). Project the caller's element only (never '*');
   // a legacy flat object is left alone so stale indexes stay distinguishable
   // from "not hunted here".
-  if (Array.isArray(source.attribution)) {
-    const element = source.attribution.find(
+  if (Array.isArray(source.corroboration)) {
+    const element = source.corroboration.find(
       (el): el is Record<string, unknown> =>
         typeof el === 'object' &&
         el !== null &&
         (el as Record<string, unknown>).space_id === spaceId
     );
     if (element) {
-      result.attribution = element;
+      result.corroboration = element;
     } else {
-      delete result.attribution;
+      delete result.corroboration;
     }
   }
 

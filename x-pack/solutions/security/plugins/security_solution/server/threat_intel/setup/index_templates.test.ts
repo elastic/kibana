@@ -58,8 +58,8 @@ const fullyMigratedReportMappings = () => ({
       properties: {},
     },
     lineage: { properties: { content_scrubbed_at: {} } },
-    // v29: attribution is a space-keyed nested array; the guard checks the leaf.
-    attribution: { properties: { space_id: {} } },
+    // v30: corroboration is a space-keyed nested array; the guard checks the leaf.
+    corroboration: { properties: { space_id: {} } },
     extracted: {
       properties: {
         diamond: {},
@@ -532,7 +532,7 @@ describe('index_templates — mapping coverage guard', () => {
     expect(properties).toEqual(expect.objectContaining({ revision: { type: 'integer' } }));
   });
 
-  it('reports template declares attribution as a space-keyed nested array (v29)', async () => {
+  it('reports template declares corroboration as a space-keyed nested array (v30)', async () => {
     const { byIndex } = await runInstall();
 
     const properties = (
@@ -541,7 +541,7 @@ describe('index_templates — mapping coverage guard', () => {
       }
     ).properties;
 
-    expect(properties.attribution).toEqual(
+    expect(properties.corroboration).toEqual(
       expect.objectContaining({
         type: 'nested',
         properties: expect.objectContaining({ space_id: { type: 'keyword' } }),
@@ -549,15 +549,39 @@ describe('index_templates — mapping coverage guard', () => {
     );
   });
 
-  it('attribution.space_id is a required report field so a stale index fails bootstrap loudly', () => {
-    // v29 flipped attribution from object to nested, which cannot be applied to an
-    // existing index. This entry is the only detection for a stale index: without it
-    // the write is rejected by dynamic: strict and swallowed by on-failure: continue.
-    expect(src).toContain("{ path: 'attribution.space_id' }");
+  // Merged from the former separate `attribution` (Attribute Alerts) and
+  // `feedback` (Hunt Watch) fields: neither's keys overlapped, and both are
+  // per-space evidence about the same report, so one element covers both.
+  it('corroboration carries both alert-attribution and hunt-feedback fields', async () => {
+    const { byIndex } = await runInstall();
+
+    const properties = (
+      byIndex(THREAT_REPORTS_INDEX)?.template?.mappings as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+
+    expect(
+      (properties.corroboration as { properties: Record<string, unknown> }).properties
+    ).toEqual(
+      expect.objectContaining({
+        alert_hits_total: { type: 'integer' },
+        last_hunt_status: { type: 'keyword' },
+        corroborated_rank_score: { type: 'float' },
+      })
+    );
   });
 
-  it('TEMPLATE_VERSION is 29 for the attribution reshape', () => {
-    expect(src).toContain('const TEMPLATE_VERSION = 29;');
+  it('corroboration.space_id is a required report field so a stale index fails bootstrap loudly', () => {
+    // v30 flipped attribution/feedback into corroboration, object -> nested,
+    // which cannot be applied to an existing index. This entry is the only
+    // detection for a stale index: without it the write is rejected by
+    // dynamic: strict and swallowed by on-failure: continue.
+    expect(src).toContain("{ path: 'corroboration.space_id' }");
+  });
+
+  it('TEMPLATE_VERSION is 30 for the corroboration reshape', () => {
+    expect(src).toContain('const TEMPLATE_VERSION = 30;');
   });
 
   it('indicators template declares a top-level space_id keyword (v24 space isolation)', async () => {
