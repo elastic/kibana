@@ -102,7 +102,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ),
         getComparators: () => ({
           ...titleComparators,
-          filters: 'referenceEquality',
+          filters: 'deepEquality',
           ...drilldownsManager.comparators,
         }),
         defaultState: {

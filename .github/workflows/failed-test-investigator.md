@@ -38,13 +38,30 @@ if: >-
   || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
 concurrency:
-  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  # Keep one investigation lane per issue. Events that can't activate this workflow still
+  # create a run that claims the concurrency group before the `if` above is evaluated, so
+  # with `cancel-in-progress` they would kill an in-flight investigation and then skip
+  # themselves. Give those events their own group suffix:
+  # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
+  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
+  #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'failed-test' &&
         github.event.label.name
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        !(
+          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            contains(github.event.issue.body, '"test.failCount":2,') ||
+            contains(github.event.issue.body, '"test.failCount":2}')
+          )
+        ) &&
+        format('comment-{0}', github.event.comment.id)
       ) ||
       'investigate'
     }}
