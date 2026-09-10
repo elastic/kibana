@@ -29,6 +29,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FlyoutTemplateManagedProvider } from '@kbn/flyout-template';
 import type { FlyoutTemplateManaged } from '@kbn/flyout-template';
 import { SystemFlyoutRef } from './system_flyout_ref';
+import { FlyoutMountGuard } from './flyout_mount_guard';
 
 interface SystemFlyoutStartDeps {
   analytics: AnalyticsServiceStart;
@@ -234,7 +235,9 @@ export class SystemFlyoutService {
             userProfile={userProfile}
           >
             <FlyoutTemplateManagedProvider value={managed}>
-              <Content />
+              <FlyoutMountGuard onError={onCloseFlyout}>
+                <Content />
+              </FlyoutMountGuard>
             </FlyoutTemplateManagedProvider>
           </KibanaRenderContextProvider>,
           flyoutContainer

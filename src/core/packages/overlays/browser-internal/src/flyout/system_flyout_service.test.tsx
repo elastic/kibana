@@ -395,6 +395,9 @@ describe('SystemFlyoutService', () => {
     const managedValue = (call = 0) =>
       mockReactDomRender.mock.calls[call][0].props.children.props.value;
 
+    /** Silences the React error log a deliberate render failure produces. */
+    const silenceReactErrors = () => jest.spyOn(console, 'error').mockImplementation(() => {});
+
     it('renders the zones a content component declares: the header title is visible', () => {
       systemFlyouts.openTemplate({ session: 'never' }, content('My Flyout Title'));
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
@@ -512,6 +515,48 @@ describe('SystemFlyoutService', () => {
       systemFlyouts.openTemplate({ session: 'never' }, content('No leak'));
 
       expect(managedValue().props).not.toHaveProperty('children');
+    });
+
+    it('closes the flyout when the content throws while rendering', async () => {
+      const error = silenceReactErrors();
+      // The caller's `onClose` has to run: callers reset their own open state in it, and a
+      // caller that still believes the flyout is open cannot reopen it.
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => {
+        throw new Error('content blew up');
+      });
+
+      render(mockReactDomRender.mock.calls[0][0]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledWith(ref);
+      expect(error).toHaveBeenCalled();
+    });
+
+    it('releases the container when the content throws while rendering', async () => {
+      silenceReactErrors();
+      const targetElement = document.createElement('div');
+      const testService = new SystemFlyoutService();
+      const flyouts = testService.start({
+        analytics: analyticsMock,
+        i18n: i18nMock,
+        theme: themeMock,
+        userProfile: userProfileMock,
+        targetDomElement: targetElement,
+      });
+
+      flyouts.openTemplate({ session: 'never' }, () => {
+        throw new Error('content blew up');
+      });
+      expect(targetElement.children.length).toBe(1);
+
+      render(mockReactDomRender.mock.calls[0][0]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(targetElement.children.length).toBe(0);
+
+      testService.stop();
     });
 
     it('cascade closes a child flyout (session: "inherit") when the session ends', () => {
