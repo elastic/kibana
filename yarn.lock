@@ -4468,6 +4468,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alertzero-common@link:x-pack/solutions/security/packages/kbn-alertzero-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alertzero-plugin@link:x-pack/solutions/security/plugins/alertzero":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ambient-common-types@link:src/platform/packages/private/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
@@ -7732,10 +7740,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-test-plugin@link:src/platform/test/plugin_functional/plugins/management_test_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/manifest@link:packages/kbn-manifest":
   version "0.0.0"
   uid ""
@@ -8028,6 +8032,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alerting-plugin@link:x-pack/solutions/observability/plugins/observability_alerting":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
@@ -8189,14 +8197,6 @@
   uid ""
 
 "@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
-  version "0.0.0"
-  uid ""
-
-"@kbn/pnd-common@link:x-pack/solutions/security/packages/kbn-pnd-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/pnd-plugin@link:x-pack/solutions/security/plugins/pnd":
   version "0.0.0"
   uid ""
 
@@ -21373,9 +21373,9 @@ fast-string-width@^3.0.2:
     fast-string-truncated-width "^3.0.2"
 
 fast-uri@^3.0.1:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.6.tgz#bfdd308ef763f835fed059f3c6c925f708e33e3a"
-  integrity sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.7.tgz#743157d957f3cbb4c65310e033dc2ad4ad7dc60a"
+  integrity sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==
 
 fast-wrap-ansi@^0.2.0:
   version "0.2.0"

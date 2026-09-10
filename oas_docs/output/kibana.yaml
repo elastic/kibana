@@ -1170,6 +1170,13 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    post_execution_workflow_ids:
+                      items:
+                        description: Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.
+                        maxLength: 512
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -1685,6 +1692,13 @@ paths:
                       description: Array of plugin IDs to assign to the agent.
                       items:
                         description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
+                    post_execution_workflow_ids:
+                      items:
+                        description: Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.
+                        maxLength: 512
                         type: string
                       maxItems: 100
                       type: array
@@ -3535,6 +3549,17 @@ paths:
                   description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
                   type: boolean
                   x-state: Technical Preview; added in 9.6.0
+                reasoning_level:
+                  description: 'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+                  enum:
+                    - none
+                    - minimal
+                    - low
+                    - medium
+                    - high
+                    - xhigh
+                  type: string
+                  x-state: Experimental; added in 9.6.0
       responses:
         '200':
           content:
@@ -4004,6 +4029,17 @@ paths:
                   description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
                   type: boolean
                   x-state: Technical Preview; added in 9.6.0
+                reasoning_level:
+                  description: 'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+                  enum:
+                    - none
+                    - minimal
+                    - low
+                    - medium
+                    - high
+                    - xhigh
+                  type: string
+                  x-state: Experimental; added in 9.6.0
       responses:
         '200':
           content:
