@@ -279,7 +279,12 @@ async function resolveMatchGroup(
       .map((id) => entities.get(id))
       .filter((entity): entity is FetchedEntity => entity != null);
 
-    const candidates = uniqueById([...unresolved, ...existingTargets]);
+    // Drop mid-chain aliases: cascadeLinkEntities rejects them as a target.
+    const linkable = [
+      ...unresolved,
+      ...existingTargets.filter((entity) => !entity.resolvedTo),
+    ];
+    const candidates = uniqueById(linkable);
     if (candidates.length === 0) {
       stats.skippedNoopBuckets++;
       logger.warn(
@@ -289,16 +294,9 @@ async function resolveMatchGroup(
     }
 
     const target = selectTarget(candidates);
-    // Existing targets from TOP(resolved_to) are often outside this group
-    // (different match value, namespace filter, or MV_COUNT). They can win
-    // selectTarget; when they lose they must be aliased so cascade retargets
-    // their trees. Skip mid-chain aliases — cascadeLinkEntities rejects them.
-    const aliasIds = [
-      ...new Set([
-        ...unresolved.map((entity) => entity.entityId),
-        ...existingTargets.filter((entity) => !entity.resolvedTo).map((entity) => entity.entityId),
-      ]),
-    ].filter((id) => id !== target.entityId);
+    const aliasIds = candidates
+      .map((entity) => entity.entityId)
+      .filter((id) => id !== target.entityId);
 
     if (aliasIds.length === 0) {
       stats.skippedNoopBuckets++;

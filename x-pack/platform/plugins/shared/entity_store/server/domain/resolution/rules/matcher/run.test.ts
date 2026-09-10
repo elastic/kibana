@@ -496,8 +496,8 @@ describe('runEsqlMatcherRule', () => {
           [
             groupRow({
               matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-ad'],
-              namespaces: ['active_directory'],
+              unresolvedIds: ['user-cs'],
+              namespaces: ['crowdstrike'],
               existingTargets: ['user-mid', 'user-okta'],
               unresolvedCount: 1,
               groupSize: 3,
@@ -508,8 +508,8 @@ describe('runEsqlMatcherRule', () => {
     (mockEsClient.search as jest.Mock).mockResolvedValue({
       hits: {
         hits: [
-          entityHit('user-ad', 'active_directory'),
-          entityHit('user-mid', 'entra_id', 'user-okta'),
+          entityHit('user-cs', 'crowdstrike'),
+          entityHit('user-mid', 'active_directory', 'user-okta'),
           entityHit('user-okta', 'okta'),
         ],
       },
@@ -517,7 +517,7 @@ describe('runEsqlMatcherRule', () => {
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
-    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-okta']);
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-okta', ['user-cs']);
   });
 
   it('does not advance the watermark when a bucket fails', async () => {
