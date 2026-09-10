@@ -86,6 +86,13 @@ export const createProposalAttachmentDefinition = ({
 
   renderInlineContent: (props) => {
     const proposalId = props.attachment.origin ?? props.attachment.id;
+    // eslint-disable-next-line no-console
+    console.log('[proposal_attachment] renderInlineContent', {
+      id: props.attachment.id,
+      origin: props.attachment.origin,
+      proposalId,
+      data: props.attachment.data,
+    });
     return (
       <ProposalApprovalCard
         proposal={props.attachment.data}

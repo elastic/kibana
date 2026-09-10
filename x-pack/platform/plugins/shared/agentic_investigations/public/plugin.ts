@@ -29,10 +29,16 @@ export class AgenticInvestigationsPublicPlugin
     core: CoreStart,
     startDeps: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
+    // eslint-disable-next-line no-console
+    console.log('[agenticInvestigations] start() agentBuilder present:', !!startDeps.agentBuilder);
     if (startDeps.agentBuilder) {
       const agentBuilder = startDeps.agentBuilder;
       void import('./proposals/attachments').then(({ registerProposalAttachmentTypes }) => {
+        // eslint-disable-next-line no-console
+        console.log('[agenticInvestigations] registering proposal attachment types');
         registerProposalAttachmentTypes(agentBuilder, core.http);
+        // eslint-disable-next-line no-console
+        console.log('[agenticInvestigations] proposal attachment types registered');
       });
     }
     return {};
