@@ -248,6 +248,64 @@ describe('save_automation tool', () => {
       expect(confirmation?.message).not.toContain('full corpus');
     });
 
+    it('discloses that running enables the workflow for good, not just for the run', async () => {
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: Pilot\nenabled: false\nsteps: []',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation?.message).toContain('stays enabled afterwards even if the run fails');
+    });
+
+    it('says nothing about enabling when the definition is already enabled', async () => {
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: Pilot\nenabled: true\nsteps: []',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation?.message).not.toContain('stays enabled');
+    });
+
+    it('reads the enabled flag off the stored workflow when attaching one by id', async () => {
+      const tool = createTool();
+      getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Saved', enabled: true });
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowId: 'workflow-1',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation?.message).not.toContain('stays enabled');
+    });
+
+    it('does not mention enabling on a save that is not running anything', async () => {
+      hasWorkflowExecutePrivilege.mockResolvedValue(false);
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: Pilot\nenabled: false\nsteps: []',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation?.message).not.toContain('stays enabled');
+    });
+
     it('does not check the execute privilege when no run was asked for', async () => {
       const tool = createTool();
 
@@ -428,6 +486,14 @@ describe('save_automation tool', () => {
 
     it('rejects a call with nothing to save or attach', () => {
       expect(parse({}).success).toBe(false);
+    });
+
+    it('does not tie the run to saving, which would read as excluding an attach', () => {
+      const description = createTool().schema.shape.run.description ?? '';
+
+      expect(description).toMatch(/saved or attached/);
+      expect(description).toMatch(/including attaching a workflow that was already saved/);
+      expect(description).toMatch(/stays enabled afterwards/);
     });
   });
 });

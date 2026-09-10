@@ -49,8 +49,10 @@ const WORKFLOW_YAML = 'name: pilot\nsteps: []';
 
 const createAttachmentStateManager = ({
   origin,
+  yaml = WORKFLOW_YAML,
 }: {
   origin?: string;
+  yaml?: string;
 } = {}) => ({
   getAll: jest.fn().mockReturnValue([
     {
@@ -58,7 +60,7 @@ const createAttachmentStateManager = ({
       type: 'workflow.yaml',
       origin,
       current_version: 1,
-      versions: [{ version: 1, data: { yaml: WORKFLOW_YAML, workflowId: 'pilot-workflow' } }],
+      versions: [{ version: 1, data: { yaml, workflowId: 'pilot-workflow' } }],
     },
     {
       id: 'ai-index-attachment',
@@ -68,6 +70,7 @@ const createAttachmentStateManager = ({
     },
   ]),
   updateOrigin: jest.fn().mockResolvedValue(true),
+  update: jest.fn().mockResolvedValue({ id: WORKFLOW_ATTACHMENT_ID }),
   add: jest.fn().mockResolvedValue({ id: 'created-attachment' }),
 });
 
@@ -428,6 +431,23 @@ describe('saveAutomationHandler', () => {
       );
     });
 
+    it('does not enable a disabled workflow for a caller who cannot update it', async () => {
+      // Reached by attaching an already-saved workflow, where nothing else on the path needs the
+      // update privilege — so enabling would be the one write the caller was never checked for.
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-existing', enabled: false });
+      hasWorkflowUpdatePrivilege.mockResolvedValue(false);
+
+      const result = await save({ workflowId: 'wf-existing', run: true });
+
+      expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalled();
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.status).toBe('attached');
+      expect(result.run).toEqual({
+        started: false,
+        reason: expect.stringContaining('update privilege'),
+      });
+    });
+
     it('keeps the save when the caller cannot execute workflows', async () => {
       hasWorkflowExecutePrivilege.mockResolvedValue(false);
 
@@ -473,6 +493,162 @@ describe('saveAutomationHandler', () => {
         status: 'attached',
         run: { started: true, executionId: 'exec-1' },
       });
+    });
+  });
+
+  describe('overwriting a named workflow with a new definition', () => {
+    const REPLACEMENT_YAML = 'name: replacement\nsteps: []';
+
+    const overwrite = (
+      attachments: ReturnType<typeof createAttachmentStateManager>,
+      params: Parameters<typeof saveAutomationHandler>[0]['params'] = {
+        workflowYaml: REPLACEMENT_YAML,
+        workflowId: 'wf-persisted',
+      }
+    ) =>
+      saveAutomationHandler({
+        params,
+        request,
+        spaceId: 'default',
+        attachments: attachments as never,
+        logger,
+        getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      });
+
+    beforeEach(() => {
+      aiIndexService.addAutomation.mockResolvedValue('already_attached');
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-persisted', enabled: true });
+    });
+
+    it('replaces the named workflow rather than saving another one beside it', async () => {
+      const result = await overwrite(createAttachmentStateManager());
+
+      expect(hasWorkflowUpdatePrivilege).toHaveBeenCalled();
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        'wf-persisted',
+        { yaml: REPLACEMENT_YAML },
+        'default',
+        request
+      );
+      expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        aiIndexId: 'my-ai-index',
+        workflowId: 'wf-persisted',
+        status: 'saved_and_attached',
+      });
+    });
+
+    it('refuses to overwrite a workflow that is gone, and says what to do instead', async () => {
+      workflowsManagement.getWorkflow.mockResolvedValue(null);
+
+      await expect(overwrite(createAttachmentStateManager())).rejects.toThrow(
+        /Workflow 'wf-persisted' was not found in this space, so there is nothing to overwrite\. Omit workflowId/
+      );
+      expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('does not delete the workflow it overwrote when attaching then fails', async () => {
+      aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
+
+      await expect(overwrite(createAttachmentStateManager())).rejects.toBeInstanceOf(
+        AiIndexManagedError
+      );
+
+      // The rollback exists to undo a workflow this call brought into existence. An overwritten
+      // one predates the call, and deleting it would destroy what the user already had.
+      expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('refreshes an attachment left holding the definition that was replaced', async () => {
+      const attachments = createAttachmentStateManager({
+        origin: 'wf-persisted',
+        yaml: 'name: superseded\nsteps: []',
+      });
+
+      await overwrite(attachments);
+
+      // Left alone, a later save from this attachment would quietly restore the old definition.
+      expect(attachments.update).toHaveBeenCalledWith(
+        WORKFLOW_ATTACHMENT_ID,
+        { data: { yaml: REPLACEMENT_YAML, workflowId: 'wf-persisted', name: 'replacement' } },
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('leaves an attachment alone when it already holds what was saved', async () => {
+      const attachments = createAttachmentStateManager({
+        origin: 'wf-persisted',
+        yaml: REPLACEMENT_YAML,
+      });
+
+      await overwrite(attachments);
+
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(attachments.add).not.toHaveBeenCalled();
+    });
+
+    it('gives the conversation an attachment for a workflow it has none for', async () => {
+      const attachments = createAttachmentStateManager();
+
+      await overwrite(attachments);
+
+      expect(attachments.add).toHaveBeenCalledWith(
+        {
+          type: 'workflow.yaml',
+          data: { yaml: REPLACEMENT_YAML, workflowId: 'wf-persisted', name: 'replacement' },
+          origin: 'wf-persisted',
+        },
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('still reports the save when the stale attachment cannot be refreshed', async () => {
+      const attachments = createAttachmentStateManager({
+        origin: 'wf-persisted',
+        yaml: 'name: superseded\nsteps: []',
+      });
+      attachments.update.mockRejectedValue(new Error('Cannot update deleted attachment'));
+
+      const result = await overwrite(attachments);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('still holds the definition it replaced')
+      );
+      expect(result.workflowId).toBe('wf-persisted');
+    });
+
+    it('takes an explicit id over the workflow the attachment was last saved as', async () => {
+      const attachments = createAttachmentStateManager({ origin: 'wf-from-attachment' });
+
+      await overwrite(attachments, {
+        workflowAttachmentId: WORKFLOW_ATTACHMENT_ID,
+        workflowId: 'wf-persisted',
+      });
+
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        'wf-persisted',
+        { yaml: WORKFLOW_YAML },
+        'default',
+        request
+      );
+      expect(attachments.updateOrigin).toHaveBeenCalledWith(
+        WORKFLOW_ATTACHMENT_ID,
+        'wf-persisted',
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('rejects when the caller cannot update the workflow it named', async () => {
+      hasWorkflowUpdatePrivilege.mockResolvedValue(false);
+
+      await expect(overwrite(createAttachmentStateManager())).rejects.toThrow(
+        /Unauthorized to update workflow 'wf-persisted'/
+      );
+      expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalled();
     });
   });
 

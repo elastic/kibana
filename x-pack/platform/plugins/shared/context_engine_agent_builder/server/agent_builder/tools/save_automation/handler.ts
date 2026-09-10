@@ -78,25 +78,52 @@ export const parseWorkflowNameFromYaml = (yaml: string): string | undefined => {
   return typeof name === 'string' && name.trim() !== '' ? name : undefined;
 };
 
-export const tryResolveWorkflowDisplayNameFromAttachments = (
-  attachments: AttachmentStateManager | undefined,
-  workflowAttachmentId: string
-): string | undefined => {
-  if (!attachments) {
+/**
+ * The `enabled` flag a definition declares, which is what it will be saved as. Absent counts as
+ * disabled, matching how a stored workflow with no flag is treated when a run tries to start it.
+ */
+export const parseWorkflowEnabledFromYaml = (yaml: string): boolean | undefined => {
+  const parsed = parseYamlToJSONWithoutValidation(yaml);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
     return undefined;
   }
 
-  const attachment = attachments.getAll().find((entry) => entry.id === workflowAttachmentId);
-  if (!attachment || attachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
+  const enabled = (parsed.json as Record<string, unknown>).enabled;
+  return typeof enabled === 'boolean' ? enabled : undefined;
+};
+
+const findWorkflowAttachmentData = (
+  attachments: AttachmentStateManager | undefined,
+  workflowAttachmentId: string
+): WorkflowYamlAttachmentData | undefined => {
+  const attachment = attachments
+    ?.getAll()
+    .find(
+      (entry) => entry.id === workflowAttachmentId && entry.type === WORKFLOW_YAML_ATTACHMENT_TYPE
+    );
+
+  if (!attachment) {
     return undefined;
   }
 
   const latestVersion = getLatestVersion(attachment);
-  if (!latestVersion || !isWorkflowYamlData(latestVersion.data)) {
-    return undefined;
-  }
+  return latestVersion && isWorkflowYamlData(latestVersion.data) ? latestVersion.data : undefined;
+};
 
-  return latestVersion.data.name ?? parseWorkflowNameFromYaml(latestVersion.data.yaml);
+export const tryResolveWorkflowDisplayNameFromAttachments = (
+  attachments: AttachmentStateManager | undefined,
+  workflowAttachmentId: string
+): string | undefined => {
+  const data = findWorkflowAttachmentData(attachments, workflowAttachmentId);
+  return data ? data.name ?? parseWorkflowNameFromYaml(data.yaml) : undefined;
+};
+
+export const tryResolveWorkflowEnabledFromAttachments = (
+  attachments: AttachmentStateManager | undefined,
+  workflowAttachmentId: string
+): boolean | undefined => {
+  const data = findWorkflowAttachmentData(attachments, workflowAttachmentId);
+  return data ? parseWorkflowEnabledFromYaml(data.yaml) : undefined;
 };
 
 /**
@@ -153,7 +180,13 @@ export const tryResolveAiIndexDisplayLabelFromAttachments = (
   return aiIndexId ?? 'the AI index';
 };
 
-export const tryResolveWorkflowDisplayNameById = async ({
+/** What a confirmation needs to say about a workflow that is already saved. */
+export interface SavedWorkflowSummary {
+  name?: string;
+  enabled?: boolean;
+}
+
+export const tryResolveSavedWorkflowById = async ({
   workflowsManagement,
   workflowId,
   spaceId,
@@ -161,10 +194,10 @@ export const tryResolveWorkflowDisplayNameById = async ({
   workflowsManagement: WorkflowsManagementApi;
   workflowId: string;
   spaceId: string;
-}): Promise<string | undefined> => {
+}): Promise<SavedWorkflowSummary | undefined> => {
   try {
     const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
-    return workflow?.name;
+    return workflow ? { name: workflow.name, enabled: workflow.enabled } : undefined;
   } catch {
     return undefined;
   }
@@ -346,11 +379,13 @@ const resolveWorkflowSource = (
 };
 
 /**
- * Points a conversation attachment at the saved workflow so a later edit updates it rather than
- * creating a duplicate. Failing to link costs a duplicate on the next save, not this one, so it
- * never fails a save that has already persisted and attached.
+ * Points the conversation's attachments at what was actually saved: the one the definition came
+ * from at the workflow it became, and any other copy of that workflow at the definition that
+ * replaced it. A copy left holding the superseded YAML is the dangerous one — saving from it again
+ * reverts the workflow without anyone asking for that. None of this can fail a save that has
+ * already persisted and attached, so every step only warns.
  */
-const linkWorkflowToAttachment = async ({
+const syncAttachmentsToSavedWorkflow = async ({
   source,
   workflowId,
   attachments,
@@ -361,28 +396,64 @@ const linkWorkflowToAttachment = async ({
   attachments: AttachmentStateManager;
   logger: Logger;
 }): Promise<void> => {
-  if (source.attachmentId !== undefined) {
-    const originUpdated = await attachments.updateOrigin(
-      source.attachmentId,
-      workflowId,
-      ATTACHMENT_REF_ACTOR.agent
+  const name = parseWorkflowNameFromYaml(source.yaml);
+  const savedData = { yaml: source.yaml, workflowId, ...(name !== undefined && { name }) };
+
+  const linked = attachments
+    .getAll()
+    .filter(
+      (entry) =>
+        entry.type === WORKFLOW_YAML_ATTACHMENT_TYPE &&
+        entry.active !== false &&
+        (entry.origin === workflowId || entry.id === source.attachmentId)
     );
-    if (!originUpdated) {
+
+  for (const attachment of linked) {
+    if (attachment.origin !== workflowId) {
+      const originUpdated = await attachments.updateOrigin(
+        attachment.id,
+        workflowId,
+        ATTACHMENT_REF_ACTOR.agent
+      );
+      if (!originUpdated) {
+        logger.warn(
+          `Workflow '${workflowId}' was attached but its attachment origin could not be recorded; ` +
+            `a future save for attachment '${attachment.id}' may create a duplicate workflow.`
+        );
+      }
+    }
+
+    // The attachment the definition came from already holds it.
+    if (attachment.id === source.attachmentId) {
+      continue;
+    }
+
+    const current = getLatestVersion(attachment);
+    if (current && isWorkflowYamlData(current.data) && current.data.yaml === source.yaml) {
+      continue;
+    }
+
+    try {
+      await attachments.update(attachment.id, { data: savedData }, ATTACHMENT_REF_ACTOR.agent);
+    } catch (error) {
       logger.warn(
-        `Workflow '${workflowId}' was attached but its attachment origin could not be recorded; ` +
-          `a future save for attachment '${source.attachmentId}' may create a duplicate workflow.`
+        `Workflow '${workflowId}' was saved but attachment '${attachment.id}' still holds the ` +
+          `definition it replaced; saving from that attachment would revert the workflow. ${
+            error instanceof Error ? error.message : String(error)
+          }`
       );
     }
-    return;
   }
 
-  const name = parseWorkflowNameFromYaml(source.yaml);
+  if (linked.length > 0) {
+    return;
+  }
 
   try {
     await attachments.add(
       {
         type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-        data: { yaml: source.yaml, workflowId, ...(name !== undefined && { name }) },
+        data: savedData,
         origin: workflowId,
       },
       ATTACHMENT_REF_ACTOR.agent
@@ -476,6 +547,17 @@ const runSavedAutomation = async ({
     const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
     const enabledForRun = workflow?.enabled !== true;
     if (enabledForRun) {
+      // Enabling is a write to the saved workflow, and holding execute says nothing about holding
+      // update — the attach-by-id path reaches here having only checked read and execute. Asked
+      // before the write rather than after, so a refusal reads as a privilege answer.
+      const canUpdate = await hasWorkflowUpdatePrivilege({ security, request, spaceId });
+      if (!canUpdate) {
+        return {
+          started: false,
+          reason: `Workflow '${workflowId}' is disabled, and enabling it to run requires the workflowsManagement update privilege.`,
+        };
+      }
+
       // Enabling is refused rather than thrown when the stored definition is invalid, and the
       // refusal only shows up on the response. Reporting that beats executing into a bare
       // "workflow is disabled", which names the symptom and not the reason.
@@ -625,9 +707,7 @@ export const saveAutomationHandler = async ({
       value: workflowId,
     });
 
-    if (newlyCreated) {
-      await linkWorkflowToAttachment({ source, workflowId, attachments, logger });
-    }
+    await syncAttachmentsToSavedWorkflow({ source, workflowId, attachments, logger });
 
     result = {
       aiIndexId,

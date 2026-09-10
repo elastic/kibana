@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
@@ -67,7 +68,7 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'Someone looking at an index that already has automations may want new coverage, may want',
       'something that is not working fixed, or may want neither, and nothing in the attachment or',
       'the data distinguishes those. Ask what they are after, and where the answer is new coverage,',
-      'ask which strategy in the same question. Use `ask_user_question` for it rather than',
+      `ask which strategy in the same question. Use \`${internalTools.askUserQuestion}\` for it rather than`,
       'paraphrasing the options as chat text.',
       'Then always ask again before handing anything to a subagent, whether it would create an',
       'automation or replace one. Put the whole plan in that question: the strategy, the sources and',
@@ -95,7 +96,7 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'separate choices — make the one call and let them answer there. The question you owed was the',
       'one before the build; asking a second time at the save turns one decision into two and puts',
       'the second one somewhere it cannot be acted on.',
-      'That dialog is the only decision point, so do not follow a save with an `ask_user_question`',
+      `That dialog is the only decision point, so do not follow a save with an \`${internalTools.askUserQuestion}\``,
       'offering to run: the answer has already been given.',
       'The tool starts that run itself once the dialog is accepted. It reports back `run.started`',
       'with an execution id to poll rather than a finished result — say so, and leave it polling.',

@@ -24,13 +24,16 @@ import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation'
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
+import type { SavedWorkflowSummary } from './handler';
 import {
   getSaveAutomationErrorMessage,
+  parseWorkflowEnabledFromYaml,
   parseWorkflowNameFromYaml,
   saveAutomationHandler,
   tryResolveAiIndexDisplayLabelFromAttachments,
-  tryResolveWorkflowDisplayNameById,
+  tryResolveSavedWorkflowById,
   tryResolveWorkflowDisplayNameFromAttachments,
+  tryResolveWorkflowEnabledFromAttachments,
   tryResolveWorkflowOriginFromAttachments,
 } from './handler';
 
@@ -74,7 +77,7 @@ const saveAutomationSchema = z
       .boolean()
       .optional()
       .describe(
-        'Run the automation over the full corpus straight after saving it. Set only when the user asked for it: the confirmation dialog says so, and the run costs a model call per document. Enables the workflow when its definition is disabled. Returns an execution id to poll rather than waiting for completion.'
+        'Run the automation over the full corpus once this call has saved or attached it — it applies to every way of calling this tool, including attaching a workflow that was already saved. Set only when the user asked for it: the confirmation dialog says so, and the run costs a model call per document. A disabled workflow is enabled in order to run, and stays enabled afterwards. Returns an execution id to poll rather than waiting for completion.'
       ),
   })
   .superRefine((value, ctx) => {
@@ -190,7 +193,7 @@ export const createSaveAutomationTool = ({
         workflowLabel = draftName ? `workflow "${draftName}"` : 'the drafted workflow';
       }
 
-      const resolveSavedName = async (id: string): Promise<string | undefined> => {
+      const resolveSaved = async (id: string): Promise<SavedWorkflowSummary | undefined> => {
         const canRead = await hasWorkflowReadPrivilege({
           security: await getSecurityStart(),
           request,
@@ -198,7 +201,7 @@ export const createSaveAutomationTool = ({
         });
 
         return canRead
-          ? tryResolveWorkflowDisplayNameById({
+          ? tryResolveSavedWorkflowById({
               workflowsManagement: getWorkflowsManagement(),
               workflowId: id,
               spaceId,
@@ -206,9 +209,11 @@ export const createSaveAutomationTool = ({
           : undefined;
       };
 
+      let attachTargetEnabled: boolean | undefined;
       if (!workflowAttachmentId && !workflowYaml && workflowId) {
-        const savedName = await resolveSavedName(workflowId);
-        workflowLabel = savedName ? `workflow "${savedName}"` : `workflow "${workflowId}"`;
+        const saved = await resolveSaved(workflowId);
+        workflowLabel = saved?.name ? `workflow "${saved.name}"` : `workflow "${workflowId}"`;
+        attachTargetEnabled = saved?.enabled;
       }
 
       // The dialog is binary, so a run the caller cannot perform is never offered as one: without
@@ -221,8 +226,23 @@ export const createSaveAutomationTool = ({
           spaceId,
         }));
 
+      // What the workflow's `enabled` flag will be once this call has written: whatever the
+      // definition being saved declares, or the stored flag when nothing is being written.
+      const enabledAfterSave = workflowYaml
+        ? parseWorkflowEnabledFromYaml(workflowYaml)
+        : workflowAttachmentId
+        ? tryResolveWorkflowEnabledFromAttachments(attachments, workflowAttachmentId)
+        : attachTargetEnabled;
+
+      // Enabling to run outlasts the run, including a run that fails, so it is a second change to
+      // the workflow and not a detail of the first. This dialog is the only place it is visible.
+      const enableNotice =
+        willRun && enabledAfterSave !== true
+          ? ' The workflow is disabled, so it will be enabled in order to run, and stays enabled afterwards even if the run fails.'
+          : '';
+
       if (targetWorkflowId) {
-        const existingName = await resolveSavedName(targetWorkflowId);
+        const existingName = (await resolveSaved(targetWorkflowId))?.name;
         const existingLabel = existingName ? `"${existingName}"` : `with id "${targetWorkflowId}"`;
         // A replacement that also renames is the case most easily mistaken for a new automation,
         // so the rename is called out rather than left to be discovered afterwards.
@@ -235,7 +255,7 @@ export const createSaveAutomationTool = ({
         return willRun
           ? {
               title: 'Replace and run workflow automation',
-              message: `${overwrite} Replace it and run the new definition now over the full corpus?`,
+              message: `${overwrite}${enableNotice} Replace it and run the new definition now over the full corpus?`,
               confirm_text: 'Replace and run',
               cancel_text: 'Cancel',
             }
@@ -250,7 +270,7 @@ export const createSaveAutomationTool = ({
       if (willRun) {
         return {
           title: 'Save and run workflow automation',
-          message: `Save ${workflowLabel} to Kibana, attach it to AI index "${aiIndexLabel}", and run it now over the full corpus?`,
+          message: `Save ${workflowLabel} to Kibana, attach it to AI index "${aiIndexLabel}", and run it now over the full corpus?${enableNotice}`,
           confirm_text: 'Save and run',
           cancel_text: 'Cancel',
         };
