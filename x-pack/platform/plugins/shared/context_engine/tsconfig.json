@@ -9,7 +9,7 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "test/scout/**/*"
+    "test/scout_context_engine/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

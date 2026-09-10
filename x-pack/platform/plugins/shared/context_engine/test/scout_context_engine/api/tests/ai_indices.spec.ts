@@ -17,9 +17,10 @@ const INDEX_AI_INDEX_ID = 'scout_test_index_ai_index';
 const INDEX_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${INDEX_AI_INDEX_ID}`;
 const LAZY_AI_INDEX_ID = `${AI_INDEX_ID}_lazy`;
 const LAZY_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${LAZY_AI_INDEX_ID}`;
+const MANAGED_AI_INDEX_ID = 'elastic';
+const MANAGED_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${MANAGED_AI_INDEX_ID}`;
 const DEST_DATA_STREAM = 'ai-index-ds-scout-test';
 const DEST_INDEX = 'ai-index-idx-scout-test';
-const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
@@ -37,18 +38,14 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
-    await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
-    // Deployment-agnostic stateful runs are multi-node: wait out the shared uiSettings cache TTL
-    // so every node serves the enabled flag before the suite reads it (see #265720).
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
-    await esClient.indices.createDataStream({ name: DEST_DATA_STREAM });
-    await esClient.indices.create({ index: DEST_INDEX });
+    await esClient.indices.createDataStream({ name: DEST_DATA_STREAM }, { ignore: [400] });
+    await esClient.indices.create({ index: DEST_INDEX }, { ignore: [400] });
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     // AI index deletes tolerate records that were never created (404).
     await apiClient.delete(AI_INDEX_PATH, {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
@@ -64,7 +61,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
     await esClient.indices.delete({ index: DEST_INDEX }, { ignore: [404] });
     await esClient.indices.deleteDataStream({ name: DEST_DATA_STREAM }, { ignore: [404] });
-    await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING);
   });
 
   apiTest('manages an AI index through its full lifecycle', async ({ apiClient }) => {
@@ -141,7 +137,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ acknowledged: true });
+      expect(response.body).toStrictEqual({ acknowledged: true, errors: [] });
     });
 
     await apiTest.step('returns 404 once deleted', async () => {
@@ -249,5 +245,32 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(200);
+  });
+
+  apiTest('rejects delete of a managed AI index with 409', async ({ apiClient }) => {
+    const getBefore = await apiClient.get(MANAGED_AI_INDEX_PATH, {
+      headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+    expect(getBefore).toHaveStatusCode(200);
+    expect(getBefore.body.managed).toBe(true);
+
+    const deleteResponse = await apiClient.delete(
+      `${MANAGED_AI_INDEX_PATH}?delete_knowledge_indicators=true&delete_automations=true`,
+      {
+        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      }
+    );
+
+    expect(deleteResponse).toHaveStatusCode(409);
+    expect(deleteResponse.body.message).toStrictEqual(expect.stringContaining('managed'));
+
+    const getAfter = await apiClient.get(MANAGED_AI_INDEX_PATH, {
+      headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+    expect(getAfter).toHaveStatusCode(200);
+    expect(getAfter.body.managed).toBe(true);
   });
 });

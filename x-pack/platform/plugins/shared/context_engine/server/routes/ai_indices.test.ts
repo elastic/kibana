@@ -739,14 +739,18 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
     });
 
-    it('returns 409 when the AI index is managed', async () => {
+    it('returns 409 when the AI index is managed and does not delete related resources', async () => {
       aiIndexService.get.mockResolvedValue({ ...aiIndexItem, managed: true });
 
       await callRoute('DELETE', aiIndexByIdPath, {
         params: { aiIndexId: 'customer_support' },
+        query: { delete_knowledge_indicators: true, delete_automations: true },
       });
 
       expect(aiIndexService.delete).not.toHaveBeenCalled();
+      expect(esDeleteDataStream).not.toHaveBeenCalled();
+      expect(esDeleteIndex).not.toHaveBeenCalled();
+      expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
       expect(response.conflict).toHaveBeenCalledWith({
         body: { message: expect.stringContaining('managed') },
       });
