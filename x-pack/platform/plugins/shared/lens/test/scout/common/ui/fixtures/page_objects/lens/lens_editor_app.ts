@@ -135,4 +135,16 @@ export class LensEditorApp extends LensApp {
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
   }
+
+  /** Configures a field in a text-based Lens dimension and applies the flyout changes. */
+  async configureTextBasedDimension({ dimension, field }: { dimension: string; field: string }) {
+    await this.page.testSubj.locator(dimension).click();
+    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+
+    const fieldPicker = this.page.components.comboBox('text-based-dimension-field');
+    await fieldPicker.setSelectedOptions([field]);
+
+    await this.closeDimensionEditor();
+    await this.applyFlyoutButton.click();
+  }
 }

@@ -45,7 +45,7 @@ spaceTest.describe(
         await discover.saveVisualizationToNewDashboard(visualizationTitle);
         await dashboard.waitForRenderComplete();
         await expect(
-          page.testSubj.locator(`embeddablePanelHeading-${visualizationTitle}`)
+          page.testSubj.locator(`embeddablePanelHeading-${visualizationTitle.replace(/\s/g, '')}`)
         ).toBeVisible();
       }
     );
@@ -56,27 +56,23 @@ spaceTest.describe(
         const { discover, lens } = pageObjects;
 
         await enableElasticChartDebug(context);
+
         await discover.goto({ queryMode: 'esql' });
         await discover.waitUntilTabIsLoaded();
         await discover.writeAndSubmitEsqlQuery(ESQL_QUERY);
         await discover.openLensEditFlyout();
 
         await lens.workspace.removeAllDimensions('lnsXY_xDimensionPanel');
-        await lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
+        await lens.configureTextBasedDimension({
+          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
           field: 'extension',
         });
 
-        await expect
-          .poll(
-            async () =>
-              (await lens.workspace.getCurrentChartDebugState('xyVisChart')).legend?.items
-                .map((item) => item.name)
-                .sort(),
-            { timeout: 20_000 }
-          )
-          .toStrictEqual(['css', 'gif', 'jpg', 'php', 'png']);
+        const items = (await lens.workspace.getDashboardChartDebugState('xyVisChart')).legend?.items
+          .map((item) => item.name)
+          .sort();
+
+        expect(items).toStrictEqual(['css', 'gif', 'jpg', 'php', 'png']);
       }
     );
   }
