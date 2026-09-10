@@ -22,42 +22,51 @@ export interface ConnectorResponseSettings {
 
 export type TlsConnectionOptions = ReturnType<typeof getNodeSSLOptions>;
 
+/** A resolved TCP target (hostname + port) used when building TLS and allowlist checks. */
+export interface HostTarget {
+  hostname: string;
+  port: number;
+}
+
 /**
  * The Kibana `xpack.actions.*` outbound-network settings, handed to a client type unchanged.
  *
  * These are the same settings the axios path applies via `get_axios_instance`. The framework only
  * makes them reachable; each client type is responsible for applying them through its own
- * library's native options. `ensure*` and `resolveSrvHosts` are the exception: they are checks
- * (or, for `resolveSrvHosts`, a Node-builtin-backed lookup) rather than plain values, because the
- * `allowedHosts` matching logic and DNS resolution live in the Actions plugin and cannot be
- * re-implemented in this package — this package is isomorphic (`shared-common`) and may not
- * import Node builtins, even dynamically.
+ * library's native options. `ensure*` are the exception: they are policy guards whose matching
+ * logic lives in the Actions plugin and cannot be re-implemented in this isomorphic package.
  */
 export interface ConnectorNetworkSettings {
   /** Throws AllowlistDeniedError if the URL is not on xpack.actions.allowedHosts. */
   ensureUriAllowed(url: string): void;
   /** Throws AllowlistDeniedError if the hostname is not on xpack.actions.allowedHosts. */
   ensureHostnameAllowed(host: string): void;
-  /**
-   * Resolves `_<serviceName>._tcp.<name>` SRV records (serviceName defaults to `mongodb`, matching
-   * the MongoDB driver's default). Client types for DNS-seedlist schemes (e.g. `mongodb+srv://`)
-   * must resolve and validate the real target hosts through this — the seed name alone is not the
-   * host that gets connected to.
-   */
-  resolveSrvHosts(
-    name: string,
-    serviceName?: string
-  ): Promise<Array<{ name: string; port: number }>>;
   getSslSettings(): SSLSettings;
   getProxySettings(): ProxySettings | undefined;
   getCustomHostSettings(url: string): CustomHostSettings | undefined;
   getResponseSettings(): ConnectorResponseSettings;
-  /** Builds Node TLS connection options; routed through here to keep Node-only imports server-side. */
-  getTlsOptions(
-    logger: Logger,
-    verificationMode: string | undefined,
-    sslOverrides: SSLSettings
-  ): TlsConnectionOptions;
+}
+
+/**
+ * Node-only platform capabilities injected into `BuildContext`. Separated from
+ * `ConnectorNetworkSettings` because these perform real I/O or invoke Node crypto — they are
+ * not passive config accessors.
+ */
+export interface PlatformServices {
+  /**
+   * Resolves `_<serviceName>._tcp.<name>` SRV records. `serviceName` is required — the caller
+   * supplies the protocol-specific name (e.g. `'mongodb'`) rather than relying on a default.
+   */
+  resolveSrvHosts(
+    name: string,
+    serviceName: string
+  ): Promise<Array<{ name: string; port: number }>>;
+  /**
+   * Applies `xpack.actions.ssl` and any matching `xpack.actions.customHostSettings` override to
+   * produce Node TLS options ready to spread into a driver's connect options. Consolidates the
+   * global-vs-per-host merge so client types don't each reimplement it.
+   */
+  buildTlsOptions(targets: HostTarget[], logger: Logger): TlsConnectionOptions;
 }
 
 export interface CredentialAccessor {
@@ -68,6 +77,7 @@ export interface BuildContext {
   logger: Logger;
   config?: Record<string, unknown>;
   networkSettings: ConnectorNetworkSettings;
+  platform: PlatformServices;
   credential: CredentialAccessor;
 }
 

@@ -17,6 +17,8 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
 } from './client_type_spec';
 
 export interface ClientRegistry {

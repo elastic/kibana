@@ -49,14 +49,14 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
   networkSettings: {
     ensureUriAllowed: jest.fn(),
     ensureHostnameAllowed: jest.fn(),
-    resolveSrvHosts: mockResolveSrvHosts,
     getSslSettings: jest.fn().mockReturnValue({}),
     getProxySettings: jest.fn().mockReturnValue(undefined),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn(),
-    getTlsOptions: jest.fn((logger, verificationMode, sslOverrides) =>
-      getNodeSSLOptions(logger, verificationMode, sslOverrides)
-    ),
+  },
+  platform: {
+    resolveSrvHosts: mockResolveSrvHosts,
+    buildTlsOptions: jest.fn((targets, logger) => getNodeSSLOptions(logger, undefined, {})),
   },
   credential: {
     getAuthHeaders: jest.fn().mockResolvedValue({
@@ -137,42 +137,25 @@ describe('mongodbClientType', () => {
       );
     });
 
-    it('applies the general xpack.actions.ssl settings to the MongoClient options', async () => {
+    it('calls platform.buildTlsOptions with the resolved targets and logger', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.getSslSettings as jest.Mock).mockReturnValue({
-        verificationMode: 'full',
-        ca: Buffer.from('general-ca-pem'),
-      });
       await mongodbClientType.build(ctx);
 
-      expect(MockMongoClient).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ rejectUnauthorized: true, ca: Buffer.from('general-ca-pem') })
+      expect(ctx.platform.buildTlsOptions).toHaveBeenCalledWith(
+        [{ hostname: 'mongo.example.com', port: 27017 }],
+        ctx.logger
       );
     });
 
-    it('prefers a per-host customHostSettings SSL override over the general settings', async () => {
+    it('spreads the result of platform.buildTlsOptions into the MongoClient options', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.getSslSettings as jest.Mock).mockReturnValue({
-        verificationMode: 'full',
-        ca: Buffer.from('general-ca-pem'),
-      });
-      (ctx.networkSettings.getCustomHostSettings as jest.Mock).mockImplementation((url: string) =>
-        url === 'https://mongo.example.com:27017'
-          ? { url, ssl: { verificationMode: 'none', certificateAuthoritiesData: 'custom-ca-pem' } }
-          : undefined
-      );
+      const tlsResult = { rejectUnauthorized: true, ca: Buffer.from('test-ca') };
+      (ctx.platform.buildTlsOptions as jest.Mock).mockReturnValue(tlsResult);
       await mongodbClientType.build(ctx);
 
-      expect(ctx.networkSettings.getCustomHostSettings).toHaveBeenCalledWith(
-        'https://mongo.example.com:27017'
-      );
       expect(MockMongoClient).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({
-          rejectUnauthorized: false,
-          ca: Buffer.from('custom-ca-pem'),
-        })
+        expect.objectContaining({ rejectUnauthorized: true, ca: Buffer.from('test-ca') })
       );
     });
 

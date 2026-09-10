@@ -9,14 +9,9 @@
 
 import type { MongoClient } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
-import type { BuildContext, ClientTypeSpec, TlsConnectionOptions } from './client_type_spec';
+import type { BuildContext, ClientTypeSpec, HostTarget } from './client_type_spec';
 import { loadConnectionString } from './load_connection_string';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
-
-interface HostTarget {
-  hostname: string;
-  port: number;
-}
 
 interface ResolvedHosts {
   /** Every target that was checked against the allowlist. */
@@ -53,7 +48,7 @@ const ensureHostsAllowed = async (
   const srvServiceName = connectionString.searchParams.get('srvServiceName') ?? 'mongodb';
   let records;
   try {
-    records = await ctx.networkSettings.resolveSrvHosts(seedHostname, srvServiceName);
+    records = await ctx.platform.resolveSrvHosts(seedHostname, srvServiceName);
   } catch (err) {
     throw new Error(
       `failed to resolve SRV records for "${seedHostname}": ${(err as Error).message}`
@@ -93,38 +88,6 @@ const pinToResolvedHosts = (
     pinned.searchParams.set('tls', 'true');
   }
   return pinned.toString();
-};
-
-// xpack.actions.customHostSettings entries are keyed by a URL (scheme + hostname + port); only
-// https:/smtp: schemes pass its own config validation, so "https:" is used here purely as a
-// generic TCP+TLS placeholder scheme to look up per-host overrides for a MongoDB target — there
-// is no real HTTP request involved.
-const toCustomHostSettingsUrl = ({ hostname, port }: HostTarget): string =>
-  `https://${hostname}:${port}`;
-
-/**
- * Apply the platform's outbound TLS settings (xpack.actions.ssl, plus any per-host override in
- * xpack.actions.customHostSettings) the same way the Axios connector path does via
- * getCustomAgents/configureAxiosInstanceWithSsl — otherwise an admin-configured trust store or
- * verification mode is silently ignored and the driver connects with its own defaults.
- */
-const resolveTlsOptions = (ctx: BuildContext, targets: HostTarget[]): TlsConnectionOptions => {
-  const sslSettings = ctx.networkSettings.getSslSettings();
-  const customHostSsl = targets
-    .map(
-      (target) => ctx.networkSettings.getCustomHostSettings(toCustomHostSettingsUrl(target))?.ssl
-    )
-    .find((ssl) => ssl != null);
-
-  const tlsOptions = ctx.networkSettings.getTlsOptions(
-    ctx.logger,
-    customHostSsl?.verificationMode ?? sslSettings.verificationMode,
-    sslSettings
-  );
-  if (customHostSsl?.certificateAuthoritiesData) {
-    tlsOptions.ca = Buffer.from(customHostSsl.certificateAuthoritiesData);
-  }
-  return tlsOptions;
 };
 
 const PROXY_NOT_SUPPORTED_MESSAGE =
@@ -209,7 +172,7 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
     // original mongodb+srv:// URI, which would trigger its own independent (unvalidated) SRV
     // resolution — see pinToResolvedHosts for why.
     const connectUri = srvTargets ? pinToResolvedHosts(connectionString, srvTargets) : uri;
-    const tlsOptions = resolveTlsOptions(ctx, targets);
+    const tlsOptions = ctx.platform.buildTlsOptions(targets, ctx.logger);
 
     const { MongoClient: MongoClientCtor } = await import(
       /* webpackChunkName: "mongodbDriver" */ 'mongodb'

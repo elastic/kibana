@@ -7,7 +7,7 @@
 
 import { resolveSrv } from 'node:dns/promises';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
-import type { ConnectorNetworkSettings } from '@kbn/connector-specs';
+import type { ConnectorNetworkSettings, PlatformServices } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { AllowlistDeniedError } from './connector_network_errors';
 
@@ -32,11 +32,35 @@ export const createConnectorNetworkSettings = (
       toAllowlistDeniedError(err);
     }
   },
-  resolveSrvHosts: (name, serviceName = 'mongodb') => resolveSrv(`_${serviceName}._tcp.${name}`),
   getSslSettings: () => configUtils.getSSLSettings(),
   getProxySettings: () => configUtils.getProxySettings(),
   getCustomHostSettings: (url) => configUtils.getCustomHostSettings(url),
   getResponseSettings: () => configUtils.getResponseSettings(),
-  getTlsOptions: (logger, verificationMode, sslOverrides) =>
-    getNodeSSLOptions(logger, verificationMode, sslOverrides),
+});
+
+export const createPlatformServices = (
+  configUtils: ActionsConfigurationUtilities
+): PlatformServices => ({
+  resolveSrvHosts: (name, serviceName) => resolveSrv(`_${serviceName}._tcp.${name}`),
+
+  buildTlsOptions: (targets, logger) => {
+    const sslSettings = configUtils.getSSLSettings();
+    // xpack.actions.customHostSettings entries are keyed by https://<host>:<port> — "https:" is
+    // used as a generic TCP+TLS placeholder scheme, not a real HTTP request.
+    const customHostSsl = targets
+      .map(
+        ({ hostname, port }) =>
+          configUtils.getCustomHostSettings(`https://${hostname}:${port}`)?.ssl
+      )
+      .find((ssl) => ssl != null);
+    const tlsOptions = getNodeSSLOptions(
+      logger,
+      customHostSsl?.verificationMode ?? sslSettings.verificationMode,
+      sslSettings
+    );
+    if (customHostSsl?.certificateAuthoritiesData) {
+      tlsOptions.ca = Buffer.from(customHostSsl.certificateAuthoritiesData);
+    }
+    return tlsOptions;
+  },
 });

@@ -14,6 +14,7 @@ import type {
   BuildContext,
   ConnectorNetworkSettings,
   ConnectorSpec,
+  PlatformServices,
 } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import { LeasePool } from '../lease_pool';
@@ -33,6 +34,7 @@ describe('generateExecutorFunction', () => {
   let mockHandler: jest.Mock;
   let fakeLeasePool: LeasePool<unknown>;
   let mockNetwork: ConnectorNetworkSettings;
+  let mockPlatform: PlatformServices;
 
   const makeExecOptions = (params: Record<string, unknown>) =>
     ({
@@ -67,12 +69,14 @@ describe('generateExecutorFunction', () => {
     mockNetwork = {
       ensureUriAllowed: jest.fn(),
       ensureHostnameAllowed: jest.fn(),
-      resolveSrvHosts: jest.fn(),
       getSslSettings: jest.fn(),
       getProxySettings: jest.fn(),
       getCustomHostSettings: jest.fn(),
       getResponseSettings: jest.fn(),
-      getTlsOptions: jest.fn(),
+    };
+    mockPlatform = {
+      resolveSrvHosts: jest.fn(),
+      buildTlsOptions: jest.fn(),
     };
   });
 
@@ -92,6 +96,7 @@ describe('generateExecutorFunction', () => {
       getCredential: mockGetCredential,
       getClientLeasePool: () => fakeLeasePool,
       networkSettings: mockNetwork,
+      platform: mockPlatform,
     });
 
   describe('successful execution', () => {
@@ -144,6 +149,7 @@ describe('generateExecutorFunction', () => {
         getClientLeasePool: () => fakeLeasePool,
         getRelayClient: () => relay,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -161,6 +167,7 @@ describe('generateExecutorFunction', () => {
         getClientLeasePool: () => fakeLeasePool,
         getRelayClient: () => relay,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -249,8 +256,8 @@ describe('generateExecutorFunction', () => {
     });
   });
 
-  describe('ctx.getClient - build receives networkSettings from generateExecutorFunction', () => {
-    it('passes networkSettings to clientType.build', async () => {
+  describe('ctx.getClient - build receives networkSettings and platform from generateExecutorFunction', () => {
+    it('passes networkSettings and platform to clientType.build', async () => {
       const fakeClient = { id: 'x' };
       const buildSpy = jest.fn().mockResolvedValue(fakeClient);
       const fakeClientType = {
@@ -275,13 +282,14 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
 
       expect(buildSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ networkSettings: mockNetwork })
+        expect.objectContaining({ networkSettings: mockNetwork, platform: mockPlatform })
       );
       expect(buildSpy.mock.calls[0][0]).not.toHaveProperty('axiosInstance');
     });
@@ -311,6 +319,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -363,6 +372,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -407,6 +417,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -445,6 +456,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -478,6 +490,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { unused: fakeClientType },
       });
 
@@ -509,6 +522,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { failing: fakeClientType },
       });
 
@@ -541,6 +555,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -585,6 +600,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -628,6 +644,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -680,6 +697,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: network,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -712,6 +730,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { wrapped: fakeClientType },
       });
 
@@ -750,6 +769,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: {},
       });
 
@@ -787,6 +807,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -838,6 +859,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -872,6 +894,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -900,6 +923,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -933,6 +957,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -968,6 +993,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -1006,6 +1032,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -1102,6 +1129,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result = await executor(
@@ -1225,6 +1253,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result = await executor(
@@ -1255,6 +1284,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result = await executor(
@@ -1285,6 +1315,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result1 = await executor(

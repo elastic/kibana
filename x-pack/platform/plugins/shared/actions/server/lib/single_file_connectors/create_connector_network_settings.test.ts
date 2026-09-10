@@ -15,25 +15,33 @@ jest.mock('@kbn/actions-utils', () => ({
 
 import { resolveSrv } from 'node:dns/promises';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
-import { createConnectorNetworkSettings } from './create_connector_network_settings';
+import type { Logger } from '@kbn/logging';
+import {
+  createConnectorNetworkSettings,
+  createPlatformServices,
+} from './create_connector_network_settings';
 import { AllowlistDeniedError } from './connector_network_errors';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 const mockResolveSrv = resolveSrv as jest.Mock;
 const mockGetNodeSSLOptions = getNodeSSLOptions as jest.Mock;
 
-describe('createConnectorNetworkSettings', () => {
-  const mockConfigUtils = {
+const makeConfigUtils = () =>
+  ({
     ensureUriAllowed: jest.fn(),
     ensureHostnameAllowed: jest.fn(),
-    getSSLSettings: jest.fn(),
+    getSSLSettings: jest.fn().mockReturnValue({ verificationMode: 'full' }),
     getProxySettings: jest.fn(),
-    getCustomHostSettings: jest.fn(),
+    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn(),
-  } as unknown as ActionsConfigurationUtilities;
+  } as unknown as ActionsConfigurationUtilities);
+
+describe('createConnectorNetworkSettings', () => {
+  let mockConfigUtils: ActionsConfigurationUtilities;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConfigUtils = makeConfigUtils();
   });
 
   it('returns the complete network policy surface', () => {
@@ -45,8 +53,6 @@ describe('createConnectorNetworkSettings', () => {
       'getProxySettings',
       'getResponseSettings',
       'getSslSettings',
-      'getTlsOptions',
-      'resolveSrvHosts',
     ]);
   });
 
@@ -92,33 +98,6 @@ describe('createConnectorNetworkSettings', () => {
     expect(() => network.ensureHostnameAllowed('denied.example.com')).toThrow(
       'hostname not allowed'
     );
-  });
-
-  it('resolves SRV records for the default (mongodb) service name', async () => {
-    const records = [{ name: 'shard1.example.com', port: 27017, priority: 0, weight: 0 }];
-    mockResolveSrv.mockResolvedValue(records);
-    const network = createConnectorNetworkSettings(mockConfigUtils);
-
-    const result = await network.resolveSrvHosts('cluster0.example.com');
-
-    expect(mockResolveSrv).toHaveBeenCalledWith('_mongodb._tcp.cluster0.example.com');
-    expect(result).toBe(records);
-  });
-
-  it('resolves SRV records for a custom service name', async () => {
-    mockResolveSrv.mockResolvedValue([]);
-    const network = createConnectorNetworkSettings(mockConfigUtils);
-
-    await network.resolveSrvHosts('cluster0.example.com', 'customname');
-
-    expect(mockResolveSrv).toHaveBeenCalledWith('_customname._tcp.cluster0.example.com');
-  });
-
-  it('propagates SRV resolution failures', async () => {
-    mockResolveSrv.mockRejectedValue(new Error('ENOTFOUND'));
-    const network = createConnectorNetworkSettings(mockConfigUtils);
-
-    await expect(network.resolveSrvHosts('cluster0.example.com')).rejects.toThrow('ENOTFOUND');
   });
 
   it('delegates getSslSettings and re-reads current settings', () => {
@@ -173,17 +152,91 @@ describe('createConnectorNetworkSettings', () => {
     expect(network.getResponseSettings()).toBe(secondValue);
     expect(mockConfigUtils.getResponseSettings).toHaveBeenCalledTimes(2);
   });
+});
 
-  it('delegates getTlsOptions to getNodeSSLOptions', () => {
-    const logger = { warn: jest.fn() } as unknown as Parameters<typeof getNodeSSLOptions>[0];
-    const sslOverrides = { verificationMode: 'full' as const };
-    const tlsOptions = { rejectUnauthorized: true };
-    mockGetNodeSSLOptions.mockReturnValue(tlsOptions);
-    const network = createConnectorNetworkSettings(mockConfigUtils);
+describe('createPlatformServices', () => {
+  let mockConfigUtils: ActionsConfigurationUtilities;
+  const fakeLogger = { warn: jest.fn() } as unknown as Logger;
 
-    const result = network.getTlsOptions(logger, 'full', sslOverrides);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockConfigUtils = makeConfigUtils();
+  });
 
-    expect(mockGetNodeSSLOptions).toHaveBeenCalledWith(logger, 'full', sslOverrides);
-    expect(result).toBe(tlsOptions);
+  it('resolves SRV records using the provided service name', async () => {
+    const records = [{ name: 'shard1.example.com', port: 27017, priority: 0, weight: 0 }];
+    mockResolveSrv.mockResolvedValue(records);
+    const platform = createPlatformServices(mockConfigUtils);
+
+    const result = await platform.resolveSrvHosts('cluster0.example.com', 'mongodb');
+
+    expect(mockResolveSrv).toHaveBeenCalledWith('_mongodb._tcp.cluster0.example.com');
+    expect(result).toBe(records);
+  });
+
+  it('resolves SRV records for a custom service name', async () => {
+    mockResolveSrv.mockResolvedValue([]);
+    const platform = createPlatformServices(mockConfigUtils);
+
+    await platform.resolveSrvHosts('cluster0.example.com', 'customname');
+
+    expect(mockResolveSrv).toHaveBeenCalledWith('_customname._tcp.cluster0.example.com');
+  });
+
+  it('propagates SRV resolution failures', async () => {
+    mockResolveSrv.mockRejectedValue(new Error('ENOTFOUND'));
+    const platform = createPlatformServices(mockConfigUtils);
+
+    await expect(platform.resolveSrvHosts('cluster0.example.com', 'mongodb')).rejects.toThrow(
+      'ENOTFOUND'
+    );
+  });
+
+  it('buildTlsOptions calls getNodeSSLOptions with global ssl when no per-host override', () => {
+    const globalSsl = { verificationMode: 'full' as const };
+    (mockConfigUtils.getSSLSettings as jest.Mock).mockReturnValue(globalSsl);
+    const tlsResult = { rejectUnauthorized: true };
+    mockGetNodeSSLOptions.mockReturnValue(tlsResult);
+    const platform = createPlatformServices(mockConfigUtils);
+
+    const result = platform.buildTlsOptions(
+      [{ hostname: 'mongo.example.com', port: 27017 }],
+      fakeLogger
+    );
+
+    expect(mockGetNodeSSLOptions).toHaveBeenCalledWith(fakeLogger, 'full', globalSsl);
+    expect(result).toBe(tlsResult);
+  });
+
+  it('buildTlsOptions prefers customHostSettings verificationMode over global', () => {
+    const globalSsl = { verificationMode: 'full' as const };
+    const hostSsl = { verificationMode: 'none' as const };
+    (mockConfigUtils.getSSLSettings as jest.Mock).mockReturnValue(globalSsl);
+    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockReturnValue({ ssl: hostSsl });
+    mockGetNodeSSLOptions.mockReturnValue({});
+    const platform = createPlatformServices(mockConfigUtils);
+
+    platform.buildTlsOptions([{ hostname: 'mongo.example.com', port: 27017 }], fakeLogger);
+
+    expect(mockGetNodeSSLOptions).toHaveBeenCalledWith(fakeLogger, 'none', globalSsl);
+    expect(mockConfigUtils.getCustomHostSettings).toHaveBeenCalledWith(
+      'https://mongo.example.com:27017'
+    );
+  });
+
+  it('buildTlsOptions splices in certificateAuthoritiesData as ca when present', () => {
+    const certData = Buffer.from('cert-data').toString('base64');
+    const hostSsl = { verificationMode: 'full' as const, certificateAuthoritiesData: certData };
+    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockReturnValue({ ssl: hostSsl });
+    const tlsResult = { rejectUnauthorized: true } as ReturnType<typeof getNodeSSLOptions>;
+    mockGetNodeSSLOptions.mockReturnValue(tlsResult);
+    const platform = createPlatformServices(mockConfigUtils);
+
+    const result = platform.buildTlsOptions(
+      [{ hostname: 'mongo.example.com', port: 27017 }],
+      fakeLogger
+    );
+
+    expect(result.ca).toEqual(Buffer.from(certData));
   });
 });
