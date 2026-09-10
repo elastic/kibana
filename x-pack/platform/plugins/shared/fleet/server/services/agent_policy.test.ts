@@ -895,16 +895,22 @@ describe('Agent policy', () => {
       });
       // agentless policies are allowed to have active agents; the count check is bypassed
       esClient.count.mockResolvedValue({ count: 1 } as any);
-      jest.spyOn(agentlessAgentService, 'deleteAgentlessAgent').mockResolvedValue(undefined as any);
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValue(undefined as any);
 
-      await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
+      try {
+        await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
 
-      expect(jest.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
-        agentlessSoClient,
-        esClient,
-        'mocked',
-        { revoke: true }
-      );
+        expect(jest.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
+          agentlessSoClient,
+          esClient,
+          'mocked',
+          { revoke: true }
+        );
+      } finally {
+        deleteAgentlessAgentSpy.mockRestore();
+      }
     });
 
     it('should force-revoke agents before calling deleteAgentlessAgent', async () => {
@@ -920,18 +926,24 @@ describe('Agent policy', () => {
       jest.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
         callOrder.push('unenrollForAgentPolicyId');
       });
-      jest.spyOn(agentlessAgentService, 'deleteAgentlessAgent').mockImplementationOnce(async () => {
-        callOrder.push('deleteAgentlessAgent');
-        return undefined as any;
-      });
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockImplementationOnce(async () => {
+          callOrder.push('deleteAgentlessAgent');
+          return undefined as any;
+        });
 
-      await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
+      try {
+        await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
 
-      const unenrollIdx = callOrder.indexOf('unenrollForAgentPolicyId');
-      const deleteIdx = callOrder.indexOf('deleteAgentlessAgent');
-      expect(unenrollIdx).toBeGreaterThanOrEqual(0);
-      expect(deleteIdx).toBeGreaterThanOrEqual(0);
-      expect(unenrollIdx).toBeLessThan(deleteIdx);
+        const unenrollIdx = callOrder.indexOf('unenrollForAgentPolicyId');
+        const deleteIdx = callOrder.indexOf('deleteAgentlessAgent');
+        expect(unenrollIdx).toBeGreaterThanOrEqual(0);
+        expect(deleteIdx).toBeGreaterThanOrEqual(0);
+        expect(unenrollIdx).toBeLessThan(deleteIdx);
+      } finally {
+        deleteAgentlessAgentSpy.mockRestore();
+      }
     });
   });
 
