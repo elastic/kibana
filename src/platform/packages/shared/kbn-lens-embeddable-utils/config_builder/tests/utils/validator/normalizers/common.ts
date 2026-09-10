@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only shared Lens attribute normalizers used across chart types.
+ */
+
 import { orderBy } from 'lodash';
 
 import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
@@ -1246,6 +1250,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               columnId: columnIdMap.get(column.columnId) ?? column.columnId,
             };
             normalizeColumnLabel(remapped, { isTextBased: true });
+            // `null`/`''` are leaked persist; a real Identifier Control name is reconstructed
+            // from `??` on `fieldName` by `buildESQLLayer`.
+            if (!remapped.variable) {
+              delete remapped.variable;
+            }
             return remapped;
           });
 

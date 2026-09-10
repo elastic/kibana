@@ -1,0 +1,16 @@
+lockfileVersion: '9.0'
+
+importers:
+  '.':
+    dependencies:
+      '@elastic/package-b':
+        specifier: ^2.0.0
+        version: 2.0.0
+    devDependencies:
+      '@elastic/native-module':
+        specifier: ^1.0.0
+        version: 1.0.0
+
+snapshots:
+  '@elastic/native-module@1.0.0': {}
+  '@elastic/package-b@2.0.0': {}
