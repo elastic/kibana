@@ -64,9 +64,9 @@ spaceTest.describe('Discover ES|QL dashboard', { tag: '@local-stateful-classic' 
         field: 'extension',
       });
 
-      // Add a wait for so it can be debugged
-      const legendItems = (await page.locator('[data-ech-series-name]').allTextContents()).sort();
-      expect(legendItems).toStrictEqual(['css', 'gif', 'jpg', 'php', 'png']);
+      await expect
+        .poll(async () => (await page.locator('[data-ech-series-name]').allTextContents()).sort())
+        .toStrictEqual(['css', 'gif', 'jpg', 'php', 'png']);
     }
   );
 });

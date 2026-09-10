@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License 3.0 only", or the "Server Side Public License, v 1".
- */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
@@ -87,6 +78,9 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
     await expect(
       page.testSubj.locator('lnsDragDrop_domDraggable_Top 9 values of extension.raw')
     ).toHaveText('Top 9 values of extension.raw');
+    await expect
+      .poll(async () => (await page.locator('[data-ech-series-name]').allTextContents()).sort())
+      .toStrictEqual(['css', 'gif', 'jpg', 'php', 'png']);
   });
 
   spaceTest(
