@@ -26,8 +26,8 @@ export const stripMissingUiamApiKeyTag = (tags: readonly string[] = []): string[
 
 /**
  * Returns a copy of an alert document with the "Missing Elastic Cloud API Key" tag removed from
- * `kibana.alert.rule.tags`. Use this for tests that assert the alert document directly instead of
- * through removeRandomValuedPropertiesFromAlert, so their tag expectations stay stable on MKI.
+ * `kibana.alert.rule.tags`. Used by removeRandomValuedPropertiesFromAlert to keep tag expectations
+ * stable on MKI.
  */
 export const stripMissingUiamApiKeyTagFromAlert = (alert: DetectionAlert): DetectionAlert => {
   const tags = alert[ALERT_RULE_TAGS];
