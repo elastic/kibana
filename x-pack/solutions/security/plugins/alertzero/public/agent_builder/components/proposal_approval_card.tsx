@@ -42,8 +42,7 @@ export interface ProposalApprovalCardProps {
  *
  * On mount, re-reads the live proposal from the API so stale attachment
  * snapshots don't show wrong button states (silently falls back to the snapshot
- * if the request fails — both the API and the route may not exist yet pending
- * elastic/kibana#289683).
+ * if the request fails).
  */
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
   ({ proposal: initialProposal, proposalId, http }) => {
@@ -62,7 +61,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
         })
         .then(setLiveProposal)
         .catch(() => {
-          // Fall back to snapshot silently (API may not exist until #289683 lands).
+          // Fall back to snapshot silently if the request fails.
         });
     }, [http, proposalId]);
 

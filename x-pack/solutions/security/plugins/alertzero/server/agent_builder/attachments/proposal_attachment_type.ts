@@ -7,12 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import {
-  PROPOSAL_ATTACHMENT_TYPE,
-  actionImpactSchema,
-  actionCategorySchema,
-  proposalSchema,
-} from '../../../common/proposals';
+import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
+import { PROPOSAL_ATTACHMENT_TYPE, proposalSchema } from '../../../common/proposals';
 
 /** Snapshot stored inside the attachment, mirroring `ProposalWithMetadata`. */
 const proposalAttachmentDataSchema = proposalSchema.extend({
@@ -72,12 +68,6 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
  * attachments with `attachment_add` / `attachment_update` — they are created
  * exclusively by the proposals API. The HTTP create route is unaffected, so
  * the seed script can still add by-value attachments directly.
- *
- * TODO(#289683): add `resolve` and `isStale` once `ProposalsService` is
- * available from the `agenticInvestigations` plugin. Until then, attachments
- * are by-value and can go stale if the proposal status changes after the card
- * is rendered. The browser card re-reads the live proposal on mount as a
- * best-effort mitigation.
  */
 export const proposalAttachmentType: AttachmentTypeDefinition = {
   id: PROPOSAL_ATTACHMENT_TYPE,

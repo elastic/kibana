@@ -34,8 +34,6 @@ export type DecisionState =
  * AlertZero QueryClient context.  It manages its own lightweight state and calls
  * the Kibana HTTP client directly.
  *
- * NOTE: Approve/dismiss will return 404 until elastic/kibana#289683 lands and
- * the `agenticInvestigations` plugin registers its routes.
  */
 export const useProposalDecision = (http: HttpSetup) => {
   const [decisionState, setDecisionState] = useState<DecisionState>({ status: 'idle' });

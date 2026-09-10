@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * These constants are owned by AlertZero — they are NOT in elastic/kibana#289683.
- * Do not delete this file when that PR merges.
- */
-
 /** Attachment type identifier registered with Agent Builder. */
 export const PROPOSAL_ATTACHMENT_TYPE = 'investigation_proposal' as const;
 

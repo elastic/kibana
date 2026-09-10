@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export { AGENTIC_INVESTIGATIONS_API_VERSION, PROPOSALS_INTERNAL_URL } from './constants';
-
 export {
-  actionImpactSchema,
-  actionCategorySchema,
+  AGENTIC_INVESTIGATIONS_API_VERSION,
+  PROPOSALS_INTERNAL_URL,
   approveProposalRequestSchema,
   dismissReasonSchema,
   dismissProposalRequestSchema,
@@ -21,8 +19,7 @@ export {
   proposalOriginSchema,
   proposalSchema,
   proposalStatusSchema,
-  proposalUserSchema,
-} from './proposal';
+} from '@kbn/agentic-investigations-plugin/common';
 export type {
   ActionMetadata,
   ApproveProposalRequest,
@@ -34,8 +31,7 @@ export type {
   ProposalImpact,
   ProposalOrigin,
   ProposalStatus,
-  ProposalUser,
   ProposalWithMetadata,
-} from './proposal';
+} from '@kbn/agentic-investigations-plugin/common';
 
 export { PROPOSAL_ATTACHMENT_TYPE, PROPOSAL_WITHOUT_ACTION } from './attachment';
