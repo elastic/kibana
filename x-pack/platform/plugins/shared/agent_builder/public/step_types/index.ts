@@ -14,6 +14,7 @@ import {
   conversationAttachmentUpdatedTriggerCommonDefinition,
   conversationAttachmentDeletedTriggerCommonDefinition,
 } from '../../common/workflows/triggers';
+import { sharedIcon } from './shared';
 
 export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
@@ -49,13 +50,17 @@ export function registerWorkflowSteps(
   );
 
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
-  workflowsExtensions.registerTriggerDefinition(
-    conversationAttachmentAddedTriggerCommonDefinition
-  );
-  workflowsExtensions.registerTriggerDefinition(
-    conversationAttachmentUpdatedTriggerCommonDefinition
-  );
-  workflowsExtensions.registerTriggerDefinition(
-    conversationAttachmentDeletedTriggerCommonDefinition
-  );
+
+  workflowsExtensions.registerTriggerDefinition({
+    ...conversationAttachmentAddedTriggerCommonDefinition,
+    icon: sharedIcon,
+  });
+  workflowsExtensions.registerTriggerDefinition({
+    ...conversationAttachmentUpdatedTriggerCommonDefinition,
+    icon: sharedIcon,
+  });
+  workflowsExtensions.registerTriggerDefinition({
+    ...conversationAttachmentDeletedTriggerCommonDefinition,
+    icon: sharedIcon,
+  });
 }
