@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Scout audit: REPLACE WITH JEST, do not migrate wholesale. All blocks except `trackTabs` are
+ * already covered by discover/public/ebt_manager/discover_ebt_manager.test.ts.
+ * `trackTabsEvent` (ebt_manager/scoped_discover_ebt_manager.ts) has no Jest coverage — add it
+ * there rather than porting these 7 tests.
+ */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
