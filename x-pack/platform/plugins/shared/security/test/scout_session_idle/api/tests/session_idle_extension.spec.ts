@@ -21,8 +21,6 @@ import {
   SESSION_API_HEADERS,
 } from '../../../scout_session_management/helpers';
 
-const IDLE_TIMEOUT_MS = 10_000;
-
 test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   let sessionCookie: string;
 
