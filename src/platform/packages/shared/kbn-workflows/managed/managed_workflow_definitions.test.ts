@@ -12,6 +12,10 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  ALERTZERO_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
+  ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
+  ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -27,6 +31,10 @@ import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
+import RULE_CREATION_YAML from './definitions/alertzero/rule_creation.yaml';
+import RULE_PREVIEW_YAML from './definitions/alertzero/rule_preview.yaml';
+import RULE_TUNING_REVIEW_YAML from './definitions/alertzero/rule_tuning_review.yaml';
+import RULE_TUNING_WORKER_YAML from './definitions/alertzero/rule_tuning_worker.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -159,6 +167,10 @@ it.each([
     DETECTION_RULE_CREATION_YAML,
     '1:a6804a44',
   ],
+  [ALERTZERO_RULE_PREVIEW_WORKFLOW_ID, RULE_PREVIEW_YAML, '2:033fd9bb'],
+  [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_WORKER_YAML, '23:b27e5115'],
+  [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID, RULE_TUNING_REVIEW_YAML, '14:90caeee1'],
+  [ALERTZERO_RULE_CREATION_WORKFLOW_ID, RULE_CREATION_YAML, '2:95f37a04'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
