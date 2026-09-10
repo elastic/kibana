@@ -48,7 +48,7 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
     }
   );
 
-  spaceTest('preserves filters when visualizing a field in Lens', async ({ pageObjects }) => {
+  spaceTest('preserves filters when visualizing a field in Lens', async ({ page, pageObjects }) => {
     const { filterBar, unifiedFieldList } = pageObjects;
 
     await filterBar.addFilter({
@@ -58,17 +58,24 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
     });
     await unifiedFieldList.clickFieldListItemVisualize('geo.src');
 
-    expect(await filterBar.hasFilter({ field: 'bytes', value: '3,500 to 4,000' })).toBe(true);
+    await expect(page.testSubj.locator('lnsWorkspace')).toBeVisible();
+    await expect(
+      page.testSubj.locator('~filter & ~filter-key-bytes & ~filter-value-3,500 to 4,000')
+    ).toBeVisible();
   });
 
-  spaceTest('preserves the query when visualizing a field in Lens', async ({ pageObjects }) => {
-    const { discover, queryBar, unifiedFieldList } = pageObjects;
+  spaceTest(
+    'preserves the query when visualizing a field in Lens',
+    async ({ page, pageObjects }) => {
+      const { discover, unifiedFieldList } = pageObjects;
 
-    await discover.writeAndSubmitKqlQuery('machine.os : ios');
-    await unifiedFieldList.clickFieldListItemVisualize('geo.dest');
+      await discover.writeAndSubmitKqlQuery('machine.os : ios');
+      await unifiedFieldList.clickFieldListItemVisualize('geo.dest');
 
-    expect(await queryBar.getQuery()).toBe('machine.os : ios');
-  });
+      await expect(page.testSubj.locator('lnsWorkspace')).toBeVisible();
+      await expect(page.testSubj.locator('queryInput')).toHaveValue('machine.os : ios');
+    }
+  );
 
   spaceTest('opens the histogram breakdown in Lens', async ({ page, pageObjects }) => {
     const { discover } = pageObjects;
