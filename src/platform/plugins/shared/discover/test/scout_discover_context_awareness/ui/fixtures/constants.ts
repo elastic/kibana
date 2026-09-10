@@ -29,6 +29,40 @@ export const CONTEXT_AWARENESS_TIME_RANGE = {
 };
 
 /**
+ * The data grid virtualises rows, so only the ones that fit the viewport reach the DOM. The default
+ * 1280x720 viewport renders just four rows once the tall summary column is in play, which is fewer
+ * than the six the context awareness archive returns. Specs that assert over a whole result set
+ * need the extra height: `spaceTest.use({ viewport: GRID_VIEWPORT })`.
+ */
+export const GRID_VIEWPORT = { width: 1920, height: 1080 } as const;
+
+/**
+ * `@timestamp` of every document in {@link CONTEXT_AWARENESS_ES_ARCHIVE}, newest first: the three
+ * `my-example-logs` documents interleave with the three `my-example-metrics` ones.
+ */
+export const ALL_TIMESTAMPS_DESC = [
+  '2024-06-10T16:30:00.000Z',
+  '2024-06-10T16:00:00.000Z',
+  '2024-06-10T15:30:00.000Z',
+  '2024-06-10T15:00:00.000Z',
+  '2024-06-10T14:30:00.000Z',
+  '2024-06-10T14:00:00.000Z',
+];
+
+/** `@timestamp` of the `my-example-logs` documents only, newest first. */
+export const LOGS_TIMESTAMPS_DESC = [
+  '2024-06-10T16:00:00.000Z',
+  '2024-06-10T15:00:00.000Z',
+  '2024-06-10T14:00:00.000Z',
+];
+
+/**
+ * `log.level` of the `my-example-logs` documents, newest first, capitalised the way the data source
+ * profile's cell renderer displays them (`debug` / `error` / `info` in the source documents).
+ */
+export const LOGS_LEVELS_DESC = ['Debug', 'Error', 'Info'];
+
+/**
  * Covers the `logstash_functional` documents, for the cases that query `logstash*` instead of the
  * context awareness indices.
  */
