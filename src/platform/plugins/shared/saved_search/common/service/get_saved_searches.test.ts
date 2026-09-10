@@ -22,6 +22,26 @@ describe('getSavedSearch', () => {
     searchSourceCreate = dataPluginMock.createStartContract().search.searchSource.create;
   });
 
+  test('should reject an ambiguous legacy URL before creating the saved search', async () => {
+    const savedSearchId = 'conflicting-session';
+    const handleGetSavedSrchError = jest.fn();
+    getSavedSrch = jest.fn().mockResolvedValue({
+      meta: { outcome: 'conflict' },
+    } as Awaited<ReturnType<GetSavedSearchDependencies['getSavedSrch']>>);
+
+    const result = getSavedSearch(savedSearchId, {
+      getSavedSrch,
+      searchSourceCreate,
+      handleGetSavedSrchError,
+    });
+
+    await expect(result).rejects.toThrow(
+      'This Discover session has the same URL as a legacy alias. Disable the alias to resolve this error'
+    );
+    expect(searchSourceCreate).not.toHaveBeenCalled();
+    expect(handleGetSavedSrchError).toHaveBeenCalledWith(expect.any(Error), savedSearchId);
+  });
+
   test('should find saved search', async () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {

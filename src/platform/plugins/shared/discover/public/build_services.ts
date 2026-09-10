@@ -81,6 +81,14 @@ import {
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
+import {
+  createDiscoverSessionClient,
+  createDiscoverSessionPersistence,
+  type DiscoverSessionPersistence,
+} from './session';
+
+// Enable locally while testing the REST persistence path. Keep disabled in shared branches.
+const USE_DISCOVER_SESSION_HTTP_API = true;
 
 /**
  * Location state of internal Discover history instance
@@ -115,6 +123,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  discoverSessionPersistence: DiscoverSessionPersistence;
   discoverFeatureFlags: DiscoverFeatureFlags;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
@@ -203,6 +212,15 @@ export const buildServices = ({
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
 
+  const discoverSessionClient = createDiscoverSessionClient(core.http);
+  // Keep loading and saving behind one service, including state conversion.
+  // The flag and legacy branch can be removed once Discover uses only HTTP.
+  const discoverSessionPersistence = createDiscoverSessionPersistence({
+    apiClient: discoverSessionClient,
+    legacyClient: plugins.savedSearch,
+    useHttpApi: USE_DISCOVER_SESSION_HTTP_API,
+  });
+
   return {
     agentBuilder: plugins.agentBuilder,
     aiops: plugins.aiops,
@@ -217,6 +235,7 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
+    discoverSessionPersistence,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),

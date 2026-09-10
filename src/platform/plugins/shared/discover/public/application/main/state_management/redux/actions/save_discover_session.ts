@@ -205,7 +205,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       copyOnSave: newCopyOnSave,
     };
 
-    const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
+    const discoverSession = await services.discoverSessionPersistence.save(saveParams, saveOptions);
 
     if (discoverSession) {
       await dispatch(

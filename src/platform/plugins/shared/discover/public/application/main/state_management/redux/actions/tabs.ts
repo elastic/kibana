@@ -46,6 +46,7 @@ import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
+import { loadDiscoverSession } from '../../../../../session';
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
@@ -371,10 +372,22 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
+    const getPersistedDiscoverSession = async () => {
+      if (!discoverSessionId) {
+        return undefined;
+      }
+
+      return loadDiscoverSession({
+        id: discoverSessionId,
+        persistence: services.discoverSessionPersistence,
+        core: services.core,
+      });
+    };
+
     const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
-      discoverSessionId ? services.savedSearch.getDiscoverSession(discoverSessionId) : undefined,
+      getPersistedDiscoverSession(),
     ]);
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
