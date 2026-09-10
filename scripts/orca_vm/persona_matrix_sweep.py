@@ -445,7 +445,7 @@ AD_DATASET_REMOTE = (
 )
 PATCHED_SCOUT_CONFIG = (
     KIBANA_MAIN.parent
-    / "kibana.worktrees/persona-matrix-maxpayload"
+    / "kibana.worktrees/evals-ext-matrix"
     / "src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/"
     "evals_security_persona_matrix/stateful/classic.stateful.config.ts"
 )
