@@ -112,6 +112,7 @@ export type { GraphNodeUnion } from './nodes/union';
 export type { WorkflowGraphType } from './graph';
 
 export {
+  isSynthetic,
   isAtomic,
   isDataSet,
   isElasticsearch,

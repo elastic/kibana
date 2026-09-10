@@ -43,7 +43,7 @@ export interface WorkflowExecutionCursorApi {
  * {@link WorkflowExecutionCursor.start} and {@link WorkflowExecutionCursor.stop}.
  */
 export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
-  private readonly workflowGraph: WorkflowRuntimeGraph;
+  private readonly runtimeGraph: WorkflowRuntimeGraph;
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
@@ -52,8 +52,8 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private pendingSynthetic: { currentNodeId: string; stepId: string; stepType: string } | undefined;
 
   constructor(init: WorkflowExecutionCursorInit) {
-    this.workflowGraph = init.workflowExecutionGraph;
-    this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
+    this.runtimeGraph = init.workflowExecutionGraph;
+    this.currentNodeId = init.nodeId || this.runtimeGraph.topologicalOrder[0];
     this.stackFrames = init.stackFrames ?? [];
   }
 
@@ -107,7 +107,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    */
   commitPendingNavigation(): void {
     if (this.pendingSynthetic) {
-      this.nextNodeId = this.workflowGraph.insertSyntheticScope(
+      this.nextNodeId = this.runtimeGraph.insertSyntheticScope(
         this.pendingSynthetic.currentNodeId,
         this.pendingSynthetic.stepId,
         this.pendingSynthetic.stepType
@@ -124,7 +124,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
       return null;
     }
 
-    return this.workflowGraph.getNode(this.currentNodeId) ?? null;
+    return this.runtimeGraph.getNode(this.currentNodeId) ?? null;
   }
 
   public get nextNode(): GraphNodeUnion | null {
@@ -132,11 +132,11 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
       return null;
     }
 
-    return this.workflowGraph.getNode(this.nextNodeId) ?? null;
+    return this.runtimeGraph.getNode(this.nextNodeId) ?? null;
   }
 
   public navigateToNode(nodeId: string): void {
-    if (!this.workflowGraph.getNode(nodeId)) {
+    if (!this.runtimeGraph.getNode(nodeId)) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
     }
 
@@ -144,11 +144,11 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   public navigateToNextNode(): void {
-    this.nextNodeId = this.nodeAfter(this.currentNodeId);
+    this.nextNodeId = this.runtimeGraph.nodeAfter(this.currentNodeId);
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.nextNodeId = this.nodeAfter(nodeId);
+    this.nextNodeId = this.runtimeGraph.nodeAfter(nodeId);
   }
 
   /**
@@ -184,15 +184,6 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     }).stackFrames;
   }
 
-  private nodeAfter(nodeId: string | undefined): string | undefined {
-    const topologicalOrder = this.workflowGraph.topologicalOrder;
-    const index = topologicalOrder.findIndex((id) => id === nodeId);
-    if (index >= 0 && index < topologicalOrder.length - 1) {
-      return topologicalOrder[index + 1];
-    }
-    return undefined;
-  }
-
   private syncScopeStack(): void {
     if (!this.currentNodeId) {
       return;
@@ -206,7 +197,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
       }
     }
 
-    const frames = this.workflowGraph.getNodeStack(this.currentNodeId);
+    const frames = this.runtimeGraph.getNodeStack(this.currentNodeId).stackFrames;
 
     let currentNodeScope = new WorkflowScopeStack();
 

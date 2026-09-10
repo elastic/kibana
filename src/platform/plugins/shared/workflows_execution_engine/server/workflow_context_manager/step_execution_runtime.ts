@@ -61,7 +61,7 @@ interface StepExecutionRuntimeInit {
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
-  private workflowGraph: RuntimeGraphView;
+  private runtimeGraph: RuntimeGraphView;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;
@@ -83,7 +83,7 @@ export class StepExecutionRuntime {
   }
 
   private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
+    return this.runtimeGraph.topologicalOrder;
   }
 
   private getStepName(): string {
@@ -103,7 +103,7 @@ export class StepExecutionRuntime {
   }
 
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
-    this.workflowGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
+    this.runtimeGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
     this.contextManager = stepExecutionRuntimeInit.contextManager;
 
     // Use workflow execution ID as traceId for APM compatibility

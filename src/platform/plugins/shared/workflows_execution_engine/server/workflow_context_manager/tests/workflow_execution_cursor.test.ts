@@ -16,8 +16,16 @@ describe('WorkflowExecutionCursor', () => {
   let workflowExecutionGraph: WorkflowRuntimeGraph;
 
   beforeEach(() => {
+    const topologicalOrder = ['node1', 'node2', 'node3'];
     workflowExecutionGraph = {
-      topologicalOrder: ['node1', 'node2', 'node3'],
+      topologicalOrder,
+      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+        const index = topologicalOrder.findIndex((id) => id === nodeId);
+        if (index >= 0 && index < topologicalOrder.length - 1) {
+          return topologicalOrder[index + 1];
+        }
+        return undefined;
+      }),
       getNode: jest.fn().mockImplementation((nodeId: string) => {
         if (nodeId === 'node1') {
           return { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion;

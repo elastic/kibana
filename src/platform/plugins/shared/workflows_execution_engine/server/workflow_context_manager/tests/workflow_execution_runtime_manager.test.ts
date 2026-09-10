@@ -120,8 +120,16 @@ describe('WorkflowExecutionRuntimeManager', () => {
       upsertStep: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
+    const topologicalOrder = ['node1', 'node2', 'node3'];
     workflowExecutionGraph = {
-      topologicalOrder: ['node1', 'node2', 'node3'],
+      topologicalOrder,
+      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+        const index = topologicalOrder.findIndex((id) => id === nodeId);
+        if (index >= 0 && index < topologicalOrder.length - 1) {
+          return topologicalOrder[index + 1];
+        }
+        return undefined;
+      }),
       getInnerStepIds: jest.fn().mockReturnValue(new Set<string>()),
     } as unknown as WorkflowRuntimeGraph;
 
