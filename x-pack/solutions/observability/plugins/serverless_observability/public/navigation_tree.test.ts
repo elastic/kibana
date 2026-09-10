@@ -155,9 +155,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('uses a single Alerts link to classic Observability alerts when alerting v2 is disabled', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
@@ -170,6 +168,59 @@ describe('Navigation Tree', () => {
         link: 'observability-overview:alerts',
         icon: 'warning',
       })
+    );
+    expect(flatAlerts).not.toHaveProperty('renderAs');
+  });
+
+  it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+
+    expect(alertsPanel).toEqual(
+      expect.objectContaining({
+        id: 'alerting',
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+        renderAs: 'panelOpener',
+      })
+    );
+    expect(alertsPanel?.children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+            expect.objectContaining({ link: 'observability-overview:alerts' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Rule Management',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:rules-v2' }),
+            expect.objectContaining({
+              link: 'observabilityAlerting:rules-v1',
+              sideNavStatus: 'hidden',
+            }),
+            expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Notifications and Suppressions',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:action-policies' }),
+            expect.objectContaining({ link: 'management:maintenanceWindows' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Operations',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+          ]),
+        }),
+      ])
     );
   });
 

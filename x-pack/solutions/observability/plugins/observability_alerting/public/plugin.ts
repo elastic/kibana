@@ -81,7 +81,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Alerts (Inbox)',
           }),
           path: OBSERVABILITY_ALERTING_INBOX_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'episodes', 'inbox'],
         },
         {
@@ -90,7 +90,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Rules (v1)',
           }),
           path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'rules', 'classic', 'v1'],
         },
         {
@@ -99,7 +99,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Rules',
           }),
           path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'rules', 'esql'],
         },
         {
@@ -108,7 +108,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Rule Library',
           }),
           path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'templates', 'library'],
         },
         {
@@ -117,7 +117,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Action Policies',
           }),
           path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'actions', 'policies'],
         },
         {
@@ -126,7 +126,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Execution History',
           }),
           path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'history', 'executions'],
         },
       ],
