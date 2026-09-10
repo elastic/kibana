@@ -56,6 +56,7 @@ import {
   FleetUnauthorizedError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
+  isElasticsearchReadOnlyBlockError,
 } from '../../../errors';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -313,6 +314,18 @@ export async function handleInstallPackageFailure({
       status: 'install_failed',
       latestInstallFailedAttempts,
     });
+    // If the underlying failure is an environmental Elasticsearch cluster block (e.g. a flood-stage
+    // disk watermark placing a `read-only-allow-delete` block on an index), retrying the install or
+    // rolling back to the previous version will hit the exact same block and fail again. On affected
+    // deployments this turns into a repetitive ERROR storm (tens of thousands of logs per hour) for a
+    // condition Fleet cannot fix. Skip the retry/rollback and emit a single, non-error log instead.
+    if (isElasticsearchReadOnlyBlockError(error)) {
+      logger.warn(
+        `Skipping retry/rollback for ${pkgkey} after error installing: [${error.toString()}]. The Elasticsearch cluster has a read-only/flood-stage watermark block; free disk space to clear the block. Install type: ${installType}`
+      );
+      return;
+    }
+
     // in case of install, uninstall any package assets
     if (installType === 'install') {
       logger.error(
