@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { AlertingApiServicesFixture } from '../../../common/alerting_api_services';
-import type { AlertingPageObjects } from '../fixtures';
+import type { AlertingPageObjects } from '../../../common/ui/fixtures/page_objects';
 import { buildCreateRuleData, test } from '../fixtures';
 
 const TEST_INDEX = 'test-compose-discover-recovery-yaml-sync';
@@ -186,7 +186,7 @@ test.describe(
           .poll(() => pageObjects.composeDiscover.getSelectedRecoveryType())
           .toBe('query');
         await expect(
-          pageObjects.composeDiscover.flyout.getByText('Recovery condition')
+          pageObjects.composeDiscover.flyout.getByText('Recovery condition', { exact: true })
         ).toBeVisible();
         await expect(pageObjects.composeDiscover.flyout.getByText(RECOVERY_SEGMENT)).toBeVisible();
       });

@@ -1464,6 +1464,8 @@ describe('ComposeDiscoverFlyout', () => {
     it('sets recoveryStrategy to query when Custom is selected, and keeps the recovery tab visible', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
       const getLatestFormProps = () =>
         mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
@@ -1557,6 +1559,7 @@ describe('ComposeDiscoverFlyout', () => {
       });
       renderFlyout();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       expect(readRecoveryStrategy?.()).toBe('no_breach');
 
@@ -1570,6 +1573,7 @@ describe('ComposeDiscoverFlyout', () => {
       mockParseYamlToFormValues = () => ({ values: alertYamlFormValues, error: null });
       renderFlyout();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
 
@@ -1587,6 +1591,7 @@ describe('ComposeDiscoverFlyout', () => {
       });
       renderFlyout();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
 

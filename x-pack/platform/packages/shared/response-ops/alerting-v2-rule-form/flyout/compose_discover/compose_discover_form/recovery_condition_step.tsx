@@ -147,7 +147,7 @@ export function RecoveryConditionStep({
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
-          {renderCustomRecovery({ state, dispatch })}
+          {React.createElement(renderCustomRecovery, { state, dispatch })}
         </>
       )}
 
