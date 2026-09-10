@@ -346,6 +346,40 @@ describe('EvaluatorDefinitionClient', () => {
       );
     });
 
+    it('leaves the history alone when the update changes nothing', async () => {
+      const { client, docs } = createClient();
+      const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const sizeAfterCreate = docs.size;
+
+      const unchanged = await client.update('tone', { description: 'Tone', judge: JUDGE });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(unchanged.id).toBe(created.id);
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('treats an update that omits every field as a no-op', async () => {
+      const { client, docs } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const sizeAfterCreate = docs.size;
+
+      await expect(client.update('tone', {})).resolves.toEqual(
+        expect.objectContaining({ version: '1.0.0' })
+      );
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('still writes when only the judge config changes', async () => {
+      const { client } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+
+      const updated = await client.update('tone', {
+        judge: { ...JUDGE, prompt: 'Rate {{{agent_response}}} strictly.' },
+      });
+
+      expect(updated.version).toBe('1.1.0');
+    });
+
     it('carries omitted fields forward from the version it read', async () => {
       const { client } = createClient();
       await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });

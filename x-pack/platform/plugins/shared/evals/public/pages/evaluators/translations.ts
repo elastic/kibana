@@ -203,7 +203,8 @@ export const LABELS_LABEL = i18n.translate('xpack.evals.evaluators.labelsLabel',
   defaultMessage: 'Labels',
 });
 export const LABELS_HELP = i18n.translate('xpack.evals.evaluators.labelsHelpDescription', {
-  defaultMessage: 'Enter one label and score per line, for example pass=1 and fail=0.',
+  defaultMessage:
+    'Enter one label and score per line, for example pass=1 and fail=0. The score is read after the last equals sign, so a label can contain one.',
 });
 export const REMOVE_SCORE_ARIA_LABEL = i18n.translate(
   'xpack.evals.evaluators.removeScoreAriaLabel',

@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { InternalIStorageClient, StorageIndexAdapter } from '@kbn/storage-adapter';
 import { isResponseError } from '@kbn/es-errors';
+import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import semverCompare from 'semver/functions/compare';
 import semverInc from 'semver/functions/inc';
@@ -197,7 +198,8 @@ export class EvaluatorDefinitionClient {
   /**
    * Writes the next version of a definition. The caller's fields are layered
    * over the latest version, so an update that only changes the description
-   * carries the judge config forward unchanged.
+   * carries the judge config forward unchanged. An update that changes nothing
+   * returns the current version instead of writing a duplicate of it.
    */
   async update(
     name: string,
@@ -216,6 +218,16 @@ export class EvaluatorDefinitionClient {
         throw new EvaluatorNotFoundError(name);
       }
 
+      const nextDescription = description ?? current.description;
+      const nextJudge = judge ?? current.judge;
+
+      // Saving without changing anything would otherwise mint a version identical to the one
+      // below it, inflating a history `listVersions` caps and making `name@version` ambiguous
+      // about which edit it represents.
+      if (nextDescription === current.description && isEqual(nextJudge, current.judge)) {
+        return current;
+      }
+
       const nextVersion = semverInc(current.version, 'minor');
       if (!nextVersion) {
         throw new Error(
@@ -228,8 +240,8 @@ export class EvaluatorDefinitionClient {
         name,
         version: nextVersion,
         kind: 'llm',
-        description: description ?? current.description,
-        judge: judge ?? current.judge,
+        description: nextDescription,
+        judge: nextJudge,
         space_ids: [this.spaceId],
         created_at: timestamp,
         updated_at: timestamp,

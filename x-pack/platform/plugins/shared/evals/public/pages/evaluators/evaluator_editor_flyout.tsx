@@ -54,6 +54,7 @@ import {
   type ConnectorSelectorOption,
 } from '../../components/shared/connector_selector';
 import { getErrorMessage } from '../../utils/get_error_message';
+import { parseLabels, toFieldErrors, type FieldErrors } from './lib';
 import * as i18n from './translations';
 
 interface EvaluatorEditorFlyoutProps {
@@ -85,49 +86,6 @@ const EVIDENCE_PROFILE_KEYS = {
   steps: 'tool_calls',
 } as const;
 
-type FieldErrorKey =
-  | 'name'
-  | 'description'
-  | 'systemPrompt'
-  | 'prompt'
-  | 'evidence'
-  | 'referenceDataKeys'
-  | 'scores';
-
-type FieldErrors = Partial<Record<FieldErrorKey, string>>;
-
-const FIELD_ERROR_MESSAGES: Record<FieldErrorKey, string> = {
-  name: i18n.NAME_INVALID_ERROR,
-  description: i18n.DESCRIPTION_INVALID_ERROR,
-  systemPrompt: i18n.SYSTEM_PROMPT_INVALID_ERROR,
-  prompt: i18n.PROMPT_INVALID_ERROR,
-  evidence: i18n.EVIDENCE_INVALID_ERROR,
-  referenceDataKeys: i18n.REFERENCE_KEYS_INVALID_ERROR,
-  scores: i18n.SCORES_INVALID_ERROR,
-};
-
-/** Maps a draft schema issue back to the form field the user can act on. */
-const toFieldErrorKey = (path: ReadonlyArray<PropertyKey>): FieldErrorKey | undefined => {
-  const [root, branch, leaf] = path.map(String);
-
-  if (root === 'name' || root === 'description') {
-    return root;
-  }
-  if (root !== 'judge') {
-    return undefined;
-  }
-  if (branch === 'system_prompt') {
-    return 'systemPrompt';
-  }
-  if (branch === 'prompt' || branch === 'evidence') {
-    return branch;
-  }
-  if (branch === 'reference_data_keys') {
-    return 'referenceDataKeys';
-  }
-  return branch === 'output' && leaf === 'scores' ? 'scores' : undefined;
-};
-
 const toScoreFormValue = (score: JudgeScore, id: number): ScoreFormValue => ({
   id,
   name: score.name,
@@ -137,33 +95,6 @@ const toScoreFormValue = (score: JudgeScore, id: number): ScoreFormValue => ({
     .map(({ value, score: labelScore }) => `${value}=${labelScore}`)
     .join('\n'),
 });
-
-const parseLabels = (value: string): JudgeScore['labels'] | undefined => {
-  const lines = value
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length === 0) {
-    return undefined;
-  }
-
-  const labels: NonNullable<JudgeScore['labels']> = [];
-  for (const line of lines) {
-    const separator = line.lastIndexOf('=');
-    const label = line.slice(0, separator).trim();
-    // `Number('')` is 0, so an omitted score would otherwise parse as a valid 0.
-    const rawScore = line.slice(separator + 1).trim();
-    const score = Number(rawScore);
-    if (separator < 1 || !label || !rawScore) {
-      return undefined;
-    }
-    if (!Number.isFinite(score) || score < 0 || score > 1) {
-      return undefined;
-    }
-    labels.push({ value: label, score });
-  }
-  return labels;
-};
 
 const resultValue = (score: NonNullable<TestEvaluatorResponse['result']['scores']>[number]) =>
   score.label ?? (score.score === null || score.score === undefined ? '' : String(score.score));
@@ -302,13 +233,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     const draft = { name: name.trim(), description: description.trim(), judge };
     const parsed = UserDefinedEvaluatorDraft.safeParse(draft);
     if (!parsed.success) {
-      const nextFieldErrors: FieldErrors = {};
-      for (const { path } of parsed.error.issues) {
-        const key = toFieldErrorKey(path);
-        if (key) {
-          nextFieldErrors[key] = FIELD_ERROR_MESSAGES[key];
-        }
-      }
+      const nextFieldErrors = toFieldErrors(parsed.error.issues);
       setFieldErrors(nextFieldErrors);
       setFormError(
         Object.keys(nextFieldErrors).length > 0
@@ -600,6 +525,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                             { value: 'categorical', text: i18n.CATEGORICAL_SCORE },
                           ]}
                           fullWidth
+                          data-test-subj={`evalsEvaluatorScoreType-${score.id}`}
                         />
                       </EuiFormRow>
                     </EuiFlexItem>

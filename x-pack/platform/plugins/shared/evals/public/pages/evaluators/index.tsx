@@ -11,7 +11,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -25,6 +24,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ListEvaluatorsResponse } from '@kbn/evals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -173,6 +173,13 @@ export const EvaluatorsPage: React.FC = () => {
 
   const hasActiveFilters = Boolean(search.trim()) || kind !== 'all' || origin !== 'all';
 
+  // Only an empty user-defined set is a "nothing created yet" state. Filtering an existing
+  // set down to nothing is a no-match, and telling the user none exist would be wrong.
+  const hasNoUserDefined = !(data?.evaluators ?? []).some(
+    (evaluator) => evaluator.origin === 'user_defined'
+  );
+  const showCreateFirstPrompt = origin === 'user_defined' && hasNoUserDefined;
+
   const clearFilters = () => {
     setSearch('');
     setKind('all');
@@ -244,38 +251,35 @@ export const EvaluatorsPage: React.FC = () => {
 
         {actionError ? (
           <>
-            <EuiCallOut announceOnMount color="danger" iconType="warning" title={actionError} />
+            <KbnDangerCallout announceOnMount title={actionError} />
             <EuiSpacer size="m" />
           </>
         ) : null}
 
         {error ? (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
-            iconType="warning"
             title={i18n.LOAD_ERROR_TITLE}
-          >
-            <p>{getErrorMessage(error)}</p>
-            <EuiButton color="danger" onClick={() => refetch()}>
-              {i18n.RETRY_BUTTON}
-            </EuiButton>
-          </EuiCallOut>
+            text={<p>{getErrorMessage(error)}</p>}
+            actionProps={{
+              primary: { children: i18n.RETRY_BUTTON, onClick: () => refetch() },
+            }}
+          />
         ) : (
           <>
             {!isLoading && evaluators.length === 0 ? (
               // Filtering to user-defined before creating any is the feature's entry point,
               // so that case gets a create action rather than advice to change the filters.
               <EuiEmptyPrompt
-                iconType={origin === 'user_defined' ? 'plusInCircle' : 'search'}
+                iconType={showCreateFirstPrompt ? 'plusCircle' : 'search'}
                 title={
                   <h2>
-                    {origin === 'user_defined' ? i18n.NO_USER_DEFINED_TITLE : i18n.NO_RESULTS_TITLE}
+                    {showCreateFirstPrompt ? i18n.NO_USER_DEFINED_TITLE : i18n.NO_RESULTS_TITLE}
                   </h2>
                 }
                 body={
                   <p>
-                    {origin === 'user_defined'
+                    {showCreateFirstPrompt
                       ? i18n.NO_USER_DEFINED_DESCRIPTION
                       : i18n.NO_RESULTS_DESCRIPTION}
                   </p>
@@ -286,7 +290,7 @@ export const EvaluatorsPage: React.FC = () => {
                         <EuiButton
                           key="create"
                           fill
-                          iconType="plusInCircle"
+                          iconType="plusCircle"
                           onClick={() => setEditor({ mode: 'create' })}
                           data-test-subj="evalsEvaluatorEmptyCreate"
                         >
