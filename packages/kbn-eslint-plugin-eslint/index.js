@@ -19,6 +19,7 @@ module.exports = {
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
     no_conditional_saved_object_type_registration: require('./rules/no_conditional_saved_object_type_registration'),
+    no_eso_registration_dotted_attribute_keys: require('./rules/no_eso_registration_dotted_attribute_keys'),
     no_unsafe_dynamic_http_path: require('./rules/no_unsafe_dynamic_http_path'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
     no_unsafe_hash: require('./rules/no_unsafe_hash'),

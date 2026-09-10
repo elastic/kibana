@@ -1004,7 +1004,9 @@ module.exports = {
         'x-pack/scripts/*.js',
         '**/jest.config.js',
       ],
-      excludedFiles: ['**/integration_tests/**/*'],
+      // Fixtures are lint inputs, not plugin source: rules that follow imports
+      // need them written as real ES modules.
+      excludedFiles: ['**/integration_tests/**/*', '**/__fixtures__/**/*'],
       rules: {
         'import/no-commonjs': 'off',
         'prefer-object-spread': 'off',
