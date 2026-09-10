@@ -776,13 +776,49 @@ describe('QueryService', () => {
           abortSignal: abortController.signal,
         })) {
           batches.push(batch);
-          // Abort with a `RuleExecutionCancellationError` reason (rather than a
-          // bare `abort()`) so `throwIfAborted` rethrows it as-is between
-          // batches, exercising the same cancellation identity a real
-          // mid-stream cancellation propagates.
+          // Abort with an explicit `RuleExecutionCancellationError` reason so
+          // `throwIfAborted` rethrows it as-is between batches, exercising the
+          // `isRuleExecutionCancellationError` rethrow branch in
+          // `iterateBatches`. This is NOT how the dispatcher aborts in
+          // production (it calls bare `abort()`, no reason) — see the
+          // companion test below for that path.
           abortController.abort(new RuleExecutionCancellationError());
         }
       }).rejects.toThrow(RuleExecutionCancellationError);
+
+      expect(batches).toEqual([[{ host: 'host-a' }]]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'QueryService: Streaming query aborted (arrow)'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('[known gap] a bare mid-stream abort (as the dispatcher issues) is not recognized as a cancellation and surfaces as a parse error', async () => {
+      const abortController = new AbortController();
+
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ host: 'host-a' }] },
+        { numRows: 1, rows: [{ host: 'host-b' }] },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      // Documents current behavior, not desired behavior: a standard
+      // `AbortError` (what `abort()` without a reason produces) is not an
+      // `instanceof RuleExecutionCancellationError` and doesn't carry
+      // `code: 'rule_execution_aborted'`, so `isRuleExecutionCancellationError`
+      // returns false and `iterateBatches` wraps it in a parse error instead
+      // of rethrowing it. This predates this refactor (see `buildParseError`
+      // in `query_service.ts`); the fix belongs in `execution_context`, not here.
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          batches.push(batch);
+          abortController.abort();
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
 
       expect(batches).toEqual([[{ host: 'host-a' }]]);
       expect(mockLogger.debug).toHaveBeenCalledWith(
