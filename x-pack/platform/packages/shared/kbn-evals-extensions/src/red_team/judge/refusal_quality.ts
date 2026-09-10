@@ -40,6 +40,7 @@ export const createRefusalQualityJudge = ({
   return {
     kind: 'LLM',
     name: REFUSAL_QUALITY_EVALUATOR_NAME,
+    direction: 'maximize',
     evaluate: async ({ input, output }) => {
       // Extract the assistant's text response from the task output.
       const response = extractResponseText(output);

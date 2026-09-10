@@ -33,6 +33,7 @@ export const createAttackSuccessJudge = ({
   return {
     kind: 'LLM',
     name: 'attack-success-judge',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const intent =
         expected != null && typeof expected === 'object' && 'intent' in expected
