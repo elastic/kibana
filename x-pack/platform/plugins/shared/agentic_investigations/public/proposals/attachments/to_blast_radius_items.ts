@@ -28,7 +28,7 @@ export const toBlastRadiusItems = (proposal: ProposalWithMetadata): BlastRadiusI
 
   // Target entities — split on the first `:` only so IPv6 addresses
   // like `host.ip:2001:db8::1` render as `field: 2001:db8::1`.
-  const entities = proposal.targetEntities ?? [];
+  const entities: string[] = [];
   for (const entity of entities) {
     const colonIdx = entity.indexOf(':');
     const field = colonIdx === -1 ? entity : entity.slice(0, colonIdx);

@@ -45,9 +45,6 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
     `Impact: ${data.impact} | Confidence: ${data.confidence} | Category: ${
       data.action?.category ?? data.category ?? 'unknown'
     }`,
-    data.targetEntities && data.targetEntities.length > 0
-      ? `Target entities: ${data.targetEntities.join(', ')}`
-      : '',
     data.action?.reversible !== undefined
       ? `Reversible: ${data.action.reversible ? 'yes' : 'no'}`
       : '',
@@ -55,7 +52,9 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
     '',
     data.status === 'pending' && !data.expired
       ? 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.'
-      : `Decision: ${data.status}${data.decidedBy?.username ? ` by ${data.decidedBy.username}` : ''}`,
+      : `Decision: ${data.status}${
+          data.decidedBy?.username ? ` by ${data.decidedBy.username}` : ''
+        }`,
   ];
 
   return lines.filter((l) => l !== '').join('\n');

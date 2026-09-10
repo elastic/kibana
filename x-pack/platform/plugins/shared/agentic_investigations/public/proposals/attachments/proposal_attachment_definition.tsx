@@ -9,12 +9,8 @@ import React from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import {
-  PROPOSAL_ATTACHMENT_TYPE,
-  PROPOSAL_WITHOUT_ACTION,
-  isDecided,
-} from '../../../common';
-import type { ProposalWithMetadata } from '../../../common';
+import { PROPOSAL_WITHOUT_ACTION, isDecided } from '../../../common';
+import type { ProposalWithMetadata, PROPOSAL_ATTACHMENT_TYPE } from '../../../common';
 import { ProposalApprovalCard } from '../components/proposal_approval_card';
 
 /** The attachment as stored in agent_builder conversations. */
@@ -94,11 +90,7 @@ export const createProposalAttachmentDefinition = ({
       data: props.attachment.data,
     });
     return (
-      <ProposalApprovalCard
-        proposal={props.attachment.data}
-        proposalId={proposalId}
-        http={http}
-      />
+      <ProposalApprovalCard proposal={props.attachment.data} proposalId={proposalId} http={http} />
     );
   },
 });

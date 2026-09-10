@@ -7,7 +7,8 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/agentic-investigations-common';
@@ -56,7 +57,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     // Re-read on mount so stale snapshots don't show wrong button states.
     useEffect(() => {
       http
-        .get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${proposalId}`, {
+        .get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(proposalId)}`, {
           version: AGENTIC_INVESTIGATIONS_API_VERSION,
         })
         .then(setLiveProposal)
@@ -182,9 +183,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             <>
               <EuiSpacer size="m" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
-                  color="warning"
                   size="s"
                   title={i18n.translate('xpack.agenticInvestigations.proposalCard.expiredCallout', {
                     defaultMessage:
@@ -198,18 +198,14 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             <>
               <EuiSpacer size="m" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
-                  color="primary"
                   size="s"
-                  title={i18n.translate(
-                    'xpack.agenticInvestigations.proposalCard.decidedCallout',
-                    {
-                      defaultMessage:
-                        'This proposal has already been decided ({status}). No further action is needed.',
-                      values: { status: liveProposal.status },
-                    }
-                  )}
+                  title={i18n.translate('xpack.agenticInvestigations.proposalCard.decidedCallout', {
+                    defaultMessage:
+                      'This proposal has already been decided ({status}). No further action is needed.',
+                    values: { status: liveProposal.status },
+                  })}
                 />
               </div>
             </>
@@ -230,18 +226,19 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           )}
 
           {/* Decision mutation error feedback */}
-          {(decisionState.status === 'conflict' ||
-            decisionState.status === 'expired' ||
-            decisionState.status === 'error') && (
+          {decisionState.status === 'conflict' && (
             <>
               <EuiSpacer size="s" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <EuiCallOut
-                  announceOnMount
-                  color={decisionState.status === 'conflict' ? 'warning' : 'danger'}
-                  size="s"
-                  title={decisionState.message}
-                />
+                <KbnWarningCallout announceOnMount size="s" title={decisionState.message} />
+              </div>
+            </>
+          )}
+          {(decisionState.status === 'expired' || decisionState.status === 'error') && (
+            <>
+              <EuiSpacer size="s" />
+              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+                <KbnDangerCallout announceOnMount size="s" title={decisionState.message} />
               </div>
             </>
           )}

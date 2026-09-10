@@ -7,12 +7,7 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  useEuiTheme,
-  type EuiButtonColor,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, useEuiTheme, type EuiButtonColor } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { BlastRadiusSection } from './blast_radius_section';
@@ -99,10 +94,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
 
-    const iconColor =
-      tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.primary;
-    const defaultButtonColor: EuiButtonColor =
-      tone === 'danger' ? 'danger' : 'primary';
+    const iconColor = tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.primary;
+    const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
     const hasFooter =
       primaryAction !== undefined ||
@@ -163,7 +156,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             )}
             {secondaryActions?.map((action, i) => (
               <EuiButtonEmpty
-                // eslint-disable-next-line react/no-array-index-key
                 key={i}
                 size="s"
                 color={action.color ?? 'text'}

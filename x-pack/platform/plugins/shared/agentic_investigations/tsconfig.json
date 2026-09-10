@@ -30,7 +30,8 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agentic-investigations-common",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

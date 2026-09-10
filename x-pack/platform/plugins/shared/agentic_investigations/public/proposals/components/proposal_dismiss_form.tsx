@@ -88,10 +88,9 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
           label={i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleLabel', {
             defaultMessage: 'Rationale',
           })}
-          helpText={i18n.translate(
-            'xpack.agenticInvestigations.proposalCard.rationaleHelpText',
-            { defaultMessage: 'Optional — explain why this proposal is being dismissed.' }
-          )}
+          helpText={i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleHelpText', {
+            defaultMessage: 'Optional — explain why this proposal is being dismissed.',
+          })}
         >
           <EuiTextArea
             value={rationale}

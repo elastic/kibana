@@ -99,14 +99,18 @@ describe('ApprovalContent', () => {
 
   it('calls primaryAction.onClick when primary button is clicked', () => {
     const onClick = jest.fn();
-    renderContent({ primaryAction: { label: 'Approve', onClick, 'data-test-subj': 'content-confirm' } });
+    renderContent({
+      primaryAction: { label: 'Approve', onClick, 'data-test-subj': 'content-confirm' },
+    });
     fireEvent.click(screen.getByTestId('content-confirm'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('calls secondaryAction.onClick when secondary button is clicked', () => {
     const onClick = jest.fn();
-    renderContent({ secondaryActions: [{ label: 'Cancel', onClick, 'data-test-subj': 'content-cancel' }] });
+    renderContent({
+      secondaryActions: [{ label: 'Cancel', onClick, 'data-test-subj': 'content-cancel' }],
+    });
     fireEvent.click(screen.getByTestId('content-cancel'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
@@ -122,6 +126,7 @@ describe('ApprovalContent', () => {
     const form = screen.getByTestId('inline-form');
     const confirm = screen.getByTestId('content-confirm');
     // children should appear before the confirm button in DOM order
+    // eslint-disable-next-line no-bitwise
     expect(form.compareDocumentPosition(confirm) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 

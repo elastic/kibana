@@ -8,15 +8,8 @@
 import { useCallback, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  PROPOSALS_INTERNAL_URL,
-} from '../../../common';
-import type {
-  ApproveProposalRequest,
-  DismissProposalRequest,
-  Proposal,
-} from '../../../common';
+import { AGENTIC_INVESTIGATIONS_API_VERSION, PROPOSALS_INTERNAL_URL } from '../../../common';
+import type { ApproveProposalRequest, DismissProposalRequest, Proposal } from '../../../common';
 
 export type DecisionState =
   | { status: 'idle' }
@@ -65,10 +58,10 @@ export const useProposalDecision = (http: HttpSetup) => {
     async (id: string, body: ApproveProposalRequest) => {
       setDecisionState({ status: 'loading' });
       try {
-        const proposal = await http.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/approve`, {
-          version: AGENTIC_INVESTIGATIONS_API_VERSION,
-          body: JSON.stringify(body),
-        });
+        const proposal = await http.post<Proposal>(
+          `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/approve`,
+          { version: AGENTIC_INVESTIGATIONS_API_VERSION, body: JSON.stringify(body) }
+        );
         setDecisionState({ status: 'success', proposal });
         return proposal;
       } catch (error) {
@@ -83,10 +76,10 @@ export const useProposalDecision = (http: HttpSetup) => {
     async (id: string, body: DismissProposalRequest) => {
       setDecisionState({ status: 'loading' });
       try {
-        const proposal = await http.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/dismiss`, {
-          version: AGENTIC_INVESTIGATIONS_API_VERSION,
-          body: JSON.stringify(body),
-        });
+        const proposal = await http.post<Proposal>(
+          `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/dismiss`,
+          { version: AGENTIC_INVESTIGATIONS_API_VERSION, body: JSON.stringify(body) }
+        );
         setDecisionState({ status: 'success', proposal });
         return proposal;
       } catch (error) {

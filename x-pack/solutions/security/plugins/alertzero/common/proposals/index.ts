@@ -33,4 +33,3 @@ export type {
   ProposalStatus,
   ProposalWithMetadata,
 } from '@kbn/agentic-investigations-plugin/common';
-
