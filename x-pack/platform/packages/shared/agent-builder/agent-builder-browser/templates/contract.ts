@@ -14,13 +14,13 @@ import type {
 import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
- * Props passed to a conversation template tab's `content` component.
+ * Props shared by conversation details tabs, headers, and footers.
  */
-export interface ConversationTemplateTabRenderProps {
+export interface ConversationTemplateDetailsFlyoutRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
-  /** Public service for looking up attachment UI definitions. */
-  attachmentsService: AttachmentServiceStartContract;
+  /** Whether the flyout was opened by the chat's details button rather than the public API. */
+  isOpenedFromChat: boolean;
 }
 
 /**
@@ -37,14 +37,17 @@ export interface ConversationTemplateTabDefinition {
    * mount any providers you need inside this component. The flyout can render outside any
    * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
    */
-  content: ComponentType<ConversationTemplateTabRenderProps>;
+  content: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
 }
 
 export interface ConversationTemplateBriefCardRenderProps {
   conversation: ConversationWithoutRoundsWithPermissions;
 }
 
+/** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */
 export interface ConversationTemplateUIContext {
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
   /** Opens the sidebar using the existing conversation navigation behavior. */
   openSidebarConversation: (conversationId: string) => void;
   /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
@@ -67,6 +70,13 @@ export interface ConversationTemplateUIDefinition {
   tabs: readonly string[];
   /** Self-contained card component; capture solution services and providers at registration. */
   briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /** Optional flyout content; capture capabilities from the template registration context. */
+  detailsFlyout?: {
+    /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
+    header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
+    footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+  };
 }
 
 /**
@@ -77,15 +87,18 @@ export interface ConversationTemplateUIDefinition {
  */
 export interface ConversationTemplateServiceStartContract {
   /**
-   * Register a reusable flyout tab under a tab id.
+   * Register a reusable flyout tab with a callback invoked once with Agent Builder capabilities.
    */
-  registerTab(tabId: string, definition: ConversationTemplateTabDefinition): void;
+  registerTab(
+    tabId: string,
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateTabDefinition
+  ): void;
   /**
    * Resolve a registered tab, if any.
    */
   getTab(tabId: string): ConversationTemplateTabDefinition | undefined;
   /**
-   * Register template UI with a callback invoked once with Agent Builder navigation methods.
+   * Register template UI with a callback invoked once with Agent Builder capabilities.
    */
   registerTemplateUIDefinition(
     templateId: string,
