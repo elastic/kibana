@@ -10,6 +10,8 @@
 import { DiscoverTabType } from '@kbn/discover-utils';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {

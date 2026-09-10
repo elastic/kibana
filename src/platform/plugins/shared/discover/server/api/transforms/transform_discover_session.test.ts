@@ -14,7 +14,9 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { fromStoredTab } from '../../../common/embeddable/transform_utils';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiData,
