@@ -54,7 +54,10 @@ describe('a managed FlyoutTemplate', () => {
   it('takes root props from the opener rather than the element', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
 
-    renderManaged(managed(), <Content extraProps={{ 'data-test-subj': 'ignoredSubj', size: 'l' }} />);
+    renderManaged(
+      managed(),
+      <Content extraProps={{ 'data-test-subj': 'ignoredSubj', size: 'l' }} />
+    );
 
     expect(screen.getByTestId('managedFlyoutHeader')).toBeInTheDocument();
     expect(screen.queryByTestId('ignoredSubjHeader')).not.toBeInTheDocument();
@@ -107,10 +110,7 @@ describe('a managed FlyoutTemplate', () => {
   it('runs the element handler before tearing down, and tears down once', () => {
     const order: string[] = [];
     const close = jest.fn(() => order.push('close'));
-    renderManaged(
-      managed({ close }),
-      <Content onClose={() => order.push('element')} />
-    );
+    renderManaged(managed({ close }), <Content onClose={() => order.push('element')} />);
 
     fireEvent.click(screen.getByLabelText('Close this dialog'));
 

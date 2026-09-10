@@ -101,8 +101,7 @@ export interface OverlayFlyoutTemplateContentProps {
  *
  * @public
  */
-export type OverlayFlyoutTemplateContent =
-  React.ComponentType<OverlayFlyoutTemplateContentProps>;
+export type OverlayFlyoutTemplateContent = React.ComponentType<OverlayFlyoutTemplateContentProps>;
 
 /**
  * APIs to open and manage `FlyoutTemplate`-based fly-out dialogs.
