@@ -14,6 +14,7 @@ import { getFieldValue } from '../../../../../common/domain/euid/commons';
 import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
 import { searchEntitiesByIds } from '../../../../infra/elasticsearch/resolution';
 import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
+import { ResolutionSearchTruncatedError } from '../../../errors';
 import type { ResolutionClient } from '../../resolution_client';
 import { selectTarget, type TargetSelectionEntity } from '../../target_selection';
 import type { MaintainerTelemetryClient } from '../../../../tasks/entity_maintainers/maintainer_telemetry_client';
@@ -68,6 +69,7 @@ interface BucketStats {
   skippedNoopBuckets: number;
   skippedBlockedBuckets: number;
   skippedStaleOverlapBuckets: number;
+  skippedTruncatedBuckets: number;
   cascadeRetargeted: number;
   cascadesBlocked: number;
   failedBuckets: number;
@@ -82,6 +84,7 @@ const emptyStats = (): BucketStats => ({
   skippedNoopBuckets: 0,
   skippedBlockedBuckets: 0,
   skippedStaleOverlapBuckets: 0,
+  skippedTruncatedBuckets: 0,
   cascadeRetargeted: 0,
   cascadesBlocked: 0,
   failedBuckets: 0,
@@ -155,10 +158,11 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
     stats.skippedOversizedBuckets +
     stats.skippedNoopBuckets +
     stats.skippedBlockedBuckets +
-    stats.skippedStaleOverlapBuckets;
+    stats.skippedStaleOverlapBuckets +
+    stats.skippedTruncatedBuckets;
 
   logger.info(
-    `${ruleId}: ${stats.resolutionsCreated} links, ${stats.cascadeRetargeted} cascade retargets, ${stats.cascadesBlocked} cascades blocked, ${stats.skippedAmbiguousBuckets} ambiguous skips, ${stats.skippedOversizedBuckets} oversized skips, ${stats.skippedNoopBuckets} no-op skips, ${stats.skippedBlockedBuckets} blocked skips, ${stats.skippedStaleOverlapBuckets} stale-overlap skips, ${stats.failedBuckets} failed`
+    `${ruleId}: ${stats.resolutionsCreated} links, ${stats.cascadeRetargeted} cascade retargets, ${stats.cascadesBlocked} cascades blocked, ${stats.skippedAmbiguousBuckets} ambiguous skips, ${stats.skippedOversizedBuckets} oversized skips, ${stats.skippedNoopBuckets} no-op skips, ${stats.skippedBlockedBuckets} blocked skips, ${stats.skippedStaleOverlapBuckets} stale-overlap skips, ${stats.skippedTruncatedBuckets} truncated skips, ${stats.failedBuckets} failed`
   );
 
   telemetry.report({
@@ -180,12 +184,13 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       { name: 'noop_skips', count: stats.skippedNoopBuckets },
       { name: 'blocked_skips', count: stats.skippedBlockedBuckets },
       { name: 'stale_overlap_skips', count: stats.skippedStaleOverlapBuckets },
+      { name: 'truncated_skips', count: stats.skippedTruncatedBuckets },
     ],
   });
 
-  // Oversized groups still advance the watermark: holding it for a permanently
-  // oversized value (shared mailbox, fleet-wide service SID) would pin the
-  // entire rule. Stale-overlap skips and failures do hold it so we retry.
+  // Oversized groups and truncated alias trees still advance the watermark:
+  // those sizes do not shrink, so holding would pin the entire rule.
+  // Stale-overlap skips and failures do hold it so we retry.
   const holdWatermark = stats.failedBuckets > 0 || stats.skippedStaleOverlapBuckets > 0;
 
   return {
@@ -320,6 +325,15 @@ async function resolveMatchGroup(
       stats.skippedBlockedBuckets++;
     }
   } catch (err) {
+    if (err instanceof ResolutionSearchTruncatedError) {
+      stats.skippedTruncatedBuckets++;
+      logger.warn(
+        `${ruleId}: declining truncated alias tree for bucket '${row.matchValue}': ${getErrorMessage(
+          err
+        )}`
+      );
+      return;
+    }
     stats.failedBuckets++;
     logger.warn(`${ruleId}: failed to resolve bucket '${row.matchValue}': ${getErrorMessage(err)}`);
   }

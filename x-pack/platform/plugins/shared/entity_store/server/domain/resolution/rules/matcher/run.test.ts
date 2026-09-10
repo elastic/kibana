@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ResolutionClient } from '../../resolution_client';
+import { ResolutionSearchTruncatedError } from '../../../errors';
 import { RESOLUTION_RULE_IDS } from '../../../../../common/domain/resolution_rules/constants';
 import { getResolutionRuleConfig } from '../rule_registry';
 import { GROUP_SIZE_CEILING } from './constants';
@@ -552,6 +553,53 @@ describe('runEsqlMatcherRule', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to resolve bucket'));
   });
 
+  it('skips a truncated alias tree and advances the watermark', async () => {
+    const logger = loggerMock.create();
+    const telemetry = { report: jest.fn() };
+    const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'alice@corp.com',
+              unresolvedIds: ['user-okta', 'user-entra'],
+              namespaces: ['okta', 'entra_id'],
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
+      },
+    });
+    mockCascadeLink.mockRejectedValueOnce(
+      new ResolutionSearchTruncatedError('validateAndGetRetargetableAliases', 10000, 12000)
+    );
+
+    const result = await runEsqlMatcherRule(
+      createDeps(state, mockEsClient, mockResolutionClient, { logger, telemetry })
+    );
+
+    expect(result.lastProcessedTimestamp).toBe('2026-08-10T00:00:00Z');
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated alias tree'));
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        funnel: {
+          scanned: 1,
+          qualified: 1,
+          applied: 0,
+          skipped: 1,
+          failed: 0,
+        },
+        breakdown: expect.arrayContaining([{ name: 'truncated_skips', count: 1 }]),
+      })
+    );
+  });
+
   it('reports per-rule telemetry distinguishing link, cascade, and skip outcomes', async () => {
     const telemetry = { report: jest.fn() };
     (mockEsClient.esql.query as jest.Mock)
@@ -598,6 +646,7 @@ describe('runEsqlMatcherRule', () => {
           { name: 'noop_skips', count: 0 },
           { name: 'blocked_skips', count: 0 },
           { name: 'stale_overlap_skips', count: 0 },
+          { name: 'truncated_skips', count: 0 },
         ]),
       })
     );
