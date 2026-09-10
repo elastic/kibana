@@ -277,8 +277,8 @@ export class TriggerEventHandler {
   }
 
   /**
-   * Ensures the trigger is registered and, when defined, `eventSchema` matches the same event object
-   * used for KQL resolution and scheduling (`timestamp`, `spaceId`, `eventChainDepth` included).
+   * Ensures the trigger is registered and validates the raw emitted payload against `eventSchema`.
+   * Runtime context fields are added only after validation for KQL resolution and scheduling.
    */
   private validateTrigger(
     triggerId: string,
