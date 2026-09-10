@@ -1796,30 +1796,39 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     # apart from "no docs written" (2026-09-07: a complete 98-doc shard failed as
     # docs=0/98). Query the field directly.
     q = json.dumps({"query": {"term": {"metadata.execution_id": exec_id}}})
+    # The exact gate's target must be known BEFORE counting so the flush poll
+    # below can wait for it. Floor suites have no such product, so target=None.
+    reps = int(os.environ.get("EVAL_REPETITIONS", "1") or "1")
+    prof = suite_profile()
+    _target = None
+    if prof.get("gate") != "floor":
+        _te = prof["n_examples"]
+        if shard and prof.get("honors_shard", True):
+            idx, total = (int(x) for x in shard.split("/"))
+            _te = len(range(idx - 1, _te, total))
+        _target = _te * n_evaluators * reps
     # Ask golden from the driver first: by the time the gate runs, this unit's
     # VM is already parked, so the ssh path below reaches a deallocated host.
-    # Poll: golden's OTel flush lags the eval process by ~3-7 min (see the
-    # trace-evaluator comment above), and the LAST experiment's docs land last.
-    # A single count at eval exit races that flush -- 2026-09-10 dense canary:
-    # golden held all 130 docs but the gate read 117 because the dense example
-    # (experiment 10/10, 13 docs) flushed ~1 min after the eval process exited.
-    # Poll until the count stops growing across two consecutive reads, capped
-    # at FLUSH_WINDOW, then read the stable value.
-    def _count_stable():
-        prev = -1
+    # Poll toward the target: golden's OTel flush lags the eval process by
+    # ~3-7 min (see the trace-evaluator comment above), and the LAST
+    # experiment's docs land last as a single burst. A "count stopped growing"
+    # stop condition is wrong here -- 2026-09-10 dense canary: the dense
+    # example's 13 docs landed as one burst AFTER several stable 117 reads, so
+    # a stable-below-target poll returned 117 while golden already held 130.
+    # Poll until the count reaches the target or the window elapses.
+    def _count_to_target():
         n = _golden_count_local(exec_id)
         if n is None:
             return None
         deadline = time.time() + 8 * 60  # FLUSH_WINDOW: covers the documented 3-7 min lag
-        while n != prev and time.time() < deadline:
-            prev = n
+        while _target is not None and n < _target and time.time() < deadline:
             time.sleep(20)
             n = _golden_count_local(exec_id)
             if n is None:
                 return None
         return n
 
-    _local_n = _count_stable()
+    _local_n = _count_to_target()
     if _local_n is not None:
         result: dict = {"count": _local_n}
         if _local_n == 0:
@@ -1851,8 +1860,8 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
             result = json.loads(out.splitlines()[-1])
         except Exception:
             return {"count": -1, "error": out[:200]}
-    reps = int(os.environ.get("EVAL_REPETITIONS", "1") or "1")
-    prof = suite_profile()
+    # reps/prof were computed above (before counting) so the flush poll knew
+    # the exact-gate target; reuse them here.
     if prof.get("gate") == "floor":
         # Suites whose datasets carry different evaluator counts (migrations:
         # 7 / 9 / 8) have no examples x evaluators product. Gate on a floor
