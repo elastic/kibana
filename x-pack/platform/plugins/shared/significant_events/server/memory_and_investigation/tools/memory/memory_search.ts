@@ -25,17 +25,17 @@ const memorySearchSchema = z.object({
   tags: z
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
-    .describe('Optional tag filter — only return pages with at least one of these tags.'),
+    .describe('Optional exact tag filter — use only known stored values.'),
   categories: z
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe(
-      'Optional category filter — only return pages in at least one of these categories (e.g. ["services", "streams/logs-otel"]).'
+      'Optional exact category filter — use only known stored values, never categories inferred from the query topic.'
     ),
   references: z
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
-    .describe('Optional filter by referenced page IDs — only return pages that reference these.'),
+    .describe('Optional reference filter — use only known memory page IDs.'),
   size: z
     .number()
     .min(1)

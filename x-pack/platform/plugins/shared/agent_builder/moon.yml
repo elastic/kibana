@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder
 dependsOn:
+  - '@kbn/core-ui-settings-browser'
   - '@kbn/core'
   - '@kbn/alerting-plugin'
   - '@kbn/logging'
@@ -149,6 +150,7 @@ dependsOn:
   - '@kbn/context-engine-plugin'
   - '@kbn/files-plugin'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
