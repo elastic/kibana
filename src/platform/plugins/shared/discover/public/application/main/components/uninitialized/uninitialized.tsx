@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense } from 'react';
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiDescriptionList,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { esqlKeyboardShortcuts } from '@kbn/esql-editor';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView } from '../../state_management/redux';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
-
-const LazyKeyboardShortcuts = React.lazy(async () => {
-  const { KeyboardShortcuts } = await import('@kbn/esql-editor');
-  return { default: KeyboardShortcuts };
-});
 
 interface Props {
   onRefresh: () => void;
@@ -30,6 +35,10 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
     currentDataView,
     switchToEsqlMetric: 'esql:uninitialized_query_in_esql_clicked',
   });
+  const shortcutsLabel = i18n.translate('discover.uninitialized.keyboardShortcutsLabel', {
+    defaultMessage: 'Keyboard shortcuts',
+  });
+  const shortcutsLabelId = useGeneratedHtmlId();
 
   const startSearchingPrompt = (
     <EuiEmptyPrompt
@@ -91,8 +100,24 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   }
 
   return (
-    <Suspense fallback={null}>
-      <LazyKeyboardShortcuts display="inline" />
-    </Suspense>
+    <EuiText size="m" data-test-subj="discoverUninitializedKeyboardShortcuts">
+      <h3 id={shortcutsLabelId}>{shortcutsLabel}</h3>
+      <EuiDescriptionList
+        aria-labelledby={shortcutsLabelId}
+        type="column"
+        columnWidths={['auto', 'auto']}
+        columnGutterSize="m"
+        compressed
+        listItems={esqlKeyboardShortcuts.map(({ keys, label }) => ({
+          title: label,
+          description: keys.map((key, index) => (
+            <Fragment key={`${key}-${index}`}>
+              {index > 0 ? ' ' : null}
+              <kbd>{key}</kbd>
+            </Fragment>
+          )),
+        }))}
+      />
+    </EuiText>
   );
 };

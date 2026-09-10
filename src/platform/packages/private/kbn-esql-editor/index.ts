@@ -13,8 +13,7 @@ export type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import { ESQLEditor } from './src/esql_editor';
 export type { ESQLEditorRestorableState } from './src/restorable_state';
 export { ESQLMenu } from './src/editor_menu';
-export { KeyboardShortcuts } from './src/editor_footer/keyboard_shortcuts';
-export type { KeyboardShortcutsProps } from './src/editor_footer/keyboard_shortcuts';
+export { esqlKeyboardShortcuts } from './src/editor_footer/esql_keyboard_shortcuts';
 export { EsqlEditorActionsProvider } from './src/editor_actions_context';
 export { helpLabel } from './src/editor_menu/menu_i18n';
 
