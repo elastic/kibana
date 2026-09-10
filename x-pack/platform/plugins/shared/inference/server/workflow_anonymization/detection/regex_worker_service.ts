@@ -6,12 +6,18 @@
  */
 
 import Piscina from 'piscina';
+import { RE2JS } from 're2js';
 import type { Logger } from '@kbn/logging';
-import type { AnonymizationWorkerConfig } from '../../config';
+import type { WorkflowAnonymizationWorkerConfig } from '../../config';
 import type { PiiRegexWorkerTaskPayload, PiiRegexMatch, PiiDetectionFailureMode } from './types';
 import { executeRegexRules } from './execute_regex_rules';
 
 function runSync(payload: PiiRegexWorkerTaskPayload): PiiRegexMatch[] {
+  // Worker pool provides ReDoS containment via task timeout; on the sync path we
+  // enforce RE2-only patterns so catastrophic backtracking cannot block the event loop.
+  for (const rule of payload.rules) {
+    RE2JS.compile(rule.pattern);
+  }
   return executeRegexRules(payload);
 }
 
@@ -24,9 +30,9 @@ function runSync(payload: PiiRegexWorkerTaskPayload): PiiRegexMatch[] {
 export class PiiRegexWorkerService {
   private readonly enabled: boolean;
   private worker?: Piscina;
-  private readonly config: AnonymizationWorkerConfig;
+  private readonly config: WorkflowAnonymizationWorkerConfig;
 
-  constructor(config: AnonymizationWorkerConfig, private readonly logger: Logger) {
+  constructor(config: WorkflowAnonymizationWorkerConfig, private readonly logger: Logger) {
     this.config = config;
     this.enabled = config.enabled;
 
@@ -57,7 +63,10 @@ export class PiiRegexWorkerService {
    * Throws when a rule has an invalid RE2 pattern and `failureMode` is `'block'`
    * (the default). With `'allow_unsafe'`, logs and skips the offending rule.
    *
-   * Falls back to synchronous execution when the worker pool is disabled.
+   * When the worker pool is disabled, runs synchronously on the main event loop.
+   * In that mode only RE2-compilable patterns are accepted; patterns that require
+   * native RegExp (lookahead / lookbehind / backreferences) are rejected to prevent
+   * unbounded backtracking on the event loop.
    */
   async run(
     payload: PiiRegexWorkerTaskPayload,
