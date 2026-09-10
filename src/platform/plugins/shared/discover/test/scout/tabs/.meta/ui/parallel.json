@@ -1,5 +1,5 @@
 {
-  "sha1": "a56d807169262adc6d6e6b470aae065bca603ee5",
+  "sha1": "0597a8793a4b4c14e3633cf1e155385806e58d50",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -258,7 +258,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 23,
+        "line": 33,
         "column": 64
       }
     },
@@ -271,7 +271,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 60,
+        "line": 70,
         "column": 7
       }
     },
@@ -284,7 +284,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 94,
+        "line": 104,
         "column": 26
       }
     },
@@ -520,19 +520,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
         "line": 55,
         "column": 29
-      }
-    },
-    {
-      "id": "4fa03f2bd8c05c6-1c81fcd0d15cbfe",
-      "title": "Discover tabs - restorable DocViewer table state restores DocViewer rows per page and page number per tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 97,
-        "column": 33
       }
     },
     {

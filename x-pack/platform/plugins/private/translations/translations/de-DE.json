@@ -54693,7 +54693,6 @@
     "xpack.streams.enrichment.editMode.interactive": "Interaktiv",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "Die aktuelle YAML-Konfiguration enthält Features, die im interaktiven Editor nicht dargestellt werden können.",
     "xpack.streams.enrichment.editMode.legend": "Modusauswahl bearbeiten",
-    "xpack.streams.enrichment.editMode.yaml": "YAML",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "Weitere passende Beispiele laden",
     "xpack.streams.enrichment.fetchMore.error": "Es konnten keine weiteren passenden Beispiele geladen werden.",
     "xpack.streams.enrichment.processor.deleteProcessor.cancelButtonText": "Abbrechen",
