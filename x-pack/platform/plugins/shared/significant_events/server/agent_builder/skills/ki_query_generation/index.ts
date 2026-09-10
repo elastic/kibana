@@ -21,7 +21,7 @@ import content from './skill.md.text';
 export const KI_QUERY_GENERATION_SKILL_ID = 'ki-query-generation' as const;
 
 export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
-  const { getScopedClients, server, logger } = options;
+  const { getScopedClients, logger } = options;
 
   return defineSkillType({
     id: KI_QUERY_GENERATION_SKILL_ID,
@@ -38,12 +38,10 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
         createMemoryListTool(options),
         createGetFeaturesTool({
           getScopedClients,
-          server,
           logger: logger.get('ki_features_get_tool'),
         }),
         createValidateQueriesTool({
           getScopedClients,
-          server,
           logger: logger.get('ki_queries_validate_tool'),
         }),
       ];

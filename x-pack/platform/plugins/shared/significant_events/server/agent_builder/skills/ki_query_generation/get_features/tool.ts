@@ -14,10 +14,8 @@ import {
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   toFeatureForLlmContext,
 } from '@kbn/nightshift-ai';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
@@ -35,11 +33,9 @@ const getFeaturesSchema = z.object({
 
 export const createGetFeaturesTool = ({
   getScopedClients,
-  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof getFeaturesSchema> => {
   return {
@@ -54,10 +50,6 @@ export const createGetFeaturesTool = ({
     ) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
-        await assertSignificantEventsAccess({
-          server,
-          licensing: scopedClients.licensing,
-        });
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

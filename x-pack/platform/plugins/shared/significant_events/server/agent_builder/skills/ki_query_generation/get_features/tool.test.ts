@@ -7,19 +7,12 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Streams } from '@kbn/streams-schema';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
 import { createGetFeaturesTool } from './tool';
 
-jest.mock('../../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
-
 describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as StreamsServer;
   const stream: Streams.WiredStream.Definition = {
     name: 'logs.test',
     description: 'Test logs',
@@ -37,7 +30,6 @@ describe('ki_features_get tool', () => {
   const getFeatures = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      licensing: {},
       streamsClient: { getStream },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     } as unknown as RouteHandlerScopedClients;
@@ -45,7 +37,6 @@ describe('ki_features_get tool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     getFeatures.mockResolvedValue({
       hits: [
         {
@@ -65,7 +56,6 @@ describe('ki_features_get tool', () => {
   const createTool = () =>
     createGetFeaturesTool({
       getScopedClients,
-      server,
       logger,
     });
 

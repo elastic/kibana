@@ -15,10 +15,8 @@ import {
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   validateKIQueries,
 } from '@kbn/nightshift-ai';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
@@ -55,11 +53,9 @@ const validateQueriesSchema = z.object({
 
 export const createValidateQueriesTool = ({
   getScopedClients,
-  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
@@ -71,11 +67,6 @@ export const createValidateQueriesTool = ({
     handler: async ({ target_id: targetId, queries }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
-        await assertSignificantEventsAccess({
-          server,
-          licensing: scopedClients.licensing,
-        });
-
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

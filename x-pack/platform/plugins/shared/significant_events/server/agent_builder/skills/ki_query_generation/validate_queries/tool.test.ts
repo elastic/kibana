@@ -7,20 +7,15 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Streams } from '@kbn/streams-schema';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import {
   createQueryValidationContext,
   validateKIQueries,
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
-jest.mock('../../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
 jest.mock('@kbn/nightshift-ai', () => ({
   ...jest.requireActual('@kbn/nightshift-ai'),
   createQueryValidationContext: jest.fn(),
@@ -34,7 +29,6 @@ const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof va
 
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as StreamsServer;
   const stream: Streams.QueryStream.Definition = {
     name: 'logs.test',
     description: 'Test logs',
@@ -51,7 +45,6 @@ describe('ki_queries_validate tool', () => {
   const getStreamToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      licensing: {},
       streamsClient: { getStream },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getFeatures,
@@ -83,7 +76,6 @@ describe('ki_queries_validate tool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     getFeatures.mockResolvedValue({
       hits: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
     });
@@ -118,7 +110,6 @@ describe('ki_queries_validate tool', () => {
   const createTool = () =>
     createValidateQueriesTool({
       getScopedClients,
-      server,
       logger,
     });
 
