@@ -18,7 +18,7 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError } from './utils';
+export { isESClientError, isElasticsearchReadOnlyBlockError } from './utils';
 export {
   FleetError as FleetError,
   FleetVersionConflictError,
