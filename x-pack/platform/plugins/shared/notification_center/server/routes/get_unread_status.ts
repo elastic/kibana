@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { GET_UNREAD_COUNT_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
-import { queryUnreadCount } from '../lib/query_unread_count';
+import { GET_UNREAD_STATUS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
+import { queryUnreadStatus } from '../lib/query_unread_status';
 import { getReadState } from '../lib/read_state';
 import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from './route_deps';
 
-/** Register the unread-count endpoint for callers with profile-scoped read state. */
-export const registerGetUnreadCountRoute = ({
+/** Register the unread-status endpoint for callers with profile-scoped read state. */
+export const registerGetUnreadStatusRoute = ({
   router,
   core,
   logger,
@@ -19,7 +19,7 @@ export const registerGetUnreadCountRoute = ({
   router.versioned
     .get({
       access: 'internal',
-      path: GET_UNREAD_COUNT_PATH,
+      path: GET_UNREAD_STATUS_PATH,
       security: { authz: { enabled: false, reason: NC_AUTHZ_OPT_OUT_REASON } },
     })
     .addVersion(
@@ -41,7 +41,7 @@ export const registerGetUnreadCountRoute = ({
           });
         }
 
-        const result = await queryUnreadCount({ dataStreams, logger }, readState);
+        const result = await queryUnreadStatus({ dataStreams, logger }, readState);
         return response.ok({ body: result });
       }
     );

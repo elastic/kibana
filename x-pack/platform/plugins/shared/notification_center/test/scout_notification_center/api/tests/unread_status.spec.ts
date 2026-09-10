@@ -10,9 +10,9 @@ import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import { clearNotifications, createHelpers, makeDoc, seedNotifications } from '../fixtures/helpers';
 
-const NAMESPACE = 'nc_api_unread_count_test';
+const NAMESPACE = 'nc_api_unread_status_test';
 
-apiTest.describe('Notification Center - unread count', { tag: [...tags.stateful.classic] }, () => {
+apiTest.describe('Notification Center - unread status', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
   const h = createHelpers(() => cookieHeader);
 
@@ -23,11 +23,11 @@ apiTest.describe('Notification Center - unread count', { tag: [...tags.stateful.
     const marker = Date.parse(markAll.body.read_all_before);
 
     await seedNotifications(esClient, [
-      makeDoc('unread-count-a', {
+      makeDoc('unread-status-a', {
         namespace: NAMESPACE,
         '@timestamp': new Date(marker + 1).toISOString(),
       }),
-      makeDoc('unread-count-b', {
+      makeDoc('unread-status-b', {
         namespace: NAMESPACE,
         '@timestamp': new Date(marker + 2).toISOString(),
       }),
@@ -39,20 +39,21 @@ apiTest.describe('Notification Center - unread count', { tag: [...tags.stateful.
   });
 
   apiTest('tracks read-state transitions', async ({ apiClient }) => {
-    const initial = await h.getUnreadCount(apiClient);
+    const initial = await h.getUnreadStatus(apiClient);
     expect(initial).toHaveStatusCode(200);
-    expect(initial.body).toStrictEqual({ unreadCount: 2 });
+    expect(initial.body).toStrictEqual({ hasUnread: true });
 
-    expect(await h.markRead(apiClient, { notification_id: 'unread-count-a' })).toHaveStatusCode(
+    // The newest of the two, so the scan has to look past its override to stay correct.
+    expect(await h.markRead(apiClient, { notification_id: 'unread-status-b' })).toHaveStatusCode(
       200
     );
-    const afterMarkRead = await h.getUnreadCount(apiClient);
+    const afterMarkRead = await h.getUnreadStatus(apiClient);
     expect(afterMarkRead).toHaveStatusCode(200);
-    expect(afterMarkRead.body).toStrictEqual({ unreadCount: 1 });
+    expect(afterMarkRead.body).toStrictEqual({ hasUnread: true });
 
     expect(await h.markAllRead(apiClient)).toHaveStatusCode(200);
-    const afterMarkAllRead = await h.getUnreadCount(apiClient);
+    const afterMarkAllRead = await h.getUnreadStatus(apiClient);
     expect(afterMarkAllRead).toHaveStatusCode(200);
-    expect(afterMarkAllRead.body).toStrictEqual({ unreadCount: 0 });
+    expect(afterMarkAllRead.body).toStrictEqual({ hasUnread: false });
   });
 });

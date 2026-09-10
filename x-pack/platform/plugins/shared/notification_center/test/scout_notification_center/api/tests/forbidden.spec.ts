@@ -34,7 +34,7 @@ apiTest.describe(
     });
 
     apiTest('unread count is forbidden', async ({ apiClient }) => {
-      expect(await h.getUnreadCount(apiClient)).toHaveStatusCode(403);
+      expect(await h.getUnreadStatus(apiClient)).toHaveStatusCode(403);
     });
 
     // Listing must stay open to profile-less callers: they get items with `isRead`

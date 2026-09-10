@@ -94,7 +94,7 @@ export interface NotificationQueryResult {
   truncated: boolean;
 }
 
-/** The bounded unread count for the caller's profile-scoped notification state. */
-export interface NotificationUnreadCount {
-  unreadCount: number;
+/** Whether the caller's profile-scoped notification state has anything unread. */
+export interface NotificationUnreadStatus {
+  hasUnread: boolean;
 }

@@ -14,9 +14,9 @@ import {
   READ_ALL_BEFORE_KEY,
 } from '../storage/user_storage';
 import type { NotificationRouteDeps } from './route_deps';
-import { registerGetUnreadCountRoute } from './get_unread_count';
+import { registerGetUnreadStatusRoute } from './get_unread_status';
 
-describe('GET /internal/notification_center/notifications/_unread_count', () => {
+describe('GET /internal/notification_center/notifications/_unread_status', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
@@ -28,18 +28,18 @@ describe('GET /internal/notification_center/notifications/_unread_count', () => 
         userStorage: { asScoped: jest.fn().mockReturnValue(undefined) },
       },
     ]);
-    registerGetUnreadCountRoute({
+    registerGetUnreadStatusRoute({
       router,
       core: { getStartServices },
       logger: loggingSystemMock.createLogger(),
     } as unknown as NotificationRouteDeps);
     const route = router.versioned.getRoute(
       'get',
-      '/internal/notification_center/notifications/_unread_count'
+      '/internal/notification_center/notifications/_unread_status'
     );
     const handler = route.versions['1']?.handler;
     if (!handler) {
-      throw new Error('Unread-count route was not registered');
+      throw new Error('Unread-status route was not registered');
     }
     const response = httpServerMock.createResponseFactory();
 
@@ -58,18 +58,18 @@ describe('GET /internal/notification_center/notifications/_unread_count', () => 
         userStorage: { asScoped: jest.fn().mockReturnValue(client) },
       },
     ]);
-    registerGetUnreadCountRoute({
+    registerGetUnreadStatusRoute({
       router,
       core: { getStartServices },
       logger: loggingSystemMock.createLogger(),
     } as unknown as NotificationRouteDeps);
     const route = router.versioned.getRoute(
       'get',
-      '/internal/notification_center/notifications/_unread_count'
+      '/internal/notification_center/notifications/_unread_status'
     );
     const handler = route.versions['1']?.handler;
     if (!handler) {
-      throw new Error('Unread-count route was not registered');
+      throw new Error('Unread-status route was not registered');
     }
     const response = httpServerMock.createResponseFactory();
 
@@ -81,7 +81,7 @@ describe('GET /internal/notification_center/notifications/_unread_count', () => 
     });
   });
 
-  it('initializes the first-read horizon before returning the unread count', async () => {
+  it('initializes the first-read horizon before returning the unread status', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-07-20T00:00:00.000Z'));
     const router = httpServiceMock.createRouter();
     const client = {
@@ -109,24 +109,24 @@ describe('GET /internal/notification_center/notifications/_unread_count', () => 
         userStorage: { asScoped: jest.fn().mockReturnValue(client) },
       },
     ]);
-    registerGetUnreadCountRoute({
+    registerGetUnreadStatusRoute({
       router,
       core: { getStartServices },
       logger: loggingSystemMock.createLogger(),
     } as unknown as NotificationRouteDeps);
     const route = router.versioned.getRoute(
       'get',
-      '/internal/notification_center/notifications/_unread_count'
+      '/internal/notification_center/notifications/_unread_status'
     );
     const handler = route.versions['1']?.handler;
     if (!handler) {
-      throw new Error('Unread-count route was not registered');
+      throw new Error('Unread-status route was not registered');
     }
     const response = httpServerMock.createResponseFactory();
 
     await handler({} as never, httpServerMock.createKibanaRequest({ method: 'get' }), response);
 
     expect(client.set).toHaveBeenCalledWith(READ_ALL_BEFORE_KEY, '2026-07-20T00:00:00.000Z');
-    expect(response.ok).toHaveBeenCalledWith({ body: { unreadCount: 0 } });
+    expect(response.ok).toHaveBeenCalledWith({ body: { hasUnread: false } });
   });
 });

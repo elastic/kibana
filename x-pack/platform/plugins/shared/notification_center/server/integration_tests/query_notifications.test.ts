@@ -17,7 +17,7 @@ import {
   notificationDataStreamDefinition,
 } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
-import { queryUnreadCount } from '../lib/query_unread_count';
+import { queryUnreadStatus } from '../lib/query_unread_status';
 import type { NotificationReadState } from '../lib/read_state';
 import { cleanupExpiredNotifications } from '../cleanup_task/cleanup_expired_notifications';
 
@@ -157,8 +157,8 @@ describe('queryNotifications [integration]', () => {
     ]);
   });
 
-  it('counts unread collapsed representatives using the same read state', async () => {
-    const result = await queryUnreadCount(
+  it('reports unread status from the same read state as the list', async () => {
+    const result = await queryUnreadStatus(
       { dataStreams, logger },
       {
         overrides: {
@@ -168,8 +168,8 @@ describe('queryNotifications [integration]', () => {
       }
     );
 
-    // `dup` has two source documents but contributes one unread representative.
-    expect(result).toEqual({ unreadCount: 2 });
+    // `recent-warning` is the newest group but is overridden as read, so the scan looks past it.
+    expect(result).toEqual({ hasUnread: true });
   });
 
   it('leaves items unannotated when there is no read state', async () => {
