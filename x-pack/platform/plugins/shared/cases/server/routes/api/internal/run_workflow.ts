@@ -60,7 +60,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
     },
     handler: async ({ context, request, response }) => {
       const caseContext = await context.cases;
-      const casesClient = await caseContext.getCasesClient();
+      const { casesClient, workflowOperations } = await caseContext.getCasesWorkflowRunContext();
       const { workflow_id: workflowId } = request.params;
       const result = await service.run({
         workflowId,
@@ -68,6 +68,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
         request,
         context,
         casesClient,
+        workflowOperations,
         spaceId: getSpaceId(request),
       });
 
