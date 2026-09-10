@@ -11,9 +11,16 @@ import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { ProposalActivityQuery } from '@kbn/agentic-investigations-plugin/common';
-import type { GetProposalActivityResponse } from '../../../common/proposals/activity';
-import { groupProposalActivity } from './group_proposal_activity';
+import type {
+  ProposalWithMetadata,
+  ProposalsQuery,
+} from '@kbn/agentic-investigations-plugin/common';
+import {
+  CLOSED_GROUP_KEY,
+  type ProposalGroups,
+  type ProposalItem,
+  type GetProposalsListResponse,
+} from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
 
@@ -27,11 +34,11 @@ export class ConversationProposalsService {
   ) {}
 
   async list(
-    query: ProposalActivityQuery,
+    query: ProposalsQuery,
     request: KibanaRequest,
     spaceId: string
-  ): Promise<GetProposalActivityResponse> {
-    const { proposals, total, truncated } = await this.proposalsService.listActivity(
+  ): Promise<GetProposalsListResponse> {
+    const { proposals, total, truncated } = await this.proposalsService.listByWindow(
       query,
       spaceId
     );
@@ -41,7 +48,39 @@ export class ConversationProposalsService {
       request
     );
 
-    return { groups: groupProposalActivity(proposals, titles), total, truncated };
+    return { groups: this.groupProposals(proposals, titles), total, truncated };
+  }
+
+  private groupProposals(
+    proposals: ProposalWithMetadata[],
+    titles: Map<string, string>
+  ): ProposalGroups {
+    const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
+
+    for (const proposal of proposals) {
+      const item: ProposalItem = {
+        ...proposal,
+        ...(titles.has(proposal.conversationId)
+          ? { conversationTitle: titles.get(proposal.conversationId) }
+          : {}),
+      };
+
+      if (proposal.decidedAt) {
+        groups[CLOSED_GROUP_KEY].push(item);
+      } else if (proposal.category) {
+        if (!groups[proposal.category]) {
+          groups[proposal.category] = [];
+        }
+        groups[proposal.category].push(item);
+      }
+    }
+
+    groups[CLOSED_GROUP_KEY].sort((a, b) => {
+      if (!a.decidedAt || !b.decidedAt) return 0;
+      return b.decidedAt.localeCompare(a.decidedAt);
+    });
+
+    return groups;
   }
 
   private async getTitles(

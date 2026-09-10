@@ -7,14 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import type { GetProposalActivityResponse } from '../../../common/proposals/activity';
+import type { GetProposalsListResponse } from '../../../common/proposals/list';
 import type { ConversationProposalsService } from '../../services/conversation_proposals/conversation_proposals_service';
 import type { RouteDependencies } from '../register_routes';
-import { registerGetProposalActivityRoute } from './get_proposal_activity';
+import { registerGetProposalsRoute } from './get_proposals';
 
 const makeListResult = (
-  overrides: Partial<GetProposalActivityResponse> = {}
-): GetProposalActivityResponse => ({
+  overrides: Partial<GetProposalsListResponse> = {}
+): GetProposalsListResponse => ({
   groups: { closed: [], investigate: [{ id: 'p1' } as never] },
   total: 1,
   truncated: false,
@@ -22,13 +22,13 @@ const makeListResult = (
 });
 
 const makeConversationProposalsService = (
-  listResult: GetProposalActivityResponse = makeListResult()
+  listResult: GetProposalsListResponse = makeListResult()
 ): ConversationProposalsService =>
   ({
     list: jest.fn().mockResolvedValue(listResult),
   } as unknown as ConversationProposalsService);
 
-describe('registerGetProposalActivityRoute', () => {
+describe('registerGetProposalsRoute', () => {
   const logger = loggingSystemMock.createLogger();
 
   const setup = (service: ConversationProposalsService = makeConversationProposalsService()) => {
@@ -44,7 +44,7 @@ describe('registerGetProposalActivityRoute', () => {
       getConversationProposalsService: () => service,
     };
 
-    registerGetProposalActivityRoute(deps as RouteDependencies);
+    registerGetProposalsRoute(deps as RouteDependencies);
 
     const handler = addVersion.mock.calls[0][1] as (
       context: unknown,
@@ -75,7 +75,7 @@ describe('registerGetProposalActivityRoute', () => {
     await handler({}, httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }), response);
 
     const [call] = (response.ok as jest.Mock).mock.calls;
-    const body = call[0].body as GetProposalActivityResponse;
+    const body = call[0].body as GetProposalsListResponse;
     expect(body.total).toBe(3);
     expect(body.truncated).toBe(true);
     expect(body.groups).toHaveProperty('investigate');

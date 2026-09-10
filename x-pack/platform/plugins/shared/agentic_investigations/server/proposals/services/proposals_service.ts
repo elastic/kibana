@@ -26,13 +26,13 @@ import type {
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
-  ProposalActivityQuery,
-  ProposalActivityResponse,
+  ProposalsQuery,
+  ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { isExpired, MAX_PROPOSAL_ACTIVITY_SIZE } from '../../../common/proposals/proposal';
+import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -210,13 +210,10 @@ export class ProposalsService {
    * Action-metadata resolution is memoised per `actionWorkflowId` across the
    * entire result set to avoid a `getWorkflow` fetch per proposal.
    */
-  async listActivity(
-    query: ProposalActivityQuery,
-    spaceId: string
-  ): Promise<ProposalActivityResponse> {
+  async listByWindow(query: ProposalsQuery, spaceId: string): Promise<ProposalsListResponse> {
     const response = await this.deps.storage.search({
       track_total_hits: true,
-      size: MAX_PROPOSAL_ACTIVITY_SIZE,
+      size: MAX_PROPOSALS_SIZE,
       query: {
         bool: {
           filter: [{ term: { spaceId } }],

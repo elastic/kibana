@@ -762,14 +762,14 @@ describe('ProposalsService', () => {
     });
   });
 
-  describe('listActivity', () => {
+  describe('listByWindow', () => {
     const activityQuery = (windowHours = 24) => ({ windowHours });
 
     it('includes pending proposals regardless of age', async () => {
       const storage = createStorage(baseDocument({ status: 'pending' }));
       const { service } = createService(storage);
 
-      const { proposals } = await service.listActivity(activityQuery(), SPACE_ID);
+      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
 
       expect(proposals).toHaveLength(1);
     });
@@ -778,7 +778,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.listActivity(activityQuery(48), SPACE_ID);
+      await service.listByWindow(activityQuery(48), SPACE_ID);
 
       const [[searchArgs]] = storage.search.mock.calls;
       const { bool } = searchArgs.query;
@@ -802,7 +802,7 @@ describe('ProposalsService', () => {
       } as unknown as ReturnType<typeof createStorage>;
       const { service } = createService(storage);
 
-      const { truncated, total } = await service.listActivity(activityQuery(), SPACE_ID);
+      const { truncated, total } = await service.listByWindow(activityQuery(), SPACE_ID);
 
       expect(truncated).toBe(true);
       expect(total).toBe(9999);
@@ -812,7 +812,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      const { truncated } = await service.listActivity(activityQuery(), SPACE_ID);
+      const { truncated } = await service.listByWindow(activityQuery(), SPACE_ID);
 
       expect(truncated).toBe(false);
     });
@@ -831,7 +831,7 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       const { service } = createService(storage, workflowsApi);
 
-      await service.listActivity(activityQuery(), SPACE_ID);
+      await service.listByWindow(activityQuery(), SPACE_ID);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
     });
@@ -840,7 +840,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      const { proposals } = await service.listActivity(activityQuery(), SPACE_ID);
+      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
 
       expect(proposals[0]).not.toHaveProperty('categoryRank');
       expect(proposals[0]).not.toHaveProperty('impactRank');

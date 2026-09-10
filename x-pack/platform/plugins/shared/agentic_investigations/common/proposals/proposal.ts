@@ -198,14 +198,14 @@ export interface ListProposalsResponse {
   total: number;
 }
 
-export const MAX_PROPOSAL_ACTIVITY_SIZE = 500;
+export const MAX_PROPOSALS_SIZE = 500;
 
-export const proposalActivityQuerySchema = z.object({
+export const proposalsQuerySchema = z.object({
   windowHours: z.coerce.number().int().min(1).max(168).default(24),
 });
-export type ProposalActivityQuery = z.infer<typeof proposalActivityQuerySchema>;
+export type ProposalsQuery = z.infer<typeof proposalsQuerySchema>;
 
-export interface ProposalActivityResponse {
+export interface ProposalsListResponse {
   proposals: ProposalWithMetadata[];
   total: number;
   truncated: boolean;

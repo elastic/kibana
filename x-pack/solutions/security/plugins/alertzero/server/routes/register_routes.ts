@@ -18,7 +18,7 @@ import { registerUpdateWorkerRoute } from './workers/update_worker';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
 import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
-import { registerGetProposalActivityRoute } from './proposals/get_proposal_activity';
+import { registerGetProposalsRoute } from './proposals/get_proposals';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -38,5 +38,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListInvestigationsRoute(deps);
   registerGetInvestigationRoute(deps);
   registerListInvestigationProposalsRoute(deps);
-  registerGetProposalActivityRoute(deps);
+  registerGetProposalsRoute(deps);
 };

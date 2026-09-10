@@ -8,7 +8,7 @@
 import { ApiPrivileges } from '@kbn/core-security-server';
 import type { z } from '@kbn/zod/v4';
 import { API_VERSIONS, ALERTZERO_PROPOSALS_URL, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
-import { proposalActivityQuerySchema } from '@kbn/agentic-investigations-plugin/common';
+import { proposalsQuerySchema } from '@kbn/agentic-investigations-plugin/common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -18,10 +18,10 @@ import type { RouteDependencies } from '../register_routes';
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
-const GetProposalActivityRequestQuery = proposalActivityQuerySchema;
-type GetProposalActivityRequestQuery = z.infer<typeof GetProposalActivityRequestQuery>;
+const GetProposalsRequestQuery = proposalsQuerySchema;
+type GetProposalsRequestQuery = z.infer<typeof GetProposalsRequestQuery>;
 
-export const registerGetProposalActivityRoute = ({
+export const registerGetProposalsRoute = ({
   router,
   logger,
   getSpaceId,
@@ -44,7 +44,7 @@ export const registerGetProposalActivityRoute = ({
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: { query: buildRouteValidationWithZod(GetProposalActivityRequestQuery) },
+          request: { query: buildRouteValidationWithZod(GetProposalsRequestQuery) },
         },
       },
       async (_context, request, response) => {

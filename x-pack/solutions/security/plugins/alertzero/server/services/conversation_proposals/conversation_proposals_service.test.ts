@@ -10,7 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import { CLOSED_GROUP_KEY } from '../../../common/proposals/activity';
+import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 import { ConversationProposalsService } from './conversation_proposals_service';
 
 const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
@@ -33,7 +33,7 @@ const makeProposalsService = (
   { total, truncated }: { total?: number; truncated?: boolean } = {}
 ): ReturnType<AgenticInvestigationsPluginStart['getProposalsService']> =>
   ({
-    listActivity: jest.fn().mockResolvedValue({
+    listByWindow: jest.fn().mockResolvedValue({
       proposals,
       total: total ?? proposals.length,
       truncated: truncated ?? false,
@@ -63,13 +63,13 @@ describe('ConversationProposalsService', () => {
     jest.clearAllMocks();
   });
 
-  it('calls listActivity with the provided query and spaceId', async () => {
+  it('calls listByWindow with the provided query and spaceId', async () => {
     const proposalsService = makeProposalsService();
     const service = new ConversationProposalsService(proposalsService, makeAgentBuilder(), logger);
 
     await service.list(query, request, spaceId);
 
-    expect(proposalsService.listActivity).toHaveBeenCalledWith(query, spaceId);
+    expect(proposalsService.listByWindow).toHaveBeenCalledWith(query, spaceId);
   });
 
   it('deduplicates conversation ids before fetching titles', async () => {
@@ -117,32 +117,7 @@ describe('ConversationProposalsService', () => {
     expect(result.groups.investigate[1]).not.toHaveProperty('conversationTitle');
   });
 
-  it('groups pending proposals by category and decided proposals under closed', async () => {
-    const proposals = [
-      makeProposal({ id: 'pending', category: 'contain', status: 'pending' }),
-      makeProposal({
-        id: 'decided',
-        category: 'tune',
-        status: 'dismissed',
-        decidedAt: '2026-09-09T10:00:00.000Z',
-      }),
-    ];
-
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
-    const result = await service.list(query, request, spaceId);
-
-    expect(result.groups.contain).toHaveLength(1);
-    expect(result.groups.contain[0].id).toBe('pending');
-    expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
-    expect(result.groups[CLOSED_GROUP_KEY][0].id).toBe('decided');
-    expect(result.groups.tune).toBeUndefined();
-  });
-
-  it('passes total and truncated through from listActivity', async () => {
+  it('passes total and truncated through from listByWindow', async () => {
     const proposalsService = makeProposalsService([makeProposal()], {
       total: 501,
       truncated: true,
@@ -167,5 +142,90 @@ describe('ConversationProposalsService', () => {
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.investigate[0].conversationTitle).toBe('My investigation');
+  });
+
+  it('places a pending proposal under its category, not under closed', async () => {
+    const proposals = [makeProposal({ status: 'pending', category: 'contain' })];
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.contain).toHaveLength(1);
+    expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(0);
+  });
+
+  it('places a decided proposal under closed, not under its category', async () => {
+    const proposals = [
+      makeProposal({
+        status: 'dismissed',
+        category: 'contain',
+        decidedAt: '2026-09-09T10:00:00.000Z',
+      }),
+    ];
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
+    expect(result.groups.contain).toBeUndefined();
+  });
+
+  it('only initializes closed by default; other keys created on demand', async () => {
+    const service = new ConversationProposalsService(
+      makeProposalsService([]),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups).toHaveProperty(CLOSED_GROUP_KEY);
+    expect(Object.keys(result.groups)).toEqual([CLOSED_GROUP_KEY]);
+  });
+
+  it('creates a category key on demand for any category string', async () => {
+    const proposals = [makeProposal({ status: 'pending', category: 'remediate' })];
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.remediate).toHaveLength(1);
+  });
+
+  it('sorts the closed bucket by decidedAt descending', async () => {
+    const proposals = [
+      makeProposal({ id: 'older', status: 'dismissed', decidedAt: '2026-09-08T10:00:00.000Z' }),
+      makeProposal({ id: 'newer', status: 'succeeded', decidedAt: '2026-09-09T10:00:00.000Z' }),
+    ];
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups[CLOSED_GROUP_KEY][0].id).toBe('newer');
+    expect(result.groups[CLOSED_GROUP_KEY][1].id).toBe('older');
+  });
+
+  it('drops a pending proposal with no category', async () => {
+    const proposal = makeProposal({ status: 'pending', category: undefined });
+    const service = new ConversationProposalsService(
+      makeProposalsService([proposal]),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(0);
+    expect(Object.keys(result.groups)).toEqual([CLOSED_GROUP_KEY]);
   });
 });

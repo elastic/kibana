@@ -9,15 +9,15 @@ import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/co
 
 export const CLOSED_GROUP_KEY = 'closed' as const;
 
-export interface ProposalActivityItem extends ProposalWithMetadata {
+export interface ProposalItem extends ProposalWithMetadata {
   // Absent when the server cannot read the conversation (access control, not found, etc.)
   conversationTitle?: string;
 }
 
-export type ProposalActivityGroups = Record<string, ProposalActivityItem[]>;
+export type ProposalGroups = Record<string, ProposalItem[]>;
 
-export interface GetProposalActivityResponse {
-  groups: ProposalActivityGroups;
+export interface GetProposalsListResponse {
+  groups: ProposalGroups;
   total: number;
   truncated: boolean;
 }
