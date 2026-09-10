@@ -43005,43 +43005,43 @@ paths:
                     - cloudwatch_metrics
                   serviceVars:
                     cloudwatch_metrics:
-                      - namespace: AWS/EC2
-                        regions:
-                          - us-east-1
-              postCloudOnboardingDeploymentPushRequestExample:
-                description: Create a new AWS cloud onboarding deployment using a push mechanism (cloud forwarder)
+                      namespace: AWS/EC2
+                      regions:
+                        - us-east-1
+              postCloudOnboardingDeploymentEcfRequestExample:
+                description: Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
-                    - cloud_forwarder
+                    - ecf
                   provider: aws
                   services:
                     - cloudfront_logs
                   serviceVars:
                     cloudfront_logs:
-                      - regions:
-                          - us-east-1
-                        s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
+                      regions:
+                        - us-east-1
+                      s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
               postCloudOnboardingDeploymentRequestExample:
-                description: Create a new AWS cloud onboarding deployment using identity federation (agentless)
+                description: Create a new AWS cloud onboarding deployment using identity federation (managed integration)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
-                    - agentless
+                    - managed_integration
                   provider: aws
                   services:
                     - cloudwatch_metrics
                     - cloudtrail
                   serviceVars:
                     cloudtrail:
-                      - regions:
-                          - us-east-1
-                        s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                      regions:
+                        - us-east-1
+                      s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
                     cloudwatch_metrics:
-                      - namespace: AWS/EC2
-                        regions:
-                          - us-east-1
-                          - eu-west-1
+                      namespace: AWS/EC2
+                      regions:
+                        - us-east-1
+                        - eu-west-1
             schema:
               additionalProperties: false
               type: object
@@ -43059,7 +43059,9 @@ paths:
                   type: string
                 dataFormat:
                   description: 'Data format: ecs or otel.'
-                  maxLength: 64
+                  enum:
+                    - ecs
+                    - otel
                   type: string
                 globalRegion:
                   description: Global AWS region from the Service Settings step.
@@ -43122,19 +43124,38 @@ paths:
                         - cloudwatch_metrics
                       serviceVars:
                         cloudwatch_metrics:
-                          - namespace: AWS/EC2
-                            regions:
-                              - us-east-1
+                          namespace: AWS/EC2
+                          regions:
+                            - us-east-1
+                      status: pending
+                postCloudOnboardingDeploymentEcfExample:
+                  description: ECF deployment — apiKeyId set after the Elasticsearch API key is created for the ECF service
+                  value:
+                    item:
+                      apiKeyId: es-api-key-id-1
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-3
+                      mechanisms:
+                        - ecf
+                      provider: aws
+                      services:
+                        - cloudfront_logs
+                      serviceVars:
+                        cloudfront_logs:
+                          regions:
+                            - us-east-1
+                          s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
                       status: pending
                 postCloudOnboardingDeploymentExample:
-                  description: Identity federation (agentless) deployment — packagePolicyIds set after agentless deployment completes
+                  description: Managed integration deployment — packagePolicyIds set after deployment completes
                   value:
                     item:
                       attemptCount: 1
                       connectorId: cloud-connector-id-1
                       id: onboarding-deployment-id-1
                       mechanisms:
-                        - agentless
+                        - managed_integration
                       packagePolicyIds:
                         - package-policy-id-1
                       provider: aws
@@ -43143,33 +43164,14 @@ paths:
                         - cloudtrail
                       serviceVars:
                         cloudtrail:
-                          - regions:
-                              - us-east-1
-                            s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                          regions:
+                            - us-east-1
+                          s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
                         cloudwatch_metrics:
-                          - namespace: AWS/EC2
-                            regions:
-                              - us-east-1
-                              - eu-west-1
-                      status: pending
-                postCloudOnboardingDeploymentPushExample:
-                  description: Push-service deployment — apiKeyId set after the Elasticsearch API key is created for the push service
-                  value:
-                    item:
-                      apiKeyId: es-api-key-id-1
-                      attemptCount: 1
-                      connectorId: cloud-connector-id-1
-                      id: onboarding-deployment-id-3
-                      mechanisms:
-                        - cloud_forwarder
-                      provider: aws
-                      services:
-                        - cloudfront_logs
-                      serviceVars:
-                        cloudfront_logs:
-                          - regions:
-                              - us-east-1
-                            s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
+                          namespace: AWS/EC2
+                          regions:
+                            - us-east-1
+                            - eu-west-1
                       status: pending
               schema:
                 additionalProperties: false
@@ -43200,6 +43202,9 @@ paths:
                         type: string
                       dataFormat:
                         description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
                         type: string
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
@@ -43410,6 +43415,13 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -43418,13 +43430,7 @@ paths:
                     type: string
                 required:
                   - message
-              examples:
-                notFoundResponseExample:
-                  value:
-                    statusCode: 404
-                    error: Not Found
-                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
-          description: Not found.
+          description: Not Found
       summary: Delete cloud onboarding deployment
       tags:
         - Fleet cloud onboarding deployments
@@ -43465,7 +43471,7 @@ paths:
                       deploymentName: elastic-aws-onboarding
                       id: onboarding-deployment-id-1
                       mechanisms:
-                        - agentless
+                        - managed_integration
                       packagePolicyIds:
                         - package-policy-id-1
                       provider: aws
@@ -43512,6 +43518,9 @@ paths:
                         type: string
                       dataFormat:
                         description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
                         type: string
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
@@ -43642,6 +43651,13 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -43650,13 +43666,7 @@ paths:
                     type: string
                 required:
                   - message
-              examples:
-                notFoundResponseExample:
-                  value:
-                    statusCode: 404
-                    error: Not Found
-                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
-          description: Not found.
+          description: Not Found
       summary: Get cloud onboarding deployment
       tags:
         - Fleet cloud onboarding deployments
@@ -43789,7 +43799,7 @@ paths:
                       deploymentName: elastic-aws-onboarding
                       id: onboarding-deployment-id-1
                       mechanisms:
-                        - agentless
+                        - managed_integration
                       packagePolicyIds:
                         - package-policy-id-1
                       provider: aws
@@ -43826,6 +43836,9 @@ paths:
                         type: string
                       dataFormat:
                         description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
                         type: string
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
@@ -43956,6 +43969,13 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -43964,13 +43984,7 @@ paths:
                     type: string
                 required:
                   - message
-              examples:
-                notFoundResponseExample:
-                  value:
-                    statusCode: 404
-                    error: Not Found
-                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
-          description: Not found.
+          description: Not Found
       summary: Update cloud onboarding deployment
       tags:
         - Fleet cloud onboarding deployments
@@ -44012,7 +44026,7 @@ paths:
                         deploymentName: elastic-aws-onboarding
                         id: onboarding-deployment-id-1
                         mechanisms:
-                          - agentless
+                          - managed_integration
                         packagePolicyIds:
                           - package-policy-id-1
                         provider: aws
@@ -44023,16 +44037,16 @@ paths:
                         connectorId: cloud-connector-id-1
                         id: onboarding-deployment-id-2
                         mechanisms:
-                          - agentless
-                          - firehose
+                          - managed_integration
+                          - ecf
                         provider: aws
                         services:
                           - cloudfront_logs
                         serviceVars:
                           cloudfront_logs:
-                            - regions:
-                                - us-east-1
-                              s3_bucket_arn: arn:aws:s3:::my-cloudfront-logs-bucket
+                            regions:
+                              - us-east-1
+                            s3_bucket_arn: arn:aws:s3:::my-cloudfront-logs-bucket
                         status: deploying
               schema:
                 additionalProperties: false
@@ -44064,6 +44078,9 @@ paths:
                           type: string
                         dataFormat:
                           description: 'Data format: ecs or otel.'
+                          enum:
+                            - ecs
+                            - otel
                           type: string
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
