@@ -12,7 +12,7 @@ import { isolateHostStepCommonDefinition } from '../../../../common/workflows/st
 export const isolateHostStepDefinition = createPublicStepDefinition({
   ...isolateHostStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/lock').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
       default: icon,
     }))
   ),

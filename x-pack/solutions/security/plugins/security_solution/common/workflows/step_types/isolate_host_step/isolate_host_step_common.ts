@@ -11,7 +11,7 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import { MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/constants';
 
-export const IsolateHostStepId = 'security.isolateHost' as const;
+export const IsolateHostStepId = 'security.endpointIsolateHost' as const;
 
 /** Max chars for an Elastic Defend agent.id (UUID, ~36 chars; 256 is safe). */
 const MAX_ENDPOINT_ID_LENGTH = 256;
@@ -37,8 +37,8 @@ export const isolateHostOutputSchema = z.object({
   action_id: z.string().describe('The ID of the dispatched isolation action.'),
   status: z
     .enum(['failed', 'pending', 'successful', 'canceled'])
-    .describe('Status of the action at dispatch time (usually pending).'),
-  was_successful: z.boolean().describe('Whether the action was already successful at dispatch.'),
+    .describe('Final status of the response action after polling for completion.'),
+  was_successful: z.boolean().describe('Whether the response action completed successfully.'),
   message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
 });
 
@@ -47,22 +47,25 @@ export const isolateHostStepCommonDefinition: BaseStepDefinition<
   typeof isolateHostOutputSchema
 > = {
   id: IsolateHostStepId,
-  label: i18n.translate('xpack.securitySolution.workflows.steps.isolateHost.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.endpointIsolateHost.label', {
     defaultMessage: 'Isolate Host',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.isolateHost.description', {
-    defaultMessage:
-      'Disconnects one or more endpoints from the network via the Elastic Defend response action. Only Elastic Defend retains connectivity.',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.endpointIsolateHost.description',
+    {
+      defaultMessage:
+        'Disconnects one or more endpoints from the network via the Elastic Defend response action. Only Elastic Defend retains connectivity.',
+    }
+  ),
   category: StepCategory.KibanaSecurity,
   inputSchema: isolateHostInputSchema,
   outputSchema: isolateHostOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.isolateHost.documentation.details',
+      'xpack.securitySolution.workflows.steps.endpointIsolateHost.documentation.details',
       {
         defaultMessage:
-          'Dispatches an Elastic Defend isolate response action for the specified endpoints. The action is queued immediately; the returned status is typically `pending` until the endpoint agent checks in. Requires the `canIsolateHost` endpoint privilege.',
+          'Dispatches an Elastic Defend isolate response action for the specified endpoints, then polls every 10 seconds until the action completes or times out (up to 10 minutes / 60 attempts). The returned status and was_successful fields reflect the final outcome. Requires the `canIsolateHost` endpoint privilege.',
       }
     ),
     examples: [

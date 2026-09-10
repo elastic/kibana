@@ -11,7 +11,7 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import { MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/constants';
 
-export const KillProcessStepId = 'security.killProcess' as const;
+export const KillProcessStepId = 'security.endpointKillProcess' as const;
 
 const MAX_ENDPOINT_ID_LENGTH = 256;
 const MAX_ENDPOINT_IDS = 250;
@@ -51,8 +51,8 @@ export const killProcessOutputSchema = z.object({
   action_id: z.string().describe('The ID of the dispatched kill-process action.'),
   status: z
     .enum(['failed', 'pending', 'successful', 'canceled'])
-    .describe('Status of the action at dispatch time (usually pending).'),
-  was_successful: z.boolean().describe('Whether the action was already successful at dispatch.'),
+    .describe('Final status of the response action after polling for completion.'),
+  was_successful: z.boolean().describe('Whether the response action completed successfully.'),
   message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
 });
 
@@ -61,22 +61,25 @@ export const killProcessStepCommonDefinition: BaseStepDefinition<
   typeof killProcessOutputSchema
 > = {
   id: KillProcessStepId,
-  label: i18n.translate('xpack.securitySolution.workflows.steps.killProcess.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.endpointKillProcess.label', {
     defaultMessage: 'Kill Process',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.killProcess.description', {
-    defaultMessage:
-      'Terminates a process on an endpoint via the Elastic Defend response action. Identify the process by PID or entity_id.',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.endpointKillProcess.description',
+    {
+      defaultMessage:
+        'Terminates a process on an endpoint via the Elastic Defend response action. Identify the process by PID or entity_id.',
+    }
+  ),
   category: StepCategory.KibanaSecurity,
   inputSchema: killProcessInputSchema,
   outputSchema: killProcessOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.killProcess.documentation.details',
+      'xpack.securitySolution.workflows.steps.endpointKillProcess.documentation.details',
       {
         defaultMessage:
-          'Dispatches an Elastic Defend kill-process response action. The process is identified by PID or entity_id taken from endpoint telemetry. The action is queued immediately; status is typically `pending` until the endpoint agent checks in. Requires the `canKillProcess` endpoint privilege.',
+          'Dispatches an Elastic Defend kill-process response action, then polls every 10 seconds until the action completes or times out (up to 10 minutes / 60 attempts). The process is identified by PID or entity_id taken from endpoint telemetry. The returned status and was_successful fields reflect the final outcome. Requires the `canKillProcess` endpoint privilege.',
       }
     ),
     examples: [
