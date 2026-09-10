@@ -144,13 +144,16 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         {...props}
         {...(props.previewMode
           ? {
-              visibleCellActions: 0,
               isSortEnabled: false,
+              disableCellActions: true,
+              disableColumnActions: true,
               isColumnSelectorEnabled: false,
               enableInTableSearch: false,
               showKeyboardShortcuts: false,
               showDisplaySelector: false,
               rowsPerPageOptions: [],
+              actions: false,
+              isResizable: false,
             }
           : {
               canDragAndDropColumns: true,

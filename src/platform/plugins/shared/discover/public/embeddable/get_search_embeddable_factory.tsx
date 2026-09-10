@@ -464,10 +464,6 @@ export const getSearchEmbeddableFactory = ({
                       getTriggerCompatibleActions={
                         discoverServices.uiActions.getTriggerCompatibleActions
                       }
-                      // getTriggerCompatibleActions={
-                      //   !disableTriggers$.getValue()
-                      //     ? discoverServices.uiActions.getTriggerCompatibleActions
-                      //     : () => Promise.resolve([])
                     >
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$, viewMode$ }}

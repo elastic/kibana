@@ -268,6 +268,10 @@ interface InternalUnifiedDataTableProps {
    */
   isSortEnabled?: boolean;
   /**
+   * Determines whether the columns can be resized or not
+   */
+  isResizable?: boolean;
+  /**
    * Manage column selector control
    */
   isColumnSelectorEnabled?: boolean;
@@ -468,6 +472,10 @@ interface InternalUnifiedDataTableProps {
    */
   disableCellActions?: boolean;
   /**
+   * Disable column actions for the table.
+   */
+  disableColumnActions?: boolean;
+  /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
   externalCustomRenderers?: CustomCellRenderer;
@@ -602,6 +610,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showDisplaySelector: showDisplaySelectorProp = true,
       sort,
       isSortEnabled = true,
+      isResizable = true,
       isColumnSelectorEnabled = true,
       isInMemorySortEnabled = true,
       isPaginationEnabled = true,
@@ -653,6 +662,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdatePageIndex,
       disableCellActions = false,
       disableCellPopover = false,
+      disableColumnActions = false,
       customBulkActions,
       hideDefaultBulkActions,
       shouldKeepAdHocDataViewImmutable,
@@ -1182,6 +1192,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataView,
           isSummaryOnlyColumn,
           isSortEnabled,
+          isResizable,
           isPlainRecord,
           services: {
             uiSettings,
@@ -1200,6 +1211,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onResize,
           sortedColumns,
           disableCellActions,
+          disableColumnActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
           documentsDisplayMode,
@@ -1217,6 +1229,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         headerRowHeightLines,
         isPlainRecord,
         isSortEnabled,
+        isResizable,
         onFilter,
         onResize,
         settings,
@@ -1228,6 +1241,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        disableColumnActions,
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
       ]
