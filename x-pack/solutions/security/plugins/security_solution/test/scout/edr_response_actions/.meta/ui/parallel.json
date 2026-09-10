@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 34
       }
     },
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
-        "line": 31,
-        "column": 17
+        "line": 30,
+        "column": 15
       }
     }
   ]

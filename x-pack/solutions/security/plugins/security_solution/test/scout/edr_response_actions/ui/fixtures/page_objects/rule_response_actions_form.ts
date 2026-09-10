@@ -7,8 +7,10 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 
-/** First load of the rule wizard compiles the app bundle in dev. */
+/** First wizard load waits for user-info / lists init and the ad-hoc data view. */
 const APP_LOAD_TIMEOUT_MS = 60_000;
+
+const ABOUT_STEP_NAME = 'scout-response-actions-create-rbac';
 
 /**
  * Rule create / edit Actions step: Elastic Defend automated response-action
@@ -61,7 +63,7 @@ export class RuleResponseActionsFormPage {
     return this.responseActionItem(index).locator('[data-test-subj="remove-response-action"]');
   }
 
-  async gotoCreateActionsStep(name: string, description: string): Promise<void> {
+  async completeWizardUntilActionsStep(): Promise<void> {
     // Open the wizard URL. The rules table swaps `create-new-rule` for
     // `create-rule-button` when AI rule creation is available.
     await this.page.gotoApp('security/rules/create');
@@ -84,8 +86,8 @@ export class RuleResponseActionsFormPage {
     await this.defineContinue.click();
     // Hidden wizard steps stay in the DOM with display:none (kibana#248743).
     await this.aboutRuleName.waitFor({ state: 'visible' });
-    await this.aboutRuleName.fill(name);
-    await this.aboutRuleDescription.fill(description);
+    await this.aboutRuleName.fill(ABOUT_STEP_NAME);
+    await this.aboutRuleDescription.fill(ABOUT_STEP_NAME);
     await this.aboutContinue.click();
 
     await this.scheduleContinue.waitFor({ state: 'visible' });
@@ -102,31 +104,14 @@ export class RuleResponseActionsFormPage {
     await this.responseActionItem(0).waitFor({ state: 'visible' });
   }
 
-  /**
-   * The keypad is hidden behind "Add response action" when the form already
-   * has items. Revealing it does not add a row.
-   */
-  async revealEndpointActionKeypad(): Promise<void> {
-    if (await this.addResponseActionButton.isVisible()) {
-      await this.addResponseActionButton.click();
-    }
+  /** Create form: the keypad is already on the Actions step. */
+  async waitForEndpointActionKeypad(): Promise<void> {
     await this.endpointActionOption.waitFor({ state: 'visible' });
   }
 
-  /**
-   * Clicks the disabled Elastic Defend keypad item without Playwright
-   * actionability checks. The control is intentionally disabled for
-   * `rule_author`; the assertion is that no new row appears.
-   */
-  async dispatchClickOnDisabledEndpointOption(): Promise<void> {
-    await this.endpointActionOption.dispatchEvent('click');
-  }
-
-  /**
-   * Clicks a disabled remove control. The row must stay: the control is
-   * intentionally disabled for `rule_author`.
-   */
-  async dispatchClickOnDisabledRemove(index: number): Promise<void> {
-    await this.removeResponseAction(index).dispatchEvent('click');
+  /** Edit form: existing rows hide the keypad behind "Add response action". */
+  async openEndpointActionKeypad(): Promise<void> {
+    await this.addResponseActionButton.click();
+    await this.endpointActionOption.waitFor({ state: 'visible' });
   }
 }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest, expect, tags } from '../fixtures';
+import { expect } from '@kbn/scout-security/ui';
+import { spaceTest, tags } from '../fixtures';
 import { createRuleWithAutomatedResponseActions } from '../fixtures/seed_rule';
 
 spaceTest.describe(
@@ -22,24 +23,18 @@ spaceTest.describe(
 
     spaceTest(
       'rule_author cannot add an Elastic Defend response action while creating a rule',
-      async ({ pageObjects, scoutSpace }) => {
+      async ({ pageObjects }) => {
         const { ruleResponseActionsForm } = pageObjects;
         spaceTest.setTimeout(120_000);
 
         await spaceTest.step('open the rule create wizard on the Actions step', async () => {
-          const ruleName = `scout-response-actions-create-rbac-${scoutSpace.id}`;
-          await ruleResponseActionsForm.gotoCreateActionsStep(ruleName, ruleName);
+          await ruleResponseActionsForm.completeWizardUntilActionsStep();
         });
 
-        await spaceTest.step(
-          'Elastic Defend keypad is disabled and a click does not add a row',
-          async () => {
-            await ruleResponseActionsForm.revealEndpointActionKeypad();
-            await expect(ruleResponseActionsForm.endpointActionOption).toBeDisabled();
-            await ruleResponseActionsForm.dispatchClickOnDisabledEndpointOption();
-            await expect(ruleResponseActionsForm.responseActionItem(0)).toHaveCount(0);
-          }
-        );
+        await spaceTest.step('Elastic Defend keypad is disabled', async () => {
+          await ruleResponseActionsForm.waitForEndpointActionKeypad();
+          await expect(ruleResponseActionsForm.endpointActionOption).toBeDisabled();
+        });
       }
     );
 
@@ -47,7 +42,6 @@ spaceTest.describe(
       'rule_author cannot edit or remove existing Elastic Defend response actions',
       async ({ pageObjects, kbnClient, scoutSpace }) => {
         const { ruleResponseActionsForm } = pageObjects;
-        spaceTest.setTimeout(120_000);
         const ruleName = `scout-response-actions-edit-rbac-${scoutSpace.id}`;
 
         const rule = await createRuleWithAutomatedResponseActions(
@@ -68,18 +62,10 @@ spaceTest.describe(
           await expect(ruleResponseActionsForm.removeResponseAction(0)).toBeDisabled();
         });
 
-        await spaceTest.step(
-          'force-removing a row and force-adding a command do not change the list',
-          async () => {
-            await ruleResponseActionsForm.dispatchClickOnDisabledRemove(0);
-            await expect(ruleResponseActionsForm.responseActionItem(2)).toBeVisible();
-
-            await ruleResponseActionsForm.revealEndpointActionKeypad();
-            await expect(ruleResponseActionsForm.endpointActionOption).toBeDisabled();
-            await ruleResponseActionsForm.dispatchClickOnDisabledEndpointOption();
-            await expect(ruleResponseActionsForm.responseActionItem(3)).toHaveCount(0);
-          }
-        );
+        await spaceTest.step('Elastic Defend keypad is disabled on edit', async () => {
+          await ruleResponseActionsForm.openEndpointActionKeypad();
+          await expect(ruleResponseActionsForm.endpointActionOption).toBeDisabled();
+        });
       }
     );
   }

@@ -32,4 +32,3 @@ export const spaceTest = spaceBaseTest.extend<
 });
 
 export { tags };
-export { expect } from '@kbn/scout-security/ui';

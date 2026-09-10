@@ -12,7 +12,6 @@ const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 
 export interface SeededResponseActionsRule {
   id: string;
-  name: string;
 }
 
 export const createRuleWithAutomatedResponseActions = async (
@@ -20,7 +19,7 @@ export const createRuleWithAutomatedResponseActions = async (
   spaceId: string,
   name: string
 ): Promise<SeededResponseActionsRule> => {
-  const { data } = await kbnClient.request<{ id: string; name: string }>({
+  const { data } = await kbnClient.request<{ id: string }>({
     method: 'POST',
     path: `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}`,
     headers: PUBLIC_API_HEADERS,
@@ -57,5 +56,5 @@ export const createRuleWithAutomatedResponseActions = async (
     retries: 0,
   });
 
-  return { id: data.id, name: data.name };
+  return { id: data.id };
 };
