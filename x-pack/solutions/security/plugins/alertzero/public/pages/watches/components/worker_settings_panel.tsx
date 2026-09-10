@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Use of this file is governed by the
+ * Elastic License 2.0.
+ */
+
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -30,26 +36,42 @@ import { workerName } from '../workers/translations';
 interface WorkerSettingsPanelProps {
   worker: Worker;
   /** Accordion when a Watch has several Workers; a static panel when it has exactly one. */
-  useAccordion: boolean;
+  isAccordion: boolean;
   isExpanded: boolean;
-  onToggle: (isOpen: boolean) => void;
+  onToggle: (workerId: string, isOpen: boolean) => void;
 }
 
 /**
  * A single Worker's settings in the two-column layout. The header (name, autonomy/schedule badges,
  * enabled switch) doubles as the accordion button when a Watch has several Workers, so collapsed
- * panels still summarise their state.
+ * panels still summarise their state. Memoized: scroll-spy updates in the parent must not
+ * re-render every Worker's settings.
  */
-export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
+export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   worker,
-  useAccordion,
+  isAccordion,
   isExpanded,
   onToggle,
-}) => {
+}: WorkerSettingsPanelProps) {
   const { mutate: updateWorker } = useUpdateWorker();
   const { euiTheme } = useEuiTheme();
   const settingsLocked = worker.state === 'unavailable';
   const name = workerName(worker.id, worker.name);
+
+  const accordionCss = useMemo(
+    () => css`
+      .euiAccordion__triggerWrapper {
+        align-items: center;
+        padding: ${euiTheme.size.base};
+        /* Full-width rule under the header, mirroring the static single-Worker band. */
+        border-bottom: ${isExpanded ? euiTheme.border.thin : 'none'};
+      }
+      .euiAccordion__children {
+        padding: ${euiTheme.size.base};
+      }
+    `,
+    [euiTheme, isExpanded]
+  );
 
   const enabledSwitch = (
     <EuiSwitch
@@ -114,7 +136,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
     </EuiFlexGroup>
   ) : null;
 
-  if (useAccordion) {
+  if (isAccordion) {
     return (
       <EuiPanel hasBorder hasShadow={false} paddingSize="none">
         <EuiAccordion
@@ -122,7 +144,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
           arrowDisplay="left"
           paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}
-          onToggle={onToggle}
+          onToggle={(isOpen) => onToggle(worker.id, isOpen)}
           buttonContent={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
               <EuiFlexItem grow={false}>
@@ -135,17 +157,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
           }
           extraAction={enabledSwitch}
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
-          css={css`
-            .euiAccordion__triggerWrapper {
-              align-items: center;
-              padding: ${euiTheme.size.base};
-              /* Full-width rule under the header, mirroring the static single-Worker band. */
-              border-bottom: ${isExpanded ? euiTheme.border.thin : 'none'};
-            }
-            .euiAccordion__children {
-              padding: ${euiTheme.size.base};
-            }
-          `}
+          css={accordionCss}
         >
           {settingsBody}
         </EuiAccordion>
@@ -171,4 +183,4 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
       {settingsBody}
     </EuiPanel>
   );
-};
+});

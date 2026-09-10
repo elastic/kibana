@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Use of this file is governed by the
+ * Elastic License 2.0.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -34,6 +40,7 @@ import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
 
 const RAIL_NARROW_BREAKPOINT_PX = 1020;
+const WORKER_PULSE_MS = 1200;
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
@@ -56,13 +63,18 @@ export const WatchDetailPage: React.FC = () => {
   );
 
   const workerIds = useMemo(() => members.map((worker) => worker.id), [members]);
-  const useMultiWorker = members.length > 1;
+  const isMultiWorker = members.length > 1;
 
   // Track which Workers the reader has collapsed (default: all expanded) and which is active in
   // the summary rail. Both reset when navigating to another Watch.
   const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
   const [activeWorkerId, setActiveWorkerId] = useState<string | null>(null);
   const [pulsingWorkerId, setPulsingWorkerId] = useState<string | null>(null);
+
+  // Clear the previous pulse's timer when a new one starts or the component unmounts, so a stale
+  // close cannot cancel the current pulse mid-flight.
+  const pulseTimeoutRef = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(pulseTimeoutRef.current), []);
 
   useEffect(() => {
     setCollapsedWorkerIds(new Set());
@@ -94,7 +106,11 @@ export const WatchDetailPage: React.FC = () => {
       return next;
     });
     setPulsingWorkerId(workerId);
-    window.setTimeout(() => setPulsingWorkerId(null), 1200);
+    window.clearTimeout(pulseTimeoutRef.current);
+    pulseTimeoutRef.current = window.setTimeout(
+      () => setPulsingWorkerId((current) => (current === workerId ? null : current)),
+      WORKER_PULSE_MS
+    );
     // Defer the scroll until the expanded accordion content has committed, so the target's height
     // is final before smooth-scrolling.
     requestAnimationFrame(() => {
@@ -104,7 +120,39 @@ export const WatchDetailPage: React.FC = () => {
     });
   }, []);
 
-  useWorkerScrollSpy(workerIds, useMultiWorker, setActiveWorkerId);
+  useWorkerScrollSpy(workerIds, isMultiWorker, setActiveWorkerId);
+
+  const layoutStyles = useMemo(
+    () => ({
+      twoColumn: css`
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: ${euiTheme.size.l};
+        align-items: start;
+        max-width: 1180px;
+        margin-inline: auto;
+        @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      `,
+      workersColumn: css`
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.m};
+        min-width: 0;
+      `,
+      railColumn: css`
+        min-width: 0;
+        @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
+          order: -1;
+        }
+      `,
+      workerSection: css`
+        scroll-margin-top: ${euiTheme.size.xl};
+      `,
+    }),
+    [euiTheme]
+  );
 
   const hasCurrentWatch = watch?.id === watchId;
   const isNotFound =
@@ -151,36 +199,6 @@ export const WatchDetailPage: React.FC = () => {
 
   const intro = settingsI18n.watchIntro(watch.id);
 
-  const twoColumnLayoutCss = css`
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: ${euiTheme.size.l};
-    align-items: start;
-    max-width: 1180px;
-    margin-inline: auto;
-    @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  `;
-
-  const workersColumnCss = css`
-    display: flex;
-    flex-direction: column;
-    gap: ${euiTheme.size.m};
-    min-width: 0;
-  `;
-
-  const railColumnCss = css`
-    min-width: 0;
-    @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
-      order: -1;
-    }
-  `;
-
-  const workerSectionCss = css`
-    scroll-margin-top: ${euiTheme.size.xl};
-  `;
-
   const renderWorkers = () => {
     if (workersError) {
       return (
@@ -210,14 +228,14 @@ export const WatchDetailPage: React.FC = () => {
     }
 
     return (
-      <div css={twoColumnLayoutCss}>
-        <div css={workersColumnCss}>
+      <div css={layoutStyles.twoColumn}>
+        <div css={layoutStyles.workersColumn}>
           {members.map((worker) => (
             <section
               key={worker.id}
               id={workerSectionDomId(worker.id)}
               css={[
-                workerSectionCss,
+                layoutStyles.workerSection,
                 pulsingWorkerId === worker.id
                   ? workerPanelPulseCss(euiTheme.colors.primary)
                   : undefined,
@@ -226,14 +244,14 @@ export const WatchDetailPage: React.FC = () => {
             >
               <WorkerSettingsPanel
                 worker={worker}
-                useAccordion={useMultiWorker}
+                isAccordion={isMultiWorker}
                 isExpanded={!collapsedWorkerIds.has(worker.id)}
-                onToggle={(isOpen) => handleToggleWorker(worker.id, isOpen)}
+                onToggle={handleToggleWorker}
               />
             </section>
           ))}
         </div>
-        <div css={railColumnCss}>
+        <div css={layoutStyles.railColumn}>
           <WatchWorkersSummaryRail
             workers={members}
             activeWorkerId={effectiveActiveWorkerId}

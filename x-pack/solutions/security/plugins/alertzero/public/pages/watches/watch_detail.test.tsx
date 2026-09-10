@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
@@ -300,6 +301,30 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
+  });
+
+  it('expands and scrolls to a Worker when its summary card is clicked', async () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    // Collapse the first Worker's accordion so the rail click has a state change to make.
+    await userEvent.click(
+      screen.getByTestId(
+        `alertZeroWatchWorkerAccordion-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    );
+
+    await userEvent.click(
+      screen.getByTestId(
+        `alertZeroWatchWorkerSummary-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    );
+
+    // The scroll is deferred to the next animation frame; wait for it to fire.
+    await waitFor(() =>
+      expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalledWith(
+        expect.objectContaining({ behavior: 'smooth' })
+      )
+    );
   });
 
   it('renders a summary rail card per member and marks the first as active', () => {
