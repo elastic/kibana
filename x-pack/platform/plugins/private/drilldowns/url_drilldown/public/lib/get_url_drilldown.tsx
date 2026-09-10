@@ -165,8 +165,8 @@ export function getUrlDrilldown(deps: {
             .then((result) => {
               if (!canceled) setTitle(result);
             })
-
             .catch((e) =>
+              // eslint-disable-next-line no-console
               console.warn(
                 `URL drilldown: failed to compile name template "${drilldownState.label}":`,
                 e
