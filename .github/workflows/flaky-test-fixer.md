@@ -247,7 +247,7 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 
 ## Environment
 
-Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node`, `yarn`, or `pnpm`, since each call starts a fresh shell:
+Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `pnpm`, since each call starts a fresh shell:
 
 ```bash
 export PATH="$KBN_NODE_BIN:$PATH"
