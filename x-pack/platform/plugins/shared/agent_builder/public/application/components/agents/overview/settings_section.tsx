@@ -260,7 +260,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                             <EuiText
                               size="s"
                               color={
-                                hasPostExecutionWorkflows ? 'textPrimary' : euiTheme.colors.textDisabled
+                                hasPostExecutionWorkflows
+                                  ? 'textPrimary'
+                                  : euiTheme.colors.textDisabled
                               }
                             >
                               {overviewLabels.postExecutionWorkflowTitle}

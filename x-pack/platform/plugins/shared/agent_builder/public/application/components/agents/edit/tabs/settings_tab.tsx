@@ -881,7 +881,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     ? i18n.translate(
                         'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowAdminOnlyReason',
                         {
-                          defaultMessage: 'Only administrators can configure post-execution workflows.',
+                          defaultMessage:
+                            'Only administrators can configure post-execution workflows.',
                         }
                       )
                     : undefined
