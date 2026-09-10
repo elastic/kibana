@@ -54,7 +54,7 @@ export class AgentBuilderPlatformPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;
     };
-    registerSkills(setupDeps.agentBuilder, getActionsStart);
+    registerSkills(setupDeps.agentBuilder, getActionsStart, this.logger);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {

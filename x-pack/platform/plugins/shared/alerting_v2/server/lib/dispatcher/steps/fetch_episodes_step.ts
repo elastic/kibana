@@ -19,6 +19,7 @@ import type {
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { EPISODE_QUERY_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
+import { EpisodeScan } from '../state';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawAlertEpisode {
@@ -72,7 +73,7 @@ export class FetchEpisodesStep implements DispatcherStep {
       return { type: 'halt', reason: 'no_episodes' };
     }
 
-    return { type: 'continue', data: { episodes, truncated } };
+    return { type: 'continue', data: { scan: EpisodeScan.of({ episodes, truncated }) } };
   }
 }
 

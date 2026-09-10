@@ -59,7 +59,8 @@ export async function getDefaultAsyncSubmitParams(
     // If PIT is used, this setting is ignored as well since its not supported.
     ...(isServerless || isPit ? {} : { ccs_minimize_roundtrips: true }),
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
-    ...(await getIgnoreThrottled(uiSettingsClient)),
+    // ignore_throttled is incompatible with PIT — frozen index filtering is set on openPointInTime, not the search request.
+    ...(!isPit ? await getIgnoreThrottled(uiSettingsClient) : {}),
     ...(await getDefaultSearchParams(uiSettingsClient, { isPit })),
   };
 }

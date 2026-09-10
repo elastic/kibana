@@ -272,7 +272,7 @@ describe('BackfillClient', () => {
       expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
         'ad_hoc_run-backfill': {
           title: 'Alerting Backfill Rule Run',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
           taskTypeGroup: 'alerting',
           createTaskRunner: expect.any(Function),
         },

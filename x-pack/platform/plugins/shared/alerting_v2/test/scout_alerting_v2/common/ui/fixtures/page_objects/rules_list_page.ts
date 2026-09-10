@@ -14,7 +14,6 @@ export class RulesListPage {
   public readonly bulkDisableMenuItem: Locator;
   public readonly rulesListTable: Locator;
   public readonly ruleSummaryFlyout: Locator;
-  public readonly ruleSummaryQuickEditButton: Locator;
   /** Header "Create rule" split button; hidden for read-only users. */
   public readonly createRuleButton: Locator;
 
@@ -25,9 +24,6 @@ export class RulesListPage {
     this.bulkDisableMenuItem = this.page.testSubj.locator('bulkDisableRules');
     this.rulesListTable = this.page.testSubj.locator('rulesListTable');
     this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
-    this.ruleSummaryQuickEditButton = this.page.testSubj.locator(
-      'ruleSummaryFlyoutQuickEditButton'
-    );
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
   }
 

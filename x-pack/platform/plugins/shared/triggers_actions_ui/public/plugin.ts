@@ -33,6 +33,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -115,6 +116,14 @@ import type { UntrackAlertsModalProps } from './application/sections/common/comp
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { getClassicRulesPageLazy } from './common/get_classic_rules_page';
+import type {
+  ClassicRulesPageInternalDeps,
+  ClassicRulesPagePluginsStart,
+  ClassicRulesPageProps,
+} from './application/classic_rules_page';
+
+export type { ClassicRulesPageProps } from './application/classic_rules_page';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -175,6 +184,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
   getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Classic (v1) Rules page, for hosts that mount it outside Stack Management.
+   */
+  getClassicRulesPage: (props: ClassicRulesPageProps) => ReactElement<ClassicRulesPageProps>;
 }
 
 interface PluginsSetup {
@@ -198,6 +211,7 @@ interface PluginsStart {
   features: FeaturesPluginStart;
   expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
@@ -225,6 +239,8 @@ export class Plugin
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
   private readonly isServerless: boolean;
+  private cloud?: CloudSetup;
+  private actionsSetup?: ActionsPublicPluginSetup;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -238,6 +254,8 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
+    this.cloud = plugins.cloud;
+    this.actionsSetup = plugins.actions;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -368,6 +386,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: coreStart.theme,
@@ -473,6 +492,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: params.theme,
@@ -512,6 +532,21 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const internalDeps: ClassicRulesPageInternalDeps = {
+      actions:
+        this.actionsSetup ??
+        ({
+          validateEmailAddresses: this.connectorServices?.validateEmailAddresses ?? (() => []),
+          enabledEmailServices: this.connectorServices?.enabledEmailServices ?? [],
+        } as ActionsPublicPluginSetup),
+      security: plugins.security,
+      cloud: this.cloud,
+      actionTypeRegistry: this.actionTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      isServerless: this.isServerless,
+      pluginsStart: plugins as ClassicRulesPagePluginsStart,
+    };
+
     const createAlertRuleAction = async () => {
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
         coreStart: core,
@@ -648,6 +683,8 @@ export class Plugin
         }
         return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
+      getClassicRulesPage: (props: ClassicRulesPageProps) =>
+        getClassicRulesPageLazy({ ...props, internalDeps }),
     };
   }
 

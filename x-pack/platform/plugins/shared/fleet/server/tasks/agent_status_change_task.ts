@@ -22,8 +22,6 @@ import {
 import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 import type { Agent } from '../types';
-import { SO_SEARCH_LIMIT } from '../constants';
-import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 import { throwIfAborted } from './utils';
 
@@ -186,7 +184,9 @@ export class AgentStatusChangeTask {
     soClient: SavedObjectsClientContract,
     signal: AbortSignal
   ): Promise<number> => {
-    let agentlessPolicies: string[] | undefined;
+    let policiesInfo:
+      | { agentlessPolicies: string[]; policyNamespaceMap: Map<string, string> }
+      | undefined;
     let processedCount = 0;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
       perPage: AGENTS_BATCHSIZE,
@@ -221,11 +221,16 @@ export class AgentStatusChangeTask {
         `[AgentStatusChangeTask] Recording ${agentsWithStatus.length} status changes`
       );
 
-      if (!agentlessPolicies) {
-        agentlessPolicies = await this.findAgentlessPolicies();
+      if (!policiesInfo) {
+        policiesInfo = await this.findAgentPoliciesInfo();
       }
 
-      await this.bulkCreateAgentStatusChangeDocs(esClient, agentsWithStatus, agentlessPolicies);
+      await this.bulkCreateAgentStatusChangeDocs(
+        esClient,
+        agentsWithStatus,
+        policiesInfo.agentlessPolicies,
+        policiesInfo.policyNamespaceMap
+      );
 
       const updateErrors: Record<string, Error> = {};
       await bulkUpdateAgents(
@@ -259,25 +264,50 @@ export class AgentStatusChangeTask {
     return processedCount;
   };
 
-  private findAgentlessPolicies = async () => {
+  private findAgentPoliciesInfo = async () => {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-    const agentlessPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
-      spaceId: '*',
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
-      fields: ['id'],
-    });
-    return agentlessPolicies.items.map((policy) => policy.id);
+    const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(
+      internalSoClientWithoutSpaceExtension,
+      {
+        spaceId: '*',
+        fields: ['id', 'namespace', 'supports_agentless'],
+      }
+    );
+
+    const agentlessPolicies: string[] = [];
+    const policyNamespaceMap = new Map<string, string>();
+
+    for await (const batch of agentPolicyFetcher) {
+      for (const policy of batch) {
+        if (policy.supports_agentless) {
+          agentlessPolicies.push(policy.id);
+        }
+        if (policy.id && policy.namespace) {
+          if (!policyNamespaceMap.has(policy.id)) {
+            policyNamespaceMap.set(policy.id, policy.namespace);
+          }
+        }
+      }
+    }
+
+    return { agentlessPolicies, policyNamespaceMap };
   };
 
   private bulkCreateAgentStatusChangeDocs = async (
     esClient: ElasticsearchClient,
     agentsToUpdate: Agent[],
-    agentlessPolicies: string[] | undefined
+    agentlessPolicies: string[] | undefined,
+    policyNamespaceMap: Map<string, string> | undefined
   ) => {
     const bulkBody = agentsToUpdate.flatMap((agent) => {
+      // Use policy_base_id (always the plain UUID) for map lookups so that agents whose
+      // policy_id carries a version suffix (e.g. "<uuid>#9.6") are still matched against
+      // the maps that are keyed by base id. Falls back to policy_id for agents enrolled by
+      // an older fleet-server that did not yet write policy_base_id.
+      const basePolicyId = agent.policy_base_id ?? agent.policy_id;
+      const policyNamespace = (basePolicyId && policyNamespaceMap?.get(basePolicyId)) || 'default';
       const body = {
         '@timestamp': new Date().toISOString(),
         data_stream: AGENT_STATUS_CHANGE_DATA_STREAM,
@@ -286,9 +316,10 @@ export class AgentStatusChangeTask {
         },
         status: agent.status,
         policy_id: agent.policy_id,
+        policy_namespace: policyNamespace,
         space_id: agent.namespaces,
         hostname: agent.local_metadata?.host?.hostname,
-        agentless: (agent.policy_id && agentlessPolicies?.includes(agent.policy_id)) ?? false,
+        agentless: (basePolicyId && agentlessPolicies?.includes(basePolicyId)) ?? false,
       };
 
       return [
@@ -304,7 +335,6 @@ export class AgentStatusChangeTask {
     await esClient.bulk({
       index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
       operations: bulkBody,
-      refresh: 'wait_for',
     });
   };
 }

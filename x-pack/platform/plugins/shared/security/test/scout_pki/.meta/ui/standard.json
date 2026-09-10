@@ -1,5 +1,8 @@
 {
   "sha1": "05730ed0907432037c62af59d9d530b314ef0a26",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "e85bee88fa6873c-503612110510f40",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_pki/ui/tests/pki_login.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 29,
+        "column": 5
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_pki/ui/tests/pki_no_role_mapping.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 17,
+        "column": 93
       }
     }
   ]

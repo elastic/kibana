@@ -1,8 +1,7 @@
 {
-  "sha1": "7f27721cea7abe4fe3e91a04cd0b0ecf304f6e99",
+  "sha1": "e440fd61058c3b4a5243ad4ea57f45908799f866",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -227,22 +226,6 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/overview_sorting.spec.ts",
         "line": 28,
         "column": 7
-      }
-    },
-    {
-      "id": "41a5e8b53c1a295-ec9bfa8647930ac",
-      "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/step_details.spec.ts",
-        "line": 34,
-        "column": 28
       }
     }
   ]

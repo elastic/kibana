@@ -12,7 +12,6 @@ import type { AttachmentPersistedAttributes } from '../../../common/types/attach
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
 import {
   type AttachmentPatchAttributesV2,
-  type AttachmentMode,
   UnifiedAttachmentAttributesRt,
 } from '../../../../common/types/domain/attachment/v2';
 import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
@@ -26,25 +25,23 @@ export type ModeTransformedAttributes =
   | { isUnified: true; attributes: UnifiedAttachmentAttributes }
   | { isUnified: false; attributes: AttachmentPersistedAttributes };
 
-export function transformAttributesForMode({
+/**
+ * Decides unified vs legacy shape on read. Migrated types (incl. legacy `actions`)
+ * fold to their unified shape in-memory; the stored SO is never mutated.
+ */
+export function toUnifiedAttributes({
   attributes,
-  mode,
 }: {
   attributes:
     | UnifiedAttachmentAttributes
     | AttachmentPersistedAttributes
     | AttachmentPatchAttributesV2;
-  mode: AttachmentMode;
 }): ModeTransformedAttributes {
   const attachmentType = getAttachmentTypeFromAttributes(attributes);
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
-  // Unified-only attachments (no legacy counterpart, e.g. entity/timeline or a
-  // Lens-by-reference instance) cannot be represented in the legacy schema and
-  // must stay in unified mode even when a legacy read is requested.
-  const isUnifiedOnly = isUnifiedOnlyAttachment(attributes);
 
-  if ((mode === 'unified' || isUnifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
+  if (isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
     return { isUnified: true, attributes: validatedAttributes };

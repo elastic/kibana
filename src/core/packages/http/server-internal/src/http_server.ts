@@ -600,7 +600,9 @@ export class HttpServer {
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
-      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      if (app.httpSpan?.isRecording()) {
+        app.httpSpan.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      }
 
       const stop = app.measureElu;
 

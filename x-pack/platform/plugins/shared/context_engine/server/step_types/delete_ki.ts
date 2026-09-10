@@ -14,51 +14,63 @@ import {
   assertKiWritePrivilege,
   findKiBackingIndex,
   kiNotFoundError,
-  resolveAiIndexDest,
+  resolveAiIndex,
+  withKiWriteTelemetry,
 } from './helpers';
 
 export const getDeleteKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  analyticsService,
+  logger,
 }: KiStepDependencies) =>
   createServerStepDefinition({
     ...deleteKiStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
-      await assertKiWritePrivilege(checkWritePrivilege, request);
 
       const { ai_index_id: aiIndexId, ki_id: kiId } = context.input;
-
-      const dest = await resolveAiIndexDest(getAiIndexService, aiIndexId);
-      const esClient = context.contextManager.getScopedEsClient();
-
-      const backingIndex = await findKiBackingIndex({
-        esClient,
+      return withKiWriteTelemetry({
+        action: 'delete',
         aiIndexId,
-        destValue: dest.value,
-        kiId,
-        abortSignal: context.abortSignal,
+        analyticsService,
+        logger,
+        run: async (setManaged) => {
+          await assertKiWritePrivilege(checkWritePrivilege, request);
+
+          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId);
+          setManaged(managed);
+          const esClient = context.contextManager.getScopedEsClient();
+
+          const backingIndex = await findKiBackingIndex({
+            esClient,
+            aiIndexId,
+            destValue: dest.value,
+            kiId,
+            abortSignal: context.abortSignal,
+          });
+
+          await esClient
+            .delete(
+              {
+                index: backingIndex,
+                id: kiId,
+                refresh: 'wait_for',
+              },
+              { signal: context.abortSignal }
+            )
+            .catch((error) => {
+              // The KI (or its backing index) may have been removed concurrently.
+              if (isResponseError(error) && error.statusCode === 404) {
+                throw kiNotFoundError(aiIndexId, kiId);
+              }
+              throw error;
+            });
+
+          return { output: { id: kiId } };
+        },
       });
-
-      await esClient
-        .delete(
-          {
-            index: backingIndex,
-            id: kiId,
-            refresh: 'wait_for',
-          },
-          { signal: context.abortSignal }
-        )
-        .catch((error) => {
-          // The KI (or its backing index) may have been removed concurrently.
-          if (isResponseError(error) && error.statusCode === 404) {
-            throw kiNotFoundError(aiIndexId, kiId);
-          }
-          throw error;
-        });
-
-      return { output: { id: kiId } };
     },
   });

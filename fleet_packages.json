@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.9.4"
+    "version": "2.9.6"
   },
   {
     "name": "endpoint",
@@ -52,11 +52,11 @@
   },
   {
     "name": "synthetics",
-    "version": "1.10.0"
+    "version": "1.11.0"
   },
   {
     "name": "security_detection_engine",
-    "version": "9.5.4"
+    "version": "9.5.5"
   },
   {
     "name": "security_ai_prompts",

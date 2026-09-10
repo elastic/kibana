@@ -2,8 +2,11 @@
 # Gathers diagnostic information about a Cypress test file for flaky test analysis.
 # Shows: skip status, git history, linked GitHub issues, environment tags, imported helpers.
 #
-# Usage:
-#   bash .agents/skills/security-solution-flaky-test-doctor/scripts/check_test_status.sh \
+# Usage (from this skill directory):
+#   bash scripts/check_test_status.sh path/to/test.cy.ts
+#
+# From the repo root:
+#   bash x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/scripts/check_test_status.sh \
 #     path/to/test.cy.ts
 
 set -euo pipefail

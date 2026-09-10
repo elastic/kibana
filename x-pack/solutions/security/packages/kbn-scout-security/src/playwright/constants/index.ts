@@ -11,3 +11,8 @@ export type * from './entity_analytics';
 export * from './alert_workflows';
 export * from './take_action';
 export { FULL_KIBANA_SECURITY_ROLE } from './roles';
+export {
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
+  PUBLIC_API_HEADERS,
+  INTERNAL_API_HEADERS,
+} from './api_headers';

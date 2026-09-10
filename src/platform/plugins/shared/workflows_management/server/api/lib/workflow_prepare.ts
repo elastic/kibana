@@ -72,6 +72,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
+  nameFallback?: string;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -81,11 +82,16 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     now,
     spaceId,
     triggerDefinitions,
+    nameFallback,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: looseMetadata.name ?? 'Untitled workflow',
+    // Prefer the YAML-embedded name so the stored name round-trips with the YAML.
+    // `nameFallback` is used only when the YAML cannot carry a `name` key (e.g. a
+    // schema-invalid workflow whose root is a scalar/sequence), so callers such as
+    // cloning can still name the document instead of collapsing to "Untitled workflow".
+    name: looseMetadata.name ?? nameFallback ?? 'Untitled workflow',
     description: looseMetadata.description,
     enabled: false,
     tags: looseMetadata.tags ?? [],

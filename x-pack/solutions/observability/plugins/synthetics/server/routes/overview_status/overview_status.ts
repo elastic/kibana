@@ -6,7 +6,11 @@
  */
 import { OverviewStatusService } from './overview_status_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import type { OverviewStaleStatus, OverviewStatusState } from '../../../common/runtime_types';
+import type {
+  OverviewStaleStatus,
+  OverviewStatusState,
+  PaginatedOverviewStatus,
+} from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { OverviewStatusSchema, OverviewStatusStaleBodySchema } from '../common';
 
@@ -16,7 +20,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => 
   validate: {
     query: OverviewStatusSchema,
   },
-  handler: async (routeContext): Promise<OverviewStatusState> => {
+  handler: async (routeContext): Promise<OverviewStatusState | PaginatedOverviewStatus> => {
     const statusOverview = new OverviewStatusService(routeContext);
     return await statusOverview.getOverviewStatus();
   },
@@ -33,6 +37,8 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => 
 export const createGetStaleStatusRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
+  // Read-only lookup; POST is only used for the body. Honor CPS routing.
+  writeAccess: false,
   validate: {
     query: OverviewStatusSchema,
     body: OverviewStatusStaleBodySchema,

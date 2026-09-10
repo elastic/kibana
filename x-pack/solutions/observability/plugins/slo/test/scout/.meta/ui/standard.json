@@ -1,8 +1,7 @@
 {
-  "sha1": "eb585143401bb8be021786811c4fe88442c8f07a",
+  "sha1": "44ac1dd1c4ac0de1f8d4e7369c63837d5f14d707",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -177,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
-        "line": 24,
-        "column": 61
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -193,8 +192,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "19d28556f6339bb-227f727b7a48158",
+      "title": "SLO Overview Embeddable renders a single SLO overview panel when ES query inspection is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 86,
+        "column": 55
       }
     },
     {

@@ -92,4 +92,47 @@ describe('getBenchmarksData PIT refresh', () => {
     // evaluation is the distinct-asset cardinality count per benchmark version
     expect(result.map((benchmark) => benchmark.evaluation)).toEqual([5, 7]);
   });
+
+  it('closes the PIT even when a search throws', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const encryptedSoClient = savedObjectsClientMock.create();
+
+    soClient.find.mockResolvedValue({
+      aggregations: {
+        benchmark_id: {
+          buckets: [
+            {
+              key: 'cis_k8s',
+              doc_count: 1,
+              name: {
+                buckets: [
+                  {
+                    key: 'CIS Kubernetes',
+                    doc_count: 1,
+                    version: { buckets: [{ key: 'v1.0.0', doc_count: 1 }] },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    } as any);
+
+    const searchError = new Error('ES query failed');
+    const esClient = {
+      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-0' }),
+      search: jest.fn().mockRejectedValue(searchError),
+      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true, num_freed: 1 }),
+    };
+
+    const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+
+    await expect(
+      getBenchmarksData(soClient, encryptedSoClient, esClient as any, logger as any)
+    ).rejects.toThrow('ES query failed');
+
+    // PIT must be closed regardless of the error.
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-0' });
+  });
 });

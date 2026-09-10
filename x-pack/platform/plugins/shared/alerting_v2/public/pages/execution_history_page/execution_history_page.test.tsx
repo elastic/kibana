@@ -93,6 +93,7 @@ jest.mock(
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   useComposeDiscoverFlyout: () => ({
     flyout: null,
+    confirmationModal: null,
     openCreateFlyout: jest.fn(),
     openEditFlyout: jest.fn(),
     openCloneFlyout: jest.fn(),

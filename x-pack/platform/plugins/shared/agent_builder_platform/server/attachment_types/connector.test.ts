@@ -57,25 +57,25 @@ describe('connector attachment type', () => {
 
   describe('validate', () => {
     it('accepts valid connector data', () => {
-      const result = connectorType.validate(validData);
+      const result = connectorType.validate(validData, formatContext);
       expect(result).toEqual({ valid: true, data: validData });
     });
 
     it('rejects data missing connector_id', () => {
       const { connector_id: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_name', () => {
       const { connector_name: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_type', () => {
       const { connector_type: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
   });
@@ -157,18 +157,21 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search Slack messages',
               input: inputSchema,
               handler: jest.fn(),
             },
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message to a channel',
               input: inputSchema,
               handler: jest.fn(),
             },
             internalAction: {
               isTool: false,
+              scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
               handler: jest.fn(),
@@ -212,6 +215,7 @@ describe('connector attachment type', () => {
           actions: {
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message',
               input: inputSchema,
               handler: jest.fn(),
@@ -263,6 +267,7 @@ describe('connector attachment type', () => {
               },
               searchMessages: {
                 isTool: true,
+                scope: 'read' as const,
                 description: 'Search messages',
                 input: inputSchema,
                 handler: jest.fn(),
@@ -328,6 +333,7 @@ describe('connector attachment type', () => {
             actions: {
               searchMessages: {
                 isTool: true,
+                scope: 'read' as const,
                 description: 'Search messages',
                 input: inputSchema,
                 handler: jest.fn(),
@@ -376,6 +382,7 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search messages',
               input: inputSchema,
               handler: jest.fn(),

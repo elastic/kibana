@@ -9,7 +9,7 @@ import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import type { CoreStart } from '@kbn/core/public';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -23,7 +23,7 @@ import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 
 describe('RoleMappingsGridPage', () => {
   let history: ReturnType<typeof scopedHistoryMock.create>;
-  let coreStart: CoreStart;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
@@ -38,18 +38,20 @@ describe('RoleMappingsGridPage', () => {
       },
     };
     return mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <RoleMappingsGridPage
-          rolesAPIClient={rolesAPI}
-          roleMappingsAPI={roleMappingsAPI}
-          securityFeaturesAPI={securityFeaturesAPI}
-          notifications={coreStart.notifications}
-          docLinks={coreStart.docLinks}
-          history={history}
-          navigateToApp={coreStart.application.navigateToApp}
-          readOnly={!coreStart.application.capabilities.role_mappings.save}
-        />
-      </KibanaContextProvider>
+      <MockAppHeaderProvider>
+        <KibanaContextProvider services={coreStart}>
+          <RoleMappingsGridPage
+            rolesAPIClient={rolesAPI}
+            roleMappingsAPI={roleMappingsAPI}
+            securityFeaturesAPI={securityFeaturesAPI}
+            notifications={coreStart.notifications}
+            docLinks={coreStart.docLinks}
+            history={history}
+            navigateToApp={coreStart.application.navigateToApp}
+            readOnly={!coreStart.application.capabilities.role_mappings.save}
+          />
+        </KibanaContextProvider>
+      </MockAppHeaderProvider>
     );
   };
 
