@@ -39,6 +39,9 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
   return [
     {
       id: PANEL_ID,
+      title: i18n.translate('xpack.observability.nav.alerting', {
+        defaultMessage: 'Alerting',
+      }),
       link: ALERTS_LINK,
       icon: ALERTS_ICON,
       renderAs: 'panelOpener',

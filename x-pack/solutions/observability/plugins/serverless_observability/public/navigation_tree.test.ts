@@ -183,6 +183,7 @@ describe('Navigation Tree', () => {
     expect(alertsPanel).toEqual(
       expect.objectContaining({
         id: 'alerting',
+        title: 'Alerting',
         link: 'observability-overview:alerts',
         icon: 'warning',
         renderAs: 'panelOpener',
