@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  HistogramPercentileValue,
+import {
   METRICS_GRID_HISTOGRAM_PERCENTILES,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
-  METRICS_GRID_SETTINGS_DEFAULTS,
-  type HistogramPercentile,
-  type MetricsGridSettings,
-  type SimpleAggregation,
 } from './metrics_grid_settings';
-export {
-  METRICS_GRID_SORT_DEFAULTS,
-  type MetricsGridSort,
-  type MetricsGridSortDirection,
-  type MetricsGridSortField,
-} from './metrics_grid_sort';
+
+describe('metrics grid settings', () => {
+  it('exposes exactly the four simple aggregation options', () => {
+    expect(METRICS_GRID_SIMPLE_AGGREGATIONS).toEqual(['avg', 'sum', 'min', 'max']);
+  });
+
+  it('exposes exactly the five histogram percentile options', () => {
+    expect(METRICS_GRID_HISTOGRAM_PERCENTILES).toEqual(['p50', 'p75', 'p90', 'p95', 'p99']);
+  });
+});
