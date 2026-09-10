@@ -259,14 +259,18 @@ The briefing is handed over as the agent's `message`. It instructs the agent to
 load the `analyze-and-improve` skill before reading anything, so the run carries
 the analysis playbook whichever agent the index is configured with.
 
-Prior proposals go into the briefing grouped by what they would change — the
-workflow, knowledge indicator or source named in `target` — rather than listed by
-date. A run cannot be handed the history that matters to it, because until it has
-read the signals it does not know what it is about to suggest; grouping by target
-lets it look its own conclusion up once it has one. Targets are ordered by how
-often they were rejected, so a long history is cut from the end that carries the
-least settled decisions, and the totals above the list stay exact whether or not
-it was cut.
+The briefing does not carry prior proposals, only how many there are and where
+they stand. A run cannot be handed the history that matters to it, because until
+it has read the signals it does not know what it is about to suggest, and an
+index accumulates more targets than fit in a prompt. So the briefing hands over
+an ES|QL query instead: once the run knows what it wants to change, it reads that
+target's lineage out of `context-engine-improvements` itself, filtering
+`ai_index_id` and `latest`, then `target.ki_id`, `target.workflow_id` or
+`target.subject`. This is why `resolution` is mapped where `payload` is not —
+ES|QL can only select mapped fields, and a rejection without `resolution.reason`
+tells the run nothing it can act on. The query lives in the briefing rather than
+only in the skill because the briefing is the one part of a run that cannot be
+replaced by configuring a different agent.
 
 The `platform.context_engine.ai_index` attachment is not used: it carries the
 `save_automation` tool and instructions to ask the user questions, which belong

@@ -97,6 +97,24 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toContain('already rejected');
     });
 
+    it('sends the run to look history up, rather than waiting to be handed it', () => {
+      expect(content).toContain('context-engine-improvements');
+      expect(content).toMatch(/target\.ki_id.*target\.workflow_id.*target\.subject/s);
+      expect(content).toContain('resolution.reason');
+    });
+
+    it('defers the lookup until there is a target to look up', () => {
+      // Which history matters depends on what the run decides to propose, so a lookup made before
+      // that is a guess at what will turn out to be relevant.
+      expect(content).toMatch(/when you know what you want to change, not before/);
+    });
+
+    it('names the missing index as an answer, not a failure', () => {
+      // The index is created by the first write, so an empty deployment errors rather than
+      // returning nothing — which reads as a broken lookup unless the skill says otherwise.
+      expect(content).toMatch(/Unknown index.*means nothing has ever been proposed/s);
+    });
+
     it('points at the traces skill rather than restating how the traces index is shaped', () => {
       expect(content).toContain('agent-builder-traces');
     });

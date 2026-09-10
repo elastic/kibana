@@ -41,9 +41,6 @@ export const MAX_SIGNALS_PAGE_SIZE = 100;
 export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
 
-/** Cap on the improvement history handed to an analysis run's briefing. */
-export const MAX_IMPROVEMENTS_HISTORY_SIZE = 200;
-
 /**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.

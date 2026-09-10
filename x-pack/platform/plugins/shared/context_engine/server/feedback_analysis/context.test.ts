@@ -45,7 +45,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 describe('buildFeedbackContext', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'get'>>;
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'historyFor'>>;
+  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'historySummaryFor'>>;
 
   const build = (aiIndex: AiIndexHttpItem = buildAiIndex()) => {
     aiIndexService.get.mockResolvedValue(aiIndex);
@@ -60,7 +60,9 @@ describe('buildFeedbackContext', () => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     aiIndexService = { get: jest.fn() };
-    improvementsService = { historyFor: jest.fn().mockResolvedValue([]) };
+    improvementsService = {
+      historySummaryFor: jest.fn().mockResolvedValue({ total: 0, by_status: {} }),
+    };
     selectSignalsMock.mockResolvedValue({
       patterns: [buildPattern('coverage_gap', 12)],
       spaces: ['default'],
@@ -177,16 +179,16 @@ describe('buildFeedbackContext', () => {
     expect((await build()).has_signals).toBe(false);
   });
 
-  it('carries prior improvements into the briefing', async () => {
-    improvementsService.historyFor.mockResolvedValue([
-      {
-        improvement_id: 'imp-1',
-        action: 'add_ki',
-        title: 'Add a KI for refunds',
-        status: 'rejected',
-      },
-    ] as never);
+  it('carries the shape of prior improvements into the briefing, and the query to read them', async () => {
+    improvementsService.historySummaryFor.mockResolvedValue({
+      total: 7,
+      by_status: { rejected: 7 },
+    });
 
-    expect((await build()).briefing).toContain('Add a KI for refunds');
+    const { briefing } = await build();
+
+    expect(improvementsService.historySummaryFor).toHaveBeenCalledWith('orders');
+    expect(briefing).toContain('7 proposal(s) for this index — 7 rejected.');
+    expect(briefing).toContain('FROM context-engine-improvements');
   });
 });

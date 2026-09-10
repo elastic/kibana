@@ -12,7 +12,22 @@ import type { KiFields, KiPartialFields } from '../step_types/ki';
 export const IMPROVEMENTS_INDEX = 'context-engine-improvements';
 
 /** Where an improvement stands with its reviewer. */
-export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
+export const IMPROVEMENT_STATUSES = ['suggested', 'applied', 'rejected', 'failed'] as const;
+
+export type ImprovementStatus = (typeof IMPROVEMENT_STATUSES)[number];
+
+export const isImprovementStatus = (value: string): value is ImprovementStatus =>
+  (IMPROVEMENT_STATUSES as readonly string[]).includes(value);
+
+/**
+ * How much history an AI index carries, without the documents. A run is told the shape of what
+ * came before so it knows whether to look, and queries the index itself for the lineage of the
+ * target it lands on.
+ */
+export interface ImprovementHistorySummary {
+  total: number;
+  by_status: Partial<Record<ImprovementStatus, number>>;
+}
 
 /** True for the `add_*` actions, which create their target. */
 export const isAddAction = (action: ImprovementAction): boolean => action.startsWith('add_');

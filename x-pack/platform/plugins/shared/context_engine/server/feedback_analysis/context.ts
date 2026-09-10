@@ -7,7 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { KI_SUMMARY_PAGE_SIZE, MAX_IMPROVEMENTS_HISTORY_SIZE } from '../../common/constants';
+import { KI_SUMMARY_PAGE_SIZE } from '../../common/constants';
 import type { FeedbackAnalysisContext } from '../../common/http_api/feedback_context';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -49,7 +49,7 @@ export const buildFeedbackContext = async (
       ...(now ? { now } : {}),
     }),
     getKis(esClient, { destValue: aiIndex.dest.value, size: KI_SUMMARY_PAGE_SIZE }),
-    improvementsService.historyFor(aiIndexId, { size: MAX_IMPROVEMENTS_HISTORY_SIZE }),
+    improvementsService.historySummaryFor(aiIndexId),
   ]);
 
   const groups = rankPatterns(selection.patterns);
