@@ -18,16 +18,16 @@ const esqlVariable = (key: string): ESQLControlVariable =>
     key,
   } as ESQLControlVariable);
 
-const esqlSibling = (esql: string) => {
-  const query$ = new BehaviorSubject<AggregateQuery>({ esql });
-  return { query$ };
-};
+const getSiblingApi = (esql: string) => ({
+  esql$: new BehaviorSubject<AggregateQuery[]>([{ esql }]),
+  approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
+});
 
 describe('panelIsRelatedByEsqlVariable', () => {
   test('returns true when a sibling ES|QL query consumes the control variable', () => {
     const esqlVariable$ = new BehaviorSubject(esqlVariable('myVar'));
     const { isRelated } = panelIsRelatedByEsqlVariable({ esqlVariable$ });
-    const sibling = esqlSibling('FROM logs | WHERE level == ?myVar');
+    const sibling = getSiblingApi('FROM logs | WHERE level == ?myVar');
 
     expect(
       isRelated(sibling, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?myVar' }]])
@@ -37,7 +37,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
   test('returns false when a sibling ES|QL query uses a different variable', () => {
     const esqlVariable$ = new BehaviorSubject(esqlVariable('myVar'));
     const { isRelated } = panelIsRelatedByEsqlVariable({ esqlVariable$ });
-    const sibling = esqlSibling('FROM logs | WHERE level == ?other');
+    const sibling = getSiblingApi('FROM logs | WHERE level == ?other');
 
     expect(
       isRelated(sibling, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?other' }]])
@@ -63,7 +63,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
   test('reacts to self variable key changes', () => {
     const esqlVariable$ = new BehaviorSubject(esqlVariable('myVar'));
     const { isRelated } = panelIsRelatedByEsqlVariable({ esqlVariable$ });
-    const sibling = esqlSibling('FROM logs | WHERE level == ?myVar');
+    const sibling = getSiblingApi('FROM logs | WHERE level == ?myVar');
 
     expect(
       isRelated(sibling, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?myVar' }]])
@@ -72,7 +72,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
     esqlVariable$.next(esqlVariable('renamedVar'));
     expect(
       isRelated(
-        esqlSibling('FROM logs | WHERE level == ?renamedVar'),
+        getSiblingApi('FROM logs | WHERE level == ?renamedVar'),
         [esqlVariable('renamedVar')],
         [[{ esql: 'FROM logs | WHERE level == ?renamedVar' }]]
       )
@@ -82,14 +82,17 @@ describe('panelIsRelatedByEsqlVariable', () => {
   test('reacts to sibling query changes', () => {
     const esqlVariable$ = new BehaviorSubject(esqlVariable('myVar'));
     const { isRelated } = panelIsRelatedByEsqlVariable({ esqlVariable$ });
-    const siblingQuery$ = new BehaviorSubject<AggregateQuery>({
-      esql: 'FROM logs | WHERE level == ?other',
-    });
-    const sibling = { query$: siblingQuery$ };
+    const siblingEsql$ = new BehaviorSubject<AggregateQuery[]>([
+      {
+        esql: 'FROM logs | WHERE level == ?other',
+      },
+    ]);
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
+    const sibling = { esql$: siblingEsql$, approximationApplied$ };
 
-    expect(isRelated(sibling, [esqlVariable('myVar')], [[siblingQuery$.value]])).toBe(false);
+    expect(isRelated(sibling, [esqlVariable('myVar')], [siblingEsql$.value])).toBe(false);
 
-    siblingQuery$.next({ esql: 'FROM logs | WHERE level == ?myVar' });
-    expect(isRelated(sibling, [esqlVariable('myVar')], [[siblingQuery$.value]])).toBe(true);
+    siblingEsql$.next([{ esql: 'FROM logs | WHERE level == ?myVar' }]);
+    expect(isRelated(sibling, [esqlVariable('myVar')], [siblingEsql$.value])).toBe(true);
   });
 });
