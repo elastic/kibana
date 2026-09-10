@@ -16,7 +16,7 @@ import {
   type EsAssetReference,
 } from '@kbn/fleet-plugin/common';
 
-interface InstalledAsset {
+export interface InstalledAsset {
   id: string;
   title: string;
   appLink?: string;

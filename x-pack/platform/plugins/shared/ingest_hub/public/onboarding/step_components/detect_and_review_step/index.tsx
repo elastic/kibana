@@ -33,6 +33,10 @@ import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
 import { InstalledContent } from './installed_content';
+import { useInstalledContent } from './installed_content/use_installed_content';
+
+// Title of the AWS metrics overview dashboard shipped with the `aws` integration package.
+const AWS_OVERVIEW_DASHBOARD_TITLE = '[Metrics AWS] Overview';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -45,7 +49,7 @@ interface DetectAndReviewStepProps {
 }
 
 export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepProps) {
-  useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
 
   const { servicesStep, awsServicesMap, deploymentMethod } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -76,6 +80,14 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   const installationInfo = awsPackageData?.item?.installationInfo;
   const installedKibana: KibanaAssetReference[] = installationInfo?.installed_kibana ?? [];
   const installedEs: EsAssetReference[] = installationInfo?.installed_es ?? [];
+
+  // Find the AWS Overview dashboard to wire "Take me to my data".
+  // React Query deduplicates the bulk_assets request with the one inside <InstalledContent>.
+  const { dashboards } = useInstalledContent({ installedKibana, installedEs });
+  const overviewDashboard = dashboards.find((d) => d.title === AWS_OVERVIEW_DASHBOARD_TITLE);
+  const overviewHref = overviewDashboard?.appLink
+    ? services.http.basePath.prepend(overviewDashboard.appLink)
+    : undefined;
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
@@ -150,6 +162,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             fill
             iconType="sortRight"
             iconSide="right"
+            href={overviewHref}
             onClick={onContinue}
             data-test-subj="detectAndReviewStep-continueButton"
           >

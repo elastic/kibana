@@ -33,6 +33,10 @@ jest.mock('./installed_content', () => ({
   InstalledContent: () => <div data-test-subj="mock-installed-content" />,
 }));
 
+jest.mock('./installed_content/use_installed_content', () => ({
+  useInstalledContent: jest.fn(),
+}));
+
 jest.mock('./agent_setup_callout', () => ({
   AgentSetupCallout: () => (
     <div data-test-subj="mock-agent-callout">
@@ -43,25 +47,30 @@ jest.mock('./agent_setup_callout', () => ({
   ),
 }));
 
+const mockPrepend = jest.fn((path: string) => `/base${path}`);
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: {} }),
+  useKibana: () => ({ services: { http: { basePath: { prepend: mockPrepend } } } }),
 }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { useServiceDataDetection } from './use_service_data_detection';
+import { useInstalledContent } from './installed_content/use_installed_content';
 import { DetectAndReviewStep } from '.';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockUseServiceDataDetection = useServiceDataDetection as jest.Mock;
+const mockUseInstalledContent = useInstalledContent as jest.Mock;
 
 function setupMocks({
   deploymentMethod = 'managed_integration' as 'managed_integration' | 'agent_based' | 'ecf',
   selectedServiceIds = [] as string[],
   packageData = undefined as object | undefined,
+  installedDashboards = [] as Array<{ id: string; title: string; appLink?: string }>,
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
@@ -86,6 +95,12 @@ function setupMocks({
     totalCount: 0,
     isTimedOut: false,
   });
+  mockUseInstalledContent.mockReturnValue({
+    dashboards: installedDashboards,
+    detectionRules: [],
+    esAssets: [],
+    isLoading: false,
+  });
 }
 
 function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}) {
@@ -97,7 +112,10 @@ function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}
 }
 
 describe('DetectAndReviewStep', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPrepend.mockImplementation((path: string) => `/base${path}`);
+  });
 
   describe('step header', () => {
     it('renders title and subtitle', () => {
@@ -144,6 +162,45 @@ describe('DetectAndReviewStep', () => {
       renderStep({ onBack });
       fireEvent.click(screen.getByText('Back'));
       expect(onBack).toHaveBeenCalledTimes(1);
+    });
+
+    it('has href to the [Metrics AWS] Overview dashboard when it is installed', () => {
+      setupMocks({
+        installedDashboards: [
+          { id: 'aws-overview-id', title: '[Metrics AWS] Overview', appLink: '/app/dashboards#/view/aws-overview-id' },
+          { id: 'aws-ec2-id', title: '[Metrics AWS] EC2 Overview', appLink: '/app/dashboards#/view/aws-ec2-id' },
+        ],
+      });
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).toHaveAttribute('href', '/base/app/dashboards#/view/aws-overview-id');
+    });
+
+    it('has no href when [Metrics AWS] Overview dashboard is not installed', () => {
+      setupMocks({
+        installedDashboards: [
+          { id: 'aws-ec2-id', title: '[Metrics AWS] EC2 Overview', appLink: '/app/dashboards#/view/aws-ec2-id' },
+        ],
+      });
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).not.toHaveAttribute('href');
+    });
+
+    it('has no href when no dashboards are installed', () => {
+      setupMocks({ installedDashboards: [] });
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).not.toHaveAttribute('href');
+    });
+
+    it('has no href when overview dashboard has no appLink', () => {
+      setupMocks({
+        installedDashboards: [{ id: 'aws-overview-id', title: '[Metrics AWS] Overview' }],
+      });
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).not.toHaveAttribute('href');
     });
   });
 
