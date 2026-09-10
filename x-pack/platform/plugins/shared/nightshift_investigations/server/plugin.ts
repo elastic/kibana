@@ -17,18 +17,29 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
+import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
+import { installSandboxSeedWorkflow } from './lib/managed_workflows/install_sandbox_seed_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { sandboxWriteFileStepDefinition } from './step_definitions/sandbox_write_file';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
+import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
+import { createSandboxBashTool } from './tools/sandbox_bash/tool';
+import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
+import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
+import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
+import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
+import { preconfiguredConnectorSource } from './tools/sandbox_bash/connector_sources';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -61,9 +72,11 @@ export class NightshiftInvestigationsPlugin
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
+  private actionsStart?: NightshiftInvestigationsStartDeps['actions'];
   private savedObjects?: CoreStart['savedObjects'];
+  private sandboxConnectionManager?: SandboxConnectionManager;
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
   }
 
@@ -72,6 +85,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
+    const config = this.ctx.config.get();
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
@@ -96,12 +110,71 @@ export class NightshiftInvestigationsPlugin
     );
 
     if (plugins.agentBuilder) {
-      registerInvestigationAgentType(plugins.agentBuilder);
+      registerInvestigationAgentType(plugins.agentBuilder, {
+        sandboxEnabled: !!config.sandbox,
+      });
       plugins.agentBuilder.tools.register(
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
         })
       );
+
+      if (config.sandbox) {
+        const connectionManager = new SandboxConnectionManager({
+          config: config.sandbox,
+          logger: this.logger.get('sandbox_bash_tool'),
+          // this.actionsStart is set in start(); the source is invoked at seed time, so the
+          // reference is populated before any tool handler fires.
+          // Returns [] when the actions plugin is absent — seedSandbox no-ops on an empty list.
+          getConnectors: preconfiguredConnectorSource(
+            () => this.actionsStart,
+            (req) => this.actionsStart!.getActionsClientWithRequest(req)
+          ),
+        });
+        this.sandboxConnectionManager = connectionManager;
+        const sandboxLogger = this.logger.get('sandbox_bash_tool');
+
+        const workspaceManager = new WorkspaceManager({
+          config: config.sandbox,
+          connectionManager,
+          logger: sandboxLogger.get('workspace'),
+        });
+
+        connectionManager.setRestoreCallback((conversationId) =>
+          workspaceManager.restoreWorkspace(conversationId)
+        );
+
+        plugins.agentBuilder.tools.register(
+          createSandboxBashTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxViewFileTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxStrReplaceTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
+        );
+
+        plugins.agentBuilder.hooks.register({
+          id: 'nightshift-sandbox-workspace-backup',
+          hooks: {
+            [HookLifecycle.afterAgent]: {
+              mode: HookExecutionMode.nonBlocking,
+              handler: (context) => {
+                const conversationId = context.conversationId;
+                if (!conversationId) return;
+                workspaceManager.backupWorkspace(conversationId).catch((err) => {
+                  sandboxLogger
+                    .get('workspace')
+                    .warn(`Workspace backup failed for conversation ${conversationId}: ${err}`);
+                });
+              },
+            },
+          },
+        });
+      }
     }
 
     if (plugins.workflowsManagement) {
@@ -112,6 +185,10 @@ export class NightshiftInvestigationsPlugin
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
+        );
+        // `sandboxConnectionManager` is only set when `config.sandbox` is present.
+        plugins.workflowsExtensions.registerStepDefinition(
+          sandboxWriteFileStepDefinition(() => this.sandboxConnectionManager)
         );
       }
 
@@ -143,6 +220,7 @@ export class NightshiftInvestigationsPlugin
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
+    this.actionsStart = plugins.actions;
     this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -239,6 +317,11 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
+    await installSandboxSeedWorkflow({ client });
     await client.ready();
+  }
+
+  stop(): void {
+    this.sandboxConnectionManager?.close();
   }
 }

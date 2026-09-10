@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, ConversationRound } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
@@ -22,6 +23,10 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
+  /** Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs. */
+  conversationId?: string;
+  /** True when this is the first agent round of the conversation (no prior rounds exist). */
+  isFirstRound?: boolean;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -37,10 +42,22 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
   toolHandlerContext: ToolHandlerContext;
 }
 
+export interface AfterRoundHookContext extends AgentHookContextBase {
+  round: ConversationRound;
+  conversationId?: string;
+  agentConfiguration: AgentConfiguration;
+}
+
+export interface AfterAgentHookContext extends AgentHookContextBase {
+  conversationId?: string;
+}
+
 export interface HookContextByLifecycle {
   [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
+  [HookLifecycle.afterRound]: AfterRoundHookContext;
+  [HookLifecycle.afterAgent]: AfterAgentHookContext;
 }
 
 export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextByLifecycle[E];
@@ -58,6 +75,8 @@ export interface HookHandlerResultByLifecycle {
   [HookLifecycle.afterToolCall]: {
     toolReturn?: RunToolReturn;
   };
+  [HookLifecycle.afterRound]: Record<string, never>;
+  [HookLifecycle.afterAgent]: Record<string, never>;
 }
 
 export type HookHandlerResult<E extends HookLifecycle = HookLifecycle> =

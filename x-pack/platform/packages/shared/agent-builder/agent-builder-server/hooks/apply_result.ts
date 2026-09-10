@@ -11,6 +11,8 @@ import {
   type BeforeAgentHookContext,
   type BeforeToolCallHookContext,
   type AfterToolCallHookContext,
+  type AfterRoundHookContext,
+  type AfterAgentHookContext,
   type HookHandlerResult,
 } from './types';
 
@@ -44,6 +46,13 @@ export function applyAfterToolCallResult(
   return { ...context, toolReturn: result.toolReturn };
 }
 
+export function applyAfterRoundResult(
+  context: AfterRoundHookContext,
+  _result: void | HookHandlerResult<HookLifecycle.afterRound>
+): AfterRoundHookContext {
+  return context;
+}
+
 /**
  * Map of each hook lifecycle to its corresponding apply-result function.
  */
@@ -54,8 +63,17 @@ export type ApplyHookResultByLifecycle = {
   ) => HookContextByLifecycle[K];
 };
 
+export function applyAfterAgentResult(
+  context: AfterAgentHookContext,
+  _result: void | HookHandlerResult<HookLifecycle.afterAgent>
+): AfterAgentHookContext {
+  return context;
+}
+
 export const applyHookResultByLifecycle: ApplyHookResultByLifecycle = {
   [HookLifecycle.beforeAgent]: applyBeforeAgentResult,
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
   [HookLifecycle.afterToolCall]: applyAfterToolCallResult,
+  [HookLifecycle.afterRound]: applyAfterRoundResult,
+  [HookLifecycle.afterAgent]: applyAfterAgentResult,
 };
