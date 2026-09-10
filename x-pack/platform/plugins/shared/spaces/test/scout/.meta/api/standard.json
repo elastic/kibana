@@ -1,5 +1,5 @@
 {
-  "sha1": "f8068a550ca8ce2ef2b2002ed704e91782c28270",
+  "sha1": "c9e2b412218db3170d09f62148c14180564b7146",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -82,6 +82,48 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/active_space.spec.ts",
         "line": 52,
         "column": 18
+      }
+    },
+    {
+      "id": "1d7e625a231d8c0-1b4f90d3e965bc7",
+      "title": "GET /internal/spaces/{spaceId}/content_summary returns content summary for ab-space space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/content_summary.spec.ts",
+        "line": 48,
+        "column": 57
+      }
+    },
+    {
+      "id": "1d7e625a231d8c0-ba625d1dac4218a",
+      "title": "GET /internal/spaces/{spaceId}/content_summary returns content summary for ac-space space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/content_summary.spec.ts",
+        "line": 72,
+        "column": 14
+      }
+    },
+    {
+      "id": "1d7e625a231d8c0-24a4802bc873143",
+      "title": "GET /internal/spaces/{spaceId}/content_summary returns 404 when the space is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/content_summary.spec.ts",
+        "line": 105,
+        "column": 24
       }
     },
     {
@@ -202,6 +244,118 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
         "line": 94,
         "column": 82
+      }
+    },
+    {
+      "id": "c263e05ef7e95d0-5090ed4b3bdb145",
+      "title": "GET /internal/spaces/space/{id}/persisted_feature_visibility returns stored disabledFeatures for a classic space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/persisted_feature_visibility.spec.ts",
+        "line": 52,
+        "column": 31
+      }
+    },
+    {
+      "id": "c263e05ef7e95d0-ffc7a2bbedbf6eb",
+      "title": "GET /internal/spaces/space/{id}/persisted_feature_visibility returns stored disabledFeatures for a space with a non-classic solution view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/persisted_feature_visibility.spec.ts",
+        "line": 65,
+        "column": 48
+      }
+    },
+    {
+      "id": "c263e05ef7e95d0-f08233c679acd10",
+      "title": "GET /internal/spaces/space/{id}/persisted_feature_visibility returns 404 when the space is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/persisted_feature_visibility.spec.ts",
+        "line": 79,
+        "column": 77
+      }
+    },
+    {
+      "id": "cb91ae236dcb42c-45b54d146ae1499",
+      "title": "`space` saved object type should not return the default space via GET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/saved_objects.spec.ts",
+        "line": 20,
+        "column": 46
+      }
+    },
+    {
+      "id": "cb91ae236dcb42c-abb35757482d480",
+      "title": "`space` saved object type should not locate any spaces via _find",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/saved_objects.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "cb91ae236dcb42c-4820a4cf754bcfd",
+      "title": "`space` saved object type should not allow a space to be created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/saved_objects.spec.ts",
+        "line": 41,
+        "column": 73
+      }
+    },
+    {
+      "id": "cb91ae236dcb42c-2602f51fc1cc1bf",
+      "title": "`space` saved object type should not allow a space to be updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/saved_objects.spec.ts",
+        "line": 55,
+        "column": 74
+      }
+    },
+    {
+      "id": "cb91ae236dcb42c-24bad66ccaa473e",
+      "title": "`space` saved object type should not allow a space to be deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/saved_objects.spec.ts",
+        "line": 69,
+        "column": 21
       }
     },
     {
@@ -436,6 +590,174 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
         "line": 150,
         "column": 23
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-f6f7efc197bf37a",
+      "title": "PUT /internal/spaces/space/{id}/solution uses solution_type param to set solution on the default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 31,
+        "column": 52
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-b593421be82f808",
+      "title": "PUT /internal/spaces/space/{id}/solution uses solution param to set solution on the default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 45,
+        "column": 14
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-4a4dc84f8beddf1",
+      "title": "PUT /internal/spaces/space/{id}/solution uses solution_type param to set solution on the Foo Space space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 55,
+        "column": 80
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-b5375eed5aea4be",
+      "title": "PUT /internal/spaces/space/{id}/solution uses solution param to set solution on the Foo Space space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 62,
+        "column": 20
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-12f95f3a68e5cf7",
+      "title": "PUT /internal/spaces/space/{id}/solution throws an error if solution_type is not supported",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 75,
+        "column": 51
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-40e507fcd28e027",
+      "title": "PUT /internal/spaces/space/{id}/solution throws an error if solution is not supported",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 78,
+        "column": 26
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-9d44f42b9bc2a93",
+      "title": "PUT /internal/spaces/space/{id}/solution throws an error if solution and solution_type are both defined",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 85,
+        "column": 26
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-e711967fa6658c3",
+      "title": "PUT /internal/spaces/space/{id}/solution throws an error if solution and solution_type are not defined",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 89,
+        "column": 29
+      }
+    },
+    {
+      "id": "d52fdbc09e61f0a-5b9d8becf44b1b8",
+      "title": "PUT /internal/spaces/space/{id}/solution returns 404 when the space is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/set_solution_space.spec.ts",
+        "line": 90,
+        "column": 24
+      }
+    },
+    {
+      "id": "8052eca573728f8-2108da5f4df0ca8",
+      "title": "Space attributes should allow a space to be created with a mixed-case hex color code",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/space_attributes.spec.ts",
+        "line": 28,
+        "column": 5
+      }
+    },
+    {
+      "id": "8052eca573728f8-ade11b1859ac1b9",
+      "title": "Space attributes should allow a space to be created with an avatar image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/space_attributes.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "8052eca573728f8-8932ad8444fda13",
+      "title": "Space attributes creating a space with an invalid image fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/space_attributes.spec.ts",
+        "line": 69,
+        "column": 7
       }
     },
     {
