@@ -348,14 +348,14 @@ describe('StepDefinePackagePolicy', () => {
         };
       };
 
-      afterEach(() => {
+      beforeEach(() => {
         mockUseOutputs.mockReturnValue({
           isLoading: false,
           canUseOutputPerIntegration: true,
           allowedOutputs: [
             { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
           ] as any,
-          inheritedOutputName: 'Default output',
+          inheritedOutputName: undefined,
         });
       });
 
