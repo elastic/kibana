@@ -57,6 +57,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '24h',
   },
   [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -145,7 +146,7 @@ function createContentFingerprint(content: string): string {
 
 it.each([
   [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
-  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '2:d13818a0'],
   [
     PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
