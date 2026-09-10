@@ -8,7 +8,7 @@
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { registerStepDefinitions } from '.';
-import { mockKiStepTelemetry } from './test_utils';
+import { mockGetSpaces, mockKiStepTelemetry } from './test_utils';
 
 describe('registerStepDefinitions', () => {
   it('registers the three KI step definitions', () => {
@@ -20,6 +20,7 @@ describe('registerStepDefinitions', () => {
     registerStepDefinitions({
       workflowsExtensions,
       getAiIndexService: () => ({} as AiIndexService),
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: async () => true,
       checkWritePrivilege: async () => true,
       ...mockKiStepTelemetry(),

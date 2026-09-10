@@ -44,6 +44,14 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
 
+/** Resolves to a minimal Spaces plugin start that returns the given space id. */
+export const mockGetSpaces = (spaceId = 'default') =>
+  jest.fn().mockResolvedValue({
+    spacesService: {
+      getSpaceId: jest.fn().mockReturnValue(spaceId),
+    },
+  });
+
 /** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
 export const mockKiStepTelemetry = () => ({
   analyticsService: {

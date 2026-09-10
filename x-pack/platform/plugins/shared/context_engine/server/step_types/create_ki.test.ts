@@ -10,7 +10,12 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import { getCreateKiStepDefinition } from './create_ki';
-import { createMockStepContext, mockAiIndexService, mockKiStepTelemetry } from './test_utils';
+import {
+  createMockStepContext,
+  mockAiIndexService,
+  mockGetSpaces,
+  mockKiStepTelemetry,
+} from './test_utils';
 
 const kiInput = {
   type: 'index_metadata',
@@ -32,6 +37,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -59,6 +65,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -81,6 +88,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -104,6 +112,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -126,6 +135,7 @@ describe('getCreateKiStepDefinition', () => {
 
       const { handler } = getCreateKiStepDefinition({
         getAiIndexService: () => service,
+        getSpaces: mockGetSpaces(),
         isContextEngineEnabled: enabled,
         checkWritePrivilege: allowed,
         ...mockKiStepTelemetry(),
@@ -151,6 +161,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -158,7 +169,7 @@ describe('getCreateKiStepDefinition', () => {
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1' } });
-    expect(service.create).toHaveBeenCalledWith('new-ai-index', {
+    expect(service.create).toHaveBeenCalledWith('new-ai-index', 'default', {
       dest: { type: 'index', value: 'ai-index-idx-new-ai-index' },
       automations: [],
       sources: [],
@@ -188,6 +199,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -214,6 +226,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -237,6 +250,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: async () => false,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -260,6 +274,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege,
       ...mockKiStepTelemetry(),
@@ -283,6 +298,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -312,6 +328,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -333,6 +350,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: jest.fn().mockResolvedValue(false),
       ...telemetry,
@@ -366,6 +384,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -394,6 +413,7 @@ describe('getCreateKiStepDefinition', () => {
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
+      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),

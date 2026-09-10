@@ -103,7 +103,11 @@ describe('ai indices routes', () => {
   let esSearch: jest.Mock;
   let esGet: jest.Mock;
   let improvementsClients: unknown[];
+  let getSpaces: jest.Mock;
+  let getManagedAiIndexIds: jest.Mock;
+  let ensureAiIndex: jest.Mock;
   const logger = loggerMock.create();
+  const defaultSpaceId = 'default';
 
   const createContext = () =>
     ({
@@ -151,6 +155,9 @@ describe('ai indices routes', () => {
     };
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     improvementsClients = [];
+    getSpaces = jest.fn().mockResolvedValue(undefined);
+    getManagedAiIndexIds = jest.fn().mockReturnValue([]);
+    ensureAiIndex = jest.fn().mockResolvedValue(undefined);
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -183,6 +190,9 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getActions: async () => actions,
+      getSpaces,
+      getManagedAiIndexIds,
+      ensureAiIndex,
     });
   });
 
@@ -267,7 +277,11 @@ describe('ai indices routes', () => {
       await callRoute('POST', aiIndexPath, { body: postBody });
 
       const { id, ...properties } = postBody;
-      expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
+      expect(aiIndexService.create).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        properties
+      );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
@@ -304,7 +318,11 @@ describe('ai indices routes', () => {
       await callRoute('POST', aiIndexPath, { body });
 
       const { id, ...properties } = body;
-      expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
+      expect(aiIndexService.create).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        properties
+      );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
@@ -360,7 +378,11 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', aiIndexByIdPath, putRequest);
 
-      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', putRequest.body);
+      expect(aiIndexService.put).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        putRequest.body
+      );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
@@ -406,7 +428,7 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', aiIndexByIdPath, { ...putRequest, body });
 
-      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', body);
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
     });
 
@@ -433,7 +455,23 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: aiIndexItem });
+    });
+
+    it('ensures a managed AI index and retries when it is missing on first get', async () => {
+      const managedElasticIndex = { ...aiIndexItem, id: 'elastic', managed: true };
+      getManagedAiIndexIds.mockReturnValue(['elastic']);
+      aiIndexService.get
+        .mockRejectedValueOnce(new AiIndexNotFoundError('elastic'))
+        .mockResolvedValueOnce(managedElasticIndex);
+
+      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'elastic' } });
+
+      expect(ensureAiIndex).toHaveBeenCalledWith('elastic', defaultSpaceId);
+      expect(aiIndexService.get).toHaveBeenCalledTimes(2);
+      expect(aiIndexService.get).toHaveBeenCalledWith('elastic', defaultSpaceId);
+      expect(response.ok).toHaveBeenCalledWith({ body: managedElasticIndex });
     });
 
     it('returns 404 when the AI index does not exist', async () => {
@@ -708,7 +746,21 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexPath, {});
 
+      expect(aiIndexService.list).toHaveBeenCalledWith(defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [] } });
+    });
+
+    it('ensures missing managed AI indices and re-lists', async () => {
+      const managedElasticIndex = { ...aiIndexItem, id: 'elastic', managed: true };
+      getManagedAiIndexIds.mockReturnValue(['elastic']);
+      aiIndexService.list.mockResolvedValueOnce([]).mockResolvedValueOnce([managedElasticIndex]);
+
+      await callRoute('GET', aiIndexPath, {});
+
+      expect(ensureAiIndex).toHaveBeenCalledWith('elastic', defaultSpaceId);
+      expect(aiIndexService.list).toHaveBeenCalledTimes(2);
+      expect(aiIndexService.list).toHaveBeenCalledWith(defaultSpaceId);
+      expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [managedElasticIndex] } });
     });
   });
 
@@ -720,7 +772,7 @@ describe('ai indices routes', () => {
         params: { aiIndexId: 'customer_support' },
       });
 
-      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
+      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
     });
 
@@ -798,6 +850,7 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.setFeedbackAnalysis).toHaveBeenCalledWith(
         'customer_support',
+        defaultSpaceId,
         feedbackAnalysis
       );
       expect(response.ok).toHaveBeenCalledWith({
