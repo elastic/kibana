@@ -80,12 +80,13 @@ export interface GrantUiamApiKeyRequestBody {
  */
 export interface UiamClientAuthenticationOptions {
   /**
-   * Whether to present Kibana's own client authentication (the shared secret header and, when
-   * configured, the mTLS client certificate) alongside the caller credential. UIAM authenticates
-   * the credential and Kibana independently, and requires the two to agree: an internal API key or
-   * a session token must arrive with client authentication, while an external (organization) API
-   * key must arrive without it, so that internal credentials that leak cannot be replayed through
-   * customer-facing code paths. Presenting the wrong combination fails authentication.
+   * Whether to present Kibana's shared secret header alongside the caller credential. UIAM
+   * authenticates the credential and Kibana independently, and requires the two to agree: an
+   * internal API key or a session token must arrive with the shared secret, while an external
+   * (organization) API key must arrive without it, so that internal credentials that leak cannot
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails
+   * authentication. The mTLS client certificate is always presented when configured, regardless
+   * of this option.
    *
    * Defaults to `true`, which is correct for everything except an external API key.
    */
@@ -729,9 +730,7 @@ export class UiamService implements UiamServicePublic {
           Authorization: authorization.toString(),
         },
         body: JSON.stringify({ ...body, type: 'project' }),
-        dispatcher: includeClientAuthentication
-          ? this.#dispatcher
-          : this.#getDispatcherWithoutClientCertificate(),
+        dispatcher: this.#dispatcher,
       };
       const response = await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, requestOptions)

@@ -1135,8 +1135,9 @@ describe('UiamService', () => {
       }
     );
 
-    it('omits the client certificate for external API keys while retaining TLS verification', async () => {
-      const service = new UiamService(
+    it('withholds only the shared secret (not the mTLS certificate) when client authentication is not requested', async () => {
+      agentSpy.mockClear();
+      const mtlsUiamService = new UiamService(
         loggingSystemMock.createLogger(),
         ConfigSchema.validate(
           {
@@ -1145,9 +1146,9 @@ describe('UiamService', () => {
               url: 'https://uiam.service',
               sharedSecret: 'secret',
               ssl: {
-                certificate: '/client.crt',
-                key: '/client.key',
-                certificateAuthorities: '/ca.crt',
+                certificateAuthorities: '/some/ca/path',
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
               },
             },
           },
@@ -1155,17 +1156,38 @@ describe('UiamService', () => {
         ).uiam,
         { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
-      agentSpy.mockClear();
-      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
-      await service.createServiceAccount(new HTTPAuthorizationHeader('ApiKey', 'essu_key'), body, {
-        includeClientAuthentication: false,
+
+      // The dispatcher created during construction always includes the mTLS client certificate.
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
       });
-      expect(agentSpy).toHaveBeenCalledTimes(1);
-      const [options] = agentSpy.mock.calls[0];
-      expect(options.connect.ca).toEqual(['mocked file content for /ca.crt']);
-      expect(options.connect.rejectUnauthorized).toBe(true);
-      expect(options.connect.cert).toBeUndefined();
-      expect(options.connect.key).toBeUndefined();
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
+      await mtlsUiamService.createServiceAccount(
+        new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
+        body,
+        { includeClientAuthentication: false }
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          Authorization: 'ApiKey essu_key',
+        },
+        body: JSON.stringify({
+          ...body,
+          type: 'project',
+        }),
+        dispatcher: AGENT_MOCK,
+      });
     });
 
     it('reproduces the UIAM status code and payload when creation fails', async () => {
