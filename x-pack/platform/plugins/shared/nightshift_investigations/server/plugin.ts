@@ -171,7 +171,7 @@ export class NightshiftInvestigationsPlugin
         plugins.agentBuilder.hooks.register({
           id: 'nightshift-sandbox-workspace-backup',
           hooks: {
-            [HookLifecycle.afterAgent]: {
+            [HookLifecycle.afterExecution]: {
               mode: HookExecutionMode.nonBlocking,
               handler: (context) => {
                 const conversationId = context.conversationId;

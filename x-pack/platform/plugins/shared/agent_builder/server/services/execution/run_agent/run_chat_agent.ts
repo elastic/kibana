@@ -496,13 +496,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
   }
 
-  // afterAgent only fires on the happy path; hooks needing failure coverage should use try/finally upstream.
-  await context.hooks.run(HookLifecycle.afterAgent, {
-    request,
-    abortSignal,
-    agentId,
-    conversationId: conversationId ?? undefined,
-  });
+  // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
+  // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
+  try {
+    await context.hooks.run(HookLifecycle.afterExecution, {
+      request,
+      abortSignal,
+      agentId,
+      round,
+      conversationId: conversation?.id,
+      agentConfiguration,
+    });
+  } catch (err) {
+    logger.error(`After-round hooks failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   return {
     round,

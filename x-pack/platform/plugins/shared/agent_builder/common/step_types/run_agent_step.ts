@@ -310,6 +310,15 @@ export const ConfigSchema = z
       .max(32)
       .optional()
       .describe('Maximum response size for this workflow step.'),
+    /**
+     * Reasoning level the model should use.
+     */
+    'reasoning-level': z
+      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+      .optional()
+      .describe(
+        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
+      ),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);

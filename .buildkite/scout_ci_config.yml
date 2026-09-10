@@ -38,6 +38,7 @@ plugins:
     - error_boundary_example
     - event_annotation_listing
     - exploratory_view
+    - files_management
     - fleet
     - flyoutSystemExamples
     - gen_ai_settings
@@ -67,6 +68,7 @@ plugins:
     - nightshift_investigations
     - notification_center
     - observability
+    - observability_alerting
     - observability_onboarding
     - osquery
     - painless_lab
