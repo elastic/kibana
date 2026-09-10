@@ -7,9 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { useUserActionsPagination } from './use_user_actions_pagination';
-import { useInfiniteFindCaseUserActions } from '../../../../containers/use_infinite_find_case_user_actions';
+import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 
-jest.mock('../../../../containers/use_infinite_find_case_user_actions');
+jest.mock('../../../containers/use_infinite_find_case_user_actions');
 
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 

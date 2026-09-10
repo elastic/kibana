@@ -7,9 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { useHighlightLinkedComment } from './use_highlight_linked_comment';
-import { useCaseViewParams } from '../../../../common/navigation';
+import { useCaseViewParams } from '../../../common/navigation';
 
-jest.mock('../../../../common/navigation');
+jest.mock('../../../common/navigation');
 
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 

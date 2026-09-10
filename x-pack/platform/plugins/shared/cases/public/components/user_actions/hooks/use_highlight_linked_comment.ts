@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { useCaseViewParams } from '../../../../common/navigation';
+import { useCaseViewParams } from '../../../common/navigation';
 
 /**
  * Highlights a comment when navigating to a deep-link URL containing a commentId.

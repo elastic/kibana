@@ -8,10 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 
-import type { CurrentUserProfile } from '../../../types';
-import { UserToolTip } from '../../../user_profiles/user_tooltip';
-import { Username } from '../../../user_profiles/username';
-import { CaseUserAvatar } from '../../../user_profiles/user_avatar';
+import type { CurrentUserProfile } from '../../types';
+import { UserToolTip } from '../../user_profiles/user_tooltip';
+import { Username } from '../../user_profiles/username';
+import { CaseUserAvatar } from '../../user_profiles/user_avatar';
 import { ShowMoreActivities } from '../show_more_activities';
 import * as i18n from '../translations';
 

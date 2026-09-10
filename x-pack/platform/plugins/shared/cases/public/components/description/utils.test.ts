@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EditableMarkdownRefObject } from '../../markdown_editor';
+import type { EditableMarkdownRefObject } from '../markdown_editor';
 import { getDescriptionPreview, getDraftDescription, isCommentRef } from './utils';
 
 describe('utils', () => {

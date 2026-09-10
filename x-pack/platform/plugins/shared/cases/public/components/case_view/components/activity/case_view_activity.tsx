@@ -10,14 +10,14 @@ import React from 'react';
 import type { CaseUI } from '../../../../../common';
 import { StatusActionButton } from '../../../status/button';
 import { CaseViewAttachButton } from '../case_view_attach_button';
-import { UserActions } from '../../../cases_redesign/user_actions';
+import { UserActions } from '../../../user_actions';
 import { UserActionsFilterBar } from '../user_actions_filter_bar';
 import {
   ActivityCollapseControls,
   ActivityCollapseProvider,
-} from '../../../cases_redesign/user_actions/activity_collapse_context';
+} from '../../../user_actions/activity_collapse_context';
 import { SidebarToggleButton } from '../sidebar/sidebar_toggle_button';
-import { Description } from '../../../cases_redesign/description';
+import { Description } from '../../../description';
 import { useCaseViewActivity } from './hooks/use_case_view_activity';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
