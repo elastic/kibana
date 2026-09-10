@@ -62,6 +62,13 @@ export const CONNECTOR_ID_MAX_LENGTH = 512;
 export const IF_CONDITION_MAX_LENGTH = 2000;
 
 /**
+ * Upper bound on a Liquid template expression used in place of an array connector param
+ * (e.g. `"${{ workflow.inputs.recipients }}"`). Prevents unbounded strings from bypassing
+ * schema validation in the YAML editor.
+ */
+export const TEMPLATE_EXPRESSION_MAX_LENGTH = 500;
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:
