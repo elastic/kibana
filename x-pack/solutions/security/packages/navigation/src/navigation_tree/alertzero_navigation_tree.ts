@@ -7,6 +7,7 @@
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
+import { i18nStrings } from '../i18n_strings';
 import { alertZeroLink } from '../links';
 
 /**
@@ -25,7 +26,9 @@ import { alertZeroLink } from '../links';
 export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   {
     link: alertZeroLink(),
-    icon: 'sparkles',
+    // Note the sidebar sentence-cases every label, so "AlertZero" is also registered in the `@kbn/shared-ux-label-formatter` title case glossary.
+    title: i18nStrings.alertZero.title,
+    icon: 'sun',
   },
   {
     link: alertZeroLink(SecurityPageName.alertZeroChats),
