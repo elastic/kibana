@@ -14,7 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Task, GlobalTask, Build } from '../lib';
-import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
+import { deleteAll, deleteEmptyFolders, read, scanDelete } from '../lib';
+import { getLocalFileDependencyPaths } from './local_file_dependencies';
 
 export const Clean: GlobalTask = {
   global: true,
@@ -36,11 +37,16 @@ export const CleanPackageManagerRelatedFiles: Task = {
   description: 'Cleaning package manager related files from the build folder',
 
   async run(config, log, build) {
+    const localDependencyFiles = getLocalFileDependencyPaths(
+      config.getKibanaPkg(),
+      await read(config.resolveFromRepo('pnpm-workspace.yaml'))
+    );
     await deleteAll(
       [
         build.resolvePath('pnpm-lock.yaml'),
         build.resolvePath('pnpm-workspace.yaml'),
         build.resolvePath('.npmrc'),
+        ...localDependencyFiles.map((path) => build.resolvePath(path)),
       ],
       log
     );
