@@ -2633,6 +2633,9 @@ importers:
       '@kbn/observability-alert-details':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/alert-details
+      '@kbn/observability-alerting-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/observability_alerting
       '@kbn/observability-alerting-test-data':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/alerting-test-data
@@ -9297,6 +9300,8 @@ importers:
   x-pack/solutions/observability/plugins/observability_agent_builder: {}
 
   x-pack/solutions/observability/plugins/observability_ai_assistant_app: {}
+
+  x-pack/solutions/observability/plugins/observability_alerting: {}
 
   x-pack/solutions/observability/plugins/observability_logs_explorer: {}
 
