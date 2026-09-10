@@ -55,6 +55,7 @@ export interface SLORoutesDependencies {
   };
   corePlugins: CoreSetup;
   getScopedClients: GetScopedClients;
+  commonResourcesInstalled: Promise<void>;
   config: {
     isServerless: boolean;
   };
