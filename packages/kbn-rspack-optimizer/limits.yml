@@ -11,6 +11,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 21472
+  alertzero: 4489
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 1174
@@ -37,7 +38,7 @@ pageLoadAssetSize:
   core: 320
   cps: 6032
   crossClusterReplication: 7691
-  customContent: 2714
+  customContent: 3300
   customIntegrations: 636
   dashboard: 536
   dashboardMarkdown: 4012
@@ -147,7 +148,6 @@ pageLoadAssetSize:
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2550
-  pnd: 4489
   presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
@@ -193,7 +193,7 @@ pageLoadAssetSize:
   shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
-  significantEvents: 3022
+  significantEvents: 3679
   significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
