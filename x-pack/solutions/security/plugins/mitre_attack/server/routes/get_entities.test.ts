@@ -14,7 +14,7 @@ import {
   getMockMitreTechnique,
   getMockMitreSubtechnique,
 } from '../mocks/mitre_entities.mock';
-import { registerGetEntitiesRoute } from './get_entities';
+import { registerGetEntitiesRoute, AUTHZ_OPT_OUT_REASON } from './get_entities';
 
 describe('registerGetEntitiesRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
@@ -61,7 +61,7 @@ describe('registerGetEntitiesRoute', () => {
       const routeConfig = router.versioned.get.mock.calls[0][0];
       expect(routeConfig.security?.authz).toEqual({
         enabled: false,
-        reason: expect.stringContaining('public MITRE ATT&CK reference data'),
+        reason: AUTHZ_OPT_OUT_REASON,
       });
     });
   });

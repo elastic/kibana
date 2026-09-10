@@ -15,6 +15,15 @@ import {
 } from '@kbn/security-mitre-attack-common';
 import type { MitreAttackRequestHandlerContext } from '../types';
 
+/**
+ * Consumers of this data sit in different top-level features whose privileges do not overlap: the
+ * technique picker and coverage overview are in Rules, which grants `rules-read` but not the
+ * `securitySolution` app privilege, and later milestones add alerts and AI tooling. Any allowlist
+ * would need updating per consumer, and a miss silently renders an empty picker.
+ */
+export const AUTHZ_OPT_OUT_REASON =
+  'Serves publicly available MITRE reference data bundled with Kibana, any authenticated user may read it';
+
 export const registerGetEntitiesRoute = (
   router: IRouter<MitreAttackRequestHandlerContext>,
   logger: Logger
@@ -26,8 +35,7 @@ export const registerGetEntitiesRoute = (
       security: {
         authz: {
           enabled: false,
-          reason:
-            'Serves publicly available MITRE reference data bundled with Kibana, any authenticated user may read it',
+          reason: AUTHZ_OPT_OUT_REASON,
         },
       },
     })
