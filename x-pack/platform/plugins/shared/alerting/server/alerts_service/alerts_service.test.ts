@@ -197,6 +197,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       kibana: { version: '8.8.0' },
       managed: true,
       namespace,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
     },
   };
 };
@@ -889,6 +890,7 @@ describe('Alerts Service', () => {
               kibana: { version: '8.8.0' },
               managed: true,
               namespace: 'default',
+              content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
             },
           };
 
