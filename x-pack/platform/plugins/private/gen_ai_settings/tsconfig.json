@@ -44,6 +44,7 @@
     "@kbn/core-http-browser",
     "@kbn/agent-builder-platform-plugin",
     "@kbn/dashboard-plugin",
+    "@kbn/inference-workflows-plugin",
   ],
   "exclude": ["target/**/*"]
 }

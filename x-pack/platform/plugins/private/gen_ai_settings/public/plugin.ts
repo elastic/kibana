@@ -15,12 +15,14 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { InferenceWorkflowsPublicStart } from '@kbn/inference-workflows-plugin/public';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   dashboard?: DashboardStart;
+  inferenceWorkflows?: InferenceWorkflowsPublicStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBasePluginStart;
 }
