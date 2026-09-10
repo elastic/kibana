@@ -14,7 +14,7 @@ import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_int
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { SiemMigrationsDataLookupsClient } from '../../common/data/siem_migrations_data_lookups_client';
-import type { RuleMigrationIndexNameProviders, RuleMigrationsSemanticIndexOptions } from '../types';
+import type { RuleMigrationIndexNameProviders } from '../types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
@@ -37,8 +37,7 @@ export class RuleMigrationsDataClient extends SiemMigrationsDataClient<
     esScopedClient: IScopedClusterClient,
     logger: Logger,
     spaceId: string,
-    dependencies: SiemMigrationsClientDependencies,
-    semanticIndexOptions: RuleMigrationsSemanticIndexOptions
+    dependencies: SiemMigrationsClientDependencies
   ) {
     super(esScopedClient, logger);
 
@@ -68,16 +67,14 @@ export class RuleMigrationsDataClient extends SiemMigrationsDataClient<
       currentUser,
       esScopedClient,
       logger,
-      dependencies,
-      semanticIndexOptions
+      dependencies
     );
     this.prebuiltRules = new RuleMigrationsDataPrebuiltRulesClient(
       indexNameProviders.prebuiltrules,
       currentUser,
       esScopedClient,
       logger,
-      dependencies,
-      semanticIndexOptions
+      dependencies
     );
     this.lookups = new SiemMigrationsDataLookupsClient(
       currentUser,

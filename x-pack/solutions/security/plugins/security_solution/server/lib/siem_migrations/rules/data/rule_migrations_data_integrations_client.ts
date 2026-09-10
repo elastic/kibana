@@ -6,22 +6,13 @@
  */
 
 import pMap from 'p-map';
-import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { PackageList, PackageListItem } from '@kbn/fleet-plugin/common';
 import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { RuleMigrationIntegration, RuleMigrationsSemanticIndexOptions } from '../types';
+import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import type {
-  SiemMigrationsClientDependencies,
-  SiemMigrationsIndexNameProvider,
-} from '../../common/types';
-import { getIntegrationsFieldMap } from './field_maps';
-import { ensureIndex } from './utils/ensure_index';
-import { resolveElserInferenceId } from './utils/resolve_elser_inference_id';
-import { isMissingIndexError } from './utils/is_missing_index_error';
 
 const INTEGRATION_WEIGHTS = [
   // These integrations should be boosted because in many cases they are used as fallback.
@@ -54,17 +45,6 @@ const RETURNED_INTEGRATIONS = 7 as const;
 const PACKAGE_METADATA_CONCURRENCY = 30 as const;
 
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
-  constructor(
-    getIndexName: SiemMigrationsIndexNameProvider,
-    currentUser: AuthenticatedUser,
-    esScopedClient: IScopedClusterClient,
-    logger: Logger,
-    dependencies: SiemMigrationsClientDependencies,
-    private readonly semanticIndexOptions: RuleMigrationsSemanticIndexOptions
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger, dependencies);
-  }
-
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
     const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
@@ -190,25 +170,13 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         return;
       }
 
-      const elserInferenceId = await resolveElserInferenceId(
-        this.esClient,
-        this.semanticIndexOptions.elserInferenceId
-      );
-      await ensureIndex({
-        ...this.semanticIndexOptions,
-        esClient: this.esClient,
-        logger: this.logger,
-        index,
-        fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
-      });
-
       await this.esClient
         .bulk(
           {
             refresh: 'wait_for',
             operations: validIntegrations.flatMap(({ id, ...doc }) => [
-              { index: { _index: index, _id: id } },
-              doc,
+              { update: { _index: index, _id: id } },
+              { doc, doc_as_upsert: true },
             ]),
           },
           { requestTimeout: 10 * 60 * 1000 } // 10 minutes
@@ -216,7 +184,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         .then((response) => {
           if (response.errors) {
             // use the first error to throw
-            const reason = response.items.find((item) => item.index?.error)?.index?.error?.reason;
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
             throw new Error(reason ?? 'Unknown error');
           }
         })
@@ -259,9 +227,6 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       })
       .then(this.processResponseHits.bind(this))
       .catch((error) => {
-        if (isMissingIndexError(error, index)) {
-          return [];
-        }
         this.logger.error(`Error querying integration details for ELSER: ${error.message}`);
         throw error;
       });

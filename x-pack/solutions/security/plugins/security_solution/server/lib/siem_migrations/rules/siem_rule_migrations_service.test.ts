@@ -67,15 +67,6 @@ describe('SiemRuleMigrationsService', () => {
       await retry(async (): Promise<void> => {
         expect(logger.error).toHaveBeenCalledWith('Error installing data service.', error);
       });
-
-      expect(() =>
-        ruleMigrationsService.createClient({
-          request: httpServerMock.createKibanaRequest(),
-          currentUser,
-          spaceId: 'default',
-          dependencies,
-        })
-      ).not.toThrow();
     });
   });
 
@@ -107,7 +98,6 @@ describe('SiemRuleMigrationsService', () => {
           currentUser: createClientParams.currentUser,
           esScopedClient: esClusterClient.asScoped(),
           dependencies,
-          indexInstallOptions: { pluginStop$, tasksTimeoutMs: undefined },
         });
       });
 

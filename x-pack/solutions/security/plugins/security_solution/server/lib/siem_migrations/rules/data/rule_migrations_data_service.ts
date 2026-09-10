@@ -17,15 +17,17 @@ import type {
   RuleMigrationAdapterId,
   RuleMigrationAdapters,
   RuleMigrationIndexNameProviders,
-  RuleMigrationsSemanticIndexOptions,
 } from '../types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import {
+  getIntegrationsFieldMap,
+  getPrebuiltRulesFieldMap,
   migrationsFieldMaps,
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
 } from './field_maps';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
+import { resolveElserInferenceId } from './utils/resolve_elser_inference_id';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
 
 interface CreateClientParams {
@@ -33,7 +35,6 @@ interface CreateClientParams {
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
   dependencies: SiemMigrationsClientDependencies;
-  indexInstallOptions: Pick<RuleMigrationsSemanticIndexOptions, 'pluginStop$' | 'tasksTimeoutMs'>;
 }
 interface CreateRuleAdapterParams {
   adapterId: RuleMigrationAdapterId;
@@ -68,12 +69,25 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
         adapterId: 'resources',
         fieldMap: ruleMigrationResourcesFieldMap,
       }),
+      integrations: this.createRuleIndexAdapter({
+        adapterId: 'integrations',
+        fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
+      }),
+      prebuiltrules: this.createRuleIndexAdapter({
+        adapterId: 'prebuiltrules',
+        fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
+      }),
     };
   }
 
   private createRuleIndexPatternAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
     return this.createIndexPatternAdapter({ name, fieldMap });
+  }
+
+  private createRuleIndexAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {
+    const name = this.getAdapterIndexName(adapterId);
+    return this.createIndexAdapter({ name, fieldMap });
   }
 
   private async runIndexMigrations(esClient: SetupParams['esClient']) {
@@ -85,22 +99,27 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
     await Promise.all([
       this.adapters.rules.install({ ...params, logger: this.logger }),
       this.adapters.resources.install({ ...params, logger: this.logger }),
+      this.adapters.integrations.install({ ...params, logger: this.logger }),
+      this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
       this.adapters.migrations.install({ ...params, logger: this.logger }),
     ]);
   }
 
   public async setup(params: SetupParams): Promise<void> {
+    const elserInferenceId = await resolveElserInferenceId(params.esClient, this.elserInferenceId);
+    this.adapters.integrations = this.createRuleIndexAdapter({
+      adapterId: 'integrations',
+      fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
+    });
+    this.adapters.prebuiltrules = this.createRuleIndexAdapter({
+      adapterId: 'prebuiltrules',
+      fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
+    });
     await this.install(params);
     await this.runIndexMigrations(params.esClient);
   }
 
-  public createClient({
-    spaceId,
-    currentUser,
-    esScopedClient,
-    dependencies,
-    indexInstallOptions,
-  }: CreateClientParams) {
+  public createClient({ spaceId, currentUser, esScopedClient, dependencies }: CreateClientParams) {
     const indexNameProviders: RuleMigrationIndexNameProviders = {
       rules: this.createIndexNameProvider(this.adapters.rules, spaceId),
       resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
@@ -115,12 +134,7 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
       esScopedClient,
       this.logger,
       spaceId,
-      dependencies,
-      {
-        ...indexInstallOptions,
-        kibanaVersion: this.kibanaVersion,
-        elserInferenceId: this.elserInferenceId,
-      }
+      dependencies
     );
   }
 }
