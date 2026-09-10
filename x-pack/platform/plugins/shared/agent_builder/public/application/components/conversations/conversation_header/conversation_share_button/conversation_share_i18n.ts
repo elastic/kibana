@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const inviteLabel = i18n.translate('xpack.agentBuilder.conversationSharing.invite', {
-  defaultMessage: 'Invite',
-});
-
 export const sharingLabel = i18n.translate('xpack.agentBuilder.conversationSharing.title', {
   defaultMessage: 'Sharing',
 });
@@ -91,11 +87,19 @@ export const removeMemberLabel = i18n.translate(
   }
 );
 
-export const extraMembersLabel = (count: number) =>
-  i18n.translate('xpack.agentBuilder.conversationSharing.extraMembersLabel', {
-    defaultMessage: '{count, plural, one {# more member} other {# more members}}',
+export const participantsCountAriaLabel = (count: number) =>
+  i18n.translate('xpack.agentBuilder.conversationSharing.participantsCountAriaLabel', {
+    defaultMessage:
+      'Sharing, {count, plural, one {# person has access} other {# people have access}}',
     values: { count },
   });
+
+export const publicAccessAriaLabel = i18n.translate(
+  'xpack.agentBuilder.conversationSharing.publicAccessAriaLabel',
+  {
+    defaultMessage: 'Sharing, public',
+  }
+);
 
 export const saveErrorLabel = i18n.translate('xpack.agentBuilder.conversationSharing.saveError', {
   defaultMessage: 'Failed to update sharing settings',
