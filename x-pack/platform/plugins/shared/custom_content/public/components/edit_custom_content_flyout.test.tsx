@@ -34,6 +34,13 @@ import { EditCustomContentFlyout } from './edit_custom_content_flyout';
 
 const mockUseEditFlyoutState = useEditFlyoutState as jest.Mock;
 
+const mockTelemetry = {
+  trackPanelSaved: jest.fn(),
+  trackGenerateWithChatClicked: jest.fn(),
+};
+
+jest.mock('../telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
 const baseFlyoutState = {
   draftEsqlQuery: '',
   setDraftEsqlQuery: jest.fn(),
@@ -56,6 +63,7 @@ const defaultProps = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   onSave: jest.fn(),
   onClose: jest.fn(),
   onRunPreview: jest.fn(),
@@ -65,7 +73,11 @@ const defaultProps = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
-  (getServices as jest.Mock).mockReturnValue({});
+  (getServices as jest.Mock).mockReturnValue({
+    core: {
+      docLinks: { links: { visualize: { customPanels: 'https://docs.example/custom-panels' } } },
+    },
+  });
 });
 
 describe('EditCustomContentFlyout', () => {
@@ -111,7 +123,22 @@ describe('EditCustomContentFlyout', () => {
 
       expect(onSave).toHaveBeenCalledWith('FROM logs', '<div></div>');
       expect(onClose).not.toHaveBeenCalled();
+      expect(mockTelemetry.trackPanelSaved).toHaveBeenCalledWith({
+        isNewPanel: false,
+        hasTemplate: true,
+        hasEsqlQuery: true,
+        templateSizeBytes: '<div></div>'.length,
+      });
     });
+  });
+
+  it('links to the custom panels docs', () => {
+    render(<EditCustomContentFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('customContentFlyoutDocsLink')).toHaveAttribute(
+      'href',
+      'https://docs.example/custom-panels'
+    );
   });
 
   describe('Cancel', () => {
@@ -205,6 +232,10 @@ describe('EditCustomContentFlyout', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
 
       expect(onGenerateWithChat).toHaveBeenCalledWith('<p>hi</p>', 'FROM logs');
+      expect(mockTelemetry.trackGenerateWithChatClicked).toHaveBeenCalledWith({
+        triggerSource: 'flyout',
+        hasExistingTemplate: true,
+      });
     });
 
     it('calls onGenerateWithChat when clicked with an empty template', async () => {
@@ -214,6 +245,10 @@ describe('EditCustomContentFlyout', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Generate with chat' }));
 
       expect(onGenerateWithChat).toHaveBeenCalledWith('', undefined);
+      expect(mockTelemetry.trackGenerateWithChatClicked).toHaveBeenCalledWith({
+        triggerSource: 'flyout',
+        hasExistingTemplate: false,
+      });
     });
   });
 });

@@ -36,6 +36,7 @@ const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ input, output }) => {
     const detections = output.inputDetections ?? input.detections ?? [];
     const expectedRuleUuids = new Set(

@@ -42,7 +42,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   }
 
   getIconType(): string | undefined {
-    return 'discoverApp';
+    return 'productDiscover';
   }
 
   async isCompatible({ embeddable }: EmbeddableApiContext) {

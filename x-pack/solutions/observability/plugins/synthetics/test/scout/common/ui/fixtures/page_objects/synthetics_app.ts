@@ -10,11 +10,9 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
-  public readonly ruleMonitorCountButton: Locator;
+  public readonly ruleMonitorCount: Locator;
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.ruleMonitorCountButton = page.testSubj.locator(
-      'syntheticsStatusRuleVizMonitorQueryIDsButton'
-    );
+    this.ruleMonitorCount = page.testSubj.locator('syntheticsStatusRuleVizMonitorCount');
   }
 
   async navigateToMonitorManagement() {
@@ -62,23 +60,6 @@ export class SyntheticsAppPage {
   async navigateToAddMonitor() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/add-monitor'));
     await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName', { timeout: 30_000 });
-  }
-
-  async navigateToStepDetails({
-    configId,
-    stepIndex,
-    checkGroup,
-    locationId,
-  }: {
-    checkGroup: string;
-    configId: string;
-    stepIndex: number;
-    locationId?: string;
-  }) {
-    const locationQuery = locationId ? `?locationId=${locationId}` : '';
-    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}${locationQuery}`;
-    await this.page.goto(this.kbnUrl.get(stepDetailsPath));
-    await this.page.testSubj.waitForSelector('synth-step-metrics');
   }
 
   async waitForMonitorManagementLoadingToFinish() {
