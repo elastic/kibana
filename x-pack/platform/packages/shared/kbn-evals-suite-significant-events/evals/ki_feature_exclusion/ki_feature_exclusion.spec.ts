@@ -14,15 +14,14 @@ import {
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
-  SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExclusionScenario,
 } from '../../src/datasets';
@@ -33,7 +32,7 @@ import {
   followUpRetainedCountEvaluator,
 } from '../../src/evaluators/ki_feature_exclusion/feature_counts';
 import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
 evaluate.describe.configure({ timeout: 1_200_000 });
@@ -43,6 +42,7 @@ evaluate.describe(
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
+    const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
@@ -95,14 +95,15 @@ evaluate.describe(
               snapshotSource: scenario.snapshot_source,
             });
 
-            const available =
-              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-            if (!available.has(source.snapshotName)) {
-              log.info(
-                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 

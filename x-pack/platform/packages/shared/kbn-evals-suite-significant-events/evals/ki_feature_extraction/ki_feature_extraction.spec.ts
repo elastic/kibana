@@ -15,11 +15,9 @@ import {
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
 import {
-  SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
   replayIntoManagedStream,
   replaySignificantEventsSnapshot,
-  resolveBasePath,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction';
@@ -29,10 +27,9 @@ import {
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import { buildAvailableSnapshotsBySource, hasAvailableSnapshot } from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
 import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
@@ -97,20 +94,15 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             snapshotSource: scenario.snapshot_source,
           });
 
-          const availableSnapshots =
-            availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-          if (!availableSnapshots.has(source.snapshotName)) {
-            if (failOnMissingSnapshot) {
-              throw new Error(
-                `Snapshot "${source.snapshotName}" for dataset "${dataset.id}" was not found at ` +
-                  `"${source.gcs.bucket}/${resolveBasePath(source.gcs)}".`
-              );
-            }
-            log.info(
-              `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-            );
+          if (
+            !hasAvailableSnapshot({
+              availableSnapshotsBySource,
+              source,
+              datasetId: dataset.id,
+              failOnMissingSnapshot,
+              log,
+            })
+          ) {
             continue;
           }
 

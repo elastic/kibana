@@ -8,9 +8,14 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GcsConfig } from '../src/data_generators/replay';
-import { listAvailableSnapshots } from '../src/data_generators/replay';
+import { listAvailableSnapshots, resolveBasePath } from '../src/data_generators/replay';
 import type { DatasetConfig, SnapshotSourceOverride } from '../src/datasets';
 import { resolveScenarioSnapshotSource, snapshotCatalogKey } from '../src/datasets';
+
+interface ResolvedSnapshotSource {
+  snapshotName: string;
+  gcs: GcsConfig;
+}
 
 /**
  * For each dataset, resolves the GCS snapshot source for every scenario
@@ -43,4 +48,39 @@ export async function buildAvailableSnapshotsBySource(
     availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
   }
   return availableSnapshotsBySource;
+}
+
+/**
+ * Applies the suite's missing-snapshot policy: an implicit dataset selection skips a scenario whose
+ * snapshot is absent, while an explicit selection fails so a requested dataset cannot silently
+ * evaluate nothing.
+ */
+export function hasAvailableSnapshot({
+  availableSnapshotsBySource,
+  source,
+  datasetId,
+  failOnMissingSnapshot,
+  log,
+}: {
+  availableSnapshotsBySource: Map<string, Set<string>>;
+  source: ResolvedSnapshotSource;
+  datasetId: string;
+  failOnMissingSnapshot: boolean;
+  log: ToolingLog;
+}): boolean {
+  const availableSnapshots = availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs));
+  if (availableSnapshots?.has(source.snapshotName)) {
+    return true;
+  }
+
+  const missingSnapshot =
+    `Snapshot "${source.snapshotName}" for dataset "${datasetId}" was not found at ` +
+    `"${source.gcs.bucket}/${resolveBasePath(source.gcs)}".`;
+
+  if (failOnMissingSnapshot) {
+    throw new Error(missingSnapshot);
+  }
+
+  log.info(`${missingSnapshot} Skipping.`);
+  return false;
 }
