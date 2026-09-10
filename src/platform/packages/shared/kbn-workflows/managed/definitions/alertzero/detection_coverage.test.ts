@@ -160,9 +160,6 @@ describe('Detection Coverage worker', () => {
       expect(emit?.install_approved_not_applied).toContain(
         'steps.install_prebuilt_rule.output.summary.skipped > 0'
       );
-      expect(emit?.rule_installed).toContain(
-        'steps.install_prebuilt_rule.output.summary.skipped > 0'
-      );
       expect(emit?.installed_not_enabled).toContain(
         'steps.install_prebuilt_rule.output.summary.succeeded > 0'
       );

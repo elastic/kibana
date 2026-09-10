@@ -251,7 +251,7 @@ steps:
       # error, so an `error == null` check reports success for work that never ran. A
       # skipped step also has no output, so these read false.
       rule_enabled: "${{ steps.enable_existing_rule.output.succeeded > 0 or steps.enable_existing_rule.output.skipped > 0 or steps.enable_installed_rule.output.succeeded > 0 or steps.enable_installed_rule.output.skipped > 0 }}"
-      rule_installed: "${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 or steps.install_prebuilt_rule.output.summary.skipped > 0 }}"
+      rule_installed: "${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 }}"
       # An action the analyst approved but the guards then declined is the state a caller
       # must never read as done. One field per action: an `or` chain across steps that did
       # not run in this branch evaluates to null and swallows the true case, and naming the
