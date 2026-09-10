@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -102,9 +102,8 @@ export const getSearchEmbeddableFactory = ({
       const defaultState = { selected_tab_id: tabs[0]?.id };
 
       /** All other state */
-      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      // Query/fetch errors are non-blocking: they only replace the embeddable's own content, unlike blockingError$.
       const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
@@ -140,8 +139,17 @@ export const getSearchEmbeddableFactory = ({
         selectedTabId$,
         savedObjectId$,
         searchEmbeddable,
-        blockingError$,
+        setSearchError: (error: Error | undefined) => searchError$.next(error),
         dataLoading$,
+      });
+
+      // Search errors surface in the platform's blocking panel like Lens and Vega, except
+      // while inline editing, where they must render in-panel to keep apply/cancel reachable.
+      const blockingErrorSubscription = combineLatest([
+        searchError$,
+        inlineEditingApi.isInlineEditing$,
+      ]).subscribe(([searchError, isInlineEditing]) => {
+        blockingError$.next(isInlineEditing ? undefined : searchError);
       });
 
       const stateApi = initializeStateApi<SearchEmbeddablePanelApiState>({
@@ -381,6 +389,7 @@ export const getSearchEmbeddableFactory = ({
               drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
               cleanupFetch();
+              blockingErrorSubscription.unsubscribe();
             };
           }, []);
 

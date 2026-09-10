@@ -265,7 +265,53 @@ describe('saved search embeddable', () => {
         expect(discoverComponent.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
 
-      // search errors are non-blocking and must not trigger the panel-level error overlay
+      // outside inline editing, search errors surface in the platform's blocking panel,
+      // consistent with other embeddables
+      expect(api.blockingError$.getValue()).toBe(searchError);
+    });
+
+    it('should keep a query failure non-blocking while inline editing so apply/discard stay reachable', async () => {
+      const searchError = new Error('Query failed');
+      const { search, rejectSearch } = createSearchErrorFnMock(searchError);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL, savedObjectId: 'id' },
+      });
+
+      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
+        navigateToEditor: jest.fn(),
+      }));
+      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+        app: 'discover',
+        path: '/mock-url',
+        state: {},
+      });
+
+      const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+      await waitOneTick(); // wait for build to complete
+      const discoverComponent = renderWithI18n(<Component />);
+
+      await act(async () => {
+        await api.onEdit?.();
+      });
+
+      rejectSearch();
+      await waitOneTick();
+
+      await waitFor(() => {
+        expect(discoverComponent.getByTestId('discoverEmbeddableErrorCallout')).toBeInTheDocument();
+        expect(
+          discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton')
+        ).toBeInTheDocument();
+      });
+
+      // the platform panel would hide our content along with the discard button
       expect(api.blockingError$.getValue()).toBeUndefined();
     });
   });
