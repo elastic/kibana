@@ -7,17 +7,17 @@
 
 import { renderHook } from '@testing-library/react';
 import { useBuilderContext } from './use_builder_context';
-import { useCasesContext } from '../../../cases_context/use_cases_context';
-import { basicCase } from '../../../../containers/mock';
-import { casesConfigurationsMock } from '../../../../containers/configure/mock';
-import { getCaseConnectorsMockResponse } from '../../../../common/mock/connectors';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { basicCase } from '../../../containers/mock';
+import { casesConfigurationsMock } from '../../../containers/configure/mock';
+import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useEuiTheme: () => ({ euiTheme: { colors: {}, size: {} } }),
 }));
 
-jest.mock('../../../cases_context/use_cases_context');
+jest.mock('../../cases_context/use_cases_context');
 
 const useCasesContextMock = useCasesContext as jest.Mock;
 

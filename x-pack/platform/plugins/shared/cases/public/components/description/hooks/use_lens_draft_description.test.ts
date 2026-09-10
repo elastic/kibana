@@ -8,11 +8,11 @@
 import type { MutableRefObject } from 'react';
 import { renderHook, act } from '@testing-library/react';
 
-import { useLensDraftComment } from '../../../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { useLensDraftComment } from '../../markdown_editor/plugins/lens/use_lens_draft_comment';
 import type { DescriptionMarkdownRefObject } from '../types';
 import { useLensDraftDescription } from './use_lens_draft_description';
 
-jest.mock('../../../markdown_editor/plugins/lens/use_lens_draft_comment');
+jest.mock('../../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 const useLensDraftCommentMock = useLensDraftComment as jest.Mock;
 const clearDraftComment = jest.fn();

@@ -9,9 +9,9 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import type { CaseConnectors, CaseUI, CasesConfigurationUI } from '../../../../containers/types';
-import type { CurrentUserProfile } from '../../../types';
-import { useCasesContext } from '../../../cases_context/use_cases_context';
+import type { CaseConnectors, CaseUI, CasesConfigurationUI } from '../../../containers/types';
+import type { CurrentUserProfile } from '../../types';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 interface UseBuilderContextArgs {
   caseData: CaseUI;

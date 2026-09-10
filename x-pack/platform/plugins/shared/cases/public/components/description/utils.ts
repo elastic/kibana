@@ -6,9 +6,9 @@
  */
 
 import type { Node } from 'unist';
-import { parseCommentString } from '../../../../common/utils/markdown_plugins/utils';
-import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
-import type { EditableMarkdownRefObject } from '../../markdown_editor';
+import { parseCommentString } from '../../../common/utils/markdown_plugins/utils';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import type { EditableMarkdownRefObject } from '../markdown_editor';
 
 const collectTextNodes = (node: Node, parts: string[]): void => {
   if (node.type === 'text' || node.type === 'inlineCode') {

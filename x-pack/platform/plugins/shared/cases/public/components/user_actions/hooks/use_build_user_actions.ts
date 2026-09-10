@@ -15,12 +15,12 @@ import type {
   CasesConfigurationUI,
   CaseUI,
   CaseConnectors,
-} from '../../../../containers/types';
-import type { CurrentUserProfile } from '../../../types';
-import type { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
-import type { CasesPermissions } from '../../../../../common/ui/types';
-import { isUserActionTypeSupported } from '../../../user_actions/helpers';
-import { builderMap } from '../../../user_actions/builder';
+} from '../../../containers/types';
+import type { CurrentUserProfile } from '../../types';
+import type { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
+import type { CasesPermissions } from '../../../../common/ui/types';
+import { isUserActionTypeSupported } from '../helpers';
+import { builderMap } from '../builder';
 
 interface UseBuildUserActionsArgs {
   caseUserActions: UserActionUI[];

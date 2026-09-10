@@ -9,15 +9,15 @@ import { renderHook } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 import { useBuildUserActions } from './use_build_user_actions';
-import { builderMap } from '../../../user_actions/builder';
-import { basicCase, getUserAction } from '../../../../containers/mock';
-import { casesConfigurationsMock } from '../../../../containers/configure/mock';
-import { getCaseConnectorsMockResponse } from '../../../../common/mock/connectors';
-import { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
-import { allCasesPermissions } from '../../../../common/mock';
-import { UserActionTypes } from '../../../../../common/types/domain';
+import { builderMap } from '../builder';
+import { basicCase, getUserAction } from '../../../containers/mock';
+import { casesConfigurationsMock } from '../../../containers/configure/mock';
+import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
+import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
+import { allCasesPermissions } from '../../../common/mock';
+import { UserActionTypes } from '../../../../common/types/domain';
 
-jest.mock('../../../user_actions/builder');
+jest.mock('../builder');
 
 const builderMapMock = jest.mocked(builderMap);
 
