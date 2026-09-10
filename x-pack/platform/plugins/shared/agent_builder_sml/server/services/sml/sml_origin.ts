@@ -7,6 +7,11 @@
 
 import type { SmlDocument } from './types';
 
+const SCHEME_SEPARATOR = '://';
+
 /** Raw origin id (e.g. the saved object id) of an SML document, parsed out of `attributes.origin.uri`. */
-export const getSmlOriginId = (doc: Pick<SmlDocument, 'attributes'>): string =>
-  doc.attributes.origin.uri.split('://')[1] ?? '';
+export const getSmlOriginId = (doc: Pick<SmlDocument, 'attributes'>): string => {
+  const uri = doc.attributes.origin.uri;
+  const separatorIndex = uri.indexOf(SCHEME_SEPARATOR);
+  return separatorIndex === -1 ? '' : uri.slice(separatorIndex + SCHEME_SEPARATOR.length);
+};
