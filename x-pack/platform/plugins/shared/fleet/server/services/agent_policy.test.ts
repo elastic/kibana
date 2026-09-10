@@ -2112,7 +2112,8 @@ describe('Agent policy', () => {
 
       await agentPolicyService.deleteFleetServerPoliciesForPolicyId(esClient, 'test-agent-policy');
 
-      expect(esClient.deleteByQuery).toBeCalledTimes(2);
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
     });
   });
+
 });
