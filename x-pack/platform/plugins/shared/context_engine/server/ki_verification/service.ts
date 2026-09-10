@@ -24,7 +24,8 @@ export class KiVerificationService {
    * result with its verifier id. A verifier that throws from `applies` or
    * `verify` is recorded as a failure and does not abort the run; cancellation
    * errors rethrow. No-op when the feature flag is off. Runs `verifiers` in
-   * order when given, otherwise every registered verifier.
+   * order when given (an empty list runs nothing and passes), otherwise every
+   * registered verifier.
    */
   async verifyKi(
     ki: KnowledgeIndicator,

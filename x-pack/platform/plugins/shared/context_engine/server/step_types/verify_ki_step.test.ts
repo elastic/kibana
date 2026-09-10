@@ -266,6 +266,18 @@ describe('verify_ki workflow step', () => {
       });
     });
 
+    it('runs nothing and passes when verifiers is an empty list', async () => {
+      setContextEngineEnabled(true);
+
+      const output = await runHandler(
+        { attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } },
+        []
+      );
+
+      expect(output).toEqual({ passed: true, results: [] });
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+    });
+
     it('throws for an unknown built-in verifier id', async () => {
       setContextEngineEnabled(true);
 

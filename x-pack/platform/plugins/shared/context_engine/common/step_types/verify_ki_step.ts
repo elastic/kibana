@@ -74,7 +74,7 @@ export const VerifyKiInputSchema = z.object({
     .max(MAX_KI_VERIFIER_WORKFLOWS)
     .optional()
     .describe(
-      'The verifiers to run, in order: built-ins by `id` and custom workflows by `workflow_id`. When omitted, every built-in verifier runs.'
+      'The verifiers to run, in order: built-ins by `id` and custom workflows by `workflow_id`. When omitted, every built-in verifier runs. An empty list runs no verifiers and the step passes.'
     ),
 });
 
@@ -109,7 +109,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. Without `verifiers`, every built-in verifier runs. With `verifiers`, exactly the listed ones run in order: built-ins by `id` (for example `esql-valid-syntax`) and custom workflows by `workflow_id`. A verifier only runs when it applies to the KI (for example, the ES|QL verifier needs `attributes.esql`); if none apply, the step passes with empty results. A custom verifier workflow receives the KI as `inputs.ki` and must emit `passed` (boolean) and `reason` (string) through a `workflow.output` step. A custom verifier that fails, times out, or returns malformed output fails the KI. Requires the Context Engine advanced setting.',
+        'The {stepTypeId} step runs Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. Without `verifiers`, every built-in verifier runs. With `verifiers`, exactly the listed ones run in order: built-ins by `id` (for example `esql-valid-syntax`) and custom workflows by `workflow_id`. An empty `verifiers` list runs nothing and the step passes with empty results, so only use it to deliberately skip verification. A verifier only runs when it applies to the KI (for example, the ES|QL verifier needs `attributes.esql`); if none apply, the step passes with empty results. A custom verifier workflow receives the KI as `inputs.ki` and must emit `passed` (boolean) and `reason` (string) through a `workflow.output` step. A custom verifier that fails, times out, or returns malformed output fails the KI. Requires the Context Engine advanced setting.',
       values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID },
     }),
     examples: [
