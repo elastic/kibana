@@ -54,6 +54,7 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
   setAdvancedSettings,
+  stripMissingUiamApiKeyTagFromAlert,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -230,8 +231,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
+      const normalizedAlert = stripMissingUiamApiKeyTagFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         '@timestamp': fullAlert['@timestamp'],
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
@@ -412,8 +414,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
+      const normalizedAlert = stripMissingUiamApiKeyTagFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         '@timestamp': fullAlert['@timestamp'],
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
