@@ -31,11 +31,6 @@ interface UseRunCasesWorkflowResult {
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator prioritising tagged then context-relevant workflows. */
   sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
-  /**
-   * When true the panel should suppress its own success toast because the
-   * executor will handle multi-case toasting itself.
-   */
-  showSuccessToast: boolean;
 }
 
 const NO_WORKFLOW_TAGS: readonly string[] = [];
@@ -68,10 +63,6 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   const filterWorkflow = useMemo(() => createCaseWorkflowFilter(NO_WORKFLOW_TAGS), []);
   const sortWorkflow = useMemo(() => createCaseWorkflowComparator(NO_WORKFLOW_TAGS), []);
 
-  // The executor always handles the success toast itself so the "View execution"
-  // button is placed consistently (actionProps.primary) for both N=1 and N>1.
-  const showSuccessToast = false;
-
   return {
     canRunWorkflow,
     isModalOpen,
@@ -81,6 +72,5 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
     runWorkflow,
     filterWorkflow,
     sortWorkflow,
-    showSuccessToast,
   };
 };

@@ -50,7 +50,6 @@ export const useRunWorkflowAction = ({
     runWorkflow,
     filterWorkflow,
     sortWorkflow,
-    showSuccessToast,
   } = useRunCasesWorkflow();
 
   const handleOpen = useCallback(
@@ -91,10 +90,9 @@ export const useRunWorkflowAction = ({
       runWorkflow,
       filterWorkflow,
       sortWorkflow,
-      showSuccessToast,
       onClose: handleClose,
     }),
-    [inputs, runWorkflow, filterWorkflow, sortWorkflow, showSuccessToast, handleClose]
+    [inputs, runWorkflow, filterWorkflow, sortWorkflow, handleClose]
   );
 
   return {
