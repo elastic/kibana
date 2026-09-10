@@ -63,7 +63,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'denies a manager whose Streams privilege is limited to one space',
+      'denies a manager whose Nightshift privilege is limited to one space',
       async ({ apiClient, samlAuth, config }) => {
         const streamsAdmin = getStreamsUsers(config).streamsAdmin;
         const oneSpaceManager = {
@@ -89,7 +89,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'allows an all-spaces Streams manager to update and restore settings',
+      'allows an all-spaces Nightshift manager to update and restore settings',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };

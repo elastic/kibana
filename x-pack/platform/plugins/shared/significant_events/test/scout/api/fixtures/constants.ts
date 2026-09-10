@@ -39,7 +39,7 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
       kibana: [
         {
           base: ['all'],
-          feature: {},
+          feature: { nightshift: ['manage-engines'] },
           spaces: ['*'],
         },
       ],
