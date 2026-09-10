@@ -6,7 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+
+export type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
 
 export interface AgentConnector {
   id: string;
@@ -20,7 +23,7 @@ export interface AgentConnector {
  */
 export const listAgentConnectors = async (
   callContext: SandboxCallContext,
-  getActionsClient: ((req: KibanaRequest) => Promise<any>) | undefined
+  getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined
 ): Promise<AgentConnector[]> => {
   if (!getActionsClient || callContext.allowedConnectorIds.length === 0) return [];
 
@@ -29,8 +32,8 @@ export const listAgentConnectors = async (
     const all = await actionsClient.getAll({ includeSystemActions: false });
     const allowedSet = new Set(callContext.allowedConnectorIds);
     return all
-      .filter((c: any) => allowedSet.has(c.id))
-      .map((c: any) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
+      .filter((c) => allowedSet.has(c.id))
+      .map((c) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
   } catch (err) {
     return [];
   }

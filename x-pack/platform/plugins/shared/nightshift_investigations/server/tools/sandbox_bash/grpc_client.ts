@@ -15,19 +15,6 @@ import type { Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsConfig } from '../../config';
 import type { SandboxCallContext } from './tool_utils';
 
-export interface ConnectorCallbackRequest {
-  request_id: string;
-  connector_id: string;
-  sub_action: string;
-  sub_action_params: Buffer;
-}
-
-export interface ConnectorCallbackResult {
-  status: 'ok' | 'error';
-  data?: Buffer;
-  error_message?: string;
-}
-
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
 // (no eval, no code generation — plain Buffer manipulation)
@@ -185,95 +172,6 @@ function deserializeRunCommandResponse(buf: Buffer): RunCommandResult {
     }
   }
   return result;
-}
-
-// ConnectorCallbackResponse (field layout: 1=request_id str, 2=status str, 3=data bytes, 4=error_message str)
-function serializeConnectorCallbackResponse(
-  resp: ConnectorCallbackResult & { request_id: string }
-): Buffer {
-  return Buffer.concat([
-    encodeStringField(1, resp.request_id),
-    encodeStringField(2, resp.status),
-    resp.data ? encodeBytesField(3, resp.data) : Buffer.alloc(0),
-    encodeStringField(4, resp.error_message ?? ''),
-  ]);
-}
-
-// ConnectorCallbackRequest (field layout: 1=request_id str, 2=connector_id str, 3=sub_action str, 4=sub_action_params bytes)
-function deserializeConnectorCallbackRequest(buf: Buffer): ConnectorCallbackRequest {
-  const r: ConnectorCallbackRequest = {
-    request_id: '',
-    connector_id: '',
-    sub_action: '',
-    sub_action_params: Buffer.alloc(0),
-  };
-  let offset = 0;
-  while (offset < buf.length) {
-    const { value: tag, bytesRead: tb } = decodeVarint(buf, offset);
-    offset += tb;
-    const field = tag >>> 3;
-    const wireType = tag & 0x7;
-    if (wireType === 2) {
-      const { value: len, bytesRead: lb } = decodeVarint(buf, offset);
-      offset += lb;
-      const payload = buf.slice(offset, offset + len);
-      offset += len;
-      if (field === 1) r.request_id = payload.toString('utf8');
-      else if (field === 2) r.connector_id = payload.toString('utf8');
-      else if (field === 3) r.sub_action = payload.toString('utf8');
-      else if (field === 4) r.sub_action_params = Buffer.from(payload);
-    } else if (wireType === 0) {
-      const { bytesRead: vb } = decodeVarint(buf, offset);
-      offset += vb;
-    } else if (wireType === 1) {
-      offset += 8;
-    } else if (wireType === 5) {
-      offset += 4;
-    }
-  }
-  return r;
-}
-
-// RunCommandClientMessage: oneof { RunCommandRequest command=1; ConnectorCallbackResponse callback_response=2; }
-// Takes already-serialized payload and wraps it in the outer oneof field
-function serializeRunCommandClientMessageCommand(commandPayload: Buffer): Buffer {
-  return encodeNestedMessage(1, commandPayload);
-}
-
-function serializeRunCommandClientMessageCallback(callbackPayload: Buffer): Buffer {
-  return encodeNestedMessage(2, callbackPayload);
-}
-
-type RunCommandServerMessageDecoded =
-  | { type: 'callback_request'; value: ConnectorCallbackRequest }
-  | { type: 'result'; value: RunCommandResult };
-
-// RunCommandServerMessage: oneof { ConnectorCallbackRequest callback_request=1; RunCommandResponse result=2; }
-function deserializeRunCommandServerMessage(buf: Buffer): RunCommandServerMessageDecoded {
-  let offset = 0;
-  while (offset < buf.length) {
-    const { value: tag, bytesRead: tb } = decodeVarint(buf, offset);
-    offset += tb;
-    const field = tag >>> 3;
-    const wireType = tag & 0x7;
-    if (wireType === 2) {
-      const { value: len, bytesRead: lb } = decodeVarint(buf, offset);
-      offset += lb;
-      const payload = buf.slice(offset, offset + len);
-      offset += len;
-      if (field === 1)
-        return { type: 'callback_request', value: deserializeConnectorCallbackRequest(payload) };
-      if (field === 2) return { type: 'result', value: deserializeRunCommandResponse(payload) };
-    } else if (wireType === 0) {
-      const { bytesRead: vb } = decodeVarint(buf, offset);
-      offset += vb;
-    } else if (wireType === 1) {
-      offset += 8;
-    } else if (wireType === 5) {
-      offset += 4;
-    }
-  }
-  throw new Error('RunCommandServerMessage: no recognized field found');
 }
 
 // ---------------------------------------------------------------------------
@@ -598,16 +496,6 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
     responseSerialize: (res: Buffer) => res,
     responseDeserialize: (buf: Buffer) => deserializeStateOperationResponse(buf),
   },
-  runCommandBidi: {
-    path: '/sandbox.SandboxService/RunCommandBidi',
-    requestStream: true,
-    responseStream: true,
-    // We write pre-serialized Buffers and read raw Buffers
-    requestSerialize: (req: Buffer): Buffer => req,
-    requestDeserialize: (buf: Buffer): Buffer => buf,
-    responseSerialize: (res: Buffer): Buffer => res,
-    responseDeserialize: (buf: Buffer): Buffer => buf,
-  },
 };
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
@@ -659,81 +547,6 @@ export class SandboxApiClient {
       },
       this.metadata(conversationId)
     );
-  }
-
-  runCommandBidi(
-    conversationId: string,
-    params: RunCommandParams,
-    onConnectorCallback: (req: ConnectorCallbackRequest) => Promise<ConnectorCallbackResult>
-  ): Promise<RunCommandResult> {
-    return new Promise((resolve, reject) => {
-      const stream: grpc.ClientDuplexStream<Buffer, Buffer> = (this.client as any).runCommandBidi(
-        this.metadata(conversationId)
-      );
-      let settled = false;
-
-      const settle = (fn: () => void): void => {
-        if (settled) return;
-        settled = true;
-        fn();
-      };
-
-      stream.on('data', (rawBuf: Buffer) => {
-        let msg: ReturnType<typeof deserializeRunCommandServerMessage>;
-        try {
-          msg = deserializeRunCommandServerMessage(rawBuf);
-        } catch (err) {
-          settle(() => reject(err));
-          stream.destroy();
-          return;
-        }
-
-        if (msg.type === 'result') {
-          settle(() => resolve(msg.value));
-          stream.end();
-          return;
-        }
-
-        // msg.type === 'callback_request'
-        const cb = msg.value;
-        void (async () => {
-          let callbackResult: ConnectorCallbackResult;
-          try {
-            callbackResult = await onConnectorCallback(cb);
-          } catch (err) {
-            callbackResult = { status: 'error', error_message: String(err) };
-          }
-          const responsePayload = serializeConnectorCallbackResponse({
-            request_id: cb.request_id,
-            ...callbackResult,
-          });
-          if (!stream.destroyed) {
-            stream.write(serializeRunCommandClientMessageCallback(responsePayload));
-          }
-        })().catch((err) => {
-          settle(() => reject(err));
-          stream.destroy();
-        });
-      });
-
-      stream.on('error', (err: grpc.ServiceError) => {
-        settle(() => reject(err));
-      });
-
-      stream.on('end', () => {
-        settle(() => reject(new Error('RunCommandBidi stream ended without a result')));
-      });
-
-      // Send the command first
-      const commandPayload = serializeRunCommandRequest({
-        command: params.command,
-        directory: params.directory ?? '',
-        env: params.env ?? {},
-        timeout_seconds: params.timeout_seconds ?? 0,
-        task_group_id: '',
-      });
-      stream.write(serializeRunCommandClientMessageCommand(commandPayload));
-    });
   }
 
   async statFiles(conversationId: string, paths: string[]): Promise<FileMetadata[]> {

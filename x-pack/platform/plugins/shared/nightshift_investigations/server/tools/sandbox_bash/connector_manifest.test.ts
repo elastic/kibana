@@ -77,7 +77,7 @@ const renderManifest = async ({
     conversationId: CONVERSATION_ID,
     apiClient: apiClient as unknown as SandboxApiClient,
     callContext: createCallContext(allowedConnectorIds),
-    getActionsClient: withActionsClient ? getActionsClient : undefined,
+    getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
     logger,
   });
 

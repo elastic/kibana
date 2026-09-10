@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { AgentConnector } from './agent_connectors';
+import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxApiClient } from './grpc_client';
 import type { SandboxCallContext } from './tool_utils';
@@ -24,7 +24,7 @@ export const writeConnectorManifest = async ({
   conversationId: string;
   apiClient: SandboxApiClient;
   callContext: SandboxCallContext;
-  getActionsClient: ((req: KibanaRequest) => Promise<any>) | undefined;
+  getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
   logger: Logger;
 }): Promise<void> => {
   const connectors = await listAgentConnectors(callContext, getActionsClient);

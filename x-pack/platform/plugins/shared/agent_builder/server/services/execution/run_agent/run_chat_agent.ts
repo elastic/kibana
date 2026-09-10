@@ -496,6 +496,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
   }
 
+  // afterAgent only fires on the happy path; hooks needing failure coverage should use try/finally upstream.
   await context.hooks.run(HookLifecycle.afterAgent, {
     request,
     abortSignal,
