@@ -12,7 +12,7 @@ responses:
                   provider: 'aws'
                   connectorId: 'cloud-connector-id-1'
                   mechanisms:
-                    - 'agentless'
+                    - 'managed_integration'
                   deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
                   deploymentName: 'elastic-aws-onboarding'
                   services:
@@ -25,17 +25,17 @@ responses:
                   provider: 'aws'
                   connectorId: 'cloud-connector-id-1'
                   mechanisms:
-                    - 'agentless'
-                    - 'firehose'
+                    - 'managed_integration'
+                    - 'ecf'
                   services:
                     - 'cloudfront_logs'
                   status: 'deploying'
                   attemptCount: 1
                   serviceVars:
                     cloudfront_logs:
-                      - regions:
-                          - 'us-east-1'
-                        s3_bucket_arn: 'arn:aws:s3:::my-cloudfront-logs-bucket'
+                      regions:
+                        - 'us-east-1'
+                      s3_bucket_arn: 'arn:aws:s3:::my-cloudfront-logs-bucket'
   400:
     description: 'Bad Request'
     content:

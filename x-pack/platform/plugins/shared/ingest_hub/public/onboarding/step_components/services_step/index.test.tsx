@@ -42,7 +42,7 @@ function makeServicesStepReturn(): ReturnType<typeof useServicesStep> {
     setSearchQuery: jest.fn(),
     filteredServices: [],
     categories: [],
-    activeCategory: null,
+    activeCategory: 'analytics',
     setSelectedCategory: jest.fn(),
     servicesInCategory: [],
     duplicateNamesInCategory: new Set(),

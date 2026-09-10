@@ -45097,6 +45097,12 @@ paths:
                     type: string
                 required:
                   - message
+              examples:
+                notFoundResponseExample:
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
           description: Not found.
       summary: Delete cloud onboarding deployment
       tags:
@@ -45323,6 +45329,12 @@ paths:
                     type: string
                 required:
                   - message
+              examples:
+                notFoundResponseExample:
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
           description: Not found.
       summary: Get cloud onboarding deployment
       tags:
@@ -45631,6 +45643,12 @@ paths:
                     type: string
                 required:
                   - message
+              examples:
+                notFoundResponseExample:
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
           description: Not found.
       summary: Update cloud onboarding deployment
       tags:
