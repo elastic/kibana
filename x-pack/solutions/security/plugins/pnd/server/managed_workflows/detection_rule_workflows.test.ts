@@ -16,6 +16,7 @@ import {
   PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
+import { workerRegistry } from './worker_registry';
 
 const DETECTION_WORKFLOW_IDS = [
   PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -30,7 +31,9 @@ const getManagedYaml = (workflowId: string): string => {
   if (!definition) throw new Error(`Missing managed workflow definition for "${workflowId}"`);
   if ('yaml' in definition && definition.yaml) return definition.yaml;
   if ('yamlTemplate' in definition && definition.yamlTemplate) {
-    return definition.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' });
+    const registration = workerRegistry.get(workflowId);
+    if (!registration) throw new Error(`Worker "${workflowId}" is not registered`);
+    return definition.yamlTemplate(registration.settings.createDefaultValues());
   }
   throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
 };

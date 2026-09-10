@@ -66,6 +66,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '2h',
   },
   [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -152,7 +153,7 @@ it.each([
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
     '2:de85a75a',
   ],
-  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '3:bf01bf78'],
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '4:b1cbd09c'],
   [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID, DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',

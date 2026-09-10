@@ -9,7 +9,10 @@
 
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_WORKER_MANAGEMENT } from './constants';
 import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
-import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
+import {
+  renderScheduledWorkerYaml,
+  type ScheduledWorkerTemplateValues,
+} from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID = 'system-security-detection-rule-tuning';
@@ -19,7 +22,7 @@ export const PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   id: PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   management: PND_WORKER_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(DETECTION_RULE_TUNING_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
+  version: 4,
+  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+    renderScheduledWorkerYaml(DETECTION_RULE_TUNING_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
