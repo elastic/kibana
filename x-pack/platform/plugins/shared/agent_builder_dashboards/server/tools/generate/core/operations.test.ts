@@ -2410,4 +2410,69 @@ describe('add_controls / remove_controls operations', () => {
 
     expect(afterRemove.pinned_panels).toHaveLength(1);
   });
+
+  describe('attachment-source panels', () => {
+    // The point of the source: the model places a visualization it already created without
+    // copying its payload back through the tool call.
+    it('adds a panel from a visualization attachment without a config in the input', async () => {
+      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+        type: 'success',
+        panelContent: { type: 'lens', config: { type: 'lnsXY' } },
+      });
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+        operations: [
+          {
+            operation: 'add_panels',
+            panels: [
+              {
+                source: 'attachment',
+                attachment_id: 'att-1',
+                grid: { x: 0, y: 0, w: 24, h: 10 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolveAttachmentPanel,
+      });
+
+      expect(resolveAttachmentPanel).toHaveBeenCalledWith('att-1');
+      expect(result.failures).toHaveLength(0);
+      expect(result.dashboardData.panels).toEqual([
+        expect.objectContaining({ type: 'lens', config: { type: 'lnsXY' } }),
+      ]);
+    });
+
+    it('records a failure and skips the panel when the attachment cannot be resolved', async () => {
+      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+        type: 'failure',
+        failure: { type: 'add_panels', identifier: 'att-missing', error: 'not found' },
+      });
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+        operations: [
+          {
+            operation: 'add_panels',
+            panels: [
+              {
+                source: 'attachment',
+                attachment_id: 'att-missing',
+                grid: { x: 0, y: 0, w: 24, h: 10 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolveAttachmentPanel,
+      });
+
+      expect(result.dashboardData.panels).toHaveLength(0);
+      expect(result.failures).toEqual([
+        expect.objectContaining({ identifier: 'att-missing', error: 'not found' }),
+      ]);
+    });
+  });
 });
