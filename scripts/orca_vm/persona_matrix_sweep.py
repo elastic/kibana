@@ -1798,7 +1798,28 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     q = json.dumps({"query": {"term": {"metadata.execution_id": exec_id}}})
     # Ask golden from the driver first: by the time the gate runs, this unit's
     # VM is already parked, so the ssh path below reaches a deallocated host.
-    _local_n = _golden_count_local(exec_id)
+    # Poll: golden's OTel flush lags the eval process by ~3-7 min (see the
+    # trace-evaluator comment above), and the LAST experiment's docs land last.
+    # A single count at eval exit races that flush -- 2026-09-10 dense canary:
+    # golden held all 130 docs but the gate read 117 because the dense example
+    # (experiment 10/10, 13 docs) flushed ~1 min after the eval process exited.
+    # Poll until the count stops growing across two consecutive reads, capped
+    # at FLUSH_WINDOW, then read the stable value.
+    def _count_stable():
+        prev = -1
+        n = _golden_count_local(exec_id)
+        if n is None:
+            return None
+        deadline = time.time() + 8 * 60  # FLUSH_WINDOW: covers the documented 3-7 min lag
+        while n != prev and time.time() < deadline:
+            prev = n
+            time.sleep(20)
+            n = _golden_count_local(exec_id)
+            if n is None:
+                return None
+        return n
+
+    _local_n = _count_stable()
     if _local_n is not None:
         result: dict = {"count": _local_n}
         if _local_n == 0:
