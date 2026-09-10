@@ -99238,7 +99238,7 @@ components:
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many rows each JSON cell renders by default in JSON document view.'
+                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
                             maximum: 200
                             minimum: 10
                             type: number
@@ -99262,7 +99262,7 @@ components:
                               - enum:
                                   - json
                                 type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -99367,7 +99367,7 @@ components:
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many rows each JSON cell renders by default in JSON document view.'
+                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
                             maximum: 200
                             minimum: 10
                             type: number
@@ -99391,7 +99391,7 @@ components:
                               - enum:
                                   - json
                                 type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -99536,7 +99536,7 @@ components:
                       description: Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.
                       type: object
                     default_rendered_nodes:
-                      description: 'Discover display option: controls how many rows each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
                       maximum: 200
                       minimum: 10
                       type: number

@@ -55,13 +55,7 @@ export const viewModeSchema = z
       'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
   });
 
-const documentsDisplayModeSchema = z
-  .union([z.literal('table'), z.literal('json')])
-  .optional()
-  .meta({
-    description:
-      'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.',
-  });
+const documentsDisplayModeSchema = z.union([z.literal('table'), z.literal('json')]).optional();
 
 export const dataTableLimitsSchema = z
   .object({
@@ -119,7 +113,10 @@ export const dataTableSchema = z
         description:
           'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
       }),
-    documents_display_mode: documentsDisplayModeSchema,
+    documents_display_mode: documentsDisplayModeSchema.meta({
+      description:
+        'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").',
+    }),
     hide_nulls: z.boolean().optional().meta({
       description:
         'Discover display option: controls whether fields with null values are hidden in JSON document view.',
@@ -130,7 +127,7 @@ export const dataTableSchema = z
     }),
     default_rendered_nodes: z.number().min(10).max(200).optional().meta({
       description:
-        'Discover display option: controls how many rows each JSON cell renders by default in JSON document view.',
+        'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.',
     }),
   })
   .strict()
@@ -187,7 +184,10 @@ export const panelOverridesSchema = z
       description:
         'Discover display option: controls how many documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
     }),
-    documents_display_mode: documentsDisplayModeSchema,
+    documents_display_mode: documentsDisplayModeSchema.meta({
+      description:
+        'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.',
+    }),
     hide_nulls: z.boolean().optional().meta({
       description:
         'Discover display option: controls whether fields with null values are hidden in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
@@ -198,7 +198,7 @@ export const panelOverridesSchema = z
     }),
     default_rendered_nodes: z.number().min(10).max(200).optional().meta({
       description:
-        'Discover display option: controls how many rows each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+        'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
   })
   .strict()
