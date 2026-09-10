@@ -15,6 +15,8 @@ import {
   createWorkflowVerifier,
   KiVerificationInputError,
   KiVerificationService,
+  MAX_KI_VERIFIER_WORKFLOW_DEPTH,
+  readKiVerifierChain,
 } from '../ki_verification';
 import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
@@ -51,7 +53,8 @@ export const createVerifyKiStepDefinition = (
       }
 
       const entries = context.input.verifiers ?? [];
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const { workflow, metadata } = context.contextManager.getContext();
+      const { spaceId } = workflow;
       const hasWorkflowVerifiers = entries.some((entry) => typeof entry !== 'string');
       if (
         hasWorkflowVerifiers &&
@@ -61,6 +64,17 @@ export const createVerifyKiStepDefinition = (
         throw new ExecutionError({
           type: 'PermissionError',
           message: 'Insufficient privileges to execute workflows as KI verifiers',
+        });
+      }
+
+      // The chain of verifier workflows that led here, ending with this workflow.
+      const verifierChain = [...readKiVerifierChain(metadata), workflow.id];
+      if (hasWorkflowVerifiers && verifierChain.length > MAX_KI_VERIFIER_WORKFLOW_DEPTH) {
+        throw new ExecutionError({
+          type: 'InputValidationError',
+          message: `Verifier workflows are nested too deeply (chain: ${verifierChain.join(
+            ' -> '
+          )}); the maximum depth is ${MAX_KI_VERIFIER_WORKFLOW_DEPTH}`,
         });
       }
 
@@ -76,11 +90,21 @@ export const createVerifyKiStepDefinition = (
               'Custom KI verifiers require the workflowsManagement plugin, which is not available.',
           });
         }
+        if (verifierChain.includes(entry.workflow_id)) {
+          throw new ExecutionError({
+            type: 'InputValidationError',
+            message: `Verifier workflow '${entry.workflow_id}' would call itself (chain: ${[
+              ...verifierChain,
+              entry.workflow_id,
+            ].join(' -> ')})`,
+          });
+        }
         return createWorkflowVerifier(entry, {
           workflowsManagement: workflowVerifierDeps.workflowsManagement,
           request: fakeRequest,
           spaceId,
           auditLogger,
+          verifierChain,
         });
       });
 

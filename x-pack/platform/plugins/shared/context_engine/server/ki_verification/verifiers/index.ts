@@ -14,6 +14,9 @@ export {
 } from './esql_valid_runtime';
 export {
   createWorkflowVerifier,
+  readKiVerifierChain,
+  KI_VERIFIER_CHAIN_METADATA_KEY,
+  MAX_KI_VERIFIER_WORKFLOW_DEPTH,
   WORKFLOW_VERIFIER_ID_PREFIX,
   WORKFLOW_VERIFIER_TRIGGERED_BY,
 } from './workflow_verifier';

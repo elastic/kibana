@@ -40,7 +40,7 @@ describe('createWorkflowVerifier', () => {
   const makeVerifier = (definition: Partial<Parameters<typeof createWorkflowVerifier>[0]> = {}) =>
     createWorkflowVerifier(
       { workflow_id: 'my-verifier', ...definition },
-      { workflowsManagement, request, spaceId, auditLogger }
+      { workflowsManagement, request, spaceId, auditLogger, verifierChain: ['parent-wf'] }
     );
 
   beforeEach(() => {
@@ -106,6 +106,7 @@ describe('createWorkflowVerifier', () => {
         spaceId,
         waitForCompletion: false,
         triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
+        metadata: { ki_verifier_chain: ['parent-wf'] },
       });
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(executionId, spaceId, {
         includeOutput: true,

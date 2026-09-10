@@ -34,9 +34,11 @@ const makeHandlerContext = (
   {
     verifiers,
     getScopedEsClient,
+    metadata,
   }: {
     verifiers?: VerifyKiVerifiers;
     getScopedEsClient?: () => unknown;
+    metadata?: Record<string, unknown>;
   } = {}
 ): VerifyKiHandlerContext =>
   ({
@@ -46,7 +48,9 @@ const makeHandlerContext = (
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
       getScopedEsClient: getScopedEsClient ?? jest.fn().mockReturnValue(esClient),
-      getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'space-a' } }),
+      getContext: jest
+        .fn()
+        .mockReturnValue({ workflow: { id: 'parent-wf', spaceId: 'space-a' }, metadata }),
     },
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
@@ -95,7 +99,7 @@ describe('verify_ki workflow step', () => {
 
   const runHandler = async (
     ki: VerifyKiHandlerContext['input']['ki'],
-    opts: { verifiers?: VerifyKiVerifiers } = {}
+    opts: { verifiers?: VerifyKiVerifiers; metadata?: Record<string, unknown> } = {}
   ) => {
     const { output } = await makeDefinition().handler(makeHandlerContext(ki, esClient, opts));
     if (!output) {
@@ -469,6 +473,83 @@ describe('verify_ki workflow step', () => {
         verifiersRun: 2,
         failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow'],
       });
+    });
+
+    it('forwards the verifier chain, ending with this workflow, to the child run', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        completedWith({ passed: true }) as never
+      );
+
+      await runHandler(
+        { title: 'x' },
+        { verifiers: [{ workflow_id: 'no-pii' }], metadata: { ki_verifier_chain: ['root-wf'] } }
+      );
+
+      expect(workflowsManagement.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { ki_verifier_chain: ['root-wf', 'parent-wf'] } })
+      );
+    });
+
+    it('rejects a verifier workflow that names the current workflow', async () => {
+      setContextEngineEnabled(true);
+
+      const thrown = await runHandler(
+        { title: 'x' },
+        { verifiers: [{ workflow_id: 'parent-wf' }] }
+      ).catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(ExecutionError);
+      expect(thrown.type).toBe('InputValidationError');
+      expect(thrown.message).toBe(
+        "Verifier workflow 'parent-wf' would call itself (chain: parent-wf -> parent-wf)"
+      );
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a verifier workflow already in the calling chain', async () => {
+      setContextEngineEnabled(true);
+
+      const thrown = await runHandler(
+        { title: 'x' },
+        { verifiers: [{ workflow_id: 'root-wf' }], metadata: { ki_verifier_chain: ['root-wf'] } }
+      ).catch((error) => error);
+
+      expect(thrown.type).toBe('InputValidationError');
+      expect(thrown.message).toBe(
+        "Verifier workflow 'root-wf' would call itself (chain: root-wf -> parent-wf -> root-wf)"
+      );
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects verifier workflows nested beyond the maximum depth', async () => {
+      setContextEngineEnabled(true);
+
+      const thrown = await runHandler(
+        { title: 'x' },
+        {
+          verifiers: [{ workflow_id: 'deeper' }],
+          metadata: { ki_verifier_chain: ['a', 'b', 'c'] },
+        }
+      ).catch((error) => error);
+
+      expect(thrown.type).toBe('InputValidationError');
+      expect(thrown.message).toContain('nested too deeply');
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('lets built-ins run at any depth', async () => {
+      setContextEngineEnabled(true);
+
+      const output = await runHandler(
+        { attributes: { esql: validEsql } },
+        {
+          verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID],
+          metadata: { ki_verifier_chain: ['a', 'b', 'c'] },
+        }
+      );
+
+      expect(output.passed).toBe(true);
     });
 
     it('checks the execute privilege in the executing space before dispatching', async () => {

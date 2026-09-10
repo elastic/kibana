@@ -24,6 +24,22 @@ export const WORKFLOW_VERIFIER_TRIGGERED_BY = 'context-engine:verify-ki';
 
 export const WORKFLOW_VERIFIER_POLL_INTERVAL_MS = 1_000;
 
+/**
+ * How many levels of verifier workflows may nest (a verifier whose own
+ * `verifyKi` step runs verifier workflows, and so on). `executeWorkflow`
+ * bypasses the engine's event-chain depth guard, so the step enforces this.
+ */
+export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 3;
+
+/** Execution metadata carrying the verifier nesting state into child workflows. */
+export const KI_VERIFIER_CHAIN_METADATA_KEY = 'ki_verifier_chain';
+
+/** The workflow ids from the outermost caller down to the current workflow, read from execution metadata. */
+export const readKiVerifierChain = (metadata: Record<string, unknown> | undefined): string[] => {
+  const chain = metadata?.[KI_VERIFIER_CHAIN_METADATA_KEY];
+  return Array.isArray(chain) ? chain.filter((id): id is string => typeof id === 'string') : [];
+};
+
 const MAX_REASON_LENGTH = 2048;
 
 const workflowVerifierOutputSchema = z.object({
@@ -44,6 +60,7 @@ export interface KiVerifierWorkflowRunner {
     spaceId: string;
     waitForCompletion: boolean;
     triggeredBy: string;
+    metadata?: Record<string, unknown>;
   }): Promise<{ workflowExecutionId: string }>;
   getWorkflowExecution(
     workflowExecutionId: string,
@@ -63,6 +80,8 @@ export interface WorkflowVerifierDependencies {
   spaceId: string;
   /** Records each verifier workflow run, mirroring the workflow run HTTP route's audit event. */
   auditLogger?: AuditLogger;
+  /** Workflow ids from the outermost caller down to the calling workflow; forwarded so nested verifiers can detect cycles. */
+  verifierChain: string[];
 }
 
 /** Audit action id shared with the workflows management run route. */
@@ -149,7 +168,13 @@ const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerif
  */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
-  { workflowsManagement, request, spaceId, auditLogger }: WorkflowVerifierDependencies
+  {
+    workflowsManagement,
+    request,
+    spaceId,
+    auditLogger,
+    verifierChain,
+  }: WorkflowVerifierDependencies
 ): KiVerifier => {
   const timeoutMs = (timeoutSec ?? DEFAULT_KI_VERIFIER_TIMEOUT_SEC) * 1000;
 
@@ -174,6 +199,7 @@ export const createWorkflowVerifier = (
           spaceId,
           waitForCompletion: false,
           triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
+          metadata: { [KI_VERIFIER_CHAIN_METADATA_KEY]: verifierChain },
         }));
       } catch (error) {
         auditLogger?.log(workflowRunAuditEvent(workflowId, { error }));
