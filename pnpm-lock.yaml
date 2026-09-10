@@ -392,6 +392,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/agentic_investigations
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -9019,6 +9022,8 @@ importers:
   x-pack/platform/plugins/shared/agent_builder_visualizations: {}
 
   x-pack/platform/plugins/shared/agent_builder_workflows: {}
+
+  x-pack/platform/plugins/shared/agentic_investigations: {}
 
   x-pack/platform/plugins/shared/ai_infra/llm_tasks: {}
 

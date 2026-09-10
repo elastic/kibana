@@ -1409,6 +1409,7 @@ packages:
   - 'x-pack/platform/plugins/shared/agent_builder_sml'
   - 'x-pack/platform/plugins/shared/agent_builder_visualizations'
   - 'x-pack/platform/plugins/shared/agent_builder_workflows'
+  - 'x-pack/platform/plugins/shared/agentic_investigations'
   - 'x-pack/platform/plugins/shared/ai_infra/llm_tasks'
   - 'x-pack/platform/plugins/shared/ai_infra/product_doc_base'
   - 'x-pack/platform/plugins/shared/aiops'

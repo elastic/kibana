@@ -224,6 +224,7 @@
     "@kbn/agent-builder-workflow-gen": "workspace:*",
     "@kbn/agent-builder-workflows-plugin": "workspace:*",
     "@kbn/agentic-investigations-common": "workspace:*",
+    "@kbn/agentic-investigations-plugin": "workspace:*",
     "@kbn/ai-assistant": "workspace:*",
     "@kbn/ai-assistant-common": "workspace:*",
     "@kbn/ai-assistant-connector-selector-action": "workspace:*",
