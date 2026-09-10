@@ -32,13 +32,13 @@ import {
 import { applyAgentKqlFilter } from '../../utils/log_exploration_refinements';
 import { getLogVolumeComparison } from './handler';
 
-export const OBSERVABILITY_GET_LOG_VOLUME_COMPARISON_TOOL_ID =
-  'observability.get_log_volume_comparison';
+export const OBSERVABILITY_EXPLORE_LOG_VOLUME_COMPARISON_TOOL_ID =
+  'observability.explore_log_volume_comparison';
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 const DEFAULT_MESSAGE_FIELD = 'message';
 
-const getLogVolumeComparisonSchema = z.object({
+const exploreLogVolumeComparisonSchema = z.object({
   start: z
     .string()
     .max(MAX_SHORT_STRING_LENGTH)
@@ -79,7 +79,7 @@ const getLogVolumeComparisonSchema = z.object({
     .optional(),
 });
 
-export function createGetLogVolumeComparisonTool({
+export function createExploreLogVolumeComparisonTool({
   core,
   plugins,
   logger,
@@ -88,8 +88,8 @@ export function createGetLogVolumeComparisonTool({
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
-  const toolDefinition: BuiltinToolDefinition<typeof getLogVolumeComparisonSchema> = {
-    id: OBSERVABILITY_GET_LOG_VOLUME_COMPARISON_TOOL_ID,
+  const toolDefinition: BuiltinToolDefinition<typeof exploreLogVolumeComparisonSchema> = {
+    id: OBSERVABILITY_EXPLORE_LOG_VOLUME_COMPARISON_TOOL_ID,
     type: ToolType.builtin,
     annotations: {
       title: 'Compare Log Volume Against A Baseline',
@@ -107,7 +107,7 @@ How it works:
 Runs two ES|QL BUCKET queries over a shared interval so the epochs are directly comparable, then emits the result as an interactive attachment. The series are NOT returned to you — the result contains only attachment_ids. Render it with <render_attachment id="..." />.
 
 The user changes the range and re-baselines the chart themselves, so the message that renders it must not restate the time range or the baseline — say "the selected window", "the chosen baseline". The chart is displayed to the user; spend the message on what it does not state. A later reply may name the range and baseline it was computed from, but only above a re-render of the view, never below one.`,
-    schema: getLogVolumeComparisonSchema,
+    schema: exploreLogVolumeComparisonSchema,
     tags: ['observability', 'logs'],
     availability: {
       cacheMode: 'space',

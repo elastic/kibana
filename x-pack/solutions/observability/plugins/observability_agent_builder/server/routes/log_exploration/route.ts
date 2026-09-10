@@ -15,8 +15,8 @@ import {
   LOG_VOLUME_COMPARISON_API_PATH,
   logExplorationRequestSchema,
 } from '../../../common/log_exploration';
-import { getLogPatterns } from '../../tools/get_log_patterns/handler';
-import { getLogVolumeComparison } from '../../tools/get_log_volume_comparison/handler';
+import { getLogPatterns } from '../../tools/explore_log_patterns/handler';
+import { getLogVolumeComparison } from '../../tools/explore_log_volume_comparison/handler';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 
 /**

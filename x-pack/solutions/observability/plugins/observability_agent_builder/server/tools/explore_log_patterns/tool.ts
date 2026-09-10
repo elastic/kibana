@@ -36,12 +36,12 @@ import {
 import { applyAgentKqlFilter } from '../../utils/log_exploration_refinements';
 import { getLogPatterns } from './handler';
 
-export const OBSERVABILITY_GET_LOG_PATTERNS_TOOL_ID = 'observability.get_log_patterns';
+export const OBSERVABILITY_EXPLORE_LOG_PATTERNS_TOOL_ID = 'observability.explore_log_patterns';
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 const DEFAULT_MESSAGE_FIELD = 'message';
 
-const getLogPatternsSchema = z.object({
+const exploreLogPatternsSchema = z.object({
   start: z
     .string()
     .max(MAX_SHORT_STRING_LENGTH)
@@ -77,7 +77,7 @@ const getLogPatternsSchema = z.object({
     .optional(),
 });
 
-export function createGetLogPatternsTool({
+export function createExploreLogPatternsTool({
   core,
   plugins,
   logger,
@@ -86,11 +86,11 @@ export function createGetLogPatternsTool({
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
-  const toolDefinition: BuiltinToolDefinition<typeof getLogPatternsSchema> = {
-    id: OBSERVABILITY_GET_LOG_PATTERNS_TOOL_ID,
+  const toolDefinition: BuiltinToolDefinition<typeof exploreLogPatternsSchema> = {
+    id: OBSERVABILITY_EXPLORE_LOG_PATTERNS_TOOL_ID,
     type: ToolType.builtin,
     annotations: {
-      title: 'Get Log Patterns',
+      title: 'Explore Log Patterns',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
@@ -107,7 +107,7 @@ Runs an ES|QL query using CATEGORIZE and SPARKLINE, then emits the result as an 
 The query is LIMIT ${MAX_PATTERNS}, so the table is a top-N cut by document count, not the complete set of patterns in the logs. Say so when you describe it, and do not present these counts as covering every document.
 
 The user re-runs this view themselves by changing the range or the filters in it, so the message that renders it must not restate the time range or the filters — say "the selected window". The table is displayed to the user; do not read its rows back to them. A later reply may name the range and filters it was computed from, but only above a re-render of the view, never below one.`,
-    schema: getLogPatternsSchema,
+    schema: exploreLogPatternsSchema,
     tags: ['observability', 'logs'],
     availability: {
       cacheMode: 'space',

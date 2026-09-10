@@ -60,13 +60,13 @@ import {
   createGetApmCorrelationsTool,
 } from './get_apm_correlations/tool';
 import {
-  OBSERVABILITY_GET_LOG_PATTERNS_TOOL_ID,
-  createGetLogPatternsTool,
-} from './get_log_patterns/tool';
+  OBSERVABILITY_EXPLORE_LOG_PATTERNS_TOOL_ID,
+  createExploreLogPatternsTool,
+} from './explore_log_patterns/tool';
 import {
-  OBSERVABILITY_GET_LOG_VOLUME_COMPARISON_TOOL_ID,
-  createGetLogVolumeComparisonTool,
-} from './get_log_volume_comparison/tool';
+  OBSERVABILITY_EXPLORE_LOG_VOLUME_COMPARISON_TOOL_ID,
+  createExploreLogVolumeComparisonTool,
+} from './explore_log_volume_comparison/tool';
 
 export const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
@@ -96,8 +96,8 @@ export const OBSERVABILITY_TOOL_IDS = [
 ];
 
 export const OBSERVABILITY_LOGS_EXPLORATION_TOOL_IDS = [
-  OBSERVABILITY_GET_LOG_PATTERNS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_VOLUME_COMPARISON_TOOL_ID,
+  OBSERVABILITY_EXPLORE_LOG_PATTERNS_TOOL_ID,
+  OBSERVABILITY_EXPLORE_LOG_VOLUME_COMPARISON_TOOL_ID,
 ];
 
 export async function registerTools({
@@ -128,8 +128,8 @@ export async function registerTools({
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
     createGetLogsTool({ core, logger }),
     createGetApmCorrelationsTool({ core, plugins, logger }),
-    createGetLogPatternsTool({ core, plugins, logger }),
-    createGetLogVolumeComparisonTool({ core, plugins, logger }),
+    createExploreLogPatternsTool({ core, plugins, logger }),
+    createExploreLogVolumeComparisonTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

@@ -6,12 +6,12 @@ the result, and respect the state they have built up.
 
 ## Tools
 
-- `observability.get_log_patterns` — groups logs into message patterns with counts and trend
-  sparklines, and returns the largest ones by document count. Use this when the user wants to see
-  what kinds of messages exist, find noisy patterns, or start narrowing down.
-- `observability.get_log_volume_comparison` — charts log volume for the current range against an
-  earlier baseline epoch. Use this when the user asks whether volume is unusual, higher or lower than
-  before, or wants to compare now against an earlier period.
+- `observability.explore_log_patterns` — opens the view on the largest message patterns by document
+  count, with counts and trend sparklines the user can filter and mute directly. Use this when the
+  user wants to see what kinds of messages exist, find noisy patterns, or start narrowing down.
+- `observability.explore_log_volume_comparison` — switches the view to log volume for the current
+  range against an earlier baseline epoch. Use this when the user asks whether volume is unusual,
+  higher or lower than before, or wants to compare now against an earlier period.
 
 ## The pattern table is a top-N cut
 
@@ -25,7 +25,7 @@ So, whenever you describe the table:
 - Call them the top patterns, the largest patterns, or the most frequent patterns. Never "all the
   patterns", "the patterns in these logs", or "the N categories found".
 - Do not add the counts up and present the total as the number of documents in the range. It only
-  covers the patterns in the cut. Use `observability.get_log_volume_comparison` if the user wants
+  covers the patterns in the cut. Use `observability.explore_log_volume_comparison` if the user wants
   totals.
 - If the user asks how many distinct patterns exist, say the view does not answer that — it shows the
   largest ones only.
@@ -144,7 +144,7 @@ reach depends on the view they are looking at:
   the current time range, and do not bring muted patterns back into the discussion.
 - **Compare a pattern against the baseline** — the view has already been scoped to that one pattern
   before the message reaches you, and the scope is listed in the attachment as a filter. Call
-  `observability.get_log_volume_comparison` with no parameters: the scope, the window and the
+  `observability.explore_log_volume_comparison` with no parameters: the scope, the window and the
   baseline are all carried forward. The pattern is deliberately not in the message, so do not try to
   reconstruct it or pass it as a filter. Describe the result as that one pattern's volume, never as
   the volume of the whole index.
@@ -166,7 +166,7 @@ reach depends on the view they are looking at:
   pattern or filtered, say that the change is that pattern's, not the whole index's.
 - **Back to top patterns** — the user was looking at one pattern's volume and wants the pattern
   table back. The scope has already been removed from the attachment before the message reaches you,
-  so it is no longer listed as a filter. Call `observability.get_log_patterns` with no parameters —
+  so it is no longer listed as a filter. Call `observability.explore_log_patterns` with no parameters —
   the window, the mutes and any KQL filter are carried forward — and render the result. Do not
   re-apply the scope and do not name the pattern they just left: it is deliberately not in the
   message. This is a change of view, not a question, so present the table rather than analysing the

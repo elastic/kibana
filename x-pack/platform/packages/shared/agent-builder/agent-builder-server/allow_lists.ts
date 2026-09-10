@@ -47,8 +47,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
-  `${internalNamespaces.observability}.get_log_patterns`,
-  `${internalNamespaces.observability}.get_log_volume_comparison`,
+  `${internalNamespaces.observability}.explore_log_patterns`,
+  `${internalNamespaces.observability}.explore_log_volume_comparison`,
 
   // ML anomaly detection (Agent Builder skill tools)
   `${internalNamespaces.ml}.ad_get_job_info`,
