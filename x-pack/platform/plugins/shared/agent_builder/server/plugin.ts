@@ -22,6 +22,7 @@ import {
   MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
+import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -351,6 +352,7 @@ export class AgentBuilderPlugin
       plugins,
       conversations,
       conversationTemplates,
+      attachments,
     } = startServices;
     const runner = runnerFactory.getRunner();
 
@@ -398,6 +400,16 @@ export class AgentBuilderPlugin
           const agentRegistry = await agents.getRegistry({ request });
           return createConversationPublicClient({ client, agentRegistry });
         },
+      },
+      attachments: {
+        getScopedClient: async ({ request }) =>
+          createAttachmentPublicClient({
+            request,
+            conversationsService: conversations,
+            attachmentsService: attachments,
+            coreStart,
+            spaces,
+          }),
       },
       conversationTemplates,
     };
