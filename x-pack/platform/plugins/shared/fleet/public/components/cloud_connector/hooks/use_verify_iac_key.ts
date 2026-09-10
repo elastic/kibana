@@ -19,6 +19,8 @@ export interface UseVerifyIacKeyParams {
 }
 
 export const VERIFY_IAC_KEY_QUERY_KEY = 'cloud-connector-verify-iac-key';
+/** Long enough to absorb tab switches and re-mounts; short enough that a stale verdict does not linger. */
+export const VERIFY_IAC_KEY_STALE_TIME_MS = 30_000;
 
 export const useVerifyIacKey = ({
   cloudConnectorId,
@@ -36,5 +38,14 @@ export const useVerifyIacKey = ({
       }
       return data;
     },
-    { enabled: enabled && Boolean(cloudConnectorId), retry: false, staleTime: 0 }
+    {
+      enabled: enabled && Boolean(cloudConnectorId),
+      retry: false,
+      // Every check is a full render on the provisioner (artifact included), so do not re-run it
+      // just because the user came back from the CloudFormation tab: the Verify button refetches
+      // explicitly, and a changed integration set changes the query key. Seen in the 2026-09-09
+      // walkthrough: seven identical checks in forty seconds from window-focus refetches.
+      refetchOnWindowFocus: false,
+      staleTime: VERIFY_IAC_KEY_STALE_TIME_MS,
+    }
   );
