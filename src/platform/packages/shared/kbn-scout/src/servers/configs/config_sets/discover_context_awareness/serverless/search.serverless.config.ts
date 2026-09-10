@@ -8,16 +8,13 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
+import { servers as defaultServers } from '../../default/serverless/search.serverless.config';
 import { discoverContextAwarenessServerArgs } from '../shared';
-import { discoverContextAwarenessConfig } from './base.config';
 
 export const servers: ScoutServerConfig = {
-  ...discoverContextAwarenessConfig,
+  ...defaultServers,
   kbnTestServer: {
-    ...discoverContextAwarenessConfig.kbnTestServer,
-    serverArgs: [
-      ...discoverContextAwarenessConfig.kbnTestServer.serverArgs,
-      ...discoverContextAwarenessServerArgs,
-    ],
+    ...defaultServers.kbnTestServer,
+    serverArgs: [...defaultServers.kbnTestServer.serverArgs, ...discoverContextAwarenessServerArgs],
   },
 };

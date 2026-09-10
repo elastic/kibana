@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalSetupHook } from '@kbn/scout';
+import { globalSetupHook, tags } from '@kbn/scout';
 import { LOGSTASH_ES_ARCHIVE } from '../../../scout/common/ui/fixtures/constants';
 import { CONTEXT_AWARENESS_ES_ARCHIVE } from '../fixtures';
 
@@ -18,7 +18,7 @@ import { CONTEXT_AWARENESS_ES_ARCHIVE } from '../fixtures';
  */
 globalSetupHook(
   'Setup Discover context awareness tests data',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.deploymentAgnostic },
   async ({ esArchiver, log }) => {
     log.debug('[setup:context_awareness] loading context awareness ES data...');
     await esArchiver.loadIfNeeded(CONTEXT_AWARENESS_ES_ARCHIVE);
