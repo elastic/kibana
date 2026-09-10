@@ -79,7 +79,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard/group6/config.ts
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
-  - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
@@ -103,13 +102,6 @@ enabled:
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/health_gateway/config.ts
-  - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
-  - src/platform/test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts
-  - src/platform/test/interactive_setup_api_integration/manual_configuration_flow.config.ts
-  - src/platform/test/interactive_setup_functional/enrollment_token.config.ts
-  - src/platform/test/interactive_setup_functional/manual_configuration_without_security.config.ts
-  - src/platform/test/interactive_setup_functional/manual_configuration_without_tls.config.ts
-  - src/platform/test/interactive_setup_functional/manual_configuration.config.ts
   - src/platform/test/interpreter_functional/config.ts
   - src/platform/test/node_roles_functional/all.config.ts
   - src/platform/test/node_roles_functional/background_tasks.config.ts
@@ -199,7 +191,6 @@ enabled:
   - x-pack/platform/test/functional_execution_context/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config.ts
-  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config_legacy.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
