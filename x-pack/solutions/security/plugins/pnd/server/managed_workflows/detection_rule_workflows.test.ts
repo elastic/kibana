@@ -630,10 +630,9 @@ describe('detection rule workflows', () => {
         expect(concurrency.max).toBe(1);
       });
 
-      // A sweep waits out its slowest gate (72h) and every space shares one
-      // concurrency key, so a single lane would let one pending gate drop the whole
-      // fleet's scheduled sweeps.
-      it('leaves room for other spaces to sweep while gates are pending', () => {
+      // The limit is per space; with max 1 a sweep waiting on its gates (up to 72h)
+      // would make every scheduled 2h sweep get skipped until it finishes.
+      it('keeps sweeping a space for new rules while earlier gates are pending', () => {
         const { concurrency } = (tuning as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { strategy: string; max: number } };
 

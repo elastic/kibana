@@ -9,13 +9,11 @@ tags:
   - security
   - detection-rule-tuning
 settings:
-  # A sweep lives as long as its slowest gate (up to 72h) and the key is one global
-  # bucket, so a single max would let one space's pending gate drop every other
-  # space's scheduled sweep for three days. Five lanes keep that from starving the
-  # fleet while still bounding how many joins wait at once.
-  # Overlap is safe now that the harvest skips rules with an in-flight review;
-  # for sweeps that start close enough together to miss that, the review's own
-  # per-rule drop concurrency stops the duplicate before it can rediagnose.
+  # The limit applies per space. A sweep stays running until analysts answer all
+  # its gates (up to 72h). With max 1, the scheduled sweep every 2h would be
+  # skipped that whole time and no new rule would get diagnosed; 5 allows that
+  # while capping how many sweeps wait. Overlap is safe: the harvest skips rules
+  # with an in-flight review.
   concurrency:
     key: detection-rule-tuning
     strategy: drop
