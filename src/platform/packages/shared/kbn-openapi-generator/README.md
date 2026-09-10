@@ -147,7 +147,7 @@ Then add the code generation script to the build pipeline. Open the buildkite ch
 .buildkite/scripts/steps/code_generation/elastic_assistant_codegen.sh
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/code_generation/osquery_codegen.sh
-.buildkite/scripts/steps/checks/yarn_deduplicate.sh
+.buildkite/scripts/steps/checks/deduplicate_dependencies.sh
 ...
 ```
 

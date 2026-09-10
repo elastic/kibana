@@ -90,6 +90,8 @@ export interface QuerySandboxFlyoutProps {
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onBaseEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onSingleEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
@@ -112,6 +114,8 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   headerActions,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  onBaseEditorMount,
+  onSingleEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
     defaultMessage: 'Query sandbox',
   }),
@@ -261,6 +265,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
       onAlertEditorMount,
       onRecoveryEditorMount,
+      onBaseEditorMount,
       readOnly: editingLocked,
     };
   }, [
@@ -271,6 +276,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     updateQuery,
     onAlertEditorMount,
     onRecoveryEditorMount,
+    onBaseEditorMount,
     editingLocked,
   ]);
 
@@ -303,6 +309,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           helpText={helpText}
           headerActions={headerActions}
           tabProps={tabProps}
+          onSingleEditorMount={onSingleEditorMount}
           validationError={activeValidationError}
         />
       </EuiFlyoutBody>
