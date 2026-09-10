@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Readable } from 'node:stream';
 import { registerChatRoutes } from './chat';
 import { of, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -226,61 +225,50 @@ describe('registerChatApiRoutes', () => {
 });
 
 describe('message-only endpoint acknowledgements', () => {
-  it.each([`${chatApiPath}/converse`, `${chatApiPath}/converse/async`])(
-    'persists through %s without execution or callback setup',
-    async (path) => {
-      const { router, handlers } = captureHandlers();
-      const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
-      const appendUserMessage = jest.fn().mockResolvedValue(conversation);
-      const executeAgent = jest.fn();
-      const validateCallbackUrl = jest.fn();
-      const getStartServices = jest.fn();
-      const services = {
-        conversations: {
-          getScopedClient: async () => ({ appendUserMessage }),
-          getConversationRoundAuthor: async () => ({ id: 'user' }),
+  it('persists through sync converse without execution setup', async () => {
+    const { router, handlers } = captureHandlers();
+    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
+    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
+    const executeAgent = jest.fn();
+    const validateCallbackUrl = jest.fn();
+    const getStartServices = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ appendUserMessage }),
+        getConversationRoundAuthor: async () => ({ id: 'user' }),
+      },
+      attachments: { getTypeDefinition: jest.fn() },
+      execution: { executeAgent },
+      callbackDeliveryService: { validateCallbackUrl },
+    };
+    const deps = {
+      router,
+      getInternalServices: () => services,
+      coreSetup: { getStartServices },
+      logger: loggingSystemMock.createLogger(),
+    };
+    registerChatApiRoutes(deps as never);
+    registerChatRoutes(deps as never);
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      {
+        ...activeContext(true),
+        agentBuilder: Promise.resolve({ spaces: { getSpaceId: () => 'default' } }),
+      },
+      {
+        body: {
+          trigger_mode: 'never',
+          input: 'context',
+          execution_idempotency_key: 'callback-key',
         },
-        attachments: { getTypeDefinition: jest.fn() },
-        execution: { executeAgent },
-        callbackDeliveryService: { validateCallbackUrl },
-      };
-      const deps = {
-        router,
-        getInternalServices: () => services,
-        coreSetup: { getStartServices },
-        logger: loggingSystemMock.createLogger(),
-      };
-      registerChatApiRoutes(deps as never);
-      registerChatRoutes(deps as never);
-      const response = buildResponse();
-      const result = await handlers[path](
-        {
-          ...activeContext(true),
-          agentBuilder: Promise.resolve({ spaces: { getSpaceId: () => 'default' } }),
-        },
-        {
-          body: {
-            trigger_mode: 'never',
-            input: 'context',
-            execution_idempotency_key: 'callback-key',
-          },
-        },
-        response
-      );
-      expect(result.status).toBe(200);
-      expect(appendUserMessage).toHaveBeenCalledTimes(1);
-      if (path.endsWith('/async')) {
-        const stream = result.payload as Readable;
-        const chunks = await stream.toArray();
-        const text = chunks.join('');
-        expect(text.match(/event: message_persisted/g)).toHaveLength(1);
-        expect(text).toContain(JSON.stringify(conversation));
-      } else {
-        expect(result.payload).toEqual(conversation);
-      }
-      expect(executeAgent).not.toHaveBeenCalled();
-      expect(validateCallbackUrl).not.toHaveBeenCalled();
-      expect(getStartServices).not.toHaveBeenCalled();
-    }
-  );
+      },
+      response
+    );
+    expect(result.status).toBe(200);
+    expect(appendUserMessage).toHaveBeenCalledTimes(1);
+    expect(result.payload).toEqual(conversation);
+    expect(executeAgent).not.toHaveBeenCalled();
+    expect(validateCallbackUrl).not.toHaveBeenCalled();
+    expect(getStartServices).not.toHaveBeenCalled();
+  });
 });

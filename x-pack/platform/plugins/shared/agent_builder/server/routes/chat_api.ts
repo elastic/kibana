@@ -6,11 +6,10 @@
  */
 
 import type { Observable } from 'rxjs';
-import { firstValueFrom, toArray, of } from 'rxjs';
+import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { schema } from '@kbn/config-schema';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -20,14 +19,7 @@ import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { getMessageOnlyHandler } from './message_only';
-import { conversePayloadSchema } from './chat';
-
-export const chatPayloadSchema = conversePayloadSchema.extends({
-  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
-    defaultValue: 'always',
-    meta: { description: 'Use never to persist a user message without executing the agent.' },
-  }),
-});
+import { chatPayloadSchema, conversePayloadSchema } from './chat';
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -116,7 +108,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message (streaming)',
       description:
-        'Send a message to an agent and stream the response as server-sent events as the agent works. With trigger_mode: never, returns the updated conversation after persistence. Public message-only requests do not deduplicate retries.',
+        'Send a message to an agent and stream the response as server-sent events as the agent works.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -132,33 +124,18 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: chatPayloadSchema },
+          request: { body: conversePayloadSchema },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
+          const [, { cloud }] = await coreSetup.getStartServices();
           const { execution: executionService } = getInternalServices();
           const payload = request.body as ChatRequestBodyPayload;
-
-          if (payload.trigger_mode === 'never') {
-            const data = await persistMessage({
-              payload,
-              request,
-              spaceId: (await ctx.agentBuilder).spaces.getSpaceId(),
-            });
-            return response.ok({
-              headers: getSSEResponseHeaders(),
-              body: observableIntoEventSourceStream(of({ type: 'message_persisted', data }), {
-                logger,
-                signal: new AbortController().signal,
-              }),
-            });
-          }
 
           await validateConfigurationOverrides({ payload, request });
           validateAction(payload);
 
-          const [, { cloud }] = await coreSetup.getStartServices();
           const abortController = new AbortController();
           request.events.aborted$.subscribe(() => {
             abortController.abort();

@@ -298,6 +298,13 @@ export const conversePayloadSchema = schema.object({
   ),
 });
 
+export const chatPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
+    defaultValue: 'always',
+    meta: { description: 'Use never to persist a user message without executing the agent.' },
+  }),
+});
+
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
   execution_idempotency_key: schema.string({
     minLength: 1,

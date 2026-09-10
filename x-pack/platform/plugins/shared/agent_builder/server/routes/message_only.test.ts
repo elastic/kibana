@@ -9,8 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
 import { createConversationClientMock, createEmptyConversation } from '../test_utils/conversations';
 import { getMessageOnlyHandler } from './message_only';
-import { conversePayloadSchema, callbackConversePayloadSchema } from './chat';
-import { chatPayloadSchema } from './chat_api';
+import { conversePayloadSchema, callbackConversePayloadSchema, chatPayloadSchema } from './chat';
 import type { RouteDependencies } from './types';
 
 const request = httpServerMock.createKibanaRequest();

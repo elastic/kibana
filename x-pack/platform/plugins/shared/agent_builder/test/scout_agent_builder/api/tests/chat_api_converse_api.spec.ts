@@ -105,7 +105,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'message-only sync and streaming persist context for the next model request',
+      'message-only sync requests persist context for the next model request',
       async ({ apiClient }) => {
         const requestsBefore = llmProxy.interceptedRequests.length;
         const first = await apiClient.post(CHAT_CONVERSE, {
@@ -117,24 +117,20 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(first).toHaveStatusCode(200);
-        const { conversation_id: conversationId, message_id: firstMessageId } = first.body as {
-          conversation_id: string;
-          message_id: string;
-        };
+        const firstBody = first.body as GetConversationResponse;
+        const conversationId = firstBody.id;
+        const firstMessageId = firstBody.events?.[0].id;
         conversationIds.push(conversationId);
-        const streamed = await apiClient.post(CHAT_CONVERSE_ASYNC, {
+        const second = await apiClient.post(CHAT_CONVERSE, {
           headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           body: {
             trigger_mode: 'never',
             conversation_id: conversationId,
             input: 'Errors returned to normal',
           },
-          responseType: 'text',
+          responseType: 'json',
         });
-        expect(streamed).toHaveStatusCode(200);
-        const stream = String(streamed.body);
-        expect(stream.match(/event: message_persisted/g)).toHaveLength(1);
-        expect(stream).toContain(conversationId);
+        expect(second).toHaveStatusCode(200);
         const stored = await getConversation(
           apiClient,
           adminCredentials.apiKeyHeader,
