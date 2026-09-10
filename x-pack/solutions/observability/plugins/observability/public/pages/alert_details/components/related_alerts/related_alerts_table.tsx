@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { PROJECT_ROUTING } from '@kbn/cps-common';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getRelatedColumns } from './get_related_columns';

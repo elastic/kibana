@@ -164,7 +164,6 @@ dependsOn:
   - '@kbn/apm-types-shared'
   - '@kbn/cps'
   - '@kbn/cps-utils'
-  - '@kbn/cps-common'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/core-spaces-common'
