@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, ConversationRound } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
@@ -37,10 +38,17 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
   toolHandlerContext: ToolHandlerContext;
 }
 
+export interface AfterExecutionHookContext extends AgentHookContextBase {
+  round: ConversationRound;
+  conversationId?: string;
+  agentConfiguration: AgentConfiguration;
+}
+
 export interface HookContextByLifecycle {
   [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
+  [HookLifecycle.afterExecution]: AfterExecutionHookContext;
 }
 
 export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextByLifecycle[E];
@@ -58,6 +66,7 @@ export interface HookHandlerResultByLifecycle {
   [HookLifecycle.afterToolCall]: {
     toolReturn?: RunToolReturn;
   };
+  [HookLifecycle.afterExecution]: Record<string, never>;
 }
 
 export type HookHandlerResult<E extends HookLifecycle = HookLifecycle> =
