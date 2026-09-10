@@ -28,6 +28,7 @@
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.contextEngine": "platform/plugins/shared/context_engine",
+    "xpack.agenticInvestigations": "platform/plugins/shared/agentic_investigations",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
