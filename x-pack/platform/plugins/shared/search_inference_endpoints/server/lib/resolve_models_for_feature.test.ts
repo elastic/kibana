@@ -462,12 +462,9 @@ describe('resolveModelsForFeature', () => {
         soEntryFound: false,
       });
 
-      const result = await resolve(
-        { defaultConnectorId: 'global-default' },
-        'my_feature',
-        false,
-        { onlyReturnConfigured: true }
-      );
+      const result = await resolve({ defaultConnectorId: 'global-default' }, 'my_feature', false, {
+        onlyReturnConfigured: true,
+      });
 
       expect(getConnectorById).not.toHaveBeenCalled();
       expect(result.connectors).toHaveLength(1);
