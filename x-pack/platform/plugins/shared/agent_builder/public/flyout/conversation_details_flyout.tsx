@@ -10,6 +10,7 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiTitle,
   EuiTabs,
   EuiTab,
@@ -59,11 +60,13 @@ const buildTabs = (
 
 interface FlyoutFrameProps {
   titleId: string;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
   tabs?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
+const FlyoutFrame = ({ titleId, header, footer, tabs, children }: FlyoutFrameProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Align the selected-tab underline with the flyout header border.
@@ -73,10 +76,14 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          <h4 id={titleId}>{FLYOUT_TITLE}</h4>
-        </EuiTitle>
+      <EuiFlyoutHeader hasBorder={Boolean(tabs)}>
+        {header ? (
+          <div id={titleId}>{header}</div>
+        ) : (
+          <EuiTitle size="xs">
+            <h4 id={titleId}>{FLYOUT_TITLE}</h4>
+          </EuiTitle>
+        )}
         {tabs && (
           <EuiTabs css={tabsStyles} bottomBorder={false}>
             {tabs}
@@ -84,11 +91,22 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      {footer && (
+        <EuiFlyoutFooter
+          css={{
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+            borderBlockStart: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+          }}
+        >
+          {footer}
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 };
 
 export interface ConversationDetailsFlyoutContentProps {
+  isOpenedFromChat: boolean;
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
@@ -96,6 +114,7 @@ export interface ConversationDetailsFlyoutContentProps {
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
 export const ConversationDetailsFlyoutContent = ({
+  isOpenedFromChat,
   conversation,
   conversationTemplatesService,
   titleId,
@@ -114,22 +133,38 @@ export const ConversationDetailsFlyoutContent = ({
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
   // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
+  const definition = conversation.template_id
+    ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
+    : undefined;
+  const Header = definition?.detailsFlyout?.header;
+  const Footer = definition?.detailsFlyout?.footer;
+
+  const shouldRenderTabs = tabs.length > 1;
 
   return (
     <FlyoutFrame
       titleId={titleId}
-      tabs={tabs.map((entry) => (
-        <EuiTab
-          key={entry.id}
-          isSelected={entry.id === effectiveSelectedTabId}
-          onClick={() => setSelectedTabId(entry.id)}
-        >
-          {entry.label}
-        </EuiTab>
-      ))}
+      header={Header && <Header conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
+      footer={Footer && <Footer conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
+      tabs={
+        shouldRenderTabs &&
+        tabs.map((entry) => (
+          <EuiTab
+            key={entry.id}
+            isSelected={entry.id === effectiveSelectedTabId}
+            onClick={() => setSelectedTabId(entry.id)}
+          >
+            {entry.label}
+          </EuiTab>
+        ))
+      }
     >
-      {SelectedTabContent && (
-        <SelectedTabContent key={selectedTab.id} conversation={conversation} />
+      {selectedTab && SelectedTabContent && (
+        <SelectedTabContent
+          key={selectedTab.id}
+          conversation={conversation}
+          isOpenedFromChat={isOpenedFromChat}
+        />
       )}
     </FlyoutFrame>
   );
@@ -178,6 +213,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
 
   return (
     <ConversationDetailsFlyoutContent
+      isOpenedFromChat={false}
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
@@ -200,6 +236,9 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   return (
     <EuiFlyout
       onClose={onClose}
+      session="never"
+      flyoutMenuDisplayMode="always"
+      flyoutMenuProps={{}}
       size="s"
       type="push"
       paddingSize="m"
@@ -209,6 +248,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent
+          isOpenedFromChat
           conversation={conversation}
           conversationTemplatesService={conversationTemplatesService}
           titleId={titleId}

@@ -2,7 +2,7 @@
 
 exports[`OverwrittenSessionPage renders as expected 1`] = `
 <div
-  class="css-1snbdet-kbnFullScreenBgCss"
+  class="css-1tawash-kbnFullScreenBgCss"
   data-test-subj="secAuthenticationStatePage"
 >
   <header
