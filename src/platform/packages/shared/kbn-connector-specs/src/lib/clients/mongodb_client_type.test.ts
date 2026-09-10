@@ -159,6 +159,32 @@ describe('mongodbClientType', () => {
       );
     });
 
+    it('calls platform.buildTlsOptions with the resolved SRV targets, not the seed hostname', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
+      // mockResolveSrvHosts returns two members by default
+      await mongodbClientType.build(ctx);
+
+      expect(ctx.platform.buildTlsOptions).toHaveBeenCalledWith(
+        [
+          { hostname: 'shard1.example.com', port: 27017 },
+          { hostname: 'shard2.example.com', port: 27017 },
+        ],
+        ctx.logger
+      );
+    });
+
+    it('propagates a buildTlsOptions error out of build()', async () => {
+      const ctx = makeBuildContext();
+      (ctx.platform.buildTlsOptions as jest.Mock).mockImplementation(() => {
+        throw new Error('conflicting customHostSettings TLS config');
+      });
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'conflicting customHostSettings TLS config'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
     it('throws instead of silently connecting when a configured proxy would apply to the host', async () => {
       const ctx = makeBuildContext();
       (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
