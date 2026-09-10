@@ -102,12 +102,9 @@ export const conversationAttachmentUpdatedTriggerCommonDefinition: CommonTrigger
   id: ConversationAttachmentUpdatedTriggerId,
   stability: 'tech_preview',
   eventSchema: attachmentEventSchema,
-  title: i18n.translate(
-    'xpack.agentBuilder.workflowTriggers.conversationAttachmentUpdated.title',
-    {
-      defaultMessage: 'Agent Builder - Conversation attachment updated',
-    }
-  ),
+  title: i18n.translate('xpack.agentBuilder.workflowTriggers.conversationAttachmentUpdated.title', {
+    defaultMessage: 'Agent Builder - Conversation attachment updated',
+  }),
   description: i18n.translate(
     'xpack.agentBuilder.workflowTriggers.conversationAttachmentUpdated.description',
     {
@@ -146,12 +143,9 @@ export const conversationAttachmentDeletedTriggerCommonDefinition: CommonTrigger
   id: ConversationAttachmentDeletedTriggerId,
   stability: 'tech_preview',
   eventSchema: attachmentEventSchema,
-  title: i18n.translate(
-    'xpack.agentBuilder.workflowTriggers.conversationAttachmentDeleted.title',
-    {
-      defaultMessage: 'Agent Builder - Conversation attachment deleted',
-    }
-  ),
+  title: i18n.translate('xpack.agentBuilder.workflowTriggers.conversationAttachmentDeleted.title', {
+    defaultMessage: 'Agent Builder - Conversation attachment deleted',
+  }),
   description: i18n.translate(
     'xpack.agentBuilder.workflowTriggers.conversationAttachmentDeleted.description',
     {

@@ -19,9 +19,7 @@ export function registerConversationWorkflowSteps(
   deps: ConversationStepDeps
 ) {
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
-  workflowsExtensions.registerTriggerDefinition(
-    conversationAttachmentAddedTriggerCommonDefinition
-  );
+  workflowsExtensions.registerTriggerDefinition(conversationAttachmentAddedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(
     conversationAttachmentUpdatedTriggerCommonDefinition
   );

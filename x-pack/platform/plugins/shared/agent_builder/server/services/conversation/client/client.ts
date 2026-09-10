@@ -197,9 +197,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
   private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
-  private readonly onAttachmentsChanged?: (
-    payload: ConversationAttachmentsChangedPayload
-  ) => void;
+  private readonly onAttachmentsChanged?: (payload: ConversationAttachmentsChangedPayload) => void;
 
   constructor({
     storage,
