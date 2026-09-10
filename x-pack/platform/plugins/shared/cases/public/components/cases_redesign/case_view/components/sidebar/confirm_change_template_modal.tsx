@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as commonI18n from '../../../../../common/translations';
-import * as redesignI18n from '../../../translations';
+import * as redesignI18n from '../../../../case_view/translations';
 
 export interface TemplateFieldSummary {
   name: string;

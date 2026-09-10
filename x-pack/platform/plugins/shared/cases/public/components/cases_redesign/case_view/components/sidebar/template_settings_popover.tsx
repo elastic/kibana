@@ -32,7 +32,7 @@ import {
 import type { TemplateFieldsFormApi } from '../../../../case_view/components/template_fields_form_ready';
 import { useChangeAppliedTemplate } from '../../../../case_view/use_change_applied_template';
 import * as commonI18n from '../../../../../common/translations';
-import * as redesignI18n from '../../../translations';
+import * as redesignI18n from '../../../../case_view/translations';
 import { SidebarSectionSettingsButton } from './sidebar_section_settings_button';
 import { ConfirmChangeTemplateModal } from './confirm_change_template_modal';
 import type { TemplateSummary } from './confirm_change_template_modal';

@@ -27,7 +27,7 @@ import {
   CREATED_ON,
   UNKNOWN_REPORTER,
   EDIT_CASE_NAME_ARIA,
-} from '../../../../translations';
+} from '../../../../../case_view/translations';
 import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
 

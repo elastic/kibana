@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CaseUI } from '../../../../../../common';
-import * as redesignI18n from '../../../translations';
+import * as redesignI18n from '../../../../case_view/translations';
 import { AssigneesField } from './assignees_field';
 import { ParticipantsField } from './participants_field';
 import { StatusField } from './status_field';

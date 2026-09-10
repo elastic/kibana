@@ -27,7 +27,6 @@ import { EditConnector } from '../../../../edit_connector';
 import { CustomFieldsSection } from './custom_fields_section';
 import { TemplateFields } from '../../../../case_view/components/template_fields';
 import { GlobalCaseFields } from '../../../../case_view/components/global_case_fields';
-import * as redesignI18n from '../../../translations';
 import { SidebarAccordionSection } from './sidebar_accordion_section';
 import { TemplateSettingsPopover } from './template_settings_popover';
 import { ConnectorSettingsPopover } from './connector_settings_popover';
@@ -203,7 +202,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
       className="eui-textTruncate"
       data-test-subj="case-view-sidebar-no-template-applied"
     >
-      {redesignI18n.NO_TEMPLATE_APPLIED}
+      {i18n.NO_TEMPLATE_APPLIED}
     </EuiText>
   );
 
@@ -264,7 +263,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
           isHorizontal
           indicator="handle"
           alignIndicator="center"
-          aria-label={redesignI18n.RESIZE_SIDEBAR}
+          aria-label={i18n.RESIZE_SIDEBAR}
           aria-valuenow={width}
           aria-valuemin={MIN_SIDEBAR_WIDTH}
           aria-valuemax={MAX_SIDEBAR_WIDTH}
@@ -287,7 +286,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
             </EuiScreenReaderOnly>
             <SidebarAccordionSection
               id="attributes"
-              title={redesignI18n.ATTRIBUTES_TITLE}
+              title={i18n.ATTRIBUTES_TITLE}
               isOpen={isOpen('attributes')}
               onToggle={onToggle}
               data-test-subj="case-view-sidebar-attributes"
@@ -305,9 +304,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                   title={
                     isTemplatesV2Enabled ? (
                       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          {redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
-                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>{i18n.LEGACY_CUSTOM_FIELDS_TITLE}</EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiBadge
                             color="warning"
@@ -318,7 +315,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     ) : (
-                      redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE
+                      i18n.LEGACY_CUSTOM_FIELDS_TITLE
                     )
                   }
                   isOpen={isOpen('legacyCustomFields')}
@@ -327,9 +324,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                 >
                   {isTemplatesV2Enabled ? (
                     <>
-                      <CustomFieldsDeprecationCallout
-                        title={redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
-                      />
+                      <CustomFieldsDeprecationCallout title={i18n.LEGACY_CUSTOM_FIELDS_TITLE} />
                       <EuiSpacer size="m" />
                     </>
                   ) : null}
@@ -348,7 +343,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                 <SidebarAccordionSection
                   withDivider
                   id="templateFields"
-                  title={redesignI18n.CUSTOM_FIELDS_SECTION_TITLE}
+                  title={i18n.CUSTOM_FIELDS_SECTION_TITLE}
                   subtitle={fieldsSubtitle}
                   extraAction={
                     permissions.update ? (
@@ -376,7 +371,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                         color="subdued"
                         data-test-subj="case-view-sidebar-fields-empty"
                       >
-                        <p>{redesignI18n.APPLY_TEMPLATE_TO_SEE_FIELDS}</p>
+                        <p>{i18n.APPLY_TEMPLATE_TO_SEE_FIELDS}</p>
                       </EuiText>
                     ) : null}
                     {/* Global (isGlobal) fields apply to every case regardless of the template.
@@ -401,7 +396,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
               <SidebarAccordionSection
                 withDivider
                 id="connectors"
-                title={redesignI18n.CONNECTORS_TITLE}
+                title={i18n.CONNECTORS_TITLE}
                 extraAction={
                   permissions.settings ? (
                     <ConnectorSettingsPopover data-test-subj="case-view-sidebar-connectors-settings" />
