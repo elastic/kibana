@@ -71,12 +71,40 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toMatch(/Never re-generate the definition the subagent returned/);
   });
 
-  it('tells the agent to settle the strategy and corpus filter itself', () => {
+  it('puts the question before the build and not before the save', () => {
     const description = attachmentType.getAgentDescription?.();
 
-    expect(description).toMatch(/Decide rather than ask/);
-    expect(description).toMatch(/Pick the strategy and the corpus filter yourself/);
-    expect(description).toMatch(/Ask only\s+when the evidence cannot settle a choice/);
+    expect(description).toMatch(/Ask before you build/);
+    expect(description).toMatch(/Do not ask before you save or run/);
+    expect(description).toMatch(/The question you owed was the one before the build/);
+  });
+
+  it('settles the first automation rather than asking a question with one answer', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(
+      /An index with no automations starts at Index\/Table Metadata: that is settled/
+    );
+  });
+
+  it('asks for intent on an index that already has automations, where it cannot be inferred', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(
+      /may want new coverage, may want something that is not working fixed/
+    );
+    expect(description).toMatch(/where the answer is new coverage, ask which strategy/);
+    expect(description).toContain('ask_user_question');
+  });
+
+  it('gates every subagent handoff on a confirmed plan, replacements included', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(
+      /always ask again before handing anything to a subagent, whether it would create an automation or replace one/
+    );
+    expect(description).toMatch(/naming the automation being replaced/);
+    expect(description).toMatch(/Propose values rather than asking for them/);
   });
 
   it('suppresses the workflow preview, which other attachments ask the agent to render', () => {
