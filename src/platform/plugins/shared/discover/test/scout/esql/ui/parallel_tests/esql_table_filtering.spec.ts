@@ -41,13 +41,13 @@ spaceTest.describe(
         await discover.optOutOfCascadeLayout();
         await dataGrid.waitForDocTableRendered();
 
-        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
         expect(await discover.getEsqlQueryValue()).toContain('| WHERE `geo.dest` == "BT"');
 
         await dataGrid.waitForDocTableRendered();
 
         // Negating replaces the clause rather than appending a second one.
-        await dataGrid.clickCellFilterOut(0, 'geo.dest');
+        await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'out' });
         const negated = await discover.getEsqlQueryValue();
         expect(negated).toContain('| WHERE `geo.dest`!= "BT"');
         expect(negated).not.toContain('== "BT"');
@@ -63,7 +63,7 @@ spaceTest.describe(
         await discover.optOutOfCascadeLayout();
         await dataGrid.waitForDocTableRendered();
 
-        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
         expect(await discover.getEsqlQueryValue()).toContain('AND `geo.dest` == "BT"');
       }
     );
@@ -87,7 +87,7 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await lens.applyFlyoutChanges();
 
-        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
         expect(await discover.getEsqlQueryValue()).toContain('| WHERE `geo.dest` == "BT"');
 
         await discover.openLensEditFlyout();
@@ -97,8 +97,11 @@ spaceTest.describe(
         await expect(lens.dimensionColorPicker).toHaveValue('#FF0000');
 
         // Close the flyout rather than ending the test on open, dirty editor state.
-        // Cancelling dismisses the dimension editor with it, and unlike closing the
-        // dimension editor first it survives the panel remounting underneath.
+        // The dimension editor has to go first: opening one sets the flyout's
+        // `isInlineFlyoutVisible` to false, which unmounts the footer holding the
+        // cancel button, so cancelling while it is open waits on an element the
+        // product never renders.
+        await lens.closeDimensionEditor();
         await lens.cancelFlyoutChanges();
       }
     );

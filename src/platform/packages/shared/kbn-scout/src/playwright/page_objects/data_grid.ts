@@ -129,26 +129,6 @@ export class DataGrid {
     await this.waitForLoad();
   }
 
-  /**
-   * Clicks a cell's "filter for value" action. The action buttons only render
-   * while the cell is hovered.
-   */
-  async clickCellFilterFor(rowIndex: number, columnId: string) {
-    const cell = this.getCell(rowIndex, columnId);
-    await cell.hover();
-    await cell.locator('[data-test-subj="filterForButton"]').click();
-  }
-
-  /**
-   * Clicks a cell's "filter out value" action. The action buttons only render
-   * while the cell is hovered.
-   */
-  async clickCellFilterOut(rowIndex: number, columnId: string) {
-    const cell = this.getCell(rowIndex, columnId);
-    await cell.hover();
-    await cell.locator('[data-test-subj="filterOutButton"]').click();
-  }
-
   async expandMetaFieldsSection() {
     const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
     const metaFieldsButton = metaFieldsSection.getByRole('button', { name: /Meta fields/ });

@@ -33,7 +33,7 @@ spaceTest.describe(
 
     spaceTest(
       'filters on a group-by cell but offers no filter on an aggregated one',
-      async ({ pageObjects, scoutSpace }) => {
+      async ({ page, pageObjects, scoutSpace }) => {
         const { dashboard, dataGrid, discover, filterBar } = pageObjects;
         const savedSearchTitle = `esql filter from table ${scoutSpace.id}`;
 
@@ -49,13 +49,16 @@ spaceTest.describe(
         await dashboard.waitForRenderComplete();
 
         // The group-by column is filterable, and doing so adds a dashboard filter.
-        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
         await expect.poll(() => filterBar.getFilterCount()).toBe(1);
 
-        // The aggregated column is not: no filter action is offered on its cells.
-        const aggregatedCell = dataGrid.getCell(0, 'countB');
-        await aggregatedCell.hover();
-        await expect(aggregatedCell.locator('[data-test-subj="filterForButton"]')).toBeHidden();
+        // The aggregated column is not: its cell offers no filter action to click.
+        await dataGrid.expandCell({ rowIndex: 0, columnId: 'countB' });
+        await expect(
+          page.testSubj
+            .locator('euiDataGridExpansionPopover')
+            .locator('[data-test-subj="filterForButton"]')
+        ).toBeHidden();
       }
     );
   }
