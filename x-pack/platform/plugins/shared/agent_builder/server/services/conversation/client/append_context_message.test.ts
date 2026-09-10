@@ -20,7 +20,7 @@ import { createMockedAgentRegistry } from '../../../test_utils/agents';
 import { createClient } from './client';
 import { toEs } from './converters';
 import type { ConversationProperties } from './storage';
-import type { AppendUserMessageRequest } from './types';
+import type { AppendContextMessageRequest } from './types';
 
 const mockIndex = jest.fn();
 jest.mock('./storage', () => ({
@@ -47,7 +47,7 @@ const initialConversation = {
   access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
 };
 
-const request = (messageId: string): AppendUserMessageRequest => ({
+const request = (messageId: string): AppendContextMessageRequest => ({
   id: 'conversation',
   messageId,
   message: messageId,
@@ -56,7 +56,7 @@ const request = (messageId: string): AppendUserMessageRequest => ({
   getTypeDefinition: () => textType,
 });
 
-describe('appendUserMessage', () => {
+describe('appendContextMessage', () => {
   const es = elasticsearchServiceMock.createElasticsearchClient();
   const agentRegistry = createMockedAgentRegistry();
   let stored: ConversationProperties;
@@ -94,7 +94,7 @@ describe('appendUserMessage', () => {
   });
 
   it('atomically appends messages and attachments, without projecting rounds', async () => {
-    await client.appendUserMessage({
+    await client.appendContextMessage({
       ...request('m1'),
       attachments: [{ id: 'a1', type: 'text', data: { text: 'context' } }],
     });
@@ -118,16 +118,16 @@ describe('appendUserMessage', () => {
 
   it('merges concurrent appends and checks replay identity against the fresh snapshot', async () => {
     await Promise.all([
-      client.appendUserMessage(request('m1')),
-      client.appendUserMessage(request('m2')),
-      client.appendUserMessage(request('m1')),
+      client.appendContextMessage(request('m1')),
+      client.appendContextMessage(request('m2')),
+      client.appendContextMessage(request('m1')),
     ]);
     expect((await client.get('conversation')).events?.map(({ id }) => id).sort()).toEqual([
       'm1',
       'm2',
     ]);
     const writes = mockIndex.mock.calls.length;
-    await client.appendUserMessage({
+    await client.appendContextMessage({
       ...request('m1'),
       attachments: [{ type: 'text', data: { text: 'changed replay' } }],
     });
@@ -136,7 +136,7 @@ describe('appendUserMessage', () => {
   });
 
   it('preserves messages across metadata writes and execution completion', async () => {
-    await client.appendUserMessage(request('m1'));
+    await client.appendContextMessage(request('m1'));
     await client.update({ id: 'conversation', title: 'Updated' });
     await client.replaceRoundEvents({
       id: 'conversation',
@@ -149,10 +149,10 @@ describe('appendUserMessage', () => {
 
   it('rejects read-only and cross-space writes', async () => {
     stored.read_only = true;
-    await expect(client.appendUserMessage(request('m1'))).rejects.toThrow('read-only');
+    await expect(client.appendContextMessage(request('m1'))).rejects.toThrow('read-only');
     stored.read_only = false;
     stored.space = 'other';
-    await expect(client.appendUserMessage(request('m1'))).rejects.toThrow();
+    await expect(client.appendContextMessage(request('m1'))).rejects.toThrow();
     expect(mockIndex).not.toHaveBeenCalled();
   });
 
@@ -162,7 +162,7 @@ describe('appendUserMessage', () => {
       version++;
       return { _seq_no: version, _primary_term: 1 };
     });
-    await client.appendUserMessage({
+    await client.appendContextMessage({
       ...request('m1'),
       create: { ...initialConversation, user: { id: 'unknown', username: 'unknown' } },
       attachments: [{ id: 'a1', type: 'text', data: { text: 'initial' } }],
@@ -179,11 +179,11 @@ describe('appendUserMessage', () => {
   });
 
   it('preserves attachment versions referenced by previous messages', async () => {
-    await client.appendUserMessage({
+    await client.appendContextMessage({
       ...request('m1'),
       attachments: [{ id: 'a1', type: 'text', data: { text: 'one' } }],
     });
-    await client.appendUserMessage({
+    await client.appendContextMessage({
       ...request('m2'),
       attachments: [{ id: 'a1', type: 'text', data: { text: 'two' } }],
     });
@@ -199,17 +199,17 @@ describe('appendUserMessage', () => {
 
   it('authorizes private/shared writes independently of attribution and checks agent use', async () => {
     stored.user_id = 'other-user';
-    await expect(client.appendUserMessage(request('m1'))).rejects.toThrow();
+    await expect(client.appendContextMessage(request('m1'))).rejects.toThrow();
     expect(mockIndex).not.toHaveBeenCalled();
     stored.access_control = { access_mode: ConversationAccessControlMode.Public, entries: [] };
-    await client.appendUserMessage(request('m1'));
+    await client.appendContextMessage(request('m1'));
     agentRegistry.get.mockRejectedValueOnce(createAgentNotFoundError({ agentId: 'agent' }));
-    await expect(client.appendUserMessage(request('m2'))).rejects.toThrow();
+    await expect(client.appendContextMessage(request('m2'))).rejects.toThrow();
     expect(mockIndex).toHaveBeenCalledTimes(1);
   });
 
   it('retries creation races using the same message identity', async () => {
-    await client.appendUserMessage({ ...request('m1'), create: initialConversation });
+    await client.appendContextMessage({ ...request('m1'), create: initialConversation });
     expect((await client.get('conversation')).events?.map(({ id }) => id)).toEqual(['m1']);
   });
 });

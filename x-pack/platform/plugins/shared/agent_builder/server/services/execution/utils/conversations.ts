@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap, from, firstValueFrom } from 'rxjs';
 import type {
@@ -27,6 +27,8 @@ import {
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ConversationClient } from '../../conversation';
 import {
   roundToEvents,
@@ -37,6 +39,7 @@ import {
   parseExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+import type { ConversationWithPermissions } from '../../../../common/http_api/conversations';
 
 /**
  * Persist a new conversation and emit the corresponding event
@@ -193,7 +196,7 @@ export const persistRoundInput = async ({
     conversation
   );
 
-  if (conversation.operation === 'CREATE') {
+  if (isNewConversation(conversation)) {
     const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
@@ -278,7 +281,7 @@ export const appendRoundTerminated$ = ({
     }),
     switchMap((persistedConversation) =>
       of(
-        conversation.operation === 'CREATE'
+        isNewConversation(conversation)
           ? createConversationCreatedEvent(persistedConversation)
           : createConversationUpdatedEvent(persistedConversation)
       )
@@ -393,6 +396,62 @@ export const appendResumeExecution$ = ({
 export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
+
+export const isNewConversation = (conversation: ConversationWithOperation): boolean => {
+  return conversation.operation === 'CREATE';
+};
+
+export const persistContextMessage = async ({
+  agentId,
+  conversationId,
+  accessControl,
+  readOnly,
+  spaceId,
+  conversationClient,
+  message,
+  attachments,
+  author,
+  getTypeDefinition,
+  messageId = uuidv4(),
+  createdAt = new Date(),
+}: {
+  agentId: string;
+  conversationId?: string;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+  readOnly?: boolean;
+  spaceId: string;
+  conversationClient: ConversationClient;
+  message: string;
+  attachments: AttachmentInput[];
+  author?: ConversationRoundAuthor;
+  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
+  messageId?: string;
+  createdAt?: Date;
+}): Promise<ConversationWithPermissions> => {
+  const conversation = await getConversation({
+    agentId,
+    conversationId,
+    autoCreateConversationWithId: true,
+    conversationClient,
+    accessControl,
+    readOnly,
+  });
+
+  if (isNewConversation(conversation) && !conversationId) {
+    conversation.id = uuidv5(JSON.stringify([spaceId, messageId]), uuidv5.URL);
+  }
+
+  return await conversationClient.appendContextMessage({
+    id: conversation.id,
+    ...(isNewConversation(conversation) ? { create: conversation } : {}),
+    messageId,
+    createdAt: createdAt.toISOString(),
+    message,
+    author,
+    attachments,
+    getTypeDefinition,
+  });
+};
 
 export const getConversation = async ({
   agentId,

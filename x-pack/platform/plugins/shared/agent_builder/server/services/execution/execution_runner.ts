@@ -73,6 +73,7 @@ import {
   appendResumeExecution$,
   resolveServices,
   convertErrors,
+  isNewConversation,
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
@@ -241,7 +242,7 @@ const handleConversationExecution = async ({
 
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
-    storeConversation && conversation.operation === 'CREATE'
+    storeConversation && isNewConversation(conversation)
       ? of(createConversationIdSetEvent(conversation.id))
       : EMPTY;
 
@@ -273,8 +274,7 @@ const handleConversationExecution = async ({
   // Generate title when creating a new conversation
   // OR when the conversation still carries the default placeholder title
   const needsTitle =
-    (conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)) &&
-    !subagentCreation;
+    (isNewConversation(conversation) || conversationNeedsTitle(conversation)) && !subagentCreation;
   const title$ = (
     needsTitle
       ? generateTitle({
@@ -557,9 +557,7 @@ const buildPersistenceEvents = ({
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
     const endTitle$ =
-      conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
-        ? title$
-        : undefined;
+      isNewConversation(conversation) || conversationNeedsTitle(conversation) ? title$ : undefined;
 
     return roundStartedEvents$.pipe(
       concatMap((startEvent) =>
@@ -589,7 +587,7 @@ const buildPersistenceEvents = ({
     });
   }
 
-  return conversation.operation === 'CREATE'
+  return isNewConversation(conversation)
     ? createConversation$({
         conversation,
         conversationClient,

@@ -35,7 +35,7 @@ export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
   }
   const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) });
   const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
-  return [...folded, ...standaloneMessages(conversation.events)].sort(
+  return [...folded, ...contextMessages(conversation.events)].sort(
     (left, right) =>
       left.created_at.localeCompare(right.created_at) ||
       (positions.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
@@ -168,8 +168,8 @@ export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
       events: E[];
     };
 
-/** Selects independent inputs, excluding execution triggers and receipt-time round inputs. */
-export const standaloneMessages = <E extends AnyTimelineEvent>(
+/** Selects context messages, excluding execution triggers and receipt-time round inputs. */
+export const contextMessages = <E extends AnyTimelineEvent>(
   timeline: E[]
 ): Array<UserMessageOf<E>> => {
   const triggerIds = new Set(timeline.map((event) => event.trigger_event_id));
@@ -182,13 +182,13 @@ export const standaloneMessages = <E extends AnyTimelineEvent>(
   );
 };
 
-/** Groups execution history and independent messages without fabricating rounds. */
+/** Groups execution history and context messages without fabricating rounds. */
 export const groupTimelineEntries = <E extends AnyTimelineEvent>(
   timeline: E[]
 ): Array<TimelineEntry<E>> => {
   const entries: Array<TimelineEntry<E>> = [
     ...groupTimelineRounds(timeline),
-    ...standaloneMessages(timeline).map((userMessage) => ({
+    ...contextMessages(timeline).map((userMessage) => ({
       userMessage,
       events: [userMessage] as E[],
     })),

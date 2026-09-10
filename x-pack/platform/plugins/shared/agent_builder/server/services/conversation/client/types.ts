@@ -241,7 +241,7 @@ export type NormalizedConversation = Conversation & {
   pinned_by?: ConversationPinnedByEntry[];
 };
 
-export interface AppendUserMessageRequest {
+export interface AppendContextMessageRequest {
   id: string;
   create?: ConversationCreateRequest;
   messageId: string;

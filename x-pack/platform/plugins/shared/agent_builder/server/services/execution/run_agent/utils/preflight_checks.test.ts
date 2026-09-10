@@ -163,10 +163,10 @@ describe('preflight_checks', () => {
         );
       });
 
-      it('should not treat later standalone messages as prompt responses', () => {
+      it('should not treat later context messages as prompt responses', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
-        const standaloneMessage: UserMessageEvent = {
-          id: 'standalone-message',
+        const contextMessage: UserMessageEvent = {
+          id: 'context-message',
           type: TimelineEventType.userMessage,
           created_at: '2026-01-01T00:00:00.000Z',
           actor: {
@@ -177,7 +177,7 @@ describe('preflight_checks', () => {
           },
           data: { message: 'Approved in Slack' },
         };
-        const timeline = [...roundsToEvents(conversation), standaloneMessage];
+        const timeline = [...roundsToEvents(conversation), contextMessage];
         const input: ConverseInput = { message: 'continue' };
 
         expect(() => ensureValidInput({ input, timeline })).toThrow(

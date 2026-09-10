@@ -224,20 +224,26 @@ describe('registerChatApiRoutes', () => {
   });
 });
 
-describe('message-only endpoint acknowledgements', () => {
+describe('context message acknowledgements', () => {
   it('persists through sync converse without execution setup', async () => {
     const { router, handlers } = captureHandlers();
     const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
-    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
+    const appendContextMessage = jest.fn().mockResolvedValue(conversation);
     const executeAgent = jest.fn();
     const validateCallbackUrl = jest.fn();
     const getStartServices = jest.fn();
     const services = {
       conversations: {
-        getScopedClient: async () => ({ appendUserMessage }),
+        getScopedClient: async () => ({ appendContextMessage }),
         getConversationRoundAuthor: async () => ({ id: 'user' }),
       },
-      attachments: { getTypeDefinition: jest.fn() },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validate: jest.fn().mockResolvedValue({
+          valid: true,
+          attachment: { id: 'attachment-1', type: 'text', data: { text: 'context' } },
+        }),
+      },
       execution: { executeAgent },
       callbackDeliveryService: { validateCallbackUrl },
     };
@@ -259,16 +265,71 @@ describe('message-only endpoint acknowledgements', () => {
         body: {
           trigger_mode: 'never',
           input: 'context',
-          execution_idempotency_key: 'callback-key',
         },
       },
       response
     );
     expect(result.status).toBe(200);
-    expect(appendUserMessage).toHaveBeenCalledTimes(1);
+    expect(appendContextMessage).toHaveBeenCalledTimes(1);
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
     expect(validateCallbackUrl).not.toHaveBeenCalled();
     expect(getStartServices).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    'prompts',
+    'action',
+    '_execution_mode',
+    'execution_id',
+    'connector_id',
+    'inference_id',
+    'browser_api_tools',
+    'configuration_overrides',
+    'project_routing',
+  ])('rejects %s before persisting a context message request', async (field) => {
+    const { router, handlers } = captureHandlers();
+    const getInternalServices = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      { body: { trigger_mode: 'never', input: 'context', [field]: {} } },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(getInternalServices).not.toHaveBeenCalled();
+  });
+
+  it('requires input or attachments before persisting a context message request', async () => {
+    const { router, handlers } = captureHandlers();
+    const getInternalServices = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      { body: { trigger_mode: 'never' } },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(getInternalServices).not.toHaveBeenCalled();
   });
 });

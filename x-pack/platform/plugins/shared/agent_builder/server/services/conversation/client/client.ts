@@ -59,7 +59,7 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
-  AppendUserMessageRequest,
+  AppendContextMessageRequest,
   AddAttachmentsToLastRoundRequest,
   AppendEventsRequest,
   ConversationCreateRequest,
@@ -126,7 +126,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  appendUserMessage(request: AppendUserMessageRequest): Promise<ConversationWithPermissions>;
+  appendContextMessage(request: AppendContextMessageRequest): Promise<ConversationWithPermissions>;
   appendEvents(
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
@@ -533,7 +533,9 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /** Appends timeline events onto a conversation.*/
-  async appendUserMessage(request: AppendUserMessageRequest): Promise<ConversationWithPermissions> {
+  async appendContextMessage(
+    request: AppendContextMessageRequest
+  ): Promise<ConversationWithPermissions> {
     const {
       id,
       create,

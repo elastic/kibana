@@ -105,7 +105,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'message-only sync requests persist context for the next model request',
+      'context message sync requests persist context for the next model request',
       async ({ apiClient }) => {
         const requestsBefore = llmProxy.interceptedRequests.length;
         const first = await apiClient.post(CHAT_CONVERSE, {

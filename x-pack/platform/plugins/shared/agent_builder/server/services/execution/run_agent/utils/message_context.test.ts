@@ -52,7 +52,7 @@ const context = () => {
   return value;
 };
 
-describe('standalone message context', () => {
+describe('context messages', () => {
   it('preserves ordered, attributed human inputs without artificial assistant responses', async () => {
     const events = [message('a', 'Pool limit is 200'), message('b', 'Errors recovered')];
     const timeline = eventsForContext(eventsNativeConversation(events));
@@ -73,7 +73,7 @@ describe('standalone message context', () => {
     expect(groupTimelineRounds(conversation.timeline)).toEqual([]);
   });
 
-  it('preserves stored order when standalone messages and executions share a timestamp', () => {
+  it('preserves stored order when context messages and executions share a timestamp', () => {
     const timestamp = '2026-01-01T00:00:00.000Z';
     const timeline = eventsForContext(
       eventsNativeConversation([
@@ -102,7 +102,7 @@ describe('standalone message context', () => {
     expect(groupTimelineEntries(normalized).map((entry) => entry.userMessage.id)).toEqual(['a']);
   });
 
-  it('keeps standalone messages through HITL normalization and entry slicing', () => {
+  it('keeps context messages through HITL normalization and entry slicing', () => {
     const timeline = eventsForContext(
       eventsNativeConversation([...pausedAndResumedRoundTimeline(), message('a'), message('b')])
     );
@@ -112,7 +112,7 @@ describe('standalone message context', () => {
     expect(groupTimelineEntries(sliceTimelineEntries(timeline, 1))).toEqual(entries.slice(1));
   });
 
-  it('counts standalone messages in the token budget', async () => {
+  it('counts context messages in the token budget', async () => {
     const conversation = await prepareConversation({
       timeline: [message('a', 'context '.repeat(100))],
       nextInput: { message: 'next' },
@@ -171,7 +171,7 @@ describe('standalone message context', () => {
     expect(reused.processedConversation.timeline).toEqual(result.processedConversation.timeline);
   });
 
-  it('retains pending prompt inputs when standalone messages follow the paused execution', async () => {
+  it('retains pending prompt inputs when context messages follow the paused execution', async () => {
     const stored = pausedAndResumedRoundTimeline();
     const paused = stored.slice(
       0,
