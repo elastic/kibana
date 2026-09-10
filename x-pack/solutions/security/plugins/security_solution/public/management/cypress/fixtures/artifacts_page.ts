@@ -49,6 +49,11 @@ export interface ArtifactsFixtureType {
   };
 }
 
+/**
+ * Live Cypress fork of the Scout cases in
+ * `test/scout/edr_artifacts/ui/fixtures/artifact_tabs_test_data.ts`.
+ * If you change a criteriaConditions string here, update the other.
+ */
 export const getArtifactsListTestDataForArtifact = (
   artifact: keyof typeof ENDPOINT_ARTIFACT_LISTS
 ) => getArtifactsListTestsData().find(({ tabId }) => tabId === artifact) as ArtifactsFixtureType;

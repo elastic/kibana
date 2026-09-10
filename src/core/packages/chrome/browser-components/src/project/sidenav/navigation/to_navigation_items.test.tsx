@@ -45,8 +45,8 @@ describe('toNavigationItems', () => {
   it('keeps the home node as a regular primary item', () => {
     const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
     expect(homeItem).toBeDefined();
-    expect(homeItem?.label).toBe('Security');
-    expect(homeItem?.iconType).toBe('logoSecurity');
+    expect(homeItem?.label).toBe('Home');
+    expect(homeItem?.iconType).toBe('home');
   });
 
   it('should return primary items from navigation tree', () => {

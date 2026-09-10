@@ -248,7 +248,6 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     }
     return attributes;
   },
-  ignore: ['state.datasourceStates.textBased.layers.*.columns.*.variable'],
 };
 
 /**

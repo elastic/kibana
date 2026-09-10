@@ -1270,6 +1270,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               inferColumnDataType?.(columnId, { isTextBased: true })
             );
             normalizeColumnLabel(updatedColumn, { isTextBased: true });
+            // `null`/`''` are leaked persist; a real Identifier Control name is reconstructed
+            // from `??` on `fieldName` by `buildESQLLayer`.
+            if (!updatedColumn.variable) {
+              delete updatedColumn.variable;
+            }
             normalizeFormatParams(updatedColumn);
             return updatedColumn;
           });

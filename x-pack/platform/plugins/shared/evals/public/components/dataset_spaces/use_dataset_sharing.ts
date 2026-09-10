@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 
 /**
