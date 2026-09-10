@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SpaceId } from './src/space_id';
-export {
-  ALL_SPACES_ID,
-  asSpaceId,
-  brandSpaceId,
-  DEFAULT_SPACE_ID,
-  getSpaceUrlPrefix,
-  UNKNOWN_SPACE,
-} from './src/space_id';
-export { addSpaceIdToPath, getSpaceIdFromPath } from './src/spaces_url_parser';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-rxjs-history'],
+};
