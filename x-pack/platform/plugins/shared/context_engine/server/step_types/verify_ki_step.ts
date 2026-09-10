@@ -22,7 +22,6 @@ import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
-/** What custom verifier workflows need; absent when the workflows management plugin is not available. */
 export interface WorkflowVerifierStepDependencies {
   workflowsManagement: KiVerifierWorkflowRunner;
   /** Whether the request may execute workflows in the space, mirroring the run route's privilege. */
@@ -80,7 +79,6 @@ export const createVerifyKiStepDefinition = (
           });
         }
 
-        // The chain of workflows that led here, ending with this workflow.
         const verifierChain = await resolveKiVerifierChain({
           workflowId: workflow.id,
           metadata,

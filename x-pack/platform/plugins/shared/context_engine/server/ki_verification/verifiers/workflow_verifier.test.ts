@@ -48,7 +48,7 @@ describe('resolveKiVerifierChain', () => {
     expect(getWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  it('includes any chain from execution metadata, followed by the current workflow', async () => {
+  it('reads caller workflow ids from metadata and appends the current workflow', async () => {
     await expect(resolve({ metadata: { ki_verifier_chain: ['a', 'b'] } })).resolves.toEqual([
       'a',
       'b',
@@ -56,7 +56,7 @@ describe('resolveKiVerifierChain', () => {
     ]);
   });
 
-  it('walks ancestor executions via parent refs and assembles the full chain', async () => {
+  it('looks up parent workflow run records to reconstruct the full caller list', async () => {
     getWorkflowExecution
       .mockResolvedValueOnce(
         execWith({ parentWorkflowId: 'grand', parentWorkflowExecutionId: 'grand-exec' })
@@ -70,7 +70,7 @@ describe('resolveKiVerifierChain', () => {
     expect(getWorkflowExecution).toHaveBeenNthCalledWith(2, 'grand-exec', spaceId);
   });
 
-  it('throws when an ancestor execution is missing', async () => {
+  it('throws when a parent workflow run record cannot be found', async () => {
     getWorkflowExecution.mockResolvedValue(null);
 
     await expect(
@@ -78,7 +78,7 @@ describe('resolveKiVerifierChain', () => {
     ).rejects.toThrow("ancestor execution 'dad-exec' is not readable");
   });
 
-  it('throws when ancestor lookups exceed the limit', async () => {
+  it('throws when there are too many parent workflows to trace', async () => {
     getWorkflowExecution.mockImplementation(async (id: string) =>
       execWith({ parentWorkflowId: `wf-${id}`, parentWorkflowExecutionId: `${id}x` })
     );
@@ -367,7 +367,7 @@ describe('createWorkflowVerifier', () => {
       await expect(pending).resolves.toEqual({ passed: true });
     });
 
-    it('keeps polling after a transient read error without cancelling the child execution', async () => {
+    it('retries polling after a read error instead of cancelling the running workflow', async () => {
       workflowsManagement.getWorkflowExecution
         .mockRejectedValueOnce(new Error('search failed'))
         .mockResolvedValueOnce(execution(ExecutionStatus.COMPLETED, { output: { passed: true } }));

@@ -25,7 +25,6 @@ export const MAX_KI_VERIFIER_APPLIES_TO_VALUES = 20;
 export const DEFAULT_KI_VERIFIER_TIMEOUT_SEC = 60;
 export const MAX_KI_VERIFIER_TIMEOUT_SEC = 300;
 
-/** A user-authored verifier: a workflow taking `inputs.ki` and emitting `passed` and `reason`. */
 export const kiVerifierWorkflowSchema = z.object({
   workflow_id: z
     .string()
@@ -62,7 +61,6 @@ export const kiVerifierWorkflowSchema = z.object({
 
 export type KiVerifierWorkflow = z.infer<typeof kiVerifierWorkflowSchema>;
 
-/** A built-in verifier id, or a custom verifier workflow. */
 export const kiVerifierEntrySchema = z.union([z.enum(KI_VERIFIER_IDS), kiVerifierWorkflowSchema]);
 
 export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;

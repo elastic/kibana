@@ -21,9 +21,7 @@ export class KiVerificationService {
   /**
    * Runs all applicable verifiers and aggregates their validation results.
    * Verifier exceptions propagate because they represent execution failures,
-   * not invalid KI content. No-op when the feature flag is off. A string entry
-   * in `verifiers` selects a registered verifier by id; a verifier instance
-   * (for example a workflow verifier) runs as given.
+   * not invalid KI content. No-op when the feature flag is off.
    */
   async verifyKi(
     ki: KnowledgeIndicator,

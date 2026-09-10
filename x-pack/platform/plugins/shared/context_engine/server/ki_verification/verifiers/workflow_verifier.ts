@@ -34,7 +34,6 @@ export const MAX_REASON_LENGTH = 2048;
 /** Max nesting depth for verifier workflows; enforced here because `runWorkflow` bypasses the engine's depth guard. */
 export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 3;
 
-/** Execution metadata carrying the verifier nesting state into child workflows. */
 export const KI_VERIFIER_CHAIN_METADATA_KEY = 'ki_verifier_chain';
 
 /** The workflow ids from the outermost caller down to the current workflow, read from execution metadata. */
@@ -46,13 +45,7 @@ export const readKiVerifierChain = (metadata: Record<string, unknown> | undefine
 /** Bounds the ancestor lookups; matches the engine's default `maxWorkflowDepth`. */
 const MAX_LINEAGE_LOOKUPS = 10;
 
-/**
- * Resolves the chain of workflows that led to the current one, outermost first
- * and ending with the current workflow. Verifier hops carry the chain in
- * execution metadata; `workflow.execute` hops drop metadata but record parent
- * refs, so those are followed through the ancestor executions. Throws when an
- * ancestor execution cannot be read, since the chain can then not be trusted.
- */
+/** Returns the full list of caller workflow ids, outermost first; throws if any ancestor run record is unreadable. */
 export const resolveKiVerifierChain = async ({
   workflowId,
   metadata,
@@ -99,13 +92,7 @@ const workflowVerifierOutputSchema = z.object({
   reason: z.string().optional(),
 });
 
-/**
- * The subset of the workflows management API a workflow verifier needs. Declared
- * locally because this plugin cannot reference the workflows management plugin's
- * types without a project reference cycle. `runWorkflow` is used instead of
- * `executeWorkflow` because it returns the execution id without waiting on the
- * execution document, keeping dispatch inside the verifier's own deadline.
- */
+/** Declared locally to avoid a project reference cycle with the workflows management plugin. */
 export interface KiVerifierWorkflowRunner {
   getWorkflow(workflowId: string, spaceId: string): Promise<WorkflowDetailDto | null>;
   runWorkflow(
@@ -241,11 +228,7 @@ const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerif
   }
 };
 
-/**
- * Runs a user-authored workflow as a KI verifier, failing closed on any outcome
- * other than a clean pass. The child execution is polled with the step's abort
- * signal, so cancelling the parent cancels the child and rethrows promptly.
- */
+/** Runs a workflow as a KI verifier; cancels the child execution if the parent is aborted. */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
   dependencies: WorkflowVerifierDependencies

@@ -492,7 +492,7 @@ describe('verify_ki workflow step', () => {
       });
     });
 
-    it('passes the chain of calling workflows to the child run for cycle detection', async () => {
+    it('passes the list of caller workflow ids to the child so it can detect cycles', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
 
@@ -542,7 +542,7 @@ describe('verify_ki workflow step', () => {
       expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('detects a cycle through a workflow invoked by workflow.execute steps', async () => {
+    it('blocks a cycle even when the loop runs through a workflow.execute step', async () => {
       // root-wf verified via verifier-wf, which ran this workflow via workflow.execute.
       // Naming root-wf again must be a cycle.
       setContextEngineEnabled(true);
@@ -570,7 +570,7 @@ describe('verify_ki workflow step', () => {
       expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('rejects the run when an ancestor execution record is missing', async () => {
+    it('blocks the run when a parent workflow run record cannot be read', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValueOnce(null);
 
