@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
@@ -23,17 +24,22 @@ const createClient = () => ({
   uninstall: jest.fn().mockResolvedValue(undefined),
   ready: jest.fn().mockResolvedValue(undefined),
   // Defaults to "nothing installed"; tests that exercise the uninstall path
-  // override this to report at least one global workflow as installed.
-  getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+  // override this to report at least one TI instance as installed.
+  listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
 });
 
-const INSTALLED_STATE = {
-  workflowId: 'mock-workflow-id',
-  spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-  definitionId: null,
+const installedState = (overrides: {
+  workflowId: string;
+  spaceId?: string;
+  definitionId?: string | null;
+}) => ({
+  workflowId: overrides.workflowId,
+  spaceId: overrides.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID,
+  definitionId:
+    overrides.definitionId === undefined ? overrides.workflowId : overrides.definitionId,
   templateValues: null,
   documentVersion: 1,
-};
+});
 
 let logger = loggingSystemMock.createLogger();
 
@@ -86,7 +92,9 @@ describe('threat intel managed workflow install', () => {
 
   it('uninstalls the two global workflows and attribute per space', async () => {
     const client = createClient();
-    client.getInstalledWorkflowState.mockResolvedValue(INSTALLED_STATE);
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({ workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID }),
+    ]);
 
     await uninstallThreatIntelManagedWorkflows({
       managedWorkflowsClient: client as never,
@@ -112,7 +120,9 @@ describe('threat intel managed workflow install', () => {
 
   it('tolerates uninstall failures so a partial prior install still cleans up', async () => {
     const client = createClient();
-    client.getInstalledWorkflowState.mockResolvedValue(INSTALLED_STATE);
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({ workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID }),
+    ]);
     client.uninstall.mockRejectedValueOnce(new Error('missing')).mockResolvedValue(undefined);
 
     await expect(
@@ -130,7 +140,9 @@ describe('threat intel managed workflow install', () => {
   // workflows keep running against alerts nobody is looking at any more.
   it('records an uninstall failure at debug rather than dropping it', async () => {
     const client = createClient();
-    client.getInstalledWorkflowState.mockResolvedValue(INSTALLED_STATE);
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({ workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID }),
+    ]);
     client.uninstall.mockRejectedValueOnce(new Error('forbidden')).mockResolvedValue(undefined);
 
     await uninstallThreatIntelManagedWorkflows({
@@ -150,7 +162,7 @@ describe('threat intel managed workflow install', () => {
   // The whole point of the short circuit: a deployment that never turned the
   // supply flag on should not enumerate spaces or fire per-space uninstalls on
   // every restart just to confirm there is nothing to remove.
-  it('skips space enumeration and every uninstall call when neither global workflow is installed', async () => {
+  it('skips space enumeration and every uninstall call when no TI workflow is installed', async () => {
     const client = createClient();
     const getSpaceIds = jest.fn().mockResolvedValue(['default', 'space-a']);
 
@@ -166,9 +178,9 @@ describe('threat intel managed workflow install', () => {
 
   it('still uninstalls when only one of the two global workflows is installed', async () => {
     const client = createClient();
-    client.getInstalledWorkflowState.mockImplementation(async (workflowId: string) =>
-      workflowId === THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID ? INSTALLED_STATE : null
-    );
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({ workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID }),
+    ]);
 
     await uninstallThreatIntelManagedWorkflows({
       managedWorkflowsClient: client as never,
@@ -183,6 +195,49 @@ describe('threat intel managed workflow install', () => {
       spaceId: 'default',
       workflowIdSuffix: 'default',
     });
+  });
+
+  it('still uninstalls when only a per-space attribute workflow is installed', async () => {
+    const client = createClient();
+    const getSpaceIds = jest.fn().mockResolvedValue(['default']);
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({
+        workflowId: `${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID}-default`,
+        spaceId: 'default',
+        definitionId: THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+      }),
+    ]);
+
+    await uninstallThreatIntelManagedWorkflows({
+      managedWorkflowsClient: client as never,
+      getSpaceIds,
+      logger,
+    });
+
+    expect(getSpaceIds).toHaveBeenCalled();
+    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+      spaceId: 'default',
+      workflowIdSuffix: 'default',
+    });
+  });
+
+  // The list is plugin-scoped, so alert-analysis is always present on a
+  // healthy securitySolution boot. That must not disable the short circuit.
+  it('skips uninstall when the list has only a non-TI workflow', async () => {
+    const client = createClient();
+    const getSpaceIds = jest.fn().mockResolvedValue(['default']);
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({ workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID }),
+    ]);
+
+    await uninstallThreatIntelManagedWorkflows({
+      managedWorkflowsClient: client as never,
+      getSpaceIds,
+      logger,
+    });
+
+    expect(client.uninstall).not.toHaveBeenCalled();
+    expect(getSpaceIds).not.toHaveBeenCalled();
   });
 });
 

@@ -10,9 +10,12 @@ import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+  THREAT_INTEL_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { SecurityManagedWorkflowsClient } from '../managed_workflows';
+
+const THREAT_INTEL_DEFINITION_IDS: ReadonlySet<string> = new Set(THREAT_INTEL_WORKFLOW_IDS);
 
 const GLOBAL_THREAT_INTEL_WORKFLOW_IDS = [
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
@@ -119,29 +122,43 @@ const uninstallTolerant = async (
 };
 
 /**
- * True when either global TI workflow is still persisted for this plugin. On a
- * deployment that never turned the supply flag on, both are absent, letting
+ * True when any threat-intel managed workflow is still persisted for this
+ * plugin — the two globals or a per-space attribute instance. The client list
+ * is plugin-scoped, so it also contains alert-analysis; only TI definition
+ * (or suffixed document) ids count. On a deployment that never turned the
+ * supply flag on the list has none of those, letting
  * `uninstallThreatIntelManagedWorkflows` skip space enumeration and every
  * per-space uninstall call instead of paying N+3 no-op requests on every boot.
  */
-const hasAnyGlobalThreatIntelWorkflowInstalled = async (
+const isThreatIntelWorkflowInstance = ({
+  definitionId,
+  workflowId,
+}: {
+  definitionId: string | null;
+  workflowId: string;
+}): boolean => {
+  if (definitionId != null) {
+    return THREAT_INTEL_DEFINITION_IDS.has(definitionId);
+  }
+  return THREAT_INTEL_WORKFLOW_IDS.some(
+    (id) => workflowId === id || workflowId.startsWith(`${id}-`)
+  );
+};
+
+const hasAnyThreatIntelWorkflowInstalled = async (
   managedWorkflowsClient: SecurityManagedWorkflowsClient
 ): Promise<boolean> => {
-  const states = await Promise.all(
-    GLOBAL_THREAT_INTEL_WORKFLOW_IDS.map((workflowId) =>
-      managedWorkflowsClient.getInstalledWorkflowState(workflowId, GLOBAL_WORKFLOW_SPACE_ID)
-    )
-  );
-  return states.some((state) => state !== null);
+  const states = await managedWorkflowsClient.listInstalledWorkflowStates();
+  return states.some(isThreatIntelWorkflowInstance);
 };
 
 /**
  * Removes the two global TI workflows and every per-space attribute instance.
  * Tolerates not-found so a partial prior install still cleans up. Short-circuits
- * before enumerating spaces when neither global workflow is installed, since
- * that is the steady state for every deployment that never had the supply flag
- * on. Otherwise a 100-space deployment pays 103 sequential no-op calls on
- * every restart just to confirm there is nothing to remove.
+ * before enumerating spaces when no TI instance is installed, since that is the
+ * steady state for every deployment that never had the supply flag on.
+ * Otherwise a 100-space deployment pays 103 sequential no-op calls on every
+ * restart just to confirm there is nothing to remove.
  */
 export const uninstallThreatIntelManagedWorkflows = async ({
   managedWorkflowsClient,
@@ -152,7 +169,7 @@ export const uninstallThreatIntelManagedWorkflows = async ({
   getSpaceIds: () => Promise<readonly string[]>;
   logger: Logger;
 }): Promise<void> => {
-  if (!(await hasAnyGlobalThreatIntelWorkflowInstalled(managedWorkflowsClient))) {
+  if (!(await hasAnyThreatIntelWorkflowInstalled(managedWorkflowsClient))) {
     return;
   }
 
