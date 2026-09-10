@@ -36,8 +36,6 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
       css={css`
         display: flex;
         align-items: center;
-        height: ${euiTheme.size.xl};
-        padding-inline: ${euiTheme.size.xxs};
         margin-inline-end: ${euiTheme.size.s};
       `}
     >
