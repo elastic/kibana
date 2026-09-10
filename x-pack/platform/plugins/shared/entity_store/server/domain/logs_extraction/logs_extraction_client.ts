@@ -36,7 +36,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
-import { getMergedConfig } from './merge_config';
+import { getMergedConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';

@@ -15,10 +15,7 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
-import {
-  collectAdditionalIndexPatterns,
-  enforceEntityStorePrivileges,
-} from './utils/check_entity_store_privileges';
+import { enforceEntityStorePrivileges } from './utils/check_entity_store_privileges';
 
 const bodySchema = z.object({
   logExtraction: LogExtractionUpdadeSchema,
@@ -30,7 +27,10 @@ export function registerUpdate(router: EntityStorePluginRouter) {
       path: ENTITY_STORE_ROUTES.public.UPDATE,
       access: 'public',
       summary: 'Update the Entity Store',
-      description: 'Update the Entity Store log extraction configuration.',
+      description:
+        'Update the Entity Store log extraction configuration. ' +
+        'Omitting a field leaves it unchanged. ' +
+        'Sending `null` for a field clears that override and reverts to the default value.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },
@@ -65,7 +65,7 @@ export function registerUpdate(router: EntityStorePluginRouter) {
           assetManager,
           req,
           res,
-          collectAdditionalIndexPatterns(logExtraction)
+          logExtraction?.additionalIndexPatterns
         );
         if (forbidden) return forbidden;
 

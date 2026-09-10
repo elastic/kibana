@@ -13,7 +13,6 @@ import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import type { EngineDescriptor } from './constants';
 import { EngineLogExtractionState, VersionState } from './constants';
-import type { LogExtractionTypeOverride } from '../global_state/constants';
 import { EngineDescriptorTypeName } from './types';
 import { ENGINE_STATUS } from '../../constants';
 
@@ -97,14 +96,6 @@ export class EngineDescriptorClient {
     );
 
     return attributes;
-  }
-
-  /** Merges per entity-type log extraction overrides into the descriptor. A `null` value is stored, and skipped when the layers merge. */
-  async updateLogExtractionConfig(
-    entityType: EntityType,
-    logExtractionConfig: LogExtractionTypeOverride
-  ): Promise<void> {
-    await this.update(entityType, { logExtractionConfig });
   }
 
   async delete(entityType: EntityType) {

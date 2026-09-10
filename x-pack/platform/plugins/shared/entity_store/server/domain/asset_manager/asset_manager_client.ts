@@ -41,7 +41,7 @@ import {
   HistorySnapshotState,
 } from '../saved_objects';
 import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
-import { getMergedConfig } from '../logs_extraction/merge_config';
+import { getMergedConfig } from '../config';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from '../constants';
 import type {
   EntityStoreStatus,
