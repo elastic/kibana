@@ -1504,6 +1504,16 @@ def self_test() -> int:
         # the full id returned 154. Never reintroduce a partial match here.
         check("gate does not prefix-match execution_id",
               'prefix": {"metadata.execution_id' not in _gate_src, True)
+        # The latest-execution lookup must match ANY spelling of the model id,
+        # never the single stored_id string. The VM's local index holds the
+        # display name ("anthropic-claude-4.5-haiku") while golden holds the
+        # connector id ("eis-anthropic-claude-4-5-haiku"); a term on the local
+        # display name matched only the stale reference artifact (117 docs) and
+        # false-FAILed three dense canaries as docs=117/130 while golden held
+        # 130 under the fresh exec.
+        check("latest-execution lookup matches any model-id spelling",
+              "_score_id_candidates(model)" in _gate_code and
+              '{"term": {"task.model.id": stored_id}}' not in _gate_code, True)
         check("sharded gate skips the latest-execution lookup",
               "if exec_id is None:" in _gate_src, True)
         check("ad gate is exact",
@@ -1774,7 +1784,14 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     else:
         exec_id = None
     _latest_must = [
-        {"term": {"task.model.id": stored_id}},
+        {
+            "bool": {
+                "should": [
+                    {"term": {"task.model.id": c}} for c in _score_id_candidates(model)
+                ],
+                "minimum_should_match": 1,
+            }
+        },
         {"term": {"metadata.suite_id": suite_profile()["gate_suite_id"]}},
     ]
     latest_cmd_q = json.dumps({
