@@ -44,7 +44,9 @@ describe('<WatchListPage />', () => {
   });
 
   afterEach(() => {
-    // Unmount first so useRequest clears its poll timer and the overflow menu is torn down — nothing left to drain.
+    // Unmount first (clears useRequest's poll timer, tears down the overflow menu), then discard any
+    // timers still pending. Draining while mounted ticked 60s of fake time through the tooltip's
+    // requestAnimationFrame loop and hit the 5s hook timeout.
     cleanup();
     jest.clearAllTimers();
   });
