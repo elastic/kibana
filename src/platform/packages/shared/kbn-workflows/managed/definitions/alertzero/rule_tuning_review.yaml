@@ -342,7 +342,7 @@ steps:
           and steps.record_preview_outcome.output.proposed_succeeded == true
           and steps.record_preview_outcome.output.proposed_is_aborted == false }}
 
-  # Shown verbatim in the proposal queue. Composed once here because the two
+  # Rendered as markdown by the proposal card. Composed once here because the two
   # gate calls below cannot share a step: the gate types actionInput as an object,
   # so a manual proposal has to omit the key rather than pass an empty value, and a
   # YAML object cannot omit a key conditionally.
@@ -350,30 +350,27 @@ steps:
     type: data.set
     with:
       comment: |-
-        Rule tuning review for {{ steps.fetch_rule.output.name }}
+        **Rule tuning review for {{ steps.fetch_rule.output.name }}**
 
-        {{ inputs.fp_count }} alerts were closed as false positives in the last
-        {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
+        {{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
         {% if inputs.fp_count > inputs.alert_ids.size %}
-        The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }}
-        of the {{ inputs.fp_count }} false positives; tagging them retires the older
-        ones from future sweeps too.
+        The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives; tagging them retires the older ones from future sweeps too.
         {% endif %}
 
         {{ steps.diagnose_rule.output.structured_output.summary }}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" and steps.record_auto_apply_support.output.supported %}
         Current query:
+        ```
         {{ steps.diagnose_rule.output.structured_output.current_query }}
+        ```
 
         Proposed query:
+        ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+        ```
 
-        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
-        lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
-        {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
-        current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
-        proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
+        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }}, lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover): current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}, proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
@@ -383,25 +380,24 @@ steps:
         {% if steps.decide_action.output.eligible %}
         Approving applies the proposed query to the rule.
         {% else %}
-        A backtest was inconclusive, so approving does not change the rule or tag
-        its alerts; a later sweep can retry with current data.
+        A backtest was inconclusive, so approving does not change the rule or tag its alerts; a later sweep can retry with current data.
         {% endif %}
         {% else %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         Proposed query:
+        ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+        ```
 
-        This rule uses a data view, timestamp override, or alert suppression, so it
-        is not previewed or applied automatically.
+        This rule uses a data view, timestamp override, or alert suppression, so it is not previewed or applied automatically.
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
+        ```
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
+        ```
         {% endif %}
-        This {{ steps.diagnose_rule.output.structured_output.change_type }} change
-        is not applied automatically; apply it manually in the Detection Rules UI if
-        appropriate. Approving marks these alerts acknowledged, so sweeps revisit
-        the rule only once new false positives accumulate.
+        This {{ steps.diagnose_rule.output.structured_output.change_type }} change is not applied automatically; apply it manually in the Detection Rules UI if appropriate. Approving marks these alerts acknowledged, so sweeps revisit the rule only once new false positives accumulate.
         {% endif %}
 
   # The proposal gate records the recommendation on the investigation, parks on
