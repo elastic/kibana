@@ -13,7 +13,6 @@ import type { CasesServerStartDependencies } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { searchCasesTool } from './tools/search_cases';
 import { manageCasesTool } from './tools/manage_cases';
-import { attachmentsTool } from './tools/attachment_tools';
 import { getAttachmentsTool } from './tools/get_attachments_tool';
 import { manageAttachmentsTool } from './tools/manage_attachments_tool';
 import { observablesTool } from './tools/observable_tools';
@@ -31,9 +30,8 @@ import { createCasesToolAvailability } from './utils/get_cases_tool_availability
  * 2. `platform.core.cases.manage` — create, update, delete, assign, unassign, add tags, set custom field
  * 3. `platform.core.cases.get_attachments` — get all attachments (read-only)
  * 4. `platform.core.cases.manage_attachments` — add comment/alerts/events/attachments (write)
- * 5. `platform.core.cases.attachments` — DEPRECATED: combined read+write, retained for backward compatibility
- * 6. `platform.core.cases.observables` — add, update, delete observables
- * 7. `platform.core.cases.find_templates` — read-only, only when templates are enabled: look up
+ * 5. `platform.core.cases.observables` — add, update, delete observables
+ * 6. `platform.core.cases.find_templates` — read-only, only when templates are enabled: look up
  *    case templates by name to resolve a `case_template_id`
  *
  * Also registers the `cases-management` skill, and — only when Cases-as-Data v2
@@ -65,10 +63,6 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register({ ...getAttachmentsTool(getCasesClient), availability });
   agentBuilder.tools.register({
     ...manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),
-    availability,
-  });
-  agentBuilder.tools.register({
-    ...attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),
     availability,
   });
   agentBuilder.tools.register({ ...observablesTool(getCasesClient), availability });

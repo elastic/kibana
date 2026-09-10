@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only metric (`lnsMetric`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   type MetricVisualizationState,
@@ -253,7 +257,6 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     'state.datasourceStates.textBased.layers.*.columns.*.params',
     // Runtime-only ES|QL fields not produced by the transform.
     'state.datasourceStates.textBased.initialContext',
-    'state.datasourceStates.textBased.layers.*.columns.*.variable',
   ],
 };
 

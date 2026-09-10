@@ -114,7 +114,44 @@ describe('control panel transforms', () => {
 
         expect(panels?.map(({ id }) => id)).toEqual(['good']);
         expect(warnings).toEqual([
-          expect.objectContaining({ type: 'dropped_panel', tab_id: 'tab-1', panel_id: 'bad' }),
+          {
+            type: 'dropped_panel',
+            tab_id: 'tab-1',
+            panel_id: 'bad',
+            message:
+              'Unable to transform control panel [bad]. Error: controlGroupJson panels must be JSON objects',
+          },
+        ]);
+      });
+
+      it('formats nested Zod validation errors as text instead of raw JSON', () => {
+        const { panels, warnings } = transformControlPanelsOut(
+          JSON.stringify({
+            'invalid-width': {
+              order: 0,
+              type: ESQL_CONTROL,
+              width: 'extra_large',
+              control_type: 'STATIC_VALUES',
+              variable_name: 'country',
+              variable_type: 'values',
+              available_options: ['US'],
+              selected_options: ['US'],
+              single_select: true,
+            },
+          }),
+          'tab-1'
+        );
+
+        expect(panels).toBeUndefined();
+        expect(warnings).toEqual([
+          {
+            type: 'dropped_panel',
+            tab_id: 'tab-1',
+            panel_id: 'invalid-width',
+            message:
+              'Unable to transform control panel [invalid-width]. Error: ' +
+              'Invalid input: expected "small", Invalid input: expected "medium", Invalid input: expected "large"',
+          },
         ]);
       });
 
@@ -281,49 +318,6 @@ describe('control panel transforms', () => {
       const { panels } = transformControlPanelsOut(storedAgain, 'tab-1');
 
       expect(panels).toEqual(apiPanels);
-    });
-  });
-
-  describe('transformControlPanelsIn', () => {
-    it('maps API control_panels to stored flattened controlGroupJson', () => {
-      const result = transformControlPanelsIn([
-        {
-          id: 'control-1',
-          type: ESQL_CONTROL,
-          width: 'small',
-          grow: true,
-          config: {
-            control_type: 'STATIC_VALUES',
-            variable_name: 'foo',
-            variable_type: 'values',
-            available_options: ['x', 'y'],
-            selected_options: ['y'],
-            single_select: true,
-          },
-        },
-      ]);
-
-      expect(result).toBe(
-        JSON.stringify({
-          'control-1': {
-            order: 0,
-            type: ESQL_CONTROL,
-            width: 'small',
-            grow: true,
-            control_type: 'STATIC_VALUES',
-            variable_name: 'foo',
-            variable_type: 'values',
-            available_options: ['x', 'y'],
-            selected_options: ['y'],
-            single_select: true,
-          },
-        })
-      );
-    });
-
-    it('returns undefined for empty control arrays', () => {
-      expect(transformControlPanelsIn(undefined)).toBeUndefined();
-      expect(transformControlPanelsIn([])).toBeUndefined();
     });
   });
 });

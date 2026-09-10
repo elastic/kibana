@@ -35,26 +35,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
       fromDateISO: '2022-01-01T00:00:00.000Z',
       toDateISO: '2022-01-01T23:59:59.999Z',
       pagination: {
-        timestampCursor: '2022-01-01T00:00:00.000Z',
         idCursor: '123',
-      },
-    });
-    expect(query).toMatchSnapshot();
-    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
-  });
-
-  it(`generates the expected query for host with recoveryId`, async () => {
-    const query = buildLogsExtractionEsqlQuery({
-      indexPatterns: ['test-index-*'],
-      latestIndex: 'latest-index',
-      entityDefinition: getEntityDefinition('host', 'default'),
-      docsLimit: 10000,
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      recoveryId: 'recover',
-      pagination: {
-        timestampCursor: '2022-01-01T00:00:00.000Z',
-        idCursor: 'TO BE IGNORED',
       },
     });
     expect(query).toMatchSnapshot();
@@ -96,6 +77,42 @@ describe('buildLogsExtractionEsqlQuery', () => {
     expect(query).toContain('test.log_field');
     // Query must remain syntactically valid (no dangling recent.* references)
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
+  describe('extractionMode guard: query output must not change across flag states until priority logic is added', () => {
+    it.each(Object.values(EntityType.enum))(
+      '%s: extractionMode=single output is byte-identical to default',
+      (type) => {
+        const baseParams = {
+          indexPatterns: ['test-index-*'],
+          latestIndex: 'latest-index',
+          entityDefinition: getEntityDefinition(type, 'default'),
+          docsLimit: 10000,
+          fromDateISO: '2022-01-01T00:00:00.000Z',
+          toDateISO: '2022-01-01T23:59:59.999Z',
+        };
+        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })).toBe(
+          buildLogsExtractionEsqlQuery(baseParams)
+        );
+      }
+    );
+
+    it.each(Object.values(EntityType.enum))(
+      '%s: extractionMode=priority output is byte-identical to single (no priority query logic yet)',
+      (type) => {
+        const baseParams = {
+          indexPatterns: ['test-index-*'],
+          latestIndex: 'latest-index',
+          entityDefinition: getEntityDefinition(type, 'default'),
+          docsLimit: 10000,
+          fromDateISO: '2022-01-01T00:00:00.000Z',
+          toDateISO: '2022-01-01T23:59:59.999Z',
+        };
+        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'priority' })).toBe(
+          buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })
+        );
+      }
+    );
   });
 
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {

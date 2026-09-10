@@ -258,24 +258,26 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
       {/* Response */}
       {!isAwaitingPrompt && (
-        <EuiFlexItem grow={false}>
-          <RoundResponse
-            hasError={isErrorCurrentRound}
-            response={response}
-            steps={steps}
-            isLoading={isLoadingCurrentRound}
-            isLastRound={isCurrentRound}
-            conversationAttachments={conversationAttachments}
-            attachmentRefs={attachmentRefs}
-            conversationId={conversationId}
-            rawRound={rawRound}
-          />
+        <>
+          <EuiFlexItem grow={false}>
+            <RoundResponse
+              hasError={isErrorCurrentRound}
+              response={response}
+              steps={steps}
+              isLoading={isLoadingCurrentRound}
+              isLastRound={isCurrentRound}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={attachmentRefs}
+              conversationId={conversationId}
+              rawRound={rawRound}
+            />
+          </EuiFlexItem>
           <RoundAttachmentReferences
             attachmentRefs={input.attachment_refs}
             conversationAttachments={conversationAttachments}
             actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
           />
-        </EuiFlexItem>
+        </>
       )}
     </>
   );
