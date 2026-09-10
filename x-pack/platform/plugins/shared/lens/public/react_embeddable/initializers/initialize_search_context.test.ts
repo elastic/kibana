@@ -24,20 +24,10 @@ describe('Context API', () => {
       ...internalApi.attributes$.getValue(),
       state: {
         ...internalApi.attributes$.getValue().state,
-        datasourceStates: {
-          textBased: {
-            layers: {
-              layer1: {
-                query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
-                columns: [],
-              },
-            },
-          },
-        },
         filters: [{ meta: { alias: 'test', disabled: false, negate: false, index: 'test' } }],
       },
     });
-    expect(api.query$.getValue()).toEqual({ esql: 'FROM kibana_sample_data_logs | LIMIT 1' });
+    expect(api.query$.getValue()).toEqual(internalApi.attributes$.getValue().state.query);
     expect(api.filters$.getValue()).toEqual(internalApi.attributes$.getValue().state.filters);
 
     cleanup();
@@ -80,16 +70,7 @@ describe('Context API', () => {
         ...internalApi.attributes$.getValue(),
         state: {
           ...internalApi.attributes$.getValue().state,
-          datasourceStates: {
-            textBased: {
-              layers: {
-                layer1: {
-                  query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
-                  columns: [],
-                },
-              },
-            },
-          },
+          query: { query: 'new-query', language: 'kuery' },
         },
       });
 
