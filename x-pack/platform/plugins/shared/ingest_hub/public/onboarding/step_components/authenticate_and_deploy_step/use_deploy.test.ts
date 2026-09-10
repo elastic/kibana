@@ -1267,7 +1267,7 @@ describe('useDeploy', () => {
 
     it('updates SO with packagePolicyIds and succeeded status after successful deploy', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
-      mockSendCreateAgentlessPolicy.mockResolvedValue({ data: { item: { policy_ids: ['p-1'] } } });
+      mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'p-1' } });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
       await act(async () => {
@@ -1276,7 +1276,7 @@ describe('useDeploy', () => {
 
       expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
         'so-dep-123',
-        expect.objectContaining({ status: 'succeeded' })
+        expect.objectContaining({ status: 'succeeded', packagePolicyIds: ['p-1'] })
       );
     });
 

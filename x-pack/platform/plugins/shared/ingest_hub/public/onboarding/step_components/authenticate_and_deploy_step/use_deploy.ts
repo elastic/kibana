@@ -182,11 +182,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
 
       const { connectorId } = authenticateAndDeployStep;
-      let onboardingDeploymentId = isInitialDeploy
-        ? undefined
-        : detectAndReviewStep.onboardingDeploymentId;
+      let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
 
-      if (isInitialDeploy) {
+      if (isInitialDeploy && !onboardingDeploymentId) {
         onboardingDeploymentId =
           (await createDeployment({
             provider: 'aws',
