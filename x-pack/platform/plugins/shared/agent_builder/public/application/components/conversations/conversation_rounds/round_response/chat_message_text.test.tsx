@@ -26,6 +26,8 @@ import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_ser
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
@@ -48,6 +50,8 @@ jest.mock('@kbn/agent-builder-visualizations', () => {
 });
 
 const application = {} as ApplicationStart;
+const http = {} as HttpStart;
+const uiSettings = {} as IUiSettingsClient;
 
 jest.mock('../../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
@@ -122,6 +126,8 @@ function createStartDependencies() {
     share: {},
     uiActions: {},
     embeddable: {},
+    // Read when assembling the custom content renderer's services.
+    data: { search: { search: jest.fn() } },
     unifiedSearch: {
       ui: {
         SearchBar: () => null,
@@ -168,7 +174,6 @@ describe('chat_message_text', () => {
         addPendingPrompt: jest.fn(),
         clearPendingPrompts: jest.fn(),
         setAskUserQuestionAnswers: jest.fn(),
-        clearLastRoundResponse: jest.fn(),
         addBackgroundExecutionCompleteStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
@@ -273,6 +278,8 @@ describe('chat_message_text', () => {
       const startDependencies = createStartDependencies();
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies,
         stepsFromCurrentRound: [vegaVisualizationStep],
         stepsFromPrevRounds: [],
@@ -295,6 +302,8 @@ describe('chat_message_text', () => {
       const startDependencies = createStartDependencies();
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies,
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -319,6 +328,8 @@ describe('chat_message_text', () => {
     it('returns a fallback when toolResultId is missing', () => {
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -334,6 +345,8 @@ describe('chat_message_text', () => {
     it('returns a fallback when tool result cannot be found', () => {
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -357,6 +370,8 @@ describe('chat_message_text', () => {
 
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [stepWithoutQuery],
         stepsFromPrevRounds: [],
@@ -375,6 +390,8 @@ describe('chat_message_text', () => {
     it('looks through previous rounds when current steps have no matching tool result', () => {
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [],
         stepsFromPrevRounds: [toolCallStep],
@@ -389,6 +406,8 @@ describe('chat_message_text', () => {
     it('passes the chartType as preferredChartType to VisualizeESQL', () => {
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -409,6 +428,8 @@ describe('chat_message_text', () => {
     it('works without a chartType attribute', () => {
       const renderer = createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],

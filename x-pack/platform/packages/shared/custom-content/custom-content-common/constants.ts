@@ -16,5 +16,12 @@ export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 /** Character (code-point) cap for schema validation — set well above the byte cap so ASCII content has headroom but keep in sync with CUSTOM_CONTENT_MAX_TEMPLATE_BYTES for byte-level checks. */
 export const CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH = 510_000;
 
-/** Browser feature flag gating the "Custom" entry in the dashboard "Add panel" menu. Off by default. */
-export const CUSTOM_CONTENT_ENABLED_FLAG_KEY = 'dashboard.customContent.enabled';
+/**
+ * Bounds for the height a generated template declares for itself. The panel renders in a
+ * sandboxed iframe with scripting disabled, so nothing can measure the content: the model's
+ * declared height is the only estimate available, and is clamped because it is model-authored.
+ */
+export const CUSTOM_CONTENT_DEFAULT_HEIGHT = 320;
+/** Matches the renderer's iframe-container floor; below it the host container overflows. */
+export const CUSTOM_CONTENT_MIN_HEIGHT = 200;
+export const CUSTOM_CONTENT_MAX_HEIGHT = 1200;

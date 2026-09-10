@@ -54,10 +54,20 @@ export const isEditableTitle = (
   title: string | AppHeaderEditableTitle
 ): title is AppHeaderEditableTitle => typeof title !== 'string';
 
+/**
+ * No-back start inset on the title (and matching placeholder). `xs` aligns a lone
+ * title with the back-button slot. Compact's 8px shell sits too close to a rounded
+ * workspace corner, so compact uses `s`.
+ */
+export const getNoBackTitleOffset = (
+  euiTheme: { size: { xs: string; s: string } },
+  compact?: boolean
+): string => (compact ? euiTheme.size.s : euiTheme.size.xs);
+
 // All of the title's layout/visual contract lives here, isolated from the behavior in
 // `Title`. The comments record the hard-won invariants behind read/edit pixel parity --
 // read them before changing any of these rules.
-const useTitleStyles = () => {
+const useTitleStyles = (compact?: boolean) => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -239,6 +249,13 @@ const useTitleStyles = () => {
       }
     `;
 
+    // Applied only when there is no back button, so a lone title lines up with where the
+    // text sits when a back button precedes it. Compact uses a larger token so the title
+    // clears a rounded workspace corner.
+    const titleOffsetStyle = css`
+      padding-inline-start: ${getNoBackTitleOffset(euiTheme, compact)};
+    `;
+
     return {
       titleWrapper,
       titleFrame,
@@ -250,16 +267,19 @@ const useTitleStyles = () => {
       titleSizer,
       titleText,
       placeholderText,
+      titleOffsetStyle,
     };
-  }, [euiTheme]);
+  }, [compact, euiTheme]);
 };
 
 interface TitleProps {
   title: string | AppHeaderEditableTitle;
+  titleOffset?: boolean;
   size?: 'xs' | 's';
+  compact?: boolean;
 }
 
-export const Title = React.memo<TitleProps>(({ title, size = 's' }) => {
+export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's', compact }) => {
   const editable = isEditableTitle(title);
   const text = asPlainText(editable ? title.text : title);
   const placeholder = asOptionalPlainText(editable ? title.placeholder : undefined);
@@ -281,7 +301,7 @@ export const Title = React.memo<TitleProps>(({ title, size = 's' }) => {
   const errorId = useGeneratedHtmlId({ prefix: 'appHeaderEditableTitleError' });
   const instructionsId = useGeneratedHtmlId({ prefix: 'appHeaderEditableTitleInstructions' });
 
-  const styles = useTitleStyles();
+  const styles = useTitleStyles(compact);
 
   useEffect(() => {
     if (!isEditing) {
@@ -405,7 +425,7 @@ export const Title = React.memo<TitleProps>(({ title, size = 's' }) => {
   );
 
   return (
-    <div css={styles.titleWrapper}>
+    <div css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}>
       <EuiTitle size={size}>
         <h1>
           {isEditing ? (

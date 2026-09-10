@@ -22,6 +22,7 @@ import {
   MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
+import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -44,6 +45,7 @@ import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
@@ -52,7 +54,7 @@ import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
-import { registerConversationWorkflowSteps } from './workflows';
+import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
@@ -176,17 +178,41 @@ export class AgentBuilderPlugin
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
-    registerConversationWorkflowSteps(
-      setupDeps.workflowsExtensions,
-      async (request) => {
+    registerConversationWorkflowSteps(setupDeps.workflowsExtensions, {
+      getConversationClient: async (request) => {
         const services = this.serviceManager.internalStart;
         if (!services) {
           throw new Error('Conversation service not available — plugin has not started');
         }
         return services.conversations.getScopedClient({ request });
       },
-      this.isExperimentalEnabled
-    );
+      getAgentRegistry: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Agents service not available — plugin has not started');
+        }
+        return services.agents.getRegistry({ request });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
+
+    registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
+      getAttachmentClient: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Attachment client not available — plugin has not started');
+        }
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return createAttachmentPublicClient({
+          request,
+          conversationsService: services.conversations,
+          attachmentsService: services.attachments,
+          coreStart,
+          spaces: startDeps.spaces,
+        });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -210,6 +236,12 @@ export class AgentBuilderPlugin
     });
 
     registerBeforeAgentWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerAfterExecutionWorkflowsHook(serviceSetups, {
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger,
       getInternalServices,
@@ -345,6 +377,7 @@ export class AgentBuilderPlugin
       plugins,
       conversations,
       conversationTemplates,
+      attachments,
     } = startServices;
     const runner = runnerFactory.getRunner();
 
@@ -392,6 +425,16 @@ export class AgentBuilderPlugin
           const agentRegistry = await agents.getRegistry({ request });
           return createConversationPublicClient({ client, agentRegistry });
         },
+      },
+      attachments: {
+        getScopedClient: async ({ request }) =>
+          createAttachmentPublicClient({
+            request,
+            conversationsService: conversations,
+            attachmentsService: attachments,
+            coreStart,
+            spaces,
+          }),
       },
       conversationTemplates,
     };

@@ -136,6 +136,7 @@ dependsOn:
   - '@kbn/elastic-agent-condition-language'
   - '@kbn/app-header'
   - '@kbn/core-http-browser'
+  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod
@@ -153,6 +154,7 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - test/scout_automatic_import/**/*
+    - test/scout_fi_agentless/**/*
     - test/scout_iac_provisioner/**/*
     - '!target/**/*'
 tasks: {}
