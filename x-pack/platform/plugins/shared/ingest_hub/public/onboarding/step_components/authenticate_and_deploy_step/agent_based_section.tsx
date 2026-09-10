@@ -384,10 +384,9 @@ export function AgentBasedSection({
                   />
                 )}
               </Suspense>
+              <EuiSpacer size="l" />
             </>
           )}
-
-          <EuiSpacer size="l" />
 
           <div data-test-subj="agentBasedSection-whereToAddPanel">
             {/* Hosts radio — always visible. Interactive before deploy, read-only after
@@ -484,14 +483,17 @@ export function AgentBasedSection({
 
             {/* Post-deploy description — replaces the pre-deploy text once the current mode has a completed deploy */}
             {isDeployedForCurrentMode && (
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.whereToAdd.deployed.description"
-                    defaultMessage="A new Agent Policy is created for this integration. Add an Elastic Agent to a host to start collecting data — agents enroll in Fleet by default, so updates deploy automatically and agents are centrally managed."
-                  />
-                </p>
-              </EuiText>
+              <>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.whereToAdd.deployed.description"
+                      defaultMessage="A new Agent Policy is created for this integration. Add an Elastic Agent to a host to start collecting data — agents enroll in Fleet by default, so updates deploy automatically and agents are centrally managed."
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
             )}
 
             {/* Primary CTA: Add agent — hidden once an agent has enrolled AND the current mode
