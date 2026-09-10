@@ -82,9 +82,9 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
         const count = attachment.data?.alertIds?.length ?? 0;
         return count > 0
           ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-            defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-            values: { count },
-          })
+              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+              values: { count },
+            })
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
