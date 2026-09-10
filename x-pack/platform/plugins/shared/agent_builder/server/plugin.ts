@@ -13,7 +13,10 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
@@ -35,7 +38,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
-import { registerUISettings } from './ui_settings';
+import { registerUISettings, registerGlobalDeductivUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
@@ -59,6 +62,11 @@ import { registerConversationWorkflowEventBridge } from './workflows/triggers/ev
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
+import {
+  DEDUCTIVE_AGENT_ID,
+  DEDUCTIVE_AVATAR_ICON,
+  DEDUCTIVE_ENABLED_FLAG,
+} from './services/execution/run_agent/deductive/config';
 
 export class AgentBuilderPlugin
   implements
@@ -166,6 +174,10 @@ export class AgentBuilderPlugin
     );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+    // Deductiv AI settings: registered in BOTH scopes so they can be configured once in
+    // Global Advanced Settings and apply to every user of the deployment (per-user values
+    // still take precedence at runtime).
+    registerGlobalDeductivUISettings({ uiSettings: coreSetup.uiSettings });
 
     this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -278,6 +290,58 @@ export class AgentBuilderPlugin
     });
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
+    });
+
+    // Built-in Deductive AI agent: registered for every user, but its availability is
+    // gated on the `agentBuilder:deductiveEnabled` Advanced Setting (which admins turn on
+    // together with the per-deployment feature flag). When disabled, the agent disappears
+    // from the agents list for everyone.
+    serviceSetups.agents.register({
+      id: DEDUCTIVE_AGENT_ID,
+      name: 'Deductive AI Agent',
+      description:
+        'Routes execution to the external Deductive AI backend. Requires the Deductive AI ' +
+        'Advanced Settings (endpoint + API key) on this deployment.',
+      avatar_symbol: '',
+      avatar_color: '#111113',
+      avatar_icon: DEDUCTIVE_AVATAR_ICON,
+      availability: {
+        cacheMode: 'space',
+        handler: async ({ request, uiSettings }) => {
+          // Availability must honor the GLOBAL (deployment-wide) setting too, so an admin
+          // configures `agentBuilder:deductiveEnabled` once and every user sees the agent —
+          // and the per-deployment feature flag, so flipping it off removes the agent
+          // entirely (settings stop having any effect).
+          const [coreStart] = await coreSetup.getStartServices().catch(() => [undefined]);
+          const flagEnabled = await coreStart?.featureFlags
+            ?.getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
+            .catch(() => false);
+          if (!flagEnabled) {
+            return {
+              status: 'unavailable',
+              reason: 'Deductive AI is not enabled for this deployment',
+            };
+          }
+          const globalClient = coreStart?.uiSettings?.globalAsScopedToClient(
+            coreStart.savedObjects.getScopedClient(request)
+          );
+          const read = async (client: typeof uiSettings | undefined) =>
+            client?.get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID).catch(() => false) ??
+            false;
+          const userEnabled = await read(uiSettings);
+          const globalEnabled = globalClient ? await read(globalClient) : false;
+          const enabled = userEnabled || globalEnabled;
+          return enabled
+            ? { status: 'available' }
+            : { status: 'unavailable', reason: 'Deductive AI agent is disabled' };
+        },
+      },
+      configuration: {
+        instructions: 'You are powered by Deductive AI.',
+        tools: [],
+        connector_ids: [],
+        enable_elastic_capabilities: false,
+      },
     });
 
     return {

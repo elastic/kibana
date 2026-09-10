@@ -212,6 +212,7 @@ export class ServiceManager {
       http,
       uiSettings,
       savedObjects,
+      featureFlags,
       inference,
       spaces,
       actions,

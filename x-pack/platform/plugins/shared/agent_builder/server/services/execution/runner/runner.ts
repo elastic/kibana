@@ -46,8 +46,12 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID,
+  AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { DeductiveRuntimeConfig } from '@kbn/agent-builder-server/agents';
 import type {
   ConversationStateManager,
   PromptManager,
@@ -61,6 +65,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import { DEFAULT_DEDUCTIVE_ENDPOINT, DEDUCTIVE_ENABLED_FLAG } from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
@@ -90,6 +95,7 @@ export interface CreateScopedRunnerDeps {
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  featureFlags: FeatureFlagsStart;
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
@@ -140,6 +146,11 @@ export interface CreateScopedRunnerDeps {
   experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
   agentConfiguration?: AgentConfiguration;
+  /**
+   * Resolved runtime configuration for the external Deductive execution path.
+   * Present only when the per-deployment feature flag is enabled.
+   */
+  deductive?: DeductiveRuntimeConfig;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -323,6 +334,48 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       apiTools: experimentalEnabled,
     };
 
+    // External Deductive execution path: gated per-deployment by the LaunchDarkly feature
+    // flag (self-managed / LD-unreachable stays off), configured per-deployment via Advanced
+    // Settings (agentBuilder:deductive*). All users of the deployment share this config; the
+    // Deductive agent is a built-in agent available to everyone when enabled.
+    const deductiveEnabled = await runnerDeps.featureFlags
+      .getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
+      .catch(() => false);
+
+    // Per-user values take precedence; fall back to the global (deployment-wide) scope so a
+    // single Global Advanced Settings entry applies to every user unless a user overrides it.
+    const globalDeductiveSettings = () =>
+      runnerDeps.uiSettings.globalAsScopedToClient(
+        runnerDeps.savedObjects.getScopedClient(request)
+      );
+
+    // Prefer GLOBAL (deployment-wide) values; only explicit user-provided values override
+    // them. `uiSettings.get` falls back to the registered default (turing) for unset keys,
+    // so the user scope must be read via getUserProvided to avoid an unset value shadowing.
+    const deductive = deductiveEnabled
+      ? await (async () => {
+          const global = globalDeductiveSettings();
+          const [userProvided, globalEndpoint, globalKey] = await Promise.all([
+            uiSettingsClient
+              .getUserProvided()
+              .catch(() => ({} as Record<string, { userValue?: unknown }>)),
+            global.get<string>(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID).catch(() => undefined),
+            global.get<string>(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID).catch(() => undefined),
+          ]);
+          const pick = (key: string): string | undefined => {
+            const v = userProvided[key]?.userValue;
+            return v != null && v !== '' ? String(v) : undefined;
+          };
+          return {
+            enabled: true,
+            endpoint:
+              (pick(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID) ?? globalEndpoint)?.trim() ||
+              DEFAULT_DEDUCTIVE_ENDPOINT,
+            apiKey: pick(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID) ?? globalKey,
+          };
+        })()
+      : undefined;
+
     const allDeps = {
       ...runnerDeps,
       modelProvider,
@@ -342,6 +395,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       parentExecutionId,
       subAgentExecutor,
       experimentalFeatures,
+      ...(deductive ? { deductive } : {}),
     };
     return createScopedRunner(allDeps);
   };
