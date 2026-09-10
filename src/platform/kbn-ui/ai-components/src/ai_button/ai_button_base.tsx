@@ -14,10 +14,10 @@ import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/e
 import {
   useAiButtonGradientStyles,
   useSvgAiGradient,
-} from '../../gradient_styles/use_ai_gradient_styles';
+} from '../gradient_styles/use_ai_gradient_styles';
 import { useAiButtonXsSizeCss } from './ai_button_xs_size_styles';
-import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
-import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
+import { SvgAiGradientDefs } from '../gradient_styles/svg_ai_gradient_defs';
+import { AiAssistantLogo } from '../ai_icons/ai_assistant_logo';
 import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
 import { ADD_TO_CHAT_LABEL } from './constants';
 

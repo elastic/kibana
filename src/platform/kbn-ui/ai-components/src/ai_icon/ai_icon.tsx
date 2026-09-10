@@ -12,10 +12,10 @@ import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, type EuiIconProps, type IconSize } from '@elastic/eui';
 
-import type { AiButtonIconType } from '../../ai_button/src/types';
-import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
-import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
-import { useSvgAiGradient } from '../../gradient_styles/use_ai_gradient_styles';
+import type { AiButtonIconType } from '../ai_button/types';
+import { AiAssistantLogo } from '../ai_icons/ai_assistant_logo';
+import { SvgAiGradientDefs } from '../gradient_styles/svg_ai_gradient_defs';
+import { useSvgAiGradient } from '../gradient_styles/use_ai_gradient_styles';
 
 const aiIconWrapperCss = css({
   display: 'inline-flex',
