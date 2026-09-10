@@ -96,7 +96,7 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
       <AiButton
         iconOnly
         variant="empty"
-        size="s"
+        size="xs"
         iconType="sparkles"
         withToolTip
         aria-label={ENHANCE_LABEL}
@@ -110,7 +110,7 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
   return (
     <AiButton
       variant="empty"
-      size="s"
+      size="xs"
       iconType="sparkles"
       aria-label={ENHANCE_LABEL}
       isDisabled={action.isDisabled}
