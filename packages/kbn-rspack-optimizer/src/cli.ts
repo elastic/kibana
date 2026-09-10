@@ -150,10 +150,8 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       const effectiveDist = updateLimits || dist;
-      // CI validates distribution metrics built with example and test plugins, so limit updates
-      // must include the same plugin set.
-      const effectiveExamples = updateLimits || examples;
-      const effectiveTestPlugins = updateLimits || testPlugins;
+      const effectiveExamples = updateLimits ? false : examples;
+      const effectiveTestPlugins = updateLimits ? false : testPlugins;
 
       log.info('Building with RSPack unified compilation...');
 
@@ -248,7 +246,7 @@ export function runRspackCli(options: CliOptions = {}): void {
                                       Note: --watch is ignored in profile mode
 
           Environment Variables:
-            KBN_USE_RSPACK=false      Use legacy webpack optimizer instead of default RSPack
+            KBN_USE_RSPACK=true       Use RSPack optimizer instead of webpack
             KBN_HMR=false             Disable HMR (RSPack only, alternative to --no-hmr)
             KBN_HMR_PORT=5678         Override the HMR SSE server port (RSPack only, default: 5678)
         `,
