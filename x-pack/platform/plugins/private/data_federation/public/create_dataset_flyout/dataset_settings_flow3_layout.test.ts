@@ -42,6 +42,14 @@ describe('dataset_settings_flow3_layout', () => {
         'schema_sample_size',
       ]);
     });
+
+    it('excludes conditional error limit fields for ndjson when error mode is unset', () => {
+      expect(getFlow3CommonFields('ndjson', '')).toEqual([
+        'datetime_format',
+        'error_mode',
+        'schema_sample_size',
+      ]);
+    });
   });
 
   describe('getFlow3AdvancedFields', () => {

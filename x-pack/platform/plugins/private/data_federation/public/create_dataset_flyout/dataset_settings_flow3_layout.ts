@@ -76,11 +76,9 @@ const getFlow3ConditionalCommonErrorFields = (
     return [];
   }
 
-  if (errorMode === 'fail_fast') {
-    return [];
-  }
-
-  return ['max_errors', 'max_error_ratio'];
+  return ERROR_MODE_LIMIT_FIELDS.filter((field) =>
+    isFieldVisibleForErrorMode(field, errorMode)
+  );
 };
 
 export const getFlow3CommonFields = (
@@ -111,7 +109,10 @@ const getFlow3ListAdvancedFieldIds = (
 ): DatasetSettingsFieldId[] => {
   const advancedFields = [...FLOW3_LIST_ADVANCED_FIELDS_BY_FORMAT[format]];
 
-  if (FLOW3_FORMATS_WITH_ERROR_MODE_IN_COMMON.includes(format) && errorMode !== 'fail_fast') {
+  if (
+    FLOW3_FORMATS_WITH_ERROR_MODE_IN_COMMON.includes(format) &&
+    isFieldVisibleForErrorMode('max_errors', errorMode)
+  ) {
     return advancedFields;
   }
 
