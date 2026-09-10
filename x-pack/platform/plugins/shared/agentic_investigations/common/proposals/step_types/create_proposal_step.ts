@@ -37,15 +37,13 @@ export const createProposalStepInputSchema = z.object({
   expiresIn: optionalStepInput(z.string()).describe(
     'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
   ),
-  supersedesProposalId: optionalStepInput(z.string()).describe(
-    'Proposal this one replaces, when an action was changed rather than tuned.'
-  ),
 });
 
 export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
   status: z.string(),
-  category: z.string(),
+  /** Comes from the action's metadata, so absent on a proposal with no action. */
+  category: z.string().optional(),
   /** True when the proposal still needs a human decision. */
   requiresDecision: z.boolean(),
 });

@@ -21,10 +21,6 @@ export const PROPOSAL_BY_ID_URL = `${PROPOSALS_INTERNAL_URL}/{id}` as const;
 export const PROPOSAL_APPROVE_URL = `${PROPOSALS_INTERNAL_URL}/{id}/approve` as const;
 export const PROPOSAL_DISMISS_URL = `${PROPOSALS_INTERNAL_URL}/{id}/dismiss` as const;
 
-/** Sub-feature privilege ids, granted implicitly by the top-level feature. */
-export const PROPOSALS_SUB_FEATURE_PRIVILEGE_ALL = 'proposals_all' as const;
-export const PROPOSALS_SUB_FEATURE_PRIVILEGE_READ = 'proposals_read' as const;
-
 /**
  * UI capabilities. Capabilities are namespaced by feature id rather than by
  * sub-feature, so each entity scopes its own names.

@@ -44,7 +44,6 @@ export const getCreateProposalStepDefinition = ({
             confidence: context.input.confidence ?? 'medium',
             origin: context.input.origin ?? 'worker',
             expiresAt: resolveExpiresAt(context.input.expiresIn),
-            supersedesProposalId: context.input.supersedesProposalId,
             workflowExecutionId,
           },
           {

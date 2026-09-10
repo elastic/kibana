@@ -99,7 +99,9 @@ export class ProposalsService {
       ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
       : undefined;
 
-    const category = metadata?.category ?? 'investigate';
+    // Absent for a proposal with no action: the category vocabulary belongs to
+    // the solution that authored the action, so there is no default to invent.
+    const category = metadata?.category;
     const impact = metadata?.impact ?? params.impact;
 
     const document: ProposalDocument = {
@@ -113,10 +115,9 @@ export class ProposalsService {
       confidence: params.confidence,
       category,
       origin: params.origin,
-      ...toSortRanks({ category, impact, confidence: params.confidence }),
+      ...toSortRanks({ impact, confidence: params.confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
-      supersedesProposalId: blankToUndefined(params.supersedesProposalId),
       createdAt: new Date().toISOString(),
       createdBy: user,
     };
@@ -133,10 +134,11 @@ export class ProposalsService {
 
   /**
    * Ordering and paging both happen in Elasticsearch. The queue's order is
-   * category, then impact, then confidence, then the nearest deadline — which
-   * the stored rank fields express, because the keyword enums would otherwise
-   * sort alphabetically. Doing it here rather than in memory is what makes the
-   * list pageable instead of capped at a single fetch.
+   * impact, then confidence, then the nearest deadline — which the stored rank
+   * fields express, because the keyword enums would otherwise sort
+   * alphabetically. Doing it here rather than in memory is what makes the list
+   * pageable instead of capped at a single fetch. Category is not part of the
+   * order: a UI groups by it and decides for itself which group leads.
    */
   async list(query: ListProposalsQuery, spaceId: string): Promise<ListProposalsResponse> {
     const filter: QueryFilterList = [{ term: { spaceId } }];
@@ -167,7 +169,6 @@ export class ProposalsService {
       from: query.from,
       query: { bool: { filter } },
       sort: [
-        { categoryRank: { order: 'asc' } },
         { impactRank: { order: 'asc' } },
         { confidenceRank: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
@@ -548,12 +549,8 @@ type QueryFilterList = Array<Record<string, unknown>>;
  * Drops the storage-only sort ranks, so they never reach the API contract.
  * Destructuring is the point: adding a rank field forces this to be updated.
  */
-const stripRanks = ({
-  categoryRank,
-  impactRank,
-  confidenceRank,
-  ...proposal
-}: StoredProposalRecord): Proposal => proposal;
+const stripRanks = ({ impactRank, confidenceRank, ...proposal }: StoredProposalRecord): Proposal =>
+  proposal;
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });

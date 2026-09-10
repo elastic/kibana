@@ -35,8 +35,8 @@ export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**
  * Grouping axis for the decision queue, resolved from the action's own metadata.
- * Kept as a plain string in storage so a solution can extend the vocabulary
- * without a mapping change; the enum is the shared baseline.
+ * An arbitrary keyword: this plugin owns no vocabulary, because each solution
+ * defines the categories its actions declare and its queries group by.
  */
 export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
@@ -113,8 +113,11 @@ export const proposalSchema = z.object({
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,
-  /** Resolved from the action workflow's metadata at creation. */
-  category: z.string().max(MAX_NAME_LENGTH),
+  /**
+   * Resolved from the action workflow's metadata at creation, so it is absent
+   * on a proposal that carries no action.
+   */
+  category: proposalCategorySchema.optional(),
   origin: proposalOriginSchema,
   /** Decision deadline, evaluated on read rather than swept into a status. */
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
@@ -127,8 +130,6 @@ export const proposalSchema = z.object({
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Set when this proposal replaces a dismissed one. */
-  supersedesProposalId: z.string().max(MAX_ID_LENGTH).optional(),
 
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
   createdBy: proposalUserSchema.optional(),
@@ -151,7 +152,6 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema.default('worker'),
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  supersedesProposalId: z.string().max(MAX_ID_LENGTH).optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 

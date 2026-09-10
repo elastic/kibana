@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ProposalCategory,
-  ProposalConfidence,
-  ProposalImpact,
-} from '../../../common/proposals/proposal';
+import type { ProposalConfidence, ProposalImpact } from '../../../common/proposals/proposal';
 
 /**
  * Numeric mirrors of the keyword enums, written once at creation so
@@ -20,16 +16,13 @@ import type {
  * the queue at whatever we happened to fetch, so the rank travels with the
  * document.
  *
+ * `category` has no rank: it is an arbitrary per-solution keyword used for
+ * grouping and aggregation, and the order categories are displayed in is a UI
+ * decision rather than a stored one.
+ *
  * These are `Record<Enum, number>` on purpose: adding a value to an enum
  * without ranking it is a type error rather than a silent mis-sort.
  */
-export const CATEGORY_RANK: Record<ProposalCategory, number> = {
-  contain: 0,
-  escalate: 1,
-  investigate: 2,
-  tune: 3,
-};
-
 export const IMPACT_RANK: Record<ProposalImpact, number> = {
   critical: 0,
   high: 1,
@@ -43,33 +36,19 @@ export const CONFIDENCE_RANK: Record<ProposalConfidence, number> = {
   low: 2,
 };
 
-/**
- * `category` is stored as a plain string so a solution can extend the
- * vocabulary without a mapping change. Anything outside the shared baseline
- * sorts last rather than accidentally sorting first. Kept inside a `byte`.
- */
-export const UNRANKED = 99;
-
-const rankOf = <TKey extends string>(table: Record<TKey, number>, value: string): number =>
-  value in table ? table[value as TKey] : UNRANKED;
-
 /** The sort fields derived from a proposal's snapshotted enums. */
 export interface ProposalSortRanks {
-  categoryRank: number;
   impactRank: number;
   confidenceRank: number;
 }
 
 export const toSortRanks = ({
-  category,
   impact,
   confidence,
 }: {
-  category: string;
   impact: ProposalImpact;
   confidence: ProposalConfidence;
 }): ProposalSortRanks => ({
-  categoryRank: rankOf(CATEGORY_RANK, category),
   impactRank: IMPACT_RANK[impact],
   confidenceRank: CONFIDENCE_RANK[confidence],
 });

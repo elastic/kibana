@@ -13,8 +13,8 @@ import {
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
 } from '../common/constants';
 import {
-  PROPOSALS_SUB_FEATURE_PRIVILEGE_ALL,
-  PROPOSALS_SUB_FEATURE_PRIVILEGE_READ,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+  PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
 import { CreateProposalStepId, UpdateProposalStepId } from '../common/proposals/step_types';
 import { AgenticInvestigationsPlugin } from './plugin';
@@ -97,40 +97,26 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('leaves the top-level privileges empty so every capability comes from an entity sub-feature', () => {
+    it('grants the proposals capabilities from the top-level all privilege', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.all.api).toEqual([]);
-      expect(privileges.all.ui).toEqual([]);
-      expect(privileges.read.api).toEqual([]);
-      expect(privileges.read.ui).toEqual([]);
-    });
-
-    it('grants the proposals sub-feature privileges through the top-level all and read', () => {
-      const { features } = setupPlugin();
-      const [proposals] = registeredFeature(features).subFeatures;
-      const [group] = proposals.privilegeGroups;
-
-      // An All/Read pair is mutually exclusive, most permissive first.
-      expect(group.groupType).toBe('mutually_exclusive');
-      expect(group.privileges.map(({ id }: { id: string }) => id)).toEqual([
-        PROPOSALS_SUB_FEATURE_PRIVILEGE_ALL,
-        PROPOSALS_SUB_FEATURE_PRIVILEGE_READ,
+      expect(privileges.all.api).toEqual([
+        PROPOSALS_API_PRIVILEGE_READ,
+        PROPOSALS_API_PRIVILEGE_MANAGE,
       ]);
-      expect(group.privileges.map(({ includeIn }: { includeIn: string }) => includeIn)).toEqual([
-        'all',
-        'read',
+      expect(privileges.all.ui).toEqual([
+        PROPOSALS_UI_CAPABILITY_SHOW,
+        PROPOSALS_UI_CAPABILITY_DECIDE,
       ]);
     });
 
-    it('puts the manage privilege only on the proposals All privilege', () => {
+    it('withholds manage and decide from read, so a reader cannot decide', () => {
       const { features } = setupPlugin();
-      const [proposals] = registeredFeature(features).subFeatures;
-      const [all, read] = proposals.privilegeGroups[0].privileges;
+      const { privileges } = registeredFeature(features);
 
-      expect(all.api).toEqual([PROPOSALS_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_MANAGE]);
-      expect(read.api).toEqual([PROPOSALS_API_PRIVILEGE_READ]);
+      expect(privileges.read.api).toEqual([PROPOSALS_API_PRIVILEGE_READ]);
+      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
     });
 
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {

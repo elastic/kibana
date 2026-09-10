@@ -64,11 +64,13 @@ export const ProposalDecisionCard: React.FC<ProposalDecisionCardProps> = ({
             <h4>{actionName ?? i18n.NO_ACTION}</h4>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="pndProposalCategory">
-            {proposal.category}
-          </EuiBadge>
-        </EuiFlexItem>
+        {proposal.category ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj="pndProposalCategory">
+              {proposal.category}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <EuiBadge color={IMPACT_COLORS[proposal.impact] ?? 'hollow'}>{proposal.impact}</EuiBadge>
         </EuiFlexItem>

@@ -40,7 +40,6 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
   confidence: 'medium',
   category: 'tune',
   origin: 'worker',
-  categoryRank: 3,
   impactRank: 3,
   confidenceRank: 1,
   workflowExecutionId: EXECUTION_ID,
@@ -251,7 +250,6 @@ describe('ProposalsService', () => {
 
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toMatchObject({
-        categoryRank: 0,
         impactRank: 1,
         confidenceRank: 0,
       });
@@ -307,7 +305,7 @@ describe('ProposalsService', () => {
       expect(proposal.impact).toBe('critical');
     });
 
-    it('should fall back to a default category when the action declares no metadata', async () => {
+    it('should leave the category unset when the action declares no metadata', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({ definition: { consts: {} } });
@@ -325,7 +323,9 @@ describe('ProposalsService', () => {
         { spaceId: SPACE_ID }
       );
 
-      expect(proposal.category).toBe('investigate');
+      // The category vocabulary belongs to the solution that authored the
+      // action, so there is no default for this plugin to invent.
+      expect(proposal.category).toBeUndefined();
     });
 
     it('should treat empty template output as absent rather than storing it', async () => {
@@ -340,7 +340,6 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: '',
           expiresAt: '',
-          supersedesProposalId: '',
           impact: 'low',
           confidence: 'medium',
           origin: 'worker',
@@ -351,7 +350,6 @@ describe('ProposalsService', () => {
 
       expect(proposal.expiresAt).toBeUndefined();
       expect(proposal.actionWorkflowId).toBeUndefined();
-      expect(proposal.supersedesProposalId).toBeUndefined();
       expect(proposal.workflowExecutionId).toBeUndefined();
       // An empty action id must not look action-bearing.
       expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
@@ -653,7 +651,9 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
-        definition: { consts: { actionMetadata: { category: 'not-a-category' } } },
+        // `name` is required; `category` is any keyword, so it cannot be the
+        // thing that fails here.
+        definition: { consts: { actionMetadata: { category: 'tune' } } },
       });
       const { service } = createService(storage, workflowsApi);
 
@@ -699,7 +699,6 @@ describe('ProposalsService', () => {
       // The keyword enums sort alphabetically, so the queue's order comes from
       // the numeric ranks written at creation.
       expect(searchArgs.sort).toEqual([
-        { categoryRank: { order: 'asc' } },
         { impactRank: { order: 'asc' } },
         { confidenceRank: { order: 'asc' } },
         { expiresAt: { order: 'asc', missing: '_last' } },
@@ -758,7 +757,6 @@ describe('ProposalsService', () => {
 
       const { proposals } = await service.list(listQuery(), SPACE_ID);
 
-      expect(proposals[0]).not.toHaveProperty('categoryRank');
       expect(proposals[0]).not.toHaveProperty('impactRank');
       expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });

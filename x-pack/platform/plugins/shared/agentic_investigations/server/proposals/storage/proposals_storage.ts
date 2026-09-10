@@ -32,10 +32,9 @@ const storageSettings = {
       origin: types.keyword({}),
       expiresAt: types.date({}),
 
-      // Numeric mirrors of the three enums above, so the queue's ordering is a
-      // sort clause rather than an in-memory pass. See `sort_ranks.ts`; a
-      // missing rank is a mapping error rather than a silent mis-sort.
-      categoryRank: types.byte({}),
+      // Numeric mirrors of the two ranked enums above, so the queue's ordering
+      // is a sort clause rather than an in-memory pass. See `sort_ranks.ts`.
+      // `category` has no rank: it is grouped and aggregated on, never sorted.
       impactRank: types.byte({}),
       confidenceRank: types.byte({}),
 
@@ -55,7 +54,6 @@ const storageSettings = {
       executionError: types.text({}),
 
       workflowExecutionId: types.keyword({}),
-      supersedesProposalId: types.keyword({}),
 
       createdAt: types.date({}),
       createdBy: types.object({

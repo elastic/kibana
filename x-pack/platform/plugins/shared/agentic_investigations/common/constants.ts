@@ -6,7 +6,6 @@
  */
 
 export const AGENTIC_INVESTIGATIONS_PLUGIN_ID = 'agenticInvestigations' as const;
-export const AGENTIC_INVESTIGATIONS_PLUGIN_NAME = 'Agentic investigations' as const;
 
 /** Shared by every entity's routes, so a caller versions the whole surface at once. */
 export const AGENTIC_INVESTIGATIONS_API_VERSION = '1' as const;

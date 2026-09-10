@@ -95,22 +95,28 @@ describe('create-investigation-proposal workflow', () => {
     expect(gate?.type).toBe('waitForApproval');
   });
 
-  it('drives the gate timeout from expiresIn, so the deadline and the gate agree', () => {
+  it('records the same deadline it gates on, so the queue and the gate cannot disagree', () => {
     const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
+    const create = findStep(workflow.steps, 'create_proposal');
 
-    expect(gate.timeout).toContain('inputs.expiresIn');
+    expect(gate.timeout).toBe(create?.with?.expiresIn);
   });
 
-  it('sets a workflow timeout longer than the default gate timeout, or the parked wait expires early', () => {
+  it('keeps the gate timeout static, since the engine does not template-render it', () => {
     const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
-    // The timeout is templated, so compare against the fallback it renders to
-    // when a caller supplies no `expiresIn`.
-    const defaultTimeout = /default:\s*'([^']+)'/.exec(gate.timeout ?? '')?.[1];
 
-    expect(defaultTimeout).toBeDefined();
+    // A template here reaches the duration parser unrendered and throws at
+    // execution time. See elastic/kibana#290258.
+    expect(gate.timeout).not.toContain('{{');
+    expect(() => durationToMs(gate.timeout ?? '')).not.toThrow();
+  });
+
+  it('sets a workflow timeout longer than the gate timeout, or the parked wait expires early', () => {
+    const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
+
     expect(workflow.settings?.timeout).toBeDefined();
     expect(durationToMs(workflow.settings!.timeout!)).toBeGreaterThanOrEqual(
-      durationToMs(defaultTimeout!)
+      durationToMs(gate.timeout!)
     );
   });
 

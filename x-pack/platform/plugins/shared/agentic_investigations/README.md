@@ -21,36 +21,27 @@ common/
   proposals/             constants, schemas, step definitions shared with the browser
 server/
   plugin.ts config.ts types.ts
-  features.ts            umbrella feature + one sub-feature per entity
+  features.ts            umbrella feature and its privileges
   proposals/             routes, services, step handlers, storage, managed workflows
 public/
   plugin.ts index.ts types.ts
   proposals/             browser step definitions for the YAML editor
 ```
 
-Adding an entity means adding a directory in each of the three, an entity barrel, a sub-feature in `features.ts`, and a getter on the start contract. It should not require touching the umbrella's own files beyond those two lines.
+Adding an entity means adding a directory in each of the three, an entity barrel, its privileges in `features.ts`, and a getter on the start contract. It should not require restructuring the umbrella itself.
 
 ## Privileges
 
-One Kibana feature, `agenticInvestigations`, whose top-level `all` and `read` are deliberately **empty shells**. Every capability lives in an entity sub-feature and is pulled up through `includeIn`:
+One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Proposed Actions** — named for proposals alone because action proposals move to their own plugin in a follow-up. Both privileges are declared inline on the feature:
 
-```mermaid
-flowchart LR
-    all["feature: all"]
-    read["feature: read"]
-    minAll["feature: minimal_all"]
-    pAll["proposals_all<br/>read_proposals + manage_proposals"]
-    pRead["proposals_read<br/>read_proposals"]
+| Feature privilege | API | UI |
+| ----------------- | ------------------------------------ | ------------------------------------ |
+| `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
+| `read`            | `read_proposals`                     | `showProposals`                      |
 
-    all --> pAll
-    all --> pRead
-    read --> pRead
-    minAll -.->|"deliberately excludes<br/>sub-features"| pAll
-```
+So `read` can see the queue but cannot decide it. Because there are no sub-feature privileges to withhold, `minimal_all` and `minimal_read` grant the same as `all` and `read`. The feature carries `minimumLicense: 'enterprise'`.
 
-So a role granted `all` on the feature gets proposals automatically, and each future entity adds its own sub-feature without changing the top-level block. The All/Read pair is a `mutually_exclusive` group declared most permissive first, which is the platform convention.
-
-Two consequences worth knowing. `minimal_all` and `minimal_read` grant nothing but login, by design — they are the "without sub-features" variants. And `minimumLicense` is not permitted on `mutually_exclusive` privileges, so the sub-feature inherits the feature's `enterprise` gate; per-entity licensing would require an `independent` group.
+When a second entity lands and needs to be grantable on its own, its capabilities belong in a sub-feature pulled up through `includeIn` rather than in more inline privileges.
 
 ## Proposals
 
@@ -59,7 +50,7 @@ Two consequences worth knowing. `minimal_all` and `minimal_read` grant nothing b
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-investigation-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
-- Proposals are immutable once decided, and are never tuned: changing an action means dismissing and creating a new proposal, optionally linked through `supersedesProposalId`.
+- Proposals are immutable once decided, and are never tuned: changing an action means dismissing the proposal and creating a new one.
 
 ### Architecture
 
@@ -161,10 +152,11 @@ The input contract:
 | `actionWorkflowId` | no | Omit for a proposal the analyst carries out themselves. |
 | `actionInput` | no | Passed to the action workflow as its single `actionInput` object. |
 | `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. |
-| `expiresIn` | no | How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation and used as the gate timeout. |
 | `autoApprove` | no | See below. Defaults to `false`, so the gate is fail-closed. |
 
 You get back `proposalId` and `status`.
+
+**The decision deadline is a fixed 72h, not a caller input.** The workflow engine does not template-render a step's `timeout`; it hands the raw string to the duration parser, so `timeout: "{{ inputs.expiresIn }}"` fails at execution time ([#290258](https://github.com/elastic/kibana/issues/290258)). The gate timeout and the `expiresIn` recorded on the proposal are therefore both hardcoded to `72h` and must stay equal — otherwise the deadline the queue shows an analyst is not the one the gate enforces. The `investigations.createProposal` step still accepts `expiresIn`, so a caller driving that step directly can set its own deadline; only this gate workflow is pinned.
 
 **`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true` and the gate is skipped — the proposal is still recorded, and the action still runs. Anything else leaves it unset. It applies only to action proposals: a proposal with no `actionWorkflowId` is always gated regardless of the flag.
 
@@ -177,7 +169,7 @@ Omitting an optional input is safe. A Liquid template for an absent input still 
 An action workflow is an ordinary managed workflow that:
 
 1. carries the `action` tag, so the catalog can be discovered by tag;
-2. declares `consts.actionMetadata` (`name`, `category`, and optionally `description`, `impact`, `reversible`, `approvalPolicy`) — metadata has to live under `consts`, because unknown top-level YAML keys are stripped by the workflow schema;
+2. declares `consts.actionMetadata` (`name`, `category` — any keyword the owning solution chooses — and optionally `description`, `impact`, `reversible`, `approvalPolicy`) — metadata has to live under `consts`, because unknown top-level YAML keys are stripped by the workflow schema;
 3. takes a **single `actionInput` object** as its input, so the generic gate workflow never needs to know an action's parameter names;
 4. ends in `workflow.output`, because `workflow.execute` cannot type a child's result.
 
@@ -205,7 +197,8 @@ Reads need `read_proposals`; both decisions need `manage_proposals`. There is de
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
 - **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is intrinsic to the action, so it is snapshotted from the metadata at creation.
 - **`actionInput` is validated at creation**, against the schema the action declares on its manual trigger, so a proposal that could never run never reaches a human. Best-effort: the JSON Schema to zod conversion does not cover every keyword.
-- **The queue's order lives in Elasticsearch.** `category`, `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
+- **The queue's order lives in Elasticsearch.** `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
+- **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. It is absent on a proposal that carries no action. Consumers group and aggregate on it; nothing sorts on it, and which category is displayed first is a UI decision rather than a stored rank.
 
 ## Managed workflows
 
@@ -229,7 +222,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 **Privileges on the approving user:**
 
-- `all` on **Agentic investigations** (which grants `proposals_all` implicitly) — to decide.
+- `all` on **Proposed Actions** — to decide.
 - Security → **Rules** `all` (`rules-all`) — the rule is created under *their* credentials. Worth exercising deliberately: an approver **without** it should see the proposal reach `failed`, not `succeeded`. That failure is the model working as designed.
 - `workflowsManagement` execute — the resume route rides on `execute` until step-level privileges land ([#19134](https://github.com/elastic/security-team/issues/19134)).
 
@@ -242,11 +235,11 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 5. Assert the outcome: the proposal reaches `succeeded`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
 6. Repeat in a non-default space. Space scoping is invisible in `default`: every query filters on `spaceId`, and a missing filter would only show up elsewhere.
 
-**Also worth exercising:** dismissal with a reason (reaches `dismissed`, records `dismissReason` and `rationale`, creates no rule); first-actor-wins (approve from two sessions at once — one `200`, one `409`, action runs once); a gate timeout (shorten the gate timeout and let it expire — the workflow-level `on-failure` should move the proposal to `failed`); and a non-action proposal created through the API with a `comment` and no `actionWorkflowId`, which should terminate at `approved` without executing anything.
+**Also worth exercising:** dismissal with a reason (reaches `dismissed`, records `dismissReason` and `rationale`, creates no rule); first-actor-wins (approve from two sessions at once — one `200`, one `409`, action runs once); a gate timeout (shorten the gate timeout and let it expire — the workflow-level `on-failure` should move the proposal to `dismissed`, not `failed`); and a non-action proposal created through the API with a `comment` and no `actionWorkflowId`, which should terminate at `approved` without executing anything.
 
 ## Known limitations
 
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Only one entity so far.** The directory convention and the sub-feature pattern are designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.
+- **Only one entity so far.** The directory convention is designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.

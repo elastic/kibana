@@ -31,8 +31,14 @@ export const ACTION_WORKFLOW_TAG = 'action' as const;
 /** The single input every action workflow accepts. */
 export const ACTION_WORKFLOW_INPUT = 'actionInput' as const;
 
-/** Grouping axis for the decision queue an approved action feeds. */
-export const actionCategorySchema = z.enum(['contain', 'escalate', 'investigate', 'tune']);
+/**
+ * Grouping axis for the decision queue an approved action feeds. Deliberately
+ * an arbitrary keyword rather than an enum: each solution owns the vocabulary
+ * its own actions and queries use, and AlertZero's set is not NightShift's.
+ * Consumers group and aggregate on it — nothing sorts on it, and the display
+ * order of categories is a UI concern rather than something stored.
+ */
+export const actionCategorySchema = z.string().min(1).max(64);
 export type ActionCategory = z.infer<typeof actionCategorySchema>;
 
 /** How consequential running the action is. Intrinsic to the action, not the situation. */
@@ -50,7 +56,7 @@ export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
 export const actionMetadataSchema = z.object({
   name: z.string().min(1).max(256),
   description: z.string().max(2048).optional(),
-  category: actionCategorySchema,
+  category: actionCategorySchema.optional(),
   impact: actionImpactSchema.optional(),
   reversible: z.boolean().optional(),
   approvalPolicy: actionApprovalPolicySchema.optional(),

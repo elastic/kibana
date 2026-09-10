@@ -9,9 +9,8 @@ tags:
   - agentic-investigation-proposals
 settings:
   # The parked gate's wake-up is bounded by the workflow timeout, whose default
-  # is 6h. Without this the gate below would expire silently. This is a static
-  # ceiling, so an `expiresIn` longer than it is cut short by the workflow
-  # timing out rather than by the gate expiring.
+  # is 6h. Without this the gate below would expire silently, so this has to
+  # stay comfortably above the gate's own 72h.
   timeout: '80h'
   on-failure:
     # A gate timeout surfaces as a step failure rather than a branch, and HITL
@@ -68,12 +67,6 @@ triggers:
           type: string
           enum: ['low', 'medium', 'high']
           description: Confidence in the recommendation.
-        expiresIn:
-          type: string
-          description: >
-            How long the analyst has to decide, as a duration like `24h`. Drives
-            the gate timeout and is resolved to an absolute deadline on the
-            proposal. Capped by the workflow timeout in `settings` above.
         autoApprove:
           type: boolean
           description: >
@@ -104,7 +97,9 @@ steps:
       impact: "{{ inputs.impact | default: 'low' }}"
       confidence: "{{ inputs.confidence | default: 'medium' }}"
       origin: worker
-      expiresIn: '{{ inputs.expiresIn }}'
+      # Must stay equal to the gate timeout below, or the deadline the queue
+      # shows an analyst is not the one the gate actually enforces.
+      expiresIn: '72h'
 
   - name: decision_gate
     type: if
@@ -120,9 +115,11 @@ steps:
       # fail-closed by construction.
       - name: await_decision
         type: waitForApproval
-        # Same duration the proposal records as its deadline, so the queue and
-        # the gate cannot disagree about when the decision expired.
-        timeout: "{{ inputs.expiresIn | default: '72h' }}"
+        # Static, and equal to the `expiresIn` recorded above: the engine does
+        # not template-render `timeout`, it hands the raw string to the duration
+        # parser, so a template here fails at execution time. A caller-supplied
+        # deadline returns once elastic/kibana#290258 lands.
+        timeout: '72h'
         with:
           message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
           approveLabel: Approve
