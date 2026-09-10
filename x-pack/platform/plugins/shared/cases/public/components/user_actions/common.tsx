@@ -7,16 +7,16 @@
 
 import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 
 import type { UserActionAction } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
 import { UserActionTimestamp } from './timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
-import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 import { getUserActionAriaLabel } from './user_actions_aria_labels';
+import { UserActionContentToolbar } from './content_toolbar';
 
 const showMoveToReference = (
   action: UserActionAction,
@@ -29,7 +29,11 @@ type BuilderArgs = Pick<
 > & {
   label: EuiCommentProps['event'];
   icon: EuiCommentProps['timelineAvatar'];
-  /** Extra control appended after copy-link / move-to-reference (e.g. a document-flyout button). */
+  /**
+   * Extra control appended after copy-link / move-to-reference (e.g. a document-flyout button).
+   * Pass the raw node returned by `renderAttachmentAction` — it wraps BUTTON actions in their
+   * own `EuiFlexItem`, so this slot must NOT add another wrapper.
+   */
   documentAction?: React.ReactNode;
 };
 
@@ -56,10 +60,7 @@ export const createCommonUpdateUserActionBuilder = ({
         timelineAvatar: icon,
         timelineAvatarAriaLabel: getUserActionAriaLabel(userAction.type),
         actions: (
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <UserActionCopyLink id={userAction.id} />
-            </EuiFlexItem>
+          <UserActionContentToolbar id={userAction.id}>
             {showMoveToReference(userAction.action, userAction.commentId) && (
               <EuiFlexItem grow={false}>
                 <UserActionMoveToReference
@@ -68,8 +69,8 @@ export const createCommonUpdateUserActionBuilder = ({
                 />
               </EuiFlexItem>
             )}
-            {documentAction != null && <EuiFlexItem grow={false}>{documentAction}</EuiFlexItem>}
-          </EuiFlexGroup>
+            {documentAction}
+          </UserActionContentToolbar>
         ),
       },
     ],

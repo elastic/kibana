@@ -842,4 +842,84 @@ describe('CasesWorkflowRunService', () => {
       expect.stringContaining('Failed to write Cases workflow audit event')
     );
   });
+
+  // ── B1: observable inputs rejected on non-observable origins ─────────────────
+
+  it('rejects observableIds inputs when the origin is not an observable origin (cases.case)', async () => {
+    await expect(
+      run({
+        caseIds: ['case-1'],
+        inputs: { event: { observableIds: ['obs-1'] } },
+        origin: { type: 'cases.case', caseId: 'case-1' },
+      })
+    ).rejects.toThrow('Observable inputs can only be used with observable origins.');
+    expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+  });
+
+  it('rejects observableTypeKeys inputs when the origin is an attachment origin', async () => {
+    setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' });
+    await expect(
+      run({
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+            observableTypeKeys: ['ip'],
+          },
+        },
+        origin: alertOrigin('alert-1'),
+      })
+    ).rejects.toThrow('Observable inputs can only be used with observable origins.');
+    expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+  });
+
+  it('accepts observableIds when the origin is cases.observable', async () => {
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4' }],
+    } as unknown as Case);
+    await expect(
+      run({
+        caseIds: ['case-1'],
+        inputs: { event: { observableIds: ['obs-1'] } },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
+      })
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+  });
+
+  // ── B2: includeComments gated on attachment origins ───────────────────────────
+
+  it('fetches case without comments for a cases.case origin', async () => {
+    await run(defaultBody);
+    expect(casesClient.cases.get).toHaveBeenCalledWith(
+      expect.objectContaining({ includeComments: false })
+    );
+  });
+
+  it('fetches case without comments for a cases.observable origin', async () => {
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4' }],
+    } as unknown as Case);
+    await run({
+      caseIds: ['case-1'],
+      inputs: {},
+      origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
+    });
+    expect(casesClient.cases.get).toHaveBeenCalledWith(
+      expect.objectContaining({ includeComments: false })
+    );
+  });
+
+  it('fetches case with comments for a cases.attachment origin', async () => {
+    setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' });
+    await run({
+      caseIds: ['case-1'],
+      inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
+      origin: alertOrigin('alert-1'),
+    });
+    expect(casesClient.cases.get).toHaveBeenCalledWith(
+      expect.objectContaining({ includeComments: true })
+    );
+  });
 });

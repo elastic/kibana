@@ -20,7 +20,7 @@ import {
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
-import { resolveUnifiedAttachmentType, toStringArray } from '../../../common/utils/attachments';
+import { resolveUnifiedAttachmentType, isNonEmptyString } from '../../../common/utils/attachments';
 import { toUnifiedAttachmentPayload } from '../../common/attachments';
 import type {
   UnifiedAttachmentState,
@@ -119,19 +119,27 @@ const getDefaultTargets = ({
     return [{ id: savedObjectId }];
   }
 
-  const ids = toStringArray(attachment.attachmentId);
+  // Pair each id with its corresponding index positionally, using the raw arrays so that
+  // compaction of empties/non-strings in one array can never shift an index onto the wrong id.
+  // `toStringArray` is deliberately NOT used here — it filters entries, which would corrupt the
+  // positional relationship.
+  const rawAttachmentId = attachment.attachmentId;
+  const rawIds = Array.isArray(rawAttachmentId) ? rawAttachmentId : [rawAttachmentId];
   const rawIndex = getRecord(attachment.metadata)?.index;
-  const indices = toStringArray(rawIndex);
-  const broadcastIndex = typeof rawIndex === 'string' ? rawIndex : undefined;
+  // A non-empty string index is broadcast to every id; an array is paired positionally.
+  const broadcastIndex = isNonEmptyString(rawIndex) ? rawIndex : undefined;
+  const rawIndices = Array.isArray(rawIndex) ? rawIndex : [];
 
-  return ids.map((id, index) => ({
-    id,
-    ...(broadcastIndex !== undefined
-      ? { index: broadcastIndex }
-      : indices[index] !== undefined
-      ? { index: indices[index] }
-      : {}),
-  }));
+  return rawIds.flatMap((rawId, position) => {
+    if (!isNonEmptyString(rawId)) {
+      // Skip empty or non-string ids rather than emitting a target with no meaningful identity.
+      return [];
+    }
+    const candidateIndex = broadcastIndex ?? rawIndices[position];
+    return [
+      isNonEmptyString(candidateIndex) ? { id: rawId, index: candidateIndex } : { id: rawId },
+    ];
+  });
 };
 
 export interface ResolvedWorkflowAttachmentOrigin {
@@ -167,14 +175,36 @@ const resolveAttachmentOrigin = ({
         resolveUnifiedAttachmentType(attachment, theCase.owner) === origin.attachmentType
     )
     .flatMap((attachment) => {
-      const unifiedAttachment = toUnifiedAttachmentPayload({
-        ...attachment,
-        owner: attachment.owner ?? theCase.owner,
-      } as AttachmentRequestV2) as UnifiedAttachmentState;
+      // Skip attachments that cannot be converted (e.g. legacy alert comments with mismatched
+      // alertId/index array lengths). This mirrors the behaviour of `normalizeDocumentResponse`
+      // in `server/client/attachments/get.ts`, which also skips rather than throws so that one
+      // malformed sibling does not prevent a valid attachment from being targeted.
+      let unifiedAttachment: UnifiedAttachmentState;
+      try {
+        unifiedAttachment = toUnifiedAttachmentPayload({
+          ...attachment,
+          owner: attachment.owner ?? theCase.owner,
+        } as AttachmentRequestV2) as UnifiedAttachmentState;
+      } catch {
+        return [];
+      }
       const context = { attachment: unifiedAttachment, savedObjectId: attachment.id };
       return attachmentType.workflow?.getTargets?.(context) ?? getDefaultTargets(context);
     });
-  const targetsById = new Map(availableTargets.map((target) => [target.id, target]));
+  // Group targets by id. An id appearing under more than one index is ambiguous — the origin
+  // carries only an id, so there is no way to determine which index to record in the activity
+  // log. `targetsById` records all matches so the ambiguity can be detected and rejected below
+  // rather than silently picking whichever the flatMap visited last.
+  const targetsById = new Map<string, WorkflowAttachmentTarget[]>();
+  for (const target of availableTargets) {
+    const existing = targetsById.get(target.id);
+    if (existing !== undefined) {
+      existing.push(target);
+    } else {
+      targetsById.set(target.id, [target]);
+    }
+  }
+
   const requestedIds =
     origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ? [origin.attachmentId] : origin.attachmentIds;
   const seen = new Set<string>();
@@ -184,16 +214,53 @@ const resolveAttachmentOrigin = ({
     }
     seen.add(id);
 
-    const target = targetsById.get(id);
-    if (target === undefined) {
+    const matches = targetsById.get(id);
+    if (matches === undefined) {
       throw Boom.badRequest(
         `Attachment target "${id}" of type "${origin.attachmentType}" does not belong to case "${theCase.id}".`
       );
     }
-    return target;
+    // Reject ambiguous cases where the same id is attached under different indices — an activity
+    // log entry records only one index (from targets[0]), so picking one silently would be wrong.
+    const uniqueIndices = new Set(matches.map((t) => t.index));
+    if (uniqueIndices.size > 1) {
+      throw Boom.badRequest(
+        `Attachment target "${id}" of type "${origin.attachmentType}" is attached to case "${theCase.id}" under multiple indices.`
+      );
+    }
+    return matches[0];
   });
 
   return { targets };
+};
+
+/**
+ * Enforces the generic origin↔inputs alignment for attachment types registered as `workflow: {}`
+ * (with no `validateTargets` hook). Every origin target must appear in the selected alerts or
+ * selected documents, and at least one selection is required.
+ *
+ * Types that supply `validateTargets` take full responsibility for alignment and skip this check.
+ * Note: a type whose workflow inputs use neither `alertIds` nor `documents` cannot pass the
+ * generic check and must provide its own `validateTargets` hook.
+ */
+const validateDefaultTargetAlignment = ({
+  targets,
+  selectedAlerts,
+  selectedDocuments,
+}: {
+  targets: WorkflowAttachmentTarget[];
+  selectedAlerts: DocumentPair[];
+  selectedDocuments: DocumentPair[];
+}): void => {
+  const selection = selectedAlerts.length > 0 ? selectedAlerts : selectedDocuments;
+  if (selection.length === 0) {
+    throw Boom.badRequest('Attachment workflow origins require selected alert or document inputs.');
+  }
+  const selectedIds = new Set(selection.map(({ _id }) => _id));
+  const unselected = targets.find(({ id }) => !selectedIds.has(id));
+  if (unselected !== undefined) {
+    throw Boom.badRequest(`Attachment workflow origin "${unselected.id}" is not selected.`);
+  }
 };
 
 /**
@@ -291,9 +358,23 @@ export const validateOrigin = ({
   }
 
   if (resolvedAttachmentOrigin !== undefined && attachmentOrigin !== undefined) {
-    attachmentTypeRegistry
-      .get(attachmentOrigin.attachmentType)
-      .workflow?.validateTargets?.({ targets: resolvedAttachmentOrigin.targets, inputs });
+    const { validateTargets } =
+      attachmentTypeRegistry.get(attachmentOrigin.attachmentType).workflow ?? {};
+
+    if (validateTargets !== undefined) {
+      validateTargets({ targets: resolvedAttachmentOrigin.targets, inputs });
+    } else {
+      // When the attachment type does not supply its own validator, Cases enforces a generic
+      // default: the origin targets must correspond to selected alert or document inputs.
+      // Without this floor a caller can name attachment target A while passing a disjoint
+      // (but case-attached) input B, and the activity row would record "ran W on A" while
+      // the workflow received B.
+      validateDefaultTargetAlignment({
+        targets: resolvedAttachmentOrigin.targets,
+        selectedAlerts,
+        selectedDocuments,
+      });
+    }
   }
 
   return resolvedAttachmentOrigin;
