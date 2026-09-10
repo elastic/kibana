@@ -56,14 +56,14 @@ export function registerInstall(router: EntityStorePluginRouter) {
           assetManagerClient: assetManager,
           entityMaintainersClient,
         } = entityStoreCtx;
-        const { entityTypes, logExtraction, logExtractionByType, historySnapshot } = req.body;
+        const { entityTypes, logExtraction, historySnapshot } = req.body;
         logger.debug('Install api called');
 
         const forbidden = await enforceEntityStorePrivileges(
           assetManager,
           req,
           res,
-          collectAdditionalIndexPatterns(logExtraction, logExtractionByType)
+          collectAdditionalIndexPatterns(logExtraction)
         );
         if (forbidden) return forbidden;
         const { engines } = await assetManager.getStatus();
@@ -74,13 +74,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await assetManager.init(
-          req,
-          toInstall,
-          logExtraction,
-          historySnapshot,
-          logExtractionByType
-        );
+        await assetManager.init(req, toInstall, logExtraction, historySnapshot);
         await entityMaintainersClient.init(req);
 
         return res.created({ body: { ok: true } });

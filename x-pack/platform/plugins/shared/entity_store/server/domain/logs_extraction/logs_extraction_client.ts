@@ -50,15 +50,15 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import { type LogExtractionConfig, type LogExtractionTypeOverride } from '../saved_objects';
+import { type LogExtractionConfig } from '../saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import { EntityStoreNotRunningError, EntityTypeNotInstalledError } from '../errors';
-import type { LogExtractionByTypeParams, LogExtractionInstallParams } from '../../routes/constants';
+import { EntityStoreNotRunningError } from '../errors';
+import type { LogExtractionInstallParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
@@ -222,34 +222,8 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(
-    params?: LogExtractionInstallParams,
-    byType?: LogExtractionByTypeParams
-  ): Promise<LogExtractionConfig> {
-    const perTypeEntries = Object.entries(byType ?? {}) as Array<
-      [EntityType, LogExtractionTypeOverride]
-    >;
-
-    // Checked before any write, so a rejected request does not leave a partial update behind.
-    if (perTypeEntries.length > 0) {
-      const installed = new Set(
-        (await this.engineDescriptorClient.getAll()).map((engine) => engine.type)
-      );
-      const missing = perTypeEntries
-        .map(([type]) => type)
-        .filter((type) => !installed.has(type))
-        .sort();
-      if (missing.length > 0) {
-        throw new EntityTypeNotInstalledError(missing);
-      }
-    }
-
+  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({ logsExtraction: params });
-    await Promise.all(
-      perTypeEntries.map(([type, override]) =>
-        this.engineDescriptorClient.updateLogExtractionConfig(type, override)
-      )
-    );
     return state.logsExtraction;
   }
 
