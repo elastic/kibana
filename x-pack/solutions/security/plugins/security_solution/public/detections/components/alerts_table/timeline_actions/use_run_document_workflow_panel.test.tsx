@@ -21,6 +21,13 @@ import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as i18n from '../translations';
 
+const mockCaseRunWorkflow = jest.fn();
+const mockUseCaseAttachmentWorkflowRun: jest.Mock = jest.fn(() => mockCaseRunWorkflow);
+
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+}));
+
 const mockMutate = jest.fn();
 const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
@@ -157,6 +164,74 @@ describe('useRunDocumentWorkflowPanel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('originEventId and Cases executor', () => {
+    it('calls the generic attachment hook with the event target', async () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
+          attachmentType: 'security.event',
+          attachmentId: 'event-123',
+        });
+      });
+    });
+
+    it('calls the generic attachment hook without a target when originEventId is absent', async () => {
+      const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
+          attachmentType: 'security.event',
+          attachmentId: undefined,
+        });
+      });
+    });
+
+    it('passes the Cases executor as runWorkflow when originEventId is set and hook returns an executor', async () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockRunWorkflowPanelProps.length).toBeGreaterThan(0);
+      });
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      expect(panelProps?.runWorkflow).toBe(mockCaseRunWorkflow);
+    });
+
+    it('passes undefined as runWorkflow when the attachment hook returns undefined', async () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValueOnce(undefined);
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockRunWorkflowPanelProps.length).toBeGreaterThan(0);
+      });
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      expect(panelProps?.runWorkflow).toBeUndefined();
+    });
   });
 
   describe('hook return values', () => {
