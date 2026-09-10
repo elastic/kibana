@@ -51,6 +51,17 @@ steps:
         Evidence: {{ inputs.evidence }}
         Confidence: {{ inputs.confidence }}
 
+        Quality gate — refuse to draft when the gap is unwinnable. If the gap
+        description is a catch-all ("any X activity"), evidence is empty, or
+        confidence is below 0.3, do NOT call the tool. Return instead
+        {"skipped": true, "reason": "<which gate failed>"} and nothing else. A
+        vague rule that fires on everything is worse than no rule.
+
+        Populate rule.threat with the ATT&CK mapping for the technique above —
+        tactic and technique ids and names, exactly as catalogued — so the rule
+        is discoverable in the detection library. Use the stated technique and
+        sub-technique where one applies.
+
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id.
       schema:
@@ -110,9 +121,15 @@ steps:
             type: string
           attachment_version:
             type: number
+          skipped:
+            type: boolean
+          reason:
+            type: string
         required:
-          - rule
           - attachment_id
+        anyOf:
+          - required: [rule]
+          - required: [skipped]
 
   - name: preview_creation
     type: workflow.execute

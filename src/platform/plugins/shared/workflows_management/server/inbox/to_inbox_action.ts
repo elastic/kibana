@@ -8,7 +8,7 @@
  */
 
 import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
-import { buildWorkflowSourceId as buildSourceId } from '@kbn/inbox-common';
+import { buildWorkflowSourceId as buildSourceId, parseWorkflowSourceId } from '@kbn/inbox-common';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -75,28 +75,15 @@ export const deriveHistoryStatus = (
  * The `workflowRunId` is what the `resume` API needs, and the `id` (step
  * execution doc id) is retained for traceability / future sub-workflow
  * propagation work per [security-team#16710](https://github.com/elastic/security-team/issues/16710).
+ *
+ * The format itself is owned by `@kbn/inbox-common` (`buildWorkflowSourceId` /
+ * `parseWorkflowSourceId`); this adapter merely accepts the step execution
+ * document.
  */
 export const buildWorkflowSourceId = (step: EsWorkflowStepExecution): string =>
   buildSourceId(step.workflowId, step.workflowRunId, step.id);
 
-/**
- * Extracts the `workflowRunId` (a.k.a. executionId) from a composite source id.
- * Returns `null` if the source id is malformed — the route handler treats
- * that as a 404.
- */
-export const parseWorkflowSourceId = (
-  sourceId: string
-): { workflowId: string; executionId: string; stepExecutionId: string } | null => {
-  const parts = sourceId.split(':');
-  if (parts.length < 3) return null;
-  const [workflowId, executionId, ...rest] = parts;
-  return {
-    workflowId,
-    executionId,
-    // Re-join in case the step execution id contains colons (defensive).
-    stepExecutionId: rest.join(':'),
-  };
-};
+export { parseWorkflowSourceId };
 
 /**
  * Maps a paused `waitForInput` step execution to the common {@link InboxAction}
