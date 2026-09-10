@@ -722,6 +722,163 @@ describe('start', () => {
       });
     });
   });
+
+  describe('controls and help', () => {
+    it('aliases deprecated next members onto the canonical objects', async () => {
+      const { chrome, service } = await start();
+
+      expect(chrome.next.aiButton).toBe(chrome.controls.aiButton);
+      expect(chrome.next.globalSearch).toBe(chrome.controls.globalSearch);
+      expect(chrome.next.contextSwitcher).toBe(chrome.controls.contextSwitcher);
+      expect(chrome.next.projectPicker).toBe(chrome.controls.projectPicker);
+      expect(chrome.next.userMenu).toBe(chrome.controls.userMenu);
+      expect(chrome.next.registerFeedbackHandler).toBe(chrome.help.registerFeedbackHandler);
+      expect(chrome.next.getFeedbackHandler$).toBe(chrome.help.getFeedbackHandler$);
+      expect(chrome.next.registerNewsfeedHandler).toBe(chrome.help.registerNewsfeedHandler);
+      expect(chrome.next.getNewsfeedHandler$).toBe(chrome.help.getNewsfeedHandler$);
+
+      service.stop();
+    });
+
+    it('observes control registrations through either path', async () => {
+      const { chrome, service } = await start();
+      const search = { onClick: () => {} };
+
+      chrome.next.globalSearch.set(search);
+      expect(await firstValueFrom(chrome.controls.globalSearch.get$())).toBe(search);
+
+      chrome.controls.globalSearch.set(undefined);
+      expect(await firstValueFrom(chrome.next.globalSearch.get$())).toBeUndefined();
+
+      service.stop();
+    });
+
+    it('unregisters AI buttons from either path', async () => {
+      const { chrome, service } = await start();
+      const button = { content: <div /> };
+
+      const unregisterFromControls = chrome.controls.aiButton.register(button);
+      expect(await firstValueFrom(chrome.next.aiButton.get$())).toEqual([button]);
+
+      unregisterFromControls();
+      expect(await firstValueFrom(chrome.controls.aiButton.get$())).toEqual([]);
+
+      const unregisterFromNext = chrome.next.aiButton.register(button);
+      expect(await firstValueFrom(chrome.controls.aiButton.get$())).toEqual([button]);
+
+      unregisterFromNext();
+      expect(await firstValueFrom(chrome.next.aiButton.get$())).toEqual([]);
+
+      service.stop();
+    });
+
+    it('unregisters help handlers from either path', async () => {
+      const { chrome, service } = await start();
+      const feedback = () => {};
+      const newsfeed = { open: () => {}, hasNew$: new Rx.BehaviorSubject(false) };
+
+      const unregisterFeedback = chrome.next.registerFeedbackHandler(feedback);
+      expect(await firstValueFrom(chrome.help.getFeedbackHandler$())).toBe(feedback);
+      unregisterFeedback();
+      expect(await firstValueFrom(chrome.help.getFeedbackHandler$())).toBeUndefined();
+
+      const unregisterNewsfeed = chrome.help.registerNewsfeedHandler(newsfeed);
+      expect(await firstValueFrom(chrome.next.getNewsfeedHandler$())).toBe(newsfeed);
+      unregisterNewsfeed();
+      expect(await firstValueFrom(chrome.next.getNewsfeedHandler$())).toBeUndefined();
+
+      service.stop();
+    });
+  });
+
+  describe('app header', () => {
+    it('aliases deprecated next members onto the canonical objects', async () => {
+      const { chrome, service } = await start();
+
+      expect(chrome.next.appHeader).toBe(chrome.appHeader);
+      expect(chrome.next.inlineAppHeader).toBe(chrome.inlineAppHeader);
+
+      service.stop();
+    });
+
+    it('observes registrations through either path', async () => {
+      const { chrome, service } = await start();
+      const config = { title: 'Dashboards' };
+
+      const unregisterFromNext = chrome.next.appHeader.set(config);
+      expect(await firstValueFrom(chrome.appHeader.get$())).toEqual(config);
+
+      unregisterFromNext();
+      expect(await firstValueFrom(chrome.appHeader.get$())).toBeUndefined();
+
+      const unregisterFromCanonical = chrome.appHeader.set(config);
+      expect(await firstValueFrom(chrome.next.appHeader.get$())).toEqual(config);
+
+      unregisterFromCanonical();
+      expect(await firstValueFrom(chrome.next.appHeader.get$())).toBeUndefined();
+
+      service.stop();
+    });
+  });
+});
+
+describe('componentDeps.docTitleParts$', () => {
+  it('exposes initial, changed, and reset title parts', async () => {
+    document.title = 'Kibana';
+    const { chrome, service } = await start();
+    const titles: Array<readonly string[]> = [];
+    const subscription = chrome.componentDeps.docTitleParts$.subscribe((parts) =>
+      titles.push(parts)
+    );
+
+    chrome.docTitle.change('Dashboard');
+    chrome.docTitle.reset();
+
+    expect(titles).toEqual([['Kibana'], ['Dashboard', 'Kibana'], ['Kibana']]);
+
+    subscription.unsubscribe();
+    service.stop();
+  });
+});
+
+describe('inline app header', () => {
+  it('clears inline state on app change and ignores the previous registration', async () => {
+    const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+    const { chrome, service } = await start({ startDeps });
+    const values: Array<{ title?: unknown } | undefined> = [];
+    const subscription = chrome.next.inlineAppHeader
+      .get$()
+      .subscribe((value) => values.push(value));
+
+    const registration = chrome.next.inlineAppHeader.register('First');
+    startDeps.application.navigateToApp('alpha');
+    registration.update('Stale');
+    registration.unregister();
+
+    expect(values).toContainEqual({ title: 'First' });
+    expect(values).not.toContainEqual({ title: 'Stale' });
+    expect(values[values.length - 1]).toBeUndefined();
+
+    subscription.unsubscribe();
+    service.stop();
+  });
+
+  it('does not let a stale registration update or clear a newer one', async () => {
+    const { chrome, service } = await start();
+    const first = chrome.next.inlineAppHeader.register('First');
+    const second = chrome.next.inlineAppHeader.register('Second');
+
+    first.update('Stale');
+    first.unregister();
+
+    await expect(firstValueFrom(chrome.next.inlineAppHeader.get$())).resolves.toEqual({
+      title: 'Second',
+    });
+
+    second.unregister();
+    await expect(firstValueFrom(chrome.next.inlineAppHeader.get$())).resolves.toBeUndefined();
+    service.stop();
+  });
 });
 
 describe('stop', () => {
