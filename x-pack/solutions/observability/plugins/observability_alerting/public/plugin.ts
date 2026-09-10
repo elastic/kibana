@@ -58,6 +58,7 @@ export class ObservabilityAlertingPlugin
       title: i18n.translate('xpack.observabilityAlerting.appTitle', {
         defaultMessage: 'Alerting',
       }),
+      euiIconType: 'logoObservability',
       appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
       status: AppStatus.inaccessible,

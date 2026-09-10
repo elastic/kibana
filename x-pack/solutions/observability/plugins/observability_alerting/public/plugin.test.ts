@@ -87,6 +87,7 @@ describe('ObservabilityAlertingPlugin', () => {
       expect.objectContaining({
         id: OBSERVABILITY_ALERTING_APP_ID,
         appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
+        euiIconType: 'logoObservability',
         status: AppStatus.inaccessible,
         visibleIn: [],
         deepLinks: expect.arrayContaining([
