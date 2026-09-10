@@ -5,11 +5,14 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
 permissions:
   contents: read
   pull-requests: read
 jobs:
   build:
+    if: github.event_name != 'merge_group'
     uses: elastic/docs-actions/.github/workflows/docs-build.yml@v1
     with:
       enable-vale-linting: true
