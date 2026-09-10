@@ -90,7 +90,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - test/scout_context_engine/**/*
+    - test/scout_agent_builder/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
