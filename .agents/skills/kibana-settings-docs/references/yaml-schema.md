@@ -80,7 +80,7 @@ Do not invent a datatype the file never uses.
 
 ## applies_to in settings YAML
 
-The canonical authoring contract lives in docs-builder. Until [docs-builder#4014](https://github.com/elastic/docs-builder/pull/4014) merges, use that PR. After merge, use [applies_to in settings YAML](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md#settings-yaml). This skill keeps the rules an agent needs to tag Kibana YAML.
+The canonical authoring contract lives in docs-builder: [applies_to in settings YAML](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md#settings-yaml). This skill keeps the rules an agent needs to tag Kibana YAML.
 
 This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-tagging` rule that stack and deployment keys must share the same lifecycle.
 
