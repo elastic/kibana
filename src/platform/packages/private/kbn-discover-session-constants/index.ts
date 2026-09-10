@@ -31,6 +31,14 @@ export const MAX_SEARCH_QUERY_LENGTH = 1000;
 export const MAX_METRICS_TAB_DIMENSIONS = 5;
 export const MAX_METRICS_TAB_STATE_STRING_LENGTH = 1000;
 
+/**
+ * Aggregations supported by the metrics grid.
+ * Values match ES|QL's FunctionNames enum (avg, sum, min, max).
+ */
+export const METRICS_GRID_SIMPLE_AGGREGATIONS = ['avg', 'sum', 'min', 'max'] as const;
+
+export const METRICS_GRID_HISTOGRAM_PERCENTILES = ['p50', 'p75', 'p90', 'p95', 'p99'] as const;
+
 export type SavedSearchContentType = typeof SavedSearchType;
 
 export enum VIEW_MODE {

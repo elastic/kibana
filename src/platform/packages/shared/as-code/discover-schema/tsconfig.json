@@ -18,7 +18,6 @@
     "@kbn/controls-constants",
     "@kbn/data-service-server",
     "@kbn/es-query-server",
-    "@kbn/discover-session-constants",
-    "@kbn/discover-utils"
+    "@kbn/discover-session-constants"
   ]
 }

@@ -25,11 +25,9 @@ import {
   MAX_METRICS_TAB_DIMENSIONS,
   MAX_METRICS_TAB_STATE_STRING_LENGTH,
   DiscoverTabType,
-} from '@kbn/discover-session-constants';
-import {
   METRICS_GRID_HISTOGRAM_PERCENTILES,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
-} from '@kbn/discover-utils';
+} from '@kbn/discover-session-constants';
 import { classicTabSchema, esqlTabSchema } from './tab';
 import { visContextSchema } from './vis_context';
 import { discoverSessionControlPanelsSchema } from './control_panel';

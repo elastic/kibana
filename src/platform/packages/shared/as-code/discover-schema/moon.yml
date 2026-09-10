@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/data-service-server'
   - '@kbn/es-query-server'
   - '@kbn/discover-session-constants'
-  - '@kbn/discover-utils'
 tags:
   - shared-server
   - package
