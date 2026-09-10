@@ -559,6 +559,7 @@ packages:
   - 'src/core/test-helpers/kbn-server'
   - 'src/core/test-helpers/model-versions'
   - 'src/dev'
+  - 'src/platform/kbn-ui/ai-components'
   - 'src/platform/kbn-ui/app-header'
   - 'src/platform/kbn-ui/app-menu'
   - 'src/platform/kbn-ui/callout'

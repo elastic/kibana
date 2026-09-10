@@ -13,11 +13,11 @@ import { render, screen } from '@testing-library/react';
 import { AiIcon } from './ai_icon';
 
 const mockUseSvgAiGradient = jest.fn();
-jest.mock('../../gradient_styles/use_ai_gradient_styles', () => ({
+jest.mock('../gradient_styles/use_ai_gradient_styles', () => ({
   useSvgAiGradient: () => mockUseSvgAiGradient(),
 }));
 
-jest.mock('../../gradient_styles/svg_ai_gradient_defs', () => ({
+jest.mock('../gradient_styles/svg_ai_gradient_defs', () => ({
   SvgAiGradientDefs: () => <div data-test-subj="svg-ai-gradient-defs" />,
 }));
 

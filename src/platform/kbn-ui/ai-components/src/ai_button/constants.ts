@@ -9,6 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADD_TO_CHAT_LABEL = i18n.translate('sharedUXPackages.aiButton.addToChatLabel', {
+export const ADD_TO_CHAT_LABEL = i18n.translate('kbnUI.aiComponents.addToChatLabel', {
   defaultMessage: 'Add to chat',
 });

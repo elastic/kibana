@@ -3611,6 +3611,9 @@ importers:
       '@kbn/ui-actions-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ui_actions
+      '@kbn/ui-ai-components':
+        specifier: workspace:*
+        version: link:src/platform/kbn-ui/ai-components
       '@kbn/ui-app-header':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/app-header
@@ -7315,6 +7318,8 @@ importers:
   src/core/test-helpers/model-versions: {}
 
   src/dev: {}
+
+  src/platform/kbn-ui/ai-components: {}
 
   src/platform/kbn-ui/app-header: {}
 
