@@ -9,12 +9,11 @@ import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { LogExtractionInstallParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
+import type { LogExtractionTypeOverride } from '../../../domain/saved_objects';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
-  LogExtractionTypeOverride,
 } from '../../../domain/saved_objects';
-import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 
@@ -114,8 +113,3 @@ export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine
 export const LogExtractionUpdadeSchema = LogExtractionInstallParams.superRefine(
   validateLogExtractionParams
 );
-
-/** Per entity-type params, with the same per-field checks applied to every entry. */
-export const LogExtractionByTypeSchema = z
-  .partialRecord(EntityType, LogExtractionTypeOverride.superRefine(validateLogExtractionParams))
-  .optional();

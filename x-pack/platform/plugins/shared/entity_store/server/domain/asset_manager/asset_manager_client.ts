@@ -40,11 +40,7 @@ import {
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
 } from '../saved_objects';
-import type {
-  HistorySnapshotBodyParams,
-  LogExtractionByTypeParams,
-  LogExtractionInstallParams,
-} from '../../routes/constants';
+import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
 import { getMergedConfig } from '../logs_extraction/merge_config';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from '../constants';
 import type {
@@ -137,8 +133,7 @@ export class AssetManagerClient {
     request: KibanaRequest,
     entityTypes: EntityType[],
     logsExtractionParams?: LogExtractionInstallParams,
-    historySnapshotParams?: HistorySnapshotBodyParams,
-    logsExtractionByTypeParams?: LogExtractionByTypeParams
+    historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
@@ -182,11 +177,7 @@ export class AssetManagerClient {
       // schedules are created — those tasks self-delete when they find zero engines,
       // so scheduling them in parallel with initEntity can tear down a freshly
       // scheduled status task mid-install.
-      await Promise.all(
-        entityTypes.map((type) =>
-          this.initEntity(request, type, logsExtractionByTypeParams?.[type])
-        )
-      );
+      await Promise.all(entityTypes.map((type) => this.initEntity(request, type)));
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
       await Promise.all([
@@ -404,16 +395,9 @@ export class AssetManagerClient {
     return getMergedConfig(type, globalOverrides, engine.logExtractionConfig);
   }
 
-  private async initEntity(
-    request: KibanaRequest,
-    type: EntityType,
-    logsExtractionTypeParams?: LogExtractionByTypeParams[EntityType]
-  ): Promise<boolean> {
+  private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
     const installed = await this.install(type);
     if (installed) {
-      if (logsExtractionTypeParams !== undefined) {
-        await this.engineDescriptorClient.updateLogExtractionConfig(type, logsExtractionTypeParams);
-      }
       await this.start(request, type);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
