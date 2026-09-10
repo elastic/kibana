@@ -65,8 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(await utils.queryWatchlistIndex(watchlistId)).toHaveLength(2);
 
       await deleteWatchlist(watchlistId);
-      // INTENTIONALLY BROKEN to exercise the skipped-on-main evaluator (revert before merge)
-      expect(await utils.queryWatchlistIndex(watchlistId)).toHaveLength(999);
+      expect(await utils.queryWatchlistIndex(watchlistId)).toHaveLength(0);
     });
 
     it('should remove the watchlist id from entity.attributes.watchlists when the watchlist is deleted', async () => {
