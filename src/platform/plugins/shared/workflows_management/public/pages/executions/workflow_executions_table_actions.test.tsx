@@ -207,6 +207,29 @@ describe('workflow executions actions column', () => {
     expect(screen.getByTestId('workflowExecutionActionViewAllExecutions')).toBeInTheDocument();
   });
 
+  it('opens the row actions menu with a downLeft anchor position', () => {
+    const services = createStartServicesMock();
+    services.application.navigateToApp = mockNavigateToApp;
+
+    render(
+      <ActionsCellHarness
+        onViewAllExecutionsForWorkflow={jest.fn()}
+        execution={createExecution({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          status: ExecutionStatus.COMPLETED,
+        })}
+      />,
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    fireEvent.click(screen.getByTestId('workflowExecutionActionsButton'));
+
+    // EUI applies the anchor class on the popover panel; downLeft keeps the menu below the row.
+    expect(document.querySelector('.euiPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionActionReRun')).toBeInTheDocument();
+  });
+
   it('hides actions when user lacks all relevant privileges', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: false,

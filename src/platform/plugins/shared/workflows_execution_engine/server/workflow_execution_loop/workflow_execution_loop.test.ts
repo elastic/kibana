@@ -34,6 +34,10 @@ describe('workflowExecutionLoop', () => {
     workflowRuntime: {
       saveState: jest.fn().mockResolvedValue(undefined),
       setWorkflowError: jest.fn(),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-1',
+        status: ExecutionStatus.RUNNING,
+      }),
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),

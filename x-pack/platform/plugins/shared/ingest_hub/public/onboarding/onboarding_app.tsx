@@ -77,7 +77,9 @@ export function renderOnboardingApp(
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={{ ...coreStart, cloud: deps.cloud, fleet: deps.fleet }}>
+      <KibanaContextProvider
+        services={{ ...coreStart, cloud: deps.cloud, fleet: deps.fleet, spaces: deps.spaces }}
+      >
         <QueryClientProvider client={queryClient}>
           <FleetStatusProvider>
             <OnboardingFlowProvider>

@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
 jest.mock('@elastic/apm-rum');
@@ -157,5 +158,140 @@ describe('FlyoutTemplate header title icon and description', () => {
     );
 
     expect(screen.getByTestId('myFlyoutHeader').textContent).toBe('Alert details');
+  });
+});
+
+describe('FlyoutTemplate header blocks', () => {
+  const body = (
+    <FlyoutTemplate.Body>
+      <span>content</span>
+    </FlyoutTemplate.Body>
+  );
+
+  const renderHeader = (children: React.ReactNode, headerProps = {}) =>
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Header title="Alert details" {...headerProps}>
+          {children}
+        </FlyoutTemplate.Header>
+        {body}
+      </FlyoutTemplate>
+    );
+
+  /** Builds `count` badges labelled `Badge 1..count`. */
+  const badges = (count: number) =>
+    Array.from({ length: count }, (_, index) => (
+      <FlyoutTemplate.Header.Badge key={index}>{`Badge ${index + 1}`}</FlyoutTemplate.Header.Badge>
+    ));
+
+  it('renders a MetaBlock as a title/value pair', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.MetaBlock title="Last updated" data-test-subj="metaUpdated">
+        Dec 3, 2025
+      </FlyoutTemplate.Header.MetaBlock>
+    );
+
+    expect(screen.getByTestId('metaUpdated')).toHaveTextContent('Last updated');
+    expect(screen.getByTestId('metaUpdated')).toHaveTextContent('Dec 3, 2025');
+  });
+
+  it('renders an InfoBlock, forwarding size and color to the value', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.InfoBlock
+        title="Risk score"
+        size="xl"
+        color="danger"
+        data-test-subj="infoRisk"
+      >
+        90
+      </FlyoutTemplate.Header.InfoBlock>
+    );
+
+    const block = screen.getByTestId('infoRisk');
+    expect(block).toHaveTextContent('Risk score');
+    expect(block).toHaveTextContent('90');
+  });
+
+  it('renders a Badge with its label, color, and icon', () => {
+    const { container } = renderHeader(
+      <FlyoutTemplate.Header.Badge color="warning" iconType="warning" data-test-subj="badgeUrgent">
+        Urgent
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    expect(screen.getByTestId('badgeUrgent')).toHaveTextContent('Urgent');
+    expect(container.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();
+  });
+
+  it('groups each part kind into its own slot regardless of JSX order', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.InfoBlock title="InfoTitle">
+          InfoValue
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.Badge>BadgeLabel</FlyoutTemplate.Header.Badge>
+        <FlyoutTemplate.Header.MetaBlock title="MetaTitle">
+          MetaValue
+        </FlyoutTemplate.Header.MetaBlock>
+      </>
+    );
+
+    // Authored info, badge, meta; rendered meta, badge, info.
+    const text = screen.getByTestId('myFlyoutHeader').textContent ?? '';
+    expect(text.indexOf('MetaTitle')).toBeLessThan(text.indexOf('BadgeLabel'));
+    expect(text.indexOf('BadgeLabel')).toBeLessThan(text.indexOf('InfoTitle'));
+  });
+
+  it('renders all badges inline at the overflow threshold', () => {
+    renderHeader(badges(5));
+
+    expect(screen.getByText('Badge 5')).toBeInTheDocument();
+    expect(screen.queryByTestId('flyoutHeaderBadgeOverflow')).not.toBeInTheDocument();
+  });
+
+  it('collapses badges past the threshold into an overflow popover', async () => {
+    renderHeader(badges(6));
+
+    // Four stay inline; the fifth and sixth move behind the overflow badge.
+    expect(screen.getByText('Badge 4')).toBeInTheDocument();
+    expect(screen.queryByText('Badge 5')).not.toBeInTheDocument();
+
+    const overflow = screen.getByTestId('flyoutHeaderBadgeOverflow');
+    expect(overflow).toHaveTextContent('+2 more');
+
+    await userEvent.click(overflow);
+
+    expect(await screen.findByText('Badge 5')).toBeInTheDocument();
+    expect(screen.getByText('Badge 6')).toBeInTheDocument();
+  });
+
+  it('places the blocks inside the collapsible region', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.MetaBlock title="Owner">Platform</FlyoutTemplate.Header.MetaBlock>
+        <FlyoutTemplate.Header.Badge>Urgent</FlyoutTemplate.Header.Badge>
+        <FlyoutTemplate.Header.InfoBlock title="Risk">90</FlyoutTemplate.Header.InfoBlock>
+      </>
+    );
+
+    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
+    expect(region).toHaveTextContent('Owner');
+    expect(region).toHaveTextContent('Urgent');
+    expect(region).toHaveTextContent('Risk');
+  });
+
+  it('hides the blocks from assistive tech when the header is collapsed', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.MetaBlock title="Owner">Platform</FlyoutTemplate.Header.MetaBlock>
+        <FlyoutTemplate.Header.Badge>Urgent</FlyoutTemplate.Header.Badge>
+      </>,
+      { collapsed: true }
+    );
+
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
   });
 });

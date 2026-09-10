@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { PluginPackage } from '@kbn/repo-packages';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import type { PluginEntry } from '../types';
 
 export type { PluginEntry };
@@ -23,6 +24,8 @@ export interface DiscoverPluginsOptions {
   paths?: string[];
   /** Directories scanned for plugins */
   parentDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 const isDefaultPlugin = getPluginPackagesFilter();
@@ -54,13 +57,21 @@ function toPluginEntry(repoRoot: string, pkg: PluginPackage): PluginEntry | null
  * Discover all Kibana plugins with UI bundles using the repo package map.
  */
 export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<PluginEntry[]> {
-  const { repoRoot, examples = false, testPlugins = false, paths, parentDirs } = options;
+  const {
+    repoRoot,
+    examples = false,
+    testPlugins = false,
+    paths,
+    parentDirs,
+    allowlistPluginGroups,
+  } = options;
   const pluginFilter = getPluginPackagesFilter({
     examples,
     testPlugins,
     browser: true,
     paths,
     parentDirs,
+    allowlistPluginGroups,
   });
 
   const plugins: PluginEntry[] = [];

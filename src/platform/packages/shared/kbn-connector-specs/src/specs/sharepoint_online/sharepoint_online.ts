@@ -198,6 +198,7 @@ export const SharepointOnline: ConnectorSpec = {
   actions: {
     getAllSites: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SharePoint sites the connector has access to. With app-only (client credentials) auth, returns all sites via /sites/getAllSites. With delegated (authorization code) auth, falls back to /sites?search= because getAllSites requires application permissions. Use this to discover site IDs needed by getSite, getSitePages, getSiteDrives, getSiteLists, and getSiteListItems.',
       input: z
@@ -243,6 +244,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePages: {
       isTool: true,
+      scope: 'read',
       description:
         'List all pages in a SharePoint site. Returns page metadata (id, title, description, webUrl, createdDateTime, lastModifiedDateTime). Use getAllSites to discover siteId values, and then use getSitePageContents to fetch the full content of a specific page.',
       input: lazySchema(() =>
@@ -279,6 +281,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch the full HTML content of a SharePoint site page, including its canvas layout. Use this to read wiki/news pages. Use getAllSites to discover siteId values, and getSitePages to discover pageId values for a given site.',
       input: lazySchema(() =>
@@ -327,6 +330,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSite: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve details for a single SharePoint site by either its site ID or its relative URL. Returns id, displayName, webUrl, siteCollection, createdDateTime, and lastModifiedDateTime. Use getAllSites to discover site IDs, or provide a relativeUrl in the format "contoso.sharepoint.com:/sites/hr:".',
       input: lazySchema(() =>
@@ -380,6 +384,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteDrives: {
       isTool: true,
+      scope: 'read',
       description:
         'List all document libraries (drives) within a SharePoint site. Returns drive metadata including id, name, driveType, webUrl, and owner. Use getAllSites to discover siteId values. Drive IDs returned here are required by getDriveItems and downloadDriveItem.',
       input: lazySchema(() =>
@@ -418,6 +423,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteLists: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SharePoint lists within a site (e.g., custom lists, document libraries represented as lists). Returns id, displayName, name, webUrl, and description for each list. Use getAllSites to discover siteId values. List IDs returned here are required by getSiteListItems.',
       input: lazySchema(() =>
@@ -458,6 +464,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteListItems: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch all items from a specific list within a SharePoint site. Returns item metadata (id, webUrl, createdDateTime, lastModifiedDateTime, createdBy, lastModifiedBy). Use getAllSites to discover siteId values and getSiteLists to discover listId values.',
       input: lazySchema(() =>
@@ -508,6 +515,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getDriveItems: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and folders within a SharePoint document library (drive), optionally scoped to a subfolder path. Returns item metadata including id, name, webUrl, size, and @microsoft.graph.downloadUrl. Use getSiteDrives to discover driveId values. The @microsoft.graph.downloadUrl field can be passed to downloadItemFromURL.',
       input: lazySchema(() =>
@@ -550,6 +558,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     downloadDriveItem: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a file from a SharePoint document library and return it as UTF-8 text. Best suited for plain-text or markdown files. For PDFs, .docx, and other binary formats that require preprocessing, use downloadItemFromURL instead (which returns base64 for Elasticsearch ingest pipeline extraction). Use getSiteDrives to find driveId and getDriveItems to find itemId.',
       input: lazySchema(() =>
@@ -604,6 +613,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     downloadItemFromURL: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a SharePoint file using its pre-authenticated @microsoft.graph.downloadUrl and return the content as a base64-encoded string. Use this for PDFs, .docx, and other binary formats that require preprocessing via an Elasticsearch ingest pipeline attachment processor. For plain-text or markdown files you can use downloadDriveItem instead. Use getDriveItems to find the @microsoft.graph.downloadUrl field on a file item.',
       input: lazySchema(() =>
@@ -699,6 +709,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search SharePoint content using the Microsoft Graph Search API with Keyword Query Language (KQL). Supports searching across sites, lists, list items, drives, and drive items. Note: not all entity type combinations can be mixed in a single request — valid groupings are (driveItem, listItem), (site, list), or (drive) alone.',
       input: lazySchema(() =>

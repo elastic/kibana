@@ -35,7 +35,11 @@ import type {
 } from '../../../../../../../common/types';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
-import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
+import {
+  isPackageUnverified,
+  isPackageUpdatable,
+  ExperimentalFeaturesService,
+} from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
@@ -155,10 +159,19 @@ export const mapToCard = ({
       isDeprecated = true;
     }
 
-    const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${version}`,
-      ...(item.integration ? { integration: item.integration } : {}),
-    });
+    // Content packages have no add-integration flow; keep linking to the overview page.
+    // Non-content packages go to the add-integration page only when the feature flag is on.
+    const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
+    const url =
+      item.type === 'content' || !enableIntegrationTileClickToAdd
+        ? getHref('integration_details_overview', {
+            pkgkey: `${item.name}-${version}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          })
+        : getHref('add_integration_to_policy', {
+            pkgkey: `${item.name}-${version}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          });
 
     uiInternalPathUrl = url;
   }

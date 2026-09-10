@@ -17,6 +17,12 @@ import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
+/** Never call from the tool-result path — image bytes must not enter tool results. */
+export type PromptImageResolver = (ref: {
+  attachmentId: string;
+  version?: number;
+}) => Promise<{ base64: string; mimeType: string } | undefined>;
+
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   /**
@@ -47,6 +53,7 @@ export interface PromptFactoryParams {
    */
   relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
+  imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
 }
 

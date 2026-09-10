@@ -234,6 +234,13 @@ describe('events_write tool', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts only discovery as the optional caller source', () => {
+    expect(eventsWriteSchema.safeParse({ source: 'discovery', items: [input] }).success).toBe(true);
+    expect(eventsWriteSchema.safeParse({ source: 'investigation', items: [input] }).success).toBe(
+      false
+    );
+  });
+
   it('enriches causal features from their Knowledge Indicators', async () => {
     getFeatures.mockImplementation((_streams, options) => {
       const hits =

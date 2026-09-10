@@ -273,9 +273,6 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
             }
           }}
           css={[timeseriesExplorerStyles, annotationStyles]}
-          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
-          data-rendering-count={1}
-          data-render-complete={isRenderComplete ?? false}
         >
           <KibanaRenderContextProvider {...startServices}>
             <KibanaContextProvider

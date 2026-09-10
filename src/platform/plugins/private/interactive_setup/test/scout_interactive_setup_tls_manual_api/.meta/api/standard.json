@@ -1,0 +1,60 @@
+{
+  "sha1": "0d0c6f7b5d077acb263be49b464776685f1df118",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a5a4c45afefd3d9-23dfb70da237cfb",
+      "title": "Interactive setup - manual configuration flow rejects configuration with an invalid verification code",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "a5a4c45afefd3d9-0a707b885ce6f07",
+      "title": "Interactive setup - manual configuration flow rejects configuration with a corrupt CA certificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
+        "line": 45,
+        "column": 69
+      }
+    },
+    {
+      "id": "a5a4c45afefd3d9-c2bd66c963335de",
+      "title": "Interactive setup - manual configuration flow rejects configuration with invalid credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "a5a4c45afefd3d9-1d93826017e5e74",
+      "title": "Interactive setup - manual configuration flow configures Kibana, then refuses further requests and boots",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
+        "line": 85,
+        "column": 9
+      }
+    }
+  ]
+}

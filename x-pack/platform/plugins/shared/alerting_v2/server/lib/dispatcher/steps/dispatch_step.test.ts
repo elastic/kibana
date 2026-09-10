@@ -24,12 +24,16 @@ import { DispatchStep } from './dispatch_step';
 const API_KEY = 'dGVzdC1pZDp0ZXN0LWtleQ==';
 
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
-  result.type === 'continue' ? result.data?.dispatchFailures ?? [] : [];
+  result.type === 'continue' ? [...(result.data?.outcome?.failures ?? [])] : [];
 
-const getExecutions = (
-  result: Awaited<ReturnType<DispatchStep['execute']>>
-): Map<string, string[]> | undefined =>
-  result.type === 'continue' ? result.data?.dispatchedExecutions : undefined;
+const getExecutionIds = (
+  result: Awaited<ReturnType<DispatchStep['execute']>>,
+  groupId: string
+): readonly string[] =>
+  result.type === 'continue' ? result.data?.outcome?.executionIdsFor(groupId) ?? [] : [];
+
+const getScheduledGroupCount = (result: Awaited<ReturnType<DispatchStep['execute']>>): number =>
+  result.type === 'continue' ? result.data?.outcome?.scheduledGroupCount ?? 0 : 0;
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
@@ -100,7 +104,8 @@ describe('DispatchStep', () => {
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-1']]]));
+    expect(getExecutionIds(result, 'g1')).toEqual(['exec-1']);
+    expect(getScheduledGroupCount(result)).toBe(1);
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'default');
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
@@ -207,7 +212,8 @@ describe('DispatchStep', () => {
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1', 'workflow-2'], 'default');
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(2);
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-1', 'exec-2']]]));
+    expect(getExecutionIds(result, 'g1')).toEqual(['exec-1', 'exec-2']);
+    expect(getScheduledGroupCount(result)).toBe(1);
   });
 
   it('continues with no-op when dispatch is empty', async () => {
@@ -265,12 +271,9 @@ describe('DispatchStep', () => {
     expect(result.type).toBe('continue');
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(getExecutions(result)).toEqual(
-      new Map([
-        ['g0', ['exec-1']],
-        ['g2', ['exec-3']],
-      ])
-    );
+    expect(getExecutionIds(result, 'g0')).toEqual(['exec-1']);
+    expect(getExecutionIds(result, 'g2')).toEqual(['exec-3']);
+    expect(getScheduledGroupCount(result)).toBe(2);
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).toHaveBeenCalledWith('network timeout', expect.anything());
   });
@@ -346,7 +349,8 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-2']]]));
+    expect(getExecutionIds(result, 'g1')).toEqual(['exec-2']);
+    expect(getScheduledGroupCount(result)).toBe(1);
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
   });
 
@@ -597,7 +601,8 @@ describe('DispatchStep', () => {
       loggerService
     );
 
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-1']]]));
+    expect(getExecutionIds(result, 'g1')).toEqual(['exec-1']);
+    expect(getScheduledGroupCount(result)).toBe(1);
     const failures = getFailures(result);
     expect(failures).toHaveLength(1);
     expect(failures[0]).toMatchObject({
@@ -628,10 +633,9 @@ describe('DispatchStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
 
-    const executionIds = result.data?.dispatchedExecutions;
-    expect(executionIds?.get('g1')).toBeUndefined();
-    expect(executionIds?.get('g2')).toBeUndefined();
-    expect(result.data?.dispatchFailures).toHaveLength(0);
+    expect(getExecutionIds(result, 'g1')).toEqual([]);
+    expect(getExecutionIds(result, 'g2')).toEqual([]);
+    expect(result.data?.outcome?.failures).toHaveLength(0);
     expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
     expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
   });
@@ -757,7 +761,8 @@ describe('DispatchStep', () => {
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       message: 'es down',
     });
-    expect(getExecutions(result)).toEqual(new Map([['g2', ['exec-b']]]));
+    expect(getExecutionIds(result, 'g2')).toEqual(['exec-b']);
+    expect(getScheduledGroupCount(result)).toBe(1);
   });
 
   it('records schedule_error when scheduling returns no execution id', async () => {
@@ -784,7 +789,7 @@ describe('DispatchStep', () => {
       actionGroupId: 'g1',
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
     });
-    expect(getExecutions(result)?.get('g1')).toBeUndefined();
+    expect(getExecutionIds(result, 'g1')).toEqual([]);
   });
 
   it('does not start a second chunk once the signal is aborted', async () => {
@@ -817,9 +822,9 @@ describe('DispatchStep', () => {
 
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(DISPATCH_CHUNK_SIZE);
-    expect(getExecutions(result)?.size).toBe(DISPATCH_CHUNK_SIZE);
-    expect(getExecutions(result)?.has('g0')).toBe(true);
-    expect(getExecutions(result)?.has(`g${DISPATCH_CHUNK_SIZE}`)).toBe(false);
+    expect(getScheduledGroupCount(result)).toBe(DISPATCH_CHUNK_SIZE);
+    expect(getExecutionIds(result, 'g0')).not.toEqual([]);
+    expect(getExecutionIds(result, `g${DISPATCH_CHUNK_SIZE}`)).toEqual([]);
     expect(getFailures(result)).toHaveLength(0);
   });
 
@@ -862,6 +867,7 @@ describe('DispatchStep', () => {
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       message: 'key-a failed',
     });
-    expect(getExecutions(result)).toEqual(new Map([['g2', ['exec-b']]]));
+    expect(getExecutionIds(result, 'g2')).toEqual(['exec-b']);
+    expect(getScheduledGroupCount(result)).toBe(1);
   });
 });

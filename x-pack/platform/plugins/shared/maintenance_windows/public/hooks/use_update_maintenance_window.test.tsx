@@ -63,7 +63,7 @@ describe('useUpdateMaintenanceWindow', () => {
       await result.current.mutate({ maintenanceWindowId: '123', updateParams });
     });
     await waitFor(() =>
-      expect(mockAddSuccess).toBeCalledWith("Updated maintenance window 'updated'")
+      expect(mockAddSuccess).toHaveBeenCalledWith("Updated maintenance window 'updated'")
     );
   });
 
@@ -79,7 +79,7 @@ describe('useUpdateMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to update maintenance window.')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to update maintenance window.')
     );
   });
 });

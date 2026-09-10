@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiComboBox,
   EuiDescribedFormGroup,
@@ -24,6 +25,7 @@ import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ClusterPrivileges } from './cluster_privileges';
+import { DataSourcePrivileges } from './data_source_privileges';
 import { IndexPrivileges } from './index_privileges';
 import { RemoteClusterPrivileges } from './remote_cluster_privileges';
 import type { BuiltinESPrivileges, Role, SecurityLicense } from '../../../../../../common';
@@ -43,6 +45,7 @@ interface Props {
   builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
   remoteClusters?: Cluster[];
+  isDataFederationEnabled?: boolean;
   canUseRemoteIndices?: boolean;
   canUseRemoteClusters?: boolean;
   isDarkMode?: boolean;
@@ -50,6 +53,11 @@ interface Props {
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
+  private ensureGlobalPrivilege = (): estypes.SecurityGlobalPrivilege => {
+    // @ts-expect-error SecurityGlobalPrivilege expects application attribute but it should be optional
+    return this.props.role.elasticsearch.global ?? {};
+  };
+
   public render() {
     return (
       <CollapsiblePanel iconType={'logoElasticsearch'} title={'Elasticsearch'}>
@@ -70,6 +78,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       remoteClusters,
       license,
       builtinESPrivileges,
+      isDataFederationEnabled,
       canUseRemoteIndices,
       canUseRemoteClusters,
       buildFlavor,
@@ -255,6 +264,39 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </>
         )}
+
+        {isDataFederationEnabled && (
+          <>
+            <EuiSpacer />
+            <EuiSpacer />
+
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesTitle"
+                  defaultMessage="Data source privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesDescription"
+                  defaultMessage="Control access to ES|QL data sources. "
+                />
+                {this.learnMore(docLinks.links.security.esqlDataFederationSecurityPrivileges)}
+              </p>
+            </EuiText>
+            <DataSourcePrivileges
+              role={role}
+              validator={validator}
+              onChange={onChange}
+              onAdd={this.addDataSourcePrivilege}
+              editable={editable}
+            />
+          </>
+        )}
       </Fragment>
     );
   };
@@ -267,6 +309,19 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       />
     </EuiLink>
   );
+
+  public addDataSourcePrivilege = () => {
+    const global = this.ensureGlobalPrivilege();
+    const current = global.data_source ?? [];
+    const next = [...current, { names: [], privileges: [] }];
+    this.props.onChange({
+      ...this.props.role,
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        global: { ...global, data_source: next },
+      },
+    });
+  };
 
   public addIndexPrivilege = () => {
     const { role } = this.props;

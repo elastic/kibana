@@ -7,9 +7,9 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { LeadEntity, Observation, ObservationModule } from '../types';
+import type { LeadEntity, Observation, ObservationModule, ScoredEntity } from '../types';
 import { createLeadGenerationEngine, computeCohortContext } from './lead_generation_engine';
-import { llmSynthesizeBatch, type ScoredEntityInput } from './llm_synthesize';
+import { llmSynthesizeBatch } from './llm_synthesize';
 
 jest.mock('./llm_synthesize');
 
@@ -54,14 +54,14 @@ const createMockModule = (
     collect: collectFn,
   } as ObservationModule);
 
-/** Test helper: prepare all candidates then synthesize (sorted by priority). */
+/** Test helper: prepare the confident candidates then synthesize (sorted by priority). */
 const runEngine = async (
   engine: ReturnType<typeof createLeadGenerationEngine>,
   entities: LeadEntity[],
   chatModel: InferenceChatModel
 ) => {
-  const candidates = await engine.prepareLeadCandidates(entities);
-  const leads = await engine.synthesizeLeads(candidates, { chatModel });
+  const { confident } = await engine.prepareLeadCandidates(entities);
+  const leads = await engine.synthesizeLeads(confident, { chatModel });
   return [...leads].sort((a, b) => b.priority - a.priority);
 };
 
@@ -420,6 +420,52 @@ describe('LeadGenerationEngine', () => {
       expect(leads).toHaveLength(3);
     });
 
+    it('returns entities beyond maxLeads as exploratory, not dropped', async () => {
+      const entities = Array.from({ length: 5 }, (_, i) => createMockEntity(`entity_${i}`));
+      const observations = entities.map((e, idx) =>
+        createMockObservation(e, 'mod', { score: 80 - idx * 10, confidence: 0.9 })
+      );
+
+      const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 3 } });
+      engine.registerModule(
+        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+      );
+
+      const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
+
+      expect(confident).toHaveLength(3);
+      expect(exploratory).toHaveLength(2);
+      // exploratory picks up where confident leaves off, in the same priority order
+      expect(exploratory.map((c) => c.entity.name)).toEqual(['entity_3', 'entity_4']);
+    });
+
+    it('excludes entities below minObservations from both confident and exploratory', async () => {
+      const alice = createMockEntity('alice');
+      const bob = createMockEntity('bob');
+
+      const aliceObs1 = createMockObservation(alice, 'mod', { score: 80, confidence: 0.9 });
+      const aliceObs2 = createMockObservation(alice, 'mod', {
+        type: 'second_signal',
+        score: 70,
+        confidence: 0.8,
+      });
+      const bobObs = createMockObservation(bob, 'mod', { score: 60, confidence: 0.7 });
+
+      const engine = createLeadGenerationEngine({
+        logger,
+        config: { minObservations: 2, maxLeads: 0 },
+      });
+      engine.registerModule(
+        createMockModule('mod', 0.5, jest.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
+      );
+
+      const { confident, exploratory } = await engine.prepareLeadCandidates([alice, bob]);
+
+      // maxLeads: 0 puts every qualifying entity in `exploratory`; bob never qualifies.
+      expect(confident).toEqual([]);
+      expect(exploratory.map((c) => c.entity.name)).toEqual(['alice']);
+    });
+
     it('sorts leads by priority descending', async () => {
       const low = createMockEntity('low_risk');
       const high = createMockEntity('high_risk');
@@ -686,8 +732,8 @@ describe('LeadGenerationEngine', () => {
 });
 
 describe('computeCohortContext', () => {
-  const scored = (id: string, types: string[]): ScoredEntityInput => ({
-    entity: { id, type: 'user', name: id, record: {} as ScoredEntityInput['entity']['record'] },
+  const scored = (id: string, types: string[]): ScoredEntity => ({
+    entity: { id, type: 'user', name: id, record: {} as ScoredEntity['entity']['record'] },
     priority: 5,
     observations: types.map((type) => ({
       entityId: id,
@@ -699,10 +745,12 @@ describe('computeCohortContext', () => {
       description: 'd',
       metadata: {},
     })),
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
   });
 
   it('counts each entity once per observation type', () => {
-    const candidates: ScoredEntityInput[] = [
+    const candidates: ScoredEntity[] = [
       scored('user:a', ['risk_escalation_24h', 'risk_escalation_24h', 'ml_anomaly']),
       scored('user:b', ['risk_escalation_24h']),
       scored('user:c', ['governance_gap']),

@@ -12,7 +12,10 @@ import { useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/code-editor';
 import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import { createMarkersAndDecorations } from './create_yaml_validation_markers_and_decorations';
-import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
+import {
+  getWorkflowYamlValidationContextError,
+  useWorkflowYamlValidationContext,
+} from './use_workflow_yaml_validation_context';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectEditorWorkflowLookup,
@@ -89,33 +92,70 @@ export function useYamlValidation(
         return;
       }
 
-      const yamlString = model.getValue();
-      const results = await collectFullWorkflowYamlValidationResults({
-        yamlString,
-        model,
-        yamlDocument,
-        lineCounter,
-        workflowLookup: workflowLookup ?? undefined,
-        workflowGraph: workflowGraph ?? undefined,
-        workflowDefinition: workflowDefinition ?? undefined,
-        graphBuildError,
-        context: {
-          ...validationContext,
-          signal: esqlAbortController.signal,
-        },
-      });
-
-      const { markers, decorations } = createMarkersAndDecorations(results);
-
-      if (decorationsCollection.current) {
-        decorationsCollection.current.clear();
+      if (validationContext.connectorTypes.status === 'loading') {
+        // Connector types gate connector-id validation, so stale results would
+        // outlive the run that produced them. Change-history clears the same way.
+        if (decorationsCollection.current) {
+          decorationsCollection.current.clear();
+        }
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
+        setStableValidationResults([]);
+        setIsLoading(true);
+        setError(null);
+        return;
       }
-      decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
-      setStableValidationResults(results);
-      setIsLoading(false);
-      monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, markers);
+      setIsLoading(true);
       setError(null);
+      const validationContextError = getWorkflowYamlValidationContextError(validationContext);
+
+      try {
+        const yamlString = model.getValue();
+        const results = await collectFullWorkflowYamlValidationResults({
+          yamlString,
+          model,
+          yamlDocument,
+          lineCounter,
+          workflowLookup: workflowLookup ?? undefined,
+          workflowGraph: workflowGraph ?? undefined,
+          workflowDefinition: workflowDefinition ?? undefined,
+          graphBuildError,
+          context: {
+            ...validationContext,
+            signal: esqlAbortController.signal,
+          },
+        });
+
+        if (esqlAbortController.signal.aborted) {
+          return;
+        }
+
+        const { markers, decorations } = createMarkersAndDecorations(results);
+
+        if (decorationsCollection.current) {
+          decorationsCollection.current.clear();
+        }
+        decorationsCollection.current = editor.createDecorationsCollection(decorations);
+
+        setStableValidationResults(results);
+        setIsLoading(false);
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, markers);
+        setError(validationContextError);
+      } catch (validationError) {
+        if (esqlAbortController.signal.aborted) {
+          return;
+        }
+
+        if (decorationsCollection.current) {
+          decorationsCollection.current.clear();
+        }
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
+        setStableValidationResults([]);
+        setIsLoading(false);
+        setError(
+          validationError instanceof Error ? validationError : new Error(String(validationError))
+        );
+      }
     }
 
     validateYaml();

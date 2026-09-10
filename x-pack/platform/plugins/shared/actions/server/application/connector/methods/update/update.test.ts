@@ -24,7 +24,6 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const authorization = actionsAuthorizationMock.create();
@@ -256,6 +255,33 @@ describe('update()', () => {
       });
 
       expect(result.authMode).toBe('per-user');
+    });
+  });
+
+  describe('Kibana managed auth types', () => {
+    test('rejects switching an existing connector to a Kibana managed auth type', async () => {
+      const soResult = makeSavedObjectResult({
+        actionTypeId: '.slack2',
+        authMode: 'shared',
+        secrets: { authType: 'bearer' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: {
+            name: 'Test Connector',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.]`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 
@@ -872,6 +898,84 @@ describe('update()', () => {
           wasSuccessful: true,
         })
       );
+    });
+  });
+
+  describe('inbound ingress credentials', () => {
+    const inboundContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+    };
+
+    const storedHash = 'b'.repeat(64);
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.inboundWebhook',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes) => ({
+        id: 'connector-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    test('keeps the stored hash and does not return a new token', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: storedHash },
+        },
+      } as never);
+
+      const result = await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash: string };
+      };
+      expect(saved.config.ingestTokenHash).toBe(storedHash);
+      expect(result).not.toHaveProperty('secrets');
+    });
+
+    test('ignores a client-supplied ingestTokenHash', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: storedHash },
+        },
+      } as never);
+
+      await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: {
+          name: 'renamed',
+          config: { ingestTokenHash: 'c'.repeat(64) },
+          secrets: {},
+        },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash: string };
+      };
+      expect(saved.config.ingestTokenHash).toBe(storedHash);
     });
   });
 });

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { diffSOSecretPaths } from './common';
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../app_context';
+
+import { collectCompiledSecretRefIds, diffSOSecretPaths } from './common';
 
 describe('diffSOSecretPaths', () => {
   const paths1 = [
@@ -183,5 +186,54 @@ describe('diffSOSecretPaths', () => {
       toDelete: [],
       noChange: [paths1[0]],
     });
+  });
+});
+
+describe('collectCompiledSecretRefIds', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('returns an empty set when no placeholders are present', () => {
+    const result = collectCompiledSecretRefIds({ inputs: [{ type: 'logfile' }] });
+    expect(result).toEqual(new Set());
+  });
+
+  it('extracts a single id from a plain string value', () => {
+    const result = collectCompiledSecretRefIds('$co.elastic.secret{my-id}');
+    expect(result).toEqual(new Set(['my-id']));
+  });
+
+  it('extracts ids from an array of strings', () => {
+    const result = collectCompiledSecretRefIds([
+      '$co.elastic.secret{id-1}',
+      '$co.elastic.secret{id-2}',
+    ]);
+    expect(result).toEqual(new Set(['id-1', 'id-2']));
+  });
+
+  it('extracts ids from deeply nested objects', () => {
+    const result = collectCompiledSecretRefIds({
+      a: { b: { password: '$co.elastic.secret{nested-id}' } },
+    });
+    expect(result).toEqual(new Set(['nested-id']));
+  });
+
+  it('deduplicates ids that appear more than once', () => {
+    const result = collectCompiledSecretRefIds([
+      '$co.elastic.secret{dup-id}',
+      '$co.elastic.secret{dup-id}',
+    ]);
+    expect(result).toEqual(new Set(['dup-id']));
+  });
+
+  it('returns an empty set for undefined input', () => {
+    const result = collectCompiledSecretRefIds(undefined);
+    expect(result).toEqual(new Set());
+  });
+
+  it('returns undefined for an unserializable input (BigInt) and logs a warning', () => {
+    const result = collectCompiledSecretRefIds(BigInt(1));
+    expect(result).toBeUndefined();
   });
 });

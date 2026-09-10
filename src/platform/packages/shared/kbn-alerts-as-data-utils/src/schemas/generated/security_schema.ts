@@ -136,6 +136,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
   'kibana.alert.duration.us': schemaStringOrNumber,
   'kibana.alert.end': schemaDate,
+  'kibana.alert.entity.id': schemaStringArray,
   'kibana.alert.flapping': schemaBoolean,
   'kibana.alert.flapping_history': schemaBooleanArray,
   'kibana.alert.group.id': schemaString,
