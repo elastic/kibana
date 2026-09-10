@@ -70,10 +70,6 @@ describe('getAlertsNavPanel', () => {
             title: 'Inbox',
             badgeType: 'new',
           }),
-          expect.objectContaining({
-            link: 'observability-overview:alerts',
-            title: 'Alerts V1',
-          }),
         ],
       })
     );
@@ -105,6 +101,38 @@ describe('getAlertsNavPanel', () => {
         children: [{ link: 'observabilityAlerting:execution-history', badgeType: 'new' }],
       })
     );
+  });
+
+  it('omits Alerts V1 when alerting v2 is enabled and the classic table setting is off', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.client.get = <T>(_key: string) => false as T;
+
+    const alertsGroup = getAlertsNavPanel(core)[0].children?.[0];
+
+    expect(alertsGroup?.children).toEqual([
+      expect.objectContaining({
+        link: 'observabilityAlerting:inbox',
+        title: 'Inbox',
+      }),
+    ]);
+  });
+
+  it('includes Alerts V1 when alerting v2 is enabled and the classic table setting is on', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.client.get = <T>(_key: string) => true as T;
+
+    const alertsGroup = getAlertsNavPanel(core)[0].children?.[0];
+
+    expect(alertsGroup?.children).toEqual([
+      expect.objectContaining({
+        link: 'observabilityAlerting:inbox',
+        title: 'Inbox',
+      }),
+      expect.objectContaining({
+        link: 'observability-overview:alerts',
+        title: 'Alerts V1',
+      }),
+    ]);
   });
 
   it('keeps rules-v1 in the tree with a hidden side-nav status', () => {

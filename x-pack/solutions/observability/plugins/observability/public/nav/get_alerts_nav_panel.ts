@@ -8,7 +8,10 @@
 import type { RootNodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import {
+  isAlertingV2Enabled,
+  shouldShowClassicObservabilityAlertsTable,
+} from '@kbn/alerting-v2-utils';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   type ObservabilityAlertingLinkId,
@@ -51,12 +54,16 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
               }),
               badgeType: 'new' as const,
             },
-            {
-              link: ALERTS_LINK,
-              title: i18n.translate('xpack.observability.nav.alertsV1', {
-                defaultMessage: 'Alerts V1',
-              }),
-            },
+            ...(shouldShowClassicObservabilityAlertsTable(core)
+              ? [
+                  {
+                    link: ALERTS_LINK,
+                    title: i18n.translate('xpack.observability.nav.alertsV1', {
+                      defaultMessage: 'Alerts V1',
+                    }),
+                  },
+                ]
+              : []),
           ],
         },
         {

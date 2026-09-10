@@ -193,7 +193,6 @@ describe('Navigation Tree', () => {
         expect.objectContaining({
           children: expect.arrayContaining([
             expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
-            expect.objectContaining({ link: 'observability-overview:alerts' }),
           ]),
         }),
         expect.objectContaining({
