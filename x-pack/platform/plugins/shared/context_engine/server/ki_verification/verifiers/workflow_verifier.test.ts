@@ -48,7 +48,7 @@ describe('resolveKiVerifierChain', () => {
     expect(getWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  it('appends the current workflow to the inherited metadata chain', async () => {
+  it('includes any chain from execution metadata, followed by the current workflow', async () => {
     await expect(resolve({ metadata: { ki_verifier_chain: ['a', 'b'] } })).resolves.toEqual([
       'a',
       'b',
@@ -56,7 +56,7 @@ describe('resolveKiVerifierChain', () => {
     ]);
   });
 
-  it('follows parent refs and merges each ancestor inherited chain', async () => {
+  it('walks ancestor executions via parent refs and assembles the full chain', async () => {
     getWorkflowExecution
       .mockResolvedValueOnce(
         execWith({ parentWorkflowId: 'grand', parentWorkflowExecutionId: 'grand-exec' })
@@ -78,7 +78,7 @@ describe('resolveKiVerifierChain', () => {
     ).rejects.toThrow("ancestor execution 'dad-exec' is not readable");
   });
 
-  it('throws instead of walking an unbounded ancestry', async () => {
+  it('throws when ancestor lookups exceed the limit', async () => {
     getWorkflowExecution.mockImplementation(async (id: string) =>
       execWith({ parentWorkflowId: `wf-${id}`, parentWorkflowExecutionId: `${id}x` })
     );
@@ -210,7 +210,7 @@ describe('createWorkflowVerifier', () => {
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledTimes(3);
     });
 
-    it('passes when the workflow output passed', async () => {
+    it('passes when the workflow reports passed: true', async () => {
       completed({ passed: true });
 
       await expect(makeVerifier().verify({}, context)).resolves.toEqual({ passed: true });
@@ -356,7 +356,7 @@ describe('createWorkflowVerifier', () => {
       }
     );
 
-    it('keeps polling while the execution document is not yet readable', async () => {
+    it('keeps polling when the execution status is not yet available', async () => {
       workflowsManagement.getWorkflowExecution
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(execution(ExecutionStatus.COMPLETED, { output: { passed: true } }));
@@ -367,7 +367,7 @@ describe('createWorkflowVerifier', () => {
       await expect(pending).resolves.toEqual({ passed: true });
     });
 
-    it('keeps polling after a failed read instead of orphaning the child', async () => {
+    it('keeps polling after a transient read error without cancelling the child execution', async () => {
       workflowsManagement.getWorkflowExecution
         .mockRejectedValueOnce(new Error('search failed'))
         .mockResolvedValueOnce(execution(ExecutionStatus.COMPLETED, { output: { passed: true } }));
@@ -439,7 +439,7 @@ describe('createWorkflowVerifier', () => {
       }
     );
 
-    it('cancels the execution when aborted with a non-Error reason', async () => {
+    it('cancels the execution when aborted with a string reason instead of an Error', async () => {
       workflowsManagement.getWorkflowExecution.mockResolvedValue(
         execution(ExecutionStatus.RUNNING)
       );
@@ -467,7 +467,7 @@ describe('createWorkflowVerifier', () => {
       );
     });
 
-    it('propagates dispatch errors and audits the failed run', async () => {
+    it('throws and writes a failure audit event when the workflow cannot be started', async () => {
       workflowsManagement.runWorkflow.mockRejectedValue(new Error('workflow not found'));
 
       await expect(makeVerifier().verify({}, context)).rejects.toThrow('workflow not found');
@@ -480,7 +480,7 @@ describe('createWorkflowVerifier', () => {
       );
     });
 
-    it('audits a dispatched run with its execution id', async () => {
+    it('writes a success audit event with the execution id after starting the workflow', async () => {
       completed({ passed: true });
 
       await makeVerifier().verify({}, context);

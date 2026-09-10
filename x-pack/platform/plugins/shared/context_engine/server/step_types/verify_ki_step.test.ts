@@ -148,7 +148,7 @@ describe('verify_ki workflow step', () => {
       message: 'Unknown verifier id: "unknown-verifier"',
     },
   ])(
-    'reports $caseName verifier selection as an input validation error',
+    'fails with an input validation error for a $caseName verifier',
     async ({ verifiers, message }) => {
       setContextEngineEnabled(true);
 
@@ -244,7 +244,7 @@ describe('verify_ki workflow step', () => {
     ]);
   });
 
-  it('skips KIs with no applicable verifiers', async () => {
+  it('passes with empty results when no verifier applies to the KI', async () => {
     setContextEngineEnabled(true);
 
     const output = await runHandler({ title: 'no esql here' }, { verifiers: ALL_ESQL_VERIFIERS });
@@ -375,7 +375,7 @@ describe('verify_ki workflow step', () => {
     expect(telemetry.logger.debug).toHaveBeenCalledWith('KI verification errored: TypeError');
   });
 
-  it('reports no event when the setting is off', async () => {
+  it('emits no telemetry event when the Context Engine setting is off', async () => {
     setContextEngineEnabled(false);
 
     await expect(runHandler({ attributes: { esql: 'FROM logs-*' } })).rejects.toThrow();
@@ -473,7 +473,7 @@ describe('verify_ki workflow step', () => {
       });
     });
 
-    it('reports custom verifier failures by kind, not id', async () => {
+    it('records custom verifier failures as "workflow" in telemetry, not the workflow id', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: false, reason: 'nope' })
@@ -492,7 +492,7 @@ describe('verify_ki workflow step', () => {
       });
     });
 
-    it('forwards the verifier chain, ending with this workflow, to the child run', async () => {
+    it('passes the chain of calling workflows to the child run for cycle detection', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
 
@@ -542,9 +542,9 @@ describe('verify_ki workflow step', () => {
       expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('follows workflow.execute lineage so a cycle through a sub-workflow is rejected', async () => {
-      // root-wf verified via verifier-wf (metadata chain), which ran this workflow via
-      // workflow.execute (parent refs only). Naming root-wf again must be a cycle.
+    it('detects a cycle through a workflow invoked by workflow.execute steps', async () => {
+      // root-wf verified via verifier-wf, which ran this workflow via workflow.execute.
+      // Naming root-wf again must be a cycle.
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValueOnce({
         workflowId: 'verifier-wf',
@@ -570,7 +570,7 @@ describe('verify_ki workflow step', () => {
       expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('fails closed when an ancestor execution cannot be read', async () => {
+    it('rejects the run when an ancestor execution record is missing', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValueOnce(null);
 
@@ -656,7 +656,7 @@ describe('verify_ki workflow step', () => {
       expect(output.passed).toBe(true);
     });
 
-    it('reports several failing custom verifiers as one workflow entry', async () => {
+    it('collapses multiple failing custom verifiers into one "workflow" telemetry entry', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: false, reason: 'nope' })

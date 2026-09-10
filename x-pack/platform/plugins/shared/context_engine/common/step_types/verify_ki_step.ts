@@ -116,7 +116,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'Runs the verifiers listed in `verifiers`, in order, and returns a pass/fail result per verifier. At least one entry is required; an unknown id fails the step. A verifier only runs when it applies to the KI; if none apply, the step passes with empty results. ES|QL verifiers: `{syntaxVerifierId}` validates each query locally (no cluster call); `{runtimeVerifierId}` executes each query against live data, bounded to one row. A custom verifier is a workflow listed by `workflow_id`: it receives the KI as `inputs.ki` and must emit `passed` (boolean) and `reason` (string) through a `workflow.output` step. A custom verifier that fails, times out, or returns malformed output fails the KI. Requires the Context Engine advanced setting.',
+        'Runs each verifier against the KI and returns a pass/fail result per verifier. Built-in ids: `{syntaxVerifierId}` (ES|QL parse), `{runtimeVerifierId}` (ES|QL execute). Custom verifiers use `workflow_id`; the workflow receives `inputs.ki` and must emit `passed` and `reason`. Requires the Context Engine advanced setting.',
       values: {
         syntaxVerifierId: ESQL_VALID_SYNTAX_VERIFIER_ID,
         runtimeVerifierId: ESQL_VALID_RUNTIME_VERIFIER_ID,
