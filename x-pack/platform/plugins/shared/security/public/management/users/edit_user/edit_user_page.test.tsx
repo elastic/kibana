@@ -195,4 +195,31 @@ describe('EditUserPage', () => {
       expect(field).toHaveProperty('disabled', true);
     });
   });
+
+  it('hides the activate action when viewing a deactivated user with readonly privileges', async () => {
+    coreStart.http.get.mockResolvedValueOnce({
+      ...userMock,
+      enabled: false,
+    });
+    coreStart.http.get.mockResolvedValueOnce([]);
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      users: {
+        save: false,
+      },
+    };
+
+    render(
+      coreStart.rendering.addContext(
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
+      )
+    );
+
+    await screen.findByText(/User has been deactivated/i);
+    expect(screen.queryByRole('button', { name: 'Activate user' })).not.toBeInTheDocument();
+  });
 });
