@@ -108,6 +108,9 @@ export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] 
  * Classifies each failure as "known skipped" when the test resolves to a skipped suite/test in
  * the file as it exists on `mainRef` but not on `baseRef` (the PR's merge base). Skips already
  * present at the merge base are not new to the PR, so removing them in the PR keeps the failure.
+ * A file absent at the merge base was added by the PR itself, so a skip on `mainRef` comes from an
+ * independent add of the same path; rebasing would conflict rather than apply it, so the failure
+ * stays real.
  */
 export function evaluateFailures(
   failures: EvaluableFailure[],
@@ -123,14 +126,10 @@ export function evaluateFailures(
     return trees[key];
   };
 
-  const findSkip = (tree: SuiteNode[] | undefined, failure: EvaluableFailure) => {
-    if (!tree) {
-      return undefined;
-    }
-    return failure.kind === 'ftr'
+  const findSkip = (tree: SuiteNode[], failure: EvaluableFailure) =>
+    failure.kind === 'ftr'
       ? findSkipForFullTitle(tree, failure.fullTitle)
       : findSkipForScoutFailure(tree, failure.suite, failure.title);
-  };
 
   const evaluation: SkippedOnMainEvaluation = { knownSkipped: [], real: [] };
   for (const failure of failures) {
@@ -138,9 +137,14 @@ export function evaluateFailures(
       evaluation.real.push(failure);
       continue;
     }
-    const skipOnMain = findSkip(getTree(mainRef, failure.file), failure);
-    const skipAtBase = findSkip(getTree(baseRef, failure.file), failure);
-    if (skipOnMain && !skipAtBase) {
+    const mainTree = getTree(mainRef, failure.file);
+    const baseTree = getTree(baseRef, failure.file);
+    if (!mainTree || !baseTree) {
+      evaluation.real.push(failure);
+      continue;
+    }
+    const skipOnMain = findSkip(mainTree, failure);
+    if (skipOnMain && !findSkip(baseTree, failure)) {
       evaluation.knownSkipped.push({ failure, issue: skipOnMain.issue });
     } else {
       evaluation.real.push(failure);

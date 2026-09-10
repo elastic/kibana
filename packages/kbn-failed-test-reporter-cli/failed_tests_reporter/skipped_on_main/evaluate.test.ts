@@ -94,12 +94,13 @@ describe('evaluateFailures', () => {
     expect(missing.real).toEqual([scoutFailure]);
   });
 
-  it('treats a file that is new on main relative to the merge base as newly skipped', () => {
+  it('keeps the failure when the file is absent at the merge base (PR and main both added it)', () => {
     const readFile = readerFor({ [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after') });
 
     const result = evaluateFailures([scoutFailure], { mainRef: 'main', baseRef: 'base', readFile });
 
-    expect(result.knownSkipped).toHaveLength(1);
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([scoutFailure]);
   });
 
   it('keeps failures without a file location', () => {
