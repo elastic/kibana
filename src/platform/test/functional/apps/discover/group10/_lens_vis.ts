@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIXED. See individual tests. This 16-min file is the Discover
+ * Lens / ES|QL vis persistence journey. Suggestion types and shape compatibility already
+ * live in
+ * src/platform/packages/shared/kbn-unified-histogram/services/lens_vis_service.suggestions.test.ts
+ * and utils/external_vis_context.test.ts. Saving an invalidated visContext is covered in
+ * save_discover_session.test.ts. Classic histogram chrome/persist overlaps
+ * test/scout/core/ui/parallel_tests/histogram.spec.ts and histogram_session.spec.ts.
+ * Break the save-then-load coupling by seeding
+ * `vis_context` with `apiServices.discover.create` (see histogram_session.spec.ts).
+ * Use `test.step` only inside a single journey that still fits the 60s budget.
+ * Keep the hit-count assertions. No serverless FTR mirror.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -119,6 +133,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.resetQueryMode();
     });
 
+    /**
+     * Migration recommendation: MIXED. Default histogram chrome is already the landing
+     * state of histogram.spec.ts. Persist hide/show after save is histogram_session.spec.ts.
+     * Keep the 14,004 → 4,756 hit counts after the time-range change, save, and refresh.
+     * Classic chrome (edit/breakdown/interval) can be asserted on this test, not bolted
+     * onto the ES|QL customize tests.
+     */
     it('should show histogram by default', async () => {
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
 
@@ -141,6 +162,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkHistogramVis(savedSearchTimeSpan, savedSearchTotalCount);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Empty time range → no-results → restore
+     * histogram is not covered. histogram.spec.ts only recovers from a broken KQL query.
+     * Keep hasNoResults + histogramForDataView after expand, and the recovered hit count of 1.
+     */
     it('should show no histogram for no results view and recover when time range expanded', async () => {
       await timePicker.setAbsoluteRange(
         'Sep 19, 2015 @ 00:00:00.000',
@@ -161,6 +187,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForDataView');
     });
 
+    /**
+     * Migration recommendation: MIXED. Hiding the histogram when the time field is removed
+     * is already in
+     * test/scout/core2/ui/parallel_tests/data_view_edit.spec.ts. Restoring @timestamp is
+     * the inverse — extend that spec rather than a new one. histogramForDataView is
+     * unit-tested in lens_vis_service.suggestions.test.ts.
+     */
     it('should show no histogram for non-time-based data views and recover for time-based data views', async () => {
       await dataViews.createFromSearchBar({
         name: 'logs',
@@ -179,6 +212,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForDataView');
     });
 
+    /**
+     * Migration recommendation: DELETE. Chart is omitted when `!isTimeBased && !isESQLQuery`
+     * (use_state_props.test.ts, `chart: undefined`). ES|QL without a usable time field →
+     * unsupported is lens_vis_service.suggestions.test.ts. Classic hide is already in
+     * data_view_edit.spec.ts.
+     */
     it('should show no histogram for non-time-based data in data view and ES|QL modes', async () => {
       await dataViews.switchToAndValidate('indices-stats*');
       await header.waitUntilLoadingHasFinished();
@@ -191,6 +230,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkNoVis('50');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. ES|QL chrome (save vis, edit-on-fly,
+     * no interval selector) plus time-range update. Suggestion type histogramForESQL is
+     * unit-tested; new_search_action.spec.ts only asserts it after New. Keep the 10 / 1
+     * hit counts after the time-range change. Own `spaceTest` — do not chain into customize/save.
+     */
     it('should show ESQL histogram for ES|QL query', async () => {
       await discover.selectTextBaseLang();
 
@@ -210,6 +255,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkESQLHistogramVis('Sep 20, 2015 @ 00:00:00.000 - Sep 20, 2015 @ 00:00:00.000', '1');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Line-shape persist on save is the core
+     * contract and is not in Scout. Later FTR tests load `testCustomESQLHistogram` —
+     * do not chain them here. Seed that session via `apiServices.discover.create` with
+     * `vis_context` so each load/revert/invalidate test stays under 60s.
+     */
     it('should be able to customize ESQL histogram and save it', async () => {
       await discover.selectTextBaseLang();
 
@@ -231,6 +282,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
     });
 
+    /**
+     * Migration recommendation: MIXED. Breakdown forcing bar_stacked is
+     * lens_vis_service.suggestions.test.ts. Legend values overlap
+     * histogram_breakdown.spec.ts. Keep one Scout step that an ES|QL Line customization
+     * flips to Bar when a breakdown is applied; drop the exact legend list.
+     */
     it('should be able to customize ESQL histogram and then choose a breakdown field', async () => {
       await discover.selectTextBaseLang();
 
@@ -265,6 +322,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    /**
+     * Migration recommendation: DELETE. `from logstash-*` → `from logs*` resetting Line
+     * to Bar is the same compatibility path as the query-change revert test below
+     * (external_vis_context.test.ts + that Scout step). Breakdown after reset duplicates
+     * the test above.
+     */
     it('should be able to customize ESQL histogram and then choose a breakdown field after switching to another data view', async () => {
       await discover.selectTextBaseLang();
 
@@ -308,6 +371,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Line → Area → revert is not covered.
+     * unsaved_changes_indicator.spec.ts reverts columns/sample size/filters, not vis
+     * shape. Own test: seed the Line histogram session via the API, then edit/revert.
+     */
     it('should be able to load a saved search with custom histogram vis, edit vis and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
@@ -341,6 +409,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    /**
+     * Migration recommendation: MIXED. Line retained on a compatible `limit` change is
+     * isSuggestionShapeAndVisContextCompatible in external_vis_context.test.ts. Keep the
+     * Scout journey: query still marks unsaved, incompatible STATS + treemap → revert
+     * restores Line + histogramForESQL. Keep the 10 / 100 / 5 hit counts through each query.
+     */
     it('should be able to load a saved search with custom histogram vis, edit query and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
@@ -417,6 +491,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
     });
 
+    /**
+     * Migration recommendation: MIXED. Applying overriddenVisContextAfterInvalidation on
+     * save is save_discover_session.test.ts. Keep a short Scout step: save-as after
+     * STATS → treemap, refresh, still Treemap / lensSuggestion.
+     */
     it('should be able to load a saved search with custom histogram vis and handle invalidations', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
@@ -471,6 +550,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
     });
 
+    /**
+     * Migration recommendation: DELETE. Same invalidation path as the test above, then a
+     * second suggestion pick (waffle) before save. Fold waffle-after-invalidate into that
+     * step if we want two shapes; do not keep a second 16-min FTR case.
+     */
     it('should be able to load a saved search with custom histogram vis and save new customization', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
@@ -529,6 +613,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. First persist of a lensSuggestion
+     * (treemap), not a histogram. Later FTR tests load `testCustomESQLVis` /
+     * `testCustomESQLVisPartition` — seed those via the session API instead of chaining
+     * UI setup. This test can stop after the first save if load tests cover reload.
+     */
     it('should be able to customize ESQL vis and save it', async () => {
       await discover.selectTextBaseLang();
 
@@ -556,6 +646,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Inverse of the histogram query-revert:
+     * treemap → `limit` resets to Bar / histogramForESQL → revert restores treemap →
+     * re-save stays treemap. Not in Scout.
+     */
     it('should be able to load a saved search with custom vis, edit query and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLVisPartition');
 
@@ -607,6 +702,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. changeVisShape via the Lens flyout (Pie),
+     * persist, then query reset + revert back to Pie. flyouts.spec.ts only opens/closes
+     * the flyout against the doc viewer — it does not change shape or persist.
+     */
     it('should be able to change to an unfamiliar vis type via lens flyout', async () => {
       await discover.loadSavedSearch('testCustomESQLVisPartition');
 
@@ -664,6 +764,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
     });
 
+    /**
+     * Migration recommendation: DELETE. Waffle → revert → waffle → Treemap → save is the
+     * same vis-edit/revert/save contract as the Line → Area revert above. Fold one extra
+     * suggestion-picker click into that step if partition vis needs coverage.
+     */
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLVis');
 
@@ -704,6 +809,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Unique: revert must close
+     * `lnsEditOnFlyFlyout`. flyouts.spec.ts does not cover revert. Own short `spaceTest`.
+     */
     it('should close lens flyout on revert changes', async () => {
       await discover.selectTextBaseLang();
 
@@ -749,6 +858,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Distinct from
+     * request_cancellation.spec.ts (user cancel → warnings). This aborts an in-flight
+     * `error_query` stall by changing the time range and asserts histogram + hits recover.
+     * initialize_fetch.test.ts only covers embeddable abort. Keep the recovered 4,756 count.
+     */
     it('should be able to recover after an aborted request', async () => {
       const reducedTimeRange = {
         from: 'Sep 20, 2015 @ 00:00:00.000',

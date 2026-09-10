@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/packages/shared/agent_builder_visualizations/agent-builder-visualizations
 dependsOn:
+  - '@kbn/custom-content-common'
+  - '@kbn/custom-content-renderer'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-visualizations-common'
