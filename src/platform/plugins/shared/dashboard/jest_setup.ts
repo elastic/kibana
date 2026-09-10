@@ -32,11 +32,12 @@ jest.mock('./public/services/dashboard_api_services', () => {
 });
 
 jest.mock('./public/services/dashboard_recently_accessed_service', () => {
+  const { of } = jest.requireActual('rxjs');
   return {
     getDashboardRecentlyAccessedService: () => ({
       add: jest.fn(),
       get: jest.fn(),
-      get$: jest.fn(),
+      get$: jest.fn(() => of([])),
     }),
   };
 });
