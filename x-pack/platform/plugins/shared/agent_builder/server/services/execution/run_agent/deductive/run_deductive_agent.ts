@@ -85,6 +85,7 @@ export const runDeductiveAgent = async (
   // fresh session and replay the same message (mirrors the dx CLI behavior).
   let sessionId = existingSessionId;
   let attempt = 0;
+  let refreshed = false;
   let result: DeductiveRunResult | undefined;
 
   while (result === undefined && attempt < 2) {
@@ -124,14 +125,21 @@ export const runDeductiveAgent = async (
         sessionId = undefined;
         continue;
       }
-      if (error instanceof DeductiveError && error.statusCode === 401 && config.refreshToken) {
-        const refreshed = await refreshDeductiveToken({
+      if (
+        error instanceof DeductiveError &&
+        error.statusCode === 401 &&
+        config.refreshToken &&
+        !refreshed
+      ) {
+        // One-shot auth refresh: a persistent 401 (e.g. token/cluster mismatch) must not
+        // loop forever refunding `attempt`; fail after a single refresh attempt.
+        const refreshedTokens = await refreshDeductiveToken({
           endpoint: config.endpoint,
           refreshToken: config.refreshToken,
         });
-        config.token = refreshed.token;
-        config.refreshToken = refreshed.refreshToken;
-        attempt -= 1; // allow the retry budget to be used for the auth retry
+        config.token = refreshedTokens.token;
+        config.refreshToken = refreshedTokens.refreshToken;
+        refreshed = true;
         continue;
       }
       throw error;

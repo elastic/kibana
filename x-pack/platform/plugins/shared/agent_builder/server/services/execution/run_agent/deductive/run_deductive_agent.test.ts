@@ -8,7 +8,7 @@
 import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
 import { shouldUseDeductive } from './config';
 import * as deductiveClient from './deductive_client';
-import { DeductiveSessionUnavailableError } from './deductive_client';
+import { DeductiveSessionUnavailableError, DeductiveError } from './deductive_client';
 import { runDeductiveAgent } from './run_deductive_agent';
 
 jest.mock('./deductive_client', () => {
@@ -54,6 +54,10 @@ beforeEach(() => {
   clientMock.sendDeductiveMessageAndReadSse.mockResolvedValue({
     answer: 'the answer',
     timeToFirstTokenMs: 150,
+  });
+  clientMock.refreshDeductiveToken.mockResolvedValue({
+    token: 'dak_refreshed',
+    refreshToken: 'refreshed-rt',
   });
 });
 
@@ -192,6 +196,22 @@ describe('runDeductiveAgent', () => {
 
     const types = ctx.events.emit.mock.calls.map((c: any) => c[0].type as string);
     expect(types.filter((t: any) => t === 'message_chunk')).toHaveLength(2);
+  });
+
+  it('persistent 401 after refresh is bounded (no infinite loop)', async () => {
+    const ctx = context();
+    // flag on but no settings configured => env fallback carries the refresh token
+    ctx.deductive = { enabled: true };
+    process.env.DEDUCTIVE_REFRESH_TOKEN = 'env-refresh';
+    // 401 every time, even after a successful refresh
+    clientMock.sendDeductiveMessageAndReadSse.mockRejectedValue(new DeductiveError('401', 401));
+
+    await expect(runDeductiveAgent(baseParams({ id: 'conv-1' }), ctx)).rejects.toThrow('401');
+    // one refresh attempt only, then the loop exits
+    expect(clientMock.refreshDeductiveToken).toHaveBeenCalledTimes(1);
+    expect(clientMock.sendDeductiveMessageAndReadSse).toHaveBeenCalledTimes(2);
+
+    delete process.env.DEDUCTIVE_REFRESH_TOKEN;
   });
 
   it('propagates errors from the client', async () => {
