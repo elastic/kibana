@@ -4,7 +4,9 @@
 Rules enforced here (the point of the script, not decoration):
 * Every number comes from the aggregate JSON; nothing is hardcoded or imputed.
 * A field with no source renders as a visible blank marker, never a guess.
-* Coverage (n) rides next to each mean so a 7-doc mean cannot pose as a 1040-doc one.
+* Coverage (n) rides next to each mean so a 1-doc mean cannot pose as many.
+* Trace cards show the FINAL ANSWER (task.output.insights) per execution;
+  a board without them would hide what the model actually concluded.
 * Refuses to emit if the aggregate is empty or every discovery cell is null.
 """
 import argparse
@@ -22,28 +24,78 @@ def cell(mean, n, digits=2):
     return f'{mean:.{digits}f}<span class="n">n={n}</span>'
 
 
+def status_badge(m):
+    counts = m["status"]["counts"]
+    if not counts:
+        return BLANK
+    if "failed" in counts:
+        return f'<span class="bad">failed</span>'
+    if counts.get("succeeded"):
+        return f'<span class="ok">succeeded</span>'
+    return html.escape("/".join(sorted(counts.keys())))
+
+
 def build_rows(models):
     out = []
     for m in sorted(models, key=lambda r: (r["discoveryCount"]["mean"] is None, -(r["discoveryCount"]["mean"] or 0))):
-        st = m["status"]
-        rate = st["completedRate"]
-        badge = BLANK if rate is None else (
-            f'<span class="ok">completed {rate*100:.0f}%</span>' if rate >= 0.99
-            else f'<span class="warn">completed {rate*100:.0f}%</span>'
+        lat = m.get("generateLatencySeconds")
+        rub = (m.get("evaluators") or {}).get("AttackDiscoveryRubric") or {}
+        errs = m.get("generateErrors") or []
+        err_html = (
+            f'<div class="err">{"; ".join(html.escape(e) for e in errs[:1])}</div>'
+            if errs else ""
         )
-        lat = m["latencySeconds"]
         out.append(
             "<tr>"
             f'<td class="model">{html.escape(m["modelId"])}</td>'
-            f"<td>{badge}</td>"
-            f'<td>{cell(m["discoveryCount"]["mean"], m["discoveryCount"]["n"])}</td>'
-            f'<td>{cell(m["alertsContextCount"]["mean"], m["alertsContextCount"]["n"])}</td>'
+            f"<td>{status_badge(m)}</td>"
+            f'<td>{cell(m["discoveryCount"]["mean"], m["discoveryCount"]["n"], 0)}</td>'
+            f'<td>{cell(m["alertsContextCount"]["mean"], m["alertsContextCount"]["n"], 0)}</td>'
             f'<td>{f"{lat:.1f}s" if lat is not None else BLANK}</td>'
+            f'<td>{cell(rub.get("mean"), rub.get("n", 0))}</td>'
             f'<td>{BLANK if m["totalRisk"] is None else m["totalRisk"]}</td>'
             f'<td class="dim">{m["docs"]}</td>'
+            f"{err_html and ''}"
             "</tr>"
+            + (f'<tr class="errrow"><td></td><td colspan="7">{err_html}</td></tr>' if err_html else "")
         )
     return "\n".join(out)
+
+
+def trace_cards(models):
+    """Per-model final-answer cards. Each card carries the execution id, the
+    OTel trace id, and every insight the model produced (title, risk, tactics,
+    summary excerpt). This is the answer itself, not a pointer to it."""
+    blocks = []
+    for m in models:
+        cards = m.get("traceCards") or []
+        if not cards:
+            blocks.append(
+                f'<div class="tcard empty"><div class="thead">{html.escape(m["modelId"])} '
+                f'&mdash; no final answer on golden (generation failed or no insights)</div></div>'
+            )
+            continue
+        for t in cards:
+            items = []
+            for i, ins in enumerate(t["insights"], 1):
+                tactics = ", ".join(ins.get("mitre_attack_tactics") or []) or "--"
+                risk = ins.get("risk_score")
+                summary = (ins.get("summary_markdown") or "").strip()
+                if len(summary) > 220:
+                    summary = summary[:217] + "..."
+                items.append(
+                    f'<li><span class="t">{html.escape(str(ins.get("title") or f"insight {i}"))}</span>'
+                    f'<span class="meta">risk {html.escape(str(risk))} &middot; {html.escape(tactics)}</span>'
+                    f'<div class="sum">{html.escape(summary)}</div></li>'
+                )
+            blocks.append(
+                f'<details class="tcard"><summary>{html.escape(m["modelId"])} &mdash; '
+                f'{t["insightCount"]} insights '
+                f'<span class="dim">exec <code>{html.escape(t["executionId"][:16])}&hellip;</code> '
+                f'trace <code>{html.escape((t.get("traceId") or "")[:16])}&hellip;</code></span></summary>'
+                f'<ul class="ins">{" ".join(items)}</ul></details>'
+            )
+    return "\n".join(blocks)
 
 
 CSS = """
@@ -56,8 +108,10 @@ th{color:#9aa4b2;font-weight:600;font-size:12px;text-transform:uppercase;letter-
 td.model{font-family:ui-monospace,Menlo,monospace;color:#7dd3fc}
 .n{color:#5b6472;font-size:11px;margin-left:6px}
 .na{color:#5b6472}
-.ok{color:#4ade80}.warn{color:#fbbf24}
+.ok{color:#4ade80}.warn{color:#fbbf24}.bad{color:#f87171}
 .dim{color:#5b6472}
+.err{color:#f87171;font-size:12px}
+tr.errrow td{border-bottom:1px solid #1e2430;padding-top:0}
 .disc{background:#141a24;border-left:3px solid #fbbf24;padding:14px 18px;margin:22px 0;max-width:1100px;border-radius:4px}
 .disc h2{font-size:13px;margin:0 0 8px;text-transform:uppercase;color:#fbbf24;letter-spacing:.04em}
 .disc li{margin:4px 0;color:#c7cdd6}
@@ -67,6 +121,15 @@ table.sources td{font-size:13px;color:#c7cdd6;vertical-align:top}
 table.sources td.src-col{color:#7dd3fc;font-weight:600;width:170px;white-space:nowrap}
 tr.missing td{color:#5b6472;font-style:italic}
 tr.missing td.model{color:#6b7480;font-style:normal}
+.tcard{background:#141a24;border:1px solid #1e2430;border-radius:4px;margin:8px 0;max-width:1100px}
+.tcard summary{padding:10px 14px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;color:#7dd3fc;font-size:13px}
+.tcard.empty{padding:10px 14px;color:#6b7480;font-size:13px}
+.tcard .thead{font-family:ui-monospace,Menlo,monospace}
+.ins{list-style:none;margin:0;padding:4px 14px 12px}
+.ins li{margin:8px 0;padding-bottom:8px;border-bottom:1px solid #1e2430}
+.ins .t{color:#e6e6e6;font-weight:600;display:block}
+.ins .meta{color:#9aa4b2;font-size:12px;display:block;margin:2px 0}
+.ins .sum{color:#c7cdd6;font-size:12px}
 """
 
 
@@ -74,32 +137,32 @@ tr.missing td.model{color:#6b7480;font-style:normal}
 # reader never has to guess whether a value was measured, derived, or missing.
 COLUMN_SOURCES = [
     ("Model", "<code>task.model.id</code> from the golden score documents."),
-    ("Status", "<code>task.output.adToolResult.status</code>; shown as the share of documents reporting <code>completed</code>."),
-    ("Discoveries", "mean of <code>task.output.adToolResult.discoveryCount</code> over documents that carry it."),
-    ("Alerts in context", "mean of <code>task.output.adToolResult.alertsContextCount</code>."),
-    ("Latency", "mean score of the <code>Latency</code> evaluator, in seconds &mdash; NOT a <code>task.output</code> field."),
-    ("Total risk", "no source field exists in our schema; always blank."),
+    ("Status", "<code>task.output.raw.status</code> &mdash; the product-level attack-discovery generate result."),
+    ("Discoveries", "count of <code>task.output.insights</code> (the final AD answer), once per execution."),
+    ("Alerts in context", "<code>task.output.raw.alerts_context_count</code> (input volume, 95-alert corpus)."),
+    ("Gen latency", "<code>task.output.raw.latency_ms</code> &mdash; the <code>_generate</code> call wall clock, ms &rarr; s."),
+    ("Rubric", "mean score of the <code>AttackDiscoveryRubric</code> evaluator (Gemini 3.1 Pro judge)."),
+    ("Total risk", "no per-board aggregate field exists in our schema; always blank."),
     ("Docs", "count of scored documents contributing to that row."),
 ]
 
 
 def render_missing_rows(missing):
-    """Criterion 6: reference models absent from our data are shown as
-    explicitly missing. Their cells stay blank -- never filled from the
-    reference HTML."""
+    """Reference/board-candidate models absent from our data are shown as
+    explicitly missing. Their cells stay blank -- never filled by hand."""
     if not missing:
         return ""
     cells = "\n".join(
         "<tr class='missing'>"
-        f'<td class="model">{html.escape(m)}</td>'
-        f'<td colspan="6"><span class="na">not present in our golden data &mdash; never run in this suite</span></td>'
+        f'<td class="model">{html.escape(m["model"])}</td>'
+        f'<td colspan="7"><span class="na">{html.escape(m["reason"])}</span></td>'
         "</tr>"
-        for m in sorted(missing)
+        for m in missing
     )
     return cells
 
 
-def render(agg, source_note, missing_models=(), diff_summary=None, false_green=None):
+def render(agg, source_note, missing_models=(), disclosure_extra=""):
     rows = build_rows(agg["models"])
     absent = agg["absentFields"]
     absent_html = (
@@ -113,38 +176,26 @@ def render(agg, source_note, missing_models=(), diff_summary=None, false_green=N
         for name, desc in COLUMN_SOURCES
     )
     missing_html = render_missing_rows(missing_models)
-    missing_note = (
-        f"<li><strong>{len(missing_models)} models appear in the reference artifact but not in our "
-        "golden data.</strong> They are listed at the foot of the table with blank cells. Their "
-        "reference numbers were deliberately NOT copied across &mdash; doing so would report another "
-        "harness's results as ours.</li>"
-        if missing_models else ""
-    )
-    diff_note = (
-        f"<li><strong>Field-level diff vs the reference:</strong> "
-        f"{diff_summary['identical']}/{diff_summary['comparable']} fields identical "
-        f"({100*diff_summary['identical']/max(1,diff_summary['comparable']):.1f}%), "
-        f"{diff_summary['differs']} differ, {diff_summary['absentInOurs']} absent. "
-        "Full evidence in <code>field_diff.json</code>.</li>"
-        if diff_summary else ""
-    )
+    cards = trace_cards(agg["models"])
     return f"""<!doctype html><meta charset="utf-8">
 <title>Attack Discovery -- golden results</title><style>{CSS}</style>
 <h1>Attack Discovery &mdash; model board</h1>
 <div class="sub">{agg['modelCount']} models &middot; {agg['sourceDocCount']} scored documents &middot;
 suite <code>{html.escape(agg['suiteId'])}</code> &middot; rendered {ts}</div>
 
-<div class="disc"><h2>Read this before comparing to the reference artifact</h2><ul>
-<li><strong>This is not a 1:1 reproduction, because the underlying runs differ.</strong>
-The reference artifact reports a single large run: <code>8</code> discoveries over
-<code>95</code> alerts for every model. Our golden data is a scenario-fixture suite &mdash;
-discovery counts of 0/1/4 over 0-16 alerts. Copying its shape would describe a benchmark we did not run.</li>
-{diff_note}
+<div class="disc"><h2>What this board is</h2><ul>
+<li><strong>Real corpus, real product API.</strong> Every run restores the
+<code>oh-my-malware-95-deduped</code> GCS snapshot (95 alerts) and drives the production
+attack-discovery <code>_generate</code> API against it. No synthetic seeds, no scenario fixtures.</li>
+<li><strong>Judge:</strong> <code>eis-google-gemini-3-1-pro</code> (Gemini 3.1 Pro) via the
+<code>AttackDiscoveryRubric</code> evaluator. The judge never scores its own generation
+(it is excluded from the candidate set).</li>
+<li>Each mean carries its own <code>n</code>. A model with one execution shows n=1 &mdash;
+this is a single-shot sweep, not a multi-rep average.</li>
+<li>Trace cards below the table carry the final answer per execution: every insight title,
+risk, MITRE tactics and summary excerpt, straight from <code>task.output.insights</code>.</li>
+{disclosure_extra}
 {absent_html}
-{missing_note}
-<li>Each mean carries its own <code>n</code>. Coverage is uneven by design
-(57% of documents carry <code>discoveryCount</code>); a mean over 7 documents is not
-dressed up as a mean over 1040.</li>
 <li>Source: {html.escape(source_note)}</li>
 </ul></div>
 
@@ -156,49 +207,14 @@ dressed up as a mean over 1040.</li>
 <h2 class="sec">Results</h2>
 <table><thead><tr>
 <th>Model</th><th>Status</th><th>Discoveries</th><th>Alerts in context</th>
-<th>Latency</th><th>Total risk</th><th>Docs</th>
+<th>Gen latency</th><th>Rubric</th><th>Total risk</th><th>Docs</th>
 </tr></thead><tbody>
 {rows}
 {missing_html}
 </tbody></table>
-{false_green_section(false_green)}
-"""
 
-
-def false_green_section(fg):
-    """Render the connector false-green measurement.
-
-    This is a different suite from the board above, so it is deliberately
-    kept in its own section with its own provenance rather than merged into
-    the model table.
-    """
-    if not fg:
-        return ""
-    s, scan = fg["summary"], fg["scan"]
-    rows = "\n".join(
-        f'<tr><td class="m">{html.escape(r["model"])}</td>'
-        f'<td class="n">{r["real"]}/{r["total"]}</td>'
-        f'<td class="n">{r["rate"]:.1f}%</td></tr>'
-        for r in fg["perModel"]
-    )
-    return f"""
-<h2 class="sec">Connector false green &mdash; why <code>ExpectedToolCalled</code> was not enough</h2>
-<div class="disc"><ul>
-<li><code>ExpectedToolCalled</code> maps tool calls to <code>tool_id</code> and asserts the id is
-present. It never inspects arguments or output, so a model scores 1 for <em>calling</em>
-<code>generate_workflow</code> even when the workflow it produced targets no connector at all.</li>
-<li><strong>{s['falseGreen']} false greens:</strong> {s['expectedToolCalledPass']} cells score 1.0,
-but only {s['reallyTargetsConnector']} author a real <code>type: http</code> step at the connector.</li>
-<li>Positive control: {scan['positiveControlDocsMentioningSlack']} scanned documents mention Slack,
-so this scan detects the signal it is looking for &mdash; it is not a null instrument.</li>
-<li><strong>Caveat:</strong> {html.escape(scan['caveat'])}</li>
-<li>Source: <code>measure_connector_false_green.py</code> &rarr;
-<code>connector_false_green.json</code>. Suites: {html.escape(', '.join(scan['suites']))}.</li>
-</ul></div>
-<table><thead><tr><th>Model</th><th>Really targets connector</th><th>Rate</th></tr></thead>
-<tbody>
-{rows}
-</tbody></table>
+<h2 class="sec">Final answers &mdash; trace cards per execution</h2>
+{cards}
 """
 
 
@@ -206,8 +222,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--aggregate", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--field-diff", help="field_diff.json from diff_attack_discovery_vs_reference.py")
-    ap.add_argument("--false-green", help="connector_false_green.json from measure_connector_false_green.py")
+    ap.add_argument("--missing", help="JSON list of {model, reason} rows to show as explicitly absent")
     args = ap.parse_args()
 
     agg = json.load(open(args.aggregate))
@@ -217,24 +232,17 @@ def main():
         sys.exit("no model carries a discoveryCount -- refusing to render a vacuous board")
 
     missing_models = []
-    diff_summary = None
-    if args.field_diff:
-        diff = json.load(open(args.field_diff))
-        missing_models = diff.get("referenceOnly", [])
-        diff_summary = diff.get("fieldTotals")
-
-    false_green = None
-    if args.false_green:
-        false_green = json.load(open(args.false_green))
-        if not false_green.get("perModel"):
-            sys.exit("--false-green given but carries no perModel rows -- refusing to render a hollow section")
+    if args.missing:
+        missing_models = json.load(open(args.missing))
+        if not isinstance(missing_models, list) or not all(
+            isinstance(x, dict) and "model" in x and "reason" in x for x in missing_models
+        ):
+            sys.exit("--missing must be a JSON list of {model, reason} objects")
 
     html_out = render(
         agg,
         f"golden ES, suite_id={agg['suiteId']}, {agg['sourceDocCount']} docs",
         missing_models=missing_models,
-        diff_summary=diff_summary,
-        false_green=false_green,
     )
     with open(args.out, "w") as fh:
         fh.write(html_out)
