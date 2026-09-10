@@ -35,6 +35,12 @@ const mockAuthenticateAndGetSpace = authenticateAndGetSpace as jest.MockedFuncti
   typeof authenticateAndGetSpace
 >;
 
+/**
+ * An arbitrary producer identity. No production caller passes a
+ * `generationSource` yet — this only exercises the opt-in mechanism.
+ */
+const TEST_GENERATION_SOURCE = 'test-producer';
+
 describe('getPersistDiscoveriesStepDefinition', () => {
   const mockLogger = {
     debug: jest.fn(),
@@ -239,6 +245,66 @@ describe('getPersistDiscoveriesStepDefinition', () => {
           replacements: {},
           with_replacements: false,
         },
+      });
+    });
+
+    describe('generation_source', () => {
+      it('forwards undefined when the step input does not set generation_source', async () => {
+        const stepDefinition = getPersistDiscoveriesStepDefinition({
+          adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+          getStartServices: mockGetStartServices,
+          logger: mockLogger,
+        });
+
+        await stepDefinition.handler(mockContext as never);
+
+        expect(mockValidateAttackDiscoveries).toHaveBeenCalledWith(
+          expect.objectContaining({ generationSource: undefined })
+        );
+      });
+
+      it('forwards the generation_source step input to validateAttackDiscoveries', async () => {
+        const stepDefinition = getPersistDiscoveriesStepDefinition({
+          adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+          getStartServices: mockGetStartServices,
+          logger: mockLogger,
+        });
+
+        await stepDefinition.handler({
+          ...mockContext,
+          input: {
+            ...mockContext.input,
+            generation_source: TEST_GENERATION_SOURCE,
+          },
+        } as never);
+
+        expect(mockValidateAttackDiscoveries).toHaveBeenCalledWith(
+          expect.objectContaining({
+            generationSource: TEST_GENERATION_SOURCE,
+          })
+        );
+      });
+
+      it('does not leak generation_source into the validate request body', async () => {
+        // the field is persisted and indexed, but deliberately not part of the
+        // HTTP API contract (`PostValidateRequestBody`)
+        const stepDefinition = getPersistDiscoveriesStepDefinition({
+          adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+          getStartServices: mockGetStartServices,
+          logger: mockLogger,
+        });
+
+        await stepDefinition.handler({
+          ...mockContext,
+          input: {
+            ...mockContext.input,
+            generation_source: TEST_GENERATION_SOURCE,
+          },
+        } as never);
+
+        const [{ validateRequestBody }] = mockValidateAttackDiscoveries.mock.calls[0];
+
+        expect(Object.keys(validateRequestBody)).not.toContain('generation_source');
       });
     });
 
