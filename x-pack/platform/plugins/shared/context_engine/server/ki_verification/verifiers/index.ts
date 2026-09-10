@@ -15,6 +15,7 @@ export {
 export {
   createWorkflowVerifier,
   readKiVerifierChain,
+  resolveKiVerifierChain,
   KI_VERIFIER_CHAIN_METADATA_KEY,
   MAX_KI_VERIFIER_WORKFLOW_DEPTH,
   WORKFLOW_VERIFIER_ID_PREFIX,

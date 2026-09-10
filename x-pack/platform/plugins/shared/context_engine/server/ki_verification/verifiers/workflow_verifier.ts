@@ -42,6 +42,57 @@ export const readKiVerifierChain = (metadata: Record<string, unknown> | undefine
   return Array.isArray(chain) ? chain.filter((id): id is string => typeof id === 'string') : [];
 };
 
+/** Bounds the ancestor lookups; matches the engine's default `maxWorkflowDepth`. */
+const MAX_LINEAGE_LOOKUPS = 10;
+
+/**
+ * Resolves the chain of workflows that led to the current one, outermost first
+ * and ending with the current workflow. Verifier hops carry the chain in
+ * execution metadata; `workflow.execute` hops drop metadata but record parent
+ * refs, so those are followed through the ancestor executions. Throws when an
+ * ancestor execution cannot be read, since the chain can then not be trusted.
+ */
+export const resolveKiVerifierChain = async ({
+  workflowId,
+  metadata,
+  parent,
+  spaceId,
+  workflowsManagement,
+}: {
+  workflowId: string;
+  metadata: Record<string, unknown> | undefined;
+  parent: { workflowId: string; executionId: string } | undefined;
+  spaceId: string;
+  workflowsManagement: Pick<KiVerifierWorkflowRunner, 'getWorkflowExecution'>;
+}): Promise<string[]> => {
+  const lineage: string[] = [];
+  let ancestor = parent;
+  for (let lookups = 0; ancestor; lookups++) {
+    if (lookups >= MAX_LINEAGE_LOOKUPS) {
+      throw new Error(
+        `Cannot resolve the verifier workflow chain for '${workflowId}': more than ${MAX_LINEAGE_LOOKUPS} ancestor workflows`
+      );
+    }
+    const execution = await workflowsManagement.getWorkflowExecution(ancestor.executionId, spaceId);
+    if (!execution) {
+      throw new Error(
+        `Cannot resolve the verifier workflow chain for '${workflowId}': ancestor execution '${ancestor.executionId}' is not readable`
+      );
+    }
+    const context = execution.context ?? {};
+    lineage.unshift(
+      ...readKiVerifierChain(context.metadata as Record<string, unknown> | undefined),
+      ancestor.workflowId
+    );
+    const { parentWorkflowId, parentWorkflowExecutionId } = context;
+    ancestor =
+      typeof parentWorkflowId === 'string' && typeof parentWorkflowExecutionId === 'string'
+        ? { workflowId: parentWorkflowId, executionId: parentWorkflowExecutionId }
+        : undefined;
+  }
+  return [...lineage, ...readKiVerifierChain(metadata), workflowId];
+};
+
 const workflowVerifierOutputSchema = z.object({
   passed: z.boolean(),
   reason: z.string().optional(),

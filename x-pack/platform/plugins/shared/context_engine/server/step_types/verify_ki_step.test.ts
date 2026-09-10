@@ -36,10 +36,12 @@ const makeHandlerContext = (
     verifiers,
     getScopedEsClient,
     metadata,
+    parent,
   }: {
     verifiers?: VerifyKiVerifiers;
     getScopedEsClient?: () => unknown;
     metadata?: Record<string, unknown>;
+    parent?: { workflowId: string; executionId: string };
   } = {}
 ): VerifyKiHandlerContext =>
   ({
@@ -49,9 +51,11 @@ const makeHandlerContext = (
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
       getScopedEsClient: getScopedEsClient ?? jest.fn().mockReturnValue(esClient),
-      getContext: jest
-        .fn()
-        .mockReturnValue({ workflow: { id: 'parent-wf', spaceId: 'space-a' }, metadata }),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'parent-wf', spaceId: 'space-a' },
+        metadata,
+        parent,
+      }),
     },
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
@@ -100,7 +104,11 @@ describe('verify_ki workflow step', () => {
 
   const runHandler = async (
     ki: VerifyKiHandlerContext['input']['ki'],
-    opts: { verifiers?: VerifyKiVerifiers; metadata?: Record<string, unknown> } = {}
+    opts: {
+      verifiers?: VerifyKiVerifiers;
+      metadata?: Record<string, unknown>;
+      parent?: { workflowId: string; executionId: string };
+    } = {}
   ) => {
     const { output } = await makeDefinition().handler(makeHandlerContext(ki, esClient, opts));
     if (!output) {
@@ -517,6 +525,50 @@ describe('verify_ki workflow step', () => {
       expect(thrown.message).toBe(
         "Verifier workflow 'root-wf' would call itself (chain: root-wf -> parent-wf -> root-wf)"
       );
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('follows workflow.execute lineage so a cycle through a sub-workflow is rejected', async () => {
+      // root-wf verified via verifier-wf (metadata chain), which ran this workflow via
+      // workflow.execute (parent refs only). Naming root-wf again must be a cycle.
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValueOnce({
+        workflowId: 'verifier-wf',
+        context: { metadata: { ki_verifier_chain: ['root-wf'] } },
+      } as unknown as WorkflowExecutionDto);
+
+      const thrown = await runHandler(
+        { title: 'x' },
+        {
+          verifiers: [{ workflow_id: 'root-wf' }],
+          parent: { workflowId: 'verifier-wf', executionId: 'verifier-exec' },
+        }
+      ).catch((error) => error);
+
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
+        'verifier-exec',
+        'space-a'
+      );
+      expect(thrown.type).toBe('InputValidationError');
+      expect(thrown.message).toBe(
+        "Verifier workflow 'root-wf' would call itself (chain: root-wf -> verifier-wf -> parent-wf -> root-wf)"
+      );
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when an ancestor execution cannot be read', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValueOnce(null);
+
+      await expect(
+        runHandler(
+          { title: 'x' },
+          {
+            verifiers: [{ workflow_id: 'no-pii' }],
+            parent: { workflowId: 'verifier-wf', executionId: 'gone' },
+          }
+        )
+      ).rejects.toThrow("ancestor execution 'gone' is not readable");
       expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
     });
 

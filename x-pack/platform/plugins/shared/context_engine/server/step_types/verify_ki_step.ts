@@ -16,7 +16,7 @@ import {
   KiVerificationInputError,
   KiVerificationService,
   MAX_KI_VERIFIER_WORKFLOW_DEPTH,
-  readKiVerifierChain,
+  resolveKiVerifierChain,
 } from '../ki_verification';
 import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
@@ -53,7 +53,7 @@ export const createVerifyKiStepDefinition = (
       }
 
       const entries = context.input.verifiers ?? [];
-      const { workflow, metadata } = context.contextManager.getContext();
+      const { workflow, metadata, parent } = context.contextManager.getContext();
       const { spaceId } = workflow;
       const hasWorkflowVerifiers = entries.some((entry) => typeof entry !== 'string');
       if (
@@ -67,8 +67,17 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      // The chain of verifier workflows that led here, ending with this workflow.
-      const verifierChain = [...readKiVerifierChain(metadata), workflow.id];
+      // The chain of workflows that led here, ending with this workflow.
+      const verifierChain =
+        hasWorkflowVerifiers && workflowVerifierDeps
+          ? await resolveKiVerifierChain({
+              workflowId: workflow.id,
+              metadata,
+              parent,
+              spaceId,
+              workflowsManagement: workflowVerifierDeps.workflowsManagement,
+            })
+          : [workflow.id];
       if (hasWorkflowVerifiers && verifierChain.length > MAX_KI_VERIFIER_WORKFLOW_DEPTH) {
         throw new ExecutionError({
           type: 'InputValidationError',

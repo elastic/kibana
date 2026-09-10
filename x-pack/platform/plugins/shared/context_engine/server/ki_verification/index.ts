@@ -23,6 +23,7 @@ export {
   createEsqlValidRuntimeVerifier,
   createWorkflowVerifier,
   readKiVerifierChain,
+  resolveKiVerifierChain,
   KI_VERIFIER_CHAIN_METADATA_KEY,
   MAX_KI_VERIFIER_WORKFLOW_DEPTH,
   ESQL_ATTRIBUTE_KEY,

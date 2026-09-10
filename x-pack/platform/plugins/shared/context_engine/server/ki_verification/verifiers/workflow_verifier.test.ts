@@ -14,10 +14,80 @@ import type { KiVerifierContext } from '../types';
 import type { KiVerifierWorkflowRunner } from './workflow_verifier';
 import {
   createWorkflowVerifier,
+  resolveKiVerifierChain,
   MAX_REASON_LENGTH,
   WORKFLOW_VERIFIER_POLL_INTERVAL_MS,
   WORKFLOW_VERIFIER_TRIGGERED_BY,
 } from './workflow_verifier';
+
+describe('resolveKiVerifierChain', () => {
+  const spaceId = 'space-a';
+  let getWorkflowExecution: jest.Mock;
+
+  const execWith = (context: Record<string, unknown>) =>
+    ({ context } as unknown as WorkflowExecutionDto);
+
+  beforeEach(() => {
+    getWorkflowExecution = jest.fn();
+  });
+
+  const resolve = (args: {
+    metadata?: Record<string, unknown>;
+    parent?: { workflowId: string; executionId: string };
+  }) =>
+    resolveKiVerifierChain({
+      workflowId: 'me',
+      metadata: args.metadata,
+      parent: args.parent,
+      spaceId,
+      workflowsManagement: { getWorkflowExecution },
+    });
+
+  it('is just the current workflow when nothing led here', async () => {
+    await expect(resolve({})).resolves.toEqual(['me']);
+    expect(getWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('appends the current workflow to the inherited metadata chain', async () => {
+    await expect(resolve({ metadata: { ki_verifier_chain: ['a', 'b'] } })).resolves.toEqual([
+      'a',
+      'b',
+      'me',
+    ]);
+  });
+
+  it('follows parent refs and merges each ancestor inherited chain', async () => {
+    getWorkflowExecution
+      .mockResolvedValueOnce(
+        execWith({ parentWorkflowId: 'grand', parentWorkflowExecutionId: 'grand-exec' })
+      )
+      .mockResolvedValueOnce(execWith({ metadata: { ki_verifier_chain: ['root'] } }));
+
+    await expect(
+      resolve({ parent: { workflowId: 'dad', executionId: 'dad-exec' } })
+    ).resolves.toEqual(['root', 'grand', 'dad', 'me']);
+    expect(getWorkflowExecution).toHaveBeenNthCalledWith(1, 'dad-exec', spaceId);
+    expect(getWorkflowExecution).toHaveBeenNthCalledWith(2, 'grand-exec', spaceId);
+  });
+
+  it('throws when an ancestor execution is missing', async () => {
+    getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(
+      resolve({ parent: { workflowId: 'dad', executionId: 'dad-exec' } })
+    ).rejects.toThrow("ancestor execution 'dad-exec' is not readable");
+  });
+
+  it('throws instead of walking an unbounded ancestry', async () => {
+    getWorkflowExecution.mockImplementation(async (id: string) =>
+      execWith({ parentWorkflowId: `wf-${id}`, parentWorkflowExecutionId: `${id}x` })
+    );
+
+    await expect(resolve({ parent: { workflowId: 'dad', executionId: 'e' } })).rejects.toThrow(
+      'more than 10 ancestor workflows'
+    );
+  });
+});
 
 const request = { headers: {} } as unknown as KibanaRequest;
 const spaceId = 'space-a';
