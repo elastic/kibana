@@ -198,6 +198,19 @@ export interface ListProposalsResponse {
   total: number;
 }
 
+export const MAX_PROPOSAL_ACTIVITY_SIZE = 500;
+
+export const proposalActivityQuerySchema = z.object({
+  windowHours: z.coerce.number().int().min(1).max(168).default(24),
+});
+export type ProposalActivityQuery = z.infer<typeof proposalActivityQuerySchema>;
+
+export interface ProposalActivityResponse {
+  proposals: ProposalWithMetadata[];
+  total: number;
+  truncated: boolean;
+}
+
 /** Terminal states: a decided or executed proposal can no longer be acted on. */
 export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
 

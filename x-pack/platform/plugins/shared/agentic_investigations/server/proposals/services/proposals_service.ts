@@ -26,11 +26,13 @@ import type {
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
+  ProposalActivityQuery,
+  ProposalActivityResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { isExpired } from '../../../common/proposals/proposal';
+import { isExpired, MAX_PROPOSAL_ACTIVITY_SIZE } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -193,6 +195,55 @@ export class ProposalsService {
           ? response.hits.total
           : response.hits.total?.value ?? proposals.length,
     };
+  }
+
+  /**
+   * Returns all currently-pending proposals (regardless of age) plus proposals
+   * that were decided within the given time window, in queue order.
+   *
+   * "Pending" and "decided in the last N hours" are unrelated conditions, so
+   * this cannot be expressed as a conjunction on top of `list()`'s query; it
+   * needs its own `should` disjunction and is intentionally not given an HTTP
+   * route in this plugin — the shaping is AlertZero-specific and is reachable
+   * only through the in-process start contract.
+   *
+   * Action-metadata resolution is memoised per `actionWorkflowId` across the
+   * entire result set to avoid a `getWorkflow` fetch per proposal.
+   */
+  async listActivity(
+    query: ProposalActivityQuery,
+    spaceId: string
+  ): Promise<ProposalActivityResponse> {
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: MAX_PROPOSAL_ACTIVITY_SIZE,
+      query: {
+        bool: {
+          filter: [{ term: { spaceId } }],
+          // TODO(#19258): add `must_not: { exists: { field: 'supersededBy' } }` once the field lands.
+          should: [
+            { term: { status: 'pending' } },
+            { range: { decidedAt: { gte: `now-${query.windowHours}h` } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      sort: [{ createdAt: { order: 'asc' } }],
+    });
+
+    const hits = response.hits.hits.filter(
+      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
+    );
+    const rawProposals = hits.map((hit) => toProposal(hit._id, hit._source as ProposalDocument));
+
+    const proposals = await this.withMetadataBatch(rawProposals, spaceId);
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? proposals.length;
+
+    return { proposals, total, truncated: total > proposals.length };
   }
 
   /**
@@ -534,6 +585,37 @@ export class ProposalsService {
       : undefined;
 
     return { ...proposal, action, expired: isExpired(proposal) };
+  }
+
+  /**
+   * Resolves action metadata for a collection of proposals, memoising per
+   * `actionWorkflowId` across the batch. A single `getWorkflow` fetch serves
+   * all proposals that share the same action workflow, rather than fetching
+   * once per proposal as `withMetadata` does. The memo is request-scoped and
+   * never escapes this call.
+   */
+  private async withMetadataBatch(
+    proposals: Proposal[],
+    spaceId: string
+  ): Promise<ProposalWithMetadata[]> {
+    const metaMemo = new Map<string, Promise<ActionMetadata | undefined>>();
+
+    return Promise.all(
+      proposals.map(async (proposal) => {
+        let action: ActionMetadata | undefined;
+
+        if (proposal.actionWorkflowId) {
+          let pending = metaMemo.get(proposal.actionWorkflowId);
+          if (!pending) {
+            pending = this.resolveActionMetadata(proposal.actionWorkflowId, spaceId);
+            metaMemo.set(proposal.actionWorkflowId, pending);
+          }
+          action = await pending;
+        }
+
+        return { ...proposal, action, expired: isExpired(proposal) };
+      })
+    );
   }
 }
 
