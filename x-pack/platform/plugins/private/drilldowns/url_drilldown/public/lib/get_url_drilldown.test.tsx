@@ -44,7 +44,9 @@ describe('getUrlDrilldown MenuItem', () => {
       url: 'https://example.com',
     } as any;
 
-    const { getByText } = render(<MenuItem drilldownState={drilldownState} context={mockContext} />);
+    const { getByText } = render(
+      <MenuItem drilldownState={drilldownState} context={mockContext} />
+    );
 
     // initially renders raw label
     expect(getByText('Go to URL {{event.values.[0]}}')).toBeInTheDocument();
@@ -66,7 +68,9 @@ describe('getUrlDrilldown MenuItem', () => {
       url: 'https://example.com',
     } as any;
 
-    const { getByText } = render(<MenuItem drilldownState={drilldownState} context={mockContext} />);
+    const { getByText } = render(
+      <MenuItem drilldownState={drilldownState} context={mockContext} />
+    );
 
     await waitFor(() => {
       expect(getByText('Go to external site')).toBeInTheDocument();

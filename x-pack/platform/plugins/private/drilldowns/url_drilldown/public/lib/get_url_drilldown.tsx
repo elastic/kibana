@@ -162,10 +162,19 @@ export function getUrlDrilldown(deps: {
         useEffect(() => {
           let canceled = false;
           compile(drilldownState.label, getRuntimeVariables(context), false)
-            .then((result) => { if (!canceled) setTitle(result); })
-            // eslint-disable-next-line no-console
-            .catch((e) => console.warn(`URL drilldown: failed to compile name template "${drilldownState.label}":`, e));
-          return () => { canceled = true; };
+            .then((result) => {
+              if (!canceled) setTitle(result);
+            })
+
+            .catch((e) =>
+              console.warn(
+                `URL drilldown: failed to compile name template "${drilldownState.label}":`,
+                e
+              )
+            );
+          return () => {
+            canceled = true;
+          };
         }, [drilldownState.label, context]);
 
         return <span>{title}</span>;
