@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { userMessageEventDataSchema } from './user_message';
 
 const askUserQuestionAnswerSchema = z.object({
   choice: z.array(z.number()).optional(),
@@ -23,4 +24,5 @@ const promptResponseSchema = z.union([
 export const promptResponseEventDataSchema = z.object({
   prompt_requested_event_id: z.string(),
   responses: z.record(z.string(), promptResponseSchema),
+  input: userMessageEventDataSchema.optional(),
 });
