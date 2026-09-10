@@ -207,7 +207,7 @@ apiTest.describe(
             const statsRes = await esClient.ml.getDatafeedStats({
               datafeed_id: datafeedIds.join(','),
             });
-            log.debug(
+            log.info(
               `Waiting for ML datafeed allocation (attempt ${attempt}/${maxAttempts}, ` +
                 `not ready: ${notReady.join(', ')}): ` +
                 `${JSON.stringify(
@@ -221,7 +221,7 @@ apiTest.describe(
                 )}`
             );
           } catch (err) {
-            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
+            log.warn(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
           }
 
           if (attempt < maxAttempts) {
