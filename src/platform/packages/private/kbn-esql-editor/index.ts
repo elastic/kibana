@@ -9,6 +9,7 @@
 
 export type { DataErrorsControl } from './src/types';
 export type { ESQLEditorProps } from './src/esql_editor';
+export type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import { ESQLEditor } from './src/esql_editor';
 export type { ESQLEditorRestorableState } from './src/restorable_state';
 export { ESQLMenu } from './src/editor_menu';

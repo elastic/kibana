@@ -31,6 +31,7 @@ import {
   ESQLMenu,
   EsqlEditorActionsProvider,
   type ESQLEditorProps,
+  type RestorableStateProviderApi,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -351,6 +352,13 @@ export const QueryBarTopRow = React.memo(
         setIsCancelling(false);
       }
     }, [props.isLoading]);
+
+    const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
+    // Discover persists editor UI in initialState (e.g. closing history on first
+    // search of a new tab). Restorable state ignores parent updates until refresh.
+    useEffect(() => {
+      esqlEditorRef.current?.refreshInitialState();
+    }, [props.esqlEditorInitialState?.isHistoryOpen]);
 
     const {
       showQueryInput = true,
@@ -1344,6 +1352,7 @@ export const QueryBarTopRow = React.memo(
         props.query &&
         isOfAggregateQueryType(props.query) && (
           <ESQLLangEditor
+            ref={esqlEditorRef}
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
@@ -1360,11 +1369,6 @@ export const QueryBarTopRow = React.memo(
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
             onInitialStateChange={props.onEsqlEditorInitialStateChange}
-            isHistoryOpen={
-              props.onEsqlEditorInitialStateChange
-                ? props.esqlEditorInitialState?.isHistoryOpen
-                : undefined
-            }
             controlsContext={
               props.esqlVariablesConfig
                 ? {
