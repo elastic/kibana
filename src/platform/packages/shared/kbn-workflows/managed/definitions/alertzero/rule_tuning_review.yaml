@@ -342,7 +342,7 @@ steps:
           and steps.record_preview_outcome.output.proposed_succeeded == true
           and steps.record_preview_outcome.output.proposed_is_aborted == false }}
 
-  # Rendered as markdown in the proposal queue. Composed once here because the two
+  # Shown verbatim in the proposal queue. Composed once here because the two
   # gate calls below cannot share a step: the gate types actionInput as an object,
   # so a manual proposal has to omit the key rather than pass an empty value, and a
   # YAML object cannot omit a key conditionally.
@@ -350,7 +350,7 @@ steps:
     type: data.set
     with:
       comment: |-
-        **Rule tuning review for {{ steps.fetch_rule.output.name }}**
+        Rule tuning review for {{ steps.fetch_rule.output.name }}
 
         {{ inputs.fp_count }} alerts were closed as false positives in the last
         {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
@@ -364,14 +364,10 @@ steps:
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" and steps.record_auto_apply_support.output.supported %}
         Current query:
-        ```
         {{ steps.diagnose_rule.output.structured_output.current_query }}
-        ```
 
         Proposed query:
-        ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
-        ```
 
         Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
         lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
@@ -393,18 +389,14 @@ steps:
         {% else %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         Proposed query:
-        ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
-        ```
 
         This rule uses a data view, timestamp override, or alert suppression, so it
         is not previewed or applied automatically.
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
-        ```
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
-        ```
         {% endif %}
         This {{ steps.diagnose_rule.output.structured_output.change_type }} change
         is not applied automatically; apply it manually in the Detection Rules UI if
@@ -435,6 +427,8 @@ steps:
           query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
         impact: medium
         confidence: medium
+        # Query edits always wait for an analyst; matches the action's approvalPolicy.
+        autoApprove: false
 
   # Same gate without an action: the analyst carries the change out themselves, so
   # approval is the whole lifecycle.
