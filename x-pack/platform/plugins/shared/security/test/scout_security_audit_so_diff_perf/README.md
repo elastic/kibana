@@ -80,98 +80,46 @@ SO_DIFF_PERF_LABEL=diffs-off node scripts/scout run-tests --arch stateful --doma
 
 ### ☁️ Running against a Cloud deployment
 
-To reproduce the memory conditions that matter, create the deployment in Elastic Cloud with a
-**1 GB RAM Kibana instance**. The Elasticsearch size is not important; 1 GB is sufficient.
-The plan below is the one used by the prebuilt rules OOM suite with the audit settings added.
-With QAF, place it in `~/.qaf/config/cloud_plans/so_diff_perf.yml`.
+To reproduce the memory conditions that matter, create a deployment in Elastic Cloud with a
+**1 GB RAM Kibana instance** in a **CFT region** (`gcp-us-west2` or `aws-eu-west-1`). Other
+regions restrict `user_settings_yaml` to allow-listed keys and `savedObjectDiff` /
+`ops.interval` are not on that list.
+
+Under **Kibana user settings** apply (diffs-on run):
 
 ```yaml
----
-name: '{{ deployment_name }}'
-settings:
-  autoscaling_enabled: '{{ autoscaling_enabled }}'
-metadata:
-  system_owned: false
-resources:
-  elasticsearch:
-    - region: '{{ region }}'
-      settings:
-        dedicated_masters_threshold: 6
-      plan:
-        cluster_topology:
-          - zone_count: 1
-            elasticsearch:
-              node_attributes:
-                data: hot
-            instance_configuration_id: gcp.es.datahot.n2.68x10x45
-            node_roles:
-              - master
-              - ingest
-              - remote_cluster_client
-              - data_hot
-              - transform
-              - data_content
-            id: hot_content
-            size:
-              value: 1024
-              resource: memory
-        elasticsearch:
-          version: '{{ stack_version }}'
-        deployment_template:
-          id: gcp-storage-optimized
-      ref_id: main-elasticsearch
-  enterprise_search: []
-  kibana:
-    - elasticsearch_cluster_ref_id: main-elasticsearch
-      region: '{{ region }}'
-      plan:
-        cluster_topology:
-          - instance_configuration_id: gcp.kibana.n2.68x32x45
-            zone_count: 1
-            size:
-              value: 1024
-              resource: memory
-        kibana:
-          version: '{{ stack_version }}'
-          user_settings_yaml: |-
-            xpack.security.audit.enabled: true
-            xpack.security.audit.savedObjectDiff.enabled: true
-            xpack.security.audit.savedObjectDiff.typesToInclude: ["index-pattern"]
-            ops.interval: 2000
-      ref_id: main-kibana
+xpack.security.audit.enabled: true
+xpack.security.audit.savedObjectDiff.enabled: true
+xpack.security.audit.savedObjectDiff.typesToInclude: ["index-pattern"]
+ops.interval: 2000
 ```
 
-For the baseline deployment, drop the two `savedObjectDiff` lines (or set `enabled: false`).
-Either create two deployments or change the plan between runs.
+For the baseline run, omit the two `savedObjectDiff` lines (or set `enabled: false`).
+Either create two deployments or change the settings between runs.
 
-> **_NOTE:_** Use Cloud First Testing (CFT) regions (`gcp-us-west2` or `aws-eu-west-1`).
-> Other regions restrict `user_settings_yaml` to the allow-listed settings marked with the
-> "C" icon in the Kibana configuration reference, and `savedObjectDiff` / `ops.interval` are
-> not on that list.
-
-Create the deployment:
-
-```bash
-qaf elastic-cloud deployments create --stack-version <stack-version> --version-validation \
-  --deployment-name <deployment-name> --environment production --no-autoscaling --no-sso \
-  --region gcp-us-west2 --plan so_diff_perf
-```
-
-Point Scout at it by writing `KIBANA_REPO_ROOT/.scout/servers/cloud_ech.json` (see the
-[Scout README](../../../../../../../src/platform/packages/shared/kbn-scout/README.md) for the
-`role_users.json` format):
+Once the deployment is up, write `.scout/servers/cloud_ech.json`:
 
 ```json
 {
   "serverless": false,
   "isCloud": true,
-  "cloudHostName": "<elastic_cloud_hostname>",
-  "cloudUsersFilePath": "<path>/role_users.json",
+  "cloudHostName": "cloud.elastic.co",
+  "cloudUsersFilePath": "<absolute-path>/role_users.json",
   "hosts": {
     "kibana": "https://<deployment>.kb.<region>.gcp.elastic-cloud.com",
     "elasticsearch": "https://<deployment>.es.<region>.gcp.elastic-cloud.com"
   },
-  "auth": { "username": "elastic", "password": "<deployment_password>" }
+  "auth": { "username": "elastic", "password": "<password>" }
+}
+```
+
+`role_users.json` maps role names to `{ "email": "...", "password": "..." }` for Cloud SAML
+login. The tests use `admin`; set it to the `elastic` superuser credentials:
+
+```json
+{
+  "admin": { "email": "<elastic-user-email>", "password": "<password>" },
+  "custom_role_worker_1": { "email": "<elastic-user-email>", "password": "<password>" }
 }
 ```
 

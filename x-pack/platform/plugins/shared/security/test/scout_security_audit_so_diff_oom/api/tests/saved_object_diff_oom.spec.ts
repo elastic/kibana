@@ -23,6 +23,12 @@ const MAX_SETTLED_HEAP_USAGE_RATIO = 0.85;
 const DEEP_PANEL_COUNT = 800;
 const BULK_OBJECT_COUNT = 20;
 const BULK_PANEL_COUNT = 80;
+// Bulk update holds before+after snapshots for every object simultaneously — the
+// worst-case allocator. Fewer objects than bulk create but larger each.
+const BULK_UPDATE_OBJECT_COUNT = 10;
+const BULK_UPDATE_PANEL_COUNT = 200;
+// Sequential updates stress GC: each iteration must release the previous pair.
+const SEQUENTIAL_UPDATE_COUNT = 15;
 
 interface HeapMetrics {
   usedBytes: number;
@@ -188,6 +194,89 @@ apiTest.describe(
         const lastDiff = await waitForDiffEvent('saved_object_create', lastId);
         expect(firstDiff.ops.length).toBeGreaterThan(BULK_PANEL_COUNT);
         expect(lastDiff.ops.length).toBeGreaterThan(BULK_PANEL_COUNT);
+
+        await expectHeapUsageWithinBudget(apiClient, headers);
+      }
+    );
+
+    apiTest(
+      'bulk update nested objects succeeds under constrained heap',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_HEADERS };
+        await expectHeapUsageWithinBudget(apiClient, headers);
+
+        // Create the objects first, then update them all in one batch.
+        // Bulk update is the worst-case allocator: it holds before+after snapshots
+        // for every object in the batch simultaneously during the diff phase.
+        const stamp = Date.now();
+        const ids = Array.from(
+          { length: BULK_UPDATE_OBJECT_COUNT },
+          (_, i) => `so-diff-oom-bu-${stamp}-${i}`
+        );
+
+        await apiClient.post('api/saved_objects/_bulk_create', {
+          headers,
+          body: ids.map((id, i) => ({
+            type: TYPE,
+            id,
+            attributes: buildNestedAttributes(`oom-bu-${i}`, BULK_UPDATE_PANEL_COUNT),
+          })),
+          responseType: 'json',
+        });
+        savedObjectsToCleanUp.push(...ids.map((id) => ({ type: TYPE, id })));
+
+        const updateRes = await apiClient.put('api/saved_objects/_bulk_update', {
+          headers,
+          body: ids.map((id, i) => ({
+            type: TYPE,
+            id,
+            attributes: { title: `oom-bu-${i}-updated` },
+          })),
+          responseType: 'json',
+        });
+        expect(updateRes).toHaveStatusCode(200);
+
+        const firstDiff = await waitForDiffEvent('saved_object_update', ids[0]);
+        const lastDiff = await waitForDiffEvent('saved_object_update', ids[ids.length - 1]);
+        expect(firstDiff.ops.find((op) => op.path === '/title')).toMatchObject({
+          op: 'replace',
+          value: 'oom-bu-0-updated',
+          oldValue: 'oom-bu-0',
+        });
+        expect(lastDiff.ops.length).toBeGreaterThan(0);
+
+        await expectHeapUsageWithinBudget(apiClient, headers);
+      }
+    );
+
+    apiTest(
+      'sequential updates to a large object succeed under constrained heap',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_HEADERS };
+        await expectHeapUsageWithinBudget(apiClient, headers);
+
+        // Each iteration must release the before+after pair from the previous
+        // one before allocating the next. A retained reference keeps the heap
+        // growing monotonically across iterations.
+        const id = `so-diff-oom-seq-${Date.now()}`;
+        await apiClient.post(`api/saved_objects/${TYPE}/${id}`, {
+          headers,
+          body: { attributes: buildNestedAttributes('oom-seq-0', DEEP_PANEL_COUNT) },
+          responseType: 'json',
+        });
+        savedObjectsToCleanUp.push({ type: TYPE, id });
+
+        for (let i = 1; i <= SEQUENTIAL_UPDATE_COUNT; i++) {
+          const updateRes = await apiClient.put(`api/saved_objects/${TYPE}/${id}`, {
+            headers,
+            body: { attributes: { title: `oom-seq-${i}` } },
+            responseType: 'json',
+          });
+          expect(updateRes).toHaveStatusCode(200);
+          await waitForDiffEvent('saved_object_update', id);
+        }
 
         await expectHeapUsageWithinBudget(apiClient, headers);
       }
