@@ -7,6 +7,7 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { conversationStepRegistry, type ConversationStepDeps } from './registry';
+import { attachmentStepRegistry, type AttachmentStepDeps } from './attachment_registry';
 import {
   conversationMetadataUpdatedTriggerCommonDefinition,
   conversationAttachmentAddedTriggerCommonDefinition,
@@ -28,6 +29,15 @@ export function registerConversationWorkflowSteps(
   );
 
   for (const factory of conversationStepRegistry) {
+    workflowsExtensions.registerStepDefinition(factory(deps));
+  }
+}
+
+export function registerAttachmentWorkflowSteps(
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  deps: AttachmentStepDeps
+) {
+  for (const factory of attachmentStepRegistry) {
     workflowsExtensions.registerStepDefinition(factory(deps));
   }
 }

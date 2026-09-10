@@ -49,6 +49,22 @@ export function registerWorkflowSteps(
     import('./conversation_metadata').then((m) => m.createConversationStepDefinition)
   );
 
+  workflowsExtensions.registerStepDefinition(() =>
+    ifExperimental(() => import('./attachments').then((m) => m.addAttachmentStepDefinition))
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    ifExperimental(() => import('./attachments').then((m) => m.updateAttachmentStepDefinition))
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    ifExperimental(() => import('./attachments').then((m) => m.deleteAttachmentStepDefinition))
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    ifExperimental(() => import('./attachments').then((m) => m.readAttachmentStepDefinition))
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    ifExperimental(() => import('./attachments').then((m) => m.listAttachmentsStepDefinition))
+  );
+
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
 
   workflowsExtensions.registerTriggerDefinition({
