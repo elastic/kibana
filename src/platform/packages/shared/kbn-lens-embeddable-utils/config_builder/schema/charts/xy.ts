@@ -73,7 +73,7 @@ export const statisticsSchema = z
 export const statisticsOptionsSize = 17;
 
 const domainRoundingSchema = z.boolean().default(true).meta({
-  id: 'vis_api_domain_rounding',
+  id: 'visApiDomainRounding',
   description:
     'Whether to round axis domain bounds outward to readable “nice” values (for example 1, 5, 10, 100) instead of exact data min/max.',
 });
@@ -85,7 +85,7 @@ const domainFullConfigSchema = z
   })
   .strict()
   .meta({
-    id: 'vis_api_domain_full',
+    id: 'visApiDomainFull',
     description:
       'Uses the full chart domain, including baseline expansion when applicable (for example, includes zero for bar-like series).',
   });
@@ -97,7 +97,7 @@ const domainFitConfigSchema = z
   })
   .strict()
   .meta({
-    id: 'vis_api_domain_fit',
+    id: 'visApiDomainFit',
     description:
       'Uses tight domain bounds from the observed data minimum to maximum, without baseline expansion.',
   });
@@ -111,7 +111,7 @@ const domainCustomConfigSchema = z
   })
   .strict()
   .meta({
-    id: 'vis_api_domain_custom',
+    id: 'visApiDomainCustom',
     description: 'Uses explicitly provided domain bounds (min and max).',
   });
 
@@ -230,7 +230,7 @@ const legendSeriesHeaderSchema = z
   })
   .strict()
   .meta({
-    id: 'xyLegendSeriesHeader',
+    id: 'visXyLegendSeriesHeader',
     description: 'Legend table series header configuration.',
   });
 
@@ -310,7 +310,7 @@ const xyStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'xyStylingOverlays',
+        id: 'visXyStylingOverlays',
         description: 'Visual overlays drawn on top of the chart canvas',
       }),
 
@@ -343,7 +343,7 @@ const xyStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'xyFitting',
+        id: 'visXyFitting',
         description: 'Missing data interpolation configuration for line and area series',
       }),
     interpolation: z
@@ -367,7 +367,7 @@ const xyStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'xyStylingPoints',
+        id: 'visXyStylingPoints',
         description: 'Data point marker settings for line and area series',
       }),
 
@@ -397,7 +397,7 @@ const xyStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'xyStylingAreas',
+        id: 'visXyStylingAreas',
         description: 'Area-specific rendering settings',
       }),
     bars: z
@@ -422,13 +422,13 @@ const xyStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'xyStylingBars',
+        id: 'visXyStylingBars',
         description: 'Bar-specific rendering settings',
       }),
   })
   .strict()
   .meta({
-    id: 'xyStyling',
+    id: 'visXyStyling',
     description: 'Visual styling options for the chart',
   });
 
@@ -443,7 +443,7 @@ const xyLegendOutsideHorizontalSchema = sharedLegendSchema
     position: z.enum(['top', 'bottom']).optional(),
   })
   .meta({
-    id: 'xyLegendOutsideHorizontal',
+    id: 'visXyLegendOutsideHorizontal',
     title: 'Outside horizontal',
     description: 'Outside legend positioned horizontal (top/bottom) of the chart',
   });
@@ -456,7 +456,7 @@ const xyLegendOutsideVerticalSchema = sharedLegendSchema
     size: legendSizeSchema,
   })
   .meta({
-    id: 'xyLegendOutsideVertical',
+    id: 'visXyLegendOutsideVertical',
     title: 'Outside vertical',
     description: 'Outside legend positioned vertical (left/right) of the chart',
   });
@@ -471,7 +471,7 @@ const xyLegendInsideSchema = sharedLegendSchema
     }),
   })
   .meta({
-    id: 'xyLegendInside',
+    id: 'visXyLegendInside',
     title: 'Inside',
     description: 'Inside legend',
   });
@@ -484,7 +484,7 @@ const xySharedSettings = {
     .union([xyLegendOutsideHorizontalSchema, xyLegendOutsideVerticalSchema, xyLegendInsideSchema])
     .optional()
     .meta({
-      id: 'xyLegend',
+      id: 'visXyLegend',
       title: 'Legend',
       description: 'Legend configuration for XY chart',
     }),
@@ -498,7 +498,7 @@ const xySharedSettings = {
     .strict()
     .optional()
     .meta({
-      id: 'vis_api_xy_axis_config',
+      id: 'visApiXyAxisConfig',
       title: 'Axis',
       description:
         'Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.',
@@ -548,7 +548,7 @@ const xyDataLayerSchemaNoESQL = z
   })
   .strict()
   .meta({
-    id: 'xyLayerNoESQL',
+    id: 'visXyLayerNoESQL',
     title: 'Layer (DSL)',
     description: 'Data layer for standard queries with metrics and buckets',
   });
@@ -585,7 +585,7 @@ const xyDataLayerSchemaESQL = z
   })
   .strict()
   .meta({
-    id: 'xyLayerESQL',
+    id: 'visXyLayerESQL',
     title: 'Layer (ES|QL)',
     description: 'Data layer for ES|QL queries with column references',
   });
@@ -675,7 +675,7 @@ const referenceLineLayerSchemaNoESQL = z
   })
   .strict()
   .meta({
-    id: 'xyReferenceLineLayerNoESQL',
+    id: 'visXyReferenceLineLayerNoESQL',
     title: 'Reference Line Layer (DSL)',
     description: 'Reference line layer for standard queries',
   });
@@ -696,7 +696,7 @@ const referenceLineLayerSchemaESQL = z
   })
   .strict()
   .meta({
-    id: 'xyReferenceLineLayerESQL',
+    id: 'visXyReferenceLineLayerESQL',
     title: 'Reference Line Layer (ES|QL)',
     description: 'Reference line layer for ES|QL queries',
   });
@@ -765,7 +765,7 @@ const annotationQuery = z
   })
   .strict()
   .meta({
-    id: 'xyAnnotationQuery',
+    id: 'visXyAnnotationQuery',
     description: 'Annotation from query results matching a filter',
   });
 
@@ -788,7 +788,7 @@ const annotationManualEvent = z
   })
   .strict()
   .meta({
-    id: 'xyAnnotationManualEvent',
+    id: 'visXyAnnotationManualEvent',
     description: 'Manual point annotation at specific timestamp',
   });
 
@@ -815,7 +815,7 @@ const annotationManualRange = z
   })
   .strict()
   .meta({
-    id: 'xyAnnotationManualRange',
+    id: 'visXyAnnotationManualRange',
     description: 'Manual range annotation spanning time interval',
   });
 
@@ -841,7 +841,7 @@ const annotationLayerByValueSchema = z
   })
   .strict()
   .meta({
-    id: 'xyAnnotationLayerNoESQL',
+    id: 'visXyAnnotationLayerNoESQL',
     title: 'Annotation Layer (DSL)',
     description: 'Layer containing annotations (query-based, points, and ranges)',
   });
@@ -858,7 +858,7 @@ const annotationByRefLayerSchema = z
   })
   .strict()
   .meta({
-    id: 'xyAnnotationByRefLayer',
+    id: 'visXyAnnotationByRefLayer',
     title: 'Annotation Layer (By Reference)',
     description: 'Reference to a library annotation group',
   });
@@ -866,7 +866,7 @@ const annotationByRefLayerSchema = z
 const annotationLayerSchema = z
   .union([annotationLayerByValueSchema, annotationByRefLayerSchema])
   .meta({
-    id: 'xyAnnotationLayer',
+    id: 'visXyAnnotationLayer',
     description: 'Annotation layer which can be defined by-value or by-reference',
   });
 
@@ -878,12 +878,12 @@ const xyLayerUnionNoESQL = z
     annotationByRefLayerSchema,
   ])
   .meta({
-    id: 'xyLayersNoESQL',
+    id: 'visXyLayersNoESQL',
     description: 'XY chart layer types for DSL queries',
   });
 
 const xyLayerUnionESQL = xyDataLayerSchemaESQL.meta({
-  id: 'xyLayersESQL',
+  id: 'visXyLayersESQL',
   description: 'XY chart layer types for ES|QL queries',
 });
 
@@ -899,7 +899,7 @@ export const xyConfigSchemaNoESQL = z
     layers: z.array(xyLayerUnionNoESQL).min(1).max(100).meta({ description: 'Chart layers' }),
   })
   .meta({
-    id: 'xyChartNoESQL',
+    id: 'visXyChartNoESQL',
     title: 'XY Chart (DSL)',
     description: 'XY chart configuration for DSL queries',
   });
@@ -915,7 +915,7 @@ export const xyConfigSchemaESQL = z
     layers: z.array(xyLayerUnionESQL).min(1).max(100).meta({ description: 'ES|QL chart layers' }),
   })
   .meta({
-    id: 'xyChartESQL',
+    id: 'visXyChartESQL',
     title: 'XY Chart (ES|QL)',
     description: 'XY chart configuration for ES|QL queries',
   });
@@ -924,7 +924,7 @@ export const xyConfigSchemaESQL = z
  * XY chart state
  */
 export const xyConfigSchema = z.union([xyConfigSchemaNoESQL, xyConfigSchemaESQL]).meta({
-  id: 'xyChart',
+  id: 'visXyChart',
   title: 'XY Chart',
   description: 'XY chart configuration',
 });
