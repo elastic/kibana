@@ -174,7 +174,7 @@ export const AgentInstallSection = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem css={AgentInstallPanelContainer}>
-            <EuiPanel color="transparent" paddingSize="l">
+            <EuiPanel color="transparent" hasBorder={false} paddingSize="l">
               <AgentInstallPanel
                 icon="commandLine"
                 title={
