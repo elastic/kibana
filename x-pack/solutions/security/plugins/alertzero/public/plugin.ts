@@ -78,7 +78,13 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(_core: CoreStart, _startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+    if (startDeps.agentBuilder) {
+      const agentBuilder = startDeps.agentBuilder;
+      void import('./agent_builder').then(({ registerAlertZeroAttachmentTypes }) => {
+        registerAlertZeroAttachmentTypes({ agentBuilder, http: core.http });
+      });
+    }
     return {};
   }
 

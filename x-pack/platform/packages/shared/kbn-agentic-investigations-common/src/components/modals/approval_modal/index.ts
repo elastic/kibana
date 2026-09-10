@@ -6,3 +6,10 @@
  */
 
 export { ApprovalModal, type ApprovalModalProps } from './approval_modal';
+export {
+  ApprovalContent,
+  type ApprovalContentProps,
+  type ApprovalAction,
+  type AlwaysAllowOption,
+} from './approval_content';
+export { type BlastRadiusContent, type BlastRadiusSectionProps } from './blast_radius_section';
