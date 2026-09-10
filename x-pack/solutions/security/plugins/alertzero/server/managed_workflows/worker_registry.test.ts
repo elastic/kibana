@@ -23,7 +23,7 @@ interface ExpectedWorkerSettings {
   settingsVersion: number;
   /** Present only for schedule-driven Workers. */
   scheduleInterval?: string;
-  triggerType: string;
+  triggerTypes: string[];
 }
 
 /**
@@ -32,15 +32,20 @@ interface ExpectedWorkerSettings {
  * change what already-installed spaces receive.
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
-  'system-security-floor-alert-triage': { settingsVersion: 1, triggerType: 'manual' },
+  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['manual'] },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
     scheduleInterval: '24h',
-    triggerType: 'scheduled',
+    triggerTypes: ['scheduled'],
   },
-  'system-security-dark-continuous-threat-hunt': { settingsVersion: 1, triggerType: 'manual' },
-  'system-security-detection-rule-tuning': { settingsVersion: 1, triggerType: 'manual' },
-  'system-security-detection-rule-creation': { settingsVersion: 1, triggerType: 'manual' },
+  'system-security-dark-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
+  // Keeps manual alongside the schedule so a sweep can be kicked on demand.
+  'system-security-detection-rule-tuning': {
+    settingsVersion: 1,
+    scheduleInterval: '2h',
+    triggerTypes: ['scheduled', 'manual'],
+  },
+  'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
@@ -86,7 +91,7 @@ describe('workerRegistry', () => {
       );
 
       // A Worker with no schedule must not gain one by accident, and vice versa.
-      expect(parsed.triggers?.map(({ type }) => type)).toEqual([expected.triggerType]);
+      expect(parsed.triggers?.map(({ type }) => type)).toEqual(expected.triggerTypes);
       expect(parsed.triggers?.[0]?.with?.every).toBe(expected.scheduleInterval);
       if (expected.scheduleInterval === undefined) {
         expect(yaml).not.toContain('scheduleInterval');
