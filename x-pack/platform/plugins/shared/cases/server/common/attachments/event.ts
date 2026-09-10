@@ -8,6 +8,7 @@
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type {
   UnifiedReferenceAttachmentPayload,
+  UnifiedAttachmentPayload,
   AttachmentAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
 import type { EventAttachmentPayload } from '../../../common/types/domain';
@@ -104,7 +105,7 @@ export const eventAttachmentTransformer: AttachmentTypeTransformer<
   isLegacyPayload(attachment: AttachmentRequestV2): attachment is EventAttachmentPayload {
     return isLegacyEventAttachment(attachment);
   },
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedEventAttachment(attachment);
   },
   toUnifiedPayload(attachment: EventAttachmentPayload): UnifiedReferenceAttachmentPayload {
