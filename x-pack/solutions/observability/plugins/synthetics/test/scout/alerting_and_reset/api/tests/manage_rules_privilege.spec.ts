@@ -8,10 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
+import {
+  apiTest,
+  mergeSyntheticsApiHeaders,
+  PUBLIC_API_VERSION,
+  SYNTHETICS_API_URLS,
+} from '../../../common/fixtures';
 
 const RULE_TYPE_ID = 'xpack.synthetics.alerts.monitorStatus';
 const RULE_TAG = 'scout-synthetics-manage-rules-privilege';
+const DEFAULT_RULES_FORBIDDEN = '[uptime-write,write_synthetics_default_rules]';
 
 const createRole = (privileges: string[]): KibanaRole => ({
   elasticsearch: { cluster: [], indices: [] },
@@ -20,10 +26,13 @@ const createRole = (privileges: string[]): KibanaRole => ({
 
 const readRole = createRole(['read']);
 const readWithManageRulesRole = createRole(['read', 'can_manage_rules']);
-const existingWriteRoles = {
-  all: createRole(['all']),
-  minimalAll: createRole(['minimal_all']),
-};
+const allRole = createRole(['all']);
+const minimalAllRole = createRole(['minimal_all']);
+
+const publicApiHeaders = (headers: Record<string, string>) => ({
+  ...headers,
+  'elastic-api-version': PUBLIC_API_VERSION,
+});
 
 const createRule = (apiClient: ApiClientFixture, headers: Record<string, string>, name: string) =>
   apiClient.post('api/alerting/rule', {
@@ -47,16 +56,21 @@ const deleteRule = (apiClient: ApiClientFixture, headers: Record<string, string>
     responseType: 'json',
   });
 
+const postJson = (
+  apiClient: ApiClientFixture,
+  path: string,
+  headers: Record<string, string>,
+  body: Record<string, unknown> = {}
+) => apiClient.post(path, { headers, body, responseType: 'json' });
+
 apiTest.describe(
   'Synthetics manage rules privilege',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     let readHeaders: Record<string, string>;
     let readWithManageRulesHeaders: Record<string, string>;
-    const existingWriteHeaders: Record<keyof typeof existingWriteRoles, Record<string, string>> = {
-      all: {},
-      minimalAll: {},
-    };
+    let allHeaders: Record<string, string>;
+    let minimalAllHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       const resolveRoleHeaders = async (role: KibanaRole) => {
@@ -66,8 +80,8 @@ apiTest.describe(
 
       readHeaders = await resolveRoleHeaders(readRole);
       readWithManageRulesHeaders = await resolveRoleHeaders(readWithManageRulesRole);
-      existingWriteHeaders.all = await resolveRoleHeaders(existingWriteRoles.all);
-      existingWriteHeaders.minimalAll = await resolveRoleHeaders(existingWriteRoles.minimalAll);
+      allHeaders = await resolveRoleHeaders(allRole);
+      minimalAllHeaders = await resolveRoleHeaders(minimalAllRole);
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -98,26 +112,133 @@ apiTest.describe(
       });
       expect(updateResponse).toHaveStatusCode(200);
 
+      const enableResponse = await postJson(
+        apiClient,
+        `api/alerting/rule/${id}/_enable`,
+        readWithManageRulesHeaders
+      );
+      expect([200, 204]).toContain(enableResponse.statusCode);
+
+      const runSoonResponse = await postJson(
+        apiClient,
+        `internal/alerting/rule/${id}/_run_soon`,
+        readWithManageRulesHeaders
+      );
+      expect([200, 204]).toContain(runSoonResponse.statusCode);
+
+      const disableResponse = await postJson(
+        apiClient,
+        `api/alerting/rule/${id}/_disable`,
+        readWithManageRulesHeaders
+      );
+      expect([200, 204]).toContain(disableResponse.statusCode);
+
+      const readEnableResponse = await postJson(
+        apiClient,
+        `api/alerting/rule/${id}/_enable`,
+        readHeaders
+      );
+      expect(readEnableResponse).toHaveStatusCode(403);
+
       const deleteResponse = await deleteRule(apiClient, readWithManageRulesHeaders, id);
       expect(deleteResponse).toHaveStatusCode(204);
     });
 
-    for (const [privilege, getHeaders] of [
-      ['all', () => existingWriteHeaders.all],
-      ['minimal_all', () => existingWriteHeaders.minimalAll],
-    ] as const) {
-      apiTest(`keeps rule management available to ${privilege} users`, async ({ apiClient }) => {
-        const createResponse = await createRule(
-          apiClient,
-          getHeaders(),
-          `${privilege}-${uuidv4()}`
-        );
-        expect(createResponse).toHaveStatusCode(200);
+    apiTest(
+      'does not let a read user with can_manage_rules write monitors, settings, params, or private locations',
+      async ({ apiClient }) => {
+        const forbiddenWrites: Array<{ path: string; headers: Record<string, string> }> = [
+          {
+            path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+            headers: publicApiHeaders(readWithManageRulesHeaders),
+          },
+          {
+            path: SYNTHETICS_API_URLS.PARAMS,
+            headers: publicApiHeaders(readWithManageRulesHeaders),
+          },
+          {
+            path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+            headers: publicApiHeaders(readWithManageRulesHeaders),
+          },
+        ];
 
-        const { id } = createResponse.body as { id: string };
-        const deleteResponse = await deleteRule(apiClient, getHeaders(), id);
-        expect(deleteResponse).toHaveStatusCode(204);
-      });
-    }
+        for (const { path, headers } of forbiddenWrites) {
+          const response = await postJson(apiClient, path, headers);
+          expect(response).toHaveStatusCode(403);
+        }
+
+        const settingsPut = await apiClient.put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, {
+          headers: readWithManageRulesHeaders,
+          body: {},
+          responseType: 'json',
+        });
+        expect(settingsPut).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      'does not let a read-only user enable or update default alerting',
+      async ({ apiClient }) => {
+        const postResponse = await postJson(
+          apiClient,
+          SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
+          readHeaders
+        );
+        expect(postResponse).toHaveStatusCode(403);
+        expect(
+          decodeURIComponent((postResponse.body as { message?: string }).message ?? '')
+        ).toContain(DEFAULT_RULES_FORBIDDEN);
+
+        const putResponse = await apiClient.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING, {
+          headers: readHeaders,
+          body: {},
+          responseType: 'json',
+        });
+        expect(putResponse).toHaveStatusCode(403);
+        expect(
+          decodeURIComponent((putResponse.body as { message?: string }).message ?? '')
+        ).toContain(DEFAULT_RULES_FORBIDDEN);
+      }
+    );
+
+    apiTest(
+      'lets a read user with can_manage_rules enable default alerting',
+      async ({ apiClient }) => {
+        const response = await postJson(
+          apiClient,
+          SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
+          readWithManageRulesHeaders
+        );
+        expect(response).toHaveStatusCode(200);
+
+        const body = response.body as {
+          statusRule?: { id?: string } | null;
+          tlsRule?: { id?: string } | null;
+        };
+        expect(body.statusRule != null || body.tlsRule != null).toBe(true);
+      }
+    );
+
+    apiTest('keeps rule management available to all users', async ({ apiClient }) => {
+      const createResponse = await createRule(apiClient, allHeaders, `all-${uuidv4()}`);
+      expect(createResponse).toHaveStatusCode(200);
+
+      const { id } = createResponse.body as { id: string };
+      const deleteResponse = await deleteRule(apiClient, allHeaders, id);
+      expect(deleteResponse).toHaveStatusCode(204);
+    });
+
+    apiTest('keeps rule management available to minimal_all users', async ({ apiClient }) => {
+      const createResponse = await createRule(
+        apiClient,
+        minimalAllHeaders,
+        `minimal_all-${uuidv4()}`
+      );
+      expect(createResponse).toHaveStatusCode(200);
+
+      const { id } = createResponse.body as { id: string };
+      const deleteResponse = await deleteRule(apiClient, minimalAllHeaders, id);
+      expect(deleteResponse).toHaveStatusCode(204);
+    });
   }
 );

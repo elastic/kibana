@@ -124,6 +124,12 @@ const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
       name: i18n.translate('xpack.synthetics.features.canManageRules.label', {
         defaultMessage: 'Can manage rules',
       }),
+      // `includeIn: 'none'` — never granted implicitly. Default-alerting write
+      // routes accept EITHER `uptime-write` (which base `all` already has, so
+      // existing roles keep working) OR this `write_synthetics_default_rules`
+      // privilege. Alerting grants match base `all` so a read-only role can
+      // create, update, delete, enable, run, and backfill Synthetics/Uptime
+      // rules without monitor, settings, parameter, or private-location writes.
       includeIn: 'none',
       api: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
       savedObject: {
@@ -158,7 +164,7 @@ export const syntheticsFeature = {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', WRITE_SYNTHETICS_DEFAULT_RULES_API, 'lists-all', 'rac'],
+      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
@@ -186,7 +192,7 @@ export const syntheticsFeature = {
       management: {
         insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
-      ui: ['save', 'configureSettings', 'canManageRules', 'show', 'alerting:save'],
+      ui: ['save', 'configureSettings', 'show', 'alerting:save'],
     },
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
@@ -265,7 +271,8 @@ export const syntheticsFeature = {
         defaultMessage: 'Alert rules',
       }),
       description: i18n.translate('xpack.synthetics.features.app.rules.description', {
-        defaultMessage: 'Create and manage alert rules for monitors.',
+        defaultMessage:
+          'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors.',
       }),
       privilegeGroups: [canManageRulesPrivilege],
     },

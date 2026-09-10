@@ -10599,6 +10599,8 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "can_manage_rules": Array [
                 "login:",
+                "api:write_synthetics_default_rules",
+                "ui:uptime/canManageRules",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/get",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/bulkGet",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/getRuleState",
