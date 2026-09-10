@@ -82,9 +82,9 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
         const count = attachment.data?.alertIds?.length ?? 0;
         return count > 0
           ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-              values: { count },
-            })
+            defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+            values: { count },
+          })
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
@@ -339,14 +339,7 @@ export const registerEntityRiskScoreHistoryAttachment = ({
 
 /**
  * Registers the `security.exception` attachment renderer (read-only card showing
- * a proposed rule exception's description and conditions). Dynamically imports
- * [./exception](./exception/index.ts) so the exceptions condition components and
- * the flat-to-API entry mapper stay off the main `securitySolution` page-load
- * bundle.
- *
- * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
- * resolves during plugin start well before a user can open a conversation that
- * carries an exception proposal.
+ * a proposed rule exception's description and conditions).
  */
 export const registerExceptionAttachment = ({
   attachments,

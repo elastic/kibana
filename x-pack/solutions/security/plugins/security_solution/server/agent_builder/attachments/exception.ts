@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { exceptionItemBaseSchema } from '@kbn/securitysolution-exceptions-common/workflows';
@@ -23,10 +23,9 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
  * attachment deliberately has no `origin`/`resolve` by-reference mode and is
  * read-only.
  */
-export const exceptionAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  ...exceptionItemBaseSchema.shape,
-  attachmentLabel: z.string().max(1_000).optional(),
-});
+export const exceptionAttachmentDataSchema = securityAttachmentDataSchema.extend(
+  exceptionItemBaseSchema.shape
+);
 
 export type ExceptionAttachmentData = z.infer<typeof exceptionAttachmentDataSchema>;
 

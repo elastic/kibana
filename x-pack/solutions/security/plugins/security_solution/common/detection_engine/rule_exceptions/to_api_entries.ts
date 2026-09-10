@@ -6,12 +6,12 @@
  */
 
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionEntryInput } from './exception_item_schemas';
+import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
 
 /**
  * Thrown when an entry is missing the operand its operator requires. Workflow
- * step callers rewrap this as an execution error; other callers surface the
- * message as-is.
+ * step callers rewrap this as an execution error; UI callers fall back to a
+ * "cannot be displayed" state.
  */
 export class MissingExceptionEntryOperandError extends Error {
   constructor(entry: ExceptionEntryInput, key: 'value' | 'values' | 'list') {
@@ -28,6 +28,11 @@ export class MissingExceptionEntryOperandError extends Error {
  * operator. The presence checks mirror the schema's `superRefine`s, which have
  * normally already run by the time this is called; they are re-checked here to
  * narrow the optional fields.
+ *
+ * Lives in the plugin rather than in `@kbn/securitysolution-exceptions-common`
+ * because `@kbn/securitysolution-io-ts-list-types` already depends on that
+ * package: importing `EntriesArray` there would close a package cycle, and it
+ * would pull the io-ts schemas into a shared page-load bundle.
  */
 export const toApiEntries = (entries: ExceptionEntryInput[]): EntriesArray =>
   entries.map((entry): EntriesArray[number] => {

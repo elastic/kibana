@@ -10,31 +10,24 @@ import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { ExceptionItemCardConditions } from '@kbn/securitysolution-exception-list-components';
-import { toApiEntries } from '@kbn/securitysolution-exceptions-common/workflows';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import { toApiEntries } from '../../../../common/detection_engine/rule_exceptions/to_api_entries';
 import type { ExceptionAttachment } from './types';
 
-/**
- * `ExceptionItemCardConditions` links value-list conditions to a modal that
- * needs the Security Solution Kibana context, which chat does not provide, so
- * value lists render as plain text here. The proposals this attachment carries
- * use field conditions, not value lists.
- */
 const ValueListText: React.FC<{ children?: React.ReactNode }> = ({ children }) => <>{children}</>;
 
 const CONDITIONS_TEST_SUBJ = 'securityExceptionAttachmentConditions';
 
 /**
- * Read-only card for a proposed detection rule exception. Renders the same
- * condition list as the exceptions UI so an analyst reading a proposal in chat
- * sees it exactly as they would in the Detection Rules UI.
+ * Read-only card for a proposed detection rule exception.
  */
 export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAttachment>> = ({
   attachment,
 }) => {
   const { description, entries, os_types: osTypes } = attachment.data;
 
-  const apiEntries = useMemo<EntriesArray | undefined>(() => {
+  // Exception item card component accepts entries in a format that is returned by the `toApiEntries`.
+  const entriesProp = useMemo<EntriesArray | undefined>(() => {
     try {
       return toApiEntries(entries);
     } catch (error) {
@@ -50,9 +43,9 @@ export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAtt
           <EuiSpacer size="m" />
         </>
       ) : null}
-      {apiEntries ? (
+      {entriesProp ? (
         <ExceptionItemCardConditions
-          entries={apiEntries}
+          entries={entriesProp}
           os={osTypes}
           dataTestSubj={CONDITIONS_TEST_SUBJ}
           showValueListModal={ValueListText}
