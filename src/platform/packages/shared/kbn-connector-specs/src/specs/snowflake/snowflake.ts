@@ -363,6 +363,7 @@ export const Snowflake: ConnectorSpec = {
   actions: {
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a read-only SQL query asynchronously in Snowflake. Accepts SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN only. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected before the request is sent. Returns a statement handle — use getStatementStatus to retrieve results, or cancelStatement to abort. Supports bind variables and session-scoped context (warehouse, database, schema, role). Single-statement only; multi-statement submissions are rejected. For write or DDL operations, ask the user to invoke executeStatement from a workflow.',
       input: RunQueryInputSchema,
@@ -379,6 +380,7 @@ export const Snowflake: ConnectorSpec = {
 
     executeStatement: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Run any SQL statement asynchronously in Snowflake. Exposed to workflow authors and direct API callers only — not available to agents (agents must use runQuery for read-only access). Can modify or destroy data: accepts SELECT, DML (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes, stored procedure calls, and session state statements. Returns a statement handle — use getStatementStatus to poll for results or cancelStatement to abort. Supports bind variables, multi-statement execution (via multiStatementCount), and session-scoped context (warehouse, database, schema, role).',
       input: ExecuteStatementInputSchema,
@@ -387,6 +389,7 @@ export const Snowflake: ConnectorSpec = {
 
     getStatementStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Check the status of a previously submitted SQL statement and retrieve results if execution is complete. Returns HTTP 200 with a ResultSet when finished, or HTTP 202 with a QueryStatus if still running. Use the statementHandle returned by runQuery. For large result sets, use the partition parameter to page through data.',
       input: GetStatementStatusInputSchema,
@@ -409,6 +412,7 @@ export const Snowflake: ConnectorSpec = {
 
     cancelStatement: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel a running SQL statement in Snowflake. Use the statementHandle returned by runQuery. Returns a confirmation with the cancellation status. Only works on statements that are still executing.',
       input: CancelStatementInputSchema,
@@ -433,6 +437,7 @@ export const Snowflake: ConnectorSpec = {
 
     listDatabases: {
       isTool: true,
+      scope: 'read',
       description:
         'List Snowflake databases visible to the connector\'s role. Returns JSON objects (not SQL row arrays) with name, kind, owner, comment, created_on, and other metadata. Does not require a warehouse. Use this as the starting point for data discovery when the target database is unknown. Supports case-insensitive name filtering via "like" (SQL wildcards) and case-sensitive prefix filtering via "startsWith".',
       input: ListDatabasesInputSchema,
@@ -449,6 +454,7 @@ export const Snowflake: ConnectorSpec = {
 
     listSchemas: {
       isTool: true,
+      scope: 'read',
       description:
         'List schemas inside a Snowflake database. Returns JSON objects with name, database_name, owner, comment, and other metadata. Does not require a warehouse. Use after listDatabases to narrow down the target before listing tables or views. Database name is case-sensitive and must match exactly what listDatabases returned.',
       input: ListSchemasInputSchema,
@@ -466,6 +472,7 @@ export const Snowflake: ConnectorSpec = {
 
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List tables inside a Snowflake schema. Returns JSON objects with name, database_name, schema_name, kind, rows, bytes, cluster_by, comment, and other metadata. Does not require a warehouse. Use after listSchemas to find the specific table to describe or query. Database and schema names are case-sensitive. Optional: "history" to include dropped tables.',
       input: ListTablesInputSchema,
@@ -486,6 +493,7 @@ export const Snowflake: ConnectorSpec = {
 
     listViews: {
       isTool: true,
+      scope: 'read',
       description:
         "List views inside a Snowflake schema. Returns JSON objects with name, database_name, schema_name, owner, comment, and other metadata. Does not require a warehouse. Database and schema names are case-sensitive. Use describeView to retrieve a view's columns and underlying query text.",
       input: ListViewsInputSchema,
@@ -505,6 +513,7 @@ export const Snowflake: ConnectorSpec = {
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full definition of a Snowflake table, including columns (name, type, nullable, default, comment), clustering keys, row count, size in bytes, owner, and other metadata. Returns a clean JSON Table object (not SQL row arrays). Does not require a warehouse. Use this before runQuery to build correct SELECT or JOIN queries against the table. Database, schema, and table names are all case-sensitive.',
       input: DescribeTableInputSchema,
@@ -523,6 +532,7 @@ export const Snowflake: ConnectorSpec = {
 
     describeView: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full definition of a Snowflake view, including columns, the underlying SELECT query text, owner, comment, and other metadata. Returns a clean JSON View object. Does not require a warehouse. Use to understand what a view exposes before querying it or building dependent logic. Database, schema, and view names are all case-sensitive.',
       input: DescribeViewInputSchema,
@@ -541,6 +551,7 @@ export const Snowflake: ConnectorSpec = {
 
     listCortexSearchServices: {
       isTool: true,
+      scope: 'read',
       description:
         'List Cortex Search services defined in a Snowflake schema. Cortex Search provides semantic + lexical search over indexed text columns. Returns JSON objects with name, database_name, schema_name, target_lag, warehouse, comment, and the underlying source query. Use before cortexSearch to discover what search services are available. Database and schema names are case-sensitive.',
       input: ListCortexSearchServicesInputSchema,
@@ -560,6 +571,7 @@ export const Snowflake: ConnectorSpec = {
 
     cortexSearch: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a natural-language query against a Snowflake Cortex Search service. Cortex Search performs hybrid semantic + lexical matching over the service\'s indexed search column and returns ranked results as JSON. Use for unstructured text retrieval (support docs, product catalogs, chat logs) — much better than LIKE or CONTAINS in SQL. Supports additional attribute filtering via the "filter" DSL (@eq, @contains, @gte, @lte, @and, @or, @not). Example filter: {"@and": [{"@eq": {"REGION": "US"}}, {"@gte": {"YEAR": 2024}}]}. Prefer limit<=20 to keep LLM context small.',
       input: CortexSearchInputSchema,

@@ -28,6 +28,7 @@
     "@kbn/features-plugin",
     "@kbn/storage-adapter",
     "@kbn/es-errors",
+    "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/management-settings-ids",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
@@ -71,6 +72,7 @@
     "@kbn/es-types",
     "@kbn/task-manager-plugin",
     "@kbn/alerts-ui-shared",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/esql-utils"
   ]
 }

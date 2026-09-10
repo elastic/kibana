@@ -28,7 +28,7 @@ export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) =>
       return;
     }
 
-    const unregister = chrome.next.appHeader.set(config);
+    const unregister = chrome.appHeader.set(config);
     unregisterRef.current = unregister;
 
     return () => {

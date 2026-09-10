@@ -1,5 +1,5 @@
 {
-  "sha1": "5a3e8e24e8d0f4457c7ba50673a463ac35edae10",
+  "sha1": "64375c17ce81b40ab2b88b4d99d552d4b9240c23",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1809,6 +1809,162 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
         "line": 189,
         "column": 23
+      }
+    },
+    {
+      "id": "74db6b831103216-29fbf9a9b986d0d",
+      "title": "Suggest user profiles API matches the profile of a user that has signed in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 57,
+        "column": 11
+      }
+    },
+    {
+      "id": "74db6b831103216-467b1db18814577",
+      "title": "Suggest user profiles API returns an empty list when nothing matches the search term",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 70,
+        "column": 72
+      }
+    },
+    {
+      "id": "74db6b831103216-9cb88b5e27c3281",
+      "title": "Suggest user profiles API validation: rejects a body without a name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "74db6b831103216-34fd4c73c6c4fca",
+      "title": "Suggest user profiles API validation: rejects an empty name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 88,
+        "column": 11
+      }
+    },
+    {
+      "id": "74db6b831103216-0d852e7fad0b165",
+      "title": "Suggest user profiles API validation: rejects a name longer than the schema limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "74db6b831103216-bc90b46fbe54133",
+      "title": "Suggest user profiles API validation: rejects a size above the schema limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 100,
+        "column": 83
+      }
+    },
+    {
+      "id": "74db6b831103216-1b180939ef0f850",
+      "title": "Suggest user profiles API validation: rejects a negative size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 107,
+        "column": 63
+      }
+    },
+    {
+      "id": "74db6b831103216-e73458164ed8ce6",
+      "title": "Suggest user profiles API validation: rejects a fractional size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 114,
+        "column": 22
+      }
+    },
+    {
+      "id": "74db6b831103216-694627abe749ff9",
+      "title": "Suggest user profiles API authorization: returns 200 for a user with read-only alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 124,
+        "column": 89
+      }
+    },
+    {
+      "id": "74db6b831103216-aacd31fc7641ebb",
+      "title": "Suggest user profiles API authorization: returns 200 for a user with all alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 132,
+        "column": 12
+      }
+    },
+    {
+      "id": "74db6b831103216-563bc2fa7e983f8",
+      "title": "Suggest user profiles API authorization: returns 403 for a user with rules privileges but no alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 144,
+        "column": 5
+      }
+    },
+    {
+      "id": "74db6b831103216-a5db523f4aff7d3",
+      "title": "Suggest user profiles API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 158,
+        "column": 5
       }
     }
   ]

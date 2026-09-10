@@ -23,6 +23,10 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAwsStaticKeysForm: jest.fn(),
 }));
 
+jest.mock('../../onboarding_flow_context', () => ({
+  useOnboardingFlow: jest.fn(),
+}));
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetPackageInfoByKeyQuery,
@@ -30,27 +34,47 @@ import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
 } from '@kbn/fleet-plugin/public';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockGetAnyCloudConnectorIacTemplateUrl = getAnyCloudConnectorIacTemplateUrl as jest.Mock;
 const MockIdentityFederation = LazyAwsIdentityFederationSetup as unknown as jest.Mock;
 const MockStaticKeys = LazyAwsStaticKeysForm as unknown as jest.Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 import { ManagedIntegrationsSection } from './managed_integrations_section';
 
-function setupMocks({ cloud = undefined }: { cloud?: object } = {}) {
+function setupMocks({
+  cloud = undefined,
+  setConnectorId = jest.fn(),
+  connectorId = undefined,
+}: { cloud?: object; setConnectorId?: jest.Mock; connectorId?: string } = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
+  mockUseOnboardingFlow.mockReturnValue({
+    setConnectorId,
+    authenticateAndDeployStep: { connectorId },
+  });
 
   MockIdentityFederation.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onConnectorIdChange,
+      initialConnectorId: initId,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onConnectorIdChange?: (id: string | undefined, name?: string) => void;
+      initialConnectorId?: string;
+    }) => (
       <div data-test-subj="identity-federation">
+        {initId && <span data-test-subj="initial-connector-id">{initId}</span>}
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
+        <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
       </div>
     )
   );
@@ -191,6 +215,53 @@ describe('ManagedIntegrationsSection', () => {
       // Switch to access keys — button must reset to disabled
       fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+  });
+
+  describe('connector name propagation', () => {
+    it('calls setConnectorId with id and name when identity federation fires onConnectorIdChange', () => {
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId });
+      renderSection({ showIdentityFederation: true });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-named'));
+      });
+      expect(setConnectorId).toHaveBeenCalledWith('id-1', 'my-connector');
+    });
+
+    it('calls setConnectorId(undefined) when switching to access keys', () => {
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId });
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
+      expect(setConnectorId).toHaveBeenCalledWith(undefined);
+    });
+  });
+
+  describe('initialConnectorId restoration', () => {
+    it('passes persisted connectorId as initialConnectorId to AwsIdentityFederationSetup', () => {
+      setupMocks({ connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('initial-connector-id')).toHaveTextContent('persisted-connector');
+    });
+
+    it('passes initialConnectorId after accordion collapse and reopen', () => {
+      setupMocks({ connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+
+      // Collapse
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+
+      // Reopen — component remounts; initialConnectorId must still be passed
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(screen.getByTestId('initial-connector-id')).toHaveTextContent('persisted-connector');
+    });
+
+    it('does not render initial-connector-id span when no connectorId in state', () => {
+      setupMocks({ connectorId: undefined });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.queryByTestId('initial-connector-id')).not.toBeInTheDocument();
     });
   });
 

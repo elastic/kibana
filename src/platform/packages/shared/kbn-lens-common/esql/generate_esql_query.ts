@@ -17,6 +17,7 @@ import type { DateRange, IndexPattern, OriginalColumn } from '../types';
 import type {
   DateHistogramIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from '../datasources/operations';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { isColumnFormatted, isColumnOfType } from '../datasources/form_based/helpers';
@@ -25,6 +26,7 @@ import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
+import { getTermsConversionFailure } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
@@ -304,9 +306,10 @@ export function generateEsqlQuery(
   // Process buckets
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
-    // Check for specific unsupported operations before general toESQL check
-    if (col.operationType === 'terms') {
-      return getEsqlQueryFailedResult('terms_not_supported');
+    // Terms conversion is gated; until terms_to_esql lands, eligible columns still fail.
+    if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
+      const termsFailure = getTermsConversionFailure(col, { hasDateHistogram });
+      return getEsqlQueryFailedResult(termsFailure ?? 'terms_not_supported');
     }
 
     const toESQL = getToEsqlFn(col.operationType);

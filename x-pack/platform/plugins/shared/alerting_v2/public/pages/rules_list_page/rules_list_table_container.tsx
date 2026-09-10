@@ -254,10 +254,6 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           rule={expandedRule}
           canWrite={canWrite}
           onClose={() => setExpandedRuleId(null)}
-          onQuickEdit={(r) => {
-            setExpandedRuleId(null);
-            onEditInFlyout(r);
-          }}
           onEdit={(r) => {
             setExpandedRuleId(null);
             onEditInFlyout(r);
@@ -270,6 +266,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
           onRun={(r) => runRuleMutation.mutate({ id: r.id })}
           onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
+          onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
         />
       ) : null}
       {ruleToDelete ? (

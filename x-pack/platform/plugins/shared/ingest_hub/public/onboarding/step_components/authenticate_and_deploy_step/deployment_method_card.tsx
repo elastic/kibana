@@ -28,7 +28,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export type DeploymentMethod = 'managed_integrations';
+import type { DeploymentMethod } from '../../aws_service_matrix';
+
+// Re-export the canonical type from the matrix so all consumers use the same spelling.
+export type { DeploymentMethod };
 
 interface DeploymentMethodOption {
   value: DeploymentMethod;
@@ -42,7 +45,7 @@ interface DeploymentMethodOption {
 
 const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
   {
-    value: 'managed_integrations',
+    value: 'managed_integration',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.selectText',
       { defaultMessage: 'Elastic Managed Integrations' }

@@ -5,12 +5,39 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { secondsToCronFormatter } from '../formatting_utils';
 import type { MonitorFields } from '../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
+
+const LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS = 16;
+
+/**
+ * Omits a field from the agent policy when its value matches the Heartbeat
+ * default, so the compiled stream (and the resulting agent payload) stays lean.
+ * Heartbeat applies the same default when the field is absent, so this is a
+ * no-op for the running monitor (see elastic/kibana#241818).
+ */
+export const omitDefaultFormatter =
+  (defaultValue: unknown, formatter?: FormatterFn): FormatterFn =>
+  (fields, key) => {
+    const value = fields[key];
+    if (isEqual(value, defaultValue)) {
+      return null;
+    }
+    return formatter ? formatter(fields, key) : (value as string) ?? null;
+  };
+
+/**
+ * Always omits a field from the agent policy. Used for UI-only metadata
+ * (`__ui`) that Heartbeat ignores, so it never needs to reach the agent
+ * (see elastic/kibana#241818). An empty value already resolved to `null`
+ * before, so dropping it unconditionally is a safe extension.
+ */
+export const omitFieldFormatter: FormatterFn = () => null;
 
 export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string[]) ?? [];
@@ -88,6 +115,15 @@ export const privateTimeoutFormatter: FormatterFn = (fields) => {
       timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS
     );
     return `${adjustedTimeout}s`;
+  }
+
+  // Lightweight monitors default to a 16s timeout, which is also Heartbeat's
+  // default, so it can be omitted from the policy (elastic/kibana#241818).
+  // `TimeoutString` accepts any numeric string, so compare with `Number` rather
+  // than `parseInt` -- the latter truncates `16.5` to the default and would
+  // silently drop a timeout the user explicitly asked for.
+  if (Number(value) === LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS) {
+    return null;
   }
 
   return secondsToCronFormatter(fields, ConfigKey.TIMEOUT);

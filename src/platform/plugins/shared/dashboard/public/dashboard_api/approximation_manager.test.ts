@@ -18,11 +18,6 @@ describe('approximationManager', () => {
       ...getSampleDashboardState({ esql_approximation }),
     });
 
-  test('initializes with false when esql_approximation is not set', () => {
-    const manager = initializeApproximationManager(getSampleDashboardState());
-    expect(manager.api.isApproximate$.value).toBe(false);
-  });
-
   test('initializes with the value from initial state', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
@@ -44,7 +39,7 @@ describe('approximationManager', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
-    const emissions: boolean[] = [];
+    const emissions: Array<boolean | undefined> = [];
     manager.api.isApproximate$.subscribe((v) => emissions.push(v));
 
     manager.api.setEsqlApproximation(true);

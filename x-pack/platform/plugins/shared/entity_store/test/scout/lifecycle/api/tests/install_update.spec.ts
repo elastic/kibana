@@ -17,6 +17,10 @@ import {
   FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
 } from '../../../../../common';
+import {
+  uninstallAllEntityTypes,
+  waitForStoreNotInstalled,
+} from '../../../common/fixtures/helpers';
 
 apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -34,10 +38,17 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     };
   });
 
-  apiTest.beforeEach(async ({ kbnClient }) => {
+  apiTest.beforeEach(async ({ kbnClient, apiClient }) => {
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+
+    // Clean up any state leaked by a previous test that failed mid-install.
+    await uninstallAllEntityTypes(apiClient, defaultHeaders).catch(() => {});
+
+    // Require N consecutive not_installed responses - each request can land on
+    // a different node, so a streak gives confidence all nodes have converged.
+    await waitForStoreNotInstalled(apiClient, defaultHeaders);
   });
 
   apiTest(

@@ -12,6 +12,7 @@ import {
   ruleSavedObjectAttributesSchemaV3,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
+import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -69,6 +70,21 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'data_backfill',
         backfillFn: migrateRuleArtifactsToData,
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV3,
+    },
+  },
+  '5': {
+    // Renames the dashboard artifact data key `dashboardId` -> `dashboard_id`
+    // and the matching `artifact:dashboardId:*` reference names to match the
+    // snake_case payload convention of the alerting v2 APIs.
+    changes: [
+      {
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) => typeSafeGuard(migrateDashboardArtifactDataKey),
       },
     ],
     schemas: {

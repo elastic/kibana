@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   extendPlaywrightPage,
   KibanaCodeEditorWrapper,
   QueryBar,
   ContentListWrapper,
+  type ApiServicesFixture,
   type KibanaUrl,
   type Locator,
   type ScoutPage,
@@ -394,6 +396,54 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     openEmptyLensEditor: openEmptyLensEditorForSuite,
     getDataViewId,
   };
+}
+
+/** Creates a dashboard whose first panel is a library-linked Lens visualization. */
+export async function createDashboardWithLibraryLensPanel(
+  apiServices: Pick<ApiServicesFixture, 'dashboard'>,
+  spaceId: string,
+  params: { dashboardTitle: string; lensSavedObjectId: string }
+): Promise<string> {
+  return apiServices.dashboard.create(
+    {
+      title: params.dashboardTitle,
+      time_range: LOGSTASH_IN_RANGE_DATES,
+      panels: [
+        {
+          type: LENS_EMBEDDABLE_TYPE,
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          config: { ref_id: params.lensSavedObjectId },
+        },
+      ],
+    },
+    spaceId
+  );
+}
+
+/**
+ * Clicks the Elastic Charts canvas at an offset from the canvas **center**.
+ * Matches FTR WebDriver `move({ x, y, origin: canvas })` (center-relative), not
+ * Playwright's default top-left `position`. Coordinates match FTR lens/group4
+ * dashboard chart clicks at viewport {@link LENS_EDITOR_VIEWPORT}.
+ */
+export async function clickElasticChartCanvas(
+  page: ScoutPage,
+  offset: { x: number; y: number },
+  options?: { button?: 'left' | 'right' }
+): Promise<void> {
+  const canvas = page.locator('.echChart canvas:last-of-type');
+  await canvas.waitFor({ state: 'visible' });
+  const box = await canvas.boundingBox();
+  if (!box) {
+    throw new Error('Elastic Charts canvas has no bounding box');
+  }
+  await canvas.click({
+    button: options?.button ?? 'left',
+    position: {
+      x: box.width / 2 + offset.x,
+      y: box.height / 2 + offset.y,
+    },
+  });
 }
 
 /**

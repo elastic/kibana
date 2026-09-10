@@ -26,6 +26,7 @@ function makeRulesClientMock() {
     createRule: jest.fn(),
     updateRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    ruleExists: jest.fn(),
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
     getTags: jest.fn().mockResolvedValue([]),
   };
@@ -298,6 +299,47 @@ describe('RulesAdapterV2', () => {
         perPage: 500,
         page: 2,
       });
+    });
+  });
+
+  describe('findExistingRuleIds', () => {
+    it('returns only IDs that resolve to live rules', async () => {
+      const mock = makeRulesClientMock();
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'live-rule')
+      );
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findExistingRuleIds(['deleted-rule', 'live-rule'])).resolves.toEqual([
+        'live-rule',
+      ]);
+      expect(mock.ruleExists).toHaveBeenCalledTimes(2);
+    });
+
+    it('propagates lookup failures', async () => {
+      const mock = makeRulesClientMock();
+      mock.ruleExists.mockRejectedValueOnce(new Error('lookup failed'));
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findExistingRuleIds(['rule-1'])).rejects.toThrow('lookup failed');
+    });
+
+    it('limits concurrent existence checks', async () => {
+      const mock = makeRulesClientMock();
+      let activeChecks = 0;
+      let maxActiveChecks = 0;
+      mock.ruleExists.mockImplementation(async () => {
+        activeChecks += 1;
+        maxActiveChecks = Math.max(maxActiveChecks, activeChecks);
+        await Promise.resolve();
+        activeChecks -= 1;
+        return true;
+      });
+      const adapter = makeAdapter(mock);
+      const ruleIds = Array.from({ length: 11 }, (_, index) => `rule-${index}`);
+
+      await expect(adapter.findExistingRuleIds(ruleIds)).resolves.toEqual(ruleIds);
+      expect(maxActiveChecks).toBe(10);
     });
   });
 

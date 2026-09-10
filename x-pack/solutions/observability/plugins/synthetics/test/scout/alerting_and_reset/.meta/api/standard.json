@@ -1,5 +1,5 @@
 {
-  "sha1": "a9944810c690243a56bff05a6fd15a2820cc6449",
+  "sha1": "48efcf0e8805fa86fbb2ffa6acb9695c2f7d4db6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 190,
-        "column": 42
+        "line": 196,
+        "column": 25
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 204,
-        "column": 25
+        "line": 209,
+        "column": 7
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 256,
-        "column": 16
+        "line": 261,
+        "column": 31
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 263,
-        "column": 71
+        "line": 269,
+        "column": 16
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 269,
-        "column": 14
+        "line": 274,
+        "column": 28
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 278,
-        "column": 24
+        "line": 283,
+        "column": 69
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 289,
-        "column": 24
+        "line": 294,
+        "column": 7
       }
     },
     {
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 326,
+        "line": 331,
         "column": 7
       }
     },
@@ -196,8 +196,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 390,
+        "line": 395,
         "column": 16
+      }
+    },
+    {
+      "id": "3391fd001109be0-e682df4da11da1a",
+      "title": "getCertificates includes certificates from other permitted spaces when showFromAllSpaces is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 393,
+        "column": 27
       }
     },
     {

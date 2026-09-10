@@ -55,7 +55,7 @@
     "@kbn/spaces-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/streamlang",
-    "@kbn/streams-ai",
+    "@kbn/nightshift-ai",
     "@kbn/streams-plugin",
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",

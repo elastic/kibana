@@ -135,16 +135,11 @@ export class AssetManagerClient {
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
-      const existingState = await this.globalStateClient.find();
-      const logsExtraction = resolveLogsExtractionOnInstall(
-        existingState?.logsExtraction,
-        logsExtractionParams
-      );
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
-      await Promise.all([
-        this.globalStateClient.init({ historySnapshot, logsExtraction }),
+      const [globalState] = await Promise.all([
+        this.globalStateClient.init({ historySnapshot, logsExtraction: logsExtractionParams }),
 
         // V1 cleanup is legacy migration work — run it as the internal user so enabling the
         // entity store does not require the user to hold transform/enrich/index admin on v1 assets.
@@ -181,7 +176,9 @@ export class AssetManagerClient {
       // schedules are created — those tasks self-delete when they find zero engines,
       // so scheduling them in parallel with initEntity can tear down a freshly
       // scheduled status task mid-install.
-      await Promise.all(entityTypes.map((type) => this.initEntity(request, type, logsExtraction)));
+      await Promise.all(
+        entityTypes.map((type) => this.initEntity(request, type, globalState.logsExtraction))
+      );
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
       await Promise.all([
@@ -696,18 +693,4 @@ export class AssetManagerClient {
 
     return ENTITY_STORE_STATUS.RUNNING;
   }
-}
-
-function resolveLogsExtractionOnInstall(
-  existing: LogExtractionConfig | undefined,
-  params: LogExtractionInstallParams | undefined
-): LogExtractionConfig {
-  const hasParams = params !== undefined && Object.keys(params).length > 0;
-  if (hasParams) {
-    return LogExtractionConfig.parse(params);
-  }
-  if (existing !== undefined) {
-    return existing;
-  }
-  return LogExtractionConfig.parse({});
 }

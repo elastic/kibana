@@ -382,6 +382,10 @@ export class SavedMap {
     return this._attributes.title !== undefined ? this._attributes.title : '';
   }
 
+  public getPageTitle(): string {
+    return this._getPageTitle();
+  }
+
   public getAttributes(): MapAttributes {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling getAttributes');

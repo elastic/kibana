@@ -13,15 +13,21 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
+  createBadRequestError,
   createInternalError,
+  createNonInteractiveConfig,
   isAgentBuilderError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
+import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
   ExperimentalFeatures,
@@ -29,6 +35,7 @@ import type {
   ModelProvider,
   RunAgentReturn,
   RunContext,
+  RunApprovals,
   Runner,
   RunToolReturn,
   ScopedRunner,
@@ -159,6 +166,18 @@ export type CreateRunnerDeps = Omit<
   getExecutionService: () => AgentExecutionService;
 };
 
+const toToolRunInteractivity = (approvals?: RunApprovals): InteractivityConfig => {
+  const unknownApis = findUnknownApis(approvals?.autoApprovedApis ?? []);
+  if (unknownApis.length > 0) {
+    throw createBadRequestError(
+      `Unknown auto_approved_apis: ${formatUnknownApis(
+        unknownApis
+      )}. Each entry must name an API that exists on its target.`
+    );
+  }
+  return createNonInteractiveConfig(approvals?.autoApprovedApis);
+};
+
 export class RunnerManager {
   public readonly deps: CreateScopedRunnerDeps;
   public readonly context: RunContext;
@@ -230,6 +249,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     projectRouting,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     conversation,
     nextInput,
     promptState,
@@ -243,6 +263,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
+    reasoningLevel?: ChatCompletionReasoningEffort;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
@@ -269,12 +290,14 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       defaultConnectorId,
       telemetryMetadata,
       maxContentLength,
+      reasoningLevel,
     });
 
     const subAgentExecutor = createSubAgentExecutor({
       request,
       getExecutionService,
       projectRouting,
+      interactivity,
     });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
@@ -325,7 +348,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   return {
     runTool: async (runToolParams) => {
-      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+      const { request, defaultConnectorId, promptState, abortSignal, approvals, ...otherParams } =
         runToolParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -334,12 +357,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
-        interactivity: { enabled: false },
+        interactivity: toToolRunInteractivity(approvals),
       });
       return runner.runTool(otherParams);
     },
     runInternalTool: async (runToolParams) => {
-      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+      const { request, defaultConnectorId, promptState, abortSignal, approvals, ...otherParams } =
         runToolParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -348,7 +371,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
-        interactivity: { enabled: false },
+        interactivity: toToolRunInteractivity(approvals),
       });
       return runner.runInternalTool(otherParams);
     },
@@ -359,6 +382,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         projectRouting,
         telemetryMetadata,
         maxContentLength,
+        reasoningLevel,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         interactive,
@@ -373,6 +397,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         projectRouting,
         telemetryMetadata,
         maxContentLength,
+        reasoningLevel,
         conversation,
         nextInput,
         abortSignal,

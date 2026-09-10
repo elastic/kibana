@@ -13,13 +13,12 @@ import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
-  RecoveryType,
   StepDefinition,
   StepRenderProps,
 } from '../types';
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
-import type { FormValues } from '../../../form/types';
+import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { ScheduleField } from '../../../form/fields/schedule_field';
@@ -30,14 +29,13 @@ import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
-import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
 import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
@@ -99,8 +97,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: (props) => (
       <>
-        <CentralizedActionPoliciesPanel http={props.services.http} />
-        <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
         <EuiHorizontalRule margin="m" />
         <NotificationsStep />

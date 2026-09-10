@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {
   COMMON_HEADERS,
@@ -82,7 +86,6 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
             id: 'main',
             hide_chart: false,
             hide_table: false,
-            time_restore: false,
             data_source: {
               type: 'data_view_reference',
               ref_id: 'missing-data-view',
@@ -138,7 +141,6 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
           id: 'replacement',
           hide_chart: false,
           hide_table: false,
-          time_restore: false,
           data_source: {
             type: 'data_view_reference',
             ref_id: 'replacement-data-view',
@@ -207,6 +209,112 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest(
+    'preserves metrics tab state through a GET and PUT round trip',
+    async ({ apiClient, kbnClient }) => {
+      const id = createId('metrics-tab-state-round-trip');
+      const storedTabTypeState: NonNullable<
+        DiscoverSessionAttributes['tabs'][number]['attributes']['tabTypeState']
+      > = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name', 'service.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p99',
+      };
+
+      const attributes: DiscoverSessionAttributes = {
+        title: 'Metrics tab state round trip',
+        description: '',
+        tabs: [
+          {
+            id: 'metrics-tab',
+            label: 'Metrics',
+            attributes: {
+              hideChart: false,
+              hideTable: false,
+              columns: [],
+              sort: [],
+              grid: {},
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  query: { esql: 'TS metrics-* | LIMIT 10' },
+                  filter: [],
+                }),
+              },
+              isTextBasedQuery: true,
+              tabTypeState: storedTabTypeState,
+            },
+          },
+        ],
+      };
+
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id,
+        overwrite: false,
+        attributes,
+        references: [],
+      });
+
+      const getResponse = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.data.tabs[0]).toMatchObject({
+        id: 'metrics-tab',
+        type: 'metrics',
+        dimensions: ['host.name', 'service.name'],
+        search_term: 'cpu',
+        counter_aggregation: 'max',
+        gauge_aggregation: 'min',
+        histogram_percentile: 'p99',
+        data_source: {
+          type: 'esql',
+          query: 'TS metrics-* | LIMIT 10',
+        },
+      });
+      expect('tabTypeState' in getResponse.body.data.tabs[0]).toBe(false);
+
+      const putResponse = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: getResponse.body.data,
+        responseType: 'json',
+      });
+
+      expect(putResponse).toHaveStatusCode(200);
+      expect(putResponse.body.data).toStrictEqual(getResponse.body.data);
+
+      const repeatedGetResponse = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(repeatedGetResponse).toHaveStatusCode(200);
+      expect(repeatedGetResponse.body.data).toStrictEqual(getResponse.body.data);
+
+      const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+      });
+      expect(storedSession.attributes.tabs[0].attributes.tabTypeState).toStrictEqual(
+        storedTabTypeState
+      );
+    }
+  );
+
+  apiTest(
     'updates an existing session whose ID predates the as-code format',
     async ({ apiClient, kbnClient }) => {
       const id = `Legacy-Discover-Session-${Date.now()}`;
@@ -259,6 +367,119 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(id);
       expect(response.body.data.title).toBe('Updated legacy session');
+    }
+  );
+
+  apiTest(
+    'preserves stored pinned filter conditions through GET, PUT, and GET',
+    async ({ apiClient, kbnClient }) => {
+      const id = createId('pinned-filter-round-trip');
+      const url = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
+      const headers = { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader };
+      const pinnedFilter = {
+        meta: {
+          index: 'logs-data-view',
+          type: FILTERS.PHRASE,
+          key: 'service.name',
+          disabled: true,
+          negate: true,
+          alias: 'Saved condition',
+        },
+        query: { match_phrase: { 'service.name': 'checkout' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const appFilter = {
+        meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+        query: { exists: { field: 'bytes' } },
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+
+      // Seed the stored format: the API cannot create a filter with a pin marker.
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id,
+        overwrite: false,
+        attributes: {
+          title: 'Session with a stored pinned filter',
+          description: '',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Main',
+              attributes: {
+                hideChart: false,
+                hideTable: false,
+                columns: [],
+                sort: [],
+                grid: {},
+                isTextBasedQuery: false,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'logs-data-view',
+                    query: { language: 'kuery', query: '' },
+                    filter: [pinnedFilter, appFilter],
+                  }),
+                },
+              },
+            },
+          ],
+        },
+        references: [],
+      });
+
+      const initialResponse = await apiClient.get(url, { headers, responseType: 'json' });
+
+      expect(initialResponse).toHaveStatusCode(200);
+      expect(initialResponse.body.data.tabs[0].filters).toStrictEqual([
+        expect.objectContaining({
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'is', value: 'checkout', negate: true },
+          data_view_id: 'logs-data-view',
+          disabled: true,
+          negate: true,
+          label: 'Saved condition',
+        }),
+        expect.objectContaining({
+          type: 'condition',
+          condition: { field: 'bytes', operator: 'exists' },
+          data_view_id: 'foreign-data-view',
+        }),
+      ]);
+
+      const saveResponse = await apiClient.put(url, {
+        headers,
+        body: initialResponse.body.data,
+        responseType: 'json',
+      });
+
+      expect(saveResponse).toHaveStatusCode(200);
+      expect(saveResponse.body.data).toStrictEqual(initialResponse.body.data);
+
+      const reloadedResponse = await apiClient.get(url, { headers, responseType: 'json' });
+
+      expect(reloadedResponse).toHaveStatusCode(200);
+      expect(reloadedResponse.body.data).toStrictEqual(initialResponse.body.data);
+
+      // Check the actual write, not just the API response: conditions remain, pin markers do not.
+      const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+      });
+      const storedSearchSource = injectReferences(
+        parseSearchSourceJSON(
+          storedSession.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ),
+        storedSession.references
+      );
+
+      expect(storedSearchSource.filter).toMatchObject([
+        { meta: pinnedFilter.meta, query: pinnedFilter.query },
+        { meta: appFilter.meta, query: appFilter.query },
+      ]);
+      expect(storedSearchSource.filter?.map((filter) => filter.$state)).toStrictEqual([
+        undefined,
+        undefined,
+      ]);
     }
   );
 

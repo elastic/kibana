@@ -24,10 +24,10 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/tooling-log'
   - '@kbn/test'
-  - '@kbn/object-utils'
   - '@kbn/apm-utils'
+  - '@kbn/core-user-activity-server'
 tags:
-  - shared-common
+  - shared-server
   - package
   - prod
   - group-platform

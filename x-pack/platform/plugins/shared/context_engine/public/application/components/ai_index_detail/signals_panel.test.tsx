@@ -86,7 +86,10 @@ const renderPanel = ({
   );
 };
 
-const aiIndexWithAgent: GetAiIndexResponse = { ...aiIndex, feedback_agent_id: 'my-agent' };
+const aiIndexWithAgent: GetAiIndexResponse = {
+  ...aiIndex,
+  feedback_analysis: { enabled: false, agent_id: 'my-agent' },
+};
 
 describe('SignalsPanel', () => {
   beforeEach(() => {

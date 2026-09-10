@@ -164,11 +164,7 @@ export class ProjectNavigationService {
     return {
       getProjectHome$: () => {
         return parsedNavigation$.pipe(
-          map((parsed) => {
-            const defaultRoute = getUiSettingsHomeRoute();
-            const navRoute = parsed?.tree.find((n) => n.renderAs === 'home')?.href;
-            return defaultRoute ?? navRoute;
-          }),
+          map(() => getUiSettingsHomeRoute()),
           filter((home): home is string => home !== undefined),
           distinctUntilChanged()
         );

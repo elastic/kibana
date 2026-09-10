@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Download } from 'playwright-core';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { RenderablePage } from './renderable_page';
@@ -37,6 +38,7 @@ export class DashboardApp {
   private readonly editModeButton;
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
+  private readonly editInDiscoverLink;
   private readonly embeddablePanel;
   private readonly controlsGroup;
   private readonly controlFrame;
@@ -62,6 +64,7 @@ export class DashboardApp {
   private readonly savedObjectFinderLoadingIndicator;
   private readonly savedObjectFinderSearchInput;
   private readonly addEmbeddableSuccess;
+  private readonly savedSearchDocTable;
 
   // Markdown panel
   private readonly markdownEditorApplyButton;
@@ -90,6 +93,9 @@ export class DashboardApp {
     this.editModeButton = this.page.testSubj.locator('dashboardEditMode');
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
+    this.editInDiscoverLink = this.page.testSubj.locator(
+      'discoverEmbeddableInlineEditEditInDiscoverLink'
+    );
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
     this.controlsGroup = this.page.testSubj.locator('controls-group-wrapper');
     this.controlFrame = this.page.testSubj.locator('control-frame');
@@ -124,6 +130,7 @@ export class DashboardApp {
     );
     this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
+    this.savedSearchDocTable = this.page.testSubj.locator('embeddedSavedSearchDocTable');
 
     // Markdown panel
     this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
@@ -648,14 +655,21 @@ export class DashboardApp {
   }
 
   async getSavedSearchRowCount(): Promise<number> {
-    return this.page.evaluate(() => {
-      const docElement = document.querySelector('[data-document-number]');
-      const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
-      const rowCount = document.querySelectorAll(
-        '[data-test-subj="docTableExpandToggleColumn"]'
-      ).length;
-      return Math.max(docCount, rowCount);
-    });
+    const [rowCount = 0] = await this.getSavedSearchRowCounts();
+    return rowCount;
+  }
+
+  async getSavedSearchRowCounts(): Promise<number[]> {
+    return this.savedSearchDocTable.evaluateAll((tables) =>
+      tables.map((table) => {
+        const docElement = table.querySelector('[data-document-number]');
+        const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
+        const rowCount = table.querySelectorAll(
+          '[data-test-subj="docTableExpandToggleColumn"]'
+        ).length;
+        return Math.max(docCount, rowCount);
+      })
+    );
   }
 
   async getTagCloudTexts(): Promise<string[][]> {
@@ -978,6 +992,26 @@ export class DashboardApp {
       // Wait for context menu to close after clicking the action
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
     }
+  }
+
+  async editLinkedDiscoverPanel(title: string) {
+    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+    await this.editInDiscoverLink.waitFor({ state: 'visible' });
+    await this.editInDiscoverLink.click();
+  }
+
+  /** Generates and downloads a CSV report for a Discover session panel. */
+  async exportPanelAsCsv(title?: string): Promise<Download> {
+    await this.toasts.dismissAll();
+    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+
+    const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
+    // Report generation runs asynchronously and can be slow on shared CI workers.
+    await downloadButton.waitFor({ state: 'visible', timeout: 120_000 });
+
+    const downloadPromise = this.page.waitForEvent('download');
+    await downloadButton.click();
+    return downloadPromise;
   }
 
   /**

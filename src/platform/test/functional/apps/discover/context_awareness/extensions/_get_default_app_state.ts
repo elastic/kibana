@@ -9,6 +9,14 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_default_app_state.ts
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, but drop the 2 "merge and dedup configured default columns"
+ * tests first — that is pure logic in `getPostFetchState`
+ * (discover/public/application/main/state_management/utils/profile_app_state_defaults.ts),
+ * already covered by profile_app_state_defaults.test.ts (`describe('getPostFetchState')`).
+ * Only the dedup-collision case is missing there; add it in Jest instead.
+ * The other 6 tests (row height, breakdown field, reset-on-"New") are genuine UI assertions.
+ */
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';

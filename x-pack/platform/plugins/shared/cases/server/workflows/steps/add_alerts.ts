@@ -13,6 +13,7 @@ import {
 } from '../../../common/workflows/steps/add_alerts';
 import { LEGACY_ALERT_TYPE } from '../../../common/constants/attachments';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
@@ -70,9 +71,11 @@ export const addAlertsStepDefinition = (
           attachments,
         });
 
+        // The client returns unified comments; the output schema mirrors the
+        // public (legacy) wire shape, so convert back before validating.
         return safeParseCaseForWorkflowOutput(
           addAlertsStepCommonDefinition.outputSchema.shape.case,
-          updatedCase
+          toLegacyCaseResponse(updatedCase)
         );
       });
     }),

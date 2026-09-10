@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConversationPermissions } from '../../../../../common/http_api/conversations';
 import {
   useConversationPermissions,
+  useConversationReadOnly,
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
@@ -20,6 +21,7 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
   useHasPersistedConversation: jest.fn(),
   useConversationPermissions: jest.fn(),
+  useConversationReadOnly: jest.fn(),
 }));
 
 jest.mock('../rename_conversation_modal', () => ({
@@ -33,8 +35,15 @@ jest.mock('../delete_conversation_modal', () => ({
 const mockUseConversationTitle = jest.mocked(useConversationTitle);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
+const mockUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 
-const renderTitle = (permissions: Partial<ConversationPermissions>) => {
+const renderTitle = ({
+  permissions,
+  isReadOnly = false,
+}: {
+  permissions: Partial<ConversationPermissions>;
+  isReadOnly?: boolean;
+}) => {
   mockUseConversationTitle.mockReturnValue({ title: 'My conversation', isLoading: false });
   mockUseHasPersistedConversation.mockReturnValue(true);
   mockUseConversationPermissions.mockReturnValue({
@@ -43,6 +52,7 @@ const renderTitle = (permissions: Partial<ConversationPermissions>) => {
     update_access_control: false,
     ...permissions,
   });
+  mockUseConversationReadOnly.mockReturnValue({ isReadOnly, isLoading: false });
 
   render(
     <IntlProvider locale="en">
@@ -60,7 +70,7 @@ describe('EmbeddableConversationTitle', () => {
   });
 
   it('offers rename and delete when both are permitted', () => {
-    renderTitle({ rename: true, delete: true });
+    renderTitle({ permissions: { rename: true, delete: true } });
     openTitleMenu();
 
     expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeInTheDocument();
@@ -68,7 +78,7 @@ describe('EmbeddableConversationTitle', () => {
   });
 
   it('offers only the permitted action', () => {
-    renderTitle({ rename: true, delete: false });
+    renderTitle({ permissions: { rename: true, delete: false } });
     openTitleMenu();
 
     expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeInTheDocument();
@@ -77,11 +87,21 @@ describe('EmbeddableConversationTitle', () => {
 
   // The menu holds nothing else, so an empty popover would be a dead end.
   it('renders a plain title with no menu when neither action is permitted', () => {
-    renderTitle({ rename: false, delete: false });
+    renderTitle({ permissions: { rename: false, delete: false } });
 
     expect(screen.queryByTestId('agentBuilderConversationTitleButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderConversationTitle')).toHaveTextContent(
       'My conversation'
     );
+  });
+
+  it('renders an icon-only read-only badge for read-only conversations', () => {
+    renderTitle({ permissions: { rename: true, delete: true }, isReadOnly: true });
+
+    const badge = screen.getByTestId('agentBuilderEmbeddableConversationReadOnlyBadge');
+    expect(badge).toBeInTheDocument();
+    expect(badge).not.toHaveAttribute('role', 'button');
+    expect(badge).not.toHaveAttribute('tabindex', '0');
+    expect(screen.queryByText('Read-Only')).not.toBeInTheDocument();
   });
 });

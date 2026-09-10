@@ -99,8 +99,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: false,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
   });
 
@@ -195,8 +193,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
@@ -215,8 +211,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
@@ -235,8 +229,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
     useGetCaseConfigurationMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
@@ -267,8 +259,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
     useGetCaseConfigurationMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
@@ -303,8 +293,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
@@ -324,8 +312,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
@@ -355,8 +341,6 @@ describe('ConfigureCasesRedesign', () => {
       attachmentsEnabled: false,
       chatEnabled: false,
       templatesEnabled: true,
-      detailsRedesignEnabled: false,
-      casesRedesign: { list: false, details: false, settings: true },
     });
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);

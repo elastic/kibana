@@ -23,8 +23,14 @@ import type {
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
-import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '../server';
+import type {
+  DiscoverSessionTab as DiscoverSessionTabSchema,
+  DiscoverSessionTabAttributes,
+} from '../server';
 import type { VIEW_MODE } from '.';
+
+/** Tab-type specific state persisted with a Discover session tab. */
+export type DiscoverSessionTabTypeState = NonNullable<DiscoverSessionTabAttributes['tabTypeState']>;
 
 export interface DiscoverGridSettings extends SerializableRecord {
   columns?: Record<string, DiscoverGridSettingsColumn>;
@@ -141,6 +147,7 @@ export interface DiscoverSessionTab {
   jsonModeSettings?: JsonModeSettings;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
+  tabTypeState?: DiscoverSessionTabTypeState;
 }
 
 export interface DiscoverSession {

@@ -812,11 +812,6 @@ export const mockCasesContract = (): CasesServerStart => ({
     chat: {
       enabled: true,
     },
-    casesRedesign: {
-      list: false,
-      details: false,
-      settings: false,
-    },
     attachments: {
       enabled: true,
     },

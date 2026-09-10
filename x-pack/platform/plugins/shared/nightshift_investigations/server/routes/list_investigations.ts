@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { INVESTIGATION_STATUSES } from '../../common';
+import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
+import {
+  INVESTIGATION_STATUSES,
+  INVESTIGATION_SUBJECT_TYPES,
+  MAX_KEYWORD_LENGTH,
+} from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute({
@@ -26,11 +31,26 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
         .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
         .transform((v) => (Array.isArray(v) ? v : [v]))
         .optional(),
+      severities: z
+        .union([z.enum(SEVERITY_OPTIONS), z.array(z.enum(SEVERITY_OPTIONS)).max(4)])
+        .transform((v) => (Array.isArray(v) ? v : [v]))
+        .optional(),
+      subject_types: z
+        .union([
+          z.enum(INVESTIGATION_SUBJECT_TYPES),
+          z.array(z.enum(INVESTIGATION_SUBJECT_TYPES)).max(2),
+        ])
+        .transform((v) => (Array.isArray(v) ? v : [v]))
+        .optional(),
+      query: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      concurrency_key: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      created_after: z.string().max(100).datetime({ offset: true }).optional(),
+      created_before: z.string().max(100).datetime({ offset: true }).optional(),
       started_after: z.string().max(100).datetime({ offset: true }).optional(),
       started_before: z.string().max(100).datetime({ offset: true }).optional(),
-      finished_after: z.string().max(100).datetime({ offset: true }).optional(),
-      finished_before: z.string().max(100).datetime({ offset: true }).optional(),
-      sort_field: z.enum(['created_at', 'finished_at']).optional(),
+      completed_after: z.string().max(100).datetime({ offset: true }).optional(),
+      completed_before: z.string().max(100).datetime({ offset: true }).optional(),
+      sort_field: z.enum(['created_at', 'completed_at', 'severity']).optional(),
       sort_order: z.enum(['asc', 'desc']).optional(),
       page: z.coerce.number().int().min(1).max(100).optional(),
       size: z.coerce.number().int().min(1).max(100).optional(),

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agentic-investigations-plugin",
+  "owner": ["@elastic/security-solution"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Solution-agnostic base layer for agentic investigations. Owns the entities an agent and a human collaborate on: proposals today, investigations and incidents next.",
+  "plugin": {
+    "id": "agenticInvestigations",
+    "configPath": ["xpack", "agenticInvestigations"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": ["spaces"],
+    "extraPublicDirs": ["common"]
+  }
+}

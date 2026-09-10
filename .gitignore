@@ -17,6 +17,8 @@ node_modules
 !/src/dev/notice/__fixtures__/node_modules
 !/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules
 !/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+!/packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules
+!/packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/**
 /node_modules.tar.zst
 trash
 /optimize

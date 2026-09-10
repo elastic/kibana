@@ -245,6 +245,7 @@ export const Unifi: ConnectorSpec = {
     // ------------------------------------------------------------------
     getNetworkInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the UniFi Network application version running on the console. Cheapest call to confirm the console is reachable and the API key grants Network access before running other Network actions.',
       input: lazySchema(() => z.object({})),
@@ -255,6 +256,7 @@ export const Unifi: ConnectorSpec = {
 
     listSites: {
       isTool: true,
+      scope: 'read',
       description:
         'List the UniFi Network sites on this console. Start here: almost every other Network action requires a siteId, and a typical console has exactly one site. Returns a paginated envelope {offset, limit, count, totalCount, data[]} where each entry has an `id` (the siteId) and a name.',
       input: UnifiListSitesInputSchema,
@@ -265,6 +267,7 @@ export const Unifi: ConnectorSpec = {
 
     listDevices: {
       isTool: true,
+      scope: 'read',
       description:
         'List the UniFi devices adopted by a site (access points, switches, gateways) with model, MAC, IP, state and firmware status. Use this to inventory hardware or to find offline devices and pending firmware updates. Filterable on id, macAddress, ipAddress, name, model, state, supported, firmwareVersion, firmwareUpdatable, features and interfaces. Returns a paginated envelope; pass the `id` of a result to getDevice or getDeviceStatistics.',
       input: UnifiListDevicesInputSchema,
@@ -281,6 +284,7 @@ export const Unifi: ConnectorSpec = {
 
     getDevice: {
       isTool: true,
+      scope: 'read',
       description:
         'Get full details for one adopted device, including its port and radio interfaces, uplink, and firmware state. Use the `id` returned by listDevices. Call this before powerCyclePort to find the port number to act on.',
       input: UnifiGetDeviceInputSchema,
@@ -296,6 +300,7 @@ export const Unifi: ConnectorSpec = {
 
     getDeviceStatistics: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the latest real-time statistics for one adopted device: uptime, CPU and memory utilization, and TX/RX throughput. Use this to judge whether a device is unhealthy or saturated, after locating it with listDevices.',
       input: UnifiGetDeviceInputSchema,
@@ -313,6 +318,7 @@ export const Unifi: ConnectorSpec = {
 
     listClients: {
       isTool: true,
+      scope: 'read',
       description:
         'List clients currently connected to a site — wired and wireless endpoints plus active VPN connections — with MAC, IP, connection time and guest-authorization state. Use this to answer "who or what is on the network right now". Filterable on id, type, macAddress, ipAddress, connectedAt, access.type and access.authorized. Returns a paginated envelope. Note this only covers currently connected clients, not historical ones.',
       input: UnifiListClientsInputSchema,
@@ -329,6 +335,7 @@ export const Unifi: ConnectorSpec = {
 
     getClient: {
       isTool: true,
+      scope: 'read',
       description:
         'Get full details for one connected client, including which device and port or radio it is attached to and its guest access state. Use the `id` returned by listClients.',
       input: UnifiGetClientInputSchema,
@@ -344,6 +351,7 @@ export const Unifi: ConnectorSpec = {
 
     listNetworks: {
       isTool: true,
+      scope: 'read',
       description:
         'List the networks (VLANs, LANs and guest networks) configured on a site, with their subnets and VLAN IDs. Use this to map a client IP to the network it belongs to, or to audit network segmentation.',
       input: UnifiSiteFilterablePageInputSchema,
@@ -360,6 +368,7 @@ export const Unifi: ConnectorSpec = {
 
     listWans: {
       isTool: true,
+      scope: 'read',
       description:
         'List the WAN (internet uplink) interfaces on a site with their current status. Use this to diagnose an internet outage or to check which WAN is active on a multi-WAN gateway. Supports offset/limit paging but not filtering.',
       input: UnifiSitePageInputSchema,
@@ -376,6 +385,7 @@ export const Unifi: ConnectorSpec = {
 
     listFirewallPolicies: {
       isTool: true,
+      scope: 'read',
       description:
         'List the firewall policies configured on a site, including their source and destination zones, action and enabled state. Use this to audit what traffic is allowed or blocked between network zones. Returns a paginated envelope.',
       input: UnifiSiteFilterablePageInputSchema,
@@ -395,6 +405,7 @@ export const Unifi: ConnectorSpec = {
     // ------------------------------------------------------------------
     restartDevice: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Restart an adopted UniFi device. DISRUPTIVE: the device and everything connected through it drops offline for roughly a minute. Only call this when the user has asked for a restart or a diagnosis has established the device is wedged. Confirm the target with getDevice first — an accidental gateway restart takes the whole site down.',
       input: UnifiRestartDeviceInputSchema,
@@ -414,6 +425,7 @@ export const Unifi: ConnectorSpec = {
 
     powerCyclePort: {
       isTool: true,
+      scope: 'destroy',
       description:
         "PoE power-cycle a single switch port, rebooting only the device powered by that port. DISRUPTIVE but narrowly scoped — prefer this over restartDevice when one PoE camera or access point is unresponsive. Call getDevice first to read the switch's `interfaces.ports` and pick the right port number. The port must be actively supplying PoE: a port whose `poe` is null returns 422 'Port does not support PoE', and a port whose `poe.state` is 'DOWN' returns 422 'Port is not supplying power' even though `poe.enabled` is true. Both mean the target is wrong, not that the request failed — pick a port whose `poe.state` is 'UP', and note that a device connected to a non-PoE port is self-powered and cannot be rebooted this way.",
       input: UnifiPowerCyclePortInputSchema,
@@ -433,6 +445,7 @@ export const Unifi: ConnectorSpec = {
 
     authorizeGuestAccess: {
       isTool: true,
+      scope: 'write',
       description:
         "Authorize a guest client on the site's guest network, optionally capping session duration, total data and up/down rate. Use this to grant a visitor access after finding their client with listClients. Omit the optional limits to inherit the site's guest policy defaults.",
       input: UnifiAuthorizeGuestAccessInputSchema,
@@ -460,6 +473,7 @@ export const Unifi: ConnectorSpec = {
 
     unauthorizeGuestAccess: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Revoke a guest client's network authorization and disconnect it. Use this to cut off a visitor or a device that should not be on the guest network. The client can re-authorize through the guest portal unless it is blocked separately.",
       input: UnifiUnauthorizeGuestAccessInputSchema,
@@ -482,6 +496,7 @@ export const Unifi: ConnectorSpec = {
     // ------------------------------------------------------------------
     getProtectInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the UniFi Protect application version running on the console. Cheapest call to confirm Protect is installed on this console and the API key grants Protect access before running other Protect actions.',
       input: lazySchema(() => z.object({})),
@@ -492,6 +507,7 @@ export const Unifi: ConnectorSpec = {
 
     listProtectDevices: {
       isTool: true,
+      scope: 'read',
       description:
         "List every UniFi Protect device of one family — cameras, lights, sensors, chimes, sirens, speakers, viewers, fobs, relays, bridges, link-stations or alarm-hubs — with each device's id, name, MAC and connection state. This is the entry point for all Protect work: use it to inventory hardware, find offline cameras, or resolve a device name to the id needed by getProtectDevice, getCameraSnapshot and movePtzCameraToPreset. Unlike the Network actions this returns a bare JSON array with no paging.",
       input: UnifiListProtectDevicesInputSchema,
@@ -507,6 +523,7 @@ export const Unifi: ConnectorSpec = {
 
     getProtectDevice: {
       isTool: true,
+      scope: 'read',
       description:
         "Get full details for one UniFi Protect device, including per-family settings such as a camera's video mode, HDR type, smart-detection configuration and on-screen display, or a light's brightness and motion settings. Use the deviceType and `id` returned by listProtectDevices.",
       input: UnifiGetProtectDeviceInputSchema,
@@ -522,6 +539,7 @@ export const Unifi: ConnectorSpec = {
 
     getNvr: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details about the UniFi Protect NVR itself — the recorder running on the console — including its version, storage state and current arm mode. Use this to check recording capacity or overall Protect health, as opposed to the state of an individual camera.',
       input: lazySchema(() => z.object({})),
@@ -532,6 +550,7 @@ export const Unifi: ConnectorSpec = {
 
     getCameraSnapshot: {
       isTool: true,
+      scope: 'read',
       description:
         'Capture a still JPEG image from a Protect camera and return it base64-encoded. WARNING: this returns a large binary payload (hundreds of kilobytes, larger still with highQuality) that consumes a great deal of context and cannot be interpreted as text. Only call it when there is a concrete plan to process the image — for example passing it to an Elasticsearch ingest pipeline attachment processor or handing it to a vision-capable step — never merely to "check" a camera. To verify a camera is online, use getProtectDevice and read its `state` instead. Returns the fields cameraId, contentType, base64Length and base64. Fails with 503 when the camera is offline. Also fails when the image exceeds Kibana\'s connector response size limit — snapshots from current UniFi cameras are typically larger than the 1mb default, so an operator must raise xpack.actions.maxResponseContentLength before this action can succeed.',
       input: UnifiGetCameraSnapshotInputSchema,
@@ -559,6 +578,7 @@ export const Unifi: ConnectorSpec = {
 
     movePtzCameraToPreset: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a PTZ camera to one of its saved preset positions. Only works on cameras with pan/tilt/zoom support; slot "-1" is the home preset and "0" and above are user-configured presets. Use this to point a camera at an area of interest before capturing a snapshot.',
       input: UnifiMovePtzCameraInputSchema,

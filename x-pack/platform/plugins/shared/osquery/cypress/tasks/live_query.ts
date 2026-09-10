@@ -178,7 +178,7 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
   cy.getBySel(`row-${actionId}`).within(() => {
     cy.get('[aria-label="Details"]').click();
   });
-  cy.contains('View history');
+  cy.getBySel('appHeaderBack');
   addToCaseFromRowKebab(caseId);
 };
 

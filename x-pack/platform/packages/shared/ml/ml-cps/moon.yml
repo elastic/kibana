@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/ml-common-types'
 tags:
   - shared-browser
   - package

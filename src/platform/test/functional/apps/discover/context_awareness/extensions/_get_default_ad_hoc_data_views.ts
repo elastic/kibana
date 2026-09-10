@@ -9,6 +9,13 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_default_ad_hoc_data_views.ts
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI. The save-session copy, reload-without-error-toast, and
+ * no-data-page fallback all depend on real server state plus a rendered picker.
+ * context_awareness/hooks/use_default_ad_hoc_data_views.test.tsx covers only defaults being set
+ * and cache clearing, so there is little overlap.
+ * Care needed: the `fallback behaviour` block unloads/reloads ES archives mid-suite.
+ */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

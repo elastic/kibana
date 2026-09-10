@@ -43,7 +43,11 @@ describe('Save dashboard state', () => {
       saveOptions: {},
     });
 
-    expect(result.id).toBe('Boogaloo');
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "id": "Boogaloo",
+      }
+    `);
     expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState);
     expect(mockShowDashboardSavedToast).toHaveBeenCalledWith({
       savedDashboardId: 'Boogaloo',
@@ -62,8 +66,12 @@ describe('Save dashboard state', () => {
       saveOptions: { saveAsCopy: true },
     });
 
-    expect(result.id).toBe('newlyGeneratedId');
-    expect(result.redirectRequired).toBe(true);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "id": "newlyGeneratedId",
+        "redirectRequired": true,
+      }
+    `);
     expect(mockCreate).toHaveBeenCalled();
     expect(mockShowDashboardSavedToast).toHaveBeenCalled();
   });
@@ -79,7 +87,10 @@ describe('Save dashboard state', () => {
       saveOptions: { saveAsCopy: true },
     });
 
-    expect(result.id).toBeUndefined();
-    expect(result.error).toBe('Whoops');
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": "Whoops",
+      }
+    `);
   });
 });

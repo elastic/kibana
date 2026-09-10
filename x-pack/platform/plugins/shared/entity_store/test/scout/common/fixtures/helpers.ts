@@ -457,3 +457,45 @@ export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<
     responseType: 'json',
     body: {},
   });
+
+/**
+ * Polls the status API until N consecutive `not_installed` responses are received.
+ *
+ * Requires multiple consecutive confirmations because each request can land on a
+ * different node in a multi-node Cloud cluster. A single `not_installed` response
+ * only proves one node has converged; a streak of N makes it very unlikely any
+ * node is still serving stale state.
+ *
+ * Treats non-200 responses (e.g. 403 when the feature flag hasn't propagated yet)
+ * as "not ready" and resets the streak counter.
+ */
+export const waitForStoreNotInstalled = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  {
+    consecutiveRequired = 5,
+    intervalMs = 500,
+    timeoutMs = 30_000,
+  }: { consecutiveRequired?: number; intervalMs?: number; timeoutMs?: number } = {}
+): Promise<void> => {
+  let consecutive = 0;
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const response = await getStatus(apiClient, headers);
+
+    if (response.statusCode === 200 && response.body.status === 'not_installed') {
+      consecutive++;
+      if (consecutive >= consecutiveRequired) return;
+    } else {
+      consecutive = 0;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  throw new Error(
+    `Timed out waiting for stable not_installed state after ${timeoutMs}ms ` +
+      `(required ${consecutiveRequired} consecutive confirmations, got ${consecutive})`
+  );
+};

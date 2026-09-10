@@ -1,5 +1,5 @@
 {
-  "sha1": "7a63effb2cacba3700a3d046e9156e7583ec0371",
+  "sha1": "0963f5b1de87594c99f747894644562d0c2af19f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 27,
+        "column": 38
       }
     },
     {
@@ -340,8 +340,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 38,
-        "column": 5
+        "line": 43,
+        "column": 12
       }
     },
     {
@@ -360,8 +360,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 62,
-        "column": 26
+        "line": 55,
+        "column": 14
       }
     },
     {

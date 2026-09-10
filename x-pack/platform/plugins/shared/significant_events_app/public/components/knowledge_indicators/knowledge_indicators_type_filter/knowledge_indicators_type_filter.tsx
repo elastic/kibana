@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { KnowledgeIndicatorSelectableFilter } from '../knowledge_indicator_selectable_filter';

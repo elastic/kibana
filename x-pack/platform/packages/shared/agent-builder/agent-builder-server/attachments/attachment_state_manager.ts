@@ -29,7 +29,11 @@ import {
   isAttachmentActive,
   isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+  AttachmentValidateContext,
+} from './type_definition';
 
 /**
  * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
@@ -112,13 +116,15 @@ export interface AttachmentStateManager {
   add<TType extends string>(
     input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
-    resolveContext?: AttachmentResolveContext
+    resolveContext?: AttachmentResolveContext,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
   update(
     id: string,
     input: AttachmentUpdateInput,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment | undefined>;
   /** Soft delete an attachment (sets active=false) */
   delete(id: string, actor?: AttachmentRefActor): boolean;
@@ -188,14 +194,18 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     return definition?.isReadonly ?? false;
   }
 
-  private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
+  private async validateAttachmentData(
+    type: string,
+    data: unknown,
+    context?: AttachmentValidateContext
+  ): Promise<unknown> {
     const typeDefinition = this.options.getTypeDefinition(type);
     if (!typeDefinition) {
       throw new Error(`Unknown attachment type: ${type}`);
     }
 
     try {
-      const validationResult = await typeDefinition.validate(data);
+      const validationResult = await typeDefinition.validate(data, context);
       if (validationResult.valid) {
         return validationResult.data;
       }
@@ -297,7 +307,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   async add<TType extends string>(
     input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
-    resolveContext?: AttachmentResolveContext
+    resolveContext?: AttachmentResolveContext,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
@@ -305,7 +316,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     let validatedData: unknown;
 
     if (input.data !== undefined) {
-      validatedData = await this.validateAttachmentData(input.type, input.data);
+      validatedData = await this.validateAttachmentData(input.type, input.data, validateContext);
     } else if (input.origin !== undefined) {
       const typeDefinition = this.options.getTypeDefinition(input.type);
       if (!typeDefinition) {
@@ -369,7 +380,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   async update(
     id: string,
     input: AttachmentUpdateInput,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment | undefined> {
     const attachment = this.attachments.get(id);
     if (!attachment) {
@@ -394,7 +406,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     if (input.data !== undefined) {
-      const validatedData = await this.validateAttachmentData(attachment.type, input.data);
+      const validatedData = await this.validateAttachmentData(
+        attachment.type,
+        input.data,
+        validateContext
+      );
       const newHash = hashContent(validatedData);
       const currentVersion = getLatestVersion(attachment);
 

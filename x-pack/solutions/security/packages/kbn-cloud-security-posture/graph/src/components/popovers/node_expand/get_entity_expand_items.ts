@@ -6,11 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EntityType } from '@kbn/entity-store/common';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
 import type { NodeViewModel } from '../../types';
+import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
+import {
+  emitFilterToggle,
+  emitEntityFilterToggle,
+  isFilterActiveForScope,
+  isEntityFilterActiveForScope,
+} from '../../filters/filter_store';
+import type { NamespaceSourcePrefixResolver } from '../../filters/search_filters';
+import { isEuidDslTranslatable, buildFieldsDsl } from '../../filters/search_filters';
 import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
@@ -64,6 +74,327 @@ export const getSourceFieldsFromNode = (
     }
   }
   return undefined;
+};
+
+/**
+ * EUID API surface needed to build entity filters. Matches the shape returned by
+ * `useEntityStoreEuidApi()?.euid`, which is async-hydrated and therefore nullable.
+ */
+export interface EuidFilterApi {
+  dsl: {
+    getEuidFilterBasedOnDocument: (entityType: EntityType, doc: unknown) => object | undefined;
+  };
+  getEuidNamespaceSourceFields: (entityType: EntityType) => {
+    exactMatchFields: string[];
+    prefixMatchFields: string[];
+  };
+  /**
+   * Reduces an observed namespace source value to the prefix the entity definition derives from it.
+   * Only the definition knows each source's `splitBy`, so this must not be reimplemented locally.
+   */
+  getNamespaceSourcePrefix: (
+    entityType: EntityType,
+    field: string,
+    observedValue: string
+  ) => string | undefined;
+  /**
+   * Returns only the field→value pairs that the entity store actually used to compose the EUID for
+   * this document (the winning identity arm). Collected attributes present in the entity record but
+   * not part of identity resolution (e.g. `user.id` on a `local` user) are excluded.
+   */
+  getEntityIdentifiersFromDocument: (
+    entityType: EntityType,
+    doc: unknown
+  ) => Record<string, string> | undefined;
+}
+
+/**
+ * Maps an EUID prefix to the entity-store entity type. `getEntityTypeFromNodeId` returns
+ * `entity` for unprefixed (generic) ids, which the entity store calls `generic`.
+ */
+const euidPrefixToEntityType = (prefix: string): EntityType =>
+  (prefix === 'entity' ? 'generic' : prefix) as EntityType;
+
+/**
+ * The filter to emit for an entity role. `dsl` is the precise form built from the Entity Store's
+ * EUID logic; the two `fields` forms are fallbacks, and they are not interchangeable:
+ *
+ * - `resolvedIdentity`: exactly the fields the entity store used to compose the EUID, for entities
+ *   whose DSL cannot be translated into filter-bar operators (a `local` user, asset discovery).
+ *   Every field is required, so they are ANDed — `user.name` alone would match other hosts.
+ * - `candidateFields`: all identity `sourceFields`, used until the EUID API's lazy chunk has
+ *   loaded. We do not know which of them resolved the EUID, so they are OR'd: the winning field is
+ *   always one of the arms, making this a superset of the entity rather than a guess at it.
+ *   ANDing them would drop events that carry only the winning field.
+ */
+export type EntityFilterSpec =
+  | {
+      kind: 'dsl';
+      dsl: object;
+      /** Raw namespace source field values for replacing prefix clauses with exact phrases. */
+      namespaceSourceValues: Record<string, string | string[]>;
+      /** Entity-type-bound resolver reducing an observed value to its derived namespace prefix. */
+      getNamespaceSourcePrefix?: NamespaceSourcePrefixResolver;
+    }
+  | { kind: 'resolvedIdentity'; fields: Record<string, string | string[]> }
+  | { kind: 'candidateFields'; fields: Record<string, string | string[]> };
+
+/**
+ * Namespace source fields describe the event, not the entity, so they must never become phrase
+ * filters in the fallback path — `event.module: gcp` would match every GCP event.
+ */
+const NAMESPACE_SOURCE_FIELD_PREFIXES = ['event.', 'data_stream.', 'cloud.'];
+
+/**
+ * True for fields naming the entity itself, which are therefore role-rewritable.
+ *
+ * `entity.id` must qualify: it is the singleField identity of a generic entity, and
+ * `rewriteDslFieldsForTargetRole` uses this predicate to decide what to hand to `fieldForRole`.
+ * Excluding it left "show actions on this entity" filtering `entity.id` instead of
+ * `entity.target.id`, i.e. the actor direction.
+ */
+const isIdentitySourceField = (field: string): boolean =>
+  !NAMESPACE_SOURCE_FIELD_PREFIXES.some((prefix) => field.startsWith(prefix));
+
+/**
+ * Fields the entity store derives rather than reads from a document: they appear on entity records
+ * but in no raw event, so a phrase filter on one matches nothing.
+ * `getEntityIdentifiersFromDocument` returns `entity.namespace` beside the real identity fields,
+ * and it must not reach the filter bar. Unlike the namespace *source* fields above, this is not a
+ * prefix rule — `entity.id` is a genuine identity field.
+ */
+const DERIVED_ENTITY_FIELDS = new Set(['entity.namespace']);
+
+const isFilterableIdentityField = (field: string): boolean =>
+  isIdentitySourceField(field) && !DERIVED_ENTITY_FIELDS.has(field);
+
+/**
+ * Builds the filter matching events that resolve to the same entity as this node.
+ *
+ * Preferred form is the ES DSL from the Entity Store's own EUID logic
+ * (`euid.dsl.getEuidFilterBasedOnDocument`): the node's `sourceFields` plus its EUID are handed
+ * over as a pseudo-document, and the result carries the entity's identifying field at its EUID
+ * ranking position, guards excluding the higher-ranked fields it fell through, and the namespace
+ * clause rebuilt from the namespace source fields. A flat OR over `sourceFields` can express none
+ * of those — see https://github.com/elastic/kibana/issues/262882.
+ *
+ * DSL rather than KQL so the result can be translated into ordinary Kibana filters (phrase /
+ * exists / OR) instead of one opaque query string.
+ *
+ * `entity.id` is included because the `user` definition's pipeline gate accepts an
+ * already-resolved entity id; without it the builder rejects a bag of identity fields.
+ *
+ * Falls back to the identity `sourceFields` when the EUID API has not hydrated yet or the entity's
+ * identity cannot be resolved, so the action still works (with the previous, broader semantics)
+ * rather than silently emitting nothing.
+ */
+export const getEntityFilterSpec = (
+  nodeId: string,
+  sourceFields: Record<string, string | string[]> | undefined,
+  euidApi: EuidFilterApi | undefined,
+  role: 'actor' | 'target'
+): EntityFilterSpec | undefined => {
+  if (!sourceFields || Object.keys(sourceFields).length === 0) return undefined;
+
+  const dsl = buildEntityDsl(nodeId, sourceFields, euidApi, role);
+  // A DSL we cannot translate without dropping clauses is worse than none: the filter would be
+  // wider than the entity. Condition-based namespaces (a `local` user, asset discovery) produce
+  // `match` / `terms` clauses with no filter-bar equivalent, so fall through to the identity
+  // sourceFields, which are narrow and renderable.
+  if (dsl && isEuidDslTranslatable(dsl)) {
+    // Ask the entity store which source fields are prefix-matched for this entity type so we
+    // replace exactly those prefix clauses with observed exact values — no more, no less.
+    const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
+    const prefixFields = euidApi
+      ? new Set(euidApi.getEuidNamespaceSourceFields(entityType).prefixMatchFields)
+      : new Set<string>();
+    const namespaceSourceValues = Object.fromEntries(
+      Object.entries(sourceFields).filter(([field]) => prefixFields.has(field))
+    );
+    // Bind the entity type so the filter translator can reduce a value to its namespace prefix
+    // without knowing about entity types at all.
+    const getNamespaceSourcePrefix: NamespaceSourcePrefixResolver | undefined = euidApi
+      ? (field, observedValue) => euidApi.getNamespaceSourcePrefix(entityType, field, observedValue)
+      : undefined;
+    return { kind: 'dsl', dsl, namespaceSourceValues, getNamespaceSourcePrefix };
+  }
+
+  // Use the entity store's own identifier resolution to get only the fields that compose the EUID
+  // for this document. Collected attributes (e.g. `user.id` on a `local` user that resolved via
+  // `user.name`) are excluded — including them in an AND filter would drop events that lack them.
+  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
+  const doc = { ...sourceFields, 'entity.id': nodeId };
+  let rawIdentifiers: Record<string, string> | undefined;
+  try {
+    rawIdentifiers = euidApi?.getEntityIdentifiersFromDocument(entityType, doc);
+  } catch {
+    // Unknown entity type — fall through to the broad sourceFields filter below.
+  }
+
+  // `getEntityIdentifiersFromDocument` also returns `entity.namespace`, which the entity store
+  // derives and no raw event carries, so it is stripped — see `isFilterableIdentityField`.
+  const resolvedIdentity = Object.fromEntries(
+    Object.entries(rawIdentifiers ?? {}).filter(([field]) => isFilterableIdentityField(field))
+  );
+  if (Object.keys(resolvedIdentity).length > 0) {
+    return { kind: 'resolvedIdentity', fields: resolvedIdentity };
+  }
+
+  const candidateFields = Object.fromEntries(
+    Object.entries(sourceFields).filter(([field]) => isFilterableIdentityField(field))
+  );
+  return Object.keys(candidateFields).length > 0
+    ? { kind: 'candidateFields', fields: candidateFields }
+    : undefined;
+};
+
+const buildEntityDsl = (
+  nodeId: string,
+  sourceFields: Record<string, string | string[]>,
+  euidApi: EuidFilterApi | undefined,
+  role: 'actor' | 'target'
+): object | undefined => {
+  if (!euidApi) return undefined;
+
+  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
+
+  // sourceFields keys are normalised to the actor namespace by the server. The builder reasons
+  // over entity definitions, which are actor-namespaced too, so build in that namespace and
+  // rewrite the identity field names in the resulting DSL for the target role.
+  const doc: Record<string, string | string[]> = { ...sourceFields, 'entity.id': nodeId };
+
+  let dsl: object | undefined;
+  try {
+    dsl = euidApi.dsl.getEuidFilterBasedOnDocument(entityType, doc);
+  } catch {
+    // Unknown entity type (EUID prefix not in the entity-store registry).
+    return undefined;
+  }
+  if (!dsl || role === 'actor') return dsl;
+
+  return rewriteDslFieldsForTargetRole(dsl);
+};
+
+/**
+ * Rewrites identity field names in an EUID DSL tree to their `.target.` namespace equivalents.
+ * Namespace source fields (`event.*`, `data_stream.*`, `cloud.*`) describe the event and have no
+ * target-namespaced form, so they are left alone.
+ */
+const rewriteDslFieldsForTargetRole = (dsl: object): object => {
+  const rewriteKeys = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(rewriteKeys);
+    if (value === null || typeof value !== 'object') return value;
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => {
+        // Clause bodies are keyed by field name (`term`, `prefix`) or carry it in `field`
+        // (`exists`); both are handled by rewriting any key that looks like an identity field.
+        const rewrittenKey = isIdentitySourceField(key) ? fieldForRole(key, 'target') : key;
+        if (key === 'field' && typeof nested === 'string') {
+          return [key, isIdentitySourceField(nested) ? fieldForRole(nested, 'target') : nested];
+        }
+        return [rewrittenKey, rewriteKeys(nested)];
+      })
+    );
+  };
+
+  return rewriteKeys(dsl) as object;
+};
+
+/**
+ * Emits (or removes) the filter for an entity role, handling both the KQL and fallback forms.
+ * Shared by the graph node popover and the grouped-entities flyout so they stay in step.
+ */
+export const toggleEntityFilterSpec = (
+  scopeId: string,
+  filterKey: string,
+  spec: EntityFilterSpec,
+  role: 'actor' | 'target',
+  action: 'show' | 'hide'
+): void => {
+  if (spec.kind === 'dsl') {
+    emitEntityFilterToggle(
+      scopeId,
+      filterKey,
+      spec.dsl,
+      action,
+      spec.namespaceSourceValues,
+      spec.getNamespaceSourcePrefix
+    );
+    return;
+  }
+  if (spec.kind === 'resolvedIdentity') {
+    // Every field is required, so emit one entity filter ANDing them. Calling `emitFilterToggle`
+    // per field instead would OR them (`addFilter` combines with the first filter), giving a
+    // filter broader than the entity — `user.name` alone matches the same user on other hosts.
+    const roleFields = Object.fromEntries(
+      Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
+    );
+    emitEntityFilterToggle(scopeId, filterKey, buildFieldsDsl(roleFields), action);
+    return;
+  }
+
+  for (const [field, value] of Object.entries(spec.fields)) {
+    // Flatten string | string[] so each value gets its own OR'd phrase filter
+    for (const one of ([] as string[]).concat(value)) {
+      emitFilterToggle(scopeId, fieldForRole(field, role), one, action);
+    }
+  }
+};
+
+/** True when the filter described by `spec` is currently active. */
+export const isEntityFilterSpecActive = (
+  scopeId: string,
+  filterKey: string,
+  spec: EntityFilterSpec,
+  role: 'actor' | 'target'
+): boolean => {
+  // Both forms that emit a single keyed entity filter are looked up the same way.
+  if (spec.kind === 'dsl' || spec.kind === 'resolvedIdentity') {
+    return isEntityFilterActiveForScope(scopeId, filterKey);
+  }
+  return Object.entries(spec.fields).some(([field, value]) =>
+    ([] as string[])
+      .concat(value)
+      .some((one) => isFilterActiveForScope(scopeId, fieldForRole(field, role), one))
+  );
+};
+
+/**
+ * Resolves the `related.*` field and values for the "Show related events" action.
+ *
+ * The entity type comes from the entity store's `engine_type` when enrichment succeeded, and
+ * otherwise from the node's EUID prefix — without that fallback, unenriched entities (and any
+ * enriched type other than user/host) fell through to a generic branch that filtered on the
+ * calculated EUID, which appears in no event field and so matched nothing.
+ *
+ * `related.user` and `related.hosts` are ECS; `related.entity` is not, and is used for service
+ * and generic entities because ECS defines no equivalent for them.
+ */
+export const getRelatedEventsFilter = (
+  nodeId: string,
+  sourceFields: Record<string, string | string[]> | undefined,
+  engineType?: string
+): { field: string; values: string[] } | undefined => {
+  const type = engineType ?? getEntityTypeFromNodeId(nodeId);
+
+  const valuesForPrefix = (prefix: string): string[] =>
+    Object.entries(sourceFields ?? {})
+      .filter(([field]) => field.startsWith(prefix))
+      .flatMap(([, value]) => ([] as string[]).concat(value))
+      .filter((value) => value !== '');
+
+  const { field, values } =
+    type === 'user'
+      ? { field: RELATED_USER, values: valuesForPrefix('user.') }
+      : type === 'host'
+      ? { field: RELATED_HOST, values: valuesForPrefix('host.') }
+      : type === 'service'
+      ? { field: RELATED_ENTITY, values: valuesForPrefix('service.') }
+      : { field: RELATED_ENTITY, values: valuesForPrefix('entity.') };
+
+  // No usable values: emit nothing rather than a filter that cannot match.
+  return values.length > 0 ? { field, values } : undefined;
 };
 
 /**

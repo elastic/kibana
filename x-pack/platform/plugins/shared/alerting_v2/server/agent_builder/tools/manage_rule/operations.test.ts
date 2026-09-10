@@ -877,7 +877,7 @@ describe('executeRuleOperations', () => {
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-1' },
+          data: { dashboard_id: 'dash-1' },
         },
       ]);
     });
@@ -1025,12 +1025,12 @@ describe('executeRuleOperations', () => {
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-1' },
+          data: { dashboard_id: 'dash-1' },
         },
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-2' },
+          data: { dashboard_id: 'dash-2' },
         },
       ]);
       expect(result.data.artifacts?.[0].id).not.toBe(result.data.artifacts?.[1].id);
@@ -1040,7 +1040,7 @@ describe('executeRuleOperations', () => {
       const existing: Partial<RuleAttachmentData> = {
         artifacts: [
           { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
-          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboard_id: 'old-dash' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: ['new-dash'] }];
@@ -1052,14 +1052,14 @@ describe('executeRuleOperations', () => {
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'new-dash' },
+          data: { dashboard_id: 'new-dash' },
         },
       ]);
     });
 
     it('reuses the existing artifact id when the same dashboard is already attached', async () => {
       const existing: Partial<RuleAttachmentData> = {
-        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } }],
+        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
       };
       const ops: RuleOperation[] = [
         { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
@@ -1068,11 +1068,11 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations(existing, ops);
 
       expect(result.data.artifacts).toEqual([
-        { id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-keep', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-2' },
+          data: { dashboard_id: 'dash-2' },
         },
       ]);
     });
@@ -1085,14 +1085,14 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.artifacts).toHaveLength(1);
-      expect(result.data.artifacts?.[0].data).toEqual({ dashboardId: 'dash-1' });
+      expect(result.data.artifacts?.[0].data).toEqual({ dashboard_id: 'dash-1' });
     });
 
     it('unlinks all dashboards when passed an empty array', async () => {
       const existing: Partial<RuleAttachmentData> = {
         artifacts: [
           { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
-          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboard_id: 'old-dash' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
@@ -1200,7 +1200,7 @@ describe('executeRuleOperations', () => {
       const existing: Partial<RuleAttachmentData> = {
         artifacts: [
           { id: 'runbook-old', type: 'runbook', data: { content: 'Old steps' } },
-          { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'New steps' }];
@@ -1208,7 +1208,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations(existing, ops);
 
       expect(result.data.artifacts).toEqual([
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         { id: 'runbook-old', type: 'runbook', data: { content: 'New steps' } },
       ]);
     });
@@ -1218,7 +1218,7 @@ describe('executeRuleOperations', () => {
         artifacts: [
           { id: 'runbook-1', type: 'runbook', data: { content: 'First' } },
           { id: 'runbook-2', type: 'runbook', data: { content: 'Second' } },
-          { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'Only runbook' }];
@@ -1226,7 +1226,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations(existing, ops);
 
       expect(result.data.artifacts).toEqual([
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         { id: 'runbook-1', type: 'runbook', data: { content: 'Only runbook' } },
       ]);
     });
@@ -1235,7 +1235,7 @@ describe('executeRuleOperations', () => {
       const existing: Partial<RuleAttachmentData> = {
         artifacts: [
           { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
-          { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_runbook', content }];
@@ -1243,7 +1243,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations(existing, ops);
 
       expect(result.data.artifacts).toEqual([
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
 
@@ -1252,7 +1252,7 @@ describe('executeRuleOperations', () => {
         artifacts: Array.from({ length: 100 }, (_, index) => ({
           id: `dashboard-${index}`,
           type: 'dashboard',
-          data: { dashboardId: `dash-${index}` },
+          data: { dashboard_id: `dash-${index}` },
         })),
       };
       const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'Steps' }];

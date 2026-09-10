@@ -22,6 +22,9 @@ export class WorkflowEditorPage {
   public bulkBar: Locator;
   public graphCanvas: Locator;
   public graphYamlErrorCallout: Locator;
+  public actionsMenuButton: Locator;
+  public actionsMenuSearch: Locator;
+  public readOnlyBadge: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -39,6 +42,9 @@ export class WorkflowEditorPage {
     this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
     this.graphCanvas = this.page.testSubj.locator('workflowGraphCanvas');
     this.graphYamlErrorCallout = this.page.testSubj.locator('workflowGraphYamlErrorCallout');
+    this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
+    this.actionsMenuSearch = this.page.locator('#actions-menu-search');
+    this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
   }
 
   /**
@@ -99,6 +105,25 @@ export class WorkflowEditorPage {
    */
   async switchToYamlView(): Promise<void> {
     await this.page.testSubj.click('workflowEditorViewToggle-yaml');
+  }
+
+  /**
+   * Expand the floating bottom toolbar if it has auto-collapsed to the pill.
+   */
+  async expandBottomBar(): Promise<void> {
+    const yamlViewToggle = this.page.testSubj.locator('workflowEditorViewToggle-yaml');
+    if (!(await yamlViewToggle.isVisible())) {
+      await this.page.getByRole('button', { name: 'Show toolbar' }).hover();
+    }
+    await yamlViewToggle.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Open the actions menu from the bottom bar.
+   */
+  async openActionsMenu(): Promise<void> {
+    await this.expandBottomBar();
+    await this.actionsMenuButton.click();
   }
 
   /**

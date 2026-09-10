@@ -144,7 +144,7 @@ describe('shouldSkipFtrTests', () => {
     expect(
       shouldSkipFtrTests(new Set(['@kbn/scout']), [
         'src/platform/packages/shared/kbn-scout/src/index.ts',
-        'yarn.lock',
+        'pnpm-lock.yaml',
       ])
     ).toBe(false);
     expect(

@@ -114,6 +114,8 @@ export {
   OUTPUT_HEALTH_DATA_STREAM,
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  // data streams
+  DATA_STREAM_INDEX_PATTERN_REGEX,
   type PrivilegeMapObject,
 } from '../../common/constants';
 

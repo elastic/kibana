@@ -34,6 +34,8 @@ interface ProjectPickerContentBaseProps
   fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
   maxListHeight?: number;
   customHeaderText?: React.ReactNode;
+  /** Whether to show each project's custom tag count badge. Defaults to true. */
+  showProjectTags?: boolean;
 }
 
 interface ProjectPickerContentEnabledProps extends ProjectPickerContentBaseProps {
@@ -64,6 +66,7 @@ export const ProjectPickerContent = ({
   customHeaderText,
   projectRoutingStrategy,
   showHeader,
+  showProjectTags = true,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const initialProjectRouting = useRef(projectRouting);
@@ -105,7 +108,7 @@ export const ProjectPickerContent = ({
               customHeaderText={customHeaderText}
               showHeader={showHeader}
             >
-              <ProjectPickerList />
+              <ProjectPickerList showProjectTags={showProjectTags} />
             </ProjectPickerFrame>
           </ProjectPickerStateProvider>
         )}

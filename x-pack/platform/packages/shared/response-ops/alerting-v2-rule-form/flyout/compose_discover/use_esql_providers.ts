@@ -11,9 +11,41 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 
+// Monaco keybinding rules are global (per language service, not per editor) and
+// cannot be un-added, so register them once for the whole page.
+let inlineSuggestTabKeybindingsAdded = false;
+
 /**
- * Registers ES|QL Monaco language providers (autocomplete, signature help, hover)
- * for the lifetime of the component that calls this hook.
+ * Makes Tab accept the inline suggestion (ghost text) instead of the autocomplete
+ * widget when both are visible — mirroring `addTabKeybindingRules` in
+ * `@kbn/esql-editor`. Without this, Tab commits the suggestion widget item and the
+ * ghost text is ignored.
+ */
+const addInlineSuggestTabKeybindings = () => {
+  if (inlineSuggestTabKeybindingsAdded) {
+    return;
+  }
+
+  // Unbind the default suggestion-widget accept on Tab while an inline suggestion is showing.
+  monaco.editor.addKeybindingRule({
+    keybinding: monaco.KeyCode.Tab,
+    command: '-acceptSelectedSuggestion',
+    when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
+  });
+  // Bind Tab to commit the inline suggestion when it's visible.
+  monaco.editor.addKeybindingRule({
+    keybinding: monaco.KeyCode.Tab,
+    command: 'editor.action.inlineSuggest.commit',
+    when: 'inlineSuggestionVisible && textInputFocus',
+  });
+
+  inlineSuggestTabKeybindingsAdded = true;
+};
+
+/**
+ * Registers ES|QL Monaco language providers (autocomplete, signature help, hover,
+ * inline completions, code actions, document highlight) for the lifetime of the
+ * component that calls this hook.
  *
  * Providers are registered per-hook-instance rather than via a module-level singleton.
  * This avoids two problems with the previous singleton pattern:
@@ -70,6 +102,28 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
     const hover = ESQLLang.getHoverProvider?.(stableCallbacks);
     if (hover) {
       disposables.push(monaco.languages.registerHoverProvider(ESQL_LANG_ID, hover));
+    }
+
+    const inlineCompletions = ESQLLang.getInlineCompletionsProvider?.(stableCallbacks);
+    if (inlineCompletions) {
+      disposables.push(
+        monaco.languages.registerInlineCompletionsProvider(ESQL_LANG_ID, inlineCompletions)
+      );
+      addInlineSuggestTabKeybindings();
+    }
+
+    // Quick fixes only surface once validation markers exist (wired separately);
+    // registering here is harmless until then.
+    const codeActions = ESQLLang.getCodeActionProvider?.(stableCallbacks);
+    if (codeActions) {
+      disposables.push(monaco.languages.registerCodeActionProvider(ESQL_LANG_ID, codeActions));
+    }
+
+    const documentHighlight = ESQLLang.getDocumentHighlightProvider?.();
+    if (documentHighlight) {
+      disposables.push(
+        monaco.languages.registerDocumentHighlightProvider(ESQL_LANG_ID, documentHighlight)
+      );
     }
 
     return () => {

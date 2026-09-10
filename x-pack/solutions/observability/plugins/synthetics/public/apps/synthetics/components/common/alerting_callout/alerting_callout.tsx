@@ -8,7 +8,8 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -103,46 +104,48 @@ const MissingRulesCallout = ({
     <EuiMarkdownFormat>{`${point}${MISSING_RULES_PRIVILEGES_LABEL}`}</EuiMarkdownFormat>
   ) : null;
 
+  const reminderButtonProps = {
+    children: (
+      <FormattedMessage
+        id="xpack.synthetics.alerting.remindMeLater.button"
+        defaultMessage="Remind me later"
+      />
+    ),
+    'data-test-subj': 'syntheticsMissingRulesCalloutRemindMeLaterButton',
+    onClick: () => {
+      setIsHidden(true);
+    },
+  };
+
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.synthetics.alerting.noConnectorsCallout.header"
           defaultMessage="Alerts are not being sent"
         />
       }
-      color="warning"
-      iconType="warning"
+      actionProps={
+        missingConfig
+          ? {
+              primary: {
+                'data-test-subj': 'syntheticsAlertingCalloutLinkButtonButton',
+                href: url,
+                children: (
+                  <FormattedMessage
+                    id="xpack.synthetics.alerting.noConnectorsCallout.button"
+                    defaultMessage="Configure now"
+                  />
+                ),
+              },
+              secondary: reminderButtonProps,
+            }
+          : { primary: reminderButtonProps }
+      }
     >
       {configCallout}
       {rulesCallout}
-      {missingConfig && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButton
-            data-test-subj="syntheticsAlertingCalloutLinkButtonButton"
-            href={url}
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.synthetics.alerting.noConnectorsCallout.button"
-              defaultMessage="Configure now"
-            />
-          </EuiButton>
-        </>
-      )}
-      <EuiButtonEmpty
-        data-test-subj="syntheticsMissingRulesCalloutRemindMeLaterButton"
-        onClick={() => {
-          setIsHidden(true);
-        }}
-      >
-        <FormattedMessage
-          id="xpack.synthetics.alerting.remindMeLater.button"
-          defaultMessage="Remind me later"
-        />
-      </EuiButtonEmpty>
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };
 

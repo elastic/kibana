@@ -10,7 +10,7 @@ import { get, isEqual, unset } from 'lodash';
 import { produce } from 'immer-v9';
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { packSavedObjectType } from '../../common/types';
 import type { PackSavedObject } from '../common/types';
@@ -28,14 +28,6 @@ import {
   removePackFromPolicy,
 } from '../routes/pack/utils';
 import { escapeFilterValue } from '../routes/utils/generate_copy_name';
-
-/**
- * Fleet's all-spaces sentinel. Not re-exported from `@kbn/fleet-plugin/common`
- * (it lives in `common/constants/space_awareness`), and `@kbn/core-spaces-common`
- * exposes only `DEFAULT_SPACE_ID` — so the literal is mirrored here rather than
- * reaching through a deep internal path.
- */
-const ALL_SPACES_ID = '*';
 
 /**
  * Resolve a pack block's space and name together, from evidence only.

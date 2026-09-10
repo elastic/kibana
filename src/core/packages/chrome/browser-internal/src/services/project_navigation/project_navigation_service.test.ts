@@ -64,10 +64,12 @@ const setup = ({
   locationPathName = '/',
   navLinkIds,
   isServerless = true,
+  getUiSettingsHomeRoute = () => undefined,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
   isServerless?: boolean;
+  getUiSettingsHomeRoute?: () => string | undefined;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
@@ -82,7 +84,7 @@ const setup = ({
     history,
     prependBasePath: (p) => p,
     navLinks: navLinksService,
-    getUiSettingsHomeRoute: () => undefined,
+    getUiSettingsHomeRoute,
     logger,
     chromeBreadcrumbs$,
   });
@@ -1014,5 +1016,37 @@ describe('getActiveSolutionNavId$()', () => {
 
     activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBe('oblt');
+  });
+});
+
+describe('getProjectHome$()', () => {
+  it('emits defaultRoute when set', async () => {
+    const { projectNavigation } = setup({
+      navLinkIds: ['app1'],
+      getUiSettingsHomeRoute: () => '/app/observability/landing',
+    });
+
+    const home = await firstValueFrom(projectNavigation.getProjectHome$());
+    expect(home).toBe('/app/observability/landing');
+  });
+
+  it('emits nothing when defaultRoute is undefined', async () => {
+    const { projectNavigation } = setup({ navLinkIds: ['app1'] });
+
+    projectNavigation.initNavigation<any>(
+      'oblt',
+      of({
+        body: [{ id: 'home_node', href: '/app/custom-home', title: 'Home', icon: 'home' }],
+      })
+    );
+
+    const emitted: string[] = [];
+    const sub = projectNavigation.getProjectHome$().subscribe((value) => {
+      emitted.push(value);
+    });
+
+    await Promise.resolve();
+    expect(emitted).toEqual([]);
+    sub.unsubscribe();
   });
 });

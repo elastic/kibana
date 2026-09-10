@@ -20,6 +20,12 @@ interface DeduplicateAttackDiscoveriesParams {
   computeSha256Hash: (input: string) => string;
   connectorId: string;
   esClient: ElasticsearchClient;
+  /**
+   * Optional producer identity. MUST match the value the persistence path
+   * contributes to the hash, otherwise the lookup computes ids that were never
+   * persisted and every run reports its discoveries as new.
+   */
+  generationSource?: string;
   indexPattern: string;
   logger: Logger;
   ownerInfo: {
@@ -35,6 +41,7 @@ export const deduplicateAttackDiscoveries = async ({
   computeSha256Hash,
   connectorId,
   esClient,
+  generationSource,
   indexPattern,
   logger,
   ownerInfo,
@@ -53,6 +60,7 @@ export const deduplicateAttackDiscoveries = async ({
       attackDiscovery: attack,
       computeSha256Hash,
       connectorId,
+      generationSource,
       ownerId,
       replacements,
       spaceId,

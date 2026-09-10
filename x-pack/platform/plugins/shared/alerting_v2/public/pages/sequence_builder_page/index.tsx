@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,6 +18,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { paths } from '../../constants';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
@@ -74,6 +75,8 @@ export const SequenceBuilderPage: React.FC = () => {
 
   const { methods } = useSequenceBuilderForm();
   const uiState = useSequenceBuilderState();
+  const [isRuleListOpen, setIsRuleListOpen] = useState(true);
+  const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
 
   const basePath = useService(CoreStart('http')).basePath;
   const handleCancel = useCallback(() => {
@@ -83,6 +86,34 @@ export const SequenceBuilderPage: React.FC = () => {
   const rulesListHref = useMemo(() => basePath.prepend(paths.ruleList), [basePath]);
 
   const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues));
+
+  const canvasContent =
+    uiState.step === 'alert' ? (
+      <AlertConditionCanvas
+        seqValues={uiState.seqValues}
+        setSeqValues={uiState.setSeqValues}
+        isRuleListOpen={isRuleListOpen}
+        onToggleRuleList={handleToggleRuleList}
+      />
+    ) : (
+      <EuiEmptyPrompt
+        iconType="checkCircle"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.alertingV2.sequenceBuilderPage.recoveryPlaceholder"
+              defaultMessage="Recovery condition"
+            />
+          </h3>
+        }
+        body={
+          <FormattedMessage
+            id="xpack.alertingV2.sequenceBuilderPage.recoveryPlaceholderBody"
+            defaultMessage="Recovery condition UI coming soon. Last-step recovery is applied automatically on save."
+          />
+        }
+      />
+    );
 
   return (
     <RuleFormProvider services={ruleFormServices} meta={{ layout: 'flyout' }}>
@@ -94,20 +125,17 @@ export const SequenceBuilderPage: React.FC = () => {
         >
           <EuiFlexItem grow={false}>
             <SequenceBuilderHeader
+              step={uiState.step}
               seqValues={uiState.seqValues}
               isSaving={uiState.isSaving}
               rulesListHref={rulesListHref}
+              onStepChange={uiState.setStep}
               onSave={handleSave}
               onCancel={handleCancel}
             />
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ minHeight: 0 }}>
-            <AlertConditionCanvas
-              seqValues={uiState.seqValues}
-              setSeqValues={uiState.setSeqValues}
-            />
-          </EuiFlexItem>
+          <EuiFlexItem style={{ minHeight: 0 }}>{canvasContent}</EuiFlexItem>
         </EuiFlexGroup>
       </FormProvider>
     </RuleFormProvider>

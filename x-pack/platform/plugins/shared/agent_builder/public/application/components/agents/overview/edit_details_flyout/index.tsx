@@ -80,6 +80,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
+        post_execution_workflow_ids: agent.configuration?.post_execution_workflow_ids ?? [],
         instructions: agent.configuration?.instructions ?? '',
         ai_indices: agent.configuration?.ai_indices ?? [],
       },
@@ -103,6 +104,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
+          post_execution_workflow_ids: data.configuration.post_execution_workflow_ids,
           instructions: data.configuration.instructions,
           ai_indices: data.configuration.ai_indices,
         },

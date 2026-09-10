@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ComponentProps } from 'react';
+import type { Alert } from '@kbn/alerting-types';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -19,6 +20,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 import { AlertActions } from './alert_actions';
@@ -132,7 +134,10 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  const setup = async (pageId: string) => {
+  const setup = async (
+    pageId: string,
+    { alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] } }: { alert?: Alert } = {}
+  ) => {
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -167,7 +172,7 @@ describe('ObservabilityActions component', () => {
     > = {
       tableId: pageId,
       config,
-      alert: inventoryThresholdAlertEs,
+      alert,
       ecsAlert: [],
       nonEcsData: [],
       rowIndex: 1,
@@ -197,13 +202,15 @@ describe('ObservabilityActions component', () => {
       <Router history={createMemoryHistory()}>
         <KibanaContextProvider services={mockKibana.services}>
           <AlertsTableContextProvider value={context}>
-            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-              <AlertActions
-                {...(props as unknown as ComponentProps<
-                  GetObservabilityAlertsTableProp<'renderActionsCell'>
-                >)}
-                services={services}
-              />
+            <QueryClientProvider client={queryClient}>
+              <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+                <AlertActions
+                  {...(props as unknown as ComponentProps<
+                    GetObservabilityAlertsTableProp<'renderActionsCell'>
+                  >)}
+                  services={services}
+                />
+              </QueryClientProvider>
             </QueryClientProvider>
           </AlertsTableContextProvider>
         </KibanaContextProvider>

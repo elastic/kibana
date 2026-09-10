@@ -13,6 +13,8 @@ import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
+  isBeatsOutput,
+  isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
 
@@ -174,9 +176,10 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    const dataOutputProxy = dataOutput?.proxy_id
-      ? proxies.find((p) => p.id === dataOutput.proxy_id)
-      : undefined;
+    const dataOutputProxy =
+      dataOutput && isBeatsOutput(dataOutput) && dataOutput.proxy_id
+        ? proxies.find((p) => p.id === dataOutput.proxy_id)
+        : undefined;
 
     const packageOutputs = new Map<string, Output>();
     for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
@@ -289,7 +292,9 @@ export async function getFullAgentPolicy(
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
-          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
+          isBeatsOutput(output) && output.proxy_id
+            ? proxies.find((proxy) => output.proxy_id === proxy.id)
+            : undefined,
           standalone,
           redactProxySecrets
         );
@@ -422,7 +427,7 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      if (originalOutput?.write_to_logs_streams) {
+      if (originalOutput && isBeatsOutput(originalOutput) && originalOutput.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
             indices: [
@@ -612,6 +617,13 @@ export function transformOutputToFullPolicyOutput(
   standalone = false,
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
+  if (isOtlpOutput(output)) {
+    // OTLP policy compilation is not yet implemented — tracked separately.
+    throw new Error(
+      `OTLP output "${output.id}" cannot be compiled into an agent policy output: compilation is not yet implemented`
+    );
+  }
+
   const {
     config_yaml,
     type,
@@ -775,7 +787,7 @@ export function transformOutputToFullPolicyOutput(
     newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
-  if (outputTypeSupportPresets(output.type)) {
+  if (outputTypeSupportPresets(output)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 

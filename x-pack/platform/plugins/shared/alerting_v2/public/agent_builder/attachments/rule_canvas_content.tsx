@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import {
   RuleHeaderDescription,
@@ -22,7 +23,6 @@ import {
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
 import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
-import { buildRulePayload } from '../../../common/agent_builder/rule_mappers';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps

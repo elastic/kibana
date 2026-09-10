@@ -22,6 +22,7 @@ import {
   INITIAL_CHILDREN,
   isFocusable,
   rowKey,
+  type DefaultExpansionSeed,
   type NodeRow,
   type PagerRow,
   type RenderRow,
@@ -32,13 +33,19 @@ export interface TreeExpansionState {
   expanded: ReadonlySet<string>;
   // User clicked show more to see more hidden siblings.
   revealed: ReadonlyMap<string, number>;
+  // We need to know if this expansion state was produced with the same current budget to know if applying it or not.
+  seedBudget?: number;
 }
 
-interface UseTreeExpansionArgs {
+export interface UseTreeExpansionArgs {
   initialState?: TreeExpansionState;
   onStateChange?: (state: TreeExpansionState) => void;
   expandedBySearchNodes: ReadonlySet<string>;
   expandableIds: string[];
+  // Expand/reveal state to open a fresh cell with (breadth-first up to the row budget).
+  expansionSeed: DefaultExpansionSeed;
+  // How many rows to render by default; also tags the mirrored state so a change re-seeds.
+  defaultRenderedNodes: number;
 }
 
 export interface TreeExpansion {
@@ -61,20 +68,42 @@ export const useTreeExpansion = ({
   onStateChange,
   expandedBySearchNodes,
   expandableIds,
+  expansionSeed,
+  defaultRenderedNodes,
 }: UseTreeExpansionArgs): TreeExpansion => {
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
-    () => initialState?.expanded ?? new Set()
+  // Restore the stored state only when it was seeded at the current budget
+  // otherwise seed a fresh tree opened to `defaultRenderedNodes` rows.
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() =>
+    initialState && initialState.seedBudget === defaultRenderedNodes
+      ? initialState.expanded
+      : expansionSeed.expanded
   );
-  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(
-    () => initialState?.revealed ?? new Map()
+  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(() =>
+    initialState && initialState.seedBudget === defaultRenderedNodes
+      ? initialState.revealed
+      : expansionSeed.revealed
   );
 
-  // Mirror expand/reveal state to the host on every change so it can restore the tree after a remount.
+  // Mirror expand/reveal state to the host on every change so it can restore the tree after a remount,
+  // tagged with the budget it was seeded at (read via a ref so the tag never drives the effect itself).
   const onStateChangeRef = useRef(onStateChange);
   onStateChangeRef.current = onStateChange;
+  const seedBudgetRef = useRef(defaultRenderedNodes);
+  seedBudgetRef.current = defaultRenderedNodes;
   useEffect(() => {
-    onStateChangeRef.current?.({ expanded, revealed });
+    onStateChangeRef.current?.({ expanded, revealed, seedBudget: seedBudgetRef.current });
   }, [expanded, revealed]);
+
+  // Snap every cell to the new density when the setting changes: re-seed expansion (discarding manual
+  // expand/collapse). The ref guards the initial mount and re-renders where the budget is unchanged
+  // (e.g. toggling "Hide nulls" rebuilds the tree but must not wipe the user's expansions).
+  const appliedBudgetRef = useRef(defaultRenderedNodes);
+  useEffect(() => {
+    if (appliedBudgetRef.current === defaultRenderedNodes) return;
+    appliedBudgetRef.current = defaultRenderedNodes;
+    setExpanded(expansionSeed.expanded);
+    setRevealed(expansionSeed.revealed);
+  }, [defaultRenderedNodes, expansionSeed]);
 
   // The user's own expansion unioned with the search-driven set. The search set is never persisted
   // (the write-through effect above only mirrors `expanded`/`revealed`), so a query never pollutes
@@ -238,10 +267,7 @@ export const useRovingTreeNavigation = (
             rowRefs.current.get(rowKey(row))?.querySelector<HTMLElement>('button')?.focus();
           } else if (row.hasChildren && !row.isExpanded) {
             setExpandedFor(row.node.id, true);
-          } else if (row.hasChildren && row.isExpanded) {
-            focusRow(orderedIds[index + 1]);
           } else {
-            // Leaf row: step into its first trailing action (copy, then any host-defined actions).
             rowRefs.current
               .get(rowKey(row))
               ?.querySelector<HTMLElement>('.jsonTreeViewerRowAction')

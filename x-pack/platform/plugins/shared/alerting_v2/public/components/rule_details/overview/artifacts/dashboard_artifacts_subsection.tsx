@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiCode,
   EuiConfirmModal,
@@ -215,7 +214,7 @@ const DashboardsSubsectionHeader = ({ manageButton }: { manageButton: React.Reac
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="dashboardApp" size="m" aria-hidden={true} />
+          <EuiIcon type="productDashboard" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -249,10 +248,6 @@ export const DashboardArtifactsSubsection: React.FC = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
   const canManage = Boolean(dashboard) && canWrite;
-
-  const openManagePopover = useCallback(() => {
-    setIsManagePopoverOpen(true);
-  }, []);
 
   const toggleManagePopover = useCallback(() => {
     setIsManagePopoverOpen((isOpen) => !isOpen);
@@ -377,7 +372,9 @@ export const DashboardArtifactsSubsection: React.FC = () => {
         {dashboard && !isLoading && isError ? (
           <EuiEmptyPrompt
             color="danger"
-            iconType="warning"
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="ruleDashboardArtifactsError"
             title={
               <h4>
@@ -398,7 +395,9 @@ export const DashboardArtifactsSubsection: React.FC = () => {
 
         {dashboard && !isLoading && !isError && !hasDashboardArtifacts ? (
           <EuiEmptyPrompt
-            iconType="dashboardApp"
+            icon={<EuiIcon type="productDashboard" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="ruleDashboardArtifactsEmpty"
             title={
               <h4>
@@ -413,20 +412,6 @@ export const DashboardArtifactsSubsection: React.FC = () => {
                   defaultMessage: 'Link investigation dashboards to this rule.',
                 })}
               </EuiText>
-            }
-            actions={
-              canManage ? (
-                <EuiButton
-                  size="s"
-                  onClick={openManagePopover}
-                  data-test-subj="ruleDashboardArtifactsEmptyAddButton"
-                >
-                  {i18n.translate(
-                    'xpack.alertingV2.ruleDetails.artifacts.dashboards.emptyAddButton',
-                    { defaultMessage: 'Add dashboards' }
-                  )}
-                </EuiButton>
-              ) : undefined
             }
           />
         ) : null}

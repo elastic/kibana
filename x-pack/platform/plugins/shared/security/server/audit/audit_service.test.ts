@@ -810,18 +810,13 @@ describe('#createLoggingConfig', () => {
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
-    // includeResources keeps the audit resource attribute keys plus the promoted keys (so project.id
-    // stays in the resource for log delivery); attributes supply the service.name/service.type values.
-    expect(otelAppender.includeResources).toEqual([
-      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
-      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-    ]);
+    expect(otelAppender.includeResources).toEqual(['service.name', 'service.type']);
     expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
-    // project.id is also copied into per-record attributes (kept in both places).
+    // project.id is captured before filtering and emitted only in per-record attributes.
     expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
   });
 
-  test('merges user-provided attributes with audit resource attributes', () => {
+  test('preserves configured attributes for promotion while restricting the resource to service identity', () => {
     const features = { allowAuditLogging: true };
 
     const loggingConfig = createLoggingConfig(
@@ -832,7 +827,13 @@ describe('#createLoggingConfig', () => {
           type: 'otel',
           protocol: 'http',
           url: 'http://collector:4318/v1/logs',
-          attributes: { 'custom.attr': 'value' },
+          attributes: {
+            'custom.attr': 'value',
+            'project.id': 'configured-project',
+            'service.name': 'custom-service',
+            'service.type': 'custom-type',
+          },
+          promoteResourceAttributes: ['custom.attr'],
         },
       },
       true
@@ -842,13 +843,12 @@ describe('#createLoggingConfig', () => {
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     expect(otelAppender.attributes).toEqual({
       'custom.attr': 'value',
+      'project.id': 'configured-project',
       ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
     });
-    // includeResources must cover ALL configured attribute keys — not just the audit two — plus the
-    // promoted keys, so a deployment-provided resource attribute (e.g. project.id) is not stripped.
-    expect(otelAppender.includeResources).toEqual([
+    expect(otelAppender.includeResources).toEqual(['service.name', 'service.type']);
+    expect(otelAppender.promoteResourceAttributes).toEqual([
       'custom.attr',
-      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
       ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
     ]);
   });

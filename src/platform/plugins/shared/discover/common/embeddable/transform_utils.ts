@@ -324,6 +324,9 @@ const fromStoredJsonModeSettings = (
 ): NonNullable<DiscoverSessionPanelOverrides['json_mode_settings']> => ({
   ...(jsonModeSettings.hideNulls !== undefined && { hide_nulls: jsonModeSettings.hideNulls }),
   ...(jsonModeSettings.wrapLines !== undefined && { wrap_lines: jsonModeSettings.wrapLines }),
+  ...(jsonModeSettings.defaultRenderedNodes !== undefined && {
+    default_rendered_nodes: jsonModeSettings.defaultRenderedNodes,
+  }),
 });
 
 const toStoredJsonModeSettings = (
@@ -331,6 +334,9 @@ const toStoredJsonModeSettings = (
 ): JsonModeSettings => ({
   ...(jsonModeSettings.hide_nulls !== undefined && { hideNulls: jsonModeSettings.hide_nulls }),
   ...(jsonModeSettings.wrap_lines !== undefined && { wrapLines: jsonModeSettings.wrap_lines }),
+  ...(jsonModeSettings.default_rendered_nodes !== undefined && {
+    defaultRenderedNodes: jsonModeSettings.default_rendered_nodes,
+  }),
 });
 
 export function fromStoredGrid(

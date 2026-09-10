@@ -6,17 +6,14 @@ Persists point-in-time snapshots of object changes to Elasticsearch data streams
 
 Solution-agnostic: use it from any plugin or module that needs audit-style history.
 
-## Unsupported functionality
+## Snapshot keys containing dots
 
-### Kibana objects that use a dot `.` in their JSON structure.
+Snapshots are stored verbatim, including property names that contain a dot `.` (for example `{ "user": { "first.name": "bob" } }`). Masking via `fieldsToHash` / `fieldsToRedact` preserves these keys too.
 
-```json
-{
-  "user": { "first.name": "bob"}
-}
-```
+Two caveats:
 
-The change history package does not currently support JSON structures that use a dot `.` for property names, as it relies on "flattening" JSON into dot notation for JSON paths.
+- Keys in `fieldsToHash` / `fieldsToRedact` match snapshot keys **literally** (dots included): `{ "first.name": true }` matches only a property named `first.name`, never the nested path `first` → `name`. Use nesting (`{ first: { name: true } }`) to select nested fields.
+- `object.fields.hashed` / `object.fields.redacted` list the masked fields as paths joined with dots (for example `user.first.name`). If a key name itself contains a dot, you cannot tell from the path alone which dots are nesting and which are part of a key name: `user.first.name` could mean `{ "user": { "first.name": ... } }` or `{ "user": { "first": { "name": ... } } }`. These lists are informational only — look at `object.snapshot` to see the real structure (the masked value appears there as `[redacted]` or a hash).
 
 
 ## Overview

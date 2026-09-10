@@ -6,6 +6,7 @@
  */
 
 import { TASK_SO_NAME } from '../../saved_objects';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   buildSavedObjectBulkUpdatesForUiamKeys,
   invalidationTargetsFromUiamTaskBulkUpdates,
@@ -32,7 +33,7 @@ describe('buildSavedObjectBulkUpdatesForUiamKeys', () => {
         attributes: {
           apiKey: 'k2',
           taskType: 'actions:.email',
-          userScope: { apiKeyId: 'es-b', apiKeyCreatedByUser: false, spaceId: 's' },
+          userScope: { apiKeyId: 'es-b', apiKeyCreatedByUser: false, spaceId: asSpaceId('s') },
         },
       },
     ]);
@@ -57,7 +58,7 @@ describe('buildSavedObjectBulkUpdatesForUiamKeys', () => {
           userScope: {
             apiKeyId: 'es-b',
             apiKeyCreatedByUser: false,
-            spaceId: 's',
+            spaceId: asSpaceId('s'),
             uiamApiKeyId: 'uiam-b',
           },
           taskType: 'actions:.email',

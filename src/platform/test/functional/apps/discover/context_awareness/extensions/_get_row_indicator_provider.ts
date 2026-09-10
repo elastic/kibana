@@ -9,6 +9,11 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_row_indicator_provider.ts
 
+/**
+ * Scout audit: DELETE, do not migrate. Empty `describe` with a TODO — porting it yields a spec
+ * that asserts nothing but reports as passing. If coverage is wanted, Jest is the right layer:
+ * see profile_providers/security/accessors/get_row_indicator.test.ts for the equivalent accessor.
+ */
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({}: FtrProviderContext) {

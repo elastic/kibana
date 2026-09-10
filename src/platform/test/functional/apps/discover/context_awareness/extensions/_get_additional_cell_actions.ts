@@ -9,6 +9,12 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_additional_cell_actions.ts
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, but drop the 4 negative tests first — the compatibility
+ * logic they exercise is covered by context_awareness/hooks/use_additional_cell_actions.test.tsx
+ * (`describe('createCellAction')`). Keep the positive cases: action execution via native
+ * `alert()` and actions on the Surrounding Docs page are not unit-testable.
+ */
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { Alert } from 'selenium-webdriver';

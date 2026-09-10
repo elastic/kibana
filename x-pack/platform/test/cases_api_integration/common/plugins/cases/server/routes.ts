@@ -16,6 +16,7 @@ import {
   CASES_TELEMETRY_TASK_NAME,
 } from '@kbn/cases-plugin/common/constants';
 import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
+import { toLegacyAttachmentResponse } from '@kbn/cases-plugin/server/common/attachments';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -120,8 +121,11 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { cases }] = await core.getStartServices();
         const client = await cases.getCasesClientWithRequest(request);
 
+        // Client is unified-only now; project back to this fixture's legacy shape.
+        const attachments = await client.attachments.getAll({ caseID: request.params.id });
+
         return response.ok({
-          body: await client.attachments.getAll({ caseID: request.params.id }),
+          body: attachments.map(toLegacyAttachmentResponse),
         });
       } catch (error) {
         if (error.isBoom && error.output.statusCode === 403) {

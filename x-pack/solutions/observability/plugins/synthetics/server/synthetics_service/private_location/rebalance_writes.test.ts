@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { agentIdCondition, UNASSIGNED_CONDITION } from './assign_by_condition';
 import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
-import { configIdOf, toConditionUpdates, toMonitorPlacements } from './rebalance_writes';
+import type { ShardedPackagePolicy } from './rebalance_writes';
+import {
+  configIdOf,
+  toClearedConditionUpdates,
+  toConditionUpdates,
+  toMonitorPlacements,
+} from './rebalance_writes';
 
 const LOCATION = 'loc1';
 
-const policy = (over: Partial<PackagePolicy> & { id: string }): PackagePolicy =>
-  ({
-    name: over.id,
-    enabled: true,
-    inputs: [{ type: 'synthetics/http', enabled: true, streams: [] }],
-    policy_ids: ['agent-policy-1'],
-    spaceIds: ['default'],
-    ...over,
-  } as PackagePolicy);
+// Fixtures carry exactly what `listByAgentPolicy` projects, so a field this
+// path stops fetching but starts reading fails to compile here.
+const policy = (over: Partial<ShardedPackagePolicy> & { id: string }): ShardedPackagePolicy => ({
+  name: over.id,
+  inputs: [{ type: 'synthetics/http', enabled: true }],
+  policy_ids: ['agent-policy-1'],
+  spaceIds: ['default'],
+  version: 'WzAsMV0=',
+  revision: 1,
+  ...over,
+});
 
-const browserPolicy = (over: Partial<PackagePolicy> & { id: string }): PackagePolicy =>
+const browserPolicy = (
+  over: Partial<ShardedPackagePolicy> & { id: string }
+): ShardedPackagePolicy =>
   policy({
     inputs: [
-      { type: 'synthetics/http', enabled: false, streams: [] },
-      { type: 'synthetics/browser', enabled: true, streams: [] },
+      { type: 'synthetics/http', enabled: false },
+      { type: 'synthetics/browser', enabled: true },
     ],
     ...over,
   });
@@ -92,10 +101,71 @@ describe('toConditionUpdates', () => {
 
     const updates = bySpace.get('default')!;
     expect(updates).toHaveLength(1);
-    expect(updates[0]).toMatchObject({
-      id: `m1-${LOCATION}`,
-      condition: agentIdCondition('agent-b'),
-    });
+    expect(updates[0].update.id).toBe(`m1-${LOCATION}`);
+    expect(updates[0].update.attributes.condition).toBe(agentIdCondition('agent-b'));
+  });
+
+  it('re-sends name so Fleet can still name the write in the audit log', () => {
+    const bySpace = toConditionUpdates(
+      [
+        policy({
+          id: `m1-${LOCATION}`,
+          name: 'my monitor',
+          condition: agentIdCondition('agent-a'),
+        }),
+      ],
+      new Map([['m1', 'agent-b']]),
+      LOCATION
+    );
+
+    // Saved-object bulkUpdate echoes back only the attributes it was sent, so
+    // Fleet's bulkUpdatePartial would otherwise log `name: undefined`.
+    expect(bySpace.get('default')![0].update.attributes.name).toBe('my monitor');
+  });
+
+  it('sends only the condition, name and revision metadata, not the whole policy', () => {
+    const bySpace = toConditionUpdates(
+      [policy({ id: `m1-${LOCATION}`, condition: agentIdCondition('agent-a') })],
+      new Map([['m1', 'agent-b']]),
+      LOCATION
+    );
+
+    // Anything not listed here is left to the saved-objects merge, so a stale
+    // snapshot cannot revert a concurrent edit to inputs/vars/package. `name`
+    // rides along unchanged purely to keep the audit-log entry identifiable.
+    expect(Object.keys(bySpace.get('default')![0].update.attributes).sort()).toEqual([
+      'condition',
+      'name',
+      'revision',
+      'updated_at',
+      'updated_by',
+    ]);
+  });
+
+  it('bumps revision, since it is compiled into the agent policy document', () => {
+    const bySpace = toConditionUpdates(
+      [policy({ id: `m1-${LOCATION}`, revision: 7, condition: agentIdCondition('agent-a') })],
+      new Map([['m1', 'agent-b']]),
+      LOCATION
+    );
+
+    expect(bySpace.get('default')![0].update.attributes.revision).toBe(8);
+  });
+
+  it('captures the agent policies to bump, which the write result cannot supply', () => {
+    const bySpace = toConditionUpdates(
+      [
+        policy({
+          id: `m1-${LOCATION}`,
+          policy_ids: ['ap-1', 'ap-2'],
+          condition: agentIdCondition('agent-a'),
+        }),
+      ],
+      new Map([['m1', 'agent-b']]),
+      LOCATION
+    );
+
+    expect(bySpace.get('default')![0].agentPolicyIds).toEqual(['ap-1', 'ap-2']);
   });
 
   it('carries the version token so Fleet rejects a stale (lost-update) write', () => {
@@ -111,7 +181,17 @@ describe('toConditionUpdates', () => {
       LOCATION
     );
 
-    expect(bySpace.get('default')![0].version).toBe('WzEsMV0=');
+    expect(bySpace.get('default')![0].update.version).toBe('WzEsMV0=');
+  });
+
+  it('skips a policy with no version rather than writing without a concurrency token', () => {
+    const bySpace = toConditionUpdates(
+      [policy({ id: `m1-${LOCATION}`, version: undefined, condition: agentIdCondition('a') })],
+      new Map([['m1', 'agent-b']]),
+      LOCATION
+    );
+
+    expect(bySpace.size).toBe(0);
   });
 
   it('writes nothing when every monitor is already on its assigned agent (steady state)', () => {
@@ -151,14 +231,14 @@ describe('toConditionUpdates', () => {
     );
 
     expect(bySpace.get('default')).toHaveLength(2);
-    expect(bySpace.get('default')![0]).toMatchObject({
-      id: `m1-${LOCATION}`,
-      condition: agentIdCondition('agent-b'),
-    });
-    expect(bySpace.get('default')![1]).toMatchObject({
-      id: `m1-${LOCATION}-default`,
-      condition: agentIdCondition('agent-b'),
-    });
+    expect(bySpace.get('default')!.map(({ update }) => update.id)).toEqual([
+      `m1-${LOCATION}`,
+      `m1-${LOCATION}-default`,
+    ]);
+    expect(bySpace.get('default')!.map(({ update }) => update.attributes.condition)).toEqual([
+      agentIdCondition('agent-b'),
+      agentIdCondition('agent-b'),
+    ]);
   });
 
   it('groups updates by the package policy own space', () => {
@@ -176,5 +256,23 @@ describe('toConditionUpdates', () => {
 
     expect(bySpace.get('default')).toHaveLength(1);
     expect(bySpace.get('team-x')).toHaveLength(1);
+  });
+});
+
+describe('toClearedConditionUpdates', () => {
+  it('emits a null-condition update for every policy that currently has a pin', () => {
+    const bySpace = toClearedConditionUpdates([
+      policy({ id: `m1-${LOCATION}`, condition: agentIdCondition('agent-a') }),
+      policy({ id: `m2-${LOCATION}` }),
+    ]);
+
+    const updates = bySpace.get('default')!;
+    expect(updates).toHaveLength(1);
+    expect(updates[0].update.id).toBe(`m1-${LOCATION}`);
+    expect(updates[0].update.attributes.condition).toBeNull();
+  });
+
+  it('writes nothing when no policy has a condition', () => {
+    expect(toClearedConditionUpdates([policy({ id: `m1-${LOCATION}` })]).size).toBe(0);
   });
 });

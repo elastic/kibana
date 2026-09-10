@@ -16,7 +16,7 @@ import { DashboardApp } from './dashboard_app';
 import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
-import { DiscoverApp } from './discover_app';
+import { DiscoverApp } from './discover';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';

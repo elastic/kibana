@@ -72,9 +72,7 @@ export function registerRoutes(
   if (experimentalFeatures.enableCloudOnboardingDeployments) {
     registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
   }
-  if (config.iacProvisioner?.enabled) {
-    registerIacProvisionerRoutes(fleetAuthzRouter);
-  }
+  registerIacProvisionerRoutes(fleetAuthzRouter);
 
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 

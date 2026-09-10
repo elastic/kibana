@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export const FeedbackSubmitted: React.FC = () => (
   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />
+      <EuiIcon type="checkCircleFill" color="success" size="s" aria-hidden={true} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiText size="xs">

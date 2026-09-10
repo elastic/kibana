@@ -30,7 +30,10 @@ import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
 } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
+import type {
+  CriticalityLevel,
+  CriticalityLevelWithUnassigned,
+} from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
@@ -62,6 +65,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
+import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
 
@@ -145,6 +149,19 @@ export const RiskInputsTab = <T extends EntityType>({
 
   const { data: watchlists } = useGetWatchlists();
   const privileges = useMissingRiskEnginePrivileges({ readonly: true });
+
+  // A risk score stores the criticality that was set when the score was written, so it can be
+  // out of date. Read the current level from the entity store record instead, like
+  // EntitySummaryGrid does. Saving criticality patches this query's cache, so the row is right
+  // straight away rather than after the recalculation round trip, and stays right if that
+  // recalculation fails.
+  const { entityRecord } = useEntityFromStore({ entityId, entityType, skip: !entityId });
+
+  // The record has loaded. No `asset.criticality` on it means the level was removed, not that
+  // we failed to read it.
+  const liveCriticality: CriticalityLevelWithUnassigned | undefined = entityRecord
+    ? entityRecord.asset?.criticality ?? 'unassigned'
+    : undefined;
 
   const entityFilterQuery = useMemo(
     () =>
@@ -273,6 +290,7 @@ export const RiskInputsTab = <T extends EntityType>({
       refetchResolutionRiskScore={refetchResolutionRiskScore}
       resolutionGroup={resolutionGroup}
       watchlistNamesById={watchlistNamesById}
+      liveCriticality={liveCriticality}
       onShowAlert={onShowAlert}
       onSubTabChange={onSubTabChange}
     />
@@ -297,6 +315,8 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   refetchResolutionRiskScore: RiskScoreState<EntityType>['refetch'];
   resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
   watchlistNamesById: Map<string, string>;
+  /** The level on the entity store record right now. Undefined when we could not read it. */
+  liveCriticality: CriticalityLevelWithUnassigned | undefined;
   onShowAlert: (id: string, indexName: string) => void;
   onSubTabChange: (subTab: RiskScoreLeftPanelSubTab) => void;
 }
@@ -317,6 +337,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   refetchResolutionRiskScore,
   resolutionGroup,
   watchlistNamesById,
+  liveCriticality,
   onShowAlert,
   onSubTabChange,
 }: RiskInputsTabContentProps<T>) => {
@@ -669,6 +690,10 @@ const RiskInputsTabContent = <T extends EntityType>({
         isResolutionView={isResolutionView}
         resolutionGroup={resolutionGroup}
         watchlistNamesById={watchlistNamesById}
+        // Only the entity view is about the entity as it is now. The resolution view is about the
+        // whole group and the point-in-time view is about an old score, so both keep using the
+        // level stored on the score.
+        liveCriticality={isResolutionView || pitSelectionActive ? undefined : liveCriticality}
       />
       <EuiSpacer size="m" />
       {hasAlertsRead && riskInputsAlertSection}
@@ -686,6 +711,7 @@ interface ContextsSectionProps<T extends EntityType> {
     aliases: Array<Record<string, unknown>>;
   };
   watchlistNamesById: Map<string, string>;
+  liveCriticality: CriticalityLevelWithUnassigned | undefined;
 }
 
 const ContextsSection = <T extends EntityType>({
@@ -695,6 +721,7 @@ const ContextsSection = <T extends EntityType>({
   isResolutionView,
   resolutionGroup,
   watchlistNamesById,
+  liveCriticality,
 }: ContextsSectionProps<T>) => {
   const memberEntities = useMemo(
     () => (resolutionGroup ? [resolutionGroup.target, ...resolutionGroup.aliases] : []),
@@ -764,7 +791,12 @@ const ContextsSection = <T extends EntityType>({
     );
     const watchlists = modifiers.filter((mod) => mod.type === 'watchlist');
 
-    if (!criticality && watchlists.length === 0) {
+    // When the caller gives us a current level, show that one. The score only knows what was set
+    // when it was written.
+    const useLiveLevel = liveCriticality !== undefined;
+    const hasLiveLevel = useLiveLevel && liveCriticality !== 'unassigned';
+
+    if (!criticality && watchlists.length === 0 && !hasLiveLevel) {
       return undefined;
     }
 
@@ -775,10 +807,21 @@ const ContextsSection = <T extends EntityType>({
         }
       | undefined;
 
+    const persistedLevel = criticalityMetadata?.criticality_level ?? null;
+    const level = useLiveLevel
+      ? liveCriticality === 'unassigned'
+        ? null
+        : liveCriticality
+      : persistedLevel;
+    // The stored contribution was calculated from the stored level, so it does not match the level
+    // we show once the two differ. That gap should be brief, lasting until the recalculation
+    // writes a new score, and longer only if that recalculation failed.
+    const contributionDescribesLevel = !useLiveLevel || liveCriticality === persistedLevel;
+
     return {
       criticality: {
-        level: criticalityMetadata?.criticality_level ?? null,
-        contribution: criticality?.contribution,
+        level,
+        contribution: contributionDescribesLevel ? criticality?.contribution : undefined,
         contributorEUID:
           typeof criticalityMetadata?.contributor_euid === 'string'
             ? criticalityMetadata.contributor_euid
@@ -786,7 +829,7 @@ const ContextsSection = <T extends EntityType>({
       },
       watchlists,
     };
-  }, [entityType, riskScore]);
+  }, [entityType, liveCriticality, riskScore]);
 
   if (contributions === undefined) {
     return null;
@@ -795,7 +838,7 @@ const ContextsSection = <T extends EntityType>({
 
   const items: ContextRow[] = [];
 
-  if (criticality.level != null && criticality.contribution != null) {
+  if (criticality.level != null) {
     // Prefer the attribution persisted on the score document: the current-state
     // join below is wrong for historical scores once a member's criticality
     // changes. Scores written before attribution existed fall back to the join.
@@ -824,7 +867,8 @@ const ContextsSection = <T extends EntityType>({
           textSize="xs"
         />
       ),
-      contribution: formatContribution(criticality.contribution),
+      contribution:
+        criticality.contribution != null ? formatContribution(criticality.contribution) : '-',
       entities: relatedEntities,
     });
   }

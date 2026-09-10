@@ -168,6 +168,14 @@ export class StepExecutionRuntime {
     this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
   }
 
+  /** Stamps the optional HITL audit envelope on the in-memory step doc (flushed with the next step write). */
+  public stampHitlAudit(hitl: NonNullable<EsWorkflowStepExecution['hitl']>): void {
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      hitl,
+    });
+  }
+
   /**
    * Marks the step as COMPLETED.
    *

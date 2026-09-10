@@ -417,6 +417,15 @@ describe('vegaEmbeddableFactory', () => {
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
   });
 
+  it('should set approximationApplied$ on fetch', async () => {
+    mockVegaRequestHandler.mockResolvedValue({ ...visData, approximationApplied: true });
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+    expect(api.approximationApplied$.getValue()).toBe(true);
+  });
+
   it('forwards parent esqlVariables into the request handler and refetches on change', async () => {
     const variables = [{ key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES }];
     esqlVariables$.next(variables);

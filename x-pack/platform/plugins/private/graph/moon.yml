@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-visualizations'
   sourceRoot: x-pack/platform/plugins/private/graph
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'

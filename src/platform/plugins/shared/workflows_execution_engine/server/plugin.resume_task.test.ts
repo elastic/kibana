@@ -34,6 +34,7 @@ jest.mock('elastic-apm-node', () => ({
 
 const mockResolveInterruptedWorkflowResumeTask = jest.fn();
 const mockResolveExhaustedWorkflowRunTask = jest.fn().mockResolvedValue(undefined);
+const mockFailExecutionMissingIdentity = jest.fn().mockResolvedValue(undefined);
 jest.mock('./lib/task_recovery', () => {
   const actual = jest.requireActual('./lib/task_recovery');
   return {
@@ -42,6 +43,7 @@ jest.mock('./lib/task_recovery', () => {
       mockResolveInterruptedWorkflowResumeTask(...args),
     resolveExhaustedWorkflowRunTask: (...args: unknown[]) =>
       mockResolveExhaustedWorkflowRunTask(...args),
+    failExecutionMissingIdentity: (...args: unknown[]) => mockFailExecutionMissingIdentity(...args),
   };
 });
 
@@ -109,6 +111,7 @@ describe('workflow:resume task runner event fields', () => {
     jest.clearAllMocks();
     mockResolveInterruptedWorkflowResumeTask.mockResolvedValue({ action: 'resume_workflow' });
     mockResolveExhaustedWorkflowRunTask.mockResolvedValue(undefined);
+    mockFailExecutionMissingIdentity.mockResolvedValue(undefined);
     mockResumeWorkflow.mockResolvedValue({});
     mockGetWorkflowExecutionById.mockResolvedValue(null);
   });
@@ -361,6 +364,56 @@ describe('workflow:resume task runner event fields', () => {
       workflow_id: workflowId,
       space_id: 'default',
       outcome: 'interrupted',
+    });
+  });
+
+  it('fails the execution when claimed without a Task Manager identity', async () => {
+    setupPlugin();
+    const workflowRunId = 'exec-no-identity-resume';
+    const workflowId = 'wf-no-identity-resume';
+    const spaceId = 'default';
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId,
+      spaceId,
+      status: 'failed',
+    });
+
+    const setCustomTaskRunEventFields = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          id: `workflow:${workflowRunId}:resume`,
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: { workflowRunId, spaceId },
+          state: {},
+          attempts: 1,
+          runAt: new Date('2024-01-01T10:00:00Z'),
+          scheduledAt: new Date('2024-01-01T09:55:00Z'),
+          startedAt: new Date('2024-01-01T10:00:00Z'),
+          retryAt: null,
+          status: TaskStatus.Running,
+          ownerId: 'kibana-instance-id',
+        } as ConcreteTaskInstance,
+        fakeRequest: undefined,
+        setCustomTaskRunEventFields,
+      })
+    );
+
+    await runner.run();
+
+    expect(mockFailExecutionMissingIdentity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowRunId,
+        spaceId,
+      })
+    );
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+      workflow_execution_id: workflowRunId,
+      workflow_id: workflowId,
+      space_id: spaceId,
+      outcome: 'failed',
     });
   });
 });

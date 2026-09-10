@@ -15,3 +15,12 @@ export type {
 } from './src/schema';
 
 export { mitreEntitySchema, mitreEntitiesSchema } from './src/schema';
+
+export type {
+  MitreEntityStatus,
+  MitreEntityBuckets,
+  MitreEntityCollection,
+  MitreListParams,
+} from './src/types';
+
+export { DEFAULT_MITRE_FRAMEWORK, DEFAULT_MITRE_ENTITY_STATUS } from './src/constants';
