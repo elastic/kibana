@@ -443,12 +443,12 @@ importers:
       '@kbn/aiops-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-aiops-utils
-      '@kbn/alert-zero-common':
+      '@kbn/alertzero-common':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-alert-zero-common
-      '@kbn/alert-zero-plugin':
+        version: link:x-pack/solutions/security/packages/kbn-alertzero-common
+      '@kbn/alertzero-plugin':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/plugins/alert_zero
+        version: link:x-pack/solutions/security/plugins/alertzero
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
@@ -9369,7 +9369,7 @@ importers:
 
   x-pack/solutions/security/packages/index-adapter: {}
 
-  x-pack/solutions/security/packages/kbn-alert-zero-common: {}
+  x-pack/solutions/security/packages/kbn-alertzero-common: {}
 
   x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common: {}
 
@@ -9465,7 +9465,7 @@ importers:
 
   x-pack/solutions/security/packages/upselling: {}
 
-  x-pack/solutions/security/plugins/alert_zero: {}
+  x-pack/solutions/security/plugins/alertzero: {}
 
   x-pack/solutions/security/plugins/cloud_defend: {}
 

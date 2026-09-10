@@ -15,7 +15,7 @@ import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { useGetAppUrl, useNavigateTo } from './navigation';
-import { ALERT_ZERO_APP_ID, SECURITY_UI_APP_ID } from './constants';
+import { ALERTZERO_APP_ID, SECURITY_UI_APP_ID } from './constants';
 
 export interface BaseLinkProps {
   /** The Kibana application of the link. Defaults to Security Solution */
@@ -159,8 +159,8 @@ export const securityLink = (pageName: SecurityPageName): AppDeepLinkId => {
 };
 
 /**
- * Link id for a page on the Alert Zero app. Same registry of page names as `securityLink`, different app
- * prefix — which is what distinguishes e.g. Alert Zero's alerts page from the Security UI's.
+ * Link id for a page on the AlertZero app. Same registry of page names as `securityLink`, different app
+ * prefix — which is what distinguishes e.g. AlertZero's alerts page from the Security UI's.
  */
 export const alertZeroLink = (pageName?: SecurityPageName): AppDeepLinkId =>
-  (pageName ? `${ALERT_ZERO_APP_ID}:${pageName}` : ALERT_ZERO_APP_ID) as AppDeepLinkId;
+  (pageName ? `${ALERTZERO_APP_ID}:${pageName}` : ALERTZERO_APP_ID) as AppDeepLinkId;

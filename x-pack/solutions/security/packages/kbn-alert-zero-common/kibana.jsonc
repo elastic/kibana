@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/alert-zero-common",
-  "owner": ["@elastic/security-solution"],
-  "group": "security",
-  "visibility": "shared"
-}

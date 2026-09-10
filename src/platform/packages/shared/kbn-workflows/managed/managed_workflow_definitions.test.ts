@@ -12,21 +12,21 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
-  ALERT_ZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-  ALERT_ZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-  ALERT_ZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  ALERT_ZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
-  ALERT_ZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alert_zero/dark_continuous_threat_hunt.yaml';
-import DETECTION_RULE_CREATION_YAML from './definitions/alert_zero/detection_rule_creation.yaml';
-import DETECTION_RULE_TUNING_YAML from './definitions/alert_zero/detection_rule_tuning.yaml';
-import FLOOR_ALERT_TRIAGE_YAML from './definitions/alert_zero/floor_alert_triage.yaml';
-import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alert_zero/floor_attack_discovery.yaml';
+import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/dark_continuous_threat_hunt.yaml';
+import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
+import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
+import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -50,24 +50,24 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
-  [ALERT_ZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [ALERT_ZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '24h',
   },
-  [ALERT_ZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [ALERT_ZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [ALERT_ZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -145,16 +145,16 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [ALERT_ZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
-  [ALERT_ZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '2:d13818a0'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '2:d13818a0'],
   [
-    ALERT_ZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+    ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
     '2:de85a75a',
   ],
-  [ALERT_ZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
   [
-    ALERT_ZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+    ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
     DETECTION_RULE_CREATION_YAML,
     '1:a6804a44',
   ],

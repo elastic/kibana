@@ -17,7 +17,7 @@ import { createAlertDetectionsNavigationTree } from './alert_detections_navigati
 import {
   createAlertZeroNavigationTree,
   createAlertZeroSecondaryNavigationTree,
-} from './alert_zero_navigation_tree';
+} from './alertzero_navigation_tree';
 
 export const defaultNavigationTree = {
   alertDetections: createAlertDetectionsNavigationTree,
