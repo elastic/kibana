@@ -152,6 +152,7 @@ const ensureNoProxyRequired = (ctx: BuildContext, targets: HostTarget[]): void =
 };
 
 const URI_REQUIRED_MESSAGE = 'config.uri is required';
+const INVALID_URI_MESSAGE = 'config.uri is not a valid MongoDB connection string';
 const CREDENTIALS_REQUIRED_MESSAGE =
   'basic auth credentials (username and password) are required for MongoDB connections';
 const EMBEDDED_CREDENTIALS_MESSAGE =
@@ -161,6 +162,7 @@ const EMBEDDED_CREDENTIALS_MESSAGE =
 // otherwise stop matching the other with no compile-time signal).
 const USER_ERROR_MESSAGES: ReadonlySet<string> = new Set([
   URI_REQUIRED_MESSAGE,
+  INVALID_URI_MESSAGE,
   CREDENTIALS_REQUIRED_MESSAGE,
   EMBEDDED_CREDENTIALS_MESSAGE,
   PROXY_NOT_SUPPORTED_MESSAGE,
@@ -176,18 +178,26 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
     }
 
     const ConnectionString = await loadConnectionString();
-    const connectionString = new ConnectionString(uri);
-
-    const { targets, srvTargets } = await ensureHostsAllowed(ctx, connectionString);
-    ensureNoProxyRequired(ctx, targets);
+    let connectionString;
+    try {
+      connectionString = new ConnectionString(uri);
+    } catch {
+      // Discard the parse error: it may include the raw URI, which could contain an embedded
+      // password if the user pasted a full connection string. Throw a generic message instead.
+      throw new Error(INVALID_URI_MESSAGE);
+    }
 
     // config.uri is stored as unencrypted connector config, not a secret. A URI with
     // embedded userinfo (mongodb://user:pass@host/db) would persist that password in
     // plaintext alongside the encrypted basic-auth secrets — reject it and make the
-    // caller use the separate username/password fields instead.
+    // caller use the separate username/password fields instead. Check before allowlist/proxy
+    // so no downstream function ever receives a URI that carries a password.
     if (connectionString.username || connectionString.password) {
       throw new Error(EMBEDDED_CREDENTIALS_MESSAGE);
     }
+
+    const { targets, srvTargets } = await ensureHostsAllowed(ctx, connectionString);
+    ensureNoProxyRequired(ctx, targets);
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');

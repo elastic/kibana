@@ -368,6 +368,14 @@ describe('mongodbClientType', () => {
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
+    it('throws a generic message (without the URI) if config.uri cannot be parsed', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'not-a-valid-uri' } });
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'config.uri is not a valid MongoDB connection string'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
     it('rejects before creating a client when the network guard denies the host', async () => {
       const ctx = makeBuildContext();
       (ctx.networkSettings.ensureHostnameAllowed as jest.Mock).mockImplementation(() => {
@@ -470,6 +478,12 @@ describe('mongodbClientType', () => {
 
     it('returns true for the missing uri pre-connect error', () => {
       expect(isUserError(new Error('config.uri is required'))).toBe(true);
+    });
+
+    it('returns true for the invalid uri pre-connect error', () => {
+      expect(isUserError(new Error('config.uri is not a valid MongoDB connection string'))).toBe(
+        true
+      );
     });
 
     it('returns true for the missing credentials pre-connect error', () => {
