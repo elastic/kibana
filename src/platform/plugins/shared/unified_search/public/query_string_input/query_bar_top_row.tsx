@@ -384,11 +384,14 @@ export const QueryBarTopRow = React.memo(
     }, [props.isLoading]);
 
     const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
-    // Discover persists editor UI in initialState (e.g. closing history on first
-    // search of a new tab). Restorable state ignores parent updates until refresh.
-    useEffect(() => {
-      esqlEditorRef.current?.refreshInitialState();
-    }, [props.esqlEditorInitialState?.isHistoryOpen]);
+    const { onEsqlEditorInitialStateChange } = props;
+    const handleEsqlEditorInitialStateChange = useCallback(
+      (state: NonNullable<ESQLEditorProps['initialState']>) => {
+        onEsqlEditorInitialStateChange?.(state);
+        esqlEditorRef.current?.refreshInitialState();
+      },
+      [onEsqlEditorInitialStateChange]
+    );
 
     const {
       showQueryInput = true,
@@ -1387,7 +1390,7 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
-            onInitialStateChange={props.onEsqlEditorInitialStateChange}
+            onInitialStateChange={handleEsqlEditorInitialStateChange}
             controlsContext={
               props.esqlVariablesConfig
                 ? {
