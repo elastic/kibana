@@ -5,9 +5,31 @@
  * 2.0.
  */
 
+import { createHmac, randomBytes } from 'crypto';
 import { schema } from '@kbn/config-schema';
 import { RE2JS } from 're2js';
 import type { IRouter } from '@kbn/core/server';
+
+// TODO(spike): This is a temporary inline of generateEntityToken from
+// x-pack/platform/plugins/shared/inference/server/workflow_anonymization/detection/entity_mask.ts
+// Before this ships, extract both this function and derivePreviewScope to a shared package
+// (e.g. @kbn/inference-anonymization-utils) that both `inference` and `inference_workflows` depend on,
+// so there is a single canonical implementation.
+const generateEntityToken = (executionScope: string, entityClass: string, value: string): string => {
+  // Length-prefixed format prevents delimiter collisions — keep in sync with canonical impl.
+  const hmacInput = `${entityClass.length}:${entityClass}:${value.length}:${value}`;
+  const hash = createHmac('sha256', executionScope).update(hmacInput).digest('hex');
+  return `${entityClass}_${hash.substring(0, 32)}`;
+};
+
+// Mirrors the scope derivation in create_pii_tokenization_context.ts.
+// For preview there is no stable sessionId, so we use randomBytes as the per-request
+// "session" material. When a serverSalt is present the result is still HMAC-hardened.
+const derivePreviewScope = (serverSalt: string | undefined): string => {
+  const requestMaterial = randomBytes(32).toString('hex');
+  if (!serverSalt) return requestMaterial;
+  return createHmac('sha256', serverSalt).update(`preview:${requestMaterial}`).digest('hex');
+};
 import { BUILT_IN_PATTERNS, type BuiltInEntityClass } from '@kbn/workflows/managed';
 import { anonymizationApiPrivileges } from '../../common/anonymization_features';
 
@@ -81,7 +103,8 @@ const findMatches = (compiled: CompiledRule, value: string): Match[] => {
  */
 const tokenize = (
   text: string,
-  rules: ResolvedRule[]
+  rules: ResolvedRule[],
+  serverSalt: string | undefined
 ): { tokenized: string; tokenMap: Record<string, string> } => {
   const compiled = rules.map((r) => compileRule(r.entityClass, r.pattern));
 
@@ -99,15 +122,22 @@ const tokenize = (
   }
   allMatches.sort((a, b) => a.start - b.start);
 
+  const executionScope = derivePreviewScope(serverSalt);
+  const valueToToken = new Map<string, string>();
+
   const tokenMap: Record<string, string> = {};
-  const counters: Record<string, number> = {};
   let result = '';
   let pos = 0;
   for (const match of allMatches) {
     result += text.slice(pos, match.start);
-    const count = (counters[match.entityClass] ?? 0) + 1;
-    counters[match.entityClass] = count;
-    const token = `<${match.entityClass}_${count}>`;
+
+    const cacheKey = `${match.entityClass}:${match.matchValue}`;
+    let token = valueToToken.get(cacheKey);
+    if (!token) {
+      token = generateEntityToken(executionScope, match.entityClass, match.matchValue);
+      valueToToken.set(cacheKey, token);
+    }
+
     tokenMap[token] = match.matchValue;
     result += token;
     pos = match.end;
@@ -116,7 +146,13 @@ const tokenize = (
   return { tokenized: result, tokenMap };
 };
 
-export const registerAnonymizationPreviewRoute = ({ router }: { router: IRouter }) => {
+export const registerAnonymizationPreviewRoute = ({
+  router,
+  serverSalt,
+}: {
+  router: IRouter;
+  serverSalt: string | undefined;
+}) => {
   router.post(
     {
       path: '/internal/inference_workflows/anonymization/_preview',
@@ -192,7 +228,7 @@ export const registerAnonymizationPreviewRoute = ({ router }: { router: IRouter 
           .map((r) => ({ entityClass: r.entityClass, pattern: r.pattern })),
       ];
 
-      const { tokenized, tokenMap } = tokenize(text, activeRules);
+      const { tokenized, tokenMap } = tokenize(text, activeRules, serverSalt);
 
       return response.ok({
         body: {

@@ -94,6 +94,7 @@ export class InferenceWorkflowsPlugin
         return this.managedWorkflowClientPromise;
       },
       baseFailureMode: deps.inference.anonymizationConfig.failureMode,
+      serverSalt: deps.inference.anonymizationConfig.encryptionKey,
     });
 
     if (deps.searchInferenceEndpoints) {

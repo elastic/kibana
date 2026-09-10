@@ -25,27 +25,48 @@ import {
   EuiBadge,
   EuiEmptyPrompt,
   EuiButtonIcon,
-  EuiHealth,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiSearchBar,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { BuiltInRule, CustomRule } from './types';
 import { usePreview } from './use_anonymization_settings';
+import { CustomPatternModal } from './custom_pattern_modal';
 
-const BUILT_IN_LABELS: Record<string, string> = {
-  EMAIL: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.email', {
-    defaultMessage: 'Email addresses',
-  }),
-  IP: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.ip', {
-    defaultMessage: 'IP addresses',
-  }),
-  HOST_NAME: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.hostname', {
-    defaultMessage: 'Hostnames / domains',
-  }),
-  USER_NAME: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.username', {
-    defaultMessage: 'Usernames',
-  }),
+interface BuiltInMeta {
+  description: string;
+  example: string;
+}
+
+const BUILT_IN_META: Record<string, BuiltInMeta> = {
+  IP: {
+    description: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.ip.desc', {
+      defaultMessage: 'IPv4 addresses',
+    }),
+    example: 'IP_3992ee9f',
+  },
+  EMAIL: {
+    description: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.email.desc', {
+      defaultMessage: 'Email addresses',
+    }),
+    example: 'EMAIL_0fd00d86',
+  },
+  HOST_NAME: {
+    description: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.hostname.desc', {
+      defaultMessage: 'Host and machine names',
+    }),
+    example: 'HOST_NAME_527e4c32',
+  },
+  USER_NAME: {
+    description: i18n.translate('xpack.inferenceWorkflows.anonymization.builtIn.username.desc', {
+      defaultMessage: 'Account and login names',
+    }),
+    example: 'USER_NAME_d0bc85c9',
+  },
 };
 
 const SAMPLE_TEXT = `Hello, please email alice@example.com or contact the team.
@@ -72,6 +93,12 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
   const [localBuiltIn, setLocalBuiltIn] = useState<BuiltInRule[]>(builtInRules);
   const [localCustom, setLocalCustom] = useState<CustomRule[]>(initialCustomRules);
   const [isSaving, setIsSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Modal state — editingRule null = add mode, non-null = edit mode
+  const [editingRule, setEditingRule] = useState<CustomRule | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState<string | null>(null);
 
   // Preview tab state
   const [previewText, setPreviewText] = useState(SAMPLE_TEXT);
@@ -89,6 +116,42 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
   const handleDeleteCustom = useCallback((id: string) => {
     setLocalCustom((prev) => prev.filter((r) => r.id !== id));
   }, []);
+
+  const openAddModal = useCallback(() => {
+    setEditingRule(null);
+    setShowModal(true);
+  }, []);
+
+  const openEditModal = useCallback((rule: CustomRule) => {
+    setEditingRule(rule);
+    setShowModal(true);
+  }, []);
+
+  const handleModalSave = useCallback(
+    (saved: Omit<CustomRule, 'id'> & { id?: string }) => {
+      if (saved.id) {
+        setLocalCustom((prev) => prev.map((r) => (r.id === saved.id ? { ...r, ...saved } as CustomRule : r)));
+      } else {
+        const newRule: CustomRule = {
+          id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: saved.name,
+          entityClass: saved.entityClass,
+          pattern: saved.pattern,
+          enabled: saved.enabled,
+        };
+        setLocalCustom((prev) => [...prev, newRule]);
+      }
+      setShowModal(false);
+    },
+    []
+  );
+
+  const filteredCustom = localCustom.filter(
+    (r) =>
+      searchQuery === '' ||
+      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.entityClass.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -111,23 +174,67 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.inferenceWorkflows.anonymization.flyout.builtInDescription"
-            defaultMessage="Elastic-authored patterns for common PII types. Enable or disable each type to control what gets masked."
+            defaultMessage="Patterns maintained by Elastic. The token keeps the entity type as a prefix so the model knows what kind of thing it is looking at without seeing the value."
           />
         </EuiText>
         <EuiSpacer size="m" />
-        {localBuiltIn.map((rule) => (
-          <EuiFlexGroup key={rule.entityClass} alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={BUILT_IN_LABELS[rule.entityClass] ?? rule.entityClass}
-                checked={rule.enabled}
-                onChange={(e) => handleToggleBuiltIn(rule.entityClass, e.target.checked)}
-                disabled={!canManage}
-                data-test-subj={`anonymization-built-in-${rule.entityClass.toLowerCase()}`}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ))}
+        <EuiBasicTable
+          data-test-subj="anonymization-built-in-table"
+          items={localBuiltIn}
+          rowHeader="entityClass"
+          columns={[
+            {
+              field: 'entityClass',
+              name: i18n.translate(
+                'xpack.inferenceWorkflows.anonymization.flyout.builtIn.entityTypeCol',
+                { defaultMessage: 'Entity type' }
+              ),
+              render: (val: string) => <EuiBadge color="hollow">{val}</EuiBadge>,
+              width: '160px',
+            },
+            {
+              field: 'entityClass',
+              name: i18n.translate(
+                'xpack.inferenceWorkflows.anonymization.flyout.builtIn.descriptionCol',
+                { defaultMessage: 'What it matches' }
+              ),
+              render: (val: string) => (
+                <EuiText size="s">{BUILT_IN_META[val]?.description ?? val}</EuiText>
+              ),
+            },
+            {
+              field: 'entityClass',
+              name: i18n.translate(
+                'xpack.inferenceWorkflows.anonymization.flyout.builtIn.exampleCol',
+                { defaultMessage: 'Example' }
+              ),
+              render: (val: string) => (
+                <code style={{ fontSize: '0.85em', whiteSpace: 'nowrap' }}>
+                  {BUILT_IN_META[val]?.example ?? `${val}_xxxxxxxx`}
+                </code>
+              ),
+              width: '220px',
+            },
+            {
+              field: 'enabled',
+              name: i18n.translate(
+                'xpack.inferenceWorkflows.anonymization.flyout.builtIn.enabledCol',
+                { defaultMessage: 'Enabled' }
+              ),
+              render: (val: boolean, item: BuiltInRule) => (
+                <EuiSwitch
+                  label=""
+                  showLabel={false}
+                  checked={val}
+                  onChange={(e) => handleToggleBuiltIn(item.entityClass, e.target.checked)}
+                  disabled={!canManage}
+                  data-test-subj={`anonymization-built-in-${item.entityClass.toLowerCase()}`}
+                />
+              ),
+              width: '80px',
+            },
+          ]}
+        />
       </>
     ),
   };
@@ -140,7 +247,40 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
     content: (
       <>
         <EuiSpacer size="m" />
-        {localCustom.length === 0 ? (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.inferenceWorkflows.anonymization.flyout.customDescription"
+            defaultMessage="Identifiers that are specific to your organization, such as employee IDs, internal account numbers, badge numbers, and case IDs. The built-in types cannot cover these."
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiSearchBar
+              box={{ placeholder: i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customSearch', { defaultMessage: 'Search patterns' }), incremental: true }}
+              onChange={({ queryText }) => setSearchQuery(queryText ?? '')}
+              data-test-subj="anonymization-custom-search"
+            />
+          </EuiFlexItem>
+          {canManage && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                size="s"
+                iconType="plus"
+                onClick={openAddModal}
+                data-test-subj="anonymization-add-pattern"
+              >
+                <FormattedMessage
+                  id="xpack.inferenceWorkflows.anonymization.flyout.addPattern"
+                  defaultMessage="Add pattern"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        {filteredCustom.length === 0 ? (
           <EuiEmptyPrompt
             title={
               <h3>
@@ -156,77 +296,102 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
                 defaultMessage="Add a regex pattern to mask custom sensitive values not covered by built-in types."
               />
             }
+            actions={
+              canManage ? (
+                <EuiButton size="s" onClick={openAddModal} data-test-subj="anonymization-add-pattern-empty">
+                  <FormattedMessage
+                    id="xpack.inferenceWorkflows.anonymization.flyout.addPatternEmpty"
+                    defaultMessage="Add pattern"
+                  />
+                </EuiButton>
+              ) : undefined
+            }
           />
         ) : (
           <EuiBasicTable
             data-test-subj="anonymization-custom-rules-table"
-            items={localCustom}
+            items={filteredCustom}
             rowHeader="name"
             columns={[
               {
                 field: 'name',
-                name: i18n.translate(
-                  'xpack.inferenceWorkflows.anonymization.flyout.customRules.nameCol',
-                  { defaultMessage: 'Name' }
-                ),
+                name: i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customRules.nameCol', { defaultMessage: 'Name' }),
+                sortable: true,
               },
               {
                 field: 'entityClass',
-                name: i18n.translate(
-                  'xpack.inferenceWorkflows.anonymization.flyout.customRules.typeCol',
-                  { defaultMessage: 'Type' }
-                ),
-                render: (val: string) => <EuiBadge>{val}</EuiBadge>,
+                name: i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customRules.typeCol', { defaultMessage: 'Entity type' }),
+                render: (val: string) => <EuiBadge color="hollow">{val}</EuiBadge>,
+                width: '160px',
               },
               {
                 field: 'pattern',
-                name: i18n.translate(
-                  'xpack.inferenceWorkflows.anonymization.flyout.customRules.patternCol',
-                  { defaultMessage: 'Pattern' }
-                ),
-                render: (val: string) => <code>{val}</code>,
+                name: i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customRules.patternCol', { defaultMessage: 'Pattern' }),
+                render: (val: string) => <code style={{ fontSize: '0.85em' }}>{val}</code>,
               },
               {
                 field: 'enabled',
-                name: i18n.translate(
-                  'xpack.inferenceWorkflows.anonymization.flyout.customRules.statusCol',
-                  { defaultMessage: 'Status' }
+                name: i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customRules.enabledCol', { defaultMessage: 'Enabled' }),
+                render: (val: boolean, item: CustomRule) => (
+                  <EuiSwitch
+                    label=""
+                    showLabel={false}
+                    checked={val}
+                    onChange={(e) =>
+                      setLocalCustom((prev) =>
+                        prev.map((r) => r.id === item.id ? { ...r, enabled: e.target.checked } : r)
+                      )
+                    }
+                    disabled={!canManage}
+                    data-test-subj={`anonymization-custom-toggle-${item.id}`}
+                  />
                 ),
-                render: (val: boolean) => (
-                  <EuiHealth color={val ? 'success' : 'subdued'}>
-                    {val
-                      ? i18n.translate(
-                          'xpack.inferenceWorkflows.anonymization.flyout.customRules.enabled',
-                          { defaultMessage: 'Active' }
-                        )
-                      : i18n.translate(
-                          'xpack.inferenceWorkflows.anonymization.flyout.customRules.disabled',
-                          { defaultMessage: 'Disabled' }
-                        )}
-                  </EuiHealth>
-                ),
+                width: '80px',
               },
               ...(canManage
-                ? [
-                    {
-                      name: '',
-                      actions: [
-                        {
-                          render: (item: CustomRule) => (
-                            <EuiButtonIcon
-                              iconType="trash"
-                              color="danger"
-                              aria-label={i18n.translate(
-                                'xpack.inferenceWorkflows.anonymization.flyout.customRules.delete',
-                                { defaultMessage: 'Delete rule' }
-                              )}
-                              onClick={() => handleDeleteCustom(item.id)}
+                ? [{
+                    name: i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customRules.actionsCol', { defaultMessage: 'Actions' }),
+                    width: '80px',
+                    actions: [
+                      {
+                        render: (item: CustomRule) => (
+                          <EuiPopover
+                            button={
+                              <EuiButtonIcon
+                                iconType="boxesVertical"
+                                aria-label={i18n.translate('xpack.inferenceWorkflows.anonymization.flyout.customRules.actions', { defaultMessage: 'Actions' })}
+                                onClick={() => setOpenActionsId(openActionsId === item.id ? null : item.id)}
+                              />
+                            }
+                            isOpen={openActionsId === item.id}
+                            closePopover={() => setOpenActionsId(null)}
+                            panelPaddingSize="none"
+                            anchorPosition="leftCenter"
+                          >
+                            <EuiContextMenuPanel
+                              items={[
+                                <EuiContextMenuItem
+                                  key="edit"
+                                  icon="pencil"
+                                  onClick={() => { setOpenActionsId(null); openEditModal(item); }}
+                                >
+                                  <FormattedMessage id="xpack.inferenceWorkflows.anonymization.flyout.customRules.edit" defaultMessage="Edit" />
+                                </EuiContextMenuItem>,
+                                <EuiContextMenuItem
+                                  key="delete"
+                                  icon="trash"
+                                  color="danger"
+                                  onClick={() => { setOpenActionsId(null); handleDeleteCustom(item.id); }}
+                                >
+                                  <FormattedMessage id="xpack.inferenceWorkflows.anonymization.flyout.customRules.delete" defaultMessage="Delete" />
+                                </EuiContextMenuItem>,
+                              ]}
                             />
-                          ),
-                        },
-                      ],
-                    },
-                  ]
+                          </EuiPopover>
+                        ),
+                      },
+                    ],
+                  }]
                 : []),
             ]}
           />
@@ -341,18 +506,34 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
           <h2 id="anonymization-patterns-flyout-title">
             <FormattedMessage
               id="xpack.inferenceWorkflows.anonymization.flyout.title"
-              defaultMessage="Manage anonymization patterns"
+              defaultMessage="Anonymization patterns"
             />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.inferenceWorkflows.anonymization.flyout.bodyDescription"
+            defaultMessage="These rules apply to every LLM call from this space. Values are replaced with tokens on the way out and restored on the way back, so analysts always see real values."
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiTabbedContent
           tabs={[builtInTab, customTab, previewTab]}
           initialSelectedTab={builtInTab}
         />
       </EuiFlyoutBody>
+
+      {showModal && (
+        <CustomPatternModal
+          http={http}
+          editingRule={editingRule}
+          onSave={handleModalSave}
+          onClose={() => setShowModal(false)}
+        />
+      )}
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

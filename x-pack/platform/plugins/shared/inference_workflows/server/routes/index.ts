@@ -21,13 +21,15 @@ export const registerRoutes = ({
   management,
   getClient,
   baseFailureMode,
+  serverSalt,
 }: {
   router: IRouter;
   spaces: SpacesLike;
   management: WorkflowsManagementApi;
   getClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   baseFailureMode: 'block' | 'allow_unsafe';
+  serverSalt: string | undefined;
 }) => {
   registerAnonymizationSettingsRoutes({ router, spaces, management, getClient, baseFailureMode });
-  registerAnonymizationPreviewRoute({ router });
+  registerAnonymizationPreviewRoute({ router, serverSalt });
 };

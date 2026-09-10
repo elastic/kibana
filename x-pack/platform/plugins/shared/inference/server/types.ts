@@ -65,6 +65,11 @@ export interface InferenceServerSetup {
     /** Cluster-level failure mode from kibana.yml. Per-space overrides are stored in
      *  templateValues and override this value at request time. */
     failureMode: 'block' | 'allow_unsafe';
+    /** Per-cluster HMAC key from xpack.inference.anonymization.encryptionKey. When present,
+     *  token generation is hardened: tokens are opaque even if the session ID is known.
+     *  Exposed so consumer plugins (e.g. inference_workflows) can use the same key for
+     *  preview tokenization without duplicating config. */
+    encryptionKey: string | undefined;
   };
 }
 
