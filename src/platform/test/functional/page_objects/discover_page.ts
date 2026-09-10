@@ -593,7 +593,7 @@ export class DiscoverPageObject extends FtrService {
     });
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
     );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();

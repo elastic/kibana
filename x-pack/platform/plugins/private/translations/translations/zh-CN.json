@@ -1446,7 +1446,6 @@
     "core.euiSelectable.placeholderName": "筛选选项",
     "core.euiSelectable.screenReaderInstructions": "使用向上和向下箭头键将焦点移到选项上。按 Enter 键进行选择。按 Esc 键折叠选项。",
     "core.euiSelectable.searchResults": "{resultsLength, plural, one {# result} other {# 个结果}} 可用",
-    "core.euiSelectableListItem.checkedOption": "选中的选项。",
     "core.euiSelectableListItem.checkOptionInstructions": "要选中此选项，请按 Enter 键。",
     "core.euiSelectableListItem.excludedOption": "排除的选项。",
     "core.euiSelectableListItem.excludeOptionInstructions": "要排除此选项，请按 Enter 键。",
