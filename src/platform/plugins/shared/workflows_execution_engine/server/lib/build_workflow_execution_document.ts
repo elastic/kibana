@@ -83,6 +83,7 @@ export const buildWorkflowExecutionDocument = (
     workflowId: workflow.id,
     ...pickManagedWorkflowFields(workflow),
     isTestRun: workflow.isTestRun,
+    isEphemeral: workflow.isEphemeral,
     workflowDefinition: workflow.definition,
     yaml: workflow.yaml,
     context,

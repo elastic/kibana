@@ -515,6 +515,40 @@ steps:
     });
 
     describe('when testing with workflowId parameter', () => {
+      it.each([
+        { workflowYaml: undefined, permission: 'execute', isEphemeral: false },
+        { workflowYaml: mockWorkflowYaml, permission: 'edit', isEphemeral: true },
+      ])(
+        'requires $permission for isEphemeral=$isEphemeral',
+        async ({ workflowYaml, permission, isEphemeral }) => {
+          const privateWorkflow: WorkflowDetailDto = {
+            ...mockWorkflowDetailDto,
+            access_control: { access_mode: 'private', entries: [] },
+          };
+          mockWorkflowsService.getWorkflow.mockResolvedValue(privateWorkflow);
+
+          await api.testWorkflow({
+            workflowId: mockWorkflowDetailDto.id,
+            workflowYaml,
+            inputs,
+            spaceId,
+            request: mockRequest,
+          });
+
+          const access = await mockWorkflowsService.getAccessControl();
+          expect(access.assertAccess).toHaveBeenCalledWith(
+            privateWorkflow,
+            permission,
+            mockRequest
+          );
+          expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+            expect.objectContaining({ yaml: mockWorkflowYaml, isTestRun: true, isEphemeral }),
+            expect.any(Object),
+            mockRequest
+          );
+        }
+      );
+
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,

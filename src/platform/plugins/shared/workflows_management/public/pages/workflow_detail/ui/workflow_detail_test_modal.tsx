@@ -23,7 +23,6 @@ import {
   clearReplay,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
@@ -47,20 +46,16 @@ export const WorkflowDetailTestModal = () => {
   const yamlString = useSelector(selectEditorYaml);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
-  const runWorkflow = useAsyncThunk(runWorkflowThunk);
-  const runSavedWorkflow = workflow?.permissions?.edit === false;
 
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
-      const executionId = runSavedWorkflow
-        ? await runWorkflow({ inputs })
-        : await testWorkflow({ inputs, triggerTab });
+      const executionId = await testWorkflow({ inputs, triggerTab });
 
       if (executionId) {
         setSelectedExecution(executionId.workflowExecutionId);
       }
     },
-    [runSavedWorkflow, runWorkflow, testWorkflow, setSelectedExecution]
+    [testWorkflow, setSelectedExecution]
   );
 
   const closeModal = useCallback(() => {
@@ -112,7 +107,7 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
-      isTestRun={!runSavedWorkflow}
+      isTestRun
       definition={definition}
       workflowId={workflowId}
       yamlString={yamlString}

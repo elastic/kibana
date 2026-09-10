@@ -396,6 +396,10 @@ Public workflows use the existing RBAC permissions for viewing, running, editing
 and deletion. ACL entries apply only to private workflows. The owner controls
 visibility and sharing. Managed workflows keep their existing plugin access rules.
 
+The detail page tests workflows even when disabled. Executors test the saved YAML;
+Editors and owners can test draft YAML. Test runs do not enable the workflow.
+Normal runs and scheduled runs still require an enabled workflow.
+
 Workflows without an ACL keep their existing access. New workflows with a user
 profile record the creator as owner and start with public access under RBAC.
 For older workflows, the recorded creator can set the first ACL; this records their profile ID as owner. Subsequent checks use profile IDs.

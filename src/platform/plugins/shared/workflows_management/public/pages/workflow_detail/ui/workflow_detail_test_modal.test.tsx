@@ -21,7 +21,6 @@ import {
   selectWorkflowId,
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { TestWrapper } from '../../../shared/test_utils';
 
@@ -97,7 +96,6 @@ describe('WorkflowDetailTestModal', () => {
   };
 
   let mockTestWorkflow: jest.Mock;
-  let mockRunWorkflow: jest.Mock;
 
   const renderModal = () => {
     const store = createMockStore();
@@ -112,7 +110,6 @@ describe('WorkflowDetailTestModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockTestWorkflow = jest.fn();
-    mockRunWorkflow = jest.fn();
     jest.mocked(selectWorkflow).mockReturnValue(undefined);
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
@@ -122,7 +119,6 @@ describe('WorkflowDetailTestModal', () => {
     (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
 
     mockUseAsyncThunk.mockImplementation((thunk) => {
-      if (thunk === runWorkflowThunk) return mockRunWorkflow;
       if (thunk === testWorkflowThunk) {
         return mockTestWorkflow;
       }
@@ -223,11 +219,11 @@ describe('WorkflowDetailTestModal', () => {
     });
   });
 
-  it('runs the saved workflow for an executor without submitting editor YAML', async () => {
+  it('opens a test run for an executor of a disabled workflow', async () => {
     jest.mocked(selectWorkflow).mockReturnValue({
       id: 'saved-workflow',
       name: 'Saved workflow',
-      enabled: true,
+      enabled: false,
       yaml: 'name: Saved workflow',
       createdAt: '',
       lastUpdatedAt: '',
@@ -237,13 +233,15 @@ describe('WorkflowDetailTestModal', () => {
       valid: true,
       permissions: { read: true, execute: true, edit: false, manage: false },
     });
-    mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'saved-execution' });
+    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'saved-execution' });
     const { getByTestId } = renderModal();
     fireEvent.click(getByTestId('submit-modal'));
     await waitFor(() =>
-      expect(mockRunWorkflow).toHaveBeenCalledWith({ inputs: { test: 'input' } })
+      expect(mockTestWorkflow).toHaveBeenCalledWith({
+        inputs: { test: 'input' },
+        triggerTab: 'manual',
+      })
     );
-    expect(mockTestWorkflow).not.toHaveBeenCalled();
   });
 
   describe('warnings', () => {

@@ -871,7 +871,14 @@ export class WorkflowsManagementApi {
     spaceId,
     request,
   }: TestWorkflowParams): Promise<string> {
-    if (workflowId) await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request);
+    if (workflowId) {
+      await this.assertWorkflowAccess(
+        workflowId,
+        spaceId,
+        workflowYaml ? 'edit' : 'execute',
+        request
+      );
+    }
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
     let existingWorkflow: WorkflowDetailDto | null = null;
@@ -921,7 +928,7 @@ export class WorkflowsManagementApi {
           originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
           managedVersion: existingWorkflow?.managedVersion,
         },
-        { isTestRun: true, isEphemeral: true }
+        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
       ),
       context,
       request

@@ -161,6 +161,46 @@ describe('runWorkflow', () => {
         expect(workflowRuntime.start).not.toHaveBeenCalled();
       });
 
+      it.each([
+        { role: 'executor', isEphemeral: false, allowed: true },
+        { role: 'executor', isEphemeral: true, allowed: false },
+        { role: 'executor', isEphemeral: undefined, allowed: false },
+        { role: 'viewer', isEphemeral: false, allowed: false },
+        { role: 'editor', isEphemeral: true, allowed: true },
+      ])(
+        'checks $role access for a test with isEphemeral=$isEphemeral',
+        async ({ role, isEphemeral, allowed }) => {
+          mockGetCurrentWorkflow.mockResolvedValueOnce({
+            owner_id: 'owner',
+            enabled: false,
+            access_control: {
+              access_mode: 'private',
+              entries: [{ type: 'user', id: 'recipient', role }],
+            },
+          });
+          dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('recipient');
+          mockGetWorkflowExecutionFromState.mockReturnValue({
+            ...defaultRunningExecution(),
+            isTestRun: true,
+            isEphemeral,
+          });
+
+          await runWorkflowWithDefaults();
+
+          if (allowed) {
+            expect(workflowRuntime.start).toHaveBeenCalled();
+          } else {
+            expect(workflowRuntime.start).not.toHaveBeenCalled();
+            expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+              expect.objectContaining({
+                status: ExecutionStatus.FAILED,
+                error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+              })
+            );
+          }
+        }
+      );
+
       it('runs a public workflow without requiring an ACL profile', async () => {
         mockGetCurrentWorkflow.mockResolvedValueOnce({
           owner_id: 'owner',

@@ -129,10 +129,10 @@ export async function runWorkflow({
       ? (await dependencies.coreStart.userProfile.getCurrentProfileId({ request: fakeRequest })) ??
         undefined
       : undefined;
-  if (
-    currentWorkflow &&
-    !getWorkflowPermissions(currentWorkflow, profileId)[execution.isTestRun ? 'edit' : 'execute']
-  ) {
+  // Older test executions have no isEphemeral flag and still require edit access.
+  const requiredPermission =
+    execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
+  if (currentWorkflow && !getWorkflowPermissions(currentWorkflow, profileId)[requiredPermission]) {
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.FAILED,

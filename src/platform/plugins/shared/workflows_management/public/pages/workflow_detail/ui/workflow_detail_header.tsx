@@ -218,7 +218,6 @@ export const WorkflowDetailHeader = React.memo(
         isValid: isSyntaxValid,
         canRunWorkflow: hasExecutePrivilege,
         hasWorkflowAccess: workflow?.permissions?.execute !== false,
-        isEnabled: workflow?.permissions?.edit !== false || workflow.enabled,
         isSaving,
       });
     }, [isSyntaxValid, hasExecutePrivilege, workflow, isExecutionsTab, isSaving]);
@@ -420,12 +419,7 @@ export const WorkflowDetailHeader = React.memo(
           iconType: 'play',
           run: handleRunClick,
           disableButton:
-            isExecutionsTab ||
-            !canExecuteWorkflow ||
-            (workflow?.permissions?.edit === false && !workflow.enabled) ||
-            isLoading ||
-            isSaving ||
-            !isSyntaxValid,
+            isExecutionsTab || !canExecuteWorkflow || isLoading || isSaving || !isSyntaxValid,
           tooltipContent: runWorkflowTooltipContent ?? undefined,
           testId: 'runWorkflowHeaderButton',
         });
@@ -477,8 +471,6 @@ export const WorkflowDetailHeader = React.memo(
       isYamlSynced,
       hasUnsavedChanges,
       saveWorkflowTooltipContent,
-      workflow?.enabled,
-      workflow?.permissions?.edit,
       handleRunClick,
       canExecuteWorkflow,
       isSyntaxValid,

@@ -131,32 +131,46 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await expect(editor.accessMode).toContainText('Public');
   });
 
-  test('lets an executor run the saved workflow without edit access', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    test.setTimeout(120_000);
-    const editor = pageObjects.workflowEditor;
-    await browserAuth.loginAsPrivilegedUser();
-    await browserAuth.loginAsAdmin();
-    isAdminOwner = true;
-    await editor.gotoNewWorkflow();
-    await editor.setYamlEditorValue(getDummyWorkflowYaml('Executor access'));
-    await editor.saveWorkflow();
-    workflowId = new URL(page.url()).pathname.split('/').at(-1);
-    if (!workflowId || workflowId === 'create') throw new Error('Workflow was not created');
-    await editor.gotoWorkflow(workflowId);
-    await editor.openAccessDialog();
-    await editor.setAccessMode('private');
-    await editor.addAccessUser('test editor');
-    await editor.setAccessRole('elastic_editor', 'executor');
-    await editor.saveAccess();
-    await browserAuth.loginAsPrivilegedUser();
-    await editor.gotoWorkflow(workflowId);
-    await expect(editor.saveButton).toBeDisabled();
-    await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeEnabled();
-    await editor.executeWorkflowFromBottomBar({ message: 'Executor run' });
-    await pageObjects.workflowExecution.waitForExecutionStatus('completed', 60000);
-  });
+  for (const enabled of [true, false]) {
+    test(`lets an executor test a saved workflow with enabled=${enabled}`, async ({
+      browserAuth,
+      pageObjects,
+      page,
+      scoutSpace,
+    }) => {
+      test.setTimeout(120_000);
+      const editor = pageObjects.workflowEditor;
+      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
+      isAdminOwner = true;
+      await editor.gotoNewWorkflow();
+      await editor.setYamlEditorValue(
+        getDummyWorkflowYaml('Executor access').replace('enabled: true', `enabled: ${enabled}`)
+      );
+      await editor.saveWorkflow();
+      workflowId = new URL(page.url()).pathname.split('/').at(-1);
+      if (!workflowId || workflowId === 'create') throw new Error('Workflow was not created');
+      await editor.gotoWorkflow(workflowId);
+      await editor.openAccessDialog();
+      await editor.setAccessMode('private');
+      await editor.addAccessUser('test editor');
+      await editor.setAccessRole('elastic_editor', 'executor');
+      await editor.saveAccess();
+      await browserAuth.loginAsPrivilegedUser();
+      await editor.gotoWorkflow(workflowId);
+      await expect(editor.saveButton).toBeDisabled();
+      await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeEnabled();
+      await editor.executeWorkflowFromBottomBar({ message: 'Executor run' });
+      await pageObjects.workflowExecution.waitForExecutionStatus('completed', 60000);
+      const saved = await page.request.get(
+        `${new URL(page.url()).origin}/s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`,
+        { headers: { 'elastic-api-version': '2023-10-31' } }
+      );
+      expect(saved.status()).toBe(200);
+      expect(await saved.json()).toMatchObject({
+        enabled,
+        permissions: { execute: true, edit: false },
+      });
+    });
+  }
 });

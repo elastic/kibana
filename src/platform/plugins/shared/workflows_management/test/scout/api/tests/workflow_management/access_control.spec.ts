@@ -188,6 +188,73 @@ steps:
     }
   );
 
+  apiTest(
+    'tests a disabled saved workflow without granting draft or edit access',
+    async ({ apiClient }) => {
+      const workflowPath = `s/${spaceId}/api/workflows/workflow/${workflowId}`;
+      const testPath = `s/${spaceId}/api/workflows/test`;
+      const disabledYaml = yaml.replace('enabled: true', 'enabled: false');
+      expect(
+        await apiClient.put(workflowPath, {
+          headers: ownerHeaders,
+          body: { yaml: disabledYaml },
+        })
+      ).toHaveStatusCode(200);
+
+      for (const role of ['executor', 'viewer'] as const) {
+        expect(
+          await apiClient.put(`s/${spaceId}/internal/workflows/${workflowId}/access_control`, {
+            headers: ownerHeaders,
+            body: {
+              access_mode: 'private',
+              entries: [{ type: 'user', id: readerProfileId, role }],
+            },
+          })
+        ).toHaveStatusCode(200);
+        const savedTest = await apiClient.post(testPath, {
+          headers: readerHeaders,
+          body: { workflowId, inputs: {} },
+        });
+        expect(savedTest).toHaveStatusCode(role === 'executor' ? 200 : 403);
+        await expect
+          .poll(
+            async () => {
+              if (role === 'viewer') return 'denied';
+              const execution = await apiClient.get(
+                `s/${spaceId}/api/workflows/executions/${savedTest.body.workflowExecutionId}`,
+                { headers: readerHeaders }
+              );
+              return execution.body.status;
+            },
+            { timeout: 60000 }
+          )
+          .toBe(role === 'executor' ? 'completed' : 'denied');
+        const normalRun = await apiClient.post(`${workflowPath}/run`, {
+          headers: readerHeaders,
+          body: { inputs: {} },
+        });
+        expect(normalRun).toHaveStatusCode(400);
+        expect(normalRun.body.message).toBe('Workflow is disabled. Enable it to run it.');
+        expect(
+          await apiClient.post(testPath, {
+            headers: readerHeaders,
+            body: { workflowId, workflowYaml: disabledYaml, inputs: {} },
+          })
+        ).toHaveStatusCode(403);
+        expect(
+          await apiClient.put(workflowPath, {
+            headers: readerHeaders,
+            body: { yaml },
+          })
+        ).toHaveStatusCode(403);
+        const saved = await apiClient.get(workflowPath, { headers: readerHeaders });
+        expect(saved).toHaveStatusCode(200);
+        expect(saved.body.enabled).toBe(false);
+        expect(saved.body.yaml).toBe(disabledYaml);
+      }
+    }
+  );
+
   for (const { name, featureId, privileges, recipientSpace, canRead, canExecute, canEdit } of [
     {
       name: 'no Workflows access',

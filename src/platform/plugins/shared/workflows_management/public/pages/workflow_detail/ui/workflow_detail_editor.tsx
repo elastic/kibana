@@ -231,18 +231,12 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         isValid: Boolean(isSyntaxValid),
         canRunWorkflow: hasExecutePrivilege,
         hasWorkflowAccess: workflow?.permissions?.execute !== false,
-        isEnabled: workflow?.permissions?.edit !== false || workflow.enabled,
         isSaving: Boolean(isSaving),
       }),
     [isExecutionsTab, isSyntaxValid, hasExecutePrivilege, workflow, isSaving]
   );
 
-  const runDisabled =
-    isExecutionsTab ||
-    !canExecuteWorkflow ||
-    !isSyntaxValid ||
-    isSaving ||
-    (workflow?.permissions?.edit === false && !workflow.enabled);
+  const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
 
   const testWorkflowButton = useMemo(
     () => (

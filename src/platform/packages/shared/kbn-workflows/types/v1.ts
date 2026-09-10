@@ -146,6 +146,8 @@ export interface EsWorkflowExecution {
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
+  /** Whether the test uses a submitted definition instead of the saved workflow. */
+  isEphemeral?: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
