@@ -85,7 +85,15 @@ export const ComposableClassicRulesPage = ({
       inspector: pluginsStart.inspector,
       hideListBackButton,
     }),
-    [coreStart, internalDeps, kibanaFeatures, pluginsStart, resolvedHistory, setBreadcrumbs, hideListBackButton]
+    [
+      coreStart,
+      internalDeps,
+      kibanaFeatures,
+      pluginsStart,
+      resolvedHistory,
+      setBreadcrumbs,
+      hideListBackButton,
+    ]
   );
 
   return <RulesPageApp deps={deps} />;

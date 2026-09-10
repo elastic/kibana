@@ -44,7 +44,9 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `${MGMT_BASE}${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
+      `${MGMT_BASE}${getRuleDetailsPath(
+        mockedRuleId
+      )}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
     );
   });
@@ -58,7 +60,9 @@ describe('RuleDetailsLocator', () => {
       kuery: 'mockedKuery',
     });
     expect(location.path).toEqual(
-      `${MGMT_BASE}${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
+      `${MGMT_BASE}${getRuleDetailsPath(
+        mockedRuleId
+      )}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
@@ -100,7 +104,9 @@ describe('RuleDetailsLocator', () => {
       controlConfigs: mockedControlConfigs,
     });
     expect(location.path).toEqual(
-      `${MGMT_BASE}${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
+      `${MGMT_BASE}${getRuleDetailsPath(
+        mockedRuleId
+      )}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(untracked)` +
         `,title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group)` +
         `,(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`

@@ -16,9 +16,7 @@ test.describe('Rule details back button', { tag: tags.stateful.classic }, () => 
   let testRuleId: string;
 
   test.beforeAll(async ({ apiServices }) => {
-    const response = await apiServices.alerting.rules.create(
-      makeEsQueryRule('scout-back-button')
-    );
+    const response = await apiServices.alerting.rules.create(makeEsQueryRule('scout-back-button'));
     testRuleId = response.data.id;
   });
 
