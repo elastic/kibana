@@ -30,12 +30,33 @@ describe('aiIndexAutomationsSkill', () => {
     expect(aiIndexAutomationsSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries the index-selection reference workflow as its one referencedContent entry', () => {
-    expect(aiIndexAutomationsSkill.referencedContent).toHaveLength(1);
-    const [reference] = aiIndexAutomationsSkill.referencedContent!;
-    expect(reference.name).toBe('index-selection-reference-workflow');
-    expect(reference.relativePath).toBe('.');
-    expect(reference.content.length).toBeGreaterThan(0);
+  it('carries one workflow template per strategy that ships with one', () => {
+    const names = (aiIndexAutomationsSkill.referencedContent ?? []).map(({ name }) => name);
+
+    expect(names).toEqual([
+      'index-metadata-template',
+      'entity-profile-template',
+      'document-template',
+    ]);
+  });
+
+  it('ships each template as a complete workflow rather than a fragment', () => {
+    for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
+      expect(reference.relativePath).toBe('.');
+      // A template is only a starting point if it runs: it needs the sink, the gate that guards
+      // it, and the `consts` block that is the whole of the adaptation.
+      expect(reference.content).toContain('consts:');
+      expect(reference.content).toContain('ai_index_id');
+      expect(reference.content).toContain('context-engine.verifyKi');
+      expect(reference.content).toContain('context-engine.createKi');
+      expect(reference.content).toContain('esql-valid-runtime');
+    }
+  });
+
+  it('pins no connector in any template, so ai.prompt resolves the default at run time', () => {
+    for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
+      expect(reference.content).not.toContain('connector-id');
+    }
   });
 
   it('mentions every referencedContent entry by name in the skill content', () => {
@@ -48,7 +69,6 @@ describe('aiIndexAutomationsSkill', () => {
     const toolIds = (await aiIndexAutomationsSkill.getRegistryTools?.()) ?? [];
 
     expect(toolIds).toEqual([
-      platformCoreTools.generateWorkflow,
       platformCoreTools.executeWorkflow,
       platformCoreTools.getWorkflowExecutionStatus,
       platformCoreTools.generateEsql,
@@ -67,6 +87,13 @@ describe('aiIndexAutomationsSkill', () => {
     const toolIds = (await aiIndexAutomationsSkill.getRegistryTools?.()) ?? [];
 
     expect(toolIds.some((id) => /createKi|updateKi|deleteKi/i.test(id))).toBe(false);
+  });
+
+  it('binds no workflow generator, since authoring starts from a template', async () => {
+    const toolIds = (await aiIndexAutomationsSkill.getRegistryTools?.()) ?? [];
+
+    expect(toolIds).not.toContain(platformCoreTools.generateWorkflow);
+    expect(aiIndexAutomationsSkill.content).not.toContain('generate_workflow');
   });
 
   it('only instructs the agent to call tools that are actually bound', async () => {
@@ -117,15 +144,32 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
     });
 
-    it('scaffolds through generation once, then edits the definition as text', () => {
-      expect(content).toMatch(/Scaffold it once, then take the YAML into text/);
-      expect(content).toContain('attachments.read');
-      expect(content).toMatch(/all take a raw `yaml` string/);
+    it('starts authoring from a template rather than from a blank workflow', () => {
+      expect(content).toMatch(/Start from the template\. Do not write a workflow/);
+      expect(content).toMatch(/all take a raw\s+`yaml` string/);
     });
 
-    it('warns that re-generating to make an edit re-rolls what was already settled', () => {
-      expect(content).toMatch(/re-rolls parts of the workflow you had\s+already settled/);
-      expect(content).toMatch(/Once means once/);
+    it('names each template where its strategy is described, so the brief can cite one', () => {
+      expect(content).toMatch(/Index\/Table Metadata.*\n?.*`index-metadata-template`/);
+      expect(content).toMatch(/Bottom-Up.*\n?.*`document-template`/);
+      expect(content).toMatch(/Cumulative \/ Wiki-style.*\n?.*`entity-profile-template`/);
+    });
+
+    it('points the strategies without a template at the one to start from', () => {
+      expect(content).toMatch(/Selective \/ Outlier.*\n?.*start from `document-template`/);
+      expect(content).toMatch(/Atomic Facts.*\n?.*start from `document-template`/);
+      expect(content).toMatch(/Detection \/ Feature.*\n?.*start from `index-metadata-template`/);
+    });
+
+    it('says what a template already encodes, so it is edited rather than rewritten', () => {
+      expect(content).toMatch(/a fresh draft gets\s+wrong/);
+      expect(content).toMatch(/Take it literally/);
+      expect(content).toMatch(/none of them announce themselves/);
+    });
+
+    it('has the brief name the template, since a subagent without one writes from nothing', () => {
+      expect(content).toMatch(/\*\*the template it starts from, by name\*\*/);
+      expect(content).toMatch(/rediscovering what the\s+template already encodes/);
     });
 
     it('points at the lookup tools that cover built-in and connector step types', () => {
@@ -164,7 +208,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('points at the referenced-file path instead of browsing the filesystem', () => {
-      expect(content).toMatch(/among its `referenced_files` with an absolute path/);
+      expect(content).toMatch(/among its `referenced_files` with\s+absolute paths/);
       expect(content).toMatch(/nothing to go looking for with `list_files`/);
     });
 
@@ -176,12 +220,41 @@ describe('aiIndexAutomationsSkill', () => {
     it('names the closed set of step types, so lookups can be targeted', () => {
       for (const stepType of [
         '`elasticsearch.esql.query`',
+        '`elasticsearch.search`',
+        '`elasticsearch.request`',
         '`ai.prompt`',
         '`foreach`',
         '`if`',
         '`data.set`',
+        '`console`',
       ]) {
         expect(content).toContain(stepType);
+      }
+    });
+
+    it('covers every step type the templates use, so none needs looking up', () => {
+      const closedSet = [
+        'elasticsearch.esql.query',
+        'elasticsearch.search',
+        'elasticsearch.request',
+        'ai.prompt',
+        'foreach',
+        'if',
+        'data.set',
+        'console',
+        'context-engine.createKi',
+        'context-engine.verifyKi',
+      ];
+
+      for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
+        // Anchored on the `- name:` above it, so the `type:` keys inside an ai.prompt output
+        // schema are not mistaken for step types.
+        const used = [...reference.content.matchAll(/- name: [^\n]+\n\s*type: ([\w.-]+)/g)].map(
+          ([, stepType]) => stepType
+        );
+
+        expect(used.length).toBeGreaterThan(0);
+        expect(used.filter((stepType) => !closedSet.includes(stepType))).toEqual([]);
       }
     });
 
@@ -194,14 +267,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/omitting it resolves the deployment's default AI\s+connector/);
     });
 
-    it('strips the connector the scaffolder pins, since it is primed with the environment', () => {
-      expect(content).toMatch(/tends to pin a named `connector-id` onto\s+`ai\.prompt` steps/);
-      expect(content).toMatch(/first edit to make on the scaffold/);
-    });
-
-    it('treats the scaffold attachment as a handoff rather than a workspace to edit', () => {
-      expect(content).toMatch(/a handoff, not a workspace/);
-      expect(content).toMatch(/do not\s+try to write back to it/);
+    it('says the templates omit connector-id deliberately, so none is added back', () => {
+      expect(content).toMatch(/carry no `connector-id` on their `ai\.prompt` steps/);
+      expect(content).toMatch(/Do not add one/);
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
@@ -240,12 +308,17 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/createKi` refuses `ki_id`/);
     });
 
-    it('saves the piloted definition rather than a regenerated one', () => {
-      expect(content).toMatch(/Save the YAML exactly as the subagent returned it/);
+    it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
+      expect(content).toMatch(/tag goes on that step's `ki\.tags` list/);
+      expect(content).toMatch(/not on\s+`context-engine\.createKi`/);
     });
 
-    it('does not ask for a second validation of what generate_workflow already validated', () => {
-      expect(content).toMatch(/it validates its own output/);
+    it('points the pilot bound at the consts the templates already expose', () => {
+      expect(content).toMatch(/`max_entities`, `max_documents`, `corpus_filter`/);
+    });
+
+    it('saves the piloted definition rather than a regenerated one', () => {
+      expect(content).toMatch(/Save the YAML exactly as the subagent returned it/);
     });
 
     it('does not pay for a validate call before a run that validates anyway', () => {
