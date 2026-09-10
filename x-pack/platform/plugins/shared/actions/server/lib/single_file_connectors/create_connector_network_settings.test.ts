@@ -239,4 +239,81 @@ describe('createPlatformServices', () => {
 
     expect(result.ca).toEqual(Buffer.from(certData));
   });
+
+  it('buildTlsOptions uses a single custom host entry for multi-host URIs', () => {
+    const hostSsl = { verificationMode: 'none' as const };
+    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockImplementation((url: string) =>
+      url === 'https://rs0.example.com:27017' ? { ssl: hostSsl } : undefined
+    );
+    mockGetNodeSSLOptions.mockReturnValue({});
+    const platform = createPlatformServices(mockConfigUtils);
+
+    platform.buildTlsOptions(
+      [
+        { hostname: 'rs0.example.com', port: 27017 },
+        { hostname: 'rs1.example.com', port: 27017 },
+      ],
+      fakeLogger
+    );
+
+    expect(mockGetNodeSSLOptions).toHaveBeenCalledWith(fakeLogger, 'none', expect.anything());
+  });
+
+  it('buildTlsOptions throws when multiple hosts have conflicting customHostSettings entries', () => {
+    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockImplementation((url: string) => {
+      if (url === 'https://rs0.example.com:27017')
+        return { ssl: { verificationMode: 'none' as const } };
+      if (url === 'https://rs1.example.com:27017')
+        return { ssl: { verificationMode: 'full' as const } };
+      return undefined;
+    });
+    const platform = createPlatformServices(mockConfigUtils);
+
+    expect(() =>
+      platform.buildTlsOptions(
+        [
+          { hostname: 'rs0.example.com', port: 27017 },
+          { hostname: 'rs1.example.com', port: 27017 },
+        ],
+        fakeLogger
+      )
+    ).toThrow('multiple hosts in the connection URI have conflicting');
+  });
+
+  it('buildTlsOptions throws when a per-host CA would only cover some members of a multi-host URI', () => {
+    const certData = Buffer.from('custom-ca').toString('base64');
+    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockImplementation((url: string) =>
+      url === 'https://rs0.example.com:27017'
+        ? { ssl: { verificationMode: 'full' as const, certificateAuthoritiesData: certData } }
+        : undefined
+    );
+    const platform = createPlatformServices(mockConfigUtils);
+
+    expect(() =>
+      platform.buildTlsOptions(
+        [
+          { hostname: 'rs0.example.com', port: 27017 },
+          { hostname: 'rs1.example.com', port: 27017 },
+        ],
+        fakeLogger
+      )
+    ).toThrow('cannot be applied to only some members of a multi-host connection');
+  });
+
+  it('buildTlsOptions allows a per-host CA on a single-host connection', () => {
+    const certData = Buffer.from('custom-ca').toString('base64');
+    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockReturnValue({
+      ssl: { verificationMode: 'full' as const, certificateAuthoritiesData: certData },
+    });
+    const tlsResult = { rejectUnauthorized: true } as ReturnType<typeof getNodeSSLOptions>;
+    mockGetNodeSSLOptions.mockReturnValue(tlsResult);
+    const platform = createPlatformServices(mockConfigUtils);
+
+    const result = platform.buildTlsOptions(
+      [{ hostname: 'mongo.example.com', port: 27017 }],
+      fakeLogger
+    );
+
+    expect(result.ca).toEqual(Buffer.from(certData));
+  });
 });

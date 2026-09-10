@@ -71,6 +71,7 @@ export const FindInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(0)
+      .max(100_000)
       .optional()
       .describe(
         'Number of documents to skip before returning results. Use with limit for pagination.'

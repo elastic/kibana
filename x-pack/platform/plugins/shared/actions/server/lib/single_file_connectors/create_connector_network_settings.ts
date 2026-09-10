@@ -47,12 +47,32 @@ export const createPlatformServices = (
     const sslSettings = configUtils.getSSLSettings();
     // xpack.actions.customHostSettings entries are keyed by https://<host>:<port> — "https:" is
     // used as a generic TCP+TLS placeholder scheme, not a real HTTP request.
-    const customHostSsl = targets
-      .map(
-        ({ hostname, port }) =>
-          configUtils.getCustomHostSettings(`https://${hostname}:${port}`)?.ssl
-      )
-      .find((ssl) => ssl != null);
+    const customHostSsls = targets.flatMap(({ hostname, port }) => {
+      const ssl = configUtils.getCustomHostSettings(`https://${hostname}:${port}`)?.ssl;
+      return ssl != null ? [ssl] : [];
+    });
+    if (customHostSsls.length > 1) {
+      throw new Error(
+        'MongoDB connector: multiple hosts in the connection URI have conflicting ' +
+          'xpack.actions.customHostSettings entries. All replica-set members must share ' +
+          'the same custom TLS policy, or use the global xpack.actions.ssl settings instead.'
+      );
+    }
+    const customHostSsl = customHostSsls[0];
+    // A per-host certificateAuthoritiesData applies to the entire MongoClient (one TLS config
+    // for all connections). If only some targets have a matching entry, the replaced CA would
+    // not validate the other members' certificates.
+    if (
+      customHostSsl?.certificateAuthoritiesData != null &&
+      targets.length > customHostSsls.length
+    ) {
+      throw new Error(
+        'MongoDB connector: a certificateAuthoritiesData entry in xpack.actions.customHostSettings ' +
+          'cannot be applied to only some members of a multi-host connection. Configure the custom CA ' +
+          'in xpack.actions.ssl so it applies to all replica-set members, or add a matching ' +
+          'customHostSettings entry for every host in the connection URI.'
+      );
+    }
     const tlsOptions = getNodeSSLOptions(
       logger,
       customHostSsl?.verificationMode ?? sslSettings.verificationMode,
