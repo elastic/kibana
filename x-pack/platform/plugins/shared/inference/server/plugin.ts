@@ -210,24 +210,8 @@ export class InferencePlugin
       logger: this.logger,
     });
 
-    const workerConfig = this.config.workers.anonymization;
-    if (
-      this.config.anonymization.workflowDriven &&
-      workerConfig.workflowDrivenMinThreads > workerConfig.maxThreads
-    ) {
-      this.logger.warn(
-        `xpack.inference.workers.anonymization.workflowDrivenMinThreads ` +
-          `(${workerConfig.workflowDrivenMinThreads}) exceeds maxThreads ` +
-          `(${workerConfig.maxThreads}); clamping to maxThreads.`
-      );
-    }
-    const effectiveMinThreads = this.config.anonymization.workflowDriven
-      ? Math.min(workerConfig.workflowDrivenMinThreads, workerConfig.maxThreads)
-      : workerConfig.minThreads;
-    const effectiveWorkerConfig = { ...workerConfig, minThreads: effectiveMinThreads };
-
     this.regexWorker = new RegexWorkerService(
-      effectiveWorkerConfig,
+      this.config.workers.anonymization,
       this.logger.get('regex_worker')
     );
 

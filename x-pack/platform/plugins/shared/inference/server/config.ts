@@ -31,11 +31,17 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       minThreads: schema.number({ defaultValue: 0, min: 0 }),
       maxThreads: schema.number({ defaultValue: 3, min: 1 }),
-      // Effective minThreads when workflowDriven anonymization is enabled. Defaults to
-      // maxThreads (3) to keep workers pre-warmed and avoid cold-start latency on the
-      // synchronous request path. Set lower to allow thread scaling at the cost of
-      // occasional cold-start latency. Values above maxThreads are clamped to maxThreads.
-      workflowDrivenMinThreads: schema.number({ defaultValue: 3, min: 0 }),
+      maxQueue: schema.number({ defaultValue: 20, min: 1 }),
+      idleTimeout: schema.duration({ defaultValue: '30s' }),
+      taskTimeout: schema.duration({ defaultValue: '15s' }),
+    }),
+    workflowAnonymization: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      // Defaults to maxThreads to keep workers pre-warmed; the workflow-driven path runs
+      // synchronously on the request hot-path so cold-start latency is unacceptable.
+      // Lower this to allow partial thread scaling at the cost of occasional cold starts.
+      minThreads: schema.number({ defaultValue: 3, min: 0 }),
+      maxThreads: schema.number({ defaultValue: 3, min: 1 }),
       maxQueue: schema.number({ defaultValue: 20, min: 1 }),
       idleTimeout: schema.duration({ defaultValue: '30s' }),
       taskTimeout: schema.duration({ defaultValue: '15s' }),
@@ -46,4 +52,5 @@ export const configSchema = schema.object({
 export type InferenceConfig = TypeOf<typeof configSchema>;
 
 export type AnonymizationWorkerConfig = InferenceConfig['workers']['anonymization'];
+export type WorkflowAnonymizationWorkerConfig = InferenceConfig['workers']['workflowAnonymization'];
 export type WorkflowAnonymizationFailureMode = InferenceConfig['anonymization']['failureMode'];
