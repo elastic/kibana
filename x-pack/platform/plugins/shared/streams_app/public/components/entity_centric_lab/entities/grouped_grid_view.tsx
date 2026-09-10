@@ -76,6 +76,7 @@ import {
   alertHintFromEntity,
   bucketKeyFor,
   effectiveStatForMetric,
+  ENTITY_ALERTS_METRIC,
   ENTITY_ALERTS_METRIC_ID,
   findMetric,
   getBucketMetrics,
@@ -2539,15 +2540,51 @@ const CloudGroupedCards = ({
     border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
+  // Flatten all provider groups into a single ordered list of service rows.
+  const allServiceRows = useMemo(() => {
+    const result: Array<{ label: string; entityType: string; rows: Entity[] }> = [];
+    for (const group of providerGroups) {
+      for (const service of group.provider.services) {
+        const serviceEntities = group.rows.filter(
+          (entity) => entity.type === service.entityType
+        );
+        if (serviceEntities.length > 0) {
+          result.push({ label: service.label, entityType: service.entityType, rows: serviceEntities });
+        }
+      }
+    }
+    return result;
+  }, [providerGroups]);
+
+  // On a category-scoped page, render each service type in its own panel
+  // (matches the Kubernetes sub-type layout).
+  if (hideHeader) {
+    return (
+      <>
+        {allServiceRows.map((service, index) => (
+          <React.Fragment key={service.entityType}>
+            {index > 0 ? <EuiSpacer size="m" /> : null}
+            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+              <SubTypeRow
+                bucketKey={bucketKeyFor('cloud', service.entityType)}
+                label={service.label}
+                entities={service.rows}
+                onSelectEntity={onSelectEntity}
+              />
+            </EuiPanel>
+          </React.Fragment>
+        ))}
+      </>
+    );
+  }
+
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-          {!hideHeader && (
-            <EuiFlexItem grow={false}>
-              <CategoryHeader category="cloud" total={visibleEntities.length} />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <CategoryHeader category="cloud" total={visibleEntities.length} />
+          </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <CloudProviderFilter value={providerFilter} onChange={setProviderFilter} />
@@ -2716,10 +2753,25 @@ const CategoryCardInner = ({
       ? coloring
       : null;
 
+  // On a category-scoped page, show the entity *type* instead of the
+  // category in the header row (e.g. "Postgres 3" instead of "Databases 3").
+  const typeLabel = hideHeader ? (entities[0]?.type ?? categoryLabel) : undefined;
+
   const controlsAndTiles = (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-        {!hideHeader && (
+        {hideHeader ? (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h5>{typeLabel}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{entities.length}</EuiBadge>
+            </EuiFlexItem>
+          </>
+        ) : (
           <EuiFlexItem grow={false}>
             <CategoryHeader category={category} total={entities.length} label={labelOverride} />
           </EuiFlexItem>
@@ -2759,7 +2811,16 @@ const CategoryCardInner = ({
   );
 
   if (hideHeader) {
-    return controlsAndTiles;
+    return (
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+        data-test-subj={`entityCentricLabBucket-${bucketKey}`}
+      >
+        {controlsAndTiles}
+      </EuiPanel>
+    );
   }
 
   return (
@@ -2790,20 +2851,42 @@ const CustomGroupTiles = ({
 }: {
   entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
-}) => (
-  <BucketTileRow
-    entities={entities}
-    metric={ENTITY_HEALTH_METRIC}
-    statId="last"
-    onSelectEntity={onSelectEntity}
-  />
-);
+}) => {
+  const fallbackMetric = useMemo(() => {
+    try {
+      const raw = typeof window !== 'undefined'
+        ? window.localStorage.getItem('elasticOn_v_phase')
+        : null;
+      const phase = raw ?? 'phase1';
+      if (phase === 'phase1') return ENTITY_ALERTS_METRIC;
+    } catch { /* ignore */ }
+    return ENTITY_HEALTH_METRIC;
+  }, []);
+
+  return (
+    <BucketTileRow
+      entities={entities}
+      metric={fallbackMetric}
+      statId="last"
+      onSelectEntity={onSelectEntity}
+    />
+  );
+};
 
 /** A simple section header for a custom-grouping bucket (no category icon). */
-const GroupBucketHeader = ({ label, total }: { label: string; total: number }) => (
+const GroupBucketHeader = ({
+  label,
+  total,
+  size = 'xs',
+}: {
+  label: string;
+  total: number;
+  /** EuiTitle size — `xs` for parent groups, `xxs` for children. */
+  size?: 'xs' | 'xxs';
+}) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
+      <EuiTitle size={size}>
         <h4>{label}</h4>
       </EuiTitle>
     </EuiFlexItem>
@@ -2815,9 +2898,15 @@ const GroupBucketHeader = ({ label, total }: { label: string; total: number }) =
 
 /**
  * Derive the bucket key for a set of entities so custom-grouping buckets
- * that contain a single category/subType can re-use the per-type metric
- * catalog (Color by, legend, palette). Returns `undefined` when the
- * entities span multiple types — those buckets stay on Health-only.
+ * can re-use the per-type metric catalog (Color by, legend, palette).
+ *
+ * 1. If all entities share the same category **and** subType/type →
+ *    returns the specific `category:subType` key (e.g. `kubernetes:Pods`).
+ * 2. If all entities share the same category but have mixed types →
+ *    returns the category-level key (e.g. `hosts`), which still provides
+ *    metric controls via the category's metric catalog.
+ * 3. If entities span multiple categories → returns `undefined` (no
+ *    per-bucket metric catalog available).
  */
 const inferBucketKey = (entities: readonly Entity[]): BucketKey | undefined => {
   if (entities.length === 0) return undefined;
@@ -2825,13 +2914,17 @@ const inferBucketKey = (entities: readonly Entity[]): BucketKey | undefined => {
   const category = first.category;
   const subType =
     category === 'kubernetes' ? first.subType ?? first.type : first.type;
+  let sameType = true;
   for (let i = 1; i < entities.length; i++) {
     const entity = entities[i];
-    const entitySubType =
-      entity.category === 'kubernetes' ? entity.subType ?? entity.type : entity.type;
-    if (entity.category !== category || entitySubType !== subType) return undefined;
+    if (entity.category !== category) return undefined;
+    if (sameType) {
+      const entitySubType =
+        entity.category === 'kubernetes' ? entity.subType ?? entity.type : entity.type;
+      if (entitySubType !== subType) sameType = false;
+    }
   }
-  return bucketKeyFor(category, subType);
+  return sameType ? bucketKeyFor(category, subType) : (category as BucketKey);
 };
 
 /**
@@ -2843,17 +2936,20 @@ const CustomGroupBucketContent = ({
   entities,
   label,
   onSelectEntity,
+  isTopLevel = false,
 }: {
   entities: readonly Entity[];
   label: string;
   onSelectEntity: (entityName: string) => void;
+  /** When true, use parent-level font size (xs) matching CategoryHeader. */
+  isTopLevel?: boolean;
 }) => {
   const key = useMemo(() => inferBucketKey(entities), [entities]);
 
   if (!key) {
     return (
       <>
-        <GroupBucketHeader label={label} total={entities.length} />
+        <GroupBucketHeader label={label} total={entities.length} size={isTopLevel ? 'xs' : 'xxs'} />
         <EuiSpacer size="s" />
         <CustomGroupTiles entities={entities} onSelectEntity={onSelectEntity} />
       </>
@@ -2866,6 +2962,7 @@ const CustomGroupBucketContent = ({
       label={label}
       entities={entities}
       onSelectEntity={onSelectEntity}
+      isTopLevel={isTopLevel}
     />
   );
 };
@@ -2879,11 +2976,13 @@ const CustomGroupBucketWithControls = ({
   label,
   entities,
   onSelectEntity,
+  isTopLevel = false,
 }: {
   bucketKey: BucketKey;
   label: string;
   entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
+  isTopLevel?: boolean;
 }) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
@@ -2924,7 +3023,7 @@ const CustomGroupBucketWithControls = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
+              <EuiTitle size={isTopLevel ? 'xs' : 'xxs'}>
                 <h4>{label}</h4>
               </EuiTitle>
             </EuiFlexItem>
@@ -2990,6 +3089,7 @@ const CustomGroupCard = ({
     border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
   const childDividerClass = css`
+    margin-top: ${euiTheme.size.m};
     padding-top: ${euiTheme.size.m};
     border-top: 1px solid ${euiTheme.colors.lightShade};
   `;
@@ -3020,6 +3120,7 @@ const CustomGroupCard = ({
           entities={node.entities}
           label={node.label}
           onSelectEntity={onSelectEntity}
+          isTopLevel
         />
       )}
     </EuiPanel>

@@ -199,12 +199,12 @@ type TabId = BuiltInTabId | string;
 
 const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'overview',
+  'dashboards',
   'metrics',
   'logs',
   'traces',
   'alerts',
   'relationships',
-  'dashboards',
   'custom',
   'profiling',
 ];
@@ -576,6 +576,12 @@ export const EntityFlyout = ({
         }),
       },
       {
+        id: 'dashboards',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.dashboards', {
+          defaultMessage: 'Dashboards',
+        }),
+      },
+      {
         id: 'metrics',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.metrics', {
           defaultMessage: 'Metrics',
@@ -615,12 +621,6 @@ export const EntityFlyout = ({
         id: 'relationships',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
           defaultMessage: 'Relationships',
-        }),
-      },
-      {
-        id: 'dashboards',
-        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.dashboards', {
-          defaultMessage: 'Dashboards',
         }),
       },
       {

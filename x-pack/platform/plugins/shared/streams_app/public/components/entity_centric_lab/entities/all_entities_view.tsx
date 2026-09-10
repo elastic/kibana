@@ -873,8 +873,17 @@ const AllEntitiesViewInner = ({
         : filteredEntitiesBeforeCluster,
     [filteredEntitiesBeforeCluster, showK8sClusterFilter, k8sClusterFilter, k8sClusterNames]
   );
-  // Cloud provider filter lives inside the Cloud section card, not here.
-  const filteredEntities = filteredEntitiesAfterCluster;
+  // Cloud provider filter — page-level on the Cloud category page.
+  const filteredEntitiesAfterProvider = useMemo(
+    () =>
+      isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL
+        ? filteredEntitiesAfterCluster.filter(
+            (entity) => entity.provider === cloudProviderFilter
+          )
+        : filteredEntitiesAfterCluster,
+    [filteredEntitiesAfterCluster, isCloudCategoryPage, cloudProviderFilter]
+  );
+  const filteredEntities = filteredEntitiesAfterProvider;
 
   // ElasticOn summary "· N Groups": count distinct level-1 buckets under the
   // active grouping (Category by default), so the header stays truthful when
@@ -916,7 +925,8 @@ const AllEntitiesViewInner = ({
     Object.values(activeExtraFilters).some((values) => values.length > 0) ||
     labFilters.length > 0 ||
     search.trim() !== '' ||
-    (showK8sClusterFilter && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL);
+    (showK8sClusterFilter && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL) ||
+    (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
   const handleClearFilters = useCallback(() => {
@@ -1552,6 +1562,14 @@ const AllEntitiesViewInner = ({
                       />
                     </EuiFlexItem>
                   ) : null}
+                  {isCloudCategoryPage ? (
+                    <EuiFlexItem grow={false}>
+                      <CloudProviderFilter
+                        value={cloudProviderFilter}
+                        onChange={setCloudProviderFilter}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   {hasActiveFilters ? (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
@@ -1632,10 +1650,11 @@ const AllEntitiesViewInner = ({
                 <EuiHorizontalRule margin="m" />
                 {effectiveViewMode === 'grid' ? (
                   <GroupedGridView
+                    key={`grid-${phaseVariation}`}
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     selectedEntityName={selectedEntityName}
-                    groupCloudByProvider={false}
+                    groupCloudByProvider={!customGroupBy}
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
@@ -1643,7 +1662,7 @@ const AllEntitiesViewInner = ({
                   />
                 ) : tableStyleVariation === 'security' ? (
                   <SecurityGroupingView
-                    key={groupBy.join(',')}
+                    key={`${groupBy.join(',')}-${phaseVariation}`}
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     groupByFields={groupByFields}
