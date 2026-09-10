@@ -13,10 +13,10 @@
  * product-catalog) with a genuinely degraded payment service (connection refused,
  * 100% error rate on checkout's outbound calls) — exactly what the eval needs.
  *
- * The eval client sends text messages only; it cannot attach an
- * `observability.service-map-context` attachment the way the UI button does.
- * The view-filter context is therefore spelled out inline in the question,
- * mimicking the auto-sent prompt the button would produce.
+ * Each example sends what the "Investigate map" button actually sends: the real
+ * `observability.service-map-context` attachment carrying the view filters, plus
+ * the button's auto-sent prompt. The skill activates on that attachment, so this
+ * exercises routing as well as behaviour.
  */
 
 import { tags } from '@kbn/scout';
@@ -41,6 +41,41 @@ const INVESTIGATION_TOOLS = [
   'observability.get_alerts',
   'observability.get_service_topology',
 ];
+
+const SERVICE_MAP_CONTEXT_ATTACHMENT_TYPE = 'observability.service-map-context';
+
+/**
+ * The prompt the "Investigate map" button auto-sends
+ * (`serviceMapInvestigateButton.defaultPrompt`). The view filters travel in the
+ * attachment, not in this text.
+ */
+const BUTTON_PROMPT =
+  'Investigate the service map I am currently viewing. Identify services with problems — ' +
+  'active alerts, violated or degrading SLOs, ML anomalies, or unusual error rates and latency ' +
+  'between services — ordered by severity: active alerts first, then violated SLOs, ML anomalies, ' +
+  'degrading SLOs, unusual error rates and latency, and finally structural observations such as ' +
+  'isolated services. Explain the architecture and how the services connect, and give me links to ' +
+  'the most problematic services and their alerts.';
+
+/** Mirrors the attachment the button builds from the user's map view. */
+function serviceMapContextAttachment(
+  data: {
+    timeRange?: { from: string; to: string };
+    environment?: string;
+    kuery?: string;
+    highlightedServiceNames?: string[];
+  } = {}
+) {
+  return [
+    {
+      type: SERVICE_MAP_CONTEXT_ATTACHMENT_TYPE,
+      data: {
+        timeRange: { from: 'now-15m', to: 'now' },
+        ...data,
+      },
+    },
+  ];
+}
 
 evaluate.describe(
   'Investigate Service Map Skill (#288581)',
@@ -68,19 +103,12 @@ evaluate.describe(
           dataset: {
             name: 'service-map investigation — whole scope',
             description:
-              'Validates that the investigate-service-map skill surveys all services, orders issues by severity, explains the architecture, renders a service-map attachment, and provides deep links. Uses the payment-unreachable snapshot where checkout degrades because payment is unreachable.',
+              'Validates that the investigate-service-map skill surveys all services, orders issues by severity, explains the architecture in prose, and provides deep links. Uses the payment-unreachable snapshot where checkout degrades because payment is unreachable. Phase 1 deliberately renders no service-map attachment — the user is already looking at the map.',
             examples: [
               {
                 input: {
-                  question:
-                    'Investigate the service map I am currently viewing. ' +
-                    'Time range: last 15 minutes. Environment: all environments. ' +
-                    'Identify services with problems — active alerts, violated or degrading SLOs, ' +
-                    'ML anomalies, or unusual error rates and latency between services — ' +
-                    'ordered by severity: active alerts first, then violated SLOs, ML anomalies, ' +
-                    'degrading SLOs, unusual error rates and latency, and finally structural ' +
-                    'observations such as isolated services. Explain the architecture and how the ' +
-                    'services connect, and give me links to the most problematic services and their alerts.',
+                  question: BUTTON_PROMPT,
+                  attachments: serviceMapContextAttachment(),
                 },
                 output: {
                   criteria: [
@@ -114,18 +142,15 @@ evaluate.describe(
             name: 'service-map investigation — highlighted healthy service',
             description:
               'Validates that when the user has highlighted the frontend service (which is healthy), ' +
-              'the agent investigates that service first, reports it as healthy, still surfaces the ' +
-              'genuinely degraded payment service, and renders a service-map attachment.',
+              'the agent investigates that service first, reports it as healthy, and still surfaces ' +
+              'the genuinely degraded payment service.',
             examples: [
               {
                 input: {
-                  question:
-                    'Investigate the service map I am currently viewing. ' +
-                    'Time range: last 15 minutes. Environment: all environments. ' +
-                    'The user has highlighted the following services as their focus: frontend. ' +
-                    'Identify services with problems — active alerts, violated or degrading SLOs, ' +
-                    'ML anomalies, or unusual error rates and latency between services — ' +
-                    'ordered by severity. Explain the architecture and give me links to problematic services.',
+                  question: BUTTON_PROMPT,
+                  attachments: serviceMapContextAttachment({
+                    highlightedServiceNames: ['frontend'],
+                  }),
                 },
                 output: {
                   criteria: [

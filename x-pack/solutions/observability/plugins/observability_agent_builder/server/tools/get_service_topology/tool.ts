@@ -15,8 +15,9 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type { ServiceNodeMetadataMap } from '../../data_registry/data_registry_types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
+import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 import type { ServiceTopologyNode } from './types';
@@ -51,6 +52,23 @@ const getServiceTopologyToolSchema = z.object({
         'depth=1 returns only immediate (single-hop) dependencies. ' +
         'Omit for unlimited traversal (full multi-hop topology).'
     ),
+  environment: z
+    .string()
+    .max(MAX_SHORT_STRING_LENGTH)
+    .optional()
+    .describe(
+      'Service environment (e.g. "production") used to scope the returned `nodeMetadata` badges. ' +
+        'Pass it whenever the user is looking at a single environment — otherwise alert, SLO and ' +
+        'anomaly counts are aggregated across every environment. Omit for all environments.'
+    ),
+  kuery: z
+    .string()
+    .max(MAX_KQL_FILTER_LENGTH)
+    .optional()
+    .describe(
+      'KQL filter applied when computing the `nodeMetadata` alert and SLO badges, ' +
+        'e.g. \'service.name: "frontend"\'. Omit when no filter applies.'
+    ),
 });
 
 export function createGetServiceTopologyTool({
@@ -82,6 +100,8 @@ Returns:
 
 Supports downstream, upstream, or both directions.
 
+Scoping: \`environment\` and \`kuery\` scope the \`nodeMetadata\` badges only. The \`connections\` graph is always built from all environments, so do not claim a topology is environment-specific.
+
 When to use:
 - Checking which direct dependencies are failing or slow (depth: 1)
 - Tracing cascading failures through multi-hop dependency chains
@@ -103,7 +123,7 @@ After reviewing topology results, consider:
       },
     },
     handler: async (toolParams, context) => {
-      const { serviceName, direction, depth, start, end } = toolParams;
+      const { serviceName, direction, depth, start, end, environment, kuery } = toolParams;
       const { request } = context;
 
       try {
@@ -130,14 +150,18 @@ After reviewing topology results, consider:
           }
         }
 
-        // Enrich with per-service badge metadata (alerts, SLOs, ML anomalies).
+        // Enrich with per-service badge metadata (alerts, SLOs, ML anomalies),
+        // scoped to the same environment/kuery the caller is looking at so the
+        // counts match the user's view instead of aggregating every environment.
         // Best-effort: failures are logged and do not prevent topology from being returned.
-        let nodeMetadata: Record<string, unknown> | undefined;
+        let nodeMetadata: ServiceNodeMetadataMap | undefined;
         if (serviceNamesInTopology.size > 0) {
           try {
             nodeMetadata = await dataRegistry.getData('servicesAlertsAndSlo', {
               request,
               serviceNames: [...serviceNamesInTopology],
+              environment,
+              kuery,
               start,
               end,
             });

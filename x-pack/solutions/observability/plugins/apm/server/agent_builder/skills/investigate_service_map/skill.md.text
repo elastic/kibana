@@ -11,10 +11,18 @@ Every response from this skill MUST contain, in this order:
 Use this skill when an `observability.service-map-context` attachment is present. It is created when the user starts a conversation from the APM service map page and carries the view filters only:
 
 - `timeRange.from` / `timeRange.to` — may be datemath (e.g. `now-15m`); pass through to tools verbatim, they parse datemath.
-- `environment` — omitted when the user viewed "All" environments.
+- `environment` — omitted when the user viewed "All" environments. See "Applying the filters" below: only `get_service_topology` takes an `environment` parameter.
 - `kuery` — optional KQL filter.
-- `serviceGroupId` — optional service group scope.
+- `serviceGroupId` — optional service group scope. **No tool can apply it.** Never pass it as a tool parameter. When it is present, say once in the response that the survey covers all services in the time range, not only the selected service group.
 - `highlightedServiceNames` — services the user highlighted on the map. When present these are the user's focus: investigate them first.
+
+### Applying the filters
+
+Tool support differs, so translate the filters instead of assuming a shared `environment` parameter:
+
+- `get_services` and `get_alerts` accept `kqlFilter` and a time range only. Express the scope as KQL: `service.environment: "<environment>"`, combined with the context `kuery` using `and` when both are present.
+- `get_service_topology` accepts `environment` and `kuery` parameters directly — pass them so its `nodeMetadata` badge counts match the environment the user was viewing.
+- Nothing applies `serviceGroupId`.
 
 Do NOT use for plain requests to visualize a service map without the context attachment — defer to `service-map`.
 
@@ -30,8 +38,8 @@ Pass tool output through verbatim — do not convert units.
 
 Read the filters from the context attachment. Then, in this order:
 
-1. `get_services` scoped to `environment` and the time range — the inventory of services on the map, with health signals.
-2. `get_alerts` over the same scope — active alerts across ALL services in scope (do not filter to one service).
+1. `get_services` over the context time range, with the environment/kuery scope expressed as `kqlFilter` (see "Applying the filters") — the inventory of services on the map, with health signals.
+2. `get_alerts` over the same time range and the same `kqlFilter` — active alerts across ALL services in scope (do not filter to one service).
 
 From these, build the problem list: services with active alerts, violated/degrading SLOs, anomalies, error rate > 10%, or latency far above the scope's typical values. Note services with zero throughput that previously had traffic — zero throughput is NOT healthy.
 
@@ -45,11 +53,13 @@ From these, build the problem list: services with active alerts, violated/degrad
 
 ## Step 3 — Fetch the topology
 
-Call `get_service_topology` with the focal service, `direction: "both"`, `depth: 2`, and the context time range.
+Call `get_service_topology` with the focal service, `direction: "both"`, `depth: 2`, the context time range, and the context `environment` and `kuery` when present.
 
 Use the returned `connections` to understand the topology for the Architecture section (Step 5). If `connections` is empty, an isolated service is a finding: report it under Issues (missing exit-span instrumentation, or its dependencies are uninstrumented) and fall back to the next problem service from Step 1 as focal.
 
 `nodeMetadata` carries per-service `alertsCount`, `sloStatus`, `sloCount`, and ML anomaly fields (`anomalySeverity`, `anomalyScore`) — use it to cross-check the problem list from Step 1 and mention badge-worthy services explicitly.
+
+`environment` and `kuery` scope those badge counts, but the `connections` graph itself is built from all environments — do not describe the topology as environment-specific.
 
 ## Step 4 — Drill into the top problems (bounded)
 
@@ -83,7 +93,7 @@ Omit the `environment` query param when the context attachment has no environmen
 - **Issues before architecture** — lead with findings, then explain the topology.
 - **Zero throughput is NOT healthy** — flag as possible outage.
 - **Independent faults get independent findings** — do not collapse distinct problems.
-- **Respect the user's scope** — every tool call uses the context attachment's environment/time range; do not silently widen them (widening the time window for sparse data is fine if you say so).
+- **Respect the user's scope** — every tool call uses the context attachment's time range, and its environment/kuery via the translation in "Applying the filters"; do not silently widen them (widening the time window for sparse data is fine if you say so). When a filter cannot be applied (`serviceGroupId`, or the topology graph's environment), say so rather than implying it was.
 
 ## Common Mistakes (do NOT do these)
 

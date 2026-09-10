@@ -130,6 +130,24 @@ describe('ServiceMapInvestigateButton', () => {
     );
   });
 
+  it('truncates highlightedServiceNames to the attachment schema cap', () => {
+    setupMocks();
+    const highlightedServiceNames = Array.from({ length: 60 }, (_, i) => `service-${i}`);
+    const { getByTestId } = renderButton({
+      rangeFrom: 'now-1h',
+      rangeTo: 'now',
+      highlightedServiceNames,
+    });
+
+    fireEvent.click(getByTestId('observabilityAgentBuilderServiceMapInvestigateButton'));
+
+    // Beyond the cap the server rejects the whole attachment, so the button trims it.
+    const callData = mockOpenChat.mock.calls[0][0].attachments[0].data;
+    expect(callData.highlightedServiceNames).toHaveLength(50);
+    expect(callData.highlightedServiceNames[0]).toBe('service-0');
+    expect(callData.highlightedServiceNames[49]).toBe('service-49');
+  });
+
   it('omits empty optional fields from attachment data', () => {
     setupMocks();
     const { getByTestId } = renderButton({ rangeFrom: 'now-1h', rangeTo: 'now' });

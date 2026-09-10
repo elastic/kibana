@@ -369,9 +369,16 @@ export function registerDataProviders({
         nodeMetadata[serviceName] = { ...nodeMetadata[serviceName], sloStatus, sloCount };
       }
 
-      // Pick the worst anomaly per service (highest score that is not "no anomaly")
+      // Pick the worst anomaly per service (highest score that is not "no anomaly").
+      // `getServiceAnomalies` is not service-scoped, so restrict its results to the
+      // requested services — otherwise `nodeMetadata` leaks services that are not in
+      // the topology, bloating the payload and inviting the model to mention them.
+      const requestedServiceNames = new Set(serviceNames);
       const worstAnomalyByService = new Map<string, number>();
       for (const { serviceName, anomalyScore } of anomaliesResponse.serviceAnomalies) {
+        if (!requestedServiceNames.has(serviceName)) {
+          continue;
+        }
         if (!isNoAnomalyScore(anomalyScore)) {
           const current = worstAnomalyByService.get(serviceName);
           if (current === undefined || anomalyScore > current) {

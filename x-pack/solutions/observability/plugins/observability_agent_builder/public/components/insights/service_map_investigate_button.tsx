@@ -27,6 +27,14 @@ export interface ServiceMapInvestigateButtonProps {
   prompt?: string;
 }
 
+/**
+ * Must stay in sync with the `highlightedServiceNames` cap on
+ * `serviceMapContextAttachmentDataSchema` (APM plugin): the server rejects the
+ * whole attachment when the array is longer, which would silently break the
+ * conversation for users who highlighted a lot of services on the map.
+ */
+const MAX_HIGHLIGHTED_SERVICES = 50;
+
 const DEFAULT_PROMPT = i18n.translate(
   'xpack.observabilityAgentBuilder.serviceMapInvestigateButton.defaultPrompt',
   {
@@ -71,7 +79,9 @@ export function ServiceMapInvestigateButton({
             ...(kuery && { kuery }),
             ...(serviceGroupId && { serviceGroupId }),
             ...(highlightedServiceNames &&
-              highlightedServiceNames.length > 0 && { highlightedServiceNames }),
+              highlightedServiceNames.length > 0 && {
+                highlightedServiceNames: highlightedServiceNames.slice(0, MAX_HIGHLIGHTED_SERVICES),
+              }),
           },
         },
       ],
