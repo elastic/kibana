@@ -61,6 +61,12 @@ interface SiemSearchBarProps {
    * when the bar sits in page content (not the global FiltersGlobal portal).
    */
   displayStyle?: 'inPage' | 'detached' | 'withBorders';
+  /**
+   * Forwarded to Unified SearchBar. Renders inline after the query input and
+   * before the date picker — e.g. to offer preset ranges in place of the picker
+   * (pair with `hideDatePicker`).
+   */
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -78,6 +84,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     id,
     isLoading = false,
     queries,
+    renderQueryInputAppend,
     savedQuery,
     setSavedQuery,
     setSearchBarFilter,
@@ -345,6 +352,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           allowSavingQueries
           dataTestSubj={dataTestSubj}
           displayStyle={displayStyle}
+          renderQueryInputAppend={renderQueryInputAppend}
         />
       </div>
     ) : null;
@@ -363,6 +371,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
     prevProps.displayStyle === nextProps.displayStyle &&
+    prevProps.renderQueryInputAppend === nextProps.renderQueryInputAppend &&
     deepEqual(prevProps.queries, nextProps.queries) &&
     deepEqual(prevProps.dataView, nextProps.dataView)
 );

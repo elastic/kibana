@@ -30,6 +30,7 @@ import { useEntityStoreDataView } from '../components/home/use_entity_store_data
 import {
   isFaceliftAppHeaderVersion,
   useActiveFaceliftVersion,
+  type FaceliftVersion,
 } from '../components/home/facelift/active_version';
 import { FaceliftHome, FaceliftPageDescription } from '../components/home/facelift/facelift_home';
 
@@ -43,13 +44,24 @@ import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analy
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
-import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
-import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
 import {
   FACELIFT_V6_DEFAULT_FROM,
   FACELIFT_V6_DEFAULT_TO,
 } from '../components/home/facelift/v6/time_range';
+import {
+  FACELIFT_V7_DEFAULT_FROM,
+  FACELIFT_V7_DEFAULT_TO,
+} from '../components/home/facelift/v7/time_range';
+
+/**
+ * Prototypes that open on their own range instead of the app-wide “Today”.
+ * Each snapshot exports its own constants so the version folders stay isolated.
+ */
+const FACELIFT_DEFAULT_RANGES: Partial<Record<FaceliftVersion, { from: string; to: string }>> = {
+  v6: { from: FACELIFT_V6_DEFAULT_FROM, to: FACELIFT_V6_DEFAULT_TO },
+  v7: { from: FACELIFT_V7_DEFAULT_FROM, to: FACELIFT_V7_DEFAULT_TO },
+};
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -208,7 +220,7 @@ const EntityAnalyticsHomePageContent = () => {
       };
     }
 
-    if (faceliftVersion === 'v5' || faceliftVersion === 'v6') {
+    if (faceliftVersion === 'v5' || faceliftVersion === 'v6' || faceliftVersion === 'v7') {
       return {
         primaryActionItem: {
           id: 'entityAnalyticsCreateWatchlist',
@@ -225,10 +237,11 @@ const EntityAnalyticsHomePageContent = () => {
     return { items };
   }, [faceliftVersion, managementHref, openCreateWatchlist, watchlistsManagementHref]);
 
-  // Design prototype: v.6 opens on “Last 30 days”; older versions keep “Today”.
+  // Design prototype: v.6+ open on “Last 30 days”; older versions keep “Today”.
   useEffect(() => {
-    const fromStr = faceliftVersion === 'v6' ? FACELIFT_V6_DEFAULT_FROM : DEFAULT_FROM;
-    const toStr = faceliftVersion === 'v6' ? FACELIFT_V6_DEFAULT_TO : DEFAULT_TO;
+    const range = FACELIFT_DEFAULT_RANGES[faceliftVersion];
+    const fromStr = range?.from ?? DEFAULT_FROM;
+    const toStr = range?.to ?? DEFAULT_TO;
     const from = dateMath.parse(fromStr)?.toISOString();
     const to = dateMath.parse(toStr, { roundUp: true })?.toISOString();
     if (!from || !to) {
@@ -245,25 +258,9 @@ const EntityAnalyticsHomePageContent = () => {
     );
   }, [dispatch, faceliftVersion]);
 
-  const { data: entityStoreStatusData } = useEntityStoreStatus();
-  const entityStoreDisabled =
-    entityStoreStatusData?.status === 'not_installed' ||
-    entityStoreStatusData?.status === 'stopped';
-  // While an engine is still provisioning its assets the entity-latest index (and its data
-  // view) may not be resolvable yet. Show a loader rather than the entity page or the generic
-  // onboarding screen; the status query polls every 5s while installing and re-renders to the
-  // homepage once it flips to `running`. See elastic/security-team#18599.
-  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
+  // Design prototype: always render the facelift mock UI (do not gate on Entity Store).
 
   if (dataViewLoading) {
-    return <PageLoader />;
-  }
-
-  if (entityStoreDisabled) {
-    return <EntityStoreDisabledEmptyPrompt />;
-  }
-
-  if (entityStoreInstalling) {
     return <PageLoader />;
   }
 

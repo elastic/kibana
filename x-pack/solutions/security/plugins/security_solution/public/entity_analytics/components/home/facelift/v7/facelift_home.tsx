@@ -33,6 +33,7 @@ import { OverviewBand } from './overview_band';
 import { ResolvedEntitiesGrid } from './resolved_entities_grid';
 import { getEntitySummary } from './resolved_entities_data';
 import { useSyncEntityFilters } from './overview_filter';
+import { TimeRangeButtonGroup } from './time_range_button_group';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -41,6 +42,9 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   sort: DEFAULT_ENTITIES_TABLE_SORT,
   pageIndex: 0,
 });
+
+/** Stable so the memoised SiemSearchBar doesn't re-render on every keystroke. */
+const renderTimeRangeButtonGroup = () => <TimeRangeButtonGroup />;
 
 export const FaceliftPageDescription: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -106,7 +110,14 @@ export const FaceliftHome: React.FC<FaceliftHomeProps> = ({
         {/* 8px between KQL and filter group (eui size s) */}
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <SiemSearchBar dataView={dataView} id={InputsModelId.global} displayStyle="inPage" />
+            {/* v.7 offers three preset windows instead of the super date picker. */}
+            <SiemSearchBar
+              dataView={dataView}
+              id={InputsModelId.global}
+              displayStyle="inPage"
+              hideDatePicker
+              renderQueryInputAppend={renderTimeRangeButtonGroup}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EntityFiltersGroup

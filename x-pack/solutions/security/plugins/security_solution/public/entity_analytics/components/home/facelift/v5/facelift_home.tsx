@@ -124,7 +124,6 @@ export const FaceliftHome: React.FC<FaceliftHomeProps> = ({
         <OverviewBand
           activeFilter={activeFilter}
           pageFilters={pageFilters}
-          tableView={tableView}
           onFilterChange={setActiveFilter}
         />
       </EuiFlexItem>

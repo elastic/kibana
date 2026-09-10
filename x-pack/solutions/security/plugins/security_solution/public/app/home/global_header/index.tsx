@@ -76,7 +76,8 @@ export const GlobalHeader = React.memo(() => {
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const entityAnalyticsHomePath = isEntityAnalyticsHomePagePath(pathname);
   const [faceliftVersion] = useActiveFaceliftVersion();
-  const showMetricsVersionControl = entityAnalyticsHomePath && faceliftVersion === 'v6';
+  const showMetricsVersionControl =
+    entityAnalyticsHomePath && (faceliftVersion === 'v6' || faceliftVersion === 'v7');
 
   const { href, onClick } = useAddIntegrationsUrl();
 

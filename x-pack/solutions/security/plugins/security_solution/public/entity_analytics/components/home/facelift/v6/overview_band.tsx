@@ -12,16 +12,17 @@ import { createDataProviders } from '../../../../../app/actions/add_to_timeline/
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
-import type { ActiveFilter, PageFilters, SignalCardId, TableView } from './data';
+import type { ActiveFilter, PageFilters, SignalCardId } from './data';
 import { filterIdentities, getSignalCards } from './data';
 import { MetricChartsPanel } from './metric_charts_panel';
+
+/** Overview metrics/charts always count resolved entities; View by affects the table only. */
+const OVERVIEW_TABLE_VIEW = 'resolved' as const;
 
 export interface OverviewBandProps {
   activeFilter: ActiveFilter | null;
   /** Facet selections from the filter group; every number in the band respects them. */
   pageFilters: PageFilters;
-  /** Resolved vs raw — metrics count identities or raw records accordingly. */
-  tableView: TableView;
   onFilterChange: (next: ActiveFilter | null) => void;
 }
 
@@ -32,12 +33,11 @@ export interface OverviewBandProps {
 export const OverviewBand: React.FC<OverviewBandProps> = ({
   activeFilter,
   pageFilters,
-  tableView,
   onFilterChange,
 }) => {
   const cards = useMemo(
-    () => getSignalCards(pageFilters, tableView),
-    [pageFilters, tableView]
+    () => getSignalCards(pageFilters, OVERVIEW_TABLE_VIEW),
+    [pageFilters]
   );
   const { investigateInTimeline } = useInvestigateInTimeline();
 
@@ -97,7 +97,7 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({
           activeFilter={activeFilter}
           cards={cards}
           pageFilters={pageFilters}
-          tableView={tableView}
+          tableView={OVERVIEW_TABLE_VIEW}
           onFilterForCard={onFilterForCard}
           onFilterOutCard={onFilterOutCard}
           onAddCardToTimeline={onAddCardToTimeline}

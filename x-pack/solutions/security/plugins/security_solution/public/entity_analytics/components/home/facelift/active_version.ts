@@ -8,7 +8,7 @@
 /**
  * Active EA Facelift prototype version.
  *
- * Home UI lives in `./v1`–`./v6` as independent code snapshots. Flyout / table
+ * Home UI lives in `./v1`–`./v7` as independent code snapshots. Flyout / table
  * mock bridges read this module so external hooks follow the selected version.
  * To ship a single final version later: keep that folder, delete the others,
  * drop the switcher, and point the thin root bridges at the survivor (or move
@@ -20,18 +20,22 @@
  * The Kibana chrome header dropdown and the home page both read/write this
  * module; `subscribeActiveFaceliftVersion` keeps React state in sync.
  *
- * Within v.6 only, metric charts can also be swapped via
- * `./active_metrics_version` (Metrics version header control) without
- * changing the rest of the page. Prototype v.5 keeps a fixed metrics v.1 look.
+ * In v.6 and v.7, metric charts can also be swapped via a Metrics version
+ * header control without changing the rest of the page. Each of those
+ * prototypes owns its own metrics state: v.6 reads `./active_metrics_version`
+ * (metrics v.1–v.7), v.7 reads `./v7/active_metrics_version` (metrics v.7 only,
+ * the sole layout that prototype ships). Prototype v.5 keeps a fixed metrics
+ * v.1 look with no control.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
-export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6';
+export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6' | 'v7';
 
-export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v6';
+export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v7';
 
 export const FACELIFT_VERSION_OPTIONS: Array<{ key: FaceliftVersion; label: string }> = [
+  { key: 'v7', label: 'v.7' },
   { key: 'v6', label: 'v.6' },
   { key: 'v5', label: 'v.5' },
   { key: 'v4', label: 'v.4' },
@@ -86,4 +90,5 @@ export const isFaceliftAppHeaderVersion = (version: FaceliftVersion): boolean =>
   version === 'v3' ||
   version === 'v4' ||
   version === 'v5' ||
-  version === 'v6';
+  version === 'v6' ||
+  version === 'v7';

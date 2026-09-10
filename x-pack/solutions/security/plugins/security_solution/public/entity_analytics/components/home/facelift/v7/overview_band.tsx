@@ -14,6 +14,7 @@ import { EntityTypeToIdentifierField } from '../../../../../../common/entity_ana
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import type { ActiveFilter, PageFilters, SignalCardId } from './data';
 import { filterIdentities, getSignalCards } from './data';
+import { useActiveTimeRange } from './active_time_range';
 import { MetricChartsPanel } from './metric_charts_panel';
 
 /** Overview metrics/charts always count resolved entities; View by affects the table only. */
@@ -35,9 +36,10 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({
   pageFilters,
   onFilterChange,
 }) => {
+  const [timeRange] = useActiveTimeRange();
   const cards = useMemo(
-    () => getSignalCards(pageFilters, OVERVIEW_TABLE_VIEW),
-    [pageFilters]
+    () => getSignalCards(pageFilters, OVERVIEW_TABLE_VIEW, timeRange),
+    [pageFilters, timeRange]
   );
   const { investigateInTimeline } = useInvestigateInTimeline();
 
