@@ -56,7 +56,10 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     await mockAwsPackage(page, MOCK_AWS_PACKAGE);
   });
 
-  test('clicking Deploy navigates to detect-and-review step', async ({ browserAuth, page }) => {
+  test('Deploy fires SO POST with connector and provider, then navigates to detect-and-review', async ({
+    browserAuth,
+    page,
+  }) => {
     await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
       selectedServiceIds: ['elb'],
       globalRegion: 'us-east-1',
@@ -67,7 +70,13 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
       },
     });
 
-    // Mock SO create so the deploy path has a deployment id to work with.
+    // Register before clicking so the promise is live when the request fires.
+    const soCreatePromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'POST' &&
+        /\/api\/fleet\/cloud_onboarding_deployments$/.test(new URL(req.url()).pathname)
+    );
+
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments$/.test(url.pathname),
       (route) =>
@@ -82,11 +91,9 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(url.pathname),
       (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ item: { id: 'dep-e2e-001' } }),
-        })
+        route.request().method() === 'PUT'
+          ? route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ item: { id: 'dep-e2e-001' } }) })
+          : route.continue()
     );
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
@@ -101,11 +108,19 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
     await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
+    // Verify SO POST fired with the connector, provider, and services.
+    const soCreateReq = await soCreatePromise;
+    const body = soCreateReq.postDataJSON() as Record<string, unknown>;
+    expect(body.provider).toBe('aws');
+    expect(body.connectorId).toBe('connector-test-123');
+    expect(body.mechanisms).toContain('managed_integration');
+    expect(body.services).toContain('elb');
+
     // onContinue() fires immediately on deploy — user lands on detect-and-review.
     await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
   });
 
-  test('?deploymentId= resume lands on detect-and-review with the SO region visible', async ({
+  test('?deploymentId= resume lands on detect-and-review and keeps the param in the URL', async ({
     browserAuth,
     page,
   }) => {
