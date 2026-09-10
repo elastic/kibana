@@ -36,7 +36,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
     schema.recordOf(schema.string({ minLength: 1 }), schema.recordOf(schema.string(), schema.any()))
   ),
   globalRegion: schema.maybe(schema.string()),
-  dataFormat: schema.maybe(schema.string()),
+  dataFormat: schema.maybe(schema.oneOf([schema.literal('ecs'), schema.literal('otel')])),
   authMethod: schema.maybe(
     schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
   ),

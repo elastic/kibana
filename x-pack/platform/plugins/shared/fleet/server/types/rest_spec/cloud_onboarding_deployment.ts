@@ -52,6 +52,10 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
+const DataFormatSchema = schema.oneOf([schema.literal('ecs'), schema.literal('otel')], {
+  meta: { description: 'Data format: ecs or otel.' },
+});
+
 const ServiceVarsEntrySchema = schema.recordOf(schema.string({ maxLength: 256 }), schema.any());
 
 const RequestServiceVarsSchema = schema.recordOf(
@@ -116,13 +120,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
-  dataFormat: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Data format: ecs or otel.',
-      },
-    })
-  ),
+  dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
     schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
       meta: { description: 'Authentication method for managed integrations.' },
@@ -196,9 +194,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Global AWS region from the Service Settings step.' },
       })
     ),
-    dataFormat: schema.maybe(
-      schema.string({ maxLength: 64, meta: { description: 'Data format: ecs or otel.' } })
-    ),
+    dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
         meta: { description: 'Authentication method for managed integrations.' },

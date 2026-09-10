@@ -8,6 +8,7 @@
 import type {
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
+  CloudProvider,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
   CloudOnboardingEcfStack,
@@ -15,13 +16,13 @@ import type {
 
 export interface CreateCloudOnboardingDeploymentRequest {
   body: {
-    provider: 'aws' | 'azure' | 'gcp';
+    provider: CloudProvider;
     connectorId?: string;
     mechanisms: DeploymentMethod[];
     services: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     globalRegion?: string;
-    dataFormat?: string;
+    dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
   };
 }
