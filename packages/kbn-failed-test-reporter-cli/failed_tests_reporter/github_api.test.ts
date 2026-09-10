@@ -90,7 +90,7 @@ describe('nextPageUrl()', () => {
   });
 });
 
-describe('GithubApi#listIssues()', () => {
+describe('GithubApi#searchIssues()', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -102,11 +102,12 @@ describe('GithubApi#listIssues()', () => {
     title: `#${number}`,
     labels: [],
     body: `body ${number}`,
+    state: 'open',
     ...extra,
   });
 
   const page = (items: unknown[], nextUrl?: string) =>
-    new Response(JSON.stringify(items), {
+    new Response(JSON.stringify({ total_count: items.length, incomplete_results: false, items }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
@@ -114,18 +115,19 @@ describe('GithubApi#listIssues()', () => {
       },
     });
 
-  it('lists issues of the repository by label and state', async () => {
+  it('scopes the query to the repository and unwraps the items', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
       .mockImplementation(async () => page([issue(5), issue(6)]));
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false, repo: 'elastic/sandbox' });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open' });
+    const issues = await api.searchIssues({ query: 'label:failed-test "a.ts" OR "b.ts"' });
 
     const url = new URL(String(fetchMock.mock.calls[0][0]));
-    expect(url.origin + url.pathname).toBe('https://api.github.com/repos/elastic/sandbox/issues');
-    expect(url.searchParams.get('labels')).toBe('failed-test');
-    expect(url.searchParams.get('state')).toBe('open');
+    expect(url.origin + url.pathname).toBe('https://api.github.com/search/issues');
+    expect(url.searchParams.get('q')).toBe(
+      'repo:elastic/sandbox is:issue label:failed-test "a.ts" OR "b.ts"'
+    );
     expect(url.searchParams.get('per_page')).toBe('100');
     expect(issues.map(({ number }) => number)).toEqual([5, 6]);
   });
@@ -138,12 +140,12 @@ describe('GithubApi#listIssues()', () => {
       // A short first page that is not the last one
       return page(
         [issue(1), issue(2, { pull_request: {} })],
-        'https://api.github.com/repos/elastic/kibana/issues?per_page=100&page=2'
+        'https://api.github.com/search/issues?q=x&per_page=100&page=2'
       );
     });
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open' });
+    const issues = await api.searchIssues({ query: 'x' });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(issues.map(({ number, body }) => [number, body])).toEqual([
@@ -152,11 +154,11 @@ describe('GithubApi#listIssues()', () => {
     ]);
   });
 
-  it('still fetches in dry-run mode because listing is read-only', async () => {
+  it('still fetches in dry-run mode because searching is read-only', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => page([issue(1)]));
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open' });
+    const issues = await api.searchIssues({ query: 'x' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(issues).toHaveLength(1);
@@ -166,14 +168,34 @@ describe('GithubApi#listIssues()', () => {
     jest
       .spyOn(global, 'fetch')
       .mockImplementation(async () =>
-        page([issue(1)], 'https://api.github.com/repos/elastic/kibana/issues?page=99')
+        page([issue(1)], 'https://api.github.com/search/issues?q=x&page=99')
       );
     const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const issues = await api.listIssues({ labels: ['failed-test'], state: 'open', maxPages: 2 });
+    const issues = await api.searchIssues({ query: 'x', maxPages: 2 });
 
     expect(issues).toHaveLength(2);
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('results are incomplete'));
+  });
+
+  it('waits and retries when rate limited', async () => {
+    jest.useFakeTimers();
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockImplementationOnce(
+        async () => new Response('rate limited', { status: 403, headers: { 'Retry-After': '7' } })
+      )
+      .mockImplementationOnce(async () => page([issue(1)]));
+    jest.spyOn(log, 'warning').mockImplementation(() => {});
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    const pending = api.searchIssues({ query: 'x' });
+    await jest.advanceTimersByTimeAsync(7000);
+    const issues = await pending;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(issues).toHaveLength(1);
+    jest.useRealTimers();
   });
 });

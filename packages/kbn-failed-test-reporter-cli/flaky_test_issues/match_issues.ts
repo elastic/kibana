@@ -11,14 +11,18 @@ import Path from 'path';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { readSuiteFilePath } from './issue_title';
 import type { FlakySuite } from './suites';
 
 /**
- * What a per-test `failed-test` issue, as filed by `report_failed_tests`, says about its test.
- * Every field is best effort: older issues lack some metadata, hand-written ones lack all of it.
+ * What a `failed-test` issue says about its test: a suite issue names the file in its title, a
+ * per-test issue filed by `report_failed_tests` carries metadata. Every field is best effort:
+ * older issues lack some metadata, hand-written ones lack all of it.
  */
-export interface FailedTestIssueDetails {
+export interface IssueDetails {
   issue: GithubIssue;
+  /** File named by a `Flaky … test suite: <file>` title. */
+  suiteFilePath?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
   /** File the issue names: the Scout `Location` row or the `<path>·ts` ending an FTR classname. */
@@ -31,20 +35,22 @@ export interface FailedTestIssueDetails {
   text: string;
 }
 
-export type FailedTestIssueMatch =
-  /** The issue is about one of the suite's flaky tests. */
+export type IssueMatch =
+  /** An issue about the whole suite, `Flaky … test suite: <file>`. */
+  | 'suite'
+  /** A per-test issue about one of the suite's flaky tests. */
   | 'test'
   /** Same test and file name, but the issue names an old location: the file was moved since. */
   | 'moved'
   /** The issue names the suite's file but a different test, or one that could not be matched. */
   | 'file';
 
-export interface RelatedFailedTestIssue {
+export interface MatchedIssue {
   issue: GithubIssue;
-  match: FailedTestIssueMatch;
+  match: IssueMatch;
 }
 
-const MATCH_STRENGTH: Record<FailedTestIssueMatch, number> = { test: 0, moved: 1, file: 2 };
+const MATCH_STRENGTH: Record<IssueMatch, number> = { suite: 0, test: 1, moved: 2, file: 3 };
 const JEST_CLASS_PREFIX = 'Jest Tests.';
 const SCOUT_TEST_ID_ROW = /^\|\s*Test ID\s*\|\s*(\S+)\s*\|/m;
 const LOCATION_ROW = /^\|\s*Location\s*\|\s*(\S+)\s*\|/m;
@@ -57,14 +63,15 @@ const metadataString = (body: string, key: string): string | undefined => {
   return typeof value === 'string' ? value : undefined;
 };
 
-/** Extracts the matching keys of a per-test issue once, so every suite can be checked cheaply. */
-export const describeFailedTestIssue = (issue: GithubIssue): FailedTestIssueDetails => {
+/** Extracts the matching keys of an issue once, so every suite can be checked cheaply. */
+export const describeIssue = (issue: GithubIssue): IssueDetails => {
   const className = metadataString(issue.body, 'test.class') ?? '';
   // FTR classnames end in the file (`<report>.<path>·ts`), Jest ones in the directory
   const classLocation = getLocationFromClassname(className);
   const location = issue.body.match(LOCATION_ROW)?.[1];
   return {
     issue,
+    suiteFilePath: readSuiteFilePath(issue.title),
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)
@@ -81,38 +88,44 @@ export const describeFailedTestIssue = (issue: GithubIssue): FailedTestIssueDeta
 const namesTest = (testName: string, titles: readonly string[]): boolean =>
   titles.some((title) => testName === title || testName.endsWith(` ${title}`));
 
+/** Suite issues first, then strongest match, open before closed, newest first. */
+const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
+  MATCH_STRENGTH[a.match] - MATCH_STRENGTH[b.match] ||
+  (a.issue.state === b.issue.state ? 0 : a.issue.state === 'open' ? -1 : 1) ||
+  b.issue.number - a.issue.number;
+
 /**
- * Open per-test issues about the suite, strongest evidence first: the Scout test id, then the
- * test name together with the file (or, for Jest, the directory), then the test name together
+ * Issues about the suite, strongest evidence first: a suite issue, then the Scout test id, then
+ * the test name together with the file (or, for Jest, the directory), then the test name together
  * with the file name alone (the file was moved), then any mention of the file.
  */
-export const findRelatedFailedTestIssues = (
+export const findMatchingIssues = (
   suite: FlakySuite,
-  issues: readonly FailedTestIssueDetails[]
-): RelatedFailedTestIssue[] => {
+  issues: readonly IssueDetails[]
+): MatchedIssue[] => {
   const testIds = new Set(suite.tests.map((test) => test.testId));
   const titles = suite.tests.map((test) => test.title);
   const directory = Path.dirname(suite.filePath);
   const baseName = Path.basename(suite.filePath);
 
-  const related: RelatedFailedTestIssue[] = [];
+  const matches: MatchedIssue[] = [];
   for (const details of issues) {
-    const { issue, scoutTestId, filePath, jestDirectory, testName, text } = details;
+    const { issue, suiteFilePath, scoutTestId, filePath, jestDirectory, testName, text } = details;
     const mentionsFile = text.includes(suite.filePath);
     const namesFlakyTest = testName !== undefined && namesTest(testName, titles);
 
-    if (scoutTestId !== undefined && testIds.has(scoutTestId)) {
-      related.push({ issue, match: 'test' });
+    if (suiteFilePath === suite.filePath) {
+      matches.push({ issue, match: 'suite' });
+    } else if (scoutTestId !== undefined && testIds.has(scoutTestId)) {
+      matches.push({ issue, match: 'test' });
     } else if (namesFlakyTest && (mentionsFile || jestDirectory === directory)) {
-      related.push({ issue, match: 'test' });
+      matches.push({ issue, match: 'test' });
     } else if (namesFlakyTest && filePath !== undefined && Path.basename(filePath) === baseName) {
-      related.push({ issue, match: 'moved' });
+      matches.push({ issue, match: 'moved' });
     } else if (mentionsFile) {
-      related.push({ issue, match: 'file' });
+      matches.push({ issue, match: 'file' });
     }
   }
 
-  return related.sort(
-    (a, b) => MATCH_STRENGTH[a.match] - MATCH_STRENGTH[b.match] || b.issue.number - a.issue.number
-  );
+  return matches.sort(compareMatches);
 };

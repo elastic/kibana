@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tells, for every flaky test suite in the report produced by scout_report_flaky_tests.sh, whether
-# an open GitHub issue already tracks it, via `node scripts/check_flaky_test_issues`. Read-only:
-# nothing is filed or edited. FLAKY_TESTS_GITHUB_REPO names the repository whose issues are
-# searched. GITHUB_TOKEN (kibanamachine) comes from Vault via
-# .buildkite/scripts/common/setup_job_env.sh.
+# Tells, for every flaky test suite in the report produced by scout_report_flaky_tests.sh, which
+# GitHub failed-test issues are about it, open or closed, via `node scripts/check_flaky_test_issues`.
+# Read-only: nothing is filed or edited.
+# FLAKY_TESTS_GITHUB_REPO names the repository whose issues are checked. GITHUB_TOKEN
+# (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
 
@@ -40,11 +40,12 @@ buildkite-agent artifact upload "$SUMMARY_PATH"
 
 echo "--- Annotate build"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
-open_issues="$(jq -r '.openIssues' "$SUMMARY_PATH")"
-counts="$(jq -r '.counts | "**\(.tracked)** tracked by a suite issue, **\(.related)** with related per-test issues, **\(.untracked)** without any open issue"' "$SUMMARY_PATH")"
+issues="$(jq -r '.candidateIssues' "$SUMMARY_PATH")"
+tracked_open="$(jq -r '[.results[] | select(.status == "tracked" and any(.issues[]; .state == "open"))] | length' "$SUMMARY_PATH")"
+counts="$(jq -r --arg open "$tracked_open" '.counts | "**\(.tracked)** tracked by existing issues (\($open) by an open one), **\(.untracked)** without any"' "$SUMMARY_PATH")"
 
-# Markdown section with one bullet per suite of the given status, linking the suite issue or the
-# related per-test issues (strongest match first); collapsed when it is likely to be long
+# Markdown section with one bullet per suite of the given status, linking its issues (strongest
+# match first, open before closed); collapsed when it is likely to be long
 section() {
   local status="$1" title="$2" collapsed="$3"
   local count
@@ -61,8 +62,7 @@ section() {
   echo
   jq -r --arg status "$status" '.results[] | select(.status == $status)
     | "- `\(.filePath)`"
-      + (if .issue then " [#\(.issue.number)](\(.issue.url))" else "" end)
-      + (if .issues then " " + (.issues | map("[#\(.number)](\(.url)) (\(.match))") | join(", ")) else "" end)' "$SUMMARY_PATH"
+      + (if .issues then " " + (.issues | map("[#\(.number)](\(.url)) (\(.match), \(.state))") | join(", ")) else "" end)' "$SUMMARY_PATH"
   if [[ "$collapsed" == "true" ]]; then
     echo
     echo "</details>"
@@ -70,10 +70,9 @@ section() {
 }
 
 {
-  echo "Checked ${open_issues} open \`failed-test\` issues in \`${FLAKY_TESTS_GITHUB_REPO}\` against ${suites} flaky suites: ${counts}."
-  section tracked "Tracked by a suite issue" false
-  section related "Related per-test issues" true
-  section untracked "No open issue" true
+  echo "Checked the ${issues} open or closed \`failed-test\` issues in \`${FLAKY_TESTS_GITHUB_REPO}\` that mention one of the ${suites} flaky suites' file names: ${counts}."
+  section tracked "Tracked by existing issues" true
+  section untracked "No issue" true
   echo
   echo "Summary: <a href=\"artifact://${SUMMARY_PATH}\">${SUMMARY_PATH}</a>"
 } | buildkite-agent annotate --style info --context flaky-test-issues

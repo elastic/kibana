@@ -26,8 +26,8 @@ spec:
         FLAKY_TESTS_PIPELINES: 'kibana-on-merge'
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
-        # Repository whose open issues .buildkite/scripts/steps/scout_check_flaky_test_issues.sh
-        # searches for the flaky suites; read-only
+        # Repository whose failed-test issues .buildkite/scripts/steps/scout_check_flaky_test_issues.sh
+        # checks for the flaky suites; read-only
         FLAKY_TESTS_GITHUB_REPO: 'elastic/kibana'
       allow_rebuilds: true
       branch_configuration: main

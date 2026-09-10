@@ -94,5 +94,6 @@ export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }
   title: `Issue #${overrides.number}`,
   labels: [],
   body: '',
+  state: 'open',
   ...overrides,
 });

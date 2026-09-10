@@ -8,7 +8,7 @@
  */
 
 import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { describeFailedTestIssue, findRelatedFailedTestIssues } from './failed_test_issues';
+import { describeIssue, findMatchingIssues } from './match_issues';
 import { groupIntoSuites } from './suites';
 import { flakyTest, githubIssue, SUITE_PATH } from './test_fixtures';
 
@@ -50,17 +50,16 @@ const ftrIssue = (number: number, filePath: string, name: string) => {
   });
 };
 
-describe('describeFailedTestIssue', () => {
-  it('reads the Scout test id and location, the Jest directory and the test name', () => {
-    expect(
-      describeFailedTestIssue(scoutIssue(1, 'abc-def', 'creates default alert'))
-    ).toMatchObject({
+describe('describeIssue', () => {
+  it('reads the suite file, the Scout test id and location, the Jest directory and the test name', () => {
+    expect(describeIssue(scoutIssue(1, 'abc-def', 'creates default alert'))).toMatchObject({
+      suiteFilePath: undefined,
       scoutTestId: 'abc-def',
       filePath: SUITE_PATH,
       jestDirectory: undefined,
       testName: 'creates default alert',
     });
-    expect(describeFailedTestIssue(jestIssue(2, 'src/plugins/a', 'A b c'))).toMatchObject({
+    expect(describeIssue(jestIssue(2, 'src/plugins/a', 'A b c'))).toMatchObject({
       scoutTestId: undefined,
       filePath: undefined,
       jestDirectory: 'src/plugins/a',
@@ -68,16 +67,21 @@ describe('describeFailedTestIssue', () => {
     });
   });
 
+  it('reads the suite file of a suite issue title', () => {
+    expect(
+      describeIssue(githubIssue({ number: 5, title: `Flaky FTR test suite: ${SUITE_PATH}` }))
+    ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
+  });
+
   it('restores dots in file paths and copes with hand-written issues', () => {
-    const details = describeFailedTestIssue(ftrIssue(3, 'x-pack/test/a.ts', 'a b'));
+    const details = describeIssue(ftrIssue(3, 'x-pack/test/a.ts', 'a b'));
     expect(details.filePath).toBe('x-pack/test/a.ts');
     expect(details.text).toContain('x-pack/test/a.ts');
     expect(details.text).not.toContain('·');
 
-    expect(
-      describeFailedTestIssue(githubIssue({ number: 4, title: 'Flaky a.ts', body: '' }))
-    ).toEqual({
+    expect(describeIssue(githubIssue({ number: 4, title: 'Flaky a.ts', body: '' }))).toEqual({
       issue: expect.objectContaining({ number: 4 }),
+      suiteFilePath: undefined,
       scoutTestId: undefined,
       filePath: undefined,
       jestDirectory: undefined,
@@ -87,17 +91,37 @@ describe('describeFailedTestIssue', () => {
   });
 });
 
-describe('findRelatedFailedTestIssues', () => {
+describe('findMatchingIssues', () => {
+  it('matches suite issues by title, ahead of per-test issues, open ones ahead of closed ones', () => {
+    const [suite] = groupIntoSuites([
+      flakyTest({ testId: 'id-1', title: 'creates default alert' }),
+    ]);
+    const matches = findMatchingIssues(suite, [
+      describeIssue(scoutIssue(10, 'id-1', 'creates default alert')),
+      describeIssue(
+        githubIssue({ number: 11, title: `Flaky Scout test suite: ${SUITE_PATH}`, state: 'closed' })
+      ),
+      describeIssue(githubIssue({ number: 12, title: `Flaky test suite: ${SUITE_PATH}` })),
+      describeIssue(githubIssue({ number: 13, title: 'Flaky Scout test suite: other.spec.ts' })),
+    ]);
+
+    expect(matches.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [12, 'suite'],
+      [11, 'suite'],
+      [10, 'test'],
+    ]);
+  });
+
   it('matches Scout issues by test id, or by file for other tests of the suite', () => {
     const [suite] = groupIntoSuites([
       flakyTest({ testId: 'id-1', title: 'creates default alert' }),
       flakyTest({ testId: 'id-2', title: 'recovers' }),
     ]);
-    const related = findRelatedFailedTestIssues(suite, [
-      describeFailedTestIssue(scoutIssue(10, 'id-1', 'creates default alert')),
-      describeFailedTestIssue(scoutIssue(11, 'id-other', 'some other test of the file')),
-      describeFailedTestIssue(scoutIssue(12, 'id-2', 'recovers', 'other/file.spec.ts')),
-      describeFailedTestIssue(scoutIssue(13, 'id-elsewhere', 'recovers', 'other/file.spec.ts')),
+    const related = findMatchingIssues(suite, [
+      describeIssue(scoutIssue(10, 'id-1', 'creates default alert')),
+      describeIssue(scoutIssue(11, 'id-other', 'some other test of the file')),
+      describeIssue(scoutIssue(12, 'id-2', 'recovers', 'other/file.spec.ts')),
+      describeIssue(scoutIssue(13, 'id-elsewhere', 'recovers', 'other/file.spec.ts')),
     ]);
 
     expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([
@@ -111,14 +135,14 @@ describe('findRelatedFailedTestIssues', () => {
     const [suite] = groupIntoSuites([
       flakyTest({ filePath: 'src/plugins/a/client.test.ts', title: 'drops every stored event' }),
     ]);
-    const related = findRelatedFailedTestIssues(suite, [
-      describeFailedTestIssue(
+    const related = findMatchingIssues(suite, [
+      describeIssue(
         jestIssue(20, 'src/plugins/a', 'ConversationClient events drops every stored event')
       ),
       // Same directory, another test: could be any file of the directory
-      describeFailedTestIssue(jestIssue(21, 'src/plugins/a', 'ConversationClient other test')),
+      describeIssue(jestIssue(21, 'src/plugins/a', 'ConversationClient other test')),
       // Same test name in another directory
-      describeFailedTestIssue(jestIssue(22, 'src/plugins/b', 'drops every stored event')),
+      describeIssue(jestIssue(22, 'src/plugins/b', 'drops every stored event')),
     ]);
 
     expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([[20, 'test']]);
@@ -131,18 +155,18 @@ describe('findRelatedFailedTestIssues', () => {
         title: 'should have nothing to sync anymore',
       }),
     ]);
-    const related = findRelatedFailedTestIssues(suite, [
-      describeFailedTestIssue(
+    const related = findMatchingIssues(suite, [
+      describeIssue(
         ftrIssue(
           30,
           'x-pack/test/functional/apps/ml/synchronize.ts',
           'machine learning - stack management jobs synchronize should have nothing to sync anymore'
         )
       ),
-      describeFailedTestIssue(
+      describeIssue(
         ftrIssue(31, 'x-pack/test/functional/apps/ml/synchronize.ts', 'should sync everything')
       ),
-      describeFailedTestIssue(
+      describeIssue(
         ftrIssue(
           32,
           'x-pack/test/functional/apps/ml/other.ts',
@@ -165,8 +189,8 @@ describe('findRelatedFailedTestIssues', () => {
         title: 'creates default alert',
       }),
     ]);
-    const related = findRelatedFailedTestIssues(suite, [
-      describeFailedTestIssue(
+    const related = findMatchingIssues(suite, [
+      describeIssue(
         scoutIssue(
           50,
           'old-id',
@@ -175,7 +199,7 @@ describe('findRelatedFailedTestIssues', () => {
         )
       ),
       // Same file name, different test
-      describeFailedTestIssue(
+      describeIssue(
         scoutIssue(
           51,
           'other-id',
@@ -184,7 +208,7 @@ describe('findRelatedFailedTestIssues', () => {
         )
       ),
       // Same test name, different file name
-      describeFailedTestIssue(
+      describeIssue(
         scoutIssue(52, 'yet-another', 'creates default alert', 'x-pack/plugins/b/other.spec.ts')
       ),
     ]);
@@ -194,8 +218,8 @@ describe('findRelatedFailedTestIssues', () => {
 
   it('does not match a test title alone, without the file or directory', () => {
     const [suite] = groupIntoSuites([flakyTest({ title: 'should render' })]);
-    const related = findRelatedFailedTestIssues(suite, [
-      describeFailedTestIssue(
+    const related = findMatchingIssues(suite, [
+      describeIssue(
         githubIssue({
           number: 40,
           title: 'Failing test: Other suite - should render',

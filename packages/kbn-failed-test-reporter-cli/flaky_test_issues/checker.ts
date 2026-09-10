@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
 import type { FlakyTestReport } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { GithubApi, GithubIssue } from '../failed_tests_reporter/github_api';
-import {
-  describeFailedTestIssue,
-  findRelatedFailedTestIssues,
-  type FailedTestIssueMatch,
-} from './failed_test_issues';
-import { readSuiteFilePath } from './issue_title';
-import { groupIntoSuites } from './suites';
+import type { GithubApi, GithubIssue, GithubIssueState } from '../failed_tests_reporter/github_api';
+import { describeIssue, findMatchingIssues, type IssueMatch } from './match_issues';
+import { groupIntoSuites, type FlakySuite } from './suites';
 
 /**
  * Label shared with the issues `report_failed_tests` files for individual failures, so flaky
@@ -24,61 +20,75 @@ import { groupIntoSuites } from './suites';
  */
 export const FAILED_TEST_LABEL = 'failed-test';
 
+/**
+ * GitHub rejects search queries longer than 256 characters; `GithubApi` prepends
+ * `repo:<owner>/<name> is:issue ` (up to ~50 characters for the repositories we use).
+ */
+const MAX_QUERY_LENGTH = 200;
+
 export interface CheckFlakySuiteIssuesOptions {
   report: FlakyTestReport;
   github: GithubApi;
   log: ToolingLog;
 }
 
-export interface IssueRef {
+export interface MatchedIssueRef {
   number: number;
   url: string;
   title: string;
+  state: GithubIssueState;
+  match: IssueMatch;
 }
 
 export type FlakySuiteIssueStatus =
-  /** An open issue about the whole suite exists (`Flaky … test suite: <file>`). */
-  | { status: 'tracked'; filePath: string; issue: IssueRef }
-  /** No suite issue, but open per-test `failed-test` issues are about this file. */
-  | {
-      status: 'related';
-      filePath: string;
-      issues: Array<IssueRef & { match: FailedTestIssueMatch }>;
-    }
-  /** No open issue mentions the suite at all. */
+  /** Issues about the suite exist, open or closed; strongest match first. */
+  | { status: 'tracked'; filePath: string; issues: MatchedIssueRef[] }
+  /** No issue mentions the suite at all. */
   | { status: 'untracked'; filePath: string };
 
 export interface FlakySuiteIssuesSummary {
   generatedAt: Date;
   suites: number;
-  /** Open `failed-test` issues that were checked. */
-  openIssues: number;
+  /** `failed-test` issues, open or closed, that mention one of the suites' file names. */
+  candidateIssues: number;
   counts: Record<FlakySuiteIssueStatus['status'], number>;
   results: FlakySuiteIssueStatus[];
 }
 
-const toRef = ({ number, html_url: url, title }: GithubIssue): IssueRef => ({ number, url, title });
+/**
+ * Search queries that together return every `failed-test` issue mentioning one of the suites'
+ * file names, as few as the query length limit allows. The file name rather than the path so
+ * that issues about a moved file, or with JUnit's `path·ts` spelling, are found too; the
+ * matching rules then sort out which suite, if any, an issue is really about.
+ */
+export const suiteSearchQueries = (
+  suites: readonly Pick<FlakySuite, 'filePath'>[],
+  maxLength = MAX_QUERY_LENGTH
+): string[] => {
+  const prefix = `label:${FAILED_TEST_LABEL} `;
+  const terms = [...new Set(suites.map(({ filePath }) => `"${Path.basename(filePath)}"`))];
 
-/** Index of open flaky suite issues by the suite file path in their title; newest wins. */
-export const indexSuiteIssues = (issues: readonly GithubIssue[]): Map<string, GithubIssue> => {
-  const byFilePath = new Map<string, GithubIssue>();
-  for (const issue of issues) {
-    const filePath = readSuiteFilePath(issue.title);
-    if (!filePath) {
-      continue;
-    }
-    const current = byFilePath.get(filePath);
-    if (!current || issue.number > current.number) {
-      byFilePath.set(filePath, issue);
+  const queries: string[] = [];
+  let current = '';
+  for (const term of terms) {
+    const next = current ? `${current} OR ${term}` : `${prefix}${term}`;
+    if (current && next.length > maxLength) {
+      queries.push(current);
+      current = `${prefix}${term}`;
+    } else {
+      current = next;
     }
   }
-  return byFilePath;
+  if (current) {
+    queries.push(current);
+  }
+  return queries;
 };
 
 /**
- * Tells, for every flaky suite in the report, whether an open GitHub issue already tracks it:
- * a suite issue, per-test `failed-test` issues, or nothing. Read-only: nothing is filed,
- * edited or commented on.
+ * Tells, for every flaky suite in the report, which GitHub `failed-test` issues are about it,
+ * open or closed: a suite issue or per-test issues. Read-only: nothing is filed, edited or
+ * commented on.
  */
 export const checkFlakySuiteIssues = async ({
   report,
@@ -88,51 +98,52 @@ export const checkFlakySuiteIssues = async ({
   const suites = groupIntoSuites(report.flaky);
   log.info(`${report.flaky.length} flaky tests in ${suites.length} suites`);
 
-  const openIssues = await github.listIssues({ labels: [FAILED_TEST_LABEL], state: 'open' });
-  const suiteIssues = indexSuiteIssues(openIssues);
-  const suiteIssueNumbers = new Set([...suiteIssues.values()].map(({ number }) => number));
-  const testIssues = openIssues
-    .filter(({ number }) => !suiteIssueNumbers.has(number))
-    .map(describeFailedTestIssue);
+  const queries = suiteSearchQueries(suites);
+  const candidates = new Map<number, GithubIssue>();
+  for (const query of queries) {
+    for (const issue of await github.searchIssues({ query })) {
+      candidates.set(issue.number, issue);
+    }
+  }
   log.info(
-    `Found ${openIssues.length} open ${FAILED_TEST_LABEL} issues, ${suiteIssues.size} of them about a flaky suite`
+    `Found ${candidates.size} ${FAILED_TEST_LABEL} issues mentioning a flaky suite's file name ` +
+      `in ${queries.length} searches`
   );
+  const details = [...candidates.values()].map(describeIssue);
 
   const results: FlakySuiteIssueStatus[] = [];
-  const counts: FlakySuiteIssuesSummary['counts'] = { tracked: 0, related: 0, untracked: 0 };
+  const counts: FlakySuiteIssuesSummary['counts'] = { tracked: 0, untracked: 0 };
 
   for (const suite of suites) {
     const { filePath } = suite;
-    const suiteIssue = suiteIssues.get(filePath);
-    if (suiteIssue) {
-      log.info(`tracked by #${suiteIssue.number}: ${filePath}`);
-      results.push({ status: 'tracked', filePath, issue: toRef(suiteIssue) });
-      counts.tracked += 1;
+    const matches = findMatchingIssues(suite, details);
+    if (matches.length === 0) {
+      log.info(`no issue: ${filePath}`);
+      results.push({ status: 'untracked', filePath });
+      counts.untracked += 1;
       continue;
     }
 
-    const related = findRelatedFailedTestIssues(suite, testIssues);
-    if (related.length > 0) {
-      const numbers = related.map(({ issue, match }) => `#${issue.number} (${match})`).join(', ');
-      log.info(`related failed-test issues ${numbers}: ${filePath}`);
-      results.push({
-        status: 'related',
-        filePath,
-        issues: related.map(({ issue, match }) => ({ ...toRef(issue), match })),
-      });
-      counts.related += 1;
-      continue;
-    }
-
-    log.info(`no open issue: ${filePath}`);
-    results.push({ status: 'untracked', filePath });
-    counts.untracked += 1;
+    const refs = matches.map(({ issue, match }) => `#${issue.number} (${match}, ${issue.state})`);
+    log.info(`tracked by ${refs.join(', ')}: ${filePath}`);
+    results.push({
+      status: 'tracked',
+      filePath,
+      issues: matches.map(({ issue: { number, html_url: url, title, state }, match }) => ({
+        number,
+        url,
+        title,
+        state,
+        match,
+      })),
+    });
+    counts.tracked += 1;
   }
 
   return {
     generatedAt: report.generatedAt,
     suites: suites.length,
-    openIssues: openIssues.length,
+    candidateIssues: candidates.size,
     counts,
     results,
   };

@@ -49,10 +49,14 @@ export function runCheckFlakyTestIssuesCli() {
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
-      const { tracked, related, untracked } = summary.counts;
+      const { tracked, untracked } = summary.counts;
+      const withOpenIssue = summary.results.filter(
+        (result) =>
+          result.status === 'tracked' && result.issues.some(({ state }) => state === 'open')
+      ).length;
       log.info(
-        `${summary.suites} flaky suites: ${tracked} tracked by a suite issue, ` +
-          `${related} with related failed-test issues, ${untracked} without any open issue ` +
+        `${summary.suites} flaky suites: ${tracked} tracked by existing issues ` +
+          `(${withOpenIssue} by an open one), ${untracked} without any issue ` +
           `(summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
@@ -60,8 +64,9 @@ export function runCheckFlakyTestIssuesCli() {
     {
       description: `
         Tell, for every flaky test suite in a report written by
-        \`node scripts/scout discover-flaky-tests\`, whether an open GitHub issue already tracks it:
-        a suite issue, per-test failed-test issues, or nothing. Read-only: nothing is filed or edited.
+        \`node scripts/scout discover-flaky-tests\`, which GitHub failed-test issues are about it,
+        open or closed: a suite issue, per-test issues, or none. Read-only: nothing is filed or edited.
+        One GitHub search per handful of suites, by file name.
 
         Examples:
           GITHUB_TOKEN=... node scripts/check_flaky_test_issues --input .scout/flaky_tests.json
@@ -76,7 +81,7 @@ export function runCheckFlakyTestIssuesCli() {
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
           --summary-path        Where to write the JSON summary [default: ${DEFAULT_SUMMARY_PATH}]
-          --github-repo         owner/name of the repository whose issues are searched [default: ${DEFAULT_GITHUB_REPO}]
+          --github-repo         owner/name of the repository whose issues are checked [default: ${DEFAULT_GITHUB_REPO}]
         `,
       },
     }

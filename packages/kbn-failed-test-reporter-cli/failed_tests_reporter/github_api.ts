@@ -27,6 +27,8 @@ export function nextPageUrl(linkHeader: string | null): string | undefined {
   return undefined;
 }
 
+export type GithubIssueState = 'open' | 'closed';
+
 export interface GithubIssue {
   html_url: string;
   number: number;
@@ -34,14 +36,20 @@ export interface GithubIssue {
   title: string;
   labels: unknown[];
   body: string;
+  state: GithubIssueState;
 }
 
-export interface ListIssuesOptions {
-  /** Only issues carrying every one of these labels. */
-  labels: string[];
-  state: 'open' | 'closed' | 'all';
-  /** Safety valve against unbounded pagination; 100 issues per page. */
+export interface SearchIssuesOptions {
+  /** Search qualifiers; the repository and `is:issue` are added automatically. */
+  query: string;
+  /** GitHub caps search results at 1000, i.e. 10 pages of 100. */
   maxPages?: number;
+}
+
+interface SearchIssuesResponse {
+  total_count: number;
+  incomplete_results: boolean;
+  items: Array<GithubIssue & { pull_request?: unknown }>;
 }
 
 /**
@@ -154,22 +162,28 @@ export class GithubApi {
   }
 
   /**
-   * All issues of the repository with the given labels and state, following `Link: rel="next"`
+   * Issues of the repository matching a GitHub search query, following `Link: rel="next"`
    * pagination. Read-only, so it also runs in dry-run mode. Pull requests share the issue shape
-   * in this endpoint and are dropped.
+   * and are dropped. The search API allows 30 requests a minute and 256 characters a query.
    */
-  async listIssues({ labels, state, maxPages = 50 }: ListIssuesOptions): Promise<GithubIssue[]> {
-    const query = new URLSearchParams({ labels: labels.join(','), state, per_page: '100' });
+  async searchIssues({ query, maxPages = 10 }: SearchIssuesOptions): Promise<GithubIssue[]> {
+    const params = new URLSearchParams({
+      q: `repo:${this.repo} is:issue ${query}`,
+      per_page: '100',
+    });
     const issues: GithubIssue[] = [];
-    let url: string | undefined = Url.resolve(this.baseUrl, `issues?${query}`);
+    let url: string | undefined = `https://api.github.com/search/issues?${params}`;
 
     for (let page = 1; page <= maxPages && url; page++) {
-      const resp = await this.request<Array<GithubIssue & { pull_request?: unknown }>>(
+      const resp = await this.request<SearchIssuesResponse>(
         { method: 'GET', url, safeForDryRun: true },
-        []
+        { total_count: 0, incomplete_results: false, items: [] }
       );
+      if (resp.data.incomplete_results) {
+        this.log.warning(`GitHub search timed out for "${query}"; results may be incomplete`);
+      }
 
-      for (const issue of resp.data) {
+      for (const issue of resp.data.items) {
         if (!issue.pull_request) {
           issues.push({ ...issue, body: issue.body ?? '' });
         }
@@ -181,9 +195,7 @@ export class GithubApi {
 
     if (url) {
       this.log.warning(
-        `Stopped listing issues labelled ${labels.join(
-          ','
-        )} after ${maxPages} pages; results are incomplete`
+        `Stopped searching issues matching "${query}" after ${maxPages} pages; results are incomplete`
       );
     }
     return issues;
@@ -280,6 +292,16 @@ export class GithubApi {
           this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
           await new Promise((resolve) => setTimeout(resolve, waitMs));
           continue;
+        }
+
+        // Rate limited (the search API allows 30 requests a minute): wait as long as GitHub says
+        const retryAfterSeconds = Number(response.headers.get('retry-after'));
+        if ((response.status === 403 || response.status === 429) && retryAfterSeconds > 0) {
+          if (attempt < maxAttempts) {
+            this.log.warning(`${errorResponseLog}: rate limited, waiting ${retryAfterSeconds}s`);
+            await new Promise((resolve) => setTimeout(resolve, retryAfterSeconds * 1000));
+            continue;
+          }
         }
 
         throw new Error(`${errorResponseLog}: ${await response.text()}`);
