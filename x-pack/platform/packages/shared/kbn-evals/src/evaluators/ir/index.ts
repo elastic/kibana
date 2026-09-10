@@ -128,7 +128,7 @@ function computeIrMetrics<TOutput, TReferenceOutput>(
   const f1 = calculateF1(precision, recall);
   const hitRate = calculateHitRate(hits);
   const mrr = calculateMrr(relevantFlags);
-  const map = calculateMap(relevantFlags, k, totalRelevant);
+  const map = calculateMap(relevantFlags, totalRelevant);
 
   const gains = topKDocs.map((doc) => getRelevanceGain(doc, groundTruth, threshold));
   const ndcg = calculateNdcg(gains, getIdealGains(groundTruth, threshold, k));
@@ -314,8 +314,8 @@ export function createNdcgAtKEvaluator<TOutput = unknown, TReferenceOutput = unk
 }
 
 /**
- * MAP@K: average precision at each relevant hit in the top K, normalized by
- * min(K, total relevant docs). The mean across all examples yields Mean Average Precision.
+ * MAP@K: average precision at each relevant hit in the top K, normalized by the total
+ * relevant docs in ground truth. The mean across all examples yields Mean Average Precision.
  */
 export function createMapAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
   config: IrEvaluatorConfig<TOutput, TReferenceOutput>,

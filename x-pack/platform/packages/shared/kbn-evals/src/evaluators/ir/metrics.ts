@@ -154,11 +154,11 @@ export function calculateNdcg(gains: number[], idealGains: number[]): number {
 
 /**
  * MAP@K (average precision per query) = Σ over relevant hits at 1-indexed rank r of
- * (relevant docs seen so far / r), divided by min(K, total relevant docs in ground truth)
+ * (relevant docs seen so far / r), divided by the total relevant docs in ground truth
+ * (trec_eval `map_cut` semantics: unretrieved relevant docs contribute 0)
  */
-export function calculateMap(relevantFlags: boolean[], k: number, totalRelevant: number): number {
-  const denominator = Math.min(k, totalRelevant);
-  if (denominator <= 0) {
+export function calculateMap(relevantFlags: boolean[], totalRelevant: number): number {
+  if (totalRelevant <= 0) {
     return 0;
   }
   let numCorrect = 0;
@@ -169,5 +169,5 @@ export function calculateMap(relevantFlags: boolean[], k: number, totalRelevant:
       sumPrecisions += numCorrect / (i + 1);
     }
   });
-  return sumPrecisions / denominator;
+  return sumPrecisions / totalRelevant;
 }

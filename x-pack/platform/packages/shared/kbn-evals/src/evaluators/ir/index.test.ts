@@ -389,8 +389,24 @@ describe('IR Evaluators', () => {
         metadata: {},
       });
 
-      // Hits at ranks 1, 3, 5 -> (1/1 + 2/3 + 3/5) / min(5, 4) ≈ 0.5667
+      // Hits at ranks 1, 3, 5 with 4 relevant in ground truth -> (1/1 + 2/3 + 3/5) / 4 ≈ 0.5667
       expect(result.score).toBeCloseTo((1 + 2 / 3 + 3 / 5) / 4, 4);
+    });
+
+    it('should divide by total relevant when ground truth has more relevant docs than K', async () => {
+      const evaluator = createMapAtKEvaluator(config, 2);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: {
+          retrievedDocs: [createDoc('doc_1'), createDoc('doc_2')],
+        },
+        expected: { groundTruth },
+        metadata: {},
+      });
+
+      // Hits at ranks 1, 2 with 4 relevant in ground truth -> (1/1 + 2/2) / 4 = 0.5
+      expect(result.score).toBeCloseTo(0.5, 4);
     });
 
     it('should return 0 when no relevant docs were retrieved', async () => {

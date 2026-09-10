@@ -247,29 +247,29 @@ describe('IR Utils', () => {
 
   describe('calculateMap', () => {
     it('should return 1 when all relevant docs are ranked at the top', () => {
-      expect(calculateMap([true, true, false], 3, 2)).toBe(1);
+      expect(calculateMap([true, true, false], 2)).toBe(1);
     });
 
     it('should average precision at each relevant hit (interleaved hits)', () => {
-      // Hits at ranks 1, 3, 5: (1/1 + 2/3 + 3/5) / min(5, 3)
-      expect(calculateMap([true, false, true, false, true], 5, 3)).toBeCloseTo(
+      // Hits at ranks 1, 3, 5: (1/1 + 2/3 + 3/5) / 3 total relevant
+      expect(calculateMap([true, false, true, false, true], 3)).toBeCloseTo(
         (1 + 2 / 3 + 3 / 5) / 3,
         5
       );
     });
 
     it('should return 0 when no relevant docs were retrieved', () => {
-      expect(calculateMap([false, false], 2, 3)).toBe(0);
-      expect(calculateMap([], 2, 3)).toBe(0);
+      expect(calculateMap([false, false], 3)).toBe(0);
+      expect(calculateMap([], 3)).toBe(0);
     });
 
-    it('should cap the denominator at k when there are more relevant docs than k', () => {
-      // min(2, 10) = 2 -> perfect score achievable within top-2
-      expect(calculateMap([true, true], 2, 10)).toBe(1);
+    it('should divide by total relevant when more relevant docs exist than were retrieved', () => {
+      // Hits at ranks 1, 2 with 10 relevant in ground truth: (1/1 + 2/2) / 10
+      expect(calculateMap([true, true], 10)).toBeCloseTo(0.2, 5);
     });
 
     it('should return 0 when there are no relevant docs in ground truth', () => {
-      expect(calculateMap([false], 1, 0)).toBe(0);
+      expect(calculateMap([false], 0)).toBe(0);
     });
   });
 
