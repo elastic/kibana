@@ -83,6 +83,8 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-spaces-common'
   - '@kbn/app-header'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
