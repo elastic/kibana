@@ -1,0 +1,109 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { expect } from '@kbn/scout/ui';
+import { spaceTest, tags } from '../fixtures';
+
+const STATS_QUERY =
+  'from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB';
+
+// The colour picker renders a multi-value `data-test-subj`, so it needs `~=`.
+const COLOR_PICKER = '[data-test-subj~="indexPattern-dimension-colorPicker"]';
+
+spaceTest.describe(
+  'Discover ES|QL filtering from the table',
+  { tag: tags.deploymentAgnostic },
+  () => {
+    spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.setupDiscoverDefaults();
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+      await pageObjects.discover.waitUntilTabIsLoaded();
+    });
+
+    spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.teardownDiscoverDefaults();
+    });
+
+    spaceTest(
+      'appends a WHERE clause from the filter-for and filter-out cell actions',
+      async ({ pageObjects }) => {
+        const { discover, dataGrid } = pageObjects;
+
+        await discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+        // `STATS ... BY` lands in the cascade layout; the cell actions need the flat table.
+        await discover.optOutOfCascadeLayout();
+        await dataGrid.waitForDocTableRendered();
+
+        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        expect(await discover.getEsqlQueryValue()).toContain('| WHERE `geo.dest` == "BT"');
+
+        await dataGrid.waitForDocTableRendered();
+
+        // Negating replaces the clause rather than appending a second one.
+        await dataGrid.clickCellFilterOut(0, 'geo.dest');
+        const negated = await discover.getEsqlQueryValue();
+        expect(negated).toContain('| WHERE `geo.dest`!= "BT"');
+        expect(negated).not.toContain('== "BT"');
+      }
+    );
+
+    spaceTest(
+      'appends an AND clause when the query already has a WHERE',
+      async ({ pageObjects }) => {
+        const { discover, dataGrid } = pageObjects;
+
+        await discover.writeAndSubmitEsqlQuery(`${STATS_QUERY} | where countB > 0`);
+        await discover.optOutOfCascadeLayout();
+        await dataGrid.waitForDocTableRendered();
+
+        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        expect(await discover.getEsqlQueryValue()).toContain('AND `geo.dest` == "BT"');
+      }
+    );
+
+    spaceTest(
+      'keeps the visualization type and colour when appending a filter',
+      async ({ page, pageObjects }) => {
+        const { discover, dataGrid, lens } = pageObjects;
+
+        await discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+        await discover.optOutOfCascadeLayout();
+        await dataGrid.waitForDocTableRendered();
+
+        await discover.openLensEditFlyout();
+        await lens.switchToVisualization('line');
+
+        await page.testSubj.click('lnsXY_yDimensionPanel');
+        await page.locator(COLOR_PICKER).fill('#ff0000');
+        // Committing the value rather than sleeping for the debounce.
+        await expect(page.locator(COLOR_PICKER)).toHaveValue('#FF0000');
+        await lens.closeDimensionEditor();
+        await lens.applyFlyoutChanges();
+
+        await dataGrid.clickCellFilterFor(0, 'geo.dest');
+        expect(await discover.getEsqlQueryValue()).toContain('| WHERE `geo.dest` == "BT"');
+
+        await discover.openLensEditFlyout();
+        expect(await lens.getChartSwitchType()).toBe('Line');
+
+        await page.testSubj.click('lnsXY_yDimensionPanel');
+        await expect(page.locator(COLOR_PICKER)).toHaveValue('#FF0000');
+
+        // Close the flyout rather than ending the test on open, dirty editor state.
+        // Cancelling dismisses the dimension editor with it, and unlike closing the
+        // dimension editor first it survives the panel remounting underneath.
+        await lens.cancelFlyoutChanges();
+      }
+    );
+  }
+);
