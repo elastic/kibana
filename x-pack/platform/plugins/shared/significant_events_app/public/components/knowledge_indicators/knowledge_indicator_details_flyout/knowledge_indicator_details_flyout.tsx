@@ -229,14 +229,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [
-    canManage,
-    excludeFeature,
-    isMutating,
-    knowledgeIndicator,
-    restoreFeature,
-    setDurability,
-  ]);
+  }, [canManage, excludeFeature, isMutating, knowledgeIndicator, restoreFeature, setDurability]);
 
   const queryActionItems = useMemo(() => {
     if (!canManage || knowledgeIndicator.kind !== 'query') {
