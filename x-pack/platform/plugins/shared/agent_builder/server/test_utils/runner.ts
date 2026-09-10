@@ -149,7 +149,6 @@ export const createSkillsStoreMock = (): SkillsStoreMock => {
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
     validate: jest.fn(),
-    validateAttachments: jest.fn(),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn(),
   };

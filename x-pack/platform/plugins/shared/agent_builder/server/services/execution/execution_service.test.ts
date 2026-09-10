@@ -88,8 +88,7 @@ describe('AgentExecutionService', () => {
   } as any;
 
   const attachmentsService: AttachmentServiceStart = {
-    validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
-    validateAttachments: jest.fn().mockImplementation(async (attachments) =>
+    validate: jest.fn().mockImplementation(async (attachments) =>
       attachments?.map((attachment: { type: string; data: unknown }) => ({
         id: 'attachment-1',
         type: attachment.type,
@@ -117,7 +116,7 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (attachmentsService.validateAttachments as jest.Mock).mockImplementation(async (attachments) =>
+    (attachmentsService.validate as jest.Mock).mockImplementation(async (attachments) =>
       attachments?.map((attachment: { type: string; data: unknown }) => ({
         id: 'attachment-1',
         type: attachment.type,
@@ -250,7 +249,7 @@ describe('AgentExecutionService', () => {
     });
 
     it('validates attachments and throws on invalid attachment', async () => {
-      (attachmentsService.validateAttachments as jest.Mock).mockRejectedValue(
+      (attachmentsService.validate as jest.Mock).mockRejectedValue(
         new Error('Attachment validation failed: boom')
       );
 
@@ -270,7 +269,7 @@ describe('AgentExecutionService', () => {
         })
       ).rejects.toThrow('Attachment validation failed: boom');
 
-      expect(attachmentsService.validateAttachments).toHaveBeenCalledWith(
+      expect(attachmentsService.validate).toHaveBeenCalledWith(
         [{ type: 'some_type', data: { foo: 'bar' } }],
         request
       );

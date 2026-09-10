@@ -7,7 +7,7 @@
 
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createResolveContextMock } from '../../test_utils';
-import { validateAttachment, validateAttachments } from './validate_attachment';
+import { validateAttachments } from './validate_attachment';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
 const createRegistry = (definition: {
@@ -21,7 +21,7 @@ const createRegistry = (definition: {
     get: () => definition,
   } as unknown as AttachmentTypeRegistry);
 
-describe('validateAttachment', () => {
+describe('validateAttachments', () => {
   const resolveContext = createResolveContextMock();
 
   describe('Converse attachment input scenarios (structural + resolution)', () => {
@@ -30,19 +30,18 @@ describe('validateAttachment', () => {
         validate: async (input) => ({ valid: true, data: input }),
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text', data: { body: 'only-data' } },
-        registry,
-        resolveContext,
-      });
-
-      expect(result).toEqual({
-        valid: true,
-        attachment: expect.objectContaining({
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text', data: { body: 'only-data' } }],
+          registry,
+          resolveContext,
+        })
+      ).resolves.toEqual([
+        expect.objectContaining({
           type: 'text',
           data: { body: 'only-data' },
         }),
-      });
+      ]);
     });
 
     it('only origin: resolves when resolve() and context are available', async () => {
@@ -52,20 +51,19 @@ describe('validateAttachment', () => {
         resolve: async () => resolved,
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text', origin: 'dashboard-id' },
-        registry,
-        resolveContext,
-      });
-
-      expect(result).toEqual({
-        valid: true,
-        attachment: expect.objectContaining({
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text', origin: 'dashboard-id' }],
+          registry,
+          resolveContext,
+        })
+      ).resolves.toEqual([
+        expect.objectContaining({
           type: 'text',
           data: resolved,
           origin: 'dashboard-id',
         }),
-      });
+      ]);
     });
 
     it('data and origin: uses inline data and does not call resolve', async () => {
@@ -75,21 +73,21 @@ describe('validateAttachment', () => {
         resolve,
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text', data: { body: 'inline' }, origin: 'so-1' },
-        registry,
-        resolveContext,
-      });
-
-      expect(resolve).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        valid: true,
-        attachment: expect.objectContaining({
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text', data: { body: 'inline' }, origin: 'so-1' }],
+          registry,
+          resolveContext,
+        })
+      ).resolves.toEqual([
+        expect.objectContaining({
           type: 'text',
           data: { body: 'inline' },
           origin: 'so-1',
         }),
-      });
+      ]);
+
+      expect(resolve).not.toHaveBeenCalled();
     });
 
     it('neither data nor origin: fails before type validation', async () => {
@@ -97,23 +95,17 @@ describe('validateAttachment', () => {
         validate: async (input) => ({ valid: true, data: input }),
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text' },
-        registry,
-        resolveContext,
-      });
-
-      expect(result).toEqual({
-        valid: false,
-        error:
-          'Error during attachment validation: Either data or origin must be provided for an attachment',
-      });
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text' }],
+          registry,
+          resolveContext,
+        })
+      ).rejects.toThrow(
+        'Attachment validation failed: Either data or origin must be provided for an attachment'
+      );
     });
   });
-});
-
-describe('validateAttachments', () => {
-  const resolveContext = createResolveContextMock();
 
   it('validates each attachment and returns validated attachment shape', async () => {
     const registry = createRegistry({
@@ -136,7 +128,7 @@ describe('validateAttachments', () => {
       expect.objectContaining({
         type: 'text',
         data: { body: 'context' },
-        groupId: 'group-1',
+        group_id: 'group-1',
       }),
     ]);
   });

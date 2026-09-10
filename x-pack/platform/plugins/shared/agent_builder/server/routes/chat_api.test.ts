@@ -239,7 +239,7 @@ describe('context message acknowledgements', () => {
       },
       attachments: {
         getTypeDefinition: jest.fn(),
-        validateAttachments: jest.fn().mockImplementation(async (attachments) =>
+        validate: jest.fn().mockImplementation(async (attachments) =>
           attachments.map((attachment: { type: string; data: unknown }) => ({
             id: 'attachment-1',
             type: attachment.type,
@@ -274,7 +274,7 @@ describe('context message acknowledgements', () => {
       response
     );
     expect(result.status).toBe(200);
-    expect(services.attachments.validateAttachments).toHaveBeenCalledWith([], expect.any(Object));
+    expect(services.attachments.validate).toHaveBeenCalledWith([], expect.any(Object));
     expect(appendContextMessage).toHaveBeenCalledTimes(1);
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
@@ -335,7 +335,7 @@ describe('context message acknowledgements', () => {
       },
       attachments: {
         getTypeDefinition: jest.fn(),
-        validateAttachments: jest
+        validate: jest
           .fn()
           .mockRejectedValue(
             new Error('Attachment validation failed: Unknown attachment type: bad')

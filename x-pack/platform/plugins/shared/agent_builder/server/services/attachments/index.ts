@@ -13,4 +13,3 @@ export { type AttachmentService, createAttachmentService } from './attachment_se
 export type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
 export { createAttachmentPublicClient } from './attachment_public_client';
 export { isAttachmentReferencedInRounds, hasClientId } from './attachment_guards';
-export { toAttachmentInput } from './validate_attachment';

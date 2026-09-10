@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceStart, KibanaRequest } from '@kbn/core/server';
+import type { SavedObjectsServiceStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -14,10 +14,7 @@ import {
   type AttachmentTypeRegistry,
 } from './attachment_type_registry';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
-import {
-  validateAttachment,
-  validateAttachments as validateAttachmentList,
-} from './validate_attachment';
+import { validateAttachments } from './validate_attachment';
 
 export interface AttachmentServiceStartDeps {
   spaces?: SpacesPluginStart;
@@ -55,25 +52,16 @@ export class AttachmentServiceImpl implements AttachmentService {
   }
 
   start(deps: AttachmentServiceStartDeps): AttachmentServiceStart {
-    const getResolveContext = (request: KibanaRequest) => ({
-      request,
-      spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
-      savedObjectsClient: deps.savedObjects.getScopedClient(request),
-    });
-
     return {
-      validate: (attachment, request) => {
-        return validateAttachment({
-          attachment,
-          registry: this.attachmentTypeRegistry,
-          resolveContext: getResolveContext(request),
-        });
-      },
-      validateAttachments: (attachments, request) => {
-        return validateAttachmentList({
+      validate: (attachments, request) => {
+        return validateAttachments({
           attachments,
           registry: this.attachmentTypeRegistry,
-          resolveContext: getResolveContext(request),
+          resolveContext: {
+            request,
+            spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
+            savedObjectsClient: deps.savedObjects.getScopedClient(request),
+          },
         });
       },
       getTypeDefinition: (attachment) => {

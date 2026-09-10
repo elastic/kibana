@@ -30,7 +30,7 @@ import type {
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
-import { toAttachmentInput, type AttachmentServiceStart } from '../attachments';
+import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
 import {
@@ -84,7 +84,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const validatedAttachments = await this.deps.attachmentsService.validateAttachments(
+    const validatedAttachments = await this.deps.attachmentsService.validate(
       params.nextInput.attachments,
       request
     );
@@ -93,7 +93,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           ...params,
           nextInput: {
             ...params.nextInput,
-            attachments: validatedAttachments.map(toAttachmentInput),
+            attachments: validatedAttachments,
           },
         }
       : params;

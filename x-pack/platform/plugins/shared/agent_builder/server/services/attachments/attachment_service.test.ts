@@ -72,7 +72,7 @@ describe('AttachmentService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(
-        serviceStart.validateAttachments(
+        serviceStart.validate(
           [
             {
               type: 'test-attachment',
@@ -93,7 +93,7 @@ describe('AttachmentService', () => {
           description: 'Context attachment',
           hidden: true,
           origin: 'saved-object:1',
-          groupId: 'group-1',
+          group_id: 'group-1',
         },
       ]);
     });
@@ -104,7 +104,7 @@ describe('AttachmentService', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(serviceStart.validateAttachments(undefined, request)).resolves.toBeUndefined();
+      await expect(serviceStart.validate(undefined, request)).resolves.toBeUndefined();
     });
 
     it('throws an error for invalid attachment inputs', async () => {
@@ -113,9 +113,9 @@ describe('AttachmentService', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(
-        serviceStart.validateAttachments([{ type: 'bad', data: {} }], request)
-      ).rejects.toThrow('Attachment validation failed: Unknown attachment type: bad');
+      await expect(serviceStart.validate([{ type: 'bad', data: {} }], request)).rejects.toThrow(
+        'Attachment validation failed: Unknown attachment type: bad'
+      );
     });
   });
 });
