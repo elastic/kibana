@@ -3,7 +3,6 @@
   "id": "@kbn/deeplinks-analytics",
   "owner": [
     "@elastic/kibana-discover",
-    "@elastic/kibana-dashboards",
     "@elastic/kibana-dashboards"
   ],
   "group": "platform",
