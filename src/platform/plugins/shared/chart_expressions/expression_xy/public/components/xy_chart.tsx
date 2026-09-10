@@ -1173,6 +1173,7 @@ export function XYChart({
                         yAccessors={['y']}
                         data={points}
                         color={pointFill}
+                        groupId="left"
                         bubbleSeriesStyle={{
                           point: {
                             shape: PointShape.Diamond,
