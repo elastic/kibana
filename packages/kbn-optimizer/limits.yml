@@ -143,6 +143,7 @@ pageLoadAssetSize:
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
+  observabilityAlerting: 3500
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
   observabilityShared: 86067
