@@ -6,8 +6,7 @@ nested saved objects.
 
 They are an **OOM safety gate, not a correctness suite**. The tests assert that Kibana
 stays alive and that heap settles below 85% of its limit after each workload.
-They are scheduled on the `ci-batch-weekly` Scout channel and can also be run by hand
-against a Cloud deployment with a 1 GB Kibana instance.
+They are scheduled on the `ci-batch-weekly` Scout channel and can also be run locally.
 
 ### 💡 What is tested
 
@@ -27,8 +26,7 @@ Each test calls `GET /api/stats?extended=true` after the write and asserts that:
 
 The Scout server config set `security_audit_so_diff_oom` constrains Kibana to a
 **1.5 GB old-space heap** (`--max-old-space-size=1536`). This is the smallest heap that
-boots a full default Scout Kibana with all plugins enabled. To reproduce a 1 GB Cloud
-instance, use a Cloud deployment (below).
+boots a full default Scout Kibana with all plugins enabled.
 
 Server args applied: audit enabled, `savedObjectDiff.enabled=true`,
 `typesToInclude=["index-pattern"]`.
