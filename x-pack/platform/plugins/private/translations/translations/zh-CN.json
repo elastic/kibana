@@ -12009,7 +12009,6 @@
     "xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.title": "子代理执行",
     "xpack.agentBuilder.roundResponseActions.copy": "复制响应",
     "xpack.agentBuilder.roundResponseActions.copySuccess": "响应已复制到剪贴板",
-    "xpack.agentBuilder.roundResponseActions.regenerate": "重新生成响应",
     "xpack.agentBuilder.routeConfig.agents": "代理",
     "xpack.agentBuilder.routeConfig.connectors": "连接器",
     "xpack.agentBuilder.routeConfig.overview": "概览",
