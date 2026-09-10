@@ -22,12 +22,17 @@ test.describe(
   'Interactive setup - manual configuration without TLS',
   { tag: ['@local-stateful-classic'] },
   () => {
-    // Pre-migration tag 'skipFIPS'
     test('configures Kibana against a cluster without TLS', async ({
       pageObjects,
       apiClient,
       config,
     }) => {
+      // eslint-disable-next-line playwright/no-skipped-test
+      test.skip(
+        !!process.env.TEST_ENABLE_FIPS_VERSION?.match(/(140-2|140-3)/),
+        'Interactive setup reboots Kibana with a config that omits fipsMode; FIPS fatally rejects the mismatch (exit 78). Excluded pre-migration via skipFIPS.'
+      );
+
       test.setTimeout(SETUP_SPEC_TIMEOUT_MS);
 
       const { interactiveSetup } = pageObjects;

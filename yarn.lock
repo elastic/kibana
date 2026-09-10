@@ -4468,6 +4468,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alertzero-common@link:x-pack/solutions/security/packages/kbn-alertzero-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alertzero-plugin@link:x-pack/solutions/security/plugins/alertzero":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ambient-common-types@link:src/platform/packages/private/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
@@ -8189,14 +8197,6 @@
   uid ""
 
 "@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
-  version "0.0.0"
-  uid ""
-
-"@kbn/pnd-common@link:x-pack/solutions/security/packages/kbn-pnd-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/pnd-plugin@link:x-pack/solutions/security/plugins/pnd":
   version "0.0.0"
   uid ""
 
