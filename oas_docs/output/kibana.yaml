@@ -96752,19 +96752,26 @@ components:
           description: The context from which the workflow was triggered.
           type: object
           properties:
+            attachmentType:
+              description: For generic attachment origins, the normalized registered attachment type.
+              type: string
+            count:
+              description: For bulk attachment or observable origins, the number of selected targets.
+              type: number
             id:
-              description: The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
+              description: The primary identifier of the case, observable, or attachment from which the workflow was triggered.
               type: string
             index:
-              description: For alert origins, the Elasticsearch index the alert lives in.
+              description: For document-backed attachment origins, the Elasticsearch index the document lives in.
               type: string
             type:
               description: The origin type.
               enum:
                 - cases.case
                 - cases.observable
-                - cases.alert
-                - cases.alerts
+                - cases.observables
+                - cases.attachment
+                - cases.attachments
               type: string
             typeKey:
               description: For observable origins, the observable type key.
