@@ -22,6 +22,21 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 jest.mock('axios', () => jest.fn());
 
+jest.mock('../routes/synthetics_service/install_index_templates', () => ({
+  installSyntheticsIndexTemplates: jest.fn(),
+}));
+
+// Avoid the real retry backoff (retries x 3s+ growing timeouts) in unit tests.
+jest.mock('p-retry', () => ({
+  __esModule: true,
+  default: (fn: () => Promise<unknown>) => fn(),
+}));
+
+import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
+
+const installSyntheticsIndexTemplatesMock =
+  installSyntheticsIndexTemplates as jest.MockedFunction<typeof installSyntheticsIndexTemplates>;
+
 const taskManagerSetup = taskManagerMock.createSetup();
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
@@ -574,6 +589,85 @@ describe('SyntheticsService', () => {
       expect(logger.debug).toHaveBeenCalledTimes(112);
       expect(logger.info).toHaveBeenCalledTimes(0);
       expect(logger.error).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('setupIndexTemplates', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      delete process.env.CI;
+    });
+
+    it('logs the underlying cause when the Fleet install throws', async () => {
+      installSyntheticsIndexTemplatesMock.mockRejectedValue(
+        new Error('[synthetics] package not found in registry')
+      );
+      const { service } = getMockedService();
+
+      await service.setupIndexTemplates();
+
+      expect(service.indexTemplateExists).not.toBe(true);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to install synthetics index templates: [synthetics] package not found in registry',
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
+
+    it('logs ERROR when Fleet reports install_failed', async () => {
+      installSyntheticsIndexTemplatesMock.mockResolvedValue({
+        name: 'synthetics',
+        install_status: 'install_failed',
+      } as Awaited<ReturnType<typeof installSyntheticsIndexTemplates>>);
+      const { service } = getMockedService();
+
+      await service.setupIndexTemplates();
+
+      expect(service.indexTemplateExists).toBe(false);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to install synthetics index templates: Fleet reported install_status "install_failed".',
+        expect.anything()
+      );
+    });
+
+    it('does not re-log ERROR on repeated identical failures', async () => {
+      installSyntheticsIndexTemplatesMock.mockRejectedValue(new Error('Installation requires basic license'));
+      const { service } = getMockedService();
+
+      await service.setupIndexTemplates();
+      await service.setupIndexTemplates();
+      await service.setupIndexTemplates();
+
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Failed to install synthetics index templates: Installation requires basic license (repeated failure)'
+      );
+    });
+
+    it('logs ERROR again when the underlying failure changes', async () => {
+      const { service } = getMockedService();
+
+      installSyntheticsIndexTemplatesMock.mockRejectedValue(new Error('first cause'));
+      await service.setupIndexTemplates();
+
+      installSyntheticsIndexTemplatesMock.mockRejectedValue(new Error('second cause'));
+      await service.setupIndexTemplates();
+
+      expect(logger.error).toHaveBeenCalledTimes(2);
+    });
+
+    it('sets indexTemplateExists and clears error state on success', async () => {
+      installSyntheticsIndexTemplatesMock.mockResolvedValue({
+        name: 'synthetics',
+        install_status: 'installed',
+      } as Awaited<ReturnType<typeof installSyntheticsIndexTemplates>>);
+      const { service } = getMockedService();
+
+      await service.setupIndexTemplates();
+
+      expect(service.indexTemplateExists).toBe(true);
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 });
