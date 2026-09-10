@@ -22,7 +22,7 @@ import {
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
-import { WorkflowsManagementUiActions } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WorkflowsManagementUiActions } from '@kbn/workflows';
+import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { WorkflowOrigin, WorkflowUserAction } from '../../../common/types/domain';
@@ -46,13 +46,12 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
   const { id, name, executionId } = workflow;
 
   // Gate the execution deep link on Workflows view permissions (readWorkflow + readWorkflowExecution).
-  // Type off the enum so we don't need @kbn/workflows-ui (which would grow the bundle).
-  const wfCapabilities = capabilities?.workflowsManagement as
-    | Partial<Record<WorkflowsManagementUiActions, boolean>>
-    | undefined;
-  const canViewExecution =
-    Boolean(wfCapabilities?.[WorkflowsManagementUiActions.read]) &&
-    Boolean(wfCapabilities?.[WorkflowsManagementUiActions.readExecution]);
+  // `@kbn/workflows-ui` is already a runtime dependency of the Cases bundle, so this reuses the
+  // existing helper rather than hand-rolling the capability lookup.
+  const { canReadWorkflow, canReadWorkflowExecution } = getWorkflowsCapabilities(
+    capabilities ?? {}
+  );
+  const canViewExecution = canReadWorkflow && canReadWorkflowExecution;
 
   const executionHref = getAppUrl({
     path: `/${encodeURIComponent(id)}?tab=executions&executionId=${encodeURIComponent(

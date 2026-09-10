@@ -12,6 +12,8 @@ import type { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/serv
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
   CASE_SAVED_OBJECT,
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
@@ -196,12 +198,36 @@ export class CasesWorkflowRunService {
         throw Boom.badRequest('Document inputs can only be used with a single case.');
       }
     } else {
+      // Observable inputs (observableIds / observableTypeKeys) are server-owned and stripped
+      // before the run. Unlike alert inputs, they are not re-injected for non-observable origins,
+      // so a caller who supplies them would get an empty value silently. Reject instead so the
+      // contract is explicit, matching how alert inputs are handled above.
+      const observableInputKeys = new Set(['observableIds', 'observableTypeKeys']);
+      const rawEventForObservableCheck = isPlainObject(body.inputs.event)
+        ? (body.inputs.event as Record<string, unknown>)
+        : {};
+      const hasObservableInputs = Object.keys(rawEventForObservableCheck).some((k) =>
+        observableInputKeys.has(k)
+      );
+      if (
+        hasObservableInputs &&
+        body.origin.type !== OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
+        body.origin.type !== OBSERVABLES_WORKFLOW_ORIGIN_TYPE
+      ) {
+        throw Boom.badRequest('Observable inputs can only be used with observable origins.');
+      }
       if (caseIds.length > 1) {
         throw Boom.badRequest(
           `Workflow origin type "${body.origin.type}" can only be used with a single case.`
         );
       }
-      theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: true });
+      // Only attachment origins consume `theCase.comments`; fetching them for every other
+      // origin type would load all case attachments from ES (up to MAX_DOCS_PER_PAGE) and
+      // io-ts-decode the full case, only to discard the result immediately.
+      const needsComments =
+        body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
+        body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
+      theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: needsComments });
       // Fetch alert and event attachments in parallel, each only when their inputs are present.
       // Separate fetches (instead of a combined [alert, event] call) prevent cross-type false matches
       // — an event attachment should never satisfy an alert membership check, and vice versa.
